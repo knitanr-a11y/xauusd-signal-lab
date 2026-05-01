@@ -12,8 +12,9 @@ LABELS_DATA_DIR = DATA_DIR / "labels"
 RESULTS_DATA_DIR = DATA_DIR / "results"
 
 # Initial target symbols/timeframes.
-# File names are expected to be lowercase, e.g. xauusd_m15.csv.
-DEFAULT_SYMBOLS = ["xauusd", "btcusd"]
+# File names are expected to be lowercase, e.g. gold_m15.csv, xauusd_m15.csv, btcusd_m15.csv.
+# GOLD is included because some brokers use GOLD instead of XAUUSD.
+DEFAULT_SYMBOLS = ["gold", "xauusd", "btcusd"]
 DEFAULT_TIMEFRAMES = ["m15", "h1"]
 
 # MT5 CSV column schema exported by mt5/export_ohlc_multi.mq5
