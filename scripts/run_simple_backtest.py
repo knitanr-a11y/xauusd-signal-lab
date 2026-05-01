@@ -103,19 +103,55 @@ def attach_jst_trade_times(trades, args: argparse.Namespace):
     return out
 
 
-def apply_trade_filters(trades, allowed_jst_hours: set[int] | None, allowed_sides: set[str] | None):
+def apply_trade_filters(
+    trades,
+    allowed_jst_hours: set[int] | None,
+    allowed_sides: set[str] | None,
+    allowed_buy_jst_hours: set[int] | None,
+    allowed_sell_jst_hours: set[int] | None,
+):
+    """Apply optional trade filters.
+
+    Filter priority:
+        1. allowed_sides keeps only BUY/SELL if specified.
+        2. allowed_jst_hours applies the same JST hour set to all remaining trades.
+        3. allowed_buy_jst_hours / allowed_sell_jst_hours apply side-specific JST hour sets.
+
+    If both global and side-specific hour filters are set, both must pass.
+    """
     if trades.empty:
         return trades
 
     out = trades.copy()
 
-    if allowed_jst_hours is not None:
-        if "jst_entry_time" not in out.columns:
-            raise ValueError("jst_entry_time is required for allowed_jst_hours filter")
-        out = out[out["jst_entry_time"].dt.hour.isin(allowed_jst_hours)].copy()
-
     if allowed_sides is not None:
         out = out[out["side"].isin(allowed_sides)].copy()
+
+    hour_required = (
+        allowed_jst_hours is not None
+        or allowed_buy_jst_hours is not None
+        or allowed_sell_jst_hours is not None
+    )
+    if hour_required and "jst_entry_time" not in out.columns:
+        raise ValueError("jst_entry_time is required for JST hour filters")
+
+    if allowed_jst_hours is not None:
+        out = out[out["jst_entry_time"].dt.hour.isin(allowed_jst_hours)].copy()
+
+    if allowed_buy_jst_hours is not None or allowed_sell_jst_hours is not None:
+        hours = out["jst_entry_time"].dt.hour
+        buy_mask = out["side"].eq("BUY")
+        sell_mask = out["side"].eq("SELL")
+
+        keep_mask = True
+        if allowed_buy_jst_hours is not None:
+            buy_keep = (~buy_mask) | hours.isin(allowed_buy_jst_hours)
+            keep_mask = keep_mask & buy_keep
+        if allowed_sell_jst_hours is not None:
+            sell_keep = (~sell_mask) | hours.isin(allowed_sell_jst_hours)
+            keep_mask = keep_mask & sell_keep
+
+        out = out[keep_mask].copy()
 
     return out.reset_index(drop=True)
 
@@ -164,11 +200,21 @@ def print_backtest_report(
     args: argparse.Namespace,
 ) -> None:
     allowed_jst_hours = parse_int_csv(args.allowed_jst_hours)
+    allowed_buy_jst_hours = parse_int_csv(args.allowed_buy_jst_hours)
+    allowed_sell_jst_hours = parse_int_csv(args.allowed_sell_jst_hours)
+
     allowed_sides = {side.upper() for side in parse_csv_list(args.allowed_sides)} if args.allowed_sides else None
     if allowed_sides is not None:
         invalid = allowed_sides - {"BUY", "SELL"}
         if invalid:
             raise ValueError(f"allowed_sides must be BUY and/or SELL: {invalid}")
+
+    has_any_filter = (
+        allowed_jst_hours is not None
+        or allowed_sides is not None
+        or allowed_buy_jst_hours is not None
+        or allowed_sell_jst_hours is not None
+    )
 
     print("=" * 120)
     print(f"symbol: {symbol}")
@@ -182,6 +228,8 @@ def print_backtest_report(
     print(f"sl_buffer_atr_multiplier: {args.sl_buffer_atr}")
     print(f"max_bars_in_trade: {args.max_bars_in_trade}")
     print(f"allowed_jst_hours: {sorted(allowed_jst_hours) if allowed_jst_hours is not None else 'ALL'}")
+    print(f"allowed_buy_jst_hours: {sorted(allowed_buy_jst_hours) if allowed_buy_jst_hours is not None else 'ALL'}")
+    print(f"allowed_sell_jst_hours: {sorted(allowed_sell_jst_hours) if allowed_sell_jst_hours is not None else 'ALL'}")
     print(f"allowed_sides: {sorted(allowed_sides) if allowed_sides is not None else 'ALL'}")
     print_time_conversion_info(args)
 
@@ -221,11 +269,17 @@ def print_backtest_report(
     )
     all_trades = run_simple_hidden_divergence_backtest(signal_df, settings=settings)
     all_trades = attach_jst_trade_times(all_trades, args=args)
-    filtered_trades = apply_trade_filters(all_trades, allowed_jst_hours=allowed_jst_hours, allowed_sides=allowed_sides)
+    filtered_trades = apply_trade_filters(
+        all_trades,
+        allowed_jst_hours=allowed_jst_hours,
+        allowed_sides=allowed_sides,
+        allowed_buy_jst_hours=allowed_buy_jst_hours,
+        allowed_sell_jst_hours=allowed_sell_jst_hours,
+    )
 
     print_trade_report("ALL_TRADES_BASELINE", all_trades, args)
 
-    if allowed_jst_hours is not None or allowed_sides is not None:
+    if has_any_filter:
         print_trade_report("FILTERED_TRADES", filtered_trades, args)
 
     print("\nsummary_by_server_month baseline:")
@@ -269,7 +323,7 @@ def print_backtest_report(
     else:
         print(all_trades[display_cols].tail(20).to_string(index=False))
 
-    if allowed_jst_hours is not None or allowed_sides is not None:
+    if has_any_filter:
         print("\nrecent trades tail(20) filtered:")
         if filtered_trades.empty:
             print("No trades.")
@@ -281,7 +335,7 @@ def print_backtest_report(
         base_path = RESULTS_DATA_DIR / f"{symbol.lower()}_simple_backtest_trades_all.csv"
         all_trades.to_csv(base_path, index=False, encoding="utf-8-sig")
         print(f"\nsaved_all_trades: {base_path}")
-        if allowed_jst_hours is not None or allowed_sides is not None:
+        if has_any_filter:
             filtered_path = RESULTS_DATA_DIR / f"{symbol.lower()}_simple_backtest_trades_filtered.csv"
             filtered_trades.to_csv(filtered_path, index=False, encoding="utf-8-sig")
             print(f"saved_filtered_trades: {filtered_path}")
@@ -300,7 +354,9 @@ def main() -> int:
     parser.add_argument("--server-timezone", type=str, default=DEFAULT_MT5_SERVER_TIMEZONE, help="IANA timezone for MT5 server time. Default: Europe/Athens")
     parser.add_argument("--server-utc-offset", type=int, default=3, help="Fallback fixed UTC offset hours. Used only with --use-fixed-offset.")
     parser.add_argument("--use-fixed-offset", action="store_true", help="Use fixed UTC offset instead of DST-aware timezone conversion.")
-    parser.add_argument("--allowed-jst-hours", type=str, default=None, help="Comma-separated JST entry hours to keep, e.g. 2,3,5,7,13,19")
+    parser.add_argument("--allowed-jst-hours", type=str, default=None, help="Comma-separated JST entry hours to keep for all sides, e.g. 2,3,5,7,13,19")
+    parser.add_argument("--allowed-buy-jst-hours", type=str, default=None, help="Comma-separated JST entry hours to keep for BUY trades only, e.g. 3,7,13")
+    parser.add_argument("--allowed-sell-jst-hours", type=str, default=None, help="Comma-separated JST entry hours to keep for SELL trades only, e.g. 2,5,7,13,19")
     parser.add_argument("--allowed-sides", type=str, default=None, help="Comma-separated sides to keep: BUY,SELL. Example: BUY")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
