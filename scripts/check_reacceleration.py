@@ -134,7 +134,7 @@ def print_report(symbol: str, m15_path: Path, h1_path: Path, args: argparse.Name
         "close_ema20_delta",
         "macd_line",
         "macd_signal",
-        "macd_histogram",
+        "macd_hist",
         "macd_histogram_delta",
         "h1_trend",
         "pullback_side",
