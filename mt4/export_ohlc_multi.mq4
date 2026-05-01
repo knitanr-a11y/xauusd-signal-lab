@@ -49,7 +49,19 @@ string TrimString(string value)
 //+------------------------------------------------------------------+
 string ToLowerString(string value)
 {
-   return StringToLower(value);
+   string s = value;
+   StringToLower(s);
+   return s;
+}
+
+//+------------------------------------------------------------------+
+//| Utility: upper string                                            |
+//+------------------------------------------------------------------+
+string ToUpperString(string value)
+{
+   string s = value;
+   StringToUpper(s);
+   return s;
 }
 
 //+------------------------------------------------------------------+
@@ -72,11 +84,22 @@ string SanitizeFilePart(string value)
 }
 
 //+------------------------------------------------------------------+
+//| Digits for symbol                                                |
+//+------------------------------------------------------------------+
+int DigitsForSymbol(string symbol)
+{
+   int digits = (int)MarketInfo(symbol, MODE_DIGITS);
+   if(digits < 0)
+      digits = Digits;
+   return digits;
+}
+
+//+------------------------------------------------------------------+
 //| Convert timeframe text to MT4 timeframe constant                 |
 //+------------------------------------------------------------------+
 int TimeframeFromString(string tf)
 {
-   string t = StringToUpper(TrimString(tf));
+   string t = ToUpperString(TrimString(tf));
 
    if(t == "M1")  return PERIOD_M1;
    if(t == "M5")  return PERIOD_M5;
@@ -212,17 +235,6 @@ bool ExportOne(string symbol, int timeframe)
          " | bars=", copied);
 
    return true;
-}
-
-//+------------------------------------------------------------------+
-//| Digits for symbol                                                |
-//+------------------------------------------------------------------+
-int DigitsForSymbol(string symbol)
-{
-   int digits = (int)MarketInfo(symbol, MODE_DIGITS);
-   if(digits < 0)
-      digits = Digits;
-   return digits;
 }
 
 //+------------------------------------------------------------------+
