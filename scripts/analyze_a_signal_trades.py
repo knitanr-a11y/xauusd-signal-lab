@@ -90,6 +90,13 @@ def build_a_signal_df(args: argparse.Namespace, symbol: str) -> pd.DataFrame:
         use_fixed_offset=preset.use_fixed_offset,
     )
 
+    # B-signal generation creates macd_histogram_delta in src.reacceleration.
+    # A diagnostics does not need B signals, so create the same diagnostic column here
+    # when it is absent. This keeps the A route independent and prevents a hidden
+    # dependency on add_reacceleration_signals().
+    if "macd_histogram_delta" not in out.columns and "macd_hist" in out.columns:
+        out["macd_histogram_delta"] = out["macd_hist"] - out["macd_hist"].shift(1)
+
     print_dict("A_hidden_divergence_summary_unfiltered", hidden_divergence_summary(out))
 
     a_buy_hours = parse_int_csv(args.a_buy_jst_hours)
@@ -155,6 +162,12 @@ def _choose_side_value(out: pd.DataFrame, side_col: str, buy_col: str, sell_col:
     if sell_col in out.columns:
         out.loc[out[side_col].eq("SELL"), target_col] = out.loc[out[side_col].eq("SELL"), sell_col]
     out[target_col] = pd.to_numeric(out[target_col], errors="coerce")
+
+
+def _numeric_series(out: pd.DataFrame, column: str, default: float = 0.0) -> pd.Series:
+    if column in out.columns:
+        return pd.to_numeric(out[column], errors="coerce")
+    return pd.Series(default, index=out.index, dtype="float64")
 
 
 def enrich_a_trades(trades: pd.DataFrame, signal_df: pd.DataFrame, early_loss_bars: int) -> pd.DataFrame:
@@ -226,12 +239,12 @@ def enrich_a_trades(trades: pd.DataFrame, signal_df: pd.DataFrame, early_loss_ba
     out["hidden_macd_delta_abs"] = out["hidden_macd_delta"].abs()
 
     # MACD and H1 context at the signal candle.
-    out["macd_hist_delta_abs"] = out["signal_macd_histogram_delta"].abs()
-    out["macd_line_signal_gap"] = out["signal_macd_line"] - out["signal_macd_signal"]
+    out["macd_hist_delta_abs"] = _numeric_series(out, "signal_macd_histogram_delta").abs()
+    out["macd_line_signal_gap"] = _numeric_series(out, "signal_macd_line") - _numeric_series(out, "signal_macd_signal")
     out["macd_line_signal_gap_abs"] = out["macd_line_signal_gap"].abs()
-    out["h1_close_ema20_gap"] = out["signal_h1_close"] - out["signal_h1_ema_20"]
+    out["h1_close_ema20_gap"] = _numeric_series(out, "signal_h1_close") - _numeric_series(out, "signal_h1_ema_20")
     out["h1_close_ema20_gap_atr"] = out["h1_close_ema20_gap"].abs() / out["signal_atr_14"]
-    out["h1_ema_gap"] = out["signal_h1_ema_20"] - out["signal_h1_ema_50"]
+    out["h1_ema_gap"] = _numeric_series(out, "signal_h1_ema_20") - _numeric_series(out, "signal_h1_ema_50")
     out["h1_ema_gap_atr"] = out["h1_ema_gap"].abs() / out["signal_atr_14"]
 
     # Side-aware H1 alignment. Positive means the H1 EMA20/EMA50 gap supports the trade side.
