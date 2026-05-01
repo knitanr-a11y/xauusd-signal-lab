@@ -157,7 +157,6 @@ def apply_c2_candidate(abc_df: pd.DataFrame, c2_df: pd.DataFrame, candidate: Com
     out.loc[out["combined_buy_signal"], "combined_signal_side"] = "BUY"
     out.loc[out["combined_sell_signal"], "combined_signal_side"] = "SELL"
 
-    # Existing backtest engine consumes hidden divergence columns.
     out["hidden_bullish_divergence"] = out["combined_buy_signal"]
     out["hidden_bearish_divergence"] = out["combined_sell_signal"]
     return out
@@ -296,6 +295,11 @@ def main() -> int:
     parser.add_argument("--c2-allow-ab-overlap", action="store_true")
     parser.add_argument("--save", action="store_true")
     args = apply_preset_defaults(parser.parse_args())
+
+    # run_combined_abc_backtest.run_symbol expects this attribute because it is normally
+    # called from run_preset_backtest.py / run_combined_abc_backtest.py directly.
+    if not hasattr(args, "preset_name"):
+        args.preset_name = args.preset
 
     if not args.data_dir.exists():
         print(f"Data directory not found: {args.data_dir}")
