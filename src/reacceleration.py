@@ -41,8 +41,11 @@ def add_reacceleration_signals(
         - MACD line is below MACD signal if require_macd_signal_alignment=True
         - MACD histogram is decreasing if require_histogram_acceleration=True
 
-    This signal intentionally uses existing project ingredients only:
-        H1 context, EMA20, MACD, histogram, pullback candidates.
+    Existing indicator columns:
+        - macd_line
+        - macd_signal
+        - macd_hist
+        - macd_hist_diff
     """
     settings = settings or ReaccelerationSettings()
     settings.validate()
@@ -53,7 +56,7 @@ def add_reacceleration_signals(
         "ema_20",
         "macd_line",
         "macd_signal",
-        "macd_histogram",
+        "macd_hist",
         "h1_buy_env",
         "h1_sell_env",
         "buy_pullback_candidate",
@@ -75,7 +78,7 @@ def add_reacceleration_signals(
 
     prev_close = out["close"].shift(1)
     prev_ema20 = out["ema_20"].shift(1)
-    prev_hist = out["macd_histogram"].shift(1)
+    prev_hist = out["macd_hist"].shift(1)
 
     buy_reclaim = out["close"] > out["ema_20"]
     sell_reclaim = out["close"] < out["ema_20"]
@@ -93,8 +96,8 @@ def add_reacceleration_signals(
     buy_hist_accel = pd.Series(True, index=out.index)
     sell_hist_accel = pd.Series(True, index=out.index)
     if settings.require_histogram_acceleration:
-        buy_hist_accel = out["macd_histogram"] > prev_hist
-        sell_hist_accel = out["macd_histogram"] < prev_hist
+        buy_hist_accel = out["macd_hist"] > prev_hist
+        sell_hist_accel = out["macd_hist"] < prev_hist
 
     out["buy_reacceleration_signal"] = (
         out["h1_buy_env"].astype(bool)
@@ -105,7 +108,7 @@ def add_reacceleration_signals(
         & out["ema_20"].notna()
         & out["macd_line"].notna()
         & out["macd_signal"].notna()
-        & out["macd_histogram"].notna()
+        & out["macd_hist"].notna()
     )
 
     out["sell_reacceleration_signal"] = (
@@ -117,7 +120,7 @@ def add_reacceleration_signals(
         & out["ema_20"].notna()
         & out["macd_line"].notna()
         & out["macd_signal"].notna()
-        & out["macd_histogram"].notna()
+        & out["macd_hist"].notna()
     )
 
     out["reacceleration_side"] = "NONE"
@@ -126,7 +129,7 @@ def add_reacceleration_signals(
     out["both_reacceleration_signals"] = out["buy_reacceleration_signal"] & out["sell_reacceleration_signal"]
 
     # Diagnostics useful for later filters.
-    out["macd_histogram_delta"] = out["macd_histogram"] - prev_hist
+    out["macd_histogram_delta"] = out["macd_hist"] - prev_hist
     out["close_ema20_delta"] = out["close"] - out["ema_20"]
 
     if "hidden_bullish_divergence" in out.columns:
