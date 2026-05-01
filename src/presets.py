@@ -37,6 +37,7 @@ class BacktestPreset:
     no_histogram_acceleration: bool = False
     same_bar_win: bool = False
     max_bars_in_trade: int | None = None
+    a_exclude_hidden_price_delta_atr_lte: float | None = None
     b_exclude_risk_atr_range: str | None = None
     b_exclude_macd_hist_delta_abs_range: str | None = None
 
@@ -82,6 +83,30 @@ PRESETS: dict[str, BacktestPreset] = {
         sl_buffer_atr=0.05,
         a_buy_jst_hours="7,13",
         a_sell_jst_hours="2,13,19",
+        b_buy_jst_hours="20,21,22,23",
+        b_sell_jst_hours="10",
+        b_exclude_risk_atr_range="2.00,2.40",
+        b_exclude_macd_hist_delta_abs_range="0.40,0.60",
+    ),
+    "gold_ab_v3": BacktestPreset(
+        name="gold_ab_v3",
+        description=(
+            "GOLD A+B main candidate after A-signal quality filtering. "
+            "A=hidden divergence, B=EMA20 reclaim + MACD reacceleration. "
+            "Compared with v2, excludes weak A hidden-price-delta/ATR signals while keeping B v2 filters."
+        ),
+        symbols="gold",
+        models="A,B",
+        near_atr=0.30,
+        close_tolerance_atr=0.50,
+        swing_left=3,
+        swing_right=2,
+        recent_pullback_bars=6,
+        rr=1.5,
+        sl_buffer_atr=0.05,
+        a_buy_jst_hours="7,13",
+        a_sell_jst_hours="2,13,19",
+        a_exclude_hidden_price_delta_atr_lte=0.271,
         b_buy_jst_hours="20,21,22,23",
         b_sell_jst_hours="10",
         b_exclude_risk_atr_range="2.00,2.40",
