@@ -34,6 +34,23 @@ from src.swings import swing_summary
 from src.time_utils import DEFAULT_MT5_SERVER_TIMEZONE
 
 
+def parse_float_quad(value: str | None) -> tuple[float, float, float, float] | None:
+    if value is None or value.strip() == "":
+        return None
+    parts = [item.strip() for item in value.split(",") if item.strip()]
+    if len(parts) != 4:
+        raise ValueError(
+            "Quad range must be four comma-separated numbers: "
+            "risk_low,risk_high,macd_low,macd_high"
+        )
+    risk_low, risk_high, macd_low, macd_high = [float(item) for item in parts]
+    if risk_low > risk_high:
+        raise ValueError(f"risk_low must be <= risk_high: {value}")
+    if macd_low > macd_high:
+        raise ValueError(f"macd_low must be <= macd_high: {value}")
+    return risk_low, risk_high, macd_low, macd_high
+
+
 def _side_aware_hidden_price_delta_atr(df: pd.DataFrame, side: str) -> pd.Series:
     atr = pd.to_numeric(df["atr_14"], errors="coerce")
     if side == "BUY":
@@ -81,6 +98,69 @@ def apply_a_filters(df: pd.DataFrame, args: argparse.Namespace) -> pd.DataFrame:
     return out
 
 
+def apply_b_buy_extra_filters(df: pd.DataFrame, args: argparse.Namespace) -> pd.DataFrame:
+    """Apply B BUY-only extra filters after base A/B combination.
+
+    Existing B filters remain in add_combined_signal_columns(). This function only
+    removes additional BUY-side B signals and then rebuilds the combined signal
+    columns consumed by the backtest engine.
+    """
+    out = df.copy()
+    b_buy = out["b_buy_signal_filtered"].astype(bool)
+    remove = pd.Series(False, index=out.index)
+
+    risk = pd.to_numeric(out["b_buy_risk_atr_ratio"], errors="coerce")
+    macd = pd.to_numeric(out["b_macd_hist_delta_abs"], errors="coerce")
+
+    risk_range = parse_float_range(args.b_buy_exclude_risk_atr_range)
+    if risk_range is not None:
+        low, high = risk_range
+        remove = remove | (risk.gt(low) & risk.le(high))
+
+    combo = parse_float_quad(args.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo)
+    if combo is not None:
+        risk_low, risk_high, macd_low, macd_high = combo
+        remove = remove | (
+            risk.gt(risk_low)
+            & risk.le(risk_high)
+            & macd.gt(macd_low)
+            & macd.le(macd_high)
+        )
+
+    remove = remove.fillna(False).astype(bool) & b_buy
+    out["b_buy_extra_filtered_out"] = remove
+    out["b_buy_signal_filtered"] = b_buy & ~remove
+
+    a_buy = out["a_buy_signal_filtered"].astype(bool)
+    a_sell = out["a_sell_signal_filtered"].astype(bool)
+    b_buy = out["b_buy_signal_filtered"].astype(bool)
+    b_sell = out["b_sell_signal_filtered"].astype(bool)
+
+    combined_buy = a_buy | b_buy
+    combined_sell = a_sell | b_sell
+    conflict = combined_buy & combined_sell
+
+    out["combined_signal_conflict"] = conflict
+    out["combined_buy_signal"] = combined_buy & ~conflict
+    out["combined_sell_signal"] = combined_sell & ~conflict
+
+    out["combined_signal_source"] = "NONE"
+    out.loc[out["combined_buy_signal"] & a_buy & ~b_buy, "combined_signal_source"] = "A"
+    out.loc[out["combined_sell_signal"] & a_sell & ~b_sell, "combined_signal_source"] = "A"
+    out.loc[out["combined_buy_signal"] & b_buy & ~a_buy, "combined_signal_source"] = "B"
+    out.loc[out["combined_sell_signal"] & b_sell & ~a_sell, "combined_signal_source"] = "B"
+    out.loc[out["combined_buy_signal"] & a_buy & b_buy, "combined_signal_source"] = "A+B"
+    out.loc[out["combined_sell_signal"] & a_sell & b_sell, "combined_signal_source"] = "A+B"
+
+    out["combined_signal_side"] = "NONE"
+    out.loc[out["combined_buy_signal"], "combined_signal_side"] = "BUY"
+    out.loc[out["combined_sell_signal"], "combined_signal_side"] = "SELL"
+
+    out["hidden_bullish_divergence"] = out["combined_buy_signal"]
+    out["hidden_bearish_divergence"] = out["combined_sell_signal"]
+    return out
+
+
 def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argparse.Namespace) -> None:
     a_buy_hours = parse_int_csv(args.a_buy_jst_hours)
     a_sell_hours = parse_int_csv(args.a_sell_jst_hours)
@@ -88,6 +168,8 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
     b_sell_hours = parse_int_csv(args.b_sell_jst_hours)
     b_exclude_risk_atr_range = parse_float_range(args.b_exclude_risk_atr_range)
     b_exclude_macd_hist_delta_abs_range = parse_float_range(args.b_exclude_macd_hist_delta_abs_range)
+    b_buy_exclude_risk_atr_range = parse_float_range(args.b_buy_exclude_risk_atr_range)
+    b_buy_exclude_combo = parse_float_quad(args.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo)
 
     enabled_models = {item.upper() for item in parse_csv_list(args.models)}
     invalid_models = enabled_models - {"A", "B"}
@@ -119,6 +201,8 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
     print(f"B SELL JST hours: {sorted(b_sell_hours) if b_sell_hours is not None else 'ALL'}")
     print(f"B exclude risk_atr_range: {b_exclude_risk_atr_range if b_exclude_risk_atr_range is not None else 'NONE'}")
     print(f"B exclude macd_hist_delta_abs_range: {b_exclude_macd_hist_delta_abs_range if b_exclude_macd_hist_delta_abs_range is not None else 'NONE'}")
+    print(f"B BUY extra exclude risk_atr_range: {b_buy_exclude_risk_atr_range if b_buy_exclude_risk_atr_range is not None else 'NONE'}")
+    print(f"B BUY extra exclude risk/macd combo: {b_buy_exclude_combo if b_buy_exclude_combo is not None else 'NONE'}")
     print_time_conversion_info(args)
 
     if not m15_path.exists():
@@ -142,6 +226,7 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
         b_exclude_macd_hist_delta_abs_range=b_exclude_macd_hist_delta_abs_range,
         sl_buffer_atr=args.sl_buffer_atr,
     )
+    combined_df = apply_b_buy_extra_filters(combined_df, args=args)
 
     print_summary_dict("pullback_summary", pullback_summary(base_df))
     print_summary_dict("swing_summary", swing_summary(base_df))
@@ -154,6 +239,12 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
         },
     )
     print_summary_dict("B_reacceleration_summary_unfiltered", reacceleration_summary(base_df))
+    print_summary_dict(
+        "B_BUY_extra_filter_summary",
+        {
+            "b_buy_extra_filtered_out": int(combined_df.get("b_buy_extra_filtered_out", pd.Series(False, index=combined_df.index)).sum()),
+        },
+    )
     print_summary_dict("combined_signal_summary_filtered", combined_signal_summary(combined_df))
 
     settings = BacktestSettings(
@@ -166,7 +257,7 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
     trades = attach_jst_trade_times(trades, args=args)
     trades = attach_signal_sources_to_trades(trades, combined_df)
 
-    print_trade_report("COMBINED_A_B_TRADES_WITH_A_FILTERS", trades)
+    print_trade_report("COMBINED_A_B_TRADES_WITH_A_AND_B_BUY_FILTERS", trades)
 
     print("\nsummary_by_server_entry_hour:")
     by_hour = summarize_by_entry_hour(trades)
@@ -209,13 +300,13 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
 
     if args.save:
         RESULTS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = RESULTS_DATA_DIR / f"{symbol.lower()}_combined_ab_a_filtered_backtest_trades.csv"
+        out_path = RESULTS_DATA_DIR / f"{symbol.lower()}_combined_ab_a_b_buy_filtered_backtest_trades.csv"
         trades.to_csv(out_path, index=False, encoding="utf-8-sig")
         print(f"\nsaved_trades: {out_path}")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run combined A+B backtest with optional A-signal filters.")
+    parser = argparse.ArgumentParser(description="Run combined A+B backtest with optional A and B BUY filters.")
     parser.add_argument("--data-dir", type=Path, default=RAW_DATA_DIR, help="Directory containing raw CSV files.")
     parser.add_argument("--symbols", type=str, default="gold", help="Comma-separated symbols. Default: gold")
     parser.add_argument("--models", type=str, default="A,B", help="Enabled models: A, B, or A,B. Default: A,B")
@@ -239,6 +330,8 @@ def main() -> int:
     parser.add_argument("--b-sell-jst-hours", type=str, default="10,11", help="B signal SELL JST hours. Default: 10,11")
     parser.add_argument("--b-exclude-risk-atr-range", type=str, default=None, help="Exclude B signals with estimated risk/ATR inside range, e.g. 1.95,2.49")
     parser.add_argument("--b-exclude-macd-hist-delta-abs-range", type=str, default=None, help="Exclude B signals with abs MACD histogram delta inside range, e.g. 0.383,0.628")
+    parser.add_argument("--b-buy-exclude-risk-atr-range", type=str, default=None, help="Exclude B BUY signals with estimated risk/ATR inside range, e.g. 0.928,1.241")
+    parser.add_argument("--b-buy-exclude-risk-atr-macd-hist-delta-abs-combo", type=str, default=None, help="Exclude B BUY signals matching risk/macd combo: risk_low,risk_high,macd_low,macd_high")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
     parser.add_argument("--save", action="store_true", help="Save trades CSV to data/results.")
@@ -258,7 +351,7 @@ def main() -> int:
         print_backtest_report(symbol=symbol, m15_path=m15_path, h1_path=h1_path, args=args)
 
     print("=" * 120)
-    print("Combined A+B backtest with A filters completed.")
+    print("Combined A+B backtest with A and B BUY filters completed.")
     return 0
 
 
