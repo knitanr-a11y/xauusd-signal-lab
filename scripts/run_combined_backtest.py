@@ -65,6 +65,19 @@ def parse_int_csv(value: str | None) -> set[int] | None:
     return values
 
 
+def parse_float_range(value: str | None) -> tuple[float, float] | None:
+    if value is None or value.strip() == "":
+        return None
+    parts = [item.strip() for item in value.split(",") if item.strip()]
+    if len(parts) != 2:
+        raise ValueError(f"Range must be two comma-separated numbers, e.g. 1.95,2.49: {value}")
+    low = float(parts[0])
+    high = float(parts[1])
+    if low > high:
+        raise ValueError(f"Range lower bound must be <= upper bound: {value}")
+    return low, high
+
+
 def print_summary_dict(title: str, summary: dict[str, object]) -> None:
     print(f"\n{title}:")
     for key, value in summary.items():
@@ -109,6 +122,46 @@ def _side_hour_allowed(side: str, hour: int, buy_hours: set[int] | None, sell_ho
     return False
 
 
+def _outside_range(series: pd.Series, range_value: tuple[float, float] | None) -> pd.Series:
+    if range_value is None:
+        return pd.Series(True, index=series.index)
+    low, high = range_value
+    values = pd.to_numeric(series, errors="coerce")
+    # Keep NaN rows rather than silently deleting them. Other required signal checks handle NaNs.
+    return values.isna() | (values < low) | (values > high)
+
+
+def add_b_filter_features(out: pd.DataFrame, sl_buffer_atr: float) -> pd.DataFrame:
+    """Add B-only filter features available at entry decision time.
+
+    The backtest enters on the next bar open after a signal candle. Therefore
+    `next_open` is the actual planned entry price. In live usage, this is known
+    when the new M15 candle starts.
+    """
+    required = [
+        "open",
+        "atr_14",
+        "macd_histogram_delta",
+        "last_confirmed_swing_low_price",
+        "last_confirmed_swing_high_price",
+    ]
+    missing = [col for col in required if col not in out.columns]
+    if missing:
+        raise ValueError(f"Missing required B filter feature columns: {missing}")
+
+    out = out.copy()
+    next_open = out["open"].shift(-1)
+    atr = pd.to_numeric(out["atr_14"], errors="coerce")
+
+    buy_risk = next_open - pd.to_numeric(out["last_confirmed_swing_low_price"], errors="coerce") + (atr * sl_buffer_atr)
+    sell_risk = pd.to_numeric(out["last_confirmed_swing_high_price"], errors="coerce") + (atr * sl_buffer_atr) - next_open
+
+    out["b_buy_risk_atr_ratio"] = buy_risk / atr
+    out["b_sell_risk_atr_ratio"] = sell_risk / atr
+    out["b_macd_hist_delta_abs"] = pd.to_numeric(out["macd_histogram_delta"], errors="coerce").abs()
+    return out
+
+
 def add_combined_signal_columns(
     df: pd.DataFrame,
     a_buy_hours: set[int] | None,
@@ -116,22 +169,24 @@ def add_combined_signal_columns(
     b_buy_hours: set[int] | None,
     b_sell_hours: set[int] | None,
     enabled_models: set[str],
+    b_exclude_risk_atr_range: tuple[float, float] | None = None,
+    b_exclude_macd_hist_delta_abs_range: tuple[float, float] | None = None,
+    sl_buffer_atr: float = 0.05,
 ) -> pd.DataFrame:
     """Create combined signal columns for the existing backtest engine.
 
     A = hidden divergence
     B = EMA20 reclaim + MACD reacceleration
 
-    Direction conflict rule:
-        If BUY and SELL are both true on the same bar after filters, skip that bar.
-        This should be rare because current A/B components do not generate both sides
-        simultaneously under normal conditions, but the guard is intentional.
+    B-only optional filters:
+        --b-exclude-risk-atr-range excludes B signals whose estimated entry risk
+        divided by ATR falls inside a weak range.
 
-    Source priority:
-        A+B same direction on the same bar is marked as A+B.
-        Otherwise source is A or B.
+        --b-exclude-macd-hist-delta-abs-range excludes B signals whose absolute
+        MACD histogram acceleration falls inside a weak range.
     """
     out = df.copy().sort_values("time", kind="mergesort").reset_index(drop=True)
+    out = add_b_filter_features(out, sl_buffer_atr=sl_buffer_atr)
 
     required = [
         "jst_hour",
@@ -156,12 +211,26 @@ def add_combined_signal_columns(
     b_buy = b_buy_raw & hours.map(lambda h: _side_hour_allowed("BUY", int(h), b_buy_hours, b_sell_hours))
     b_sell = b_sell_raw & hours.map(lambda h: _side_hour_allowed("SELL", int(h), b_buy_hours, b_sell_hours))
 
+    b_buy_before_feature_filters = b_buy.copy()
+    b_sell_before_feature_filters = b_sell.copy()
+
+    b_buy_risk_keep = _outside_range(out["b_buy_risk_atr_ratio"], b_exclude_risk_atr_range)
+    b_sell_risk_keep = _outside_range(out["b_sell_risk_atr_ratio"], b_exclude_risk_atr_range)
+    b_macd_keep = _outside_range(out["b_macd_hist_delta_abs"], b_exclude_macd_hist_delta_abs_range)
+
+    b_buy = b_buy & b_buy_risk_keep & b_macd_keep
+    b_sell = b_sell & b_sell_risk_keep & b_macd_keep
+
     combined_buy = a_buy | b_buy
     combined_sell = a_sell | b_sell
     conflict = combined_buy & combined_sell
 
     out["a_buy_signal_filtered"] = a_buy
     out["a_sell_signal_filtered"] = a_sell
+    out["b_buy_signal_before_feature_filters"] = b_buy_before_feature_filters
+    out["b_sell_signal_before_feature_filters"] = b_sell_before_feature_filters
+    out["b_buy_feature_filtered_out"] = b_buy_before_feature_filters & ~b_buy
+    out["b_sell_feature_filtered_out"] = b_sell_before_feature_filters & ~b_sell
     out["b_buy_signal_filtered"] = b_buy
     out["b_sell_signal_filtered"] = b_sell
     out["combined_signal_conflict"] = conflict
@@ -208,6 +277,10 @@ def combined_signal_summary(df: pd.DataFrame) -> dict[str, object]:
         "rows": int(len(df)),
         "a_buy_filtered": int(df["a_buy_signal_filtered"].sum()),
         "a_sell_filtered": int(df["a_sell_signal_filtered"].sum()),
+        "b_buy_before_feature_filters": int(df.get("b_buy_signal_before_feature_filters", pd.Series(False, index=df.index)).sum()),
+        "b_sell_before_feature_filters": int(df.get("b_sell_signal_before_feature_filters", pd.Series(False, index=df.index)).sum()),
+        "b_buy_feature_filtered_out": int(df.get("b_buy_feature_filtered_out", pd.Series(False, index=df.index)).sum()),
+        "b_sell_feature_filtered_out": int(df.get("b_sell_feature_filtered_out", pd.Series(False, index=df.index)).sum()),
         "b_buy_filtered": int(df["b_buy_signal_filtered"].sum()),
         "b_sell_filtered": int(df["b_sell_signal_filtered"].sum()),
         "combined_buy_signals": int(df["combined_buy_signal"].sum()),
@@ -243,6 +316,9 @@ def attach_signal_sources_to_trades(trades: pd.DataFrame, signal_df: pd.DataFram
         "a_sell_signal_filtered",
         "b_buy_signal_filtered",
         "b_sell_signal_filtered",
+        "b_buy_risk_atr_ratio",
+        "b_sell_risk_atr_ratio",
+        "b_macd_hist_delta_abs",
         "jst_time",
     ]
     available = [col for col in cols if col in signal_df.columns]
@@ -319,6 +395,9 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
     a_sell_hours = parse_int_csv(args.a_sell_jst_hours)
     b_buy_hours = parse_int_csv(args.b_buy_jst_hours)
     b_sell_hours = parse_int_csv(args.b_sell_jst_hours)
+    b_exclude_risk_atr_range = parse_float_range(args.b_exclude_risk_atr_range)
+    b_exclude_macd_hist_delta_abs_range = parse_float_range(args.b_exclude_macd_hist_delta_abs_range)
+
     enabled_models = {item.upper() for item in parse_csv_list(args.models)}
     invalid_models = enabled_models - {"A", "B"}
     if invalid_models:
@@ -346,6 +425,8 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
     print(f"A SELL JST hours: {sorted(a_sell_hours) if a_sell_hours is not None else 'ALL'}")
     print(f"B BUY JST hours: {sorted(b_buy_hours) if b_buy_hours is not None else 'ALL'}")
     print(f"B SELL JST hours: {sorted(b_sell_hours) if b_sell_hours is not None else 'ALL'}")
+    print(f"B exclude risk_atr_range: {b_exclude_risk_atr_range if b_exclude_risk_atr_range is not None else 'NONE'}")
+    print(f"B exclude macd_hist_delta_abs_range: {b_exclude_macd_hist_delta_abs_range if b_exclude_macd_hist_delta_abs_range is not None else 'NONE'}")
     print_time_conversion_info(args)
 
     if not m15_path.exists():
@@ -363,6 +444,9 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
         b_buy_hours=b_buy_hours,
         b_sell_hours=b_sell_hours,
         enabled_models=enabled_models,
+        b_exclude_risk_atr_range=b_exclude_risk_atr_range,
+        b_exclude_macd_hist_delta_abs_range=b_exclude_macd_hist_delta_abs_range,
+        sl_buffer_atr=args.sl_buffer_atr,
     )
 
     print_summary_dict("pullback_summary", pullback_summary(base_df))
@@ -410,6 +494,9 @@ def print_backtest_report(symbol: str, m15_path: Path, h1_path: Path, args: argp
         "signal_atr",
         "last_swing_low_price",
         "last_swing_high_price",
+        "b_buy_risk_atr_ratio",
+        "b_sell_risk_atr_ratio",
+        "b_macd_hist_delta_abs",
     ]
     available_display_cols = [col for col in display_cols if col in trades.columns]
 
@@ -448,6 +535,8 @@ def main() -> int:
     parser.add_argument("--a-sell-jst-hours", type=str, default="2,13,19", help="A signal SELL JST hours. Default: 2,13,19")
     parser.add_argument("--b-buy-jst-hours", type=str, default="20,21,22,23", help="B signal BUY JST hours. Default: 20,21,22,23")
     parser.add_argument("--b-sell-jst-hours", type=str, default="10,11", help="B signal SELL JST hours. Default: 10,11")
+    parser.add_argument("--b-exclude-risk-atr-range", type=str, default=None, help="Exclude B signals with estimated risk/ATR inside range, e.g. 1.95,2.49")
+    parser.add_argument("--b-exclude-macd-hist-delta-abs-range", type=str, default=None, help="Exclude B signals with abs MACD histogram delta inside range, e.g. 0.383,0.628")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
     parser.add_argument("--save", action="store_true", help="Save trades CSV to data/results.")
