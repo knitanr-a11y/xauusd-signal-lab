@@ -38,6 +38,26 @@ def build_paths(data_dir: Path, symbol: str) -> tuple[Path, Path]:
     return data_dir / f"{symbol_lower}_m15.csv", data_dir / f"{symbol_lower}_h1.csv"
 
 
+def parse_csv_list(value: str) -> list[str]:
+    return [item.strip().lower() for item in value.split(",") if item.strip()]
+
+
+def parse_int_csv(value: str | None) -> set[int] | None:
+    if value is None or value.strip() == "":
+        return None
+
+    hours: set[int] = set()
+    for item in value.split(","):
+        text = item.strip()
+        if text == "":
+            continue
+        hour = int(text)
+        if hour < 0 or hour > 23:
+            raise ValueError(f"Hour must be 0-23: {hour}")
+        hours.add(hour)
+    return hours
+
+
 def build_signal_dataframe(
     m15_path: Path,
     h1_path: Path,
@@ -83,6 +103,23 @@ def attach_jst_trade_times(trades, args: argparse.Namespace):
     return out
 
 
+def apply_trade_filters(trades, allowed_jst_hours: set[int] | None, allowed_sides: set[str] | None):
+    if trades.empty:
+        return trades
+
+    out = trades.copy()
+
+    if allowed_jst_hours is not None:
+        if "jst_entry_time" not in out.columns:
+            raise ValueError("jst_entry_time is required for allowed_jst_hours filter")
+        out = out[out["jst_entry_time"].dt.hour.isin(allowed_jst_hours)].copy()
+
+    if allowed_sides is not None:
+        out = out[out["side"].isin(allowed_sides)].copy()
+
+    return out.reset_index(drop=True)
+
+
 def print_time_conversion_info(args: argparse.Namespace) -> None:
     if args.use_fixed_offset:
         print(f"time_conversion_mode: fixed offset UTC+{args.server_utc_offset}")
@@ -93,12 +130,46 @@ def print_time_conversion_info(args: argparse.Namespace) -> None:
         print("JST conversion: automatic DST-aware conversion to Asia/Tokyo")
 
 
+def print_trade_report(title: str, trades, args: argparse.Namespace) -> None:
+    print("\n" + "-" * 120)
+    print(title)
+    print_summary_dict("backtest_summary", summarize_trades(trades))
+
+    print("\nsummary_by_side:")
+    by_side = summarize_by_side(trades)
+    if by_side.empty:
+        print("No trades.")
+    else:
+        print(by_side.to_string(index=False))
+
+    print("\nsummary_by_jst_month:")
+    by_jst_month = summarize_by_month(trades, time_col="jst_entry_time", label="jst_entry_month")
+    if by_jst_month.empty:
+        print("No trades.")
+    else:
+        print(by_jst_month.to_string(index=False))
+
+    print("\nsummary_by_jst_entry_hour:")
+    by_jst_hour = summarize_by_hour(trades, time_col="jst_entry_time", label="jst_entry_hour")
+    if by_jst_hour.empty:
+        print("No trades.")
+    else:
+        print(by_jst_hour.to_string(index=False))
+
+
 def print_backtest_report(
     symbol: str,
     m15_path: Path,
     h1_path: Path,
     args: argparse.Namespace,
 ) -> None:
+    allowed_jst_hours = parse_int_csv(args.allowed_jst_hours)
+    allowed_sides = {side.upper() for side in parse_csv_list(args.allowed_sides)} if args.allowed_sides else None
+    if allowed_sides is not None:
+        invalid = allowed_sides - {"BUY", "SELL"}
+        if invalid:
+            raise ValueError(f"allowed_sides must be BUY and/or SELL: {invalid}")
+
     print("=" * 120)
     print(f"symbol: {symbol}")
     print(f"m15_file: {m15_path}")
@@ -110,6 +181,8 @@ def print_backtest_report(
     print(f"rr: {args.rr}")
     print(f"sl_buffer_atr_multiplier: {args.sl_buffer_atr}")
     print(f"max_bars_in_trade: {args.max_bars_in_trade}")
+    print(f"allowed_jst_hours: {sorted(allowed_jst_hours) if allowed_jst_hours is not None else 'ALL'}")
+    print(f"allowed_sides: {sorted(allowed_sides) if allowed_sides is not None else 'ALL'}")
     print_time_conversion_info(args)
 
     if not m15_path.exists():
@@ -146,45 +219,28 @@ def print_backtest_report(
         conservative_same_bar=not args.same_bar_win,
         max_bars_in_trade=args.max_bars_in_trade,
     )
-    trades = run_simple_hidden_divergence_backtest(signal_df, settings=settings)
-    trades = attach_jst_trade_times(trades, args=args)
+    all_trades = run_simple_hidden_divergence_backtest(signal_df, settings=settings)
+    all_trades = attach_jst_trade_times(all_trades, args=args)
+    filtered_trades = apply_trade_filters(all_trades, allowed_jst_hours=allowed_jst_hours, allowed_sides=allowed_sides)
 
-    print_summary_dict("overall_backtest_summary", summarize_trades(trades))
+    print_trade_report("ALL_TRADES_BASELINE", all_trades, args)
 
-    print("\nsummary_by_side:")
-    by_side = summarize_by_side(trades)
-    if by_side.empty:
-        print("No trades.")
-    else:
-        print(by_side.to_string(index=False))
+    if allowed_jst_hours is not None or allowed_sides is not None:
+        print_trade_report("FILTERED_TRADES", filtered_trades, args)
 
-    print("\nsummary_by_server_month:")
-    by_month = summarize_by_month(trades, time_col="entry_time", label="server_entry_month")
+    print("\nsummary_by_server_month baseline:")
+    by_month = summarize_by_month(all_trades, time_col="entry_time", label="server_entry_month")
     if by_month.empty:
         print("No trades.")
     else:
         print(by_month.to_string(index=False))
 
-    print("\nsummary_by_jst_month:")
-    by_jst_month = summarize_by_month(trades, time_col="jst_entry_time", label="jst_entry_month")
-    if by_jst_month.empty:
-        print("No trades.")
-    else:
-        print(by_jst_month.to_string(index=False))
-
-    print("\nsummary_by_server_entry_hour:")
-    by_hour = summarize_by_entry_hour(trades)
+    print("\nsummary_by_server_entry_hour baseline:")
+    by_hour = summarize_by_entry_hour(all_trades)
     if by_hour.empty:
         print("No trades.")
     else:
         print(by_hour.to_string(index=False))
-
-    print("\nsummary_by_jst_entry_hour:")
-    by_jst_hour = summarize_by_hour(trades, time_col="jst_entry_time", label="jst_entry_hour")
-    if by_jst_hour.empty:
-        print("No trades.")
-    else:
-        print(by_jst_hour.to_string(index=False))
 
     display_cols = [
         "side",
@@ -207,21 +263,28 @@ def print_backtest_report(
         "last_swing_high_price",
     ]
 
-    print("\nrecent trades tail(20):")
-    if trades.empty:
+    print("\nrecent trades tail(20) baseline:")
+    if all_trades.empty:
         print("No trades.")
     else:
-        print(trades[display_cols].tail(20).to_string(index=False))
+        print(all_trades[display_cols].tail(20).to_string(index=False))
+
+    if allowed_jst_hours is not None or allowed_sides is not None:
+        print("\nrecent trades tail(20) filtered:")
+        if filtered_trades.empty:
+            print("No trades.")
+        else:
+            print(filtered_trades[display_cols].tail(20).to_string(index=False))
 
     if args.save:
         RESULTS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = RESULTS_DATA_DIR / f"{symbol.lower()}_simple_backtest_trades.csv"
-        trades.to_csv(out_path, index=False, encoding="utf-8-sig")
-        print(f"\nsaved_trades: {out_path}")
-
-
-def parse_csv_list(value: str) -> list[str]:
-    return [item.strip().lower() for item in value.split(",") if item.strip()]
+        base_path = RESULTS_DATA_DIR / f"{symbol.lower()}_simple_backtest_trades_all.csv"
+        all_trades.to_csv(base_path, index=False, encoding="utf-8-sig")
+        print(f"\nsaved_all_trades: {base_path}")
+        if allowed_jst_hours is not None or allowed_sides is not None:
+            filtered_path = RESULTS_DATA_DIR / f"{symbol.lower()}_simple_backtest_trades_filtered.csv"
+            filtered_trades.to_csv(filtered_path, index=False, encoding="utf-8-sig")
+            print(f"saved_filtered_trades: {filtered_path}")
 
 
 def main() -> int:
@@ -237,6 +300,8 @@ def main() -> int:
     parser.add_argument("--server-timezone", type=str, default=DEFAULT_MT5_SERVER_TIMEZONE, help="IANA timezone for MT5 server time. Default: Europe/Athens")
     parser.add_argument("--server-utc-offset", type=int, default=3, help="Fallback fixed UTC offset hours. Used only with --use-fixed-offset.")
     parser.add_argument("--use-fixed-offset", action="store_true", help="Use fixed UTC offset instead of DST-aware timezone conversion.")
+    parser.add_argument("--allowed-jst-hours", type=str, default=None, help="Comma-separated JST entry hours to keep, e.g. 2,3,5,7,13,19")
+    parser.add_argument("--allowed-sides", type=str, default=None, help="Comma-separated sides to keep: BUY,SELL. Example: BUY")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
     parser.add_argument("--save", action="store_true", help="Save trades CSV to data/results.")
