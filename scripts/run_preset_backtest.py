@@ -15,19 +15,25 @@ from src.presets import get_preset, list_preset_names
 
 def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
     preset = get_preset(preset_name)
+    enabled_models = {item.strip().upper() for item in preset.models.split(",") if item.strip()}
 
-    needs_extended_runner = any(
-        [
-            preset.a_exclude_hidden_price_delta_atr_lte is not None,
-            preset.b_buy_exclude_risk_atr_range is not None,
-            preset.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo is not None,
-        ]
-    )
-    runner = "run_combined_backtest_with_a_filters.py" if needs_extended_runner else "run_combined_backtest.py"
+    if "C" in enabled_models:
+        runner = "run_combined_abc_backtest.py"
+    else:
+        needs_extended_runner = any(
+            [
+                preset.a_exclude_hidden_price_delta_atr_lte is not None,
+                preset.b_buy_exclude_risk_atr_range is not None,
+                preset.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo is not None,
+            ]
+        )
+        runner = "run_combined_backtest_with_a_filters.py" if needs_extended_runner else "run_combined_backtest.py"
 
     command = [
         sys.executable,
         str(PROJECT_ROOT / "scripts" / runner),
+        "--preset-name",
+        preset.name,
         "--symbols",
         preset.symbols,
         "--models",
@@ -76,6 +82,15 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
             "--b-buy-exclude-risk-atr-macd-hist-delta-abs-combo",
             preset.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo,
         ])
+    if "C" in enabled_models:
+        if preset.c_breakout_lookback_bars is not None:
+            command.extend(["--c-breakout-lookback-bars", str(preset.c_breakout_lookback_bars)])
+        if preset.c_buy_jst_hours is not None:
+            command.extend(["--c-buy-jst-hours", preset.c_buy_jst_hours])
+        if preset.c_sell_jst_hours is not None:
+            command.extend(["--c-sell-jst-hours", preset.c_sell_jst_hours])
+        if preset.c_buy_h1_ema_gap_atr_max is not None:
+            command.extend(["--c-buy-h1-ema-gap-atr-max", str(preset.c_buy_h1_ema_gap_atr_max)])
     if preset.use_fixed_offset:
         command.append("--use-fixed-offset")
     if preset.no_ema20_reclaim:
@@ -117,6 +132,10 @@ def print_preset_details(preset_name: str) -> None:
     print(f"B exclude macd_hist_delta_abs_range: {preset.b_exclude_macd_hist_delta_abs_range or 'NONE'}")
     print(f"B BUY exclude risk_atr_range: {preset.b_buy_exclude_risk_atr_range or 'NONE'}")
     print(f"B BUY exclude risk/macd combo: {preset.b_buy_exclude_risk_atr_macd_hist_delta_abs_combo or 'NONE'}")
+    print(f"C breakout lookback bars: {preset.c_breakout_lookback_bars if preset.c_breakout_lookback_bars is not None else 'NONE'}")
+    print(f"C BUY JST hours: {preset.c_buy_jst_hours or 'NONE'}")
+    print(f"C SELL JST hours: {preset.c_sell_jst_hours or 'NONE'}")
+    print(f"C BUY H1 EMA gap ATR max: {preset.c_buy_h1_ema_gap_atr_max if preset.c_buy_h1_ema_gap_atr_max is not None else 'NONE'}")
     print(f"server_timezone: {preset.server_timezone}")
     print(f"server_utc_offset: {preset.server_utc_offset}")
     print(f"use_fixed_offset: {preset.use_fixed_offset}")
@@ -125,7 +144,7 @@ def print_preset_details(preset_name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a named backtest preset.")
-    parser.add_argument("--preset", type=str, default="gold_ab_v4", help="Preset name. Default: gold_ab_v4")
+    parser.add_argument("--preset", type=str, default="gold_abc_v1", help="Preset name. Default: gold_abc_v1")
     parser.add_argument("--list", action="store_true", help="List available presets and exit.")
     parser.add_argument("--dry-run", action="store_true", help="Print the generated command without running it.")
     parser.add_argument("--save", action="store_true", help="Forward --save to the underlying backtest script.")
