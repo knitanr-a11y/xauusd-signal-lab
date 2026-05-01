@@ -51,6 +51,10 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
         preset.b_sell_jst_hours,
     ]
 
+    if preset.b_exclude_risk_atr_range:
+        command.extend(["--b-exclude-risk-atr-range", preset.b_exclude_risk_atr_range])
+    if preset.b_exclude_macd_hist_delta_abs_range:
+        command.extend(["--b-exclude-macd-hist-delta-abs-range", preset.b_exclude_macd_hist_delta_abs_range])
     if preset.use_fixed_offset:
         command.append("--use-fixed-offset")
     if preset.no_ema20_reclaim:
@@ -87,6 +91,8 @@ def print_preset_details(preset_name: str) -> None:
     print(f"A SELL JST hours: {preset.a_sell_jst_hours}")
     print(f"B BUY JST hours: {preset.b_buy_jst_hours}")
     print(f"B SELL JST hours: {preset.b_sell_jst_hours}")
+    print(f"B exclude risk_atr_range: {preset.b_exclude_risk_atr_range or 'NONE'}")
+    print(f"B exclude macd_hist_delta_abs_range: {preset.b_exclude_macd_hist_delta_abs_range or 'NONE'}")
     print(f"server_timezone: {preset.server_timezone}")
     print(f"server_utc_offset: {preset.server_utc_offset}")
     print(f"use_fixed_offset: {preset.use_fixed_offset}")
@@ -95,7 +101,7 @@ def print_preset_details(preset_name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a named backtest preset.")
-    parser.add_argument("--preset", type=str, default="gold_ab_v1", help="Preset name. Default: gold_ab_v1")
+    parser.add_argument("--preset", type=str, default="gold_ab_v2", help="Preset name. Default: gold_ab_v2")
     parser.add_argument("--list", action="store_true", help="List available presets and exit.")
     parser.add_argument("--dry-run", action="store_true", help="Print the generated command without running it.")
     parser.add_argument("--save", action="store_true", help="Forward --save to the underlying backtest script.")
