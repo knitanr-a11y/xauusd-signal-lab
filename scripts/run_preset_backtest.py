@@ -17,7 +17,9 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
     preset = get_preset(preset_name)
     enabled_models = {item.strip().upper() for item in preset.models.split(",") if item.strip()}
 
-    if "C" in enabled_models:
+    if "C2" in enabled_models:
+        runner = "run_combined_abcc2_backtest.py"
+    elif "C" in enabled_models:
         runner = "run_combined_abc_backtest.py"
     else:
         needs_extended_runner = any(
@@ -91,6 +93,21 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
             command.extend(["--c-sell-jst-hours", preset.c_sell_jst_hours])
         if preset.c_buy_h1_ema_gap_atr_max is not None:
             command.extend(["--c-buy-h1-ema-gap-atr-max", str(preset.c_buy_h1_ema_gap_atr_max)])
+    if "C2" in enabled_models:
+        if preset.c2_range_lookback_bars is not None:
+            command.extend(["--c2-range-lookback-bars", str(preset.c2_range_lookback_bars)])
+        if preset.c2_max_range_width_atr is not None:
+            command.extend(["--c2-max-range-width-atr", str(preset.c2_max_range_width_atr)])
+        if preset.c2_min_breakout_atr is not None:
+            command.extend(["--c2-min-breakout-atr", str(preset.c2_min_breakout_atr)])
+        if preset.c2_max_breakout_atr is not None:
+            command.extend(["--c2-max-breakout-atr", str(preset.c2_max_breakout_atr)])
+        if preset.c2_buy_jst_hours is not None:
+            command.extend(["--c2-buy-jst-hours", preset.c2_buy_jst_hours])
+        if preset.c2_sell_jst_hours is not None:
+            command.extend(["--c2-sell-jst-hours", preset.c2_sell_jst_hours])
+        command.extend(["--c2-disable-buy" if preset.c2_disable_buy else "--no-c2-disable-buy"])
+        command.extend(["--c2-disable-sell" if preset.c2_disable_sell else "--no-c2-disable-sell"])
     if preset.use_fixed_offset:
         command.append("--use-fixed-offset")
     if preset.no_ema20_reclaim:
@@ -136,6 +153,12 @@ def print_preset_details(preset_name: str) -> None:
     print(f"C BUY JST hours: {preset.c_buy_jst_hours or 'NONE'}")
     print(f"C SELL JST hours: {preset.c_sell_jst_hours or 'NONE'}")
     print(f"C BUY H1 EMA gap ATR max: {preset.c_buy_h1_ema_gap_atr_max if preset.c_buy_h1_ema_gap_atr_max is not None else 'NONE'}")
+    print(f"C2 range lookback bars: {preset.c2_range_lookback_bars if preset.c2_range_lookback_bars is not None else 'NONE'}")
+    print(f"C2 max range width ATR: {preset.c2_max_range_width_atr if preset.c2_max_range_width_atr is not None else 'NONE'}")
+    print(f"C2 BUY JST hours: {preset.c2_buy_jst_hours or 'NONE'}")
+    print(f"C2 SELL JST hours: {preset.c2_sell_jst_hours or 'NONE'}")
+    print(f"C2 disable BUY: {preset.c2_disable_buy}")
+    print(f"C2 disable SELL: {preset.c2_disable_sell}")
     print(f"server_timezone: {preset.server_timezone}")
     print(f"server_utc_offset: {preset.server_utc_offset}")
     print(f"use_fixed_offset: {preset.use_fixed_offset}")
@@ -144,7 +167,7 @@ def print_preset_details(preset_name: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a named backtest preset.")
-    parser.add_argument("--preset", type=str, default="gold_abc_v1", help="Preset name. Default: gold_abc_v1")
+    parser.add_argument("--preset", type=str, default="gold_abc_v2", help="Preset name. Default: gold_abc_v2")
     parser.add_argument("--list", action="store_true", help="List available presets and exit.")
     parser.add_argument("--dry-run", action="store_true", help="Print the generated command without running it.")
     parser.add_argument("--save", action="store_true", help="Forward --save to the underlying backtest script.")
