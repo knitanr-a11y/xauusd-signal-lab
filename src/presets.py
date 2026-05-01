@@ -68,7 +68,8 @@ PRESETS: dict[str, BacktestPreset] = {
         description=(
             "Current GOLD main candidate after B-signal quality filtering. "
             "A=hidden divergence, B=EMA20 reclaim + MACD reacceleration. "
-            "Compared with v1, excludes weak B risk/ATR and MACD histogram acceleration bands."
+            "Compared with v1, excludes weak B risk/ATR and MACD histogram acceleration bands. "
+            "Filter ranges use the narrower robustness-tested values."
         ),
         symbols="gold",
         models="A,B",
@@ -83,8 +84,8 @@ PRESETS: dict[str, BacktestPreset] = {
         a_sell_jst_hours="2,13,19",
         b_buy_jst_hours="20,21,22,23",
         b_sell_jst_hours="10",
-        b_exclude_risk_atr_range="1.95,2.49",
-        b_exclude_macd_hist_delta_abs_range="0.383,0.628",
+        b_exclude_risk_atr_range="2.00,2.40",
+        b_exclude_macd_hist_delta_abs_range="0.40,0.60",
     ),
 }
 
