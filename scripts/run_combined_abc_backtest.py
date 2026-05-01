@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 import pandas as pd
 
@@ -13,23 +15,21 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from scripts.analyze_c_signal_trades import build_c_signal_df
 from scripts.compare_combined_abc_c_buy_candidates import (
+    CombinedABCCandidate,
     apply_abc_candidate,
     attach_combined_sources_to_trades,
     build_ab_v4_combined_df,
     summarize_source_breakdown,
 )
 from scripts.run_combined_backtest import (
+    attach_jst_trade_times,
     parse_csv_list,
     print_summary_dict,
     print_trade_report,
 )
-from scripts.run_combined_backtest_with_a_filters import parse_float_quad
 from src.backtest import BacktestSettings, run_simple_hidden_divergence_backtest, summarize_by_entry_hour, summarize_trades
 from src.config import RAW_DATA_DIR, RESULTS_DATA_DIR
-from src.presets import get_preset
 from src.time_utils import DEFAULT_MT5_SERVER_TIMEZONE
-from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass(frozen=True)
@@ -80,6 +80,34 @@ def build_runtime_candidate(args: argparse.Namespace) -> RuntimeABCCandidate:
     )
 
 
+def _summary_grouped(trades: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
+    if trades.empty:
+        return pd.DataFrame()
+    rows: list[dict[str, object]] = []
+    for key, group in trades.groupby(group_cols, dropna=False):
+        if not isinstance(key, tuple):
+            key = (key,)
+        summary = summarize_trades(group)
+        for col, value in zip(group_cols, key):
+            summary[col] = value
+        rows.append(summary)
+    if not rows:
+        return pd.DataFrame()
+    ordered = group_cols + [
+        "trades",
+        "closed_trades",
+        "wins",
+        "losses",
+        "win_rate",
+        "average_r",
+        "total_r",
+        "profit_factor",
+        "max_consecutive_losses",
+        "max_drawdown_r",
+    ]
+    return pd.DataFrame(rows)[ordered].reset_index(drop=True)
+
+
 def print_table(title: str, df: pd.DataFrame) -> None:
     print(f"\n{title}:")
     if df.empty:
@@ -116,34 +144,6 @@ def print_abc_summary(combined_df: pd.DataFrame, trades: pd.DataFrame) -> None:
         print(by_hour.to_string(index=False))
 
 
-def _summary_grouped(trades: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
-    if trades.empty:
-        return pd.DataFrame()
-    rows: list[dict[str, object]] = []
-    for key, group in trades.groupby(group_cols, dropna=False):
-        if not isinstance(key, tuple):
-            key = (key,)
-        summary = summarize_trades(group)
-        for col, value in zip(group_cols, key):
-            summary[col] = value
-        rows.append(summary)
-    if not rows:
-        return pd.DataFrame()
-    ordered = group_cols + [
-        "trades",
-        "closed_trades",
-        "wins",
-        "losses",
-        "win_rate",
-        "average_r",
-        "total_r",
-        "profit_factor",
-        "max_consecutive_losses",
-        "max_drawdown_r",
-    ]
-    return pd.DataFrame(rows)[ordered].reset_index(drop=True)
-
-
 def print_recent_trades(trades: pd.DataFrame) -> None:
     display_cols = [
         "combined_signal_source",
@@ -174,9 +174,6 @@ def run_symbol(args: argparse.Namespace, symbol: str) -> tuple[pd.DataFrame, pd.
     c_df = build_c_signal_df(args, symbol=symbol)
     runtime_candidate = build_runtime_candidate(args)
 
-    # Reuse the candidate applier shape from comparison scripts.
-    from scripts.compare_combined_abc_c_buy_candidates import CombinedABCCandidate
-
     candidate = CombinedABCCandidate(
         name=runtime_candidate.name,
         description=runtime_candidate.description,
@@ -192,8 +189,6 @@ def run_symbol(args: argparse.Namespace, symbol: str) -> tuple[pd.DataFrame, pd.
     )
     trades = run_simple_hidden_divergence_backtest(combined_df, settings=settings)
     trades = attach_combined_sources_to_trades(trades, combined_df)
-    from scripts.run_combined_backtest import attach_jst_trade_times
-
     trades = attach_jst_trade_times(trades, args=args)
     if not trades.empty:
         trades["jst_entry_hour"] = trades["jst_entry_time"].dt.hour
@@ -235,6 +230,12 @@ def main() -> int:
     parser.add_argument("--c-buy-jst-hours", type=str, default="1,5,11,12,15,18,21,22")
     parser.add_argument("--c-sell-jst-hours", type=str, default="")
     parser.add_argument("--c-buy-h1-ema-gap-atr-max", type=float, default=3.623)
+    parser.add_argument("--c-no-h1-trend", action="store_true")
+    parser.add_argument("--c-no-m15-ema-alignment", action="store_true")
+    parser.add_argument("--c-no-close-beyond-ema20", action="store_true")
+    parser.add_argument("--c-no-macd-hist-direction", action="store_true")
+    parser.add_argument("--c-no-macd-hist-acceleration", action="store_true")
+    parser.add_argument("--c-allow-ab-overlap", action="store_true")
     parser.add_argument("--same-bar-win", action="store_true")
     parser.add_argument("--max-bars-in-trade", type=int, default=None)
     parser.add_argument("--save", action="store_true")
