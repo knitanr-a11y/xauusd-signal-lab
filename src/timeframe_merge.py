@@ -41,8 +41,8 @@ def add_h1_environment(h1_df: pd.DataFrame) -> pd.DataFrame:
     buy_env = (out["h1_ema_20"] > out["h1_ema_50"]) & (out["h1_close"] > out["h1_ema_20"])
     sell_env = (out["h1_ema_20"] < out["h1_ema_50"]) & (out["h1_close"] < out["h1_ema_20"])
 
-    out["h1_buy_env"] = buy_env.fillna(False)
-    out["h1_sell_env"] = sell_env.fillna(False)
+    out["h1_buy_env"] = buy_env.where(buy_env.notna(), False).astype(bool)
+    out["h1_sell_env"] = sell_env.where(sell_env.notna(), False).astype(bool)
     out["h1_trend"] = "NONE"
     out.loc[out["h1_buy_env"], "h1_trend"] = "BUY"
     out.loc[out["h1_sell_env"], "h1_trend"] = "SELL"
@@ -115,9 +115,10 @@ def merge_confirmed_h1_context(m15_df: pd.DataFrame, h1_df: pd.DataFrame) -> pd.
     )
 
     # Before enough H1 data exists, these will be NaN. Treat environment as False/NONE.
-    merged["h1_buy_env"] = merged["h1_buy_env"].fillna(False).astype(bool)
-    merged["h1_sell_env"] = merged["h1_sell_env"].fillna(False).astype(bool)
-    merged["h1_trend"] = merged["h1_trend"].fillna("NONE")
+    # Use where(...).astype(bool) instead of fillna(False).astype(bool) to avoid pandas FutureWarning.
+    merged["h1_buy_env"] = merged["h1_buy_env"].where(merged["h1_buy_env"].notna(), False).astype(bool)
+    merged["h1_sell_env"] = merged["h1_sell_env"].where(merged["h1_sell_env"].notna(), False).astype(bool)
+    merged["h1_trend"] = merged["h1_trend"].where(merged["h1_trend"].notna(), "NONE")
 
     return merged
 
