@@ -24,7 +24,12 @@ from src.divergence import add_hidden_divergence_flags, hidden_divergence_summar
 from src.indicators import add_basic_indicators
 from src.pullback import add_pullback_candidates, pullback_summary
 from src.swings import add_swing_points, swing_summary
-from src.time_utils import add_time_columns, server_to_jst_delta_hours
+from src.time_utils import (
+    DEFAULT_MT5_SERVER_TIMEZONE,
+    add_time_columns,
+    convert_server_time_to_jst,
+    server_to_jst_delta_hours,
+)
 from src.timeframe_merge import merge_confirmed_h1_context
 
 
@@ -62,16 +67,30 @@ def print_summary_dict(title: str, summary: dict[str, object]) -> None:
             print(f"  {key}: {value}")
 
 
-def attach_jst_trade_times(trades, server_utc_offset: int):
+def attach_jst_trade_times(trades, args: argparse.Namespace):
     if trades.empty:
         return trades
 
     out = trades.copy()
-    delta_hours = server_to_jst_delta_hours(server_utc_offset)
     for col in ["signal_time", "entry_time", "exit_time", "h1_time"]:
         if col in out.columns:
-            out[f"jst_{col}"] = out[col] + __import__("pandas").to_timedelta(delta_hours, unit="h")
+            out[f"jst_{col}"] = convert_server_time_to_jst(
+                out[col],
+                server_timezone=args.server_timezone,
+                fallback_server_utc_offset_hours=args.server_utc_offset,
+                use_fixed_offset=args.use_fixed_offset,
+            )
     return out
+
+
+def print_time_conversion_info(args: argparse.Namespace) -> None:
+    if args.use_fixed_offset:
+        print(f"time_conversion_mode: fixed offset UTC+{args.server_utc_offset}")
+        print(f"JST conversion: server_time + {server_to_jst_delta_hours(args.server_utc_offset)} hours")
+    else:
+        print(f"time_conversion_mode: timezone-aware DST")
+        print(f"server_timezone: {args.server_timezone}")
+        print("JST conversion: automatic DST-aware conversion to Asia/Tokyo")
 
 
 def print_backtest_report(
@@ -91,8 +110,7 @@ def print_backtest_report(
     print(f"rr: {args.rr}")
     print(f"sl_buffer_atr_multiplier: {args.sl_buffer_atr}")
     print(f"max_bars_in_trade: {args.max_bars_in_trade}")
-    print(f"server_utc_offset: UTC+{args.server_utc_offset}")
-    print(f"JST conversion: server_time + {server_to_jst_delta_hours(args.server_utc_offset)} hours")
+    print_time_conversion_info(args)
 
     if not m15_path.exists():
         print(f"M15 file not found: {m15_path}")
@@ -110,8 +128,13 @@ def print_backtest_report(
         swing_right=args.swing_right,
     )
 
-    # Add practical server/UTC/JST helper columns to signal dataframe for later feature work.
-    signal_df = add_time_columns(signal_df, time_col="time", server_utc_offset_hours=args.server_utc_offset)
+    signal_df = add_time_columns(
+        signal_df,
+        time_col="time",
+        server_timezone=args.server_timezone,
+        fallback_server_utc_offset_hours=args.server_utc_offset,
+        use_fixed_offset=args.use_fixed_offset,
+    )
 
     print_summary_dict("pullback_summary", pullback_summary(signal_df))
     print_summary_dict("swing_summary", swing_summary(signal_df))
@@ -124,7 +147,7 @@ def print_backtest_report(
         max_bars_in_trade=args.max_bars_in_trade,
     )
     trades = run_simple_hidden_divergence_backtest(signal_df, settings=settings)
-    trades = attach_jst_trade_times(trades, server_utc_offset=args.server_utc_offset)
+    trades = attach_jst_trade_times(trades, args=args)
 
     print_summary_dict("overall_backtest_summary", summarize_trades(trades))
 
@@ -211,7 +234,9 @@ def main() -> int:
     parser.add_argument("--swing-right", type=int, default=2, help="Right bars for swing detection. Default: 2")
     parser.add_argument("--rr", type=float, default=1.5, help="Risk reward ratio. Default: 1.5")
     parser.add_argument("--sl-buffer-atr", type=float, default=0.05, help="SL buffer ATR multiplier. Default: 0.05")
-    parser.add_argument("--server-utc-offset", type=int, default=3, help="MT5 server UTC offset hours. Current confirmed setting: 3")
+    parser.add_argument("--server-timezone", type=str, default=DEFAULT_MT5_SERVER_TIMEZONE, help="IANA timezone for MT5 server time. Default: Europe/Athens")
+    parser.add_argument("--server-utc-offset", type=int, default=3, help="Fallback fixed UTC offset hours. Used only with --use-fixed-offset.")
+    parser.add_argument("--use-fixed-offset", action="store_true", help="Use fixed UTC offset instead of DST-aware timezone conversion.")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
     parser.add_argument("--save", action="store_true", help="Save trades CSV to data/results.")
