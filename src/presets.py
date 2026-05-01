@@ -42,6 +42,10 @@ class BacktestPreset:
     b_exclude_macd_hist_delta_abs_range: str | None = None
     b_buy_exclude_risk_atr_range: str | None = None
     b_buy_exclude_risk_atr_macd_hist_delta_abs_combo: str | None = None
+    c_breakout_lookback_bars: int | None = None
+    c_buy_jst_hours: str | None = None
+    c_sell_jst_hours: str | None = None
+    c_buy_h1_ema_gap_atr_max: float | None = None
 
 
 PRESETS: dict[str, BacktestPreset] = {
@@ -139,6 +143,37 @@ PRESETS: dict[str, BacktestPreset] = {
         b_exclude_macd_hist_delta_abs_range="0.40,0.60",
         b_buy_exclude_risk_atr_range="0.928,1.241",
         b_buy_exclude_risk_atr_macd_hist_delta_abs_combo="1.241,2.40,0.375,0.742",
+    ),
+    "gold_abc_v1": BacktestPreset(
+        name="gold_abc_v1",
+        description=(
+            "GOLD A+B+C candidate. "
+            "AB uses frozen gold_ab_v4. "
+            "C=H1-aligned M15 breakout-continuation BUY only, signal hours 1,5,11,12,15,18,21,22, "
+            "with H1 EMA gap <= 3.623 ATR. C SELL remains disabled."
+        ),
+        symbols="gold",
+        models="A,B,C",
+        near_atr=0.30,
+        close_tolerance_atr=0.50,
+        swing_left=3,
+        swing_right=2,
+        recent_pullback_bars=6,
+        rr=1.5,
+        sl_buffer_atr=0.05,
+        a_buy_jst_hours="7,13",
+        a_sell_jst_hours="2,13,19",
+        a_exclude_hidden_price_delta_atr_lte=0.271,
+        b_buy_jst_hours="20,21,22,23",
+        b_sell_jst_hours="10",
+        b_exclude_risk_atr_range="2.00,2.40",
+        b_exclude_macd_hist_delta_abs_range="0.40,0.60",
+        b_buy_exclude_risk_atr_range="0.928,1.241",
+        b_buy_exclude_risk_atr_macd_hist_delta_abs_combo="1.241,2.40,0.375,0.742",
+        c_breakout_lookback_bars=12,
+        c_buy_jst_hours="1,5,11,12,15,18,21,22",
+        c_sell_jst_hours="",
+        c_buy_h1_ema_gap_atr_max=3.623,
     ),
 }
 
