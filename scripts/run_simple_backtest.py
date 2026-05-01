@@ -13,6 +13,7 @@ from src.backtest import (
     BacktestSettings,
     run_simple_hidden_divergence_backtest,
     summarize_by_entry_hour,
+    summarize_by_hour,
     summarize_by_month,
     summarize_by_side,
     summarize_trades,
@@ -23,6 +24,7 @@ from src.divergence import add_hidden_divergence_flags, hidden_divergence_summar
 from src.indicators import add_basic_indicators
 from src.pullback import add_pullback_candidates, pullback_summary
 from src.swings import add_swing_points, swing_summary
+from src.time_utils import add_time_columns, server_to_jst_delta_hours
 from src.timeframe_merge import merge_confirmed_h1_context
 
 
@@ -60,6 +62,18 @@ def print_summary_dict(title: str, summary: dict[str, object]) -> None:
             print(f"  {key}: {value}")
 
 
+def attach_jst_trade_times(trades, server_utc_offset: int):
+    if trades.empty:
+        return trades
+
+    out = trades.copy()
+    delta_hours = server_to_jst_delta_hours(server_utc_offset)
+    for col in ["signal_time", "entry_time", "exit_time", "h1_time"]:
+        if col in out.columns:
+            out[f"jst_{col}"] = out[col] + __import__("pandas").to_timedelta(delta_hours, unit="h")
+    return out
+
+
 def print_backtest_report(
     symbol: str,
     m15_path: Path,
@@ -77,6 +91,8 @@ def print_backtest_report(
     print(f"rr: {args.rr}")
     print(f"sl_buffer_atr_multiplier: {args.sl_buffer_atr}")
     print(f"max_bars_in_trade: {args.max_bars_in_trade}")
+    print(f"server_utc_offset: UTC+{args.server_utc_offset}")
+    print(f"JST conversion: server_time + {server_to_jst_delta_hours(args.server_utc_offset)} hours")
 
     if not m15_path.exists():
         print(f"M15 file not found: {m15_path}")
@@ -94,6 +110,9 @@ def print_backtest_report(
         swing_right=args.swing_right,
     )
 
+    # Add practical server/UTC/JST helper columns to signal dataframe for later feature work.
+    signal_df = add_time_columns(signal_df, time_col="time", server_utc_offset_hours=args.server_utc_offset)
+
     print_summary_dict("pullback_summary", pullback_summary(signal_df))
     print_summary_dict("swing_summary", swing_summary(signal_df))
     print_summary_dict("hidden_divergence_summary", hidden_divergence_summary(signal_df))
@@ -105,6 +124,7 @@ def print_backtest_report(
         max_bars_in_trade=args.max_bars_in_trade,
     )
     trades = run_simple_hidden_divergence_backtest(signal_df, settings=settings)
+    trades = attach_jst_trade_times(trades, server_utc_offset=args.server_utc_offset)
 
     print_summary_dict("overall_backtest_summary", summarize_trades(trades))
 
@@ -115,24 +135,39 @@ def print_backtest_report(
     else:
         print(by_side.to_string(index=False))
 
-    print("\nsummary_by_month:")
-    by_month = summarize_by_month(trades)
+    print("\nsummary_by_server_month:")
+    by_month = summarize_by_month(trades, time_col="entry_time", label="server_entry_month")
     if by_month.empty:
         print("No trades.")
     else:
         print(by_month.to_string(index=False))
 
-    print("\nsummary_by_entry_hour:")
+    print("\nsummary_by_jst_month:")
+    by_jst_month = summarize_by_month(trades, time_col="jst_entry_time", label="jst_entry_month")
+    if by_jst_month.empty:
+        print("No trades.")
+    else:
+        print(by_jst_month.to_string(index=False))
+
+    print("\nsummary_by_server_entry_hour:")
     by_hour = summarize_by_entry_hour(trades)
     if by_hour.empty:
         print("No trades.")
     else:
         print(by_hour.to_string(index=False))
 
+    print("\nsummary_by_jst_entry_hour:")
+    by_jst_hour = summarize_by_hour(trades, time_col="jst_entry_time", label="jst_entry_hour")
+    if by_jst_hour.empty:
+        print("No trades.")
+    else:
+        print(by_jst_hour.to_string(index=False))
+
     display_cols = [
         "side",
         "signal_time",
         "entry_time",
+        "jst_entry_time",
         "exit_time",
         "entry_price",
         "sl",
@@ -176,6 +211,7 @@ def main() -> int:
     parser.add_argument("--swing-right", type=int, default=2, help="Right bars for swing detection. Default: 2")
     parser.add_argument("--rr", type=float, default=1.5, help="Risk reward ratio. Default: 1.5")
     parser.add_argument("--sl-buffer-atr", type=float, default=0.05, help="SL buffer ATR multiplier. Default: 0.05")
+    parser.add_argument("--server-utc-offset", type=int, default=3, help="MT5 server UTC offset hours. Current confirmed setting: 3")
     parser.add_argument("--same-bar-win", action="store_true", help="If set, same-bar TP/SL is treated as win. Default is conservative loss.")
     parser.add_argument("--max-bars-in-trade", type=int, default=None, help="Optional maximum bars to hold a trade.")
     parser.add_argument("--save", action="store_true", help="Save trades CSV to data/results.")
