@@ -40,6 +40,8 @@ class BacktestPreset:
     a_exclude_hidden_price_delta_atr_lte: float | None = None
     b_exclude_risk_atr_range: str | None = None
     b_exclude_macd_hist_delta_abs_range: str | None = None
+    b_buy_exclude_risk_atr_range: str | None = None
+    b_buy_exclude_risk_atr_macd_hist_delta_abs_combo: str | None = None
 
 
 PRESETS: dict[str, BacktestPreset] = {
@@ -111,6 +113,32 @@ PRESETS: dict[str, BacktestPreset] = {
         b_sell_jst_hours="10",
         b_exclude_risk_atr_range="2.00,2.40",
         b_exclude_macd_hist_delta_abs_range="0.40,0.60",
+    ),
+    "gold_ab_v4": BacktestPreset(
+        name="gold_ab_v4",
+        description=(
+            "GOLD A+B main candidate after A filter and B BUY quality filtering. "
+            "Compared with v3, excludes weak B BUY risk/MACD combinations while keeping A v3 and B v2 filters. "
+            "This is the frozen AB baseline for C-signal research."
+        ),
+        symbols="gold",
+        models="A,B",
+        near_atr=0.30,
+        close_tolerance_atr=0.50,
+        swing_left=3,
+        swing_right=2,
+        recent_pullback_bars=6,
+        rr=1.5,
+        sl_buffer_atr=0.05,
+        a_buy_jst_hours="7,13",
+        a_sell_jst_hours="2,13,19",
+        a_exclude_hidden_price_delta_atr_lte=0.271,
+        b_buy_jst_hours="20,21,22,23",
+        b_sell_jst_hours="10",
+        b_exclude_risk_atr_range="2.00,2.40",
+        b_exclude_macd_hist_delta_abs_range="0.40,0.60",
+        b_buy_exclude_risk_atr_range="0.928,1.241",
+        b_buy_exclude_risk_atr_macd_hist_delta_abs_combo="1.241,2.40,0.375,0.742",
     ),
 }
 
