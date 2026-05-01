@@ -105,24 +105,6 @@ def run_simple_hidden_divergence_backtest(
     df: pd.DataFrame,
     settings: BacktestSettings | None = None,
 ) -> pd.DataFrame:
-    """Run a simple one-position-at-a-time backtest.
-
-    Entry:
-        next bar open after hidden divergence signal.
-
-    BUY:
-        SL = last confirmed swing low - ATR buffer
-        TP = entry + risk * rr
-
-    SELL:
-        SL = last confirmed swing high + ATR buffer
-        TP = entry - risk * rr
-
-    Trade management:
-        - one position at a time
-        - ignore new signals while in a position
-        - if TP and SL hit in the same bar, conservative mode treats it as loss
-    """
     settings = settings or BacktestSettings()
     settings.validate()
 
@@ -243,7 +225,6 @@ def run_simple_hidden_divergence_backtest(
             exit_index = max_exit_index
             result = "timeout" if settings.max_bars_in_trade is not None else "open_end"
             exit_reason = result
-            # Mark-to-market R at final close for diagnostics.
             final_close = float(data.at[exit_index, "close"])
             if side == "BUY":
                 r_value = (final_close - entry_price) / risk
@@ -267,7 +248,6 @@ def run_simple_hidden_divergence_backtest(
             )
         )
 
-        # One-position-at-a-time rule: skip all bars until trade exit.
         i = max(exit_index + 1, i + 1)
 
     return pd.DataFrame(trades)
@@ -332,29 +312,37 @@ def summarize_by_side(trades: pd.DataFrame) -> pd.DataFrame:
     ]]
 
 
-def summarize_by_month(trades: pd.DataFrame) -> pd.DataFrame:
+def summarize_by_month(trades: pd.DataFrame, time_col: str = "entry_time", label: str = "entry_month") -> pd.DataFrame:
     if trades.empty:
         return pd.DataFrame()
 
     out = trades.copy()
-    out["entry_month"] = pd.to_datetime(out["entry_time"]).dt.to_period("M").astype(str)
+    if time_col not in out.columns:
+        raise ValueError(f"Missing time column for monthly summary: {time_col}")
+    out[label] = pd.to_datetime(out[time_col]).dt.to_period("M").astype(str)
     rows = []
-    for month, group in out.groupby("entry_month", dropna=False):
+    for month, group in out.groupby(label, dropna=False):
         summary = summarize_trades(group)
-        summary["entry_month"] = month
+        summary[label] = month
         rows.append(summary)
-    return pd.DataFrame(rows).sort_values("entry_month")
+    return pd.DataFrame(rows).sort_values(label)
 
 
 def summarize_by_entry_hour(trades: pd.DataFrame) -> pd.DataFrame:
+    return summarize_by_hour(trades, time_col="entry_time", label="entry_hour")
+
+
+def summarize_by_hour(trades: pd.DataFrame, time_col: str, label: str) -> pd.DataFrame:
     if trades.empty:
         return pd.DataFrame()
 
     out = trades.copy()
-    out["entry_hour"] = pd.to_datetime(out["entry_time"]).dt.hour
+    if time_col not in out.columns:
+        raise ValueError(f"Missing time column for hourly summary: {time_col}")
+    out[label] = pd.to_datetime(out[time_col]).dt.hour
     rows = []
-    for hour, group in out.groupby("entry_hour", dropna=False):
+    for hour, group in out.groupby(label, dropna=False):
         summary = summarize_trades(group)
-        summary["entry_hour"] = int(hour)
+        summary[label] = int(hour)
         rows.append(summary)
-    return pd.DataFrame(rows).sort_values("entry_hour")
+    return pd.DataFrame(rows).sort_values(label)
