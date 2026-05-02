@@ -114,6 +114,7 @@ HISTORICAL_CASE_COLUMNS = [
     "r",
     "exit_reason",
     "bars_held",
+    "source_row",
 ]
 
 NUMERIC_SIMILARITY_COLUMNS = [
@@ -176,7 +177,9 @@ def prepare_cases(path: Path) -> pd.DataFrame:
         raise ValueError("enriched cases CSV must contain combined_signal_source")
     if "side" not in df.columns:
         raise ValueError("enriched cases CSV must contain side")
-    return df.reset_index(drop=True)
+    df = df.reset_index(drop=True)
+    df["source_row"] = df.index.astype(int)
+    return df
 
 
 def numeric_distance(current: pd.Series, other: pd.Series) -> float:
@@ -230,11 +233,15 @@ def select_similar_cases(
     current: pd.Series,
     case_type: str,
     limit: int,
+    current_index: int,
 ) -> pd.DataFrame:
     source = str(current.get("combined_signal_source", ""))
     side = str(current.get("side", ""))
 
-    candidates = cases[cases["case_type"] == case_type].copy()
+    # Critical guardrail:
+    # When using a historical row as a current-signal sample, never allow that same row
+    # to appear in the historical comparison set. Otherwise the AI can see the answer label.
+    candidates = cases[(cases["case_type"] == case_type) & (cases["source_row"] != int(current_index))].copy()
     if candidates.empty:
         return candidates
 
@@ -272,6 +279,7 @@ Important rules:
 - Return JSON only.
 - Use only current_signal_snapshot for the current signal. Historical case result/r/exit fields are labels only.
 - For spread, use entry_spread_price_atr_ratio. Do not use deprecated point/ATR ratios.
+- The current sample row is excluded from historical comparison cases to avoid label leakage.
 - Do not output skip_candidate unless winning_pattern_match is low and losing_pattern_similarity is high with multiple supporting reasons.
 
 Required output JSON schema:
@@ -289,6 +297,16 @@ Required output JSON schema:
 """
 
 
+def assert_current_not_in_similar_cases(payload: dict[str, Any], current_index: int) -> None:
+    leaked = []
+    for bucket_name in ["similar_winning_cases", "similar_losing_cases"]:
+        for case in payload.get(bucket_name, []):
+            if case.get("source_row") == int(current_index):
+                leaked.append(bucket_name)
+    if leaked:
+        raise RuntimeError(f"current row leaked into historical comparison cases: {leaked}")
+
+
 def build_payload(
     cases: pd.DataFrame,
     current_index: int,
@@ -299,8 +317,8 @@ def build_payload(
         raise IndexError(f"current-index out of range: {current_index}. rows={len(cases)}")
 
     current = cases.iloc[current_index]
-    similar_wins = select_similar_cases(cases, current, "win_pattern", win_limit)
-    similar_losses = select_similar_cases(cases, current, "loss_pattern", loss_limit)
+    similar_wins = select_similar_cases(cases, current, "win_pattern", win_limit, current_index=current_index)
+    similar_losses = select_similar_cases(cases, current, "loss_pattern", loss_limit, current_index=current_index)
 
     current_signal = row_to_dict(current, CURRENT_SIGNAL_COLUMNS)
     leaked = sorted([col for col in FUTURE_LABEL_COLUMNS if col in current_signal])
@@ -313,7 +331,7 @@ def build_payload(
             "broker_profile": "XM KIWAMI",
             "symbol": "GOLD# / goldsharp",
             "preset": "xm_kiwami_gold_abc_v3",
-            "mode": "shadow_review_payload_example",
+            "mode": "shadow_review_payload_example_no_self_case_leakage",
             "current_case_source_row": int(current_index),
             "warning": "This payload is for AI risk review, not final trade execution.",
         },
@@ -324,11 +342,13 @@ def build_payload(
         "guardrails": {
             "respect_rule_based_signal_expectancy": True,
             "do_not_use_historical_labels_as_current_features": True,
+            "exclude_current_row_from_historical_cases": True,
             "skip_candidate_requires_multiple_strong_reasons": True,
             "caution_does_not_mean_skip": True,
             "output_json_only": True,
         },
     }
+    assert_current_not_in_similar_cases(payload, current_index)
     return payload
 
 
@@ -365,6 +385,7 @@ def main() -> int:
     print("Current model/side/time:", current.get("combined_signal_source"), current.get("side"), current.get("jst_entry_time"))
     print("Similar win cases:", len(payload["similar_winning_cases"]))
     print("Similar loss cases:", len(payload["similar_losing_cases"]))
+    print("Self-case leakage check: OK")
     print("Saved JSON:", out_json)
     print("Saved prompt:", out_prompt)
 
