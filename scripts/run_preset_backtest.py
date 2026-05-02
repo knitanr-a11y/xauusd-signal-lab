@@ -34,39 +34,46 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
     command = [
         sys.executable,
         str(PROJECT_ROOT / "scripts" / runner),
-        "--preset-name",
-        preset.name,
-        "--symbols",
-        preset.symbols,
-        "--models",
-        preset.models,
-        "--near-atr",
-        str(preset.near_atr),
-        "--close-tolerance-atr",
-        str(preset.close_tolerance_atr),
-        "--swing-left",
-        str(preset.swing_left),
-        "--swing-right",
-        str(preset.swing_right),
-        "--recent-pullback-bars",
-        str(preset.recent_pullback_bars),
-        "--rr",
-        str(preset.rr),
-        "--sl-buffer-atr",
-        str(preset.sl_buffer_atr),
-        "--server-timezone",
-        preset.server_timezone,
-        "--server-utc-offset",
-        str(preset.server_utc_offset),
-        "--a-buy-jst-hours",
-        preset.a_buy_jst_hours,
-        "--a-sell-jst-hours",
-        preset.a_sell_jst_hours,
-        "--b-buy-jst-hours",
-        preset.b_buy_jst_hours,
-        "--b-sell-jst-hours",
-        preset.b_sell_jst_hours,
     ]
+
+    # Only ABC/ABCC2 runners accept --preset-name. The older AB-only runners do not.
+    if runner in {"run_combined_abc_backtest.py", "run_combined_abcc2_backtest.py"}:
+        command.extend(["--preset-name", preset.name])
+
+    command.extend(
+        [
+            "--symbols",
+            preset.symbols,
+            "--models",
+            preset.models,
+            "--near-atr",
+            str(preset.near_atr),
+            "--close-tolerance-atr",
+            str(preset.close_tolerance_atr),
+            "--swing-left",
+            str(preset.swing_left),
+            "--swing-right",
+            str(preset.swing_right),
+            "--recent-pullback-bars",
+            str(preset.recent_pullback_bars),
+            "--rr",
+            str(preset.rr),
+            "--sl-buffer-atr",
+            str(preset.sl_buffer_atr),
+            "--server-timezone",
+            preset.server_timezone,
+            "--server-utc-offset",
+            str(preset.server_utc_offset),
+            "--a-buy-jst-hours",
+            preset.a_buy_jst_hours,
+            "--a-sell-jst-hours",
+            preset.a_sell_jst_hours,
+            "--b-buy-jst-hours",
+            preset.b_buy_jst_hours,
+            "--b-sell-jst-hours",
+            preset.b_sell_jst_hours,
+        ]
+    )
 
     if preset.a_exclude_hidden_price_delta_atr_lte is not None:
         command.extend([
