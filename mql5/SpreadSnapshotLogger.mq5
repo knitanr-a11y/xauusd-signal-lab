@@ -1,13 +1,20 @@
 //+------------------------------------------------------------------+
 //| SpreadSnapshotLogger.mq5                                         |
 //| MT5 spread snapshot logger for XM KIWAMI / Vantage comparison     |
+//|                                                                  |
+//| 目的:                                                            |
+//| - Pythonを使わず、MT5だけで現在スプレッドをCSV出力する。          |
+//| - まずは壊れにくいように、即時スナップショットを書いて終了する。 |
+//|                                                                  |
+//| CSV保存場所:                                                     |
+//| MT5 -> ファイル -> データフォルダを開く -> MQL5 -> Files          |
 //+------------------------------------------------------------------+
 #property strict
 #property script_show_inputs
 
 input string InpSymbolsCsv = "GOLD#,BTCUSD#,USDJPY#,EURJPY#,GBPJPY#";
-input int    InpSeconds    = 300;     // 計測秒数
-input int    InpIntervalMs = 1000;    // 記録間隔ミリ秒
+input int    InpSamples    = 10;      // 何回記録するか。まずは10回で十分。
+input int    InpIntervalMs = 1000;    // 記録間隔ミリ秒。1000 = 1秒。
 input string InpFilePrefix = "spread_snapshot";
 
 string TrimString(string value)
@@ -21,6 +28,7 @@ string SanitizeFilePart(string value)
 {
    StringReplace(value, " ", "_");
    StringReplace(value, ":", "-");
+   StringReplace(value, ".", "-");
    StringReplace(value, "/", "-");
    StringReplace(value, "\\", "-");
    StringReplace(value, "#", "sharp");
@@ -32,10 +40,13 @@ void WriteHeader(const int handle)
    FileWrite(
       handle,
       "timestamp_server",
+      "sample_no",
       "account_login",
       "account_server",
       "account_company",
       "symbol",
+      "selected",
+      "tick_ok",
       "bid",
       "ask",
       "spread_price",
@@ -43,24 +54,24 @@ void WriteHeader(const int handle)
       "symbol_spread_points",
       "digits",
       "point",
-      "trade_mode"
+      "trade_mode",
+      "last_error"
    );
 }
 
-void WriteSymbolSnapshot(const int handle, const string symbol)
+void WriteSymbolSnapshot(const int handle, const int sample_no, const string symbol)
 {
-   if(!SymbolSelect(symbol, true))
-   {
-      Print("SymbolSelect failed: ", symbol, " error=", GetLastError());
-      return;
-   }
+   ResetLastError();
+   const bool selected = SymbolSelect(symbol, true);
+   int last_error = GetLastError();
 
    MqlTick tick;
-   if(!SymbolInfoTick(symbol, tick))
-   {
-      Print("SymbolInfoTick failed: ", symbol, " error=", GetLastError());
-      return;
-   }
+   ZeroMemory(tick);
+
+   ResetLastError();
+   const bool tick_ok = SymbolInfoTick(symbol, tick);
+   if(!tick_ok)
+      last_error = GetLastError();
 
    const double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
    const int digits = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
@@ -80,10 +91,13 @@ void WriteSymbolSnapshot(const int handle, const string symbol)
    FileWrite(
       handle,
       TimeToString(TimeCurrent(), TIME_DATE | TIME_SECONDS),
+      sample_no,
       (long)AccountInfoInteger(ACCOUNT_LOGIN),
       AccountInfoString(ACCOUNT_SERVER),
       AccountInfoString(ACCOUNT_COMPANY),
       symbol,
+      selected ? "true" : "false",
+      tick_ok ? "true" : "false",
       DoubleToString(tick.bid, digits),
       DoubleToString(tick.ask, digits),
       DoubleToString(spread_price, digits),
@@ -91,7 +105,8 @@ void WriteSymbolSnapshot(const int handle, const string symbol)
       symbol_spread_points,
       digits,
       DoubleToString(point, digits),
-      trade_mode
+      trade_mode,
+      last_error
    );
 }
 
@@ -110,10 +125,11 @@ void OnStart()
    const string company = SanitizeFilePart(AccountInfoString(ACCOUNT_COMPANY));
    const long login = (long)AccountInfoInteger(ACCOUNT_LOGIN);
    const string started = TimeToString(TimeCurrent(), TIME_DATE | TIME_MINUTES | TIME_SECONDS);
-   string started_part = SanitizeFilePart(started);
+   const string started_part = SanitizeFilePart(started);
 
    const string file_name = InpFilePrefix + "_" + company + "_" + server + "_" + IntegerToString((int)login) + "_" + started_part + ".csv";
 
+   ResetLastError();
    const int handle = FileOpen(file_name, FILE_WRITE | FILE_CSV | FILE_ANSI, ',');
    if(handle == INVALID_HANDLE)
    {
@@ -121,14 +137,17 @@ void OnStart()
       return;
    }
 
-   Print("Spread snapshot logging started: ", file_name);
-   Print("CSV output folder: MT5 File -> Open Data Folder -> MQL5 -> Files");
+   Print("Spread snapshot logger started: ", file_name);
+   Print("CSV output folder: MT5 -> File -> Open Data Folder -> MQL5 -> Files");
 
    WriteHeader(handle);
+   FileFlush(handle);
 
-   const datetime end_time = TimeCurrent() + InpSeconds;
+   int samples = InpSamples;
+   if(samples < 1)
+      samples = 1;
 
-   while(!IsStopped() && TimeCurrent() <= end_time)
+   for(int sample_no = 1; sample_no <= samples; sample_no++)
    {
       for(int i = 0; i < count; i++)
       {
@@ -136,13 +155,15 @@ void OnStart()
          if(symbol == "")
             continue;
 
-         WriteSymbolSnapshot(handle, symbol);
+         WriteSymbolSnapshot(handle, sample_no, symbol);
       }
 
       FileFlush(handle);
-      Sleep(InpIntervalMs);
+
+      if(sample_no < samples)
+         Sleep(InpIntervalMs);
    }
 
    FileClose(handle);
-   Print("Spread snapshot logging finished: ", file_name);
+   Print("Spread snapshot logger finished: ", file_name);
 }
