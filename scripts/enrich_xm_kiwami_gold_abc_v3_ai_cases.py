@@ -74,6 +74,7 @@ def add_indicators(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
     out[f"{prefix}_macd_signal"] = macd_signal
     out[f"{prefix}_macd_hist"] = macd_hist
     out[f"{prefix}_macd_hist_delta"] = macd_hist.diff()
+    out[f"{prefix}_macd_hist_delta_3"] = macd_hist - macd_hist.shift(3)
     out[f"{prefix}_macd_hist_delta_abs"] = out[f"{prefix}_macd_hist_delta"].abs()
 
     body = (close - open_).abs()
@@ -88,6 +89,19 @@ def add_indicators(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
     out[f"{prefix}_lower_wick"] = lower_wick
     out[f"{prefix}_upper_wick_ratio"] = upper_wick / candle_range
     out[f"{prefix}_lower_wick_ratio"] = lower_wick / candle_range
+    out[f"{prefix}_upper_wick_ratio_3"] = out[f"{prefix}_upper_wick_ratio"].rolling(3, min_periods=1).mean()
+    out[f"{prefix}_lower_wick_ratio_3"] = out[f"{prefix}_lower_wick_ratio"].rolling(3, min_periods=1).mean()
+
+    out[f"{prefix}_close_change_1"] = close.diff()
+    out[f"{prefix}_close_change_3"] = close - close.shift(3)
+    out[f"{prefix}_close_change_3_atr"] = out[f"{prefix}_close_change_3"] / out[f"{prefix}_atr14"].replace(0, pd.NA)
+
+    rolling_high_5 = high.rolling(5, min_periods=1).max()
+    rolling_low_5 = low.rolling(5, min_periods=1).min()
+    out[f"{prefix}_pullback_from_high_5_atr"] = (rolling_high_5 - close) / out[f"{prefix}_atr14"].replace(0, pd.NA)
+    out[f"{prefix}_rebound_from_low_5_atr"] = (close - rolling_low_5) / out[f"{prefix}_atr14"].replace(0, pd.NA)
+    out[f"{prefix}_close_vs_prev_high_atr"] = (close - high.shift(1)) / out[f"{prefix}_atr14"].replace(0, pd.NA)
+    out[f"{prefix}_close_vs_prev_low_atr"] = (close - low.shift(1)) / out[f"{prefix}_atr14"].replace(0, pd.NA)
 
     out[f"{prefix}_close_ema20_gap_atr"] = (close - out[f"{prefix}_ema20"]) / out[f"{prefix}_atr14"].replace(0, pd.NA)
     out[f"{prefix}_ema20_ema50_gap_atr"] = (out[f"{prefix}_ema20"] - out[f"{prefix}_ema50"]) / out[f"{prefix}_atr14"].replace(0, pd.NA)
@@ -115,7 +129,6 @@ def add_spread_price_columns(df: pd.DataFrame, *, prefix: str, point_size: float
     spread_col = f"{prefix}_spread"
     if spread_col not in out.columns:
         return out
-
     out[f"{prefix}_spread_points"] = out[spread_col]
     out[f"{prefix}_spread_point_size"] = point_size
     out[f"{prefix}_spread_price"] = out[f"{prefix}_spread_points"] * point_size
@@ -147,12 +160,18 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path, *, point_size: float) -
         "h1_macd_signal",
         "h1_macd_hist",
         "h1_macd_hist_delta",
+        "h1_macd_hist_delta_3",
         "h1_ema_alignment",
         "h1_close_ema20_gap_atr",
         "h1_ema20_ema50_gap_atr",
         "h1_ema50_ema200_gap_atr",
         "h1_close_position_20",
         "h1_range20_atr",
+        "h1_close_change_3_atr",
+        "h1_pullback_from_high_5_atr",
+        "h1_rebound_from_low_5_atr",
+        "h1_upper_wick_ratio_3",
+        "h1_lower_wick_ratio_3",
     ]
     h1_subset = h1[[col for col in h1_cols if col in h1.columns]].copy()
     h1_subset = h1_subset.rename(columns={"time": "h1_feature_time"})
@@ -180,14 +199,20 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path, *, point_size: float) -
     return merged.sort_values("time", kind="mergesort").reset_index(drop=True)
 
 
+def set_direction_flag(out: pd.DataFrame, flag_col: str, source_col: str) -> None:
+    out[flag_col] = "unknown"
+    out.loc[(out["side"] == "BUY") & (out[source_col] > 0), flag_col] = "yes"
+    out.loc[(out["side"] == "SELL") & (out[source_col] < 0), flag_col] = "yes"
+    out.loc[(out["side"] == "BUY") & (out[source_col] < 0), flag_col] = "no"
+    out.loc[(out["side"] == "SELL") & (out[source_col] > 0), flag_col] = "no"
+
+
 def add_signal_derived_features(cases: pd.DataFrame) -> pd.DataFrame:
     out = cases.copy()
     out["entry_risk_atr_ratio"] = out["risk"] / out["m15_atr14"].replace(0, pd.NA)
 
-    # Deprecated: do not use raw points/ATR as a price ratio. Kept only for backward comparison.
     if "m15_spread" in out.columns:
         out["entry_spread_points_atr_ratio_deprecated"] = out["m15_spread"] / out["m15_atr14"].replace(0, pd.NA)
-
     if "m15_spread_price" in out.columns:
         out["entry_spread_price_atr_ratio"] = out["m15_spread_price"] / out["m15_atr14"].replace(0, pd.NA)
 
@@ -203,17 +228,34 @@ def add_signal_derived_features(cases: pd.DataFrame) -> pd.DataFrame:
     out.loc[(out["side"] == "BUY") & (out["m15_ema_alignment"] == "bearish"), "side_matches_m15_ema"] = "no"
     out.loc[(out["side"] == "SELL") & (out["m15_ema_alignment"] == "bullish"), "side_matches_m15_ema"] = "no"
 
-    out["macd_hist_supports_side"] = "unknown"
-    out.loc[(out["side"] == "BUY") & (out["m15_macd_hist"] > 0), "macd_hist_supports_side"] = "yes"
-    out.loc[(out["side"] == "SELL") & (out["m15_macd_hist"] < 0), "macd_hist_supports_side"] = "yes"
-    out.loc[(out["side"] == "BUY") & (out["m15_macd_hist"] < 0), "macd_hist_supports_side"] = "no"
-    out.loc[(out["side"] == "SELL") & (out["m15_macd_hist"] > 0), "macd_hist_supports_side"] = "no"
+    set_direction_flag(out, "m15_macd_hist_supports_side", "m15_macd_hist")
+    set_direction_flag(out, "m15_macd_hist_delta_supports_side", "m15_macd_hist_delta")
+    set_direction_flag(out, "m15_macd_hist_delta3_supports_side", "m15_macd_hist_delta_3")
+    set_direction_flag(out, "h1_macd_hist_supports_side", "h1_macd_hist")
+    set_direction_flag(out, "h1_macd_hist_delta_supports_side", "h1_macd_hist_delta")
+    set_direction_flag(out, "h1_macd_hist_delta3_supports_side", "h1_macd_hist_delta_3")
 
-    out["macd_hist_delta_supports_side"] = "unknown"
-    out.loc[(out["side"] == "BUY") & (out["m15_macd_hist_delta"] > 0), "macd_hist_delta_supports_side"] = "yes"
-    out.loc[(out["side"] == "SELL") & (out["m15_macd_hist_delta"] < 0), "macd_hist_delta_supports_side"] = "yes"
-    out.loc[(out["side"] == "BUY") & (out["m15_macd_hist_delta"] < 0), "macd_hist_delta_supports_side"] = "no"
-    out.loc[(out["side"] == "SELL") & (out["m15_macd_hist_delta"] > 0), "macd_hist_delta_supports_side"] = "no"
+    # Backward compatible aliases used by existing scripts/payloads.
+    out["macd_hist_supports_side"] = out["m15_macd_hist_supports_side"]
+    out["macd_hist_delta_supports_side"] = out["m15_macd_hist_delta_supports_side"]
+
+    out["m15_recent_pushback_against_side"] = "unknown"
+    buy_pushback = (
+        ((out.get("m15_upper_wick_ratio_3") > 0.35) | (out.get("m15_pullback_from_high_5_atr") > 0.60) | (out.get("m15_close_change_3_atr") < -0.25))
+        & (out["side"] == "BUY")
+    )
+    sell_pushback = (
+        ((out.get("m15_lower_wick_ratio_3") > 0.35) | (out.get("m15_rebound_from_low_5_atr") > 0.60) | (out.get("m15_close_change_3_atr") > 0.25))
+        & (out["side"] == "SELL")
+    )
+    out.loc[buy_pushback | sell_pushback, "m15_recent_pushback_against_side"] = "yes"
+    out.loc[~(buy_pushback | sell_pushback), "m15_recent_pushback_against_side"] = "no"
+
+    out["m15_recent_momentum_supports_side"] = "unknown"
+    buy_momentum = (out["side"] == "BUY") & (out["m15_close_change_3_atr"] > 0) & (out["m15_macd_hist_delta_3"] > 0)
+    sell_momentum = (out["side"] == "SELL") & (out["m15_close_change_3_atr"] < 0) & (out["m15_macd_hist_delta_3"] < 0)
+    out.loc[buy_momentum | sell_momentum, "m15_recent_momentum_supports_side"] = "yes"
+    out.loc[~(buy_momentum | sell_momentum), "m15_recent_momentum_supports_side"] = "no"
 
     return out
 
@@ -231,13 +273,9 @@ data/results/ai_cases/xm_kiwami_gold_abc_v3_balanced_ai_cases_enriched.csv
 
 ## Important principle
 
-The enriched columns are **pre-entry features**.
-They are calculated from the signal candle or earlier market data, then joined to historical win/loss labels.
+The enriched columns are **pre-entry features**. They are calculated from the signal candle or earlier market data, then joined to historical win/loss labels.
 
-For future live evaluation:
-
-- historical cases may include result/r/exit information as labels
-- current signal snapshot must not include future result/r/exit information
+Historical cases may include result/r/exit information as labels. Current signal snapshots must not include future result/r/exit information.
 
 ## Indicator parameters
 
@@ -248,14 +286,9 @@ MACD: fast={MACD_FAST}, slow={MACD_SLOW}, signal={MACD_SIGNAL}
 spread point size: {point_size}
 ```
 
-MACD parameters match the project discussion using fast EMA 6, slow EMA 13, signal 4.
-
 ## Spread columns
 
-MT5 spread is exported in points, while ATR is a price-width value.
-Do not compare spread points directly to ATR.
-
-Use these columns instead:
+Use these columns for spread:
 
 ```text
 m15_spread_points
@@ -264,13 +297,11 @@ m15_spread_price
 entry_spread_price_atr_ratio
 ```
 
-Deprecated/backward-check column:
+Do not use:
 
 ```text
 entry_spread_points_atr_ratio_deprecated
 ```
-
-Do not use the deprecated column for AI judgment.
 
 ## Main feature groups
 
@@ -292,6 +323,9 @@ h1_ema20_ema50_gap_atr
 h1_ema50_ema200_gap_atr
 h1_close_position_20
 h1_range20_atr
+h1_macd_hist_supports_side
+h1_macd_hist_delta_supports_side
+h1_macd_hist_delta3_supports_side
 ```
 
 ### M15 environment
@@ -306,6 +340,13 @@ m15_range20_atr
 m15_body_ratio
 m15_upper_wick_ratio
 m15_lower_wick_ratio
+m15_upper_wick_ratio_3
+m15_lower_wick_ratio_3
+m15_close_change_3_atr
+m15_pullback_from_high_5_atr
+m15_rebound_from_low_5_atr
+m15_recent_pushback_against_side
+m15_recent_momentum_supports_side
 ```
 
 ### Direction support flags
@@ -313,18 +354,25 @@ m15_lower_wick_ratio
 ```text
 side_matches_h1_ema
 side_matches_m15_ema
-macd_hist_supports_side
-macd_hist_delta_supports_side
+m15_macd_hist_supports_side
+m15_macd_hist_delta_supports_side
+m15_macd_hist_delta3_supports_side
+h1_macd_hist_supports_side
+h1_macd_hist_delta_supports_side
+h1_macd_hist_delta3_supports_side
 ```
 
-## How AI should use this
+Backward-compatible aliases:
 
-1. Filter historical cases by same model and side first.
-2. Compare current signal pre-entry features with win cases.
-3. Compare current signal pre-entry features with loss cases.
-4. Output both winning-pattern match and losing-pattern similarity.
-5. Do not use the historical label columns as current-signal inputs.
-6. For spread, use `entry_spread_price_atr_ratio`, not point/ATR ratio.
+```text
+macd_hist_supports_side = m15_macd_hist_supports_side
+macd_hist_delta_supports_side = m15_macd_hist_delta_supports_side
+```
+
+## Why these features were added
+
+A normal-rated losing sample showed that M15 EMA/MACD alignment alone is not enough.
+The added H1 MACD and recent pushback features help the AI detect cases where the signal looks clean but the broader or very recent momentum is weakening.
 """
     path.write_text(content, encoding="utf-8")
 
@@ -392,14 +440,17 @@ def main() -> int:
 
     important = [
         "entry_risk_atr_ratio",
-        "m15_spread_points",
-        "m15_spread_price",
         "entry_spread_price_atr_ratio",
-        "entry_spread_points_atr_ratio_deprecated",
         "side_matches_h1_ema",
         "side_matches_m15_ema",
-        "macd_hist_supports_side",
-        "macd_hist_delta_supports_side",
+        "m15_macd_hist_supports_side",
+        "m15_macd_hist_delta_supports_side",
+        "m15_macd_hist_delta3_supports_side",
+        "h1_macd_hist_supports_side",
+        "h1_macd_hist_delta_supports_side",
+        "h1_macd_hist_delta3_supports_side",
+        "m15_recent_pushback_against_side",
+        "m15_recent_momentum_supports_side",
     ]
     print("\nImportant feature preview:")
     preview_cols = [col for col in ["case_type", "combined_signal_source", "side", "jst_entry_time"] + important if col in enriched.columns]
