@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.presets import get_preset, list_preset_names
 
 
-def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
+def build_combined_backtest_command(preset_name: str, save: bool, data_dir: Path | None) -> list[str]:
     preset = get_preset(preset_name)
     enabled_models = {item.strip().upper() for item in preset.models.split(",") if item.strip()}
 
@@ -35,6 +35,9 @@ def build_combined_backtest_command(preset_name: str, save: bool) -> list[str]:
         sys.executable,
         str(PROJECT_ROOT / "scripts" / runner),
     ]
+
+    if data_dir is not None:
+        command.extend(["--data-dir", str(data_dir)])
 
     # Only ABC/ABCC2 runners accept --preset-name. The older AB-only runners do not.
     if runner in {"run_combined_abc_backtest.py", "run_combined_abcc2_backtest.py"}:
@@ -175,6 +178,7 @@ def print_preset_details(preset_name: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a named backtest preset.")
     parser.add_argument("--preset", type=str, default="gold_abc_v2", help="Preset name. Default: gold_abc_v2")
+    parser.add_argument("--data-dir", type=Path, default=None, help="Optional raw data folder. Example: data/raw/xm_kiwami")
     parser.add_argument("--list", action="store_true", help="List available presets and exit.")
     parser.add_argument("--dry-run", action="store_true", help="Print the generated command without running it.")
     parser.add_argument("--save", action="store_true", help="Forward --save to the underlying backtest script.")
@@ -187,7 +191,7 @@ def main() -> int:
         return 0
 
     print_preset_details(args.preset)
-    command = build_combined_backtest_command(args.preset, save=args.save)
+    command = build_combined_backtest_command(args.preset, save=args.save, data_dir=args.data_dir)
 
     print("Generated command:")
     print(" ".join(f'"{part}"' if " " in part else part for part in command))
