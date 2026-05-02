@@ -3,7 +3,7 @@
 //|                         Multi-symbol OHLC CSV Exporter for MT5   |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.00"
+#property version   "1.01"
 #property description "Exports OHLC data for multiple symbols/timeframes to CSV. No trading logic."
 
 /*
@@ -11,9 +11,9 @@
   -------
   Export OHLC data from MT5 to CSV for one or more symbols and timeframes.
 
-  Initial project use:
-    - XAUUSD M15/H1
-    - BTCUSD M15/H1, if the broker provides BTC/USD in MT5
+  Current project use:
+    - XM KIWAMI: GOLD# M15/H1 and BTCUSD# M15/H1
+    - Vantage comparison: XAUUSD M15/H1 if needed
 
   Output folder:
     MT5 terminal data folder / MQL5 / Files /
@@ -24,21 +24,19 @@
   Important notes:
     - Attach this EA to one chart only.
     - Add target symbols to Market Watch before running.
-    - Broker symbol names vary. Examples: XAUUSD, XAUUSDm, GOLD, BTCUSD, BTCUSDm, BTCUSD.
+    - Do not remove # from XM KIWAMI symbols.
+    - Broker symbol names vary. Examples: GOLD#, BTCUSD#, XAUUSD, GOLD, BTCUSD.
     - The EA does not trade. It only exports CSV files.
 */
 
-input string InpSymbolsCSV       = "XAUUSD,BTCUSD"; // comma-separated symbols
+input string InpSymbolsCSV       = "GOLD#,BTCUSD#"; // comma-separated symbols
 input string InpTimeframesCSV    = "M15,H1";        // comma-separated TFs: M1,M5,M15,M30,H1,H4,D1,W1,MN1
-input int    InpBarsToExport     = 20000;           // number of bars to export per symbol/timeframe
+input int    InpBarsToExport     = 30000;           // number of bars to export per symbol/timeframe
 input int    InpTimerSeconds     = 60;              // export interval in seconds
 input bool   InpExportOnInit     = true;            // export immediately when attached
 input bool   InpUseSubfolder     = false;           // if true, output to MQL5/Files/export/
 input string InpSubfolderName    = "export";
 
-//+------------------------------------------------------------------+
-//| Utility: trim string                                             |
-//+------------------------------------------------------------------+
 string TrimString(string value)
 {
    StringTrimLeft(value);
@@ -46,9 +44,6 @@ string TrimString(string value)
    return value;
 }
 
-//+------------------------------------------------------------------+
-//| Utility: lower string                                            |
-//+------------------------------------------------------------------+
 string ToLowerString(string value)
 {
    string s = value;
@@ -56,9 +51,6 @@ string ToLowerString(string value)
    return s;
 }
 
-//+------------------------------------------------------------------+
-//| Utility: upper string                                            |
-//+------------------------------------------------------------------+
 string ToUpperString(string value)
 {
    string s = value;
@@ -66,12 +58,10 @@ string ToUpperString(string value)
    return s;
 }
 
-//+------------------------------------------------------------------+
-//| Utility: sanitize filename                                       |
-//+------------------------------------------------------------------+
 string SanitizeFilePart(string value)
 {
    string s = value;
+   StringReplace(s, "#", "sharp");
    StringReplace(s, "/", "");
    StringReplace(s, "\\", "");
    StringReplace(s, ":", "");
@@ -85,9 +75,6 @@ string SanitizeFilePart(string value)
    return s;
 }
 
-//+------------------------------------------------------------------+
-//| Digits for symbol                                                |
-//+------------------------------------------------------------------+
 int DigitsForSymbol(const string symbol)
 {
    long digits = 0;
@@ -97,9 +84,6 @@ int DigitsForSymbol(const string symbol)
    return _Digits;
 }
 
-//+------------------------------------------------------------------+
-//| Convert timeframe text to MT5 ENUM_TIMEFRAMES                    |
-//+------------------------------------------------------------------+
 ENUM_TIMEFRAMES TimeframeFromString(string tf)
 {
    string t = ToUpperString(TrimString(tf));
@@ -129,9 +113,6 @@ ENUM_TIMEFRAMES TimeframeFromString(string tf)
    return PERIOD_CURRENT;
 }
 
-//+------------------------------------------------------------------+
-//| Validate timeframe text                                          |
-//+------------------------------------------------------------------+
 bool IsSupportedTimeframe(string tf)
 {
    string t = ToUpperString(TrimString(tf));
@@ -147,9 +128,6 @@ bool IsSupportedTimeframe(string tf)
    return false;
 }
 
-//+------------------------------------------------------------------+
-//| Convert timeframe to label                                       |
-//+------------------------------------------------------------------+
 string TimeframeToLabel(ENUM_TIMEFRAMES timeframe)
 {
    switch(timeframe)
@@ -179,9 +157,6 @@ string TimeframeToLabel(ENUM_TIMEFRAMES timeframe)
    }
 }
 
-//+------------------------------------------------------------------+
-//| Build output filename                                            |
-//+------------------------------------------------------------------+
 string BuildFileName(const string symbol, const ENUM_TIMEFRAMES timeframe)
 {
    string safeSymbol = ToLowerString(SanitizeFilePart(symbol));
@@ -194,9 +169,6 @@ string BuildFileName(const string symbol, const ENUM_TIMEFRAMES timeframe)
    return filename;
 }
 
-//+------------------------------------------------------------------+
-//| Ensure symbol is available                                       |
-//+------------------------------------------------------------------+
 bool EnsureSymbol(const string symbol)
 {
    string s = TrimString(symbol);
@@ -211,9 +183,6 @@ bool EnsureSymbol(const string symbol)
    return false;
 }
 
-//+------------------------------------------------------------------+
-//| Export one symbol/timeframe                                      |
-//+------------------------------------------------------------------+
 bool ExportOne(const string symbol, const ENUM_TIMEFRAMES timeframe)
 {
    if(!EnsureSymbol(symbol))
@@ -249,8 +218,7 @@ bool ExportOne(const string symbol, const ENUM_TIMEFRAMES timeframe)
    {
       int fileErr = GetLastError();
       Print("[export_ohlc_multi] FileOpen failed: ", filename,
-            " | error=", fileErr,
-            " | Check MQL5/Files permissions or subfolder existence.");
+            " | error=", fileErr);
       return false;
    }
 
@@ -258,8 +226,6 @@ bool ExportOne(const string symbol, const ENUM_TIMEFRAMES timeframe)
 
    int digits = DigitsForSymbol(symbol);
 
-   // CopyRates with ArraySetAsSeries(true): index 0 is newest.
-   // Write oldest -> newest for Python/time-series processing.
    for(int i = copied - 1; i >= 0; i--)
    {
       string timeText = TimeToString(rates[i].time, TIME_DATE | TIME_MINUTES);
@@ -284,9 +250,6 @@ bool ExportOne(const string symbol, const ENUM_TIMEFRAMES timeframe)
    return true;
 }
 
-//+------------------------------------------------------------------+
-//| Export all configured symbols/timeframes                         |
-//+------------------------------------------------------------------+
 void ExportAll()
 {
    string symbols[];
@@ -328,13 +291,11 @@ void ExportAll()
    }
 }
 
-//+------------------------------------------------------------------+
-//| Expert initialization                                            |
-//+------------------------------------------------------------------+
 int OnInit()
 {
    Print("[export_ohlc_multi] MT5 EA initialized.");
    Print("[export_ohlc_multi] Symbols=", InpSymbolsCSV, " | Timeframes=", InpTimeframesCSV);
+   Print("[export_ohlc_multi] Do not remove # from XM KIWAMI symbols.");
 
    int timerSeconds = MathMax(1, InpTimerSeconds);
    EventSetTimer(timerSeconds);
@@ -345,27 +306,17 @@ int OnInit()
    return INIT_SUCCEEDED;
 }
 
-//+------------------------------------------------------------------+
-//| Expert deinitialization                                          |
-//+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
    EventKillTimer();
    Print("[export_ohlc_multi] MT5 EA stopped. reason=", reason);
 }
 
-//+------------------------------------------------------------------+
-//| Timer                                                            |
-//+------------------------------------------------------------------+
 void OnTimer()
 {
    ExportAll();
 }
 
-//+------------------------------------------------------------------+
-//| Tick                                                             |
-//+------------------------------------------------------------------+
 void OnTick()
 {
-   // Export is timer-based to avoid excessive writes on every tick.
 }
