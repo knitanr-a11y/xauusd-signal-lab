@@ -15,6 +15,9 @@ BUCKET_RULE_COLUMNS = [
     "source_row",
     "case_type",
     "final_risk_label",
+    "caution_bucket",
+    "caution_action_level",
+    "caution_bucket_reason",
     "winning_pattern_match",
     "losing_pattern_similarity",
     "result",
@@ -56,7 +59,16 @@ def read_csv(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
     if df.empty:
         return df
-    for col in ["r", "entry_risk_atr_ratio", "entry_spread_price_atr_ratio", "m15_close_change_3_atr", "m15_pullback_from_high_5_atr", "m15_rebound_from_low_5_atr", "m15_upper_wick_ratio_3", "m15_lower_wick_ratio_3"]:
+    for col in [
+        "r",
+        "entry_risk_atr_ratio",
+        "entry_spread_price_atr_ratio",
+        "m15_close_change_3_atr",
+        "m15_pullback_from_high_5_atr",
+        "m15_rebound_from_low_5_atr",
+        "m15_upper_wick_ratio_3",
+        "m15_lower_wick_ratio_3",
+    ]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
@@ -66,10 +78,11 @@ def safe_bool_eq(row: pd.Series, col: str, value: str) -> bool:
     return str(row.get(col, "")).lower() == value
 
 
-def classify_caution_quality(row: pd.Series) -> tuple[str, str]:
-    """Classify caution wins into actionable sub-buckets.
+def classify_caution_quality(row: pd.Series) -> tuple[str, str, str]:
+    """Classify caution wins into practical review buckets.
 
-    The labels are intentionally conservative. They are not trade decisions.
+    The labels are not trade decisions. They only decide how strongly the Discord/AI
+    message should warn the user.
     """
     win_match = str(row.get("winning_pattern_match", ""))
     loss_sim = str(row.get("losing_pattern_similarity", ""))
@@ -85,13 +98,19 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str]:
     risk_ok = pd.notna(risk_atr) and float(risk_atr) <= 3.0
     risk_high = pd.notna(risk_atr) and float(risk_atr) >= 4.0
 
-    # Tier 1: AI was cautious, but the setup is mostly aligned and the caution is likely mild.
-    if win_match == "high" and loss_sim in {"low", "medium"} and h1_ema_ok and m15_ema_ok and (h1_macd_ok or m15_macd_ok) and not pushback and risk_ok:
-        return "caution_but_tradeable_like", "High win match, not high loss similarity, EMA aligned, no recent pushback, risk/ATR not high."
+    # Soft caution: AI says caution, but the structure is close to normal-quality.
+    if win_match == "high" and loss_sim == "low" and h1_ema_ok and m15_ema_ok and (h1_macd_ok or m15_macd_ok) and not pushback and risk_ok:
+        return (
+            "soft_caution",
+            "low_warning",
+            "High win match, low loss similarity, EMA aligned, at least one MACD layer supports the side, no recent pushback, risk/ATR is not high.",
+        )
 
-    # Tier 2: likely still okay, but needs a human checkpoint.
+    # Tradeable caution: probably not a skip. Needs a quick human checkpoint.
     if win_match == "high" and loss_sim in {"low", "medium"} and h1_ema_ok and m15_ema_ok and not risk_high:
         reasons = []
+        if loss_sim == "medium":
+            reasons.append("loss similarity is medium")
         if pushback:
             reasons.append("recent pushback exists")
         if not h1_macd_ok:
@@ -100,25 +119,28 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str]:
             reasons.append("M15 MACD support is weak")
         if not momentum_ok:
             reasons.append("recent 3-candle momentum is not clearly supportive")
-        reason = "; ".join(reasons) if reasons else "Mostly aligned but AI still found caution evidence."
-        return "caution_needs_checkpoint", reason
+        reason = "; ".join(reasons) if reasons else "Mostly aligned, but AI still found mild caution evidence."
+        return "tradeable_caution", "medium_warning", reason
 
-    # Tier 3: caution is probably meaningful even though the trade won historically.
-    if loss_sim == "medium" or risk_high or pushback or not h1_ema_ok or not m15_ema_ok:
-        reasons = []
-        if loss_sim == "medium":
-            reasons.append("loss similarity is medium")
-        if risk_high:
-            reasons.append("risk/ATR is high")
-        if pushback:
-            reasons.append("recent pushback exists")
-        if not h1_ema_ok:
-            reasons.append("H1 EMA is not aligned")
-        if not m15_ema_ok:
-            reasons.append("M15 EMA is not aligned")
-        return "caution_meaningful_but_won", "; ".join(reasons)
+    # Hard caution: caution should be treated as meaningful, even if this historical sample won.
+    hard_reasons = []
+    if loss_sim == "high":
+        hard_reasons.append("loss similarity is high")
+    if risk_high:
+        hard_reasons.append("risk/ATR is high")
+    if pushback and not momentum_ok:
+        hard_reasons.append("recent pushback exists and recent momentum is not clearly supportive")
+    if not h1_ema_ok:
+        hard_reasons.append("H1 EMA is not aligned")
+    if not m15_ema_ok:
+        hard_reasons.append("M15 EMA is not aligned")
+    if win_match == "medium" and loss_sim == "medium":
+        hard_reasons.append("win match is only medium while loss similarity is medium")
 
-    return "caution_unclassified", "Did not match a specific caution sub-pattern."
+    if hard_reasons:
+        return "hard_caution", "high_warning", "; ".join(hard_reasons)
+
+    return "review_caution", "medium_warning", "Caution case did not match a more specific sub-pattern."
 
 
 def add_caution_bucket(df: pd.DataFrame) -> pd.DataFrame:
@@ -127,7 +149,8 @@ def add_caution_bucket(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     classified = out.apply(classify_caution_quality, axis=1)
     out["caution_bucket"] = [x[0] for x in classified]
-    out["caution_bucket_reason"] = [x[1] for x in classified]
+    out["caution_action_level"] = [x[1] for x in classified]
+    out["caution_bucket_reason"] = [x[2] for x in classified]
     return out
 
 
@@ -138,15 +161,16 @@ def safe_select(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 def summarize_bucket(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
-        return pd.DataFrame(columns=["caution_bucket", "rows", "wins", "losses", "total_r", "avg_r"])
+        return pd.DataFrame(columns=["caution_bucket", "caution_action_level", "rows", "wins", "losses", "total_r", "avg_r"])
     rows = []
-    for bucket, group in df.groupby("caution_bucket", dropna=False):
+    for (bucket, action_level), group in df.groupby(["caution_bucket", "caution_action_level"], dropna=False):
         wins = int((group.get("result") == "win").sum()) if "result" in group.columns else 0
         losses = int((group.get("result") == "loss").sum()) if "result" in group.columns else 0
         total_r = float(group["r"].sum()) if "r" in group.columns else 0.0
         rows.append(
             {
                 "caution_bucket": bucket,
+                "caution_action_level": action_level,
                 "rows": len(group),
                 "wins": wins,
                 "losses": losses,
@@ -154,7 +178,7 @@ def summarize_bucket(df: pd.DataFrame) -> pd.DataFrame:
                 "avg_r": total_r / len(group) if len(group) else 0.0,
             }
         )
-    return pd.DataFrame(rows).sort_values(["caution_bucket"], kind="mergesort")
+    return pd.DataFrame(rows).sort_values(["caution_action_level", "caution_bucket"], kind="mergesort")
 
 
 def summarize_feature_counts(df: pd.DataFrame) -> pd.DataFrame:
@@ -162,6 +186,8 @@ def summarize_feature_counts(df: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=["feature", "value", "rows"])
     rows = []
     features = [
+        "caution_bucket",
+        "caution_action_level",
         "winning_pattern_match",
         "losing_pattern_similarity",
         "case_model",
@@ -201,8 +227,7 @@ def main() -> int:
     summary_out = out_dir / "ai_review_caution_wins_bucket_summary.csv"
     feature_counts_out = out_dir / "ai_review_caution_wins_feature_counts.csv"
 
-    output_cols = ["caution_bucket", "caution_bucket_reason"] + BUCKET_RULE_COLUMNS
-    safe_select(caution_wins, output_cols).to_csv(detailed_out, index=False, encoding="utf-8-sig")
+    safe_select(caution_wins, BUCKET_RULE_COLUMNS).to_csv(detailed_out, index=False, encoding="utf-8-sig")
     summary = summarize_bucket(caution_wins)
     feature_counts = summarize_feature_counts(caution_wins)
     summary.to_csv(summary_out, index=False, encoding="utf-8-sig")
