@@ -25,7 +25,7 @@ FUTURE_LABEL_COLUMNS = {
     "bars_held",
 }
 
-CURRENT_SIGNAL_COLUMNS = [
+CORE_SIGNAL_COLUMNS = [
     "combined_signal_source",
     "side",
     "signal_time",
@@ -41,6 +41,9 @@ CURRENT_SIGNAL_COLUMNS = [
     "m15_spread_points",
     "m15_spread_price",
     "entry_spread_price_atr_ratio",
+]
+
+H1_FEATURE_COLUMNS = [
     "h1_feature_time",
     "h1_open",
     "h1_high",
@@ -52,8 +55,22 @@ CURRENT_SIGNAL_COLUMNS = [
     "h1_ema50_ema200_gap_atr",
     "h1_close_position_20",
     "h1_range20_atr",
+    "h1_macd_line",
+    "h1_macd_signal",
     "h1_macd_hist",
     "h1_macd_hist_delta",
+    "h1_macd_hist_delta_3",
+    "h1_macd_hist_supports_side",
+    "h1_macd_hist_delta_supports_side",
+    "h1_macd_hist_delta3_supports_side",
+    "h1_close_change_3_atr",
+    "h1_pullback_from_high_5_atr",
+    "h1_rebound_from_low_5_atr",
+    "h1_upper_wick_ratio_3",
+    "h1_lower_wick_ratio_3",
+]
+
+M15_FEATURE_COLUMNS = [
     "m15_feature_time",
     "m15_open",
     "m15_high",
@@ -68,48 +85,39 @@ CURRENT_SIGNAL_COLUMNS = [
     "m15_body_ratio",
     "m15_upper_wick_ratio",
     "m15_lower_wick_ratio",
+    "m15_upper_wick_ratio_3",
+    "m15_lower_wick_ratio_3",
+    "m15_close_change_3_atr",
+    "m15_pullback_from_high_5_atr",
+    "m15_rebound_from_low_5_atr",
+    "m15_close_vs_prev_high_atr",
+    "m15_close_vs_prev_low_atr",
     "m15_macd_line",
     "m15_macd_signal",
     "m15_macd_hist",
     "m15_macd_hist_delta",
+    "m15_macd_hist_delta_3",
+    "m15_macd_hist_supports_side",
+    "m15_macd_hist_delta_supports_side",
+    "m15_macd_hist_delta3_supports_side",
+    "m15_recent_pushback_against_side",
+    "m15_recent_momentum_supports_side",
+]
+
+DIRECTION_FLAG_COLUMNS = [
     "side_matches_h1_ema",
     "side_matches_m15_ema",
+    # Backward-compatible aliases. Keep these because older ledgers/scripts already use them.
     "macd_hist_supports_side",
     "macd_hist_delta_supports_side",
 ]
 
+CURRENT_SIGNAL_COLUMNS = CORE_SIGNAL_COLUMNS + H1_FEATURE_COLUMNS + M15_FEATURE_COLUMNS + DIRECTION_FLAG_COLUMNS
+
 HISTORICAL_CASE_COLUMNS = [
     "case_type",
     "case_reason",
-    "combined_signal_source",
-    "side",
-    "signal_time",
-    "entry_time",
-    "jst_entry_time",
-    "jst_entry_hour",
-    "entry_price",
-    "sl",
-    "tp",
-    "risk",
-    "entry_risk_atr_ratio",
-    "m15_spread_points",
-    "m15_spread_price",
-    "entry_spread_price_atr_ratio",
-    "h1_ema_alignment",
-    "h1_close_ema20_gap_atr",
-    "h1_range20_atr",
-    "m15_ema_alignment",
-    "m15_close_ema20_gap_atr",
-    "m15_range20_atr",
-    "m15_body_ratio",
-    "m15_upper_wick_ratio",
-    "m15_lower_wick_ratio",
-    "m15_macd_hist",
-    "m15_macd_hist_delta",
-    "side_matches_h1_ema",
-    "side_matches_m15_ema",
-    "macd_hist_supports_side",
-    "macd_hist_delta_supports_side",
+] + CURRENT_SIGNAL_COLUMNS + [
     "result",
     "r",
     "exit_reason",
@@ -122,13 +130,29 @@ NUMERIC_SIMILARITY_COLUMNS = [
     "entry_spread_price_atr_ratio",
     "h1_close_ema20_gap_atr",
     "h1_range20_atr",
+    "h1_macd_hist",
+    "h1_macd_hist_delta",
+    "h1_macd_hist_delta_3",
+    "h1_close_change_3_atr",
+    "h1_pullback_from_high_5_atr",
+    "h1_rebound_from_low_5_atr",
+    "h1_upper_wick_ratio_3",
+    "h1_lower_wick_ratio_3",
     "m15_close_ema20_gap_atr",
     "m15_range20_atr",
     "m15_body_ratio",
     "m15_upper_wick_ratio",
     "m15_lower_wick_ratio",
+    "m15_upper_wick_ratio_3",
+    "m15_lower_wick_ratio_3",
+    "m15_close_change_3_atr",
+    "m15_pullback_from_high_5_atr",
+    "m15_rebound_from_low_5_atr",
+    "m15_close_vs_prev_high_atr",
+    "m15_close_vs_prev_low_atr",
     "m15_macd_hist",
     "m15_macd_hist_delta",
+    "m15_macd_hist_delta_3",
 ]
 
 CATEGORICAL_SIMILARITY_COLUMNS = [
@@ -136,8 +160,14 @@ CATEGORICAL_SIMILARITY_COLUMNS = [
     "m15_ema_alignment",
     "side_matches_h1_ema",
     "side_matches_m15_ema",
-    "macd_hist_supports_side",
-    "macd_hist_delta_supports_side",
+    "m15_macd_hist_supports_side",
+    "m15_macd_hist_delta_supports_side",
+    "m15_macd_hist_delta3_supports_side",
+    "h1_macd_hist_supports_side",
+    "h1_macd_hist_delta_supports_side",
+    "h1_macd_hist_delta3_supports_side",
+    "m15_recent_pushback_against_side",
+    "m15_recent_momentum_supports_side",
 ]
 
 
@@ -279,6 +309,7 @@ Important rules:
 - Return JSON only.
 - Use only current_signal_snapshot for the current signal. Historical case result/r/exit fields are labels only.
 - For spread, use entry_spread_price_atr_ratio. Do not use deprecated point/ATR ratios.
+- Pay special attention to H1 MACD support, M15 recent pushback, and recent 3-candle momentum. A clean M15 EMA/MACD signal can still fail if broader or very recent momentum is weakening.
 - The current sample row is excluded from historical comparison cases to avoid label leakage.
 - Do not output skip_candidate unless winning_pattern_match is low and losing_pattern_similarity is high with multiple supporting reasons.
 
@@ -343,6 +374,7 @@ def build_payload(
             "respect_rule_based_signal_expectancy": True,
             "do_not_use_historical_labels_as_current_features": True,
             "exclude_current_row_from_historical_cases": True,
+            "use_h1_macd_and_recent_pushback_features": True,
             "skip_candidate_requires_multiple_strong_reasons": True,
             "caution_does_not_mean_skip": True,
             "output_json_only": True,
@@ -400,8 +432,14 @@ def main() -> int:
         "m15_ema_alignment",
         "side_matches_h1_ema",
         "side_matches_m15_ema",
-        "macd_hist_supports_side",
-        "macd_hist_delta_supports_side",
+        "m15_macd_hist_supports_side",
+        "m15_macd_hist_delta_supports_side",
+        "m15_macd_hist_delta3_supports_side",
+        "h1_macd_hist_supports_side",
+        "h1_macd_hist_delta_supports_side",
+        "h1_macd_hist_delta3_supports_side",
+        "m15_recent_pushback_against_side",
+        "m15_recent_momentum_supports_side",
     ]
     for col in preview_cols:
         print(f"  {col}: {current.get(col)}")
