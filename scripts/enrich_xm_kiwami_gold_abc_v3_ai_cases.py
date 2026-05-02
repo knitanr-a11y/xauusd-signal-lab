@@ -19,6 +19,7 @@ DEFAULT_README = PROJECT_ROOT / "data" / "results" / "ai_cases" / "xm_kiwami_gol
 MACD_FAST = 6
 MACD_SLOW = 13
 MACD_SIGNAL = 4
+DEFAULT_POINT_SIZE = 0.01  # XM KIWAMI GOLD# usually uses 0.01 price units per spread point.
 
 
 def read_ohlc(path: Path) -> pd.DataFrame:
@@ -109,9 +110,24 @@ def add_indicators(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
     return out
 
 
-def prepare_feature_frame(m15_path: Path, h1_path: Path) -> pd.DataFrame:
+def add_spread_price_columns(df: pd.DataFrame, *, prefix: str, point_size: float) -> pd.DataFrame:
+    out = df.copy()
+    spread_col = f"{prefix}_spread"
+    if spread_col not in out.columns:
+        return out
+
+    out[f"{prefix}_spread_points"] = out[spread_col]
+    out[f"{prefix}_spread_point_size"] = point_size
+    out[f"{prefix}_spread_price"] = out[f"{prefix}_spread_points"] * point_size
+    return out
+
+
+def prepare_feature_frame(m15_path: Path, h1_path: Path, *, point_size: float) -> pd.DataFrame:
     m15 = add_indicators(read_ohlc(m15_path), "m15")
     h1 = add_indicators(read_ohlc(h1_path), "h1")
+
+    h1 = h1.rename(columns={"open": "h1_open", "high": "h1_high", "low": "h1_low", "close": "h1_close", "spread": "h1_spread"})
+    h1 = add_spread_price_columns(h1, prefix="h1", point_size=point_size)
 
     h1_cols = [
         "time",
@@ -120,6 +136,9 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path) -> pd.DataFrame:
         "h1_low",
         "h1_close",
         "h1_spread",
+        "h1_spread_points",
+        "h1_spread_point_size",
+        "h1_spread_price",
         "h1_ema20",
         "h1_ema50",
         "h1_ema200",
@@ -135,8 +154,6 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path) -> pd.DataFrame:
         "h1_close_position_20",
         "h1_range20_atr",
     ]
-
-    h1 = h1.rename(columns={"open": "h1_open", "high": "h1_high", "low": "h1_low", "close": "h1_close", "spread": "h1_spread"})
     h1_subset = h1[[col for col in h1_cols if col in h1.columns]].copy()
     h1_subset = h1_subset.rename(columns={"time": "h1_feature_time"})
 
@@ -150,6 +167,7 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path) -> pd.DataFrame:
             "volume": "m15_volume",
         }
     )
+    m15 = add_spread_price_columns(m15, prefix="m15", point_size=point_size)
     m15["m15_feature_time"] = m15["time"]
 
     merged = pd.merge_asof(
@@ -165,7 +183,13 @@ def prepare_feature_frame(m15_path: Path, h1_path: Path) -> pd.DataFrame:
 def add_signal_derived_features(cases: pd.DataFrame) -> pd.DataFrame:
     out = cases.copy()
     out["entry_risk_atr_ratio"] = out["risk"] / out["m15_atr14"].replace(0, pd.NA)
-    out["entry_spread_atr_ratio"] = out["m15_spread"] / out["m15_atr14"].replace(0, pd.NA)
+
+    # Deprecated: do not use raw points/ATR as a price ratio. Kept only for backward comparison.
+    if "m15_spread" in out.columns:
+        out["entry_spread_points_atr_ratio_deprecated"] = out["m15_spread"] / out["m15_atr14"].replace(0, pd.NA)
+
+    if "m15_spread_price" in out.columns:
+        out["entry_spread_price_atr_ratio"] = out["m15_spread_price"] / out["m15_atr14"].replace(0, pd.NA)
 
     out["side_matches_h1_ema"] = "unknown"
     out.loc[(out["side"] == "BUY") & (out["h1_ema_alignment"] == "bullish"), "side_matches_h1_ema"] = "yes"
@@ -194,7 +218,7 @@ def add_signal_derived_features(cases: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def write_feature_notes(path: Path) -> None:
+def write_feature_notes(path: Path, *, point_size: float) -> None:
     content = f"""# XM KIWAMI GOLD ABC v3 AI Case Feature Notes
 
 This file explains the enriched AI case CSV.
@@ -221,9 +245,32 @@ For future live evaluation:
 ATR: 14-period simple rolling true range
 EMA: 20 / 50 / 200
 MACD: fast={MACD_FAST}, slow={MACD_SLOW}, signal={MACD_SIGNAL}
+spread point size: {point_size}
 ```
 
 MACD parameters match the project discussion using fast EMA 6, slow EMA 13, signal 4.
+
+## Spread columns
+
+MT5 spread is exported in points, while ATR is a price-width value.
+Do not compare spread points directly to ATR.
+
+Use these columns instead:
+
+```text
+m15_spread_points
+m15_spread_point_size
+m15_spread_price
+entry_spread_price_atr_ratio
+```
+
+Deprecated/backward-check column:
+
+```text
+entry_spread_points_atr_ratio_deprecated
+```
+
+Do not use the deprecated column for AI judgment.
 
 ## Main feature groups
 
@@ -231,7 +278,9 @@ MACD parameters match the project discussion using fast EMA 6, slow EMA 13, sign
 
 ```text
 entry_risk_atr_ratio
-entry_spread_atr_ratio
+m15_spread_points
+m15_spread_price
+entry_spread_price_atr_ratio
 ```
 
 ### H1 environment
@@ -275,6 +324,7 @@ macd_hist_delta_supports_side
 3. Compare current signal pre-entry features with loss cases.
 4. Output both winning-pattern match and losing-pattern similarity.
 5. Do not use the historical label columns as current-signal inputs.
+6. For spread, use `entry_spread_price_atr_ratio`, not point/ATR ratio.
 """
     path.write_text(content, encoding="utf-8")
 
@@ -286,6 +336,7 @@ def main() -> int:
     parser.add_argument("--h1-csv", type=Path, default=DEFAULT_H1_CSV)
     parser.add_argument("--out-csv", type=Path, default=DEFAULT_OUT_CSV)
     parser.add_argument("--notes", type=Path, default=DEFAULT_README)
+    parser.add_argument("--point-size", type=float, default=DEFAULT_POINT_SIZE, help="Price units per MT5 spread point. GOLD# default: 0.01")
     args = parser.parse_args()
 
     cases_csv = args.cases_csv if args.cases_csv.is_absolute() else PROJECT_ROOT / args.cases_csv
@@ -293,6 +344,9 @@ def main() -> int:
     h1_csv = args.h1_csv if args.h1_csv.is_absolute() else PROJECT_ROOT / args.h1_csv
     out_csv = args.out_csv if args.out_csv.is_absolute() else PROJECT_ROOT / args.out_csv
     notes = args.notes if args.notes.is_absolute() else PROJECT_ROOT / args.notes
+
+    if args.point_size <= 0:
+        raise ValueError("--point-size must be positive")
 
     for path in [cases_csv, m15_csv, h1_csv]:
         if not path.exists():
@@ -305,7 +359,7 @@ def main() -> int:
     cases["signal_time"] = pd.to_datetime(cases["signal_time"], errors="coerce")
     cases = cases.dropna(subset=["signal_time"]).sort_values("signal_time", kind="mergesort").reset_index(drop=True)
 
-    features = prepare_feature_frame(m15_csv, h1_csv)
+    features = prepare_feature_frame(m15_csv, h1_csv, point_size=args.point_size)
 
     enriched = pd.merge_asof(
         cases.sort_values("signal_time"),
@@ -318,11 +372,12 @@ def main() -> int:
 
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     enriched.to_csv(out_csv, index=False, encoding="utf-8-sig")
-    write_feature_notes(notes)
+    write_feature_notes(notes, point_size=args.point_size)
 
     print("Cases loaded:", len(cases), cases_csv)
     print("M15 rows:", len(read_ohlc(m15_csv)), m15_csv)
     print("H1 rows:", len(read_ohlc(h1_csv)), h1_csv)
+    print("Point size:", args.point_size)
     print("Enriched rows:", len(enriched))
     print("Saved enriched cases:", out_csv)
     print("Saved notes:", notes)
@@ -337,7 +392,10 @@ def main() -> int:
 
     important = [
         "entry_risk_atr_ratio",
-        "entry_spread_atr_ratio",
+        "m15_spread_points",
+        "m15_spread_price",
+        "entry_spread_price_atr_ratio",
+        "entry_spread_points_atr_ratio_deprecated",
         "side_matches_h1_ema",
         "side_matches_m15_ema",
         "macd_hist_supports_side",
