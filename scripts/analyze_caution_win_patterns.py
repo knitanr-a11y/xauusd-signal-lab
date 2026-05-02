@@ -101,21 +101,34 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str, str]:
     risk_ok = pd.notna(risk_atr) and float(risk_atr) <= 3.0
     risk_high = pd.notna(risk_atr) and float(risk_atr) >= 4.0
 
-    # Hard caution is intentionally strict. Medium/medium alone is NOT enough.
-    hard_reasons = []
+    # Hard caution split by the dominant practical reason.
+    # Priority 1: shape/similarity danger. This is a chart-quality warning.
     if loss_sim == "high":
-        hard_reasons.append("loss similarity is high")
-    if risk_high:
-        hard_reasons.append("risk/ATR is high")
-    if pushback and not momentum_ok:
-        hard_reasons.append("recent pushback exists and recent momentum is not clearly supportive")
-    if not h1_ema_ok and not h1_ema_unknown:
-        hard_reasons.append("H1 EMA is against the signal")
-    if not m15_ema_ok and not m15_ema_unknown:
-        hard_reasons.append("M15 EMA is against the signal")
+        return (
+            "hard_caution_similarity",
+            "high_warning",
+            "Losing-pattern similarity is high. Treat this as a chart-shape warning, not just a lot-size issue.",
+        )
 
-    if hard_reasons:
-        return "hard_caution", "high_warning", "; ".join(hard_reasons)
+    # Priority 2: risk/ATR danger. This is mainly a lot-size / SL-width warning.
+    if risk_high:
+        return (
+            "hard_caution_risk",
+            "high_warning",
+            "Risk/ATR is high. Historical case won, but live review should emphasize lot adjustment and SL-width confirmation.",
+        )
+
+    # Priority 3: structural caution, less common but still stronger than normal tradeable caution.
+    structure_reasons = []
+    if pushback and not momentum_ok:
+        structure_reasons.append("recent pushback exists and recent momentum is not clearly supportive")
+    if not h1_ema_ok and not h1_ema_unknown:
+        structure_reasons.append("H1 EMA is against the signal")
+    if not m15_ema_ok and not m15_ema_unknown:
+        structure_reasons.append("M15 EMA is against the signal")
+
+    if structure_reasons:
+        return "hard_caution_structure", "high_warning", "; ".join(structure_reasons)
 
     # Soft caution: close to normal-quality. Warning should be light.
     if win_match == "high" and loss_sim == "low" and h1_ema_ok and m15_ema_ok and (h1_macd_ok or m15_macd_ok) and not pushback and risk_ok:
