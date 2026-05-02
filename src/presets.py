@@ -60,11 +60,11 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_ab_v1": BacktestPreset(
         name="gold_ab_v1",
         description=(
-            "GOLD A+B baseline. "
+            "GOLD/XAUUSD A+B baseline. "
             "A=hidden divergence, B=EMA20 reclaim + MACD reacceleration. "
             "Uses JST side/model specific time filters, RR 1.5, SL buffer ATR 0.05."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B",
         near_atr=0.30,
         close_tolerance_atr=0.50,
@@ -81,12 +81,12 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_ab_v2": BacktestPreset(
         name="gold_ab_v2",
         description=(
-            "Current GOLD main candidate after B-signal quality filtering. "
+            "GOLD/XAUUSD main candidate after B-signal quality filtering. "
             "A=hidden divergence, B=EMA20 reclaim + MACD reacceleration. "
             "Compared with v1, excludes weak B risk/ATR and MACD histogram acceleration bands. "
             "Filter ranges use the narrower robustness-tested values."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B",
         near_atr=0.30,
         close_tolerance_atr=0.50,
@@ -105,11 +105,11 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_ab_v3": BacktestPreset(
         name="gold_ab_v3",
         description=(
-            "GOLD A+B main candidate after A-signal quality filtering. "
+            "GOLD/XAUUSD A+B main candidate after A-signal quality filtering. "
             "A=hidden divergence, B=EMA20 reclaim + MACD reacceleration. "
             "Compared with v2, excludes weak A hidden-price-delta/ATR signals while keeping B v2 filters."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B",
         near_atr=0.30,
         close_tolerance_atr=0.50,
@@ -129,11 +129,11 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_ab_v4": BacktestPreset(
         name="gold_ab_v4",
         description=(
-            "GOLD A+B main candidate after A filter and B BUY quality filtering. "
+            "GOLD/XAUUSD A+B main candidate after A filter and B BUY quality filtering. "
             "Compared with v3, excludes weak B BUY risk/MACD combinations while keeping A v3 and B v2 filters. "
             "This is the frozen AB baseline for C-signal research."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B",
         near_atr=0.30,
         close_tolerance_atr=0.50,
@@ -155,12 +155,12 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_abc_v1": BacktestPreset(
         name="gold_abc_v1",
         description=(
-            "GOLD A+B+C candidate. "
+            "GOLD/XAUUSD A+B+C candidate. "
             "AB uses frozen gold_ab_v4. "
             "C=H1-aligned M15 breakout-continuation BUY only, signal hours 1,5,11,12,15,18,21,22, "
             "with H1 EMA gap <= 3.623 ATR. C SELL remains disabled."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B,C",
         near_atr=0.30,
         close_tolerance_atr=0.50,
@@ -186,11 +186,11 @@ PRESETS: dict[str, BacktestPreset] = {
     "gold_abc_v2": BacktestPreset(
         name="gold_abc_v2",
         description=(
-            "GOLD A+B+C+C2 candidate. "
+            "GOLD/XAUUSD A+B+C+C2 candidate. "
             "gold_abc_v1 plus C2 SELL range-compression breakout at signal JST hours 11,14,17. "
             "C2 BUY remains disabled."
         ),
-        symbols="gold",
+        symbols="xauusd",
         models="A,B,C,C2",
         near_atr=0.30,
         close_tolerance_atr=0.50,
