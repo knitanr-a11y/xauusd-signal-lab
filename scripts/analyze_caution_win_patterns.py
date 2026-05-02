@@ -89,6 +89,9 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str, str]:
 
     h1_ema_ok = safe_bool_eq(row, "side_matches_h1_ema", "yes")
     m15_ema_ok = safe_bool_eq(row, "side_matches_m15_ema", "yes")
+    h1_ema_unknown = safe_bool_eq(row, "side_matches_h1_ema", "unknown")
+    m15_ema_unknown = safe_bool_eq(row, "side_matches_m15_ema", "unknown")
+
     h1_macd_ok = safe_bool_eq(row, "h1_macd_hist_supports_side", "yes") or safe_bool_eq(row, "h1_macd_hist_delta3_supports_side", "yes")
     m15_macd_ok = safe_bool_eq(row, "m15_macd_hist_supports_side", "yes") or safe_bool_eq(row, "m15_macd_hist_delta3_supports_side", "yes")
     pushback = safe_bool_eq(row, "m15_recent_pushback_against_side", "yes")
@@ -98,31 +101,7 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str, str]:
     risk_ok = pd.notna(risk_atr) and float(risk_atr) <= 3.0
     risk_high = pd.notna(risk_atr) and float(risk_atr) >= 4.0
 
-    # Soft caution: AI says caution, but the structure is close to normal-quality.
-    if win_match == "high" and loss_sim == "low" and h1_ema_ok and m15_ema_ok and (h1_macd_ok or m15_macd_ok) and not pushback and risk_ok:
-        return (
-            "soft_caution",
-            "low_warning",
-            "High win match, low loss similarity, EMA aligned, at least one MACD layer supports the side, no recent pushback, risk/ATR is not high.",
-        )
-
-    # Tradeable caution: probably not a skip. Needs a quick human checkpoint.
-    if win_match == "high" and loss_sim in {"low", "medium"} and h1_ema_ok and m15_ema_ok and not risk_high:
-        reasons = []
-        if loss_sim == "medium":
-            reasons.append("loss similarity is medium")
-        if pushback:
-            reasons.append("recent pushback exists")
-        if not h1_macd_ok:
-            reasons.append("H1 MACD support is weak")
-        if not m15_macd_ok:
-            reasons.append("M15 MACD support is weak")
-        if not momentum_ok:
-            reasons.append("recent 3-candle momentum is not clearly supportive")
-        reason = "; ".join(reasons) if reasons else "Mostly aligned, but AI still found mild caution evidence."
-        return "tradeable_caution", "medium_warning", reason
-
-    # Hard caution: caution should be treated as meaningful, even if this historical sample won.
+    # Hard caution is intentionally strict. Medium/medium alone is NOT enough.
     hard_reasons = []
     if loss_sim == "high":
         hard_reasons.append("loss similarity is high")
@@ -130,17 +109,43 @@ def classify_caution_quality(row: pd.Series) -> tuple[str, str, str]:
         hard_reasons.append("risk/ATR is high")
     if pushback and not momentum_ok:
         hard_reasons.append("recent pushback exists and recent momentum is not clearly supportive")
-    if not h1_ema_ok:
-        hard_reasons.append("H1 EMA is not aligned")
-    if not m15_ema_ok:
-        hard_reasons.append("M15 EMA is not aligned")
-    if win_match == "medium" and loss_sim == "medium":
-        hard_reasons.append("win match is only medium while loss similarity is medium")
+    if not h1_ema_ok and not h1_ema_unknown:
+        hard_reasons.append("H1 EMA is against the signal")
+    if not m15_ema_ok and not m15_ema_unknown:
+        hard_reasons.append("M15 EMA is against the signal")
 
     if hard_reasons:
         return "hard_caution", "high_warning", "; ".join(hard_reasons)
 
-    return "review_caution", "medium_warning", "Caution case did not match a more specific sub-pattern."
+    # Soft caution: close to normal-quality. Warning should be light.
+    if win_match == "high" and loss_sim == "low" and h1_ema_ok and m15_ema_ok and (h1_macd_ok or m15_macd_ok) and not pushback and risk_ok:
+        return (
+            "soft_caution",
+            "low_warning",
+            "High win match, low loss similarity, EMA aligned, at least one MACD layer supports the side, no recent pushback, risk/ATR is not high.",
+        )
+
+    # Tradeable caution: default bucket for medium/medium or high/medium cases without hard warning conditions.
+    tradeable_reasons = []
+    if win_match == "medium" and loss_sim == "medium":
+        tradeable_reasons.append("win match and loss similarity are both medium, but no hard caution condition was triggered")
+    elif win_match == "high" and loss_sim == "medium":
+        tradeable_reasons.append("win match is high but loss similarity is medium")
+    elif win_match == "medium" and loss_sim == "low":
+        tradeable_reasons.append("loss similarity is low, but win match is only medium")
+    else:
+        tradeable_reasons.append("caution evidence exists, but hard caution conditions are absent")
+
+    if pushback:
+        tradeable_reasons.append("recent pushback exists, but momentum is still supportive or hard condition is absent")
+    if not h1_macd_ok:
+        tradeable_reasons.append("H1 MACD support is not clearly positive")
+    if not m15_macd_ok:
+        tradeable_reasons.append("M15 MACD support is not clearly positive")
+    if not momentum_ok:
+        tradeable_reasons.append("recent 3-candle momentum is not clearly supportive")
+
+    return "tradeable_caution", "medium_warning", "; ".join(tradeable_reasons)
 
 
 def add_caution_bucket(df: pd.DataFrame) -> pd.DataFrame:
