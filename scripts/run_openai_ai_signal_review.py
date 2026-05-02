@@ -105,7 +105,42 @@ def build_input_text(payload: dict[str, Any]) -> str:
     )
 
 
-def call_openai_responses_api(payload: dict[str, Any], *, model: str, max_output_tokens: int) -> tuple[dict[str, Any], str]:
+def response_to_dict(response: Any) -> dict[str, Any]:
+    if hasattr(response, "model_dump"):
+        return response.model_dump()
+    if hasattr(response, "to_dict"):
+        return response.to_dict()
+    return json.loads(response.model_dump_json())
+
+
+def extract_output_text_from_response(response: Any) -> str:
+    output_text = getattr(response, "output_text", None)
+    if output_text:
+        return str(output_text)
+
+    data = response_to_dict(response)
+    texts: list[str] = []
+    for item in data.get("output", []) or []:
+        for content in item.get("content", []) or []:
+            if content.get("type") == "output_text" and content.get("text"):
+                texts.append(str(content["text"]))
+
+    return "\n".join(texts).strip()
+
+
+def write_debug_response(response: Any, debug_path: Path) -> None:
+    debug_path.parent.mkdir(parents=True, exist_ok=True)
+    data = response_to_dict(response)
+    debug_path.write_text(json.dumps(data, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+
+def call_openai_responses_api(
+    payload: dict[str, Any],
+    *,
+    model: str,
+    max_output_tokens: int,
+    debug_response_path: Path,
+) -> tuple[dict[str, Any], str]:
     try:
         from openai import OpenAI
     except ImportError as exc:
@@ -136,9 +171,21 @@ def call_openai_responses_api(payload: dict[str, Any], *, model: str, max_output
         max_output_tokens=max_output_tokens,
     )
 
-    output_text = getattr(response, "output_text", None)
+    write_debug_response(response, debug_response_path)
+
+    data = response_to_dict(response)
+    status = data.get("status")
+    incomplete_details = data.get("incomplete_details")
+    usage = data.get("usage", {})
+
+    output_text = extract_output_text_from_response(response)
     if not output_text:
-        raise RuntimeError("OpenAI response did not include output_text")
+        raise RuntimeError(
+            "OpenAI response did not include visible output text. "
+            f"status={status}, incomplete_details={incomplete_details}, usage={usage}. "
+            f"Debug response saved to: {debug_response_path}. "
+            "Try increasing --max-output-tokens, e.g. --max-output-tokens 3000."
+        )
 
     parsed = extract_json_object(output_text)
     validate_ai_response(parsed)
@@ -169,7 +216,7 @@ def main() -> int:
     parser.add_argument("--payload-json", type=Path, default=DEFAULT_PAYLOAD_JSON)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL)
-    parser.add_argument("--max-output-tokens", type=int, default=1200)
+    parser.add_argument("--max-output-tokens", type=int, default=3000)
     parser.add_argument("--save-ledger", action="store_true", help="Append the AI response to ai_review_ledger.csv after validation.")
     parser.add_argument("--dry-run", action="store_true", help="Validate payload and print output paths without calling OpenAI.")
     args = parser.parse_args()
@@ -184,17 +231,25 @@ def main() -> int:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_response = out_dir / f"openai_ai_response_row_{source_row}_{timestamp}.json"
     out_raw = out_dir / f"openai_ai_response_row_{source_row}_{timestamp}.txt"
+    out_debug = out_dir / f"openai_ai_response_row_{source_row}_{timestamp}_debug.json"
 
     print("Payload:", payload_json)
     print("Model:", args.model)
+    print("Max output tokens:", args.max_output_tokens)
     print("Output JSON:", out_response)
     print("Output raw:", out_raw)
+    print("Output debug:", out_debug)
 
     if args.dry_run:
         print("Dry run only. No OpenAI API call was made.")
         return 0
 
-    parsed, raw_text = call_openai_responses_api(payload, model=args.model, max_output_tokens=args.max_output_tokens)
+    parsed, raw_text = call_openai_responses_api(
+        payload,
+        model=args.model,
+        max_output_tokens=args.max_output_tokens,
+        debug_response_path=out_debug,
+    )
 
     write_json(out_response, parsed)
     out_raw.parent.mkdir(parents=True, exist_ok=True)
@@ -202,6 +257,7 @@ def main() -> int:
 
     print("Saved AI response:", out_response)
     print("Saved raw response:", out_raw)
+    print("Saved debug response:", out_debug)
     print("AI labels:", parsed["winning_pattern_match"], parsed["losing_pattern_similarity"], parsed["final_risk_label"])
 
     if args.save_ledger:
