@@ -50,25 +50,20 @@ def normalize_source_col(df: pd.DataFrame) -> str:
 
 def prepare_trades(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
-
     for col in ["signal_time", "entry_time", "exit_time", "jst_entry_time"]:
         if col in out.columns:
             out[col] = pd.to_datetime(out[col], errors="coerce")
-
-    if "jst_entry_time" in out.columns:
-        out["jst_entry_month"] = out["jst_entry_time"].dt.to_period("M").astype(str)
-        out["jst_entry_hour"] = out["jst_entry_time"].dt.hour
-        out["jst_entry_date"] = out["jst_entry_time"].dt.strftime("%Y-%m-%d")
-    else:
+    if "jst_entry_time" not in out.columns:
         raise ValueError("jst_entry_time column not found.")
-
+    out["jst_entry_month"] = out["jst_entry_time"].dt.to_period("M").astype(str)
+    out["jst_entry_hour"] = out["jst_entry_time"].dt.hour
+    out["jst_entry_date"] = out["jst_entry_time"].dt.strftime("%Y-%m-%d")
     return out
 
 
 def summarize_grouped(trades: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     if trades.empty:
         return pd.DataFrame()
-
     rows: list[dict[str, object]] = []
     for key, group in trades.groupby(group_cols, dropna=False):
         if not isinstance(key, tuple):
@@ -77,10 +72,8 @@ def summarize_grouped(trades: pd.DataFrame, group_cols: list[str]) -> pd.DataFra
         for col, value in zip(group_cols, key):
             summary[col] = value
         rows.append(summary)
-
     if not rows:
         return pd.DataFrame()
-
     ordered = group_cols + [
         "trades",
         "closed_trades",
@@ -96,19 +89,41 @@ def summarize_grouped(trades: pd.DataFrame, group_cols: list[str]) -> pd.DataFra
     return pd.DataFrame(rows)[ordered].reset_index(drop=True)
 
 
+def df_markdown_without_tabulate(df: pd.DataFrame) -> str:
+    """Return a simple GitHub-flavored markdown table without pandas.to_markdown/tabulate."""
+    if df.empty:
+        return "No data.\n"
+
+    text_df = df.copy()
+    for col in text_df.columns:
+        text_df[col] = text_df[col].map(lambda x: "" if pd.isna(x) else str(x))
+
+    headers = [str(col) for col in text_df.columns]
+    rows = text_df.values.tolist()
+
+    widths = []
+    for i, header in enumerate(headers):
+        max_cell = max([len(str(row[i])) for row in rows], default=0)
+        widths.append(max(len(header), max_cell))
+
+    def fmt_row(values: list[object]) -> str:
+        return "| " + " | ".join(str(value).ljust(widths[i]) for i, value in enumerate(values)) + " |"
+
+    header_line = fmt_row(headers)
+    sep_line = "| " + " | ".join("-" * width for width in widths) + " |"
+    body_lines = [fmt_row(row) for row in rows]
+    return "\n".join([header_line, sep_line] + body_lines) + "\n"
+
+
 def pick_representative_wins(trades: pd.DataFrame, source_col: str, max_per_source: int) -> pd.DataFrame:
     wins = trades[trades["r"] > 0].copy()
     wins = wins[wins["jst_entry_month"].isin(WIN_MONTHS)].copy()
     if wins.empty:
         return wins
 
-    # Prefer clean, not too quick/not too huge outliers. Keep diversity by source.
-    wins["abs_risk_rank"] = wins["risk"].rank(method="first") if "risk" in wins.columns else 0
     selected: list[pd.DataFrame] = []
-
-    for source, group in wins.groupby(source_col, dropna=False):
+    for _source, group in wins.groupby(source_col, dropna=False):
         group = group.sort_values(["jst_entry_month", "jst_entry_time"]).copy()
-        # take a spread across the time span instead of only the first N
         if len(group) <= max_per_source:
             chosen = group
         else:
@@ -118,7 +133,6 @@ def pick_representative_wins(trades: pd.DataFrame, source_col: str, max_per_sour
 
     if not selected:
         return pd.DataFrame()
-
     out = pd.concat(selected, ignore_index=True)
     out["case_type"] = "win_pattern"
     out["case_reason"] = "Representative winning trade from strong/healthy months"
@@ -132,14 +146,13 @@ def pick_representative_losses(trades: pd.DataFrame, source_col: str, max_per_so
         return losses
 
     selected: list[pd.DataFrame] = []
-    for source, group in losses.groupby(source_col, dropna=False):
+    for _source, group in losses.groupby(source_col, dropna=False):
         group = group.sort_values(["jst_entry_time"]).copy()
         chosen = group.head(max_per_source)
         selected.append(chosen)
 
     if not selected:
         return pd.DataFrame()
-
     out = pd.concat(selected, ignore_index=True)
     out["case_type"] = "loss_pattern"
     out["case_reason"] = "Representative losing trade from weak month 2025-03"
@@ -164,18 +177,13 @@ def write_markdown_summary(
     win_month_summary = summarize_grouped(all_trades[all_trades["jst_entry_month"].isin(WIN_MONTHS)], ["jst_entry_month"])
     loss_month_summary = summarize_grouped(all_trades[all_trades["jst_entry_month"].isin(LOSS_MONTHS)], ["jst_entry_month"])
 
-    def df_md(df: pd.DataFrame) -> str:
-        if df.empty:
-            return "No data.\n"
-        return df.to_markdown(index=False) + "\n"
-
     content = f"""# XM KIWAMI GOLD ABC v3 AI Case Summary
 
 This file summarizes representative winning and losing cases for future AI-assisted signal review.
 
 ## Purpose
 
-AI evaluation should not be biased only toward avoiding losses.  
+AI evaluation should not be biased only toward avoiding losses.
 The main comparison should be:
 
 1. Is the current signal similar to past winning patterns?
@@ -207,7 +215,7 @@ max_consecutive_losses: {overall.get('max_consecutive_losses')}
 {', '.join(WIN_MONTHS)}
 ```
 
-{df_md(win_month_summary)}
+{df_markdown_without_tabulate(win_month_summary)}
 
 ## Weak months used as loss-pattern source
 
@@ -215,11 +223,11 @@ max_consecutive_losses: {overall.get('max_consecutive_losses')}
 {', '.join(LOSS_MONTHS)}
 ```
 
-{df_md(loss_month_summary)}
+{df_markdown_without_tabulate(loss_month_summary)}
 
 ## Summary by source
 
-{df_md(by_source)}
+{df_markdown_without_tabulate(by_source)}
 
 ## Representative win cases
 
@@ -258,7 +266,7 @@ Return:
 
 ## Full monthly summary
 
-{df_md(by_month)}
+{df_markdown_without_tabulate(by_month)}
 """
     path.write_text(content, encoding="utf-8")
 
