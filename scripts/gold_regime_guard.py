@@ -39,30 +39,87 @@ def read_history_csv(path: Path) -> pd.DataFrame:
     return df.dropna(subset=["entry_time"]).sort_values("entry_time", kind="mergesort").reset_index(drop=True)
 
 
+def _upper(value: Any) -> str:
+    return str(value or "").upper().strip()
+
+
+def _combined_text(row: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for key in [
+        "symbol_group",
+        "portfolio_rank",
+        "strategy_label",
+        "signal_model",
+        "model",
+        "source",
+        "symbol",
+        "mt5_symbol",
+        "target_symbol",
+        "case_db_name",
+        "case_db_path",
+        "preset",
+        "preset_name",
+        "payload_source",
+    ]:
+        value = row.get(key)
+        if value is not None:
+            parts.append(str(value))
+    return " ".join(parts).upper()
+
+
+def flatten_payload_context(payload_or_signal: dict[str, Any]) -> dict[str, Any]:
+    """Merge useful top-level payload context into current_signal_snapshot.
+
+    Case-DB review payloads often keep the actual current features under
+    current_signal_snapshot, while dataset/preset hints live at the top level.
+    This helper lets the guard infer GOLD/ABC without sending outcome labels.
+    """
+    if not isinstance(payload_or_signal, dict):
+        return {}
+
+    current = payload_or_signal.get("current_signal_snapshot") or payload_or_signal.get("current_signal")
+    if isinstance(current, dict):
+        merged = dict(current)
+        for key, value in payload_or_signal.items():
+            if key in {"current_signal_snapshot", "current_signal", "similar_winning_cases", "similar_losing_cases"}:
+                continue
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                merged.setdefault(key, value)
+        metadata = payload_or_signal.get("metadata")
+        if isinstance(metadata, dict):
+            for key, value in metadata.items():
+                if isinstance(value, (str, int, float, bool)) or value is None:
+                    merged.setdefault(key, value)
+        return merged
+
+    return dict(payload_or_signal)
+
+
 def infer_symbol_group(row: dict[str, Any]) -> str:
-    value = str(row.get("symbol_group", "") or "").upper().strip()
+    value = _upper(row.get("symbol_group"))
     if value:
         return value
-    symbol = str(row.get("symbol", row.get("mt5_symbol", row.get("target_symbol", ""))) or "").upper()
-    if "BTC" in symbol or "XBT" in symbol:
+    text = _combined_text(row)
+    if "BTC" in text or "XBT" in text:
         return "BTC"
-    if "GOLD" in symbol or "XAU" in symbol:
+    if "GOLD" in text or "XAU" in text or "KIWAMI" in text or "GOLDSHARP" in text:
         return "GOLD"
-    return value
+    return ""
 
 
 def infer_portfolio_rank(row: dict[str, Any]) -> str:
-    value = str(row.get("portfolio_rank", "") or "").upper().strip()
+    value = _upper(row.get("portfolio_rank"))
     if value:
         return value
-    strategy = str(row.get("strategy_label", row.get("signal_model", row.get("model", row.get("source", "")))) or "").upper()
-    if "ABC" in strategy or strategy in {"A", "B", "C", "C2"}:
+    text = _combined_text(row)
+    source = _upper(row.get("source"))
+    if "ABC" in text or "XM_KIWAMI_GOLD" in text or source in {"A", "B", "C", "C2"}:
         return "GOLD_ABC"
-    return value
+    return ""
 
 
 def infer_entry_time(row: dict[str, Any]) -> pd.Timestamp | None:
-    for col in ["entry_time", "signal_time", "jst_entry_time", "time"]:
+    for col in ["entry_time", "signal_time", "jst_entry_time", "time", "entry_at", "signal_at"]:
         if col in row and row.get(col) not in [None, ""]:
             t = pd.to_datetime(row.get(col), errors="coerce")
             if pd.notna(t):
@@ -78,9 +135,10 @@ def evaluate_gold_abc_buy_danger_regime(
     min_losses: int = 3,
     lookback_days: int = 30,
 ) -> dict[str, Any]:
+    current_signal = flatten_payload_context(current_signal)
     symbol_group = infer_symbol_group(current_signal)
     portfolio_rank = infer_portfolio_rank(current_signal)
-    side = str(current_signal.get("side", "") or "").upper().strip()
+    side = _upper(current_signal.get("side"))
     current_time = infer_entry_time(current_signal)
 
     result: dict[str, Any] = {
@@ -91,6 +149,7 @@ def evaluate_gold_abc_buy_danger_regime(
         "current_symbol_group": symbol_group,
         "current_portfolio_rank": portfolio_rank,
         "current_side": side,
+        "current_time": current_time.strftime("%Y-%m-%d %H:%M:%S") if current_time is not None else "",
         "last_n": last_n,
         "min_losses": min_losses,
         "lookback_days": lookback_days,
