@@ -90,6 +90,7 @@ def run_ai_review(
     row_index: int,
     *,
     payload_dir: Path,
+    ledger_csv: Path,
     model: str,
     max_output_tokens: int,
     dry_run: bool,
@@ -104,6 +105,8 @@ def run_ai_review(
         model,
         "--max-output-tokens",
         str(max_output_tokens),
+        "--ledger-csv",
+        str(ledger_csv),
         "--save-ledger",
     ]
     return run_command(command, dry_run=dry_run)
@@ -218,6 +221,8 @@ def main() -> int:
     print("Target indices:", indices)
     print("Model:", args.model)
     print("Win/loss limits:", args.win_limit, args.loss_limit)
+    print("Ledger CSV:", ledger_csv)
+    print("Summary CSV:", summary_csv)
     print("Dry run:", args.dry_run)
 
     ok_count = 0
@@ -247,6 +252,7 @@ def main() -> int:
         rc = run_ai_review(
             row_index,
             payload_dir=payload_dir,
+            ledger_csv=ledger_csv,
             model=args.model,
             max_output_tokens=args.max_output_tokens,
             dry_run=args.dry_run,
