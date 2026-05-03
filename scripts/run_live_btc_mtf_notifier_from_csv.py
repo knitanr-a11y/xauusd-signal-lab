@@ -12,6 +12,7 @@ from typing import Any
 
 import pandas as pd
 
+from ai_signal_review import apply_ai_review, evaluate_signal_payload
 from build_latest_btc_mtf_signal_payload_from_csv import (
     DEFAULT_H1_CSV,
     DEFAULT_H4_CSV,
@@ -92,6 +93,9 @@ def append_ledger_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         "overlap_detected",
         "overlap_signal_count",
         "overlap_labels",
+        "ai_review_status",
+        "ai_decision",
+        "ai_confidence",
         "discord_sent",
         "dry_run",
     ]
@@ -165,6 +169,28 @@ def readable_side(side: str) -> str:
     return side
 
 
+def format_ai_review_lines(payload: dict[str, Any]) -> list[str]:
+    review = payload.get("ai_review") or {}
+    if not review:
+        return ["AI評価: 未接続（次工程で追加）"]
+    decision = review.get("decision_jp") or payload.get("ai_review_status") or "評価済み"
+    confidence = review.get("confidence", "")
+    summary = review.get("summary_jp", "")
+    lot = review.get("lot_multiplier_hint", "")
+    lines = [f"AI評価: {decision} / 信頼度 {confidence}"]
+    if lot != "":
+        lines.append(f"AIロット目安: 通常比 {lot}")
+    if summary:
+        lines.append(f"AI要約: {summary}")
+    reasons = review.get("reasons_jp") or []
+    warnings = review.get("warnings_jp") or []
+    if reasons:
+        lines.append("AI理由: " + " / ".join(str(x) for x in reasons[:3]))
+    if warnings:
+        lines.append("AI注意: " + " / ".join(str(x) for x in warnings[:2]))
+    return lines
+
+
 def format_discord_message(payload: dict[str, Any]) -> str:
     cur = payload.get("current_signal_snapshot", {})
     strategy = str(cur.get("strategy_label", ""))
@@ -178,7 +204,6 @@ def format_discord_message(payload: dict[str, Any]) -> str:
 
     title_icon = "🟢" if side.upper() == "BUY" else "🔴" if side.upper() == "SELL" else "📣"
     risk_note = "ロット小さめ候補" if cur.get("lot_hint") == "reduced_candidate" else "通常候補"
-    ai_note = "未接続（次工程で追加）" if payload.get("ai_review_status") == "not_connected_yet" else str(payload.get("ai_review_status", ""))
 
     lines = [
         f"{title_icon} **BTC {readable_side(side)} シグナル**",
@@ -200,7 +225,9 @@ def format_discord_message(payload: dict[str, Any]) -> str:
     else:
         lines.append("重複: なし")
 
-    lines.extend(["", f"AI評価: {ai_note}", f"内部名: {strategy}"])
+    lines.append("")
+    lines.extend(format_ai_review_lines(payload))
+    lines.append(f"内部名: {strategy}")
     return "\n".join(lines)
 
 
@@ -270,6 +297,13 @@ def collect_unnotified_payloads(
     return payloads
 
 
+def maybe_apply_ai_review(payload: dict[str, Any], *, enable_ai_review: bool, env_file: Path, ai_model: str | None) -> dict[str, Any]:
+    if not enable_ai_review:
+        return payload
+    review = evaluate_signal_payload(payload, env_file=env_file, model=ai_model)
+    return apply_ai_review(payload, review)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Live BTC MTF CSV notifier with duplicate-notification guard.")
     parser.add_argument("--m5-csv", type=Path, default=DEFAULT_M5_CSV)
@@ -284,6 +318,8 @@ def main() -> int:
     parser.add_argument("--scan-recent-m15-bars", type=int, default=20)
     parser.add_argument("--bar-offset", type=int, default=1)
     parser.add_argument("--exclude-entry-hours", default="8,13,20,21")
+    parser.add_argument("--enable-ai-review", action="store_true")
+    parser.add_argument("--ai-model", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--mark-dry-run-notified", action="store_true")
     parser.add_argument("--send-discord", action="store_true")
@@ -335,6 +371,7 @@ def main() -> int:
     print("Scan recent M5 bars:", args.scan_recent_m5_bars)
     print("Scan recent M15 bars:", args.scan_recent_m15_bars)
     print("Standby enabled: False")
+    print("AI review enabled:", bool(args.enable_ai_review))
     print("Exclude entry hours:", sorted(exclude_entry_hours))
     print("Already notified keys:", len(notified_keys))
     print("Unnotified signals selected:", len(payloads))
@@ -343,6 +380,7 @@ def main() -> int:
 
     ledger_rows: list[dict[str, Any]] = []
     for idx, payload in payloads:
+        payload = maybe_apply_ai_review(payload, enable_ai_review=args.enable_ai_review, env_file=env_file, ai_model=args.ai_model)
         message = format_discord_message(payload)
         payload_path = write_payload_json(out_dir, payload)
         print("\n" + "=" * 100)
@@ -359,6 +397,7 @@ def main() -> int:
             print("Discord sent: true")
 
         cur = payload.get("current_signal_snapshot", {})
+        ai_review = payload.get("ai_review") or {}
         should_write_ledger = bool(args.send_discord) or bool(args.mark_dry_run_notified)
         if should_write_ledger:
             ledger_rows.append(
@@ -378,6 +417,9 @@ def main() -> int:
                     "overlap_detected": payload.get("overlap_detected"),
                     "overlap_signal_count": payload.get("overlap_signal_count"),
                     "overlap_labels": "+".join(payload.get("overlap_labels", [])),
+                    "ai_review_status": payload.get("ai_review_status", ""),
+                    "ai_decision": ai_review.get("decision", ""),
+                    "ai_confidence": ai_review.get("confidence", ""),
                     "discord_sent": discord_sent,
                     "dry_run": bool(args.dry_run),
                 }
