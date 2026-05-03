@@ -7,6 +7,7 @@ REM
 REM - GOLD: run_live_gold_notifier_from_csv.py via portfolio wrapper
 REM - BTC : run_live_btc_mtf_spread_filtered_notifier_from_csv.py via portfolio wrapper
 REM - Timing: run at every minute xx:00
+REM - Bar offset: 0 because MQL5 CSV exports confirmed/closed bars only
 REM - Stop: Ctrl+C, then Y
 REM ============================================================================
 
@@ -26,6 +27,7 @@ echo ===========================================================================
 echo GOLD/BTC live portfolio notifier loop
 echo Project: %CD%
 echo Timing: every minute at xx:00
+echo Bar offset: 0 ^(MQL5 CSV confirmed bars only^)
 echo Stop: Ctrl+C, then Y
 echo ============================================================================
 
@@ -37,7 +39,7 @@ echo ===========================================================================
 echo Run started: %DATE% %TIME%
 echo ============================================================================
 
-python scripts\run_live_portfolio_notifier_from_csv.py --gold-m15-csv "%GOLD_M15_CSV%" --gold-h1-csv "%GOLD_H1_CSV%" --btc-m5-csv "%BTC_M5_CSV%" --btc-m15-csv "%BTC_M15_CSV%" --btc-h1-csv "%BTC_H1_CSV%" --btc-h4-csv "%BTC_H4_CSV%" --history-csv "%HISTORY_CSV%" --gold-scan-recent-bars 60 --btc-scan-recent-m5-bars 60 --btc-scan-recent-m15-bars 20 --btc-spread-mode csv_mode --btc-spread-source m5 --btc-point-size 0.01 --btc-pip-size 10 --enable-ai-review --send-discord
+python scripts\run_live_portfolio_notifier_from_csv.py --gold-m15-csv "%GOLD_M15_CSV%" --gold-h1-csv "%GOLD_H1_CSV%" --btc-m5-csv "%BTC_M5_CSV%" --btc-m15-csv "%BTC_M15_CSV%" --btc-h1-csv "%BTC_H1_CSV%" --btc-h4-csv "%BTC_H4_CSV%" --history-csv "%HISTORY_CSV%" --gold-scan-recent-bars 60 --btc-scan-recent-m5-bars 60 --btc-scan-recent-m15-bars 20 --bar-offset 0 --btc-spread-mode csv_mode --btc-spread-source m5 --btc-point-size 0.01 --btc-pip-size 10 --enable-ai-review --send-discord
 
 set "EXIT_CODE=%ERRORLEVEL%"
 echo.
