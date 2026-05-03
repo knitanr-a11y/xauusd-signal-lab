@@ -142,7 +142,11 @@ def run_child(name: str, cmd: list[str], *, print_only: bool) -> ChildRunResult:
     print_command(cmd)
     if print_only:
         return ChildRunResult(name=name, command=cmd, returncode=0)
-    completed = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    try:
+        completed = subprocess.run(cmd, cwd=PROJECT_ROOT)
+    except KeyboardInterrupt:
+        print(f"\nInterrupted by user while running {name} notifier.")
+        return ChildRunResult(name=name, command=cmd, returncode=130)
     print(f"\n{name} return code:", completed.returncode)
     return ChildRunResult(name=name, command=cmd, returncode=completed.returncode)
 
@@ -207,6 +211,8 @@ def main() -> int:
     if not args.skip_gold:
         result = run_child("GOLD", build_gold_command(args), print_only=bool(args.print_only))
         results.append(result)
+        if result.returncode == 130:
+            return 130
         if args.stop_on_error and result.returncode != 0:
             print("Stopping because GOLD failed and --stop-on-error is set.")
             return result.returncode
@@ -214,6 +220,8 @@ def main() -> int:
     if not args.skip_btc:
         result = run_child("BTC", build_btc_command(args), print_only=bool(args.print_only))
         results.append(result)
+        if result.returncode == 130:
+            return 130
         if args.stop_on_error and result.returncode != 0:
             print("Stopping because BTC failed and --stop-on-error is set.")
             return result.returncode
@@ -230,4 +238,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted by user. Exiting portfolio notifier.")
+        raise SystemExit(130)
