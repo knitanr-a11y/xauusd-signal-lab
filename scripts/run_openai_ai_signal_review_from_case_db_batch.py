@@ -116,15 +116,52 @@ def numeric_series(series: pd.Series) -> pd.Series:
     return pd.to_numeric(series, errors="coerce")
 
 
+def read_existing_source_rows(ledger_csv: Path) -> set[int]:
+    if not ledger_csv.exists():
+        return set()
+    try:
+        df = pd.read_csv(ledger_csv, usecols=["source_row"])
+    except Exception:
+        return set()
+    source_rows = pd.to_numeric(df["source_row"], errors="coerce").dropna().astype(int)
+    return set(source_rows.tolist())
+
+
+def dedupe_ledger_rows(df: pd.DataFrame) -> pd.DataFrame:
+    if "source_row" not in df.columns:
+        return df.copy()
+
+    out = df.copy()
+    out["source_row_num"] = pd.to_numeric(out["source_row"], errors="coerce")
+
+    sort_cols = []
+    if "recorded_at" in out.columns:
+        sort_cols.append("recorded_at")
+    sort_cols.append("source_row_num")
+    out = out.sort_values(sort_cols, kind="mergesort")
+
+    before = len(out)
+    out = out.drop_duplicates(subset=["source_row_num"], keep="last")
+    after = len(out)
+    duplicate_count = before - after
+    if duplicate_count:
+        print(f"Deduped ledger rows for summary: removed {duplicate_count} duplicate source_row records.")
+
+    return out.drop(columns=["source_row_num"])
+
+
 def summarize_ledger(ledger_csv: Path, out_csv: Path) -> None:
     if not ledger_csv.exists():
         print("Ledger not found, skip summary:", ledger_csv)
         return
 
-    df = pd.read_csv(ledger_csv)
-    if df.empty:
+    raw_df = pd.read_csv(ledger_csv)
+    if raw_df.empty:
         print("Ledger is empty, skip summary:", ledger_csv)
         return
+
+    df = dedupe_ledger_rows(raw_df)
+    print("Ledger rows raw/deduped:", len(raw_df), len(df))
 
     if "actual_r" in df.columns:
         df["actual_r_num"] = numeric_series(df["actual_r"])
@@ -201,6 +238,7 @@ def main() -> int:
     parser.add_argument("--summary-csv", type=Path, default=DEFAULT_SUMMARY_CSV)
     parser.add_argument("--sleep-seconds", type=float, default=1.0, help="Pause between API calls.")
     parser.add_argument("--stop-on-error", action="store_true")
+    parser.add_argument("--rerun-existing", action="store_true", help="Re-run rows that already exist in the target ledger.")
     parser.add_argument("--dry-run", action="store_true", help="Print commands only. No payload/API/ledger writes.")
     args = parser.parse_args()
 
@@ -216,13 +254,23 @@ def main() -> int:
     total_rows = len(cases)
     indices = parse_index_range(args.indices, total_rows=total_rows)
 
+    existing_source_rows = read_existing_source_rows(ledger_csv)
+    if existing_source_rows and not args.rerun_existing:
+        skipped = [i for i in indices if i in existing_source_rows]
+        indices = [i for i in indices if i not in existing_source_rows]
+    else:
+        skipped = []
+
     print("Case DB:", case_db)
     print("Total rows:", total_rows)
     print("Target indices:", indices)
+    if skipped:
+        print("Skipped existing source_rows:", skipped)
     print("Model:", args.model)
     print("Win/loss limits:", args.win_limit, args.loss_limit)
     print("Ledger CSV:", ledger_csv)
     print("Summary CSV:", summary_csv)
+    print("Rerun existing:", args.rerun_existing)
     print("Dry run:", args.dry_run)
 
     ok_count = 0
@@ -273,6 +321,7 @@ def main() -> int:
     print("=" * 120)
     print("success:", ok_count)
     print("failed :", fail_count)
+    print("skipped existing:", len(skipped))
     if failures:
         print("Failures:")
         for row_index, reason in failures:
