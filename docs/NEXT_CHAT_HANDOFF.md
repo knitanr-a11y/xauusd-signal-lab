@@ -13,6 +13,31 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 
 特にBTCについては、`docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md` を読まずに通知・検証・採用判断を進めてはいけない。
 
+## 最重要：本番ループ起動コマンド
+
+通常運用で起動するコマンドはこれ。
+
+```bat
+scripts\run_live_portfolio_notifier_loop.bat
+```
+
+停止する場合：
+
+```text
+Ctrl + C
+Y
+```
+
+起動後に見るポイント：
+
+```text
+Timing: every minute at xx:01
+Bar offset: 0 (MQL5 CSV confirmed bars only)
+Run started: xx:xx:01.xx
+GOLD: OK returncode=0
+BTC: OK returncode=0
+```
+
 ## 現在の全体方針
 
 MT5 + Pythonで、GOLD/XAUUSD・BTCUSD用のトレードシグナル検証/通知ツールを作成中。
@@ -72,11 +97,13 @@ mql5/Experts/ExportOhlcToCsv.mq5
 重要仕様：
 
 ```text
-#property version "1.20"
+#property version "1.30"
 InpIncludeCurrentBar = false
 InpAlignExportToMinute = true
 InpExportSecond = 0
 InpTimerSeconds = 1
+InpAppendMode = true
+InpAppendLookbackBars = 20
 ```
 
 意味：
@@ -86,20 +113,34 @@ InpTimerSeconds = 1
 - CopyRates start_pos=1 で確定足だけ取得する
 - 毎分00秒にCSV更新を寄せる
 - Python側は毎分01秒にCSVを読む
+- 起動時は指定本数ぶんCSVを全件作成
+- 通常運用時は新しい確定足だけ追記
 ```
 
-EAは追記方式ではない。
+EA v1.30の追記モードはBTCで確認済み。
+
+確認ログ：
 
 ```text
-初回:
-- 指定本数ぶんCopyRatesしてCSVを丸ごと作成
+btcusdsharp_m5.csv:
+rows=30002 -> 30003
+last_time=2026.05.03 18:35:00 -> 2026.05.03 18:40:00
+mtime_changed=True
+rows_changed=True
+last_time_changed=True
 
-次回以降:
-- 最終確定足時刻が同じなら InpSkipUnchangedFiles=true によりスキップ
-- 新しい確定足があれば、指定本数ぶんCSVを丸ごと再作成
+btcusdsharp_m15.csv:
+rows=30000 -> 30001
+last_time=2026.05.03 18:15:00 -> 2026.05.03 18:30:00
+mtime_changed=True
+rows_changed=True
+last_time_changed=True
+
+btcusdsharp_h1.csv / btcusdsharp_h4.csv:
+確認時間内では未確定のため変化なし。正常。
 ```
 
-MQL5側の出力本数：
+MQL5側の初回出力本数：
 
 ```text
 M5: 30000
@@ -140,17 +181,10 @@ Bar offset: 0 (MQL5 CSV confirmed bars only)
 scripts\run_live_portfolio_notifier_loop.bat
 ```
 
-停止：
-
-```text
-Ctrl + C
-Y
-```
-
 理想タイミング：
 
 ```text
-毎分00秒: MQL5 EA v1.20 が確定足CSVを書き出し
+毎分00秒: MQL5 EA v1.30 が確定足CSVを追記/必要時更新
 毎分01秒: Python bat がCSVを読み、GOLD/BTCを判定して必要ならDiscord通知
 ```
 
@@ -389,11 +423,14 @@ OPENAI_MODEL=gpt-4o-mini
 ## 直近の重要コミット
 
 ```text
-b79abb9f4cc68e8d1c40c5ce9b495cda3b6d69c6
-- mql5/Experts/ExportOhlcToCsv.mq5 を復元
+f0056d40690dbb413b0db67cfff51fcd276df79b
+- MQL5 CSV Export EAをv1.30へ更新。起動時全件作成 + 通常時追記モード。
+
+ca258317b23f74e0a5fa05d3d9ae802b0ae04c46
+- BTC CSV出力確認用スクリプト追加。
 
 4724cd279afe80b58ca997043f8bb8b1734fb22c
-- MQL5 CSV Export EAを毎分00秒寄せに変更（v1.20）
+- MQL5 CSV Export EAを毎分00秒寄せに変更（v1.20時点）
 
 bbf407fea142c54f96c1010ce8eb6a54ff8f80e2
 - Python本番batを毎分01秒起動に変更
@@ -407,27 +444,52 @@ bbf407fea142c54f96c1010ce8eb6a54ff8f80e2
 
 ## 次にやること
 
-次のチャットでは、まず運用ログ確認から入る。
+次回はAI評価の続きから進める。
 
 ```text
 1. docs/NEXT_CHAT_HANDOFF.md を読む
 2. docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読む
 3. GitHub Desktopで Fetch origin → Pull origin
-4. MT5側EAが ExportOhlcToCsv.mq5 v1.20 になっている前提で確認
-5. scripts\run_live_portfolio_notifier_loop.bat を起動
-6. Run started が毎分 xx:01 になっていることを確認
-7. GOLD/BTCとも Runtime context rows が出ることを確認
-8. GOLD/BTCとも returncode=0 を確認
+4. 本番ループを起動する場合は scripts\run_live_portfolio_notifier_loop.bat
+5. AI評価はBTC側の定型評価追加から進める
+```
+
+AI評価の現状：
+
+```text
+GOLD:
+- 定型評価済み
+- 戦略別固定実績で上書き
+
+BTC:
+- rule_profilesはある
+- acceptedになった通知対象だけOpenAI評価される
+- GOLDのような btc_deterministic_review() は未実装
+```
+
+次回のAI評価タスク：
+
+```text
+scripts/ai_signal_review.py に btc_deterministic_review() を追加する。
+
+BTC_RUNNER_RR2_RISK1:
+- スプレッド込みでも採用候補
+- 77件 / 勝率61.04% / +64.0R / PF3.13 / 平均実質RR1.68
+- 通常〜慎重
+
+BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8:
+- 値幅フィルタ通過時のみ評価対象
+- 109件 / 勝率64.22% / +101.0R / PF3.59
+- M5短期なので慎重寄り
 ```
 
 今後の改善候補：
 
 ```text
 - FutureWarningの解消
-- GOLD/BTC処理順序の再検討（必要ならBTC先行）
 - CSV読み込み中衝突に備えたリトライ処理
 - Discord通知が実際に出たときのledger確認
-- AI評価APIの失敗時フォールバック
+- AI評価APIの失敗時フォールバック強化
 ```
 
 ## 次のチャットで絶対に避けること
