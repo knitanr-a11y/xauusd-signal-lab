@@ -24,6 +24,60 @@ BTC系ルールは、ATRベースの理論TP/SLだけで採用判断してはい
    - CSV最頻スプレッド + 値幅フィルタ通過時のみ通知・採用候補
 ```
 
+## 現在の本番運用状態
+
+BTC本番通知は、GOLD/BTC統合ループから実行する。
+
+通常運用の起動コマンド：
+
+```bat
+scripts\run_live_portfolio_notifier_loop.bat
+```
+
+統合ループ内では、BTCは必ず以下のspread filtered版を呼ぶ。
+
+```text
+scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
+```
+
+旧BTC通知スクリプトは本番では使わない。
+
+```text
+scripts/run_live_btc_mtf_notifier_from_csv.py
+```
+
+現在の本番タイミング：
+
+```text
+MQL5 EA v1.30:
+- 毎分00秒に確定足CSVを追記
+- InpIncludeCurrentBar=false
+- InpAppendMode=true
+
+Python bat:
+- 毎分01秒に起動
+- --bar-offset 0
+- GOLD/BTC統合判定
+```
+
+BTC CSV追記モードは確認済み。
+
+```text
+btcusdsharp_m5.csv:
+rows=30002 -> 30003
+last_time=2026.05.03 18:35:00 -> 2026.05.03 18:40:00
+mtime_changed=True
+rows_changed=True
+last_time_changed=True
+
+btcusdsharp_m15.csv:
+rows=30000 -> 30001
+last_time=2026.05.03 18:15:00 -> 2026.05.03 18:30:00
+mtime_changed=True
+rows_changed=True
+last_time_changed=True
+```
+
 ## 最新の再検証結果
 
 再検証で使用したスプレッドは、M5 CSVの `spread` 列の最頻値。
@@ -277,6 +331,7 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 5. 通知・AI評価だけでなく、探索スクリプトとバックテスト自体にスプレッドコストを反映する
 6. PF、total R、勝率、最大DD、実質RRを再計算する
 7. スプレッド控除後も成立するBTCルールだけを採用候補にする
+8. 本番通知は統合ループまたはspread_filtered版から実行する
 ```
 
 ## 再検証で必要な指標
@@ -356,13 +411,28 @@ AI評価は、BTCでは理論RRではなく、スプレッド控除後の実質R
 
 ## 次にやること
 
-次の作業候補：
+次回はAI評価の続きから進める。
 
 ```text
-1. BTCの本番通知コマンドを spread_filtered 版に統一する
-2. GOLD通知側へ進む
-3. GOLD/BTC統合ライブ通知スクリプトを作る
-4. 最後にGOLD/BTC統合ポートフォリオを、BTC値幅フィルタ込みで再集計する
+1. docs/NEXT_CHAT_HANDOFF.md を読む
+2. docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読む
+3. BTC AI評価の定型化に進む
+```
+
+BTC AI評価の未完了タスク：
+
+```text
+scripts/ai_signal_review.py に btc_deterministic_review() を追加する。
+
+BTC_RUNNER_RR2_RISK1:
+- スプレッド込みでも採用候補
+- 77件 / 勝率61.04% / +64.0R / PF3.13 / 平均実質RR1.68
+- 通常〜慎重
+
+BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8:
+- 値幅フィルタ通過時のみ評価対象
+- 109件 / 勝率64.22% / +101.0R / PF3.59
+- M5短期なので慎重寄り
 ```
 
 ## 絶対に避けること
