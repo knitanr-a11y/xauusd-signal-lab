@@ -23,7 +23,7 @@ DEFAULT_OUT_SUMMARY = PROJECT_ROOT / "data" / "results" / "btc_spread_revalidati
 DEFAULT_OUT_TRADES = PROJECT_ROOT / "data" / "results" / "btc_spread_revalidation_trades.csv"
 
 DEFAULT_EXCLUDE_ENTRY_HOURS = "8,13,20,21"
-DEFAULT_ASSUMED_SPREAD_PRICE = 20.0
+DEFAULT_FALLBACK_SPREAD_PRICE = 20.0
 DEFAULT_PIP_SIZE = 10.0
 
 
@@ -46,6 +46,52 @@ def parse_int_set(value: str) -> set[int]:
 def write_csv(path: Path, df: pd.DataFrame) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False, encoding="utf-8-sig", quoting=csv.QUOTE_MINIMAL)
+
+
+def infer_most_frequent_spread_price(
+    df: pd.DataFrame,
+    *,
+    point_size: float,
+    round_digits: int,
+    exclude_zero: bool = True,
+) -> dict[str, Any]:
+    if "spread" not in df.columns:
+        return {
+            "ok": False,
+            "reason": "spread column not found",
+            "mode_spread_points": None,
+            "mode_spread_price": None,
+            "sample_count": 0,
+            "top_counts": [],
+        }
+    spread_points = pd.to_numeric(df["spread"], errors="coerce").dropna()
+    if exclude_zero:
+        spread_points = spread_points[spread_points > 0]
+    if spread_points.empty:
+        return {
+            "ok": False,
+            "reason": "no valid spread values",
+            "mode_spread_points": None,
+            "mode_spread_price": None,
+            "sample_count": 0,
+            "top_counts": [],
+        }
+    spread_price = (spread_points.astype(float) * float(point_size)).round(round_digits)
+    counts = spread_price.value_counts(dropna=True).sort_values(ascending=False)
+    mode_price = float(counts.index[0])
+    mode_points = mode_price / float(point_size)
+    top_counts = [
+        {"spread_price": float(price), "count": int(count)}
+        for price, count in counts.head(10).items()
+    ]
+    return {
+        "ok": True,
+        "reason": "csv_mode",
+        "mode_spread_points": float(mode_points),
+        "mode_spread_price": float(mode_price),
+        "sample_count": int(len(spread_price)),
+        "top_counts": top_counts,
+    }
 
 
 def force_spread_column(df: pd.DataFrame, *, spread_price: float, point_size: float) -> pd.DataFrame:
@@ -146,6 +192,8 @@ def summarize_pair(
     net: pd.DataFrame,
     assumed_spread_price: float,
     pip_size: float,
+    spread_source: str,
+    spread_mode: str,
 ) -> dict[str, Any]:
     row: dict[str, Any] = {
         "rule_name": rule_name,
@@ -155,6 +203,8 @@ def summarize_pair(
         "max_bars": max_bars,
         "assumed_spread_price": assumed_spread_price,
         "pip_size": pip_size,
+        "spread_source": spread_source,
+        "spread_mode": spread_mode,
     }
     for prefix, trades in [("gross", gross), ("net", net)]:
         if trades.empty:
@@ -247,6 +297,8 @@ def run_case(
     point_size: float,
     assumed_spread_price: float,
     pip_size: float,
+    spread_source: str,
+    spread_mode: str,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
     gross_df = force_spread_column(df, spread_price=0.0, point_size=point_size)
     net_df = force_spread_column(df, spread_price=assumed_spread_price, point_size=point_size)
@@ -278,7 +330,7 @@ def run_case(
         spread_multiplier=1.0,
     )
     gross = enrich_trades_for_costs(gross, scenario="gross_no_spread", spread_price=0.0, pip_size=pip_size, gross_rr=rr)
-    net = enrich_trades_for_costs(net, scenario="net_assumed_spread", spread_price=assumed_spread_price, pip_size=pip_size, gross_rr=rr)
+    net = enrich_trades_for_costs(net, scenario="net_csv_mode_spread", spread_price=assumed_spread_price, pip_size=pip_size, gross_rr=rr)
     summary = summarize_pair(
         rule_name=case_name,
         base_tf=base_tf,
@@ -289,20 +341,28 @@ def run_case(
         net=net,
         assumed_spread_price=assumed_spread_price,
         pip_size=pip_size,
+        spread_source=spread_source,
+        spread_mode=spread_mode,
     )
     combined = pd.concat([gross, net], ignore_index=True) if not gross.empty or not net.empty else pd.DataFrame()
     combined["base_rule_name"] = rule_name
     combined["base_tf"] = base_tf
+    combined["spread_source"] = spread_source
+    combined["spread_mode"] = spread_mode
     return summary, combined
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Revalidate BTC rules with fixed spread cost and value-width metrics.")
+    parser = argparse.ArgumentParser(description="Revalidate BTC rules with CSV-mode spread cost and value-width metrics.")
     parser.add_argument("--m5-csv", type=Path, default=DEFAULT_M5_CSV)
     parser.add_argument("--m15-csv", type=Path, default=DEFAULT_M15_CSV)
     parser.add_argument("--h1-csv", type=Path, default=DEFAULT_H1_CSV)
     parser.add_argument("--h4-csv", type=Path, default=DEFAULT_H4_CSV)
-    parser.add_argument("--assumed-spread-price", type=float, default=DEFAULT_ASSUMED_SPREAD_PRICE)
+    parser.add_argument("--spread-mode", choices=["csv_mode", "fixed"], default="csv_mode")
+    parser.add_argument("--spread-source", choices=["m5", "m15"], default="m5")
+    parser.add_argument("--assumed-spread-price", type=float, default=None, help="Used only when --spread-mode fixed, or as fallback if CSV mode cannot be inferred.")
+    parser.add_argument("--spread-round-digits", type=int, default=2)
+    parser.add_argument("--include-zero-spread-in-mode", action="store_true")
     parser.add_argument("--pip-size", type=float, default=DEFAULT_PIP_SIZE)
     parser.add_argument("--point-size", type=float, default=0.01)
     parser.add_argument("--exclude-entry-hours", default=DEFAULT_EXCLUDE_ENTRY_HOURS)
@@ -327,24 +387,46 @@ def main() -> int:
     risk_values = parse_float_list(args.risk_atr_values)
     max_bars_values = parse_int_list(args.max_bars_values)
 
+    m5_raw = read_ohlc_live_csv(m5_csv)
+    m15_raw = read_ohlc_live_csv(m15_csv)
+    h1_raw = read_ohlc_live_csv(h1_csv)
+    h4_raw = read_ohlc_live_csv(h4_csv)
+
+    spread_source_df = m5_raw if args.spread_source == "m5" else m15_raw
+    spread_info = infer_most_frequent_spread_price(
+        spread_source_df,
+        point_size=args.point_size,
+        round_digits=args.spread_round_digits,
+        exclude_zero=not args.include_zero_spread_in_mode,
+    )
+    fallback_spread = DEFAULT_FALLBACK_SPREAD_PRICE if args.assumed_spread_price is None else float(args.assumed_spread_price)
+    if args.spread_mode == "csv_mode" and spread_info["ok"]:
+        assumed_spread_price = float(spread_info["mode_spread_price"])
+        effective_spread_mode = "csv_mode"
+    elif args.spread_mode == "csv_mode":
+        assumed_spread_price = fallback_spread
+        effective_spread_mode = f"csv_mode_failed_fallback_fixed:{spread_info['reason']}"
+    else:
+        assumed_spread_price = fallback_spread
+        effective_spread_mode = "fixed"
+
     # M5 context for BTC_SCALP_H1_M5_REENTRY_FILTERED.
-    m5 = mtf.add_indicators(read_ohlc_live_csv(m5_csv))
-    m15_mtf = mtf.add_indicators(read_ohlc_live_csv(m15_csv))
-    h1_mtf = mtf.add_indicators(read_ohlc_live_csv(h1_csv))
-    h4_mtf = mtf.add_indicators(read_ohlc_live_csv(h4_csv))
+    m5 = mtf.add_indicators(m5_raw)
+    m15_mtf = mtf.add_indicators(m15_raw)
+    h1_mtf = mtf.add_indicators(h1_raw)
+    h4_mtf = mtf.add_indicators(h4_raw)
     m5_ctx = mtf.join_context(m5, [(m15_mtf, "m15"), (h1_mtf, "h1"), (h4_mtf, "h4")])
     m5_buy, m5_sell = find_m5_reentry_masks(m5_ctx, exclude_entry_hours=exclude_hours)
 
     # M15 context for BTC_RUNNER_RR2_RISK1.
-    m15_payload = add_payload_indicators(read_ohlc_live_csv(m15_csv))
-    h1_payload = add_payload_indicators(read_ohlc_live_csv(h1_csv))
+    m15_payload = add_payload_indicators(m15_raw)
+    h1_payload = add_payload_indicators(h1_raw)
     runner_df = join_h1(m15_payload, h1_payload)
     runner_buy, runner_sell = build_btc_runner_masks(runner_df)
 
     summaries: list[dict[str, Any]] = []
     trade_frames: list[pd.DataFrame] = []
 
-    # Revalidate the previously proposed M5 filtered rule across wider SL/TP settings.
     for rr in rr_values:
         for risk_atr in risk_values:
             for max_bars in max_bars_values:
@@ -360,14 +442,15 @@ def main() -> int:
                     cooldown_bars=args.cooldown_bars,
                     start_bar=args.start_bar_m5,
                     point_size=args.point_size,
-                    assumed_spread_price=args.assumed_spread_price,
+                    assumed_spread_price=assumed_spread_price,
                     pip_size=args.pip_size,
+                    spread_source=args.spread_source,
+                    spread_mode=effective_spread_mode,
                 )
                 summaries.append(summary)
                 if not trades.empty:
                     trade_frames.append(trades)
 
-    # Revalidate fixed BTC RUNNER original settings and a wider SL grid.
     runner_rr_values = sorted(set([2.0] + rr_values))
     runner_risk_values = sorted(set([1.0, 1.5, 2.0, 2.5, 3.0]))
     for rr in runner_rr_values:
@@ -385,8 +468,10 @@ def main() -> int:
                     cooldown_bars=args.cooldown_bars,
                     start_bar=args.start_bar_m15,
                     point_size=args.point_size,
-                    assumed_spread_price=args.assumed_spread_price,
+                    assumed_spread_price=assumed_spread_price,
                     pip_size=args.pip_size,
+                    spread_source=args.spread_source,
+                    spread_mode=effective_spread_mode,
                 )
                 summaries.append(summary)
                 if not trades.empty:
@@ -394,12 +479,25 @@ def main() -> int:
 
     summary_df = pd.DataFrame(summaries)
     if not summary_df.empty:
+        for key, value in {
+            "spread_mode": effective_spread_mode,
+            "spread_source": args.spread_source,
+            "spread_sample_count": spread_info.get("sample_count", 0),
+            "mode_spread_points": spread_info.get("mode_spread_points"),
+            "mode_spread_price": spread_info.get("mode_spread_price"),
+            "spread_top_counts": str(spread_info.get("top_counts", [])),
+        }.items():
+            summary_df[key] = value
         summary_df = summary_df.sort_values(
             ["value_width_warning", "net_pf", "net_total_r", "avg_effective_rr_after_spread", "net_trades"],
             ascending=[True, False, False, False, False],
             kind="mergesort",
         )
     trades_df = pd.concat(trade_frames, ignore_index=True) if trade_frames else pd.DataFrame()
+    if not trades_df.empty:
+        trades_df["spread_mode"] = effective_spread_mode
+        trades_df["spread_source"] = args.spread_source
+        trades_df["mode_spread_price"] = spread_info.get("mode_spread_price")
 
     write_csv(out_summary, summary_df)
     write_csv(out_trades, trades_df)
@@ -407,6 +505,8 @@ def main() -> int:
     display_cols = [
         "rule_name",
         "base_tf",
+        "assumed_spread_price",
+        "spread_mode",
         "net_trades",
         "net_win_rate",
         "net_total_r",
@@ -429,7 +529,10 @@ def main() -> int:
     print("M15 CSV:", m15_csv)
     print("H1 CSV:", h1_csv)
     print("H4 CSV:", h4_csv)
-    print("Assumed spread price:", args.assumed_spread_price)
+    print("Spread mode:", effective_spread_mode)
+    print("Spread source:", args.spread_source)
+    print("CSV spread mode info:", spread_info)
+    print("Assumed spread price used:", assumed_spread_price)
     print("Pip size:", args.pip_size)
     print("Exclude entry hours:", sorted(exclude_hours))
     print("M5 rows:", len(m5_ctx), "M5 filtered raw signals:", int((m5_buy | m5_sell).sum()))
