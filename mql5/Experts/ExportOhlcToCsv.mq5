@@ -3,84 +3,44 @@
 //|                         MT5 OHLC CSV Export EA for Python detector |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.20"
+#property version   "1.30"
 #property description "Export confirmed OHLC candles for GOLD#/BTCUSD# to CSV for Python detector."
 
-// -------------------------------------------------------------------
-// 目的
-// -------------------------------------------------------------------
-// - MT5 / MQL5側はローソク足CSV出力だけを担当する。
-// - シグナル判定、AI評価payload作成、Discord通知はPython側で行う。
-// - 確定足のみCSVへ出力する。
-// - 既存のGOLD/BTC M15/H1に加えて、BTC追加検証用にM5/H4も出力する。
-// - デフォルトでは毎分00秒にCSV更新を寄せ、Python側を毎分01秒に起動しやすくする。
-//
-// 出力先
-// -------------------------------------------------------------------
-// UseCommonFolder=false:
-//   <MT5データフォルダ>\MQL5\Files\*.csv
-//
-// UseCommonFolder=true:
-//   <Terminal Common Data Folder>\Files\*.csv
-//
-// MQL5はセキュリティ制限により、任意のWindowsフォルダへ直接FileWriteできません。
-// Python側はこのMQL5\Files配下のCSVをフルパスで読む運用にしてください。
-//
-// CSV列
-// -------------------------------------------------------------------
-// time,open,high,low,close,tick_volume,spread,real_volume
-//
-// time はMT5サーバー時刻です。JST変換はPython側で行います。
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-// Symbols
-// -------------------------------------------------------------------
 input string InpGoldSymbol = "GOLD#";
 input string InpBtcSymbol  = "BTCUSD#";
-
 input bool   InpExportGold = true;
 input bool   InpExportBtc  = true;
 
-// -------------------------------------------------------------------
-// Timeframes
-// -------------------------------------------------------------------
-input bool   InpExportM5  = true;   // BTC追加検証用。GOLDにも出せるがPython側で使うかは別。
-input bool   InpExportM15 = true;   // 既存本番用
-input bool   InpExportH1  = true;   // 既存本番用
-input bool   InpExportH4  = true;   // BTC追加検証用
-
-input bool   InpGoldM5Enabled = false; // 通常false。必要になったらtrue。
-input bool   InpGoldH4Enabled = false; // 通常false。必要になったらtrue。
+input bool   InpExportM5  = true;
+input bool   InpExportM15 = true;
+input bool   InpExportH1  = true;
+input bool   InpExportH4  = true;
+input bool   InpGoldM5Enabled = false;
+input bool   InpGoldH4Enabled = false;
 input bool   InpBtcM5Enabled  = true;
 input bool   InpBtcH4Enabled  = true;
 
-// -------------------------------------------------------------------
-// Runtime
-// -------------------------------------------------------------------
-input bool   InpAlignExportToMinute = true; // trueなら毎分 InpExportSecond 秒だけExportAllする。
-input int    InpExportSecond = 0;           // Python側を毎分01秒で読むなら0推奨。
-input int    InpTimerSeconds = 1;           // Align=trueでは1秒推奨。Align=falseでは従来の周期実行。
+input bool   InpAlignExportToMinute = true;
+input int    InpExportSecond = 0;
+input int    InpTimerSeconds = 1;
+input bool   InpAppendMode = true;
+input int    InpAppendLookbackBars = 20;
 input int    InpBarsToExportM5  = 30000;
 input int    InpBarsToExportM15 = 30000;
 input int    InpBarsToExportH1  = 20000;
 input int    InpBarsToExportH4  = 10000;
 
 input bool   InpUseCommonFolder = false;
-input string InpOutputRoot = ""; // 空ならMQL5\Files直下。"data\\raw"ならMQL5\Files\data\raw。
-input bool   InpIncludeCurrentBar = false; // 原則false。確定足のみ出力。
+input string InpOutputRoot = "";
+input bool   InpIncludeCurrentBar = false;
 input bool   InpForceSymbolSelect = true;
 input bool   InpWriteDebugLog = true;
-input bool   InpSkipUnchangedFiles = true; // 最終確定足時刻が同じなら再書き込みしない。
+input bool   InpSkipUnchangedFiles = true;
 
-// -------------------------------------------------------------------
-// Output filenames
-// -------------------------------------------------------------------
 input string InpGoldM5File  = "goldsharp_m5.csv";
 input string InpGoldM15File = "goldsharp_m15.csv";
 input string InpGoldH1File  = "goldsharp_h1.csv";
 input string InpGoldH4File  = "goldsharp_h4.csv";
-
 input string InpBtcM5File   = "btcusdsharp_m5.csv";
 input string InpBtcM15File  = "btcusdsharp_m15.csv";
 input string InpBtcH1File   = "btcusdsharp_h1.csv";
@@ -98,10 +58,7 @@ struct ExportJob
 string g_last_bar_key[];
 datetime g_last_bar_time[];
 int g_last_aligned_minute_key = -1;
-
-// -------------------------------------------------------------------
-// Utility
-// -------------------------------------------------------------------
+bool g_initialized_full_export = false;
 
 void DebugLog(const string message)
 {
@@ -112,6 +69,14 @@ void DebugLog(const string message)
 int TextFileFlags(const bool write_mode)
 {
    int flags = (write_mode ? FILE_WRITE : FILE_READ) | FILE_CSV | FILE_ANSI;
+   if(InpUseCommonFolder)
+      flags |= FILE_COMMON;
+   return flags;
+}
+
+int AppendFileFlags()
+{
+   int flags = FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI;
    if(InpUseCommonFolder)
       flags |= FILE_COMMON;
    return flags;
@@ -185,12 +150,10 @@ bool EnsureFolderTree()
    string root = TrimSlashes(InpOutputRoot);
    if(root == "")
       return true;
-
    string parts[];
    int count = StringSplit(root, '\\', parts);
    if(count <= 0)
       return true;
-
    string current = "";
    for(int i = 0; i < count; i++)
    {
@@ -209,11 +172,7 @@ bool EnsureFolderTree()
 bool PrepareSymbol(const string symbol)
 {
    if(symbol == "")
-   {
-      Print("[ExportOhlcToCsv] Empty symbol name.");
       return false;
-   }
-
    if(InpForceSymbolSelect)
    {
       ResetLastError();
@@ -223,13 +182,11 @@ bool PrepareSymbol(const string symbol)
          return false;
       }
    }
-
    if(!SymbolInfoInteger(symbol, SYMBOL_SELECT))
    {
       Print("[ExportOhlcToCsv] Symbol is not selected: ", symbol);
       return false;
    }
-
    return true;
 }
 
@@ -242,10 +199,8 @@ int FindKeyIndex(const string key)
 {
    int n = ArraySize(g_last_bar_key);
    for(int i = 0; i < n; i++)
-   {
       if(g_last_bar_key[i] == key)
          return i;
-   }
    return -1;
 }
 
@@ -276,34 +231,23 @@ bool ShouldRunAlignedExport()
 {
    if(!InpAlignExportToMinute)
       return true;
-
    MqlDateTime now;
    TimeToStruct(TimeLocal(), now);
    int target_second = MathMax(0, MathMin(59, InpExportSecond));
    if(now.sec != target_second)
       return false;
-
    int minute_key = (int)(TimeLocal() / 60);
    if(minute_key == g_last_aligned_minute_key)
       return false;
-
    g_last_aligned_minute_key = minute_key;
    return true;
 }
 
-// -------------------------------------------------------------------
-// Export
-// -------------------------------------------------------------------
-
-bool CopyConfirmedRates(const string symbol,
-                        const ENUM_TIMEFRAMES timeframe,
-                        const int bars_to_export,
-                        MqlRates &rates[])
+bool CopyConfirmedRates(const string symbol, const ENUM_TIMEFRAMES timeframe, const int bars_to_export, MqlRates &rates[])
 {
    int start_pos = InpIncludeCurrentBar ? 0 : 1;
    int count = MathMax(1, bars_to_export);
    ArraySetAsSeries(rates, false);
-
    ResetLastError();
    int copied = CopyRates(symbol, timeframe, start_pos, count, rates);
    if(copied <= 0)
@@ -359,10 +303,12 @@ void WriteRateRow(const int handle, const string symbol, const MqlRates &rate)
              (long)rate.real_volume);
 }
 
-bool WriteCsv(const string symbol,
-              const ENUM_TIMEFRAMES timeframe,
-              const string filename,
-              MqlRates &rates[])
+void WriteCsvHeader(const int handle)
+{
+   FileWrite(handle, "time", "open", "high", "low", "close", "tick_volume", "spread", "real_volume");
+}
+
+bool WriteCsvFull(const string symbol, const string filename, MqlRates &rates[])
 {
    string path = BuildPath(filename);
    ResetLastError();
@@ -372,17 +318,7 @@ bool WriteCsv(const string symbol,
       Print("[ExportOhlcToCsv] FileOpen failed: ", path, ", err=", GetLastError());
       return false;
    }
-
-   FileWrite(handle,
-             "time",
-             "open",
-             "high",
-             "low",
-             "close",
-             "tick_volume",
-             "spread",
-             "real_volume");
-
+   WriteCsvHeader(handle);
    int copied = ArraySize(rates);
    bool descending = RatesAreDescending(rates);
    if(!descending)
@@ -395,59 +331,137 @@ bool WriteCsv(const string symbol,
       for(int i = copied - 1; i >= 0; i--)
          WriteRateRow(handle, symbol, rates[i]);
    }
-
    FileFlush(handle);
    FileClose(handle);
    return true;
 }
 
-bool ExportOne(const string symbol,
-               const ENUM_TIMEFRAMES timeframe,
-               const string filename,
-               const int bars_to_export)
+bool AppendCsvRows(const string symbol, const string filename, MqlRates &rates[], const datetime last_exported_time, int &appended_count, datetime &new_last_time)
 {
-   if(!PrepareSymbol(symbol))
-      return false;
-
-   MqlRates rates[];
-   if(!CopyConfirmedRates(symbol, timeframe, bars_to_export, rates))
-      return false;
-
-   int copied = ArraySize(rates);
-   if(copied <= 0)
-      return false;
-
-   datetime first_time = FirstChronologicalTime(rates);
-   datetime last_time = LastChronologicalTime(rates);
-   string key = JobKey(symbol, timeframe, filename);
-
-   if(InpSkipUnchangedFiles && LastBarAlreadyExported(key, last_time))
+   appended_count = 0;
+   new_last_time = last_exported_time;
+   string path = BuildPath(filename);
+   ResetLastError();
+   int handle = FileOpen(path, AppendFileFlags(), ',');
+   if(handle == INVALID_HANDLE)
    {
-      DebugLog("Skipped unchanged: " + symbol + " " + TimeframeName(timeframe)
-               + " -> " + BuildPath(filename)
-               + " / last=" + TimeToString(last_time, TIME_DATE | TIME_MINUTES));
-      return true;
-   }
-
-   if(!WriteCsv(symbol, timeframe, filename, rates))
+      Print("[ExportOhlcToCsv] Append FileOpen failed: ", path, ", err=", GetLastError());
       return false;
-
-   RememberLastBar(key, last_time);
-
-   DebugLog("Exported " + IntegerToString(copied) + " bars: "
-            + symbol + " " + TimeframeName(timeframe)
-            + " -> " + BuildPath(filename)
-            + " / first=" + TimeToString(first_time, TIME_DATE | TIME_MINUTES)
-            + " / last=" + TimeToString(last_time, TIME_DATE | TIME_MINUTES));
-
+   }
+   FileSeek(handle, 0, SEEK_END);
+   int copied = ArraySize(rates);
+   bool descending = RatesAreDescending(rates);
+   if(!descending)
+   {
+      for(int i = 0; i < copied; i++)
+      {
+         if(rates[i].time <= last_exported_time)
+            continue;
+         WriteRateRow(handle, symbol, rates[i]);
+         appended_count++;
+         if(rates[i].time > new_last_time)
+            new_last_time = rates[i].time;
+      }
+   }
+   else
+   {
+      for(int i = copied - 1; i >= 0; i--)
+      {
+         if(rates[i].time <= last_exported_time)
+            continue;
+         WriteRateRow(handle, symbol, rates[i]);
+         appended_count++;
+         if(rates[i].time > new_last_time)
+            new_last_time = rates[i].time;
+      }
+   }
+   FileFlush(handle);
+   FileClose(handle);
    return true;
 }
 
-void AddJob(ExportJob &jobs[],
-            const string symbol,
-            const ENUM_TIMEFRAMES timeframe,
-            const string filename,
-            const bool enabled)
+bool RewriteFullOne(const string symbol, const ENUM_TIMEFRAMES timeframe, const string filename, const int bars_to_export, const string reason)
+{
+   MqlRates rates[];
+   if(!CopyConfirmedRates(symbol, timeframe, bars_to_export, rates))
+      return false;
+   int copied = ArraySize(rates);
+   if(copied <= 0)
+      return false;
+   datetime first_time = FirstChronologicalTime(rates);
+   datetime last_time = LastChronologicalTime(rates);
+   string key = JobKey(symbol, timeframe, filename);
+   if(InpSkipUnchangedFiles && LastBarAlreadyExported(key, last_time))
+   {
+      DebugLog("Skipped unchanged: " + symbol + " " + TimeframeName(timeframe) + " -> " + BuildPath(filename));
+      return true;
+   }
+   if(!WriteCsvFull(symbol, filename, rates))
+      return false;
+   RememberLastBar(key, last_time);
+   DebugLog("Rebuilt " + IntegerToString(copied) + " bars: " + symbol + " " + TimeframeName(timeframe)
+            + " -> " + BuildPath(filename)
+            + " / reason=" + reason
+            + " / first=" + TimeToString(first_time, TIME_DATE | TIME_MINUTES)
+            + " / last=" + TimeToString(last_time, TIME_DATE | TIME_MINUTES));
+   return true;
+}
+
+bool AppendNewBarsOne(const string symbol, const ENUM_TIMEFRAMES timeframe, const string filename, const int bars_to_export)
+{
+   string key = JobKey(symbol, timeframe, filename);
+   int idx = FindKeyIndex(key);
+   if(idx < 0)
+      return RewriteFullOne(symbol, timeframe, filename, bars_to_export, "no remembered last bar");
+
+   datetime last_exported_time = g_last_bar_time[idx];
+   int lookback = MathMax(2, InpAppendLookbackBars);
+   MqlRates rates[];
+   if(!CopyConfirmedRates(symbol, timeframe, lookback, rates))
+      return false;
+   if(ArraySize(rates) <= 0)
+      return false;
+
+   datetime latest_time = LastChronologicalTime(rates);
+   if(InpSkipUnchangedFiles && latest_time <= last_exported_time)
+   {
+      DebugLog("Skipped unchanged append: " + symbol + " " + TimeframeName(timeframe)
+               + " -> " + BuildPath(filename)
+               + " / last=" + TimeToString(last_exported_time, TIME_DATE | TIME_MINUTES));
+      return true;
+   }
+
+   int appended_count = 0;
+   datetime new_last_time = last_exported_time;
+   if(!AppendCsvRows(symbol, filename, rates, last_exported_time, appended_count, new_last_time))
+      return RewriteFullOne(symbol, timeframe, filename, bars_to_export, "append failed fallback");
+
+   if(appended_count <= 0)
+   {
+      DebugLog("No append rows: " + symbol + " " + TimeframeName(timeframe)
+               + " / remembered=" + TimeToString(last_exported_time, TIME_DATE | TIME_MINUTES)
+               + " / latest=" + TimeToString(latest_time, TIME_DATE | TIME_MINUTES));
+      return true;
+   }
+
+   RememberLastBar(key, new_last_time);
+   DebugLog("Appended " + IntegerToString(appended_count) + " bars: " + symbol + " " + TimeframeName(timeframe)
+            + " -> " + BuildPath(filename)
+            + " / from_after=" + TimeToString(last_exported_time, TIME_DATE | TIME_MINUTES)
+            + " / last=" + TimeToString(new_last_time, TIME_DATE | TIME_MINUTES));
+   return true;
+}
+
+bool ExportOne(const string symbol, const ENUM_TIMEFRAMES timeframe, const string filename, const int bars_to_export)
+{
+   if(!PrepareSymbol(symbol))
+      return false;
+   if(InpAppendMode && g_initialized_full_export)
+      return AppendNewBarsOne(symbol, timeframe, filename, bars_to_export);
+   return RewriteFullOne(symbol, timeframe, filename, bars_to_export, g_initialized_full_export ? "append mode disabled" : "initial full export");
+}
+
+void AddJob(ExportJob &jobs[], const string symbol, const ENUM_TIMEFRAMES timeframe, const string filename, const bool enabled)
 {
    int n = ArraySize(jobs);
    ArrayResize(jobs, n + 1);
@@ -461,7 +475,6 @@ void AddJob(ExportJob &jobs[],
 void BuildJobs(ExportJob &jobs[])
 {
    ArrayResize(jobs, 0);
-
    if(InpExportGold)
    {
       AddJob(jobs, InpGoldSymbol, PERIOD_M5,  InpGoldM5File,  InpExportM5  && InpGoldM5Enabled);
@@ -469,7 +482,6 @@ void BuildJobs(ExportJob &jobs[])
       AddJob(jobs, InpGoldSymbol, PERIOD_H1,  InpGoldH1File,  InpExportH1);
       AddJob(jobs, InpGoldSymbol, PERIOD_H4,  InpGoldH4File,  InpExportH4  && InpGoldH4Enabled);
    }
-
    if(InpExportBtc)
    {
       AddJob(jobs, InpBtcSymbol, PERIOD_M5,  InpBtcM5File,  InpExportM5  && InpBtcM5Enabled);
@@ -479,65 +491,51 @@ void BuildJobs(ExportJob &jobs[])
    }
 }
 
-void ExportAll()
+bool ExportAll()
 {
    EnsureFolderTree();
-
    ExportJob jobs[];
    BuildJobs(jobs);
-
    int enabled_count = 0;
    bool ok_all = true;
-
    for(int i = 0; i < ArraySize(jobs); i++)
    {
       if(!jobs[i].enabled)
          continue;
       enabled_count++;
-      bool ok = ExportOne(jobs[i].symbol,
-                          jobs[i].timeframe,
-                          jobs[i].filename,
-                          jobs[i].bars_to_export);
+      bool ok = ExportOne(jobs[i].symbol, jobs[i].timeframe, jobs[i].filename, jobs[i].bars_to_export);
       ok_all = ok && ok_all;
    }
-
    if(enabled_count <= 0)
       Print("[ExportOhlcToCsv] No export jobs enabled.");
-
    if(!ok_all)
       Print("[ExportOhlcToCsv] Export finished with one or more errors.");
+   return ok_all;
 }
-
-// -------------------------------------------------------------------
-// EA events
-// -------------------------------------------------------------------
 
 int OnInit()
 {
    if(InpTimerSeconds < 1)
-   {
-      Print("[ExportOhlcToCsv] InpTimerSeconds must be >= 1.");
       return INIT_PARAMETERS_INCORRECT;
-   }
-
    if(InpExportSecond < 0 || InpExportSecond > 59)
-   {
-      Print("[ExportOhlcToCsv] InpExportSecond must be between 0 and 59.");
       return INIT_PARAMETERS_INCORRECT;
-   }
+   if(InpAppendLookbackBars < 2)
+      return INIT_PARAMETERS_INCORRECT;
 
-   DebugLog("Initializing EA v1.20");
+   DebugLog("Initializing EA v1.30");
    DebugLog("GoldSymbol=" + InpGoldSymbol + ", BtcSymbol=" + InpBtcSymbol);
    DebugLog("OutputRoot=" + InpOutputRoot + ", UseCommonFolder=" + (InpUseCommonFolder ? "true" : "false"));
    DebugLog("IncludeCurrentBar=" + (InpIncludeCurrentBar ? "true" : "false"));
    DebugLog("SkipUnchangedFiles=" + (InpSkipUnchangedFiles ? "true" : "false"));
+   DebugLog("AppendMode=" + (InpAppendMode ? "true" : "false") + ", AppendLookbackBars=" + IntegerToString(InpAppendLookbackBars));
    DebugLog("AlignExportToMinute=" + (InpAlignExportToMinute ? "true" : "false")
             + ", ExportSecond=" + IntegerToString(InpExportSecond)
             + ", TimerSeconds=" + IntegerToString(InpTimerSeconds));
 
    EnsureFolderTree();
-   ExportAll();
-
+   g_initialized_full_export = false;
+   bool ok = ExportAll();
+   g_initialized_full_export = ok;
    EventSetTimer(InpTimerSeconds);
    return INIT_SUCCEEDED;
 }
@@ -556,6 +554,4 @@ void OnTimer()
 
 void OnTick()
 {
-   // CSV出力専用EAなのでTickでは何もしない。
-   // 更新はOnTimerに集約する。
 }
