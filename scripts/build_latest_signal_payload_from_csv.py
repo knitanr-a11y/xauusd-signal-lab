@@ -112,8 +112,10 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     out["is_bear"] = close < open_
     out["prev_body"] = body.shift(1)
 
-    out["bull_engulf"] = out["is_bull"] & out["is_bear"].shift(1).fillna(False) & (close >= open_.shift(1)) & (open_ <= close.shift(1)) & (body >= out["prev_body"] * 0.80)
-    out["bear_engulf"] = out["is_bear"] & out["is_bull"].shift(1).fillna(False) & (open_ >= close.shift(1)) & (close <= open_.shift(1)) & (body >= out["prev_body"] * 0.80)
+    prev_is_bear = out["is_bear"].shift(1).fillna(False).astype(bool)
+    prev_is_bull = out["is_bull"].shift(1).fillna(False).astype(bool)
+    out["bull_engulf"] = out["is_bull"] & prev_is_bear & (close >= open_.shift(1)) & (open_ <= close.shift(1)) & (body >= out["prev_body"] * 0.80)
+    out["bear_engulf"] = out["is_bear"] & prev_is_bull & (open_ >= close.shift(1)) & (close <= open_.shift(1)) & (body >= out["prev_body"] * 0.80)
     out["bull_pin"] = (out["lower_wick_ratio"] >= 0.45) & (out["upper_wick_ratio"] <= 0.25) & (out["close_pos"] >= 0.55)
     out["bear_pin"] = (out["upper_wick_ratio"] >= 0.45) & (out["lower_wick_ratio"] <= 0.25) & (out["close_pos"] <= 0.45)
     out["strong_bull_close"] = out["is_bull"] & (out["body_ratio"] >= 0.55) & (out["close_pos"] >= 0.70)
@@ -186,8 +188,6 @@ def detect_gold_extra(row: pd.Series) -> dict[str, Any] | None:
     h1_bear = row.get("h1_ema_align") == "bear"
     h1_macd_buy = row.get("h1_macd_delta3", np.nan) > 0
     h1_macd_sell = row.get("h1_macd_delta3", np.nan) < 0
-    h1_rsi_buy = 45 <= row.get("h1_rsi14", np.nan) <= 75
-    h1_rsi_sell = 25 <= row.get("h1_rsi14", np.nan) <= 55
     m15_macd_buy = row.get("macd_delta", np.nan) > 0 and row.get("macd_delta3", np.nan) > 0
     m15_macd_sell = row.get("macd_delta", np.nan) < 0 and row.get("macd_delta3", np.nan) < 0
     ema20_pull_buy = row.get("low", np.nan) <= row.get("ema20", np.nan) + 0.25 * row.get("atr14", np.nan) and row.get("close", np.nan) > row.get("ema20", np.nan)
@@ -219,15 +219,20 @@ def detect_gold_extra(row: pd.Series) -> dict[str, Any] | None:
     return None
 
 
-def build_payload(symbol_group: str, row: pd.Series, signal: dict[str, Any] | None, history_csv: Path) -> dict[str, Any]:
+def detect_signal(symbol: str, row: pd.Series) -> dict[str, Any] | None:
+    return detect_btc_runner(row) if symbol == "BTC" else detect_gold_extra(row)
+
+
+def build_payload(symbol_group: str, row: pd.Series, signal: dict[str, Any] | None, history_csv: Path, *, selection_mode: str) -> dict[str, Any]:
     base: dict[str, Any] = {
         "payload_type": "latest_csv_signal_check",
         "symbol_group": symbol_group,
         "signal_found": signal is not None,
+        "selection_mode": selection_mode,
         "time": row.get("time").strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("time")) else "",
     }
     if signal is None:
-        base["message"] = "No final-rule signal on the latest closed M15 bar."
+        base["message"] = "No final-rule signal on selected M15 bar."
         return base
 
     current = {
@@ -250,14 +255,60 @@ def build_payload(symbol_group: str, row: pd.Series, signal: dict[str, Any] | No
     return base
 
 
+def select_target_row(df: pd.DataFrame, *, symbol: str, bar_offset: int, bar_time: str | None, scan_recent_bars: int | None) -> tuple[pd.Series, dict[str, Any] | None, str, int, list[dict[str, Any]]]:
+    if bar_time:
+        target_time = pd.to_datetime(bar_time, errors="coerce")
+        if pd.isna(target_time):
+            raise ValueError(f"Invalid --bar-time: {bar_time}")
+        matches = df.index[df["time"].eq(pd.Timestamp(target_time))].tolist()
+        if not matches:
+            nearest_idx = int((df["time"] - pd.Timestamp(target_time)).abs().idxmin())
+            nearest_time = df.at[nearest_idx, "time"]
+            raise ValueError(f"No exact bar for --bar-time {bar_time}. Nearest bar is {nearest_time} at index {nearest_idx}.")
+        idx = int(matches[-1])
+        row = df.iloc[idx]
+        return row, detect_signal(symbol, row), "bar_time", idx, []
+
+    if scan_recent_bars is not None and scan_recent_bars > 0:
+        end_idx = len(df) - 1 - bar_offset
+        start_idx = max(220, end_idx - scan_recent_bars + 1)
+        found: list[dict[str, Any]] = []
+        for idx in range(start_idx, end_idx + 1):
+            row = df.iloc[idx]
+            signal = detect_signal(symbol, row)
+            if signal is not None:
+                found.append({
+                    "idx": int(idx),
+                    "time": row.get("time").strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("time")) else "",
+                    "strategy_label": signal.get("strategy_label"),
+                    "side": signal.get("side"),
+                    "rr": signal.get("rr"),
+                    "risk_atr": signal.get("risk_atr"),
+                })
+        if found:
+            last = found[-1]
+            idx = int(last["idx"])
+            row = df.iloc[idx]
+            return row, detect_signal(symbol, row), f"scan_recent_bars_{scan_recent_bars}", idx, found
+        idx = int(end_idx)
+        row = df.iloc[idx]
+        return row, None, f"scan_recent_bars_{scan_recent_bars}_no_signal", idx, found
+
+    idx = len(df) - 1 - bar_offset
+    row = df.iloc[idx]
+    return row, detect_signal(symbol, row), "bar_offset", int(idx), []
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build latest closed-bar signal payload from M15/H1 CSV for GOLD or BTC.")
+    parser = argparse.ArgumentParser(description="Build selected-bar signal payload from M15/H1 CSV for GOLD or BTC.")
     parser.add_argument("--symbol", choices=["GOLD", "BTC"], required=True)
     parser.add_argument("--m15-csv", type=Path, required=True)
     parser.add_argument("--h1-csv", type=Path, required=True)
     parser.add_argument("--history-csv", type=Path, default=DEFAULT_HISTORY_CSV)
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--bar-offset", type=int, default=1, help="1 means latest closed bar if CSV may include current forming bar; 0 means last row.")
+    parser.add_argument("--bar-time", default=None, help="Exact M15 bar time to inspect, e.g. 2026-04-01 12:15:00")
+    parser.add_argument("--scan-recent-bars", type=int, default=None, help="Scan recent N bars and build payload for the latest detected signal.")
     args = parser.parse_args()
 
     m15_csv = resolve_path(args.m15_csv)
@@ -270,13 +321,24 @@ def main() -> int:
     df = join_h1(m15, h1)
     if len(df) < 250:
         raise ValueError("Not enough rows. Need at least about 250 M15 bars for indicators.")
-    target_idx = len(df) - 1 - args.bar_offset
-    if target_idx < 220:
-        raise ValueError(f"bar-offset too large or not enough rows: target_idx={target_idx}")
-    row = df.iloc[target_idx]
 
-    signal = detect_btc_runner(row) if args.symbol == "BTC" else detect_gold_extra(row)
-    payload = build_payload(args.symbol, row, signal, history_csv)
+    row, signal, selection_mode, target_idx, found = select_target_row(
+        df,
+        symbol=args.symbol,
+        bar_offset=args.bar_offset,
+        bar_time=args.bar_time,
+        scan_recent_bars=args.scan_recent_bars,
+    )
+    if target_idx < 220:
+        raise ValueError(f"Selected target_idx too early for indicators: target_idx={target_idx}")
+
+    payload = build_payload(args.symbol, row, signal, history_csv, selection_mode=selection_mode)
+    if found:
+        payload["scan_found_count"] = len(found)
+        payload["scan_found_preview_last_10"] = found[-10:]
+    elif args.scan_recent_bars:
+        payload["scan_found_count"] = 0
+        payload["scan_found_preview_last_10"] = []
 
     out_json.parent.mkdir(parents=True, exist_ok=True)
     with out_json.open("w", encoding="utf-8") as f:
@@ -285,7 +347,14 @@ def main() -> int:
     print("Symbol:", args.symbol)
     print("M15 CSV:", m15_csv)
     print("H1 CSV:", h1_csv)
+    print("Selection mode:", selection_mode)
+    print("Target idx:", target_idx)
     print("Target bar:", row.get("time"))
+    if args.scan_recent_bars:
+        print("Scan recent bars:", args.scan_recent_bars)
+        print("Signals found in scan:", len(found))
+        if found:
+            print("Last scan signal:", found[-1])
     print("Signal found:", payload.get("signal_found"))
     if payload.get("signal_found"):
         cur = payload["current_signal_snapshot"]
