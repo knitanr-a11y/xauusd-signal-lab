@@ -22,9 +22,9 @@ from build_latest_signal_payload_from_csv import (
     detect_gold_abc,
     detect_gold_extra,
     join_h1,
-    read_ohlc,
     resolve_path,
 )
+from search_btc_mtf_extra_edges_livecsv import read_ohlc_live_csv
 
 DEFAULT_M15_CSV = PROJECT_ROOT / "data" / "raw" / "goldsharp_m15.csv"
 DEFAULT_H1_CSV = PROJECT_ROOT / "data" / "raw" / "goldsharp_h1.csv"
@@ -325,8 +325,8 @@ def format_discord_message(payload: dict[str, Any]) -> str:
 
 
 def load_gold_context(m15_csv: Path, h1_csv: Path) -> pd.DataFrame:
-    m15 = add_indicators(read_ohlc(m15_csv))
-    h1 = add_indicators(read_ohlc(h1_csv))
+    m15 = add_indicators(read_ohlc_live_csv(m15_csv))
+    h1 = add_indicators(read_ohlc_live_csv(h1_csv))
     return join_h1(m15, h1)
 
 
@@ -338,7 +338,11 @@ def collect_unnotified_payloads(
     scan_recent_bars: int,
     bar_offset: int,
 ) -> list[tuple[int, dict[str, Any]]]:
+    if df.empty:
+        return []
     end_idx = len(df) - 1 - bar_offset
+    if end_idx < 0:
+        return []
     start_idx = max(220, end_idx - scan_recent_bars + 1)
     payloads: list[tuple[int, dict[str, Any]]] = []
     for idx in range(start_idx, end_idx + 1):
@@ -456,6 +460,9 @@ def main() -> int:
     print("Ledger CSV:", ledger_csv)
     print("Env file:", env_file, "exists=" + str(env_file.exists()))
     print("Rows:", len(df))
+    if not df.empty:
+        print("First bar:", df["time"].iloc[0])
+        print("Last bar:", df["time"].iloc[-1])
     print("Scan recent bars:", args.scan_recent_bars)
     print("AI review enabled:", bool(args.enable_ai_review))
     print("Already notified keys:", len(notified_keys))
