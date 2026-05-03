@@ -32,6 +32,8 @@ from search_btc_mtf_extra_edges_livecsv import read_ohlc_live_csv
 DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "live_payloads" / "notified_signals_ledger.csv"
 DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
 DISCORD_USER_AGENT = "xauusd-signal-lab/1.0 (+https://github.com/knitanr-a11y/xauusd-signal-lab)"
+DEFAULT_BTC_ASSUMED_SPREAD_PRICE = 20.0
+DEFAULT_BTC_PIP_SIZE = 10.0
 
 
 def now_str() -> str:
@@ -95,6 +97,17 @@ def append_ledger_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         "sl_price_estimate",
         "risk_price_distance",
         "reward_price_distance",
+        "btc_assumed_spread_price",
+        "btc_pip_size",
+        "gross_tp_pips",
+        "gross_sl_pips",
+        "net_tp_after_spread_price",
+        "sl_with_spread_price",
+        "net_tp_after_spread_pips",
+        "sl_with_spread_pips",
+        "spread_to_sl_ratio",
+        "spread_to_tp_ratio",
+        "effective_rr_after_spread",
         "overlap_detected",
         "overlap_signal_count",
         "overlap_labels",
@@ -173,14 +186,28 @@ def fmt_price(value: Any, *, digits: int | None = None) -> str:
     return f"{number:.{d}f}"
 
 
-def build_trade_plan(cur: dict[str, Any]) -> dict[str, Any] | None:
+def fmt_ratio(value: Any) -> str:
+    number = safe_float(value)
+    if number is None:
+        return "N/A"
+    return f"{number * 100:.1f}%"
+
+
+def build_trade_plan(cur: dict[str, Any], *, btc_assumed_spread_price: float, btc_pip_size: float) -> dict[str, Any] | None:
     side = str(cur.get("side", "")).upper()
     entry = safe_float(cur.get("close"))
     atr14 = safe_float(cur.get("atr14"))
     rr = safe_float(cur.get("rr"))
     risk_atr = safe_float(cur.get("risk_atr"))
+    spread_price = safe_float(btc_assumed_spread_price)
+    pip_size = safe_float(btc_pip_size)
     if side not in {"BUY", "SELL"} or entry is None or atr14 is None or rr is None or risk_atr is None:
         return None
+    if spread_price is None or spread_price < 0:
+        spread_price = 0.0
+    if pip_size is None or pip_size <= 0:
+        pip_size = DEFAULT_BTC_PIP_SIZE
+
     risk_distance = atr14 * risk_atr
     if risk_distance <= 0:
         return None
@@ -191,6 +218,21 @@ def build_trade_plan(cur: dict[str, Any]) -> dict[str, Any] | None:
     else:
         sl = entry + risk_distance
         tp = entry - reward_distance
+
+    net_tp_after_spread = reward_distance - spread_price
+    sl_with_spread = risk_distance + spread_price
+    effective_rr_after_spread = net_tp_after_spread / sl_with_spread if sl_with_spread > 0 else None
+    spread_to_sl_ratio = spread_price / risk_distance if risk_distance > 0 else None
+    spread_to_tp_ratio = spread_price / reward_distance if reward_distance > 0 else None
+
+    warnings: list[str] = []
+    if spread_to_sl_ratio is not None and spread_to_sl_ratio >= 0.50:
+        warnings.append("想定スプレッドがSL幅の50%以上で重い")
+    if net_tp_after_spread <= 0:
+        warnings.append("スプレッド控除後の実質TP幅が0以下")
+    elif effective_rr_after_spread is not None and effective_rr_after_spread < 1.0:
+        warnings.append("スプレッド控除後の実質RRが1.0未満")
+
     return {
         "basis": "signal_close_estimate",
         "note": "確定足終値ベースの目安。実際の約定価格・スプレッドでズレます。",
@@ -199,13 +241,26 @@ def build_trade_plan(cur: dict[str, Any]) -> dict[str, Any] | None:
         "sl_price_estimate": sl,
         "risk_price_distance": risk_distance,
         "reward_price_distance": reward_distance,
+        "btc_assumed_spread_price": spread_price,
+        "btc_pip_size": pip_size,
+        "spread_pips": spread_price / pip_size,
+        "gross_tp_pips": reward_distance / pip_size,
+        "gross_sl_pips": risk_distance / pip_size,
+        "net_tp_after_spread_price": net_tp_after_spread,
+        "sl_with_spread_price": sl_with_spread,
+        "net_tp_after_spread_pips": net_tp_after_spread / pip_size,
+        "sl_with_spread_pips": sl_with_spread / pip_size,
+        "spread_to_sl_ratio": spread_to_sl_ratio,
+        "spread_to_tp_ratio": spread_to_tp_ratio,
+        "effective_rr_after_spread": effective_rr_after_spread,
+        "spread_warnings": warnings,
     }
 
 
-def enrich_payload_with_trade_plan(payload: dict[str, Any]) -> dict[str, Any]:
+def enrich_payload_with_trade_plan(payload: dict[str, Any], *, btc_assumed_spread_price: float, btc_pip_size: float) -> dict[str, Any]:
     out = dict(payload)
     cur = dict(out.get("current_signal_snapshot", {}) or {})
-    plan = build_trade_plan(cur)
+    plan = build_trade_plan(cur, btc_assumed_spread_price=btc_assumed_spread_price, btc_pip_size=btc_pip_size)
     if plan is not None:
         cur["trade_plan"] = plan
         out["current_signal_snapshot"] = cur
@@ -271,16 +326,28 @@ def format_trade_plan_line(payload: dict[str, Any]) -> list[str]:
         return []
     entry = safe_float(plan.get("entry_price_estimate"))
     digits = price_digits(entry)
-    return [
+    lines = [
         "価格目安: "
         f"Entry {fmt_price(plan.get('entry_price_estimate'), digits=digits)} / "
         f"TP {fmt_price(plan.get('tp_price_estimate'), digits=digits)} / "
         f"SL {fmt_price(plan.get('sl_price_estimate'), digits=digits)}",
-        "値幅目安: "
-        f"損切り幅 {fmt_price(plan.get('risk_price_distance'), digits=digits)} / "
-        f"利確幅 {fmt_price(plan.get('reward_price_distance'), digits=digits)}",
+        "理論値幅: "
+        f"TP幅 {fmt_price(plan.get('reward_price_distance'), digits=digits)}ドル（約{fmt_price(plan.get('gross_tp_pips'), digits=2)}pips） / "
+        f"SL幅 {fmt_price(plan.get('risk_price_distance'), digits=digits)}ドル（約{fmt_price(plan.get('gross_sl_pips'), digits=2)}pips）",
+        "スプレッド考慮: "
+        f"想定 {fmt_price(plan.get('btc_assumed_spread_price'), digits=digits)}ドル（約{fmt_price(plan.get('spread_pips'), digits=2)}pips） / "
+        f"実質TP幅 {fmt_price(plan.get('net_tp_after_spread_price'), digits=digits)}ドル（約{fmt_price(plan.get('net_tp_after_spread_pips'), digits=2)}pips） / "
+        f"実質SL負担 {fmt_price(plan.get('sl_with_spread_price'), digits=digits)}ドル（約{fmt_price(plan.get('sl_with_spread_pips'), digits=2)}pips）",
+        "コスト比率: "
+        f"spread/SL {fmt_ratio(plan.get('spread_to_sl_ratio'))} / "
+        f"spread/TP {fmt_ratio(plan.get('spread_to_tp_ratio'))} / "
+        f"実質RR {fmt_price(plan.get('effective_rr_after_spread'), digits=2)}",
         "価格注記: 確定足終値ベース。実約定・スプレッドでズレあり",
     ]
+    warnings = plan.get("spread_warnings") or []
+    if warnings:
+        lines.append("スプレッド注意: " + " / ".join(str(x) for x in warnings))
+    return lines
 
 
 def format_discord_message(payload: dict[str, Any]) -> str:
@@ -345,6 +412,8 @@ def collect_unnotified_payloads(
     scan_recent_m15_bars: int,
     bar_offset: int,
     exclude_entry_hours: set[int],
+    btc_assumed_spread_price: float,
+    btc_pip_size: float,
 ) -> list[tuple[int, dict[str, Any]]]:
     payloads: list[tuple[int, dict[str, Any]]] = []
 
@@ -357,7 +426,7 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m5_scan_{scan_recent_m5_bars}", source_tf="M5")
-        payload = enrich_payload_with_trade_plan(payload)
+        payload = enrich_payload_with_trade_plan(payload, btc_assumed_spread_price=btc_assumed_spread_price, btc_pip_size=btc_pip_size)
         payload["notification_type"] = "signal"
         payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
         payload["overlap_detected"] = False
@@ -377,7 +446,7 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m15_scan_{scan_recent_m15_bars}", source_tf="M15")
-        payload = enrich_payload_with_trade_plan(payload)
+        payload = enrich_payload_with_trade_plan(payload, btc_assumed_spread_price=btc_assumed_spread_price, btc_pip_size=btc_pip_size)
         payload["notification_type"] = "signal"
         payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
         payload["overlap_detected"] = False
@@ -413,6 +482,8 @@ def main() -> int:
     parser.add_argument("--scan-recent-m15-bars", type=int, default=20)
     parser.add_argument("--bar-offset", type=int, default=1)
     parser.add_argument("--exclude-entry-hours", default="8,13,20,21")
+    parser.add_argument("--btc-assumed-spread-price", type=float, default=DEFAULT_BTC_ASSUMED_SPREAD_PRICE)
+    parser.add_argument("--btc-pip-size", type=float, default=DEFAULT_BTC_PIP_SIZE)
     parser.add_argument("--enable-ai-review", action="store_true")
     parser.add_argument("--ai-model", default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -445,6 +516,8 @@ def main() -> int:
         scan_recent_m15_bars=args.scan_recent_m15_bars,
         bar_offset=args.bar_offset,
         exclude_entry_hours=exclude_entry_hours,
+        btc_assumed_spread_price=args.btc_assumed_spread_price,
+        btc_pip_size=args.btc_pip_size,
     )
     if args.max_notifications > 0:
         payloads = payloads[-args.max_notifications :]
@@ -467,6 +540,8 @@ def main() -> int:
     print("Scan recent M15 bars:", args.scan_recent_m15_bars)
     print("Standby enabled: False")
     print("AI review enabled:", bool(args.enable_ai_review))
+    print("BTC assumed spread price:", args.btc_assumed_spread_price)
+    print("BTC pip size:", args.btc_pip_size)
     print("Exclude entry hours:", sorted(exclude_entry_hours))
     print("Already notified keys:", len(notified_keys))
     print("Unnotified signals selected:", len(payloads))
@@ -515,6 +590,17 @@ def main() -> int:
                     "sl_price_estimate": plan.get("sl_price_estimate", ""),
                     "risk_price_distance": plan.get("risk_price_distance", ""),
                     "reward_price_distance": plan.get("reward_price_distance", ""),
+                    "btc_assumed_spread_price": plan.get("btc_assumed_spread_price", ""),
+                    "btc_pip_size": plan.get("btc_pip_size", ""),
+                    "gross_tp_pips": plan.get("gross_tp_pips", ""),
+                    "gross_sl_pips": plan.get("gross_sl_pips", ""),
+                    "net_tp_after_spread_price": plan.get("net_tp_after_spread_price", ""),
+                    "sl_with_spread_price": plan.get("sl_with_spread_price", ""),
+                    "net_tp_after_spread_pips": plan.get("net_tp_after_spread_pips", ""),
+                    "sl_with_spread_pips": plan.get("sl_with_spread_pips", ""),
+                    "spread_to_sl_ratio": plan.get("spread_to_sl_ratio", ""),
+                    "spread_to_tp_ratio": plan.get("spread_to_tp_ratio", ""),
+                    "effective_rr_after_spread": plan.get("effective_rr_after_spread", ""),
                     "overlap_detected": payload.get("overlap_detected"),
                     "overlap_signal_count": payload.get("overlap_signal_count"),
                     "overlap_labels": "+".join(payload.get("overlap_labels", [])),
