@@ -90,6 +90,11 @@ def append_ledger_rows(path: Path, rows: list[dict[str, Any]]) -> None:
         "rr",
         "risk_atr",
         "source_tf",
+        "entry_price_estimate",
+        "tp_price_estimate",
+        "sl_price_estimate",
+        "risk_price_distance",
+        "reward_price_distance",
         "overlap_detected",
         "overlap_signal_count",
         "overlap_labels",
@@ -138,6 +143,74 @@ def send_discord_message(webhook_url: str, content: str) -> None:
         raise RuntimeError(f"Discord webhook HTTPError status={exc.code}: {body}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(f"Discord webhook URLError: {exc}") from exc
+
+
+def safe_float(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except Exception:
+        return None
+    if pd.isna(number):
+        return None
+    return number
+
+
+def price_digits(price: float | None) -> int:
+    if price is None:
+        return 2
+    if abs(price) >= 1000:
+        return 2
+    if abs(price) >= 100:
+        return 3
+    return 5
+
+
+def fmt_price(value: Any, *, digits: int | None = None) -> str:
+    number = safe_float(value)
+    if number is None:
+        return "N/A"
+    d = price_digits(number) if digits is None else digits
+    return f"{number:.{d}f}"
+
+
+def build_trade_plan(cur: dict[str, Any]) -> dict[str, Any] | None:
+    side = str(cur.get("side", "")).upper()
+    entry = safe_float(cur.get("close"))
+    atr14 = safe_float(cur.get("atr14"))
+    rr = safe_float(cur.get("rr"))
+    risk_atr = safe_float(cur.get("risk_atr"))
+    if side not in {"BUY", "SELL"} or entry is None or atr14 is None or rr is None or risk_atr is None:
+        return None
+    risk_distance = atr14 * risk_atr
+    if risk_distance <= 0:
+        return None
+    reward_distance = risk_distance * rr
+    if side == "BUY":
+        sl = entry - risk_distance
+        tp = entry + reward_distance
+    else:
+        sl = entry + risk_distance
+        tp = entry - reward_distance
+    return {
+        "basis": "signal_close_estimate",
+        "note": "確定足終値ベースの目安。実際の約定価格・スプレッドでズレます。",
+        "entry_price_estimate": entry,
+        "tp_price_estimate": tp,
+        "sl_price_estimate": sl,
+        "risk_price_distance": risk_distance,
+        "reward_price_distance": reward_distance,
+    }
+
+
+def enrich_payload_with_trade_plan(payload: dict[str, Any]) -> dict[str, Any]:
+    out = dict(payload)
+    cur = dict(out.get("current_signal_snapshot", {}) or {})
+    plan = build_trade_plan(cur)
+    if plan is not None:
+        cur["trade_plan"] = plan
+        out["current_signal_snapshot"] = cur
+        out["trade_plan"] = plan
+    return out
 
 
 def candidate_snapshot(signal: dict[str, Any], *, source_tf: str) -> dict[str, Any]:
@@ -191,6 +264,25 @@ def format_ai_review_lines(payload: dict[str, Any]) -> list[str]:
     return lines
 
 
+def format_trade_plan_line(payload: dict[str, Any]) -> list[str]:
+    cur = payload.get("current_signal_snapshot", {}) or {}
+    plan = cur.get("trade_plan") or payload.get("trade_plan") or {}
+    if not plan:
+        return []
+    entry = safe_float(plan.get("entry_price_estimate"))
+    digits = price_digits(entry)
+    return [
+        "価格目安: "
+        f"Entry {fmt_price(plan.get('entry_price_estimate'), digits=digits)} / "
+        f"TP {fmt_price(plan.get('tp_price_estimate'), digits=digits)} / "
+        f"SL {fmt_price(plan.get('sl_price_estimate'), digits=digits)}",
+        "値幅目安: "
+        f"損切り幅 {fmt_price(plan.get('risk_price_distance'), digits=digits)} / "
+        f"利確幅 {fmt_price(plan.get('reward_price_distance'), digits=digits)}",
+        "価格注記: 確定足終値ベース。実約定・スプレッドでズレあり",
+    ]
+
+
 def format_discord_message(payload: dict[str, Any]) -> str:
     cur = payload.get("current_signal_snapshot", {})
     strategy = str(cur.get("strategy_label", ""))
@@ -214,8 +306,9 @@ def format_discord_message(payload: dict[str, Any]) -> str:
         f"ルール: {readable_strategy(strategy, source_tf)}",
         f"時間足: {source_tf}",
         f"条件: RR {rr} / SL幅 ATR×{risk_atr}",
-        f"運用メモ: {risk_note}",
     ]
+    lines.extend(format_trade_plan_line(payload))
+    lines.append(f"運用メモ: {risk_note}")
 
     if cur.get("entry_hour") is not None:
         lines.append(f"時間フィルタ: {cur.get('entry_hour')}時 → 通過")
@@ -264,6 +357,7 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m5_scan_{scan_recent_m5_bars}", source_tf="M5")
+        payload = enrich_payload_with_trade_plan(payload)
         payload["notification_type"] = "signal"
         payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
         payload["overlap_detected"] = False
@@ -283,6 +377,7 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m15_scan_{scan_recent_m15_bars}", source_tf="M15")
+        payload = enrich_payload_with_trade_plan(payload)
         payload["notification_type"] = "signal"
         payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
         payload["overlap_detected"] = False
@@ -397,6 +492,7 @@ def main() -> int:
             print("Discord sent: true")
 
         cur = payload.get("current_signal_snapshot", {})
+        plan = cur.get("trade_plan", {}) or payload.get("trade_plan", {}) or {}
         ai_review = payload.get("ai_review") or {}
         should_write_ledger = bool(args.send_discord) or bool(args.mark_dry_run_notified)
         if should_write_ledger:
@@ -414,6 +510,11 @@ def main() -> int:
                     "rr": cur.get("rr"),
                     "risk_atr": cur.get("risk_atr"),
                     "source_tf": cur.get("source_tf"),
+                    "entry_price_estimate": plan.get("entry_price_estimate", ""),
+                    "tp_price_estimate": plan.get("tp_price_estimate", ""),
+                    "sl_price_estimate": plan.get("sl_price_estimate", ""),
+                    "risk_price_distance": plan.get("risk_price_distance", ""),
+                    "reward_price_distance": plan.get("reward_price_distance", ""),
                     "overlap_detected": payload.get("overlap_detected"),
                     "overlap_signal_count": payload.get("overlap_signal_count"),
                     "overlap_labels": "+".join(payload.get("overlap_labels", [])),
