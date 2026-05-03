@@ -12,6 +12,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_case_db_test_001_ledger.csv"
 DEFAULT_OUT_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_filter_rule_summary.csv"
 DEFAULT_DETAIL_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_filter_rule_detail.csv"
+DEFAULT_RANK_SUMMARY_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_notify_rank_summary.csv"
+DEFAULT_RANK_DETAIL_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_notify_rank_detail.csv"
 
 RuleFunc = Callable[[pd.DataFrame], pd.Series]
 
@@ -116,6 +118,28 @@ def summarize_selection(df: pd.DataFrame, selected: pd.DataFrame, *, rule_name: 
     }
 
 
+def summarize_group(group: pd.DataFrame, *, rank: str, description: str, order: int) -> dict[str, object]:
+    r = group["actual_r_num"].dropna()
+    wins = int((r > 0).sum())
+    losses = int((r < 0).sum())
+    total = int(len(r))
+    total_r = float(r.sum()) if total else 0.0
+    return {
+        "notify_rank_order": order,
+        "notify_rank": rank,
+        "description": description,
+        "count": int(len(group)),
+        "count_with_actual_r": total,
+        "wins": wins,
+        "losses": losses,
+        "win_rate": wins / total if total else None,
+        "total_r": total_r,
+        "avg_r": total_r / total if total else None,
+        "pf": profit_factor(r),
+        "max_consecutive_losses": max_consecutive_losses(group["actual_result"]) if len(group) else 0,
+    }
+
+
 def build_rules() -> list[tuple[str, str, RuleFunc]]:
     return [
         (
@@ -195,14 +219,57 @@ def build_rules() -> list[tuple[str, str, RuleFunc]]:
     ]
 
 
+def assign_notify_rank(row: pd.Series) -> tuple[str, str, int]:
+    win_match = str(row.get("winning_pattern_match", ""))
+    loss_sim = str(row.get("losing_pattern_similarity", ""))
+    risk = str(row.get("final_risk_label", ""))
+
+    if risk == "normal":
+        return "HIGH", "final_risk_label=normal", 1
+
+    if win_match == "high" and loss_sim != "high":
+        return "HIGH", "winning_pattern_match=high and losing_pattern_similarity!=high", 1
+
+    if loss_sim == "high" or risk == "strong_caution":
+        return "WATCH", "losing_pattern_similarity=high or final_risk_label=strong_caution", 3
+
+    return "NORMAL", "default tradable caution/other", 2
+
+
+def add_notify_rank(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    assigned = out.apply(assign_notify_rank, axis=1)
+    out["notify_rank"] = [x[0] for x in assigned]
+    out["notify_rank_reason"] = [x[1] for x in assigned]
+    out["notify_rank_order"] = [x[2] for x in assigned]
+    return out
+
+
+def summarize_notify_ranks(df: pd.DataFrame) -> pd.DataFrame:
+    ranked = add_notify_rank(df)
+    descriptions = {
+        "HIGH": "高信頼通知。normal、または勝ち類似highかつ負け類似highではない。",
+        "NORMAL": "通常通知。除外せず、通常の人間確認を行う。",
+        "WATCH": "強注意通知。負け類似highまたはstrong_caution。自動除外ではなく要確認。",
+    }
+    orders = {"HIGH": 1, "NORMAL": 2, "WATCH": 3}
+    rows: list[dict[str, object]] = []
+    for rank in ["HIGH", "NORMAL", "WATCH"]:
+        group = ranked[ranked["notify_rank"] == rank].copy()
+        rows.append(summarize_group(group, rank=rank, description=descriptions[rank], order=orders[rank]))
+    return pd.DataFrame(rows).sort_values("notify_rank_order", kind="mergesort")
+
+
 def apply_rules(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     summary_rows: list[dict[str, object]] = []
     detail_rows: list[dict[str, object]] = []
 
+    ranked_df = add_notify_rank(df)
+
     for rule_name, description, func in build_rules():
-        mask = func(df).fillna(False)
-        selected = df[mask].copy()
-        summary_rows.append(summarize_selection(df, selected, rule_name=rule_name, description=description))
+        mask = func(ranked_df).fillna(False)
+        selected = ranked_df[mask].copy()
+        summary_rows.append(summarize_selection(ranked_df, selected, rule_name=rule_name, description=description))
 
         for _, row in selected.iterrows():
             detail_rows.append(
@@ -215,6 +282,8 @@ def apply_rules(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
                     "winning_pattern_match": row.get("winning_pattern_match"),
                     "losing_pattern_similarity": row.get("losing_pattern_similarity"),
                     "final_risk_label": row.get("final_risk_label"),
+                    "notify_rank": row.get("notify_rank"),
+                    "notify_rank_reason": row.get("notify_rank_reason"),
                     "actual_result": row.get("actual_result"),
                     "actual_r": row.get("actual_r_num"),
                 }
@@ -246,21 +315,47 @@ def main() -> int:
     parser.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
     parser.add_argument("--out-csv", type=Path, default=DEFAULT_OUT_CSV)
     parser.add_argument("--detail-csv", type=Path, default=DEFAULT_DETAIL_CSV)
+    parser.add_argument("--rank-summary-csv", type=Path, default=DEFAULT_RANK_SUMMARY_CSV)
+    parser.add_argument("--rank-detail-csv", type=Path, default=DEFAULT_RANK_DETAIL_CSV)
     parser.add_argument("--dedupe", choices=["source_row", "none"], default="source_row")
     args = parser.parse_args()
 
     ledger_csv = resolve_path(args.ledger_csv)
     out_csv = resolve_path(args.out_csv)
     detail_csv = resolve_path(args.detail_csv)
+    rank_summary_csv = resolve_path(args.rank_summary_csv)
+    rank_detail_csv = resolve_path(args.rank_detail_csv)
 
     raw = read_ledger(ledger_csv)
     df = dedupe_latest_by_source_row(raw) if args.dedupe == "source_row" else raw.copy()
     df = df.dropna(subset=["actual_r_num"]).copy()
     df = df.sort_values("source_row", kind="mergesort").reset_index(drop=True)
+    ranked_df = add_notify_rank(df)
 
     summary, detail = apply_rules(df)
+    rank_summary = summarize_notify_ranks(df)
+
+    rank_detail_cols = [
+        "source_row",
+        "signal_model",
+        "side",
+        "jst_entry_time",
+        "winning_pattern_match",
+        "losing_pattern_similarity",
+        "final_risk_label",
+        "notify_rank_order",
+        "notify_rank",
+        "notify_rank_reason",
+        "actual_result",
+        "actual_r_num",
+    ]
+    rank_detail_cols = [col for col in rank_detail_cols if col in ranked_df.columns]
+    rank_detail = ranked_df[rank_detail_cols].sort_values(["notify_rank_order", "source_row"], kind="mergesort")
+
     write_csv(out_csv, summary)
     write_csv(detail_csv, detail)
+    write_csv(rank_summary_csv, rank_summary)
+    write_csv(rank_detail_csv, rank_detail)
 
     all_source_rows = sorted(df["source_row"].astype(int).unique().tolist())
     missing_in_0_215 = [i for i in range(216) if i not in set(all_source_rows)]
@@ -272,6 +367,8 @@ def main() -> int:
     print("Missing source_rows in 0-215:", missing_in_0_215)
     print("Saved rule summary:", out_csv)
     print("Saved rule detail:", detail_csv)
+    print("Saved notify rank summary:", rank_summary_csv)
+    print("Saved notify rank detail:", rank_detail_csv)
 
     display_cols = [
         "rule_name",
@@ -288,6 +385,20 @@ def main() -> int:
         "excluded_total_r",
     ]
     print_table("AI REVIEW VIRTUAL FILTER RULE SUMMARY", summary[display_cols])
+
+    rank_display_cols = [
+        "notify_rank",
+        "count",
+        "wins",
+        "losses",
+        "win_rate",
+        "total_r",
+        "avg_r",
+        "pf",
+        "max_consecutive_losses",
+        "description",
+    ]
+    print_table("DISCORD NOTIFY RANK SUMMARY", rank_summary[rank_display_cols])
 
     return 0
 
