@@ -55,9 +55,33 @@ def load_env_file(path: Path = DEFAULT_ENV_FILE) -> None:
 
 def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
     cur = payload.get("current_signal_snapshot", {}) or {}
+    symbol_group = str(payload.get("symbol_group") or cur.get("symbol_group") or "")
+    strategy_label = str(cur.get("strategy_label") or "")
+
+    rule_profiles: dict[str, str] = {}
+    if symbol_group == "BTC":
+        rule_profiles = {
+            "BTC_RUNNER_RR2_RISK1": "BTCの低頻度RUNNER。通常候補。",
+            "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8": "BTCのM5追加ルール。検証成績は良いが高頻度なのでロット小さめ候補。",
+        }
+    elif symbol_group == "GOLD":
+        rule_profiles = {
+            "GOLD_ABC_V3": "GOLD本命ABC。danger regimeがtrueなら慎重確認。",
+            "GOLD_EXTRA_HIGH_RSI_STOCH": "GOLD EXTRA HIGH。補助候補。",
+            "GOLD_EXTRA_BB_BALANCE": "GOLD EXTRA STANDARD。補助候補。",
+        }
+
     regime_guard = payload.get("regime_guard", {}) or {}
+    guards: dict[str, Any] = {
+        "overlap_detected": payload.get("overlap_detected"),
+        "overlap_labels": payload.get("overlap_labels", []),
+        "confidence_hint": payload.get("confidence_hint"),
+    }
+    if symbol_group == "GOLD" or strategy_label.startswith("GOLD"):
+        guards["regime_guard"] = regime_guard
+
     return {
-        "symbol_group": payload.get("symbol_group"),
+        "symbol_group": symbol_group,
         "time": payload.get("time"),
         "source_tf": payload.get("source_tf") or cur.get("source_tf"),
         "signal": {
@@ -75,20 +99,11 @@ def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
         "price_context": {
             "close": cur.get("close"),
             "atr14": cur.get("atr14"),
+            "trade_plan": cur.get("trade_plan"),
         },
-        "guards": {
-            "regime_guard": regime_guard,
-            "overlap_detected": payload.get("overlap_detected"),
-            "overlap_labels": payload.get("overlap_labels", []),
-            "confidence_hint": payload.get("confidence_hint"),
-        },
-        "rule_profiles": {
-            "BTC_RUNNER_RR2_RISK1": "BTCの低頻度RUNNER。通常候補。",
-            "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8": "BTCのM5追加ルール。検証成績は良いが高頻度なのでロット小さめ候補。",
-            "GOLD_ABC_V3": "GOLD本命ABC。danger regimeがtrueなら慎重確認。",
-            "GOLD_EXTRA_HIGH_RSI_STOCH": "GOLD EXTRA HIGH。補助候補。",
-            "GOLD_EXTRA_BB_BALANCE": "GOLD EXTRA STANDARD。補助候補。",
-        },
+        "guards": guards,
+        "rule_profiles": rule_profiles,
+        "important_instruction": f"これは {symbol_group} のシグナルです。別銘柄のルールや警戒条件を理由に含めないでください。",
     }
 
 
@@ -134,15 +149,18 @@ def evaluate_signal_payload(
 
     model_name = model or os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     compact = compact_payload_for_ai(payload)
+    symbol_group = str(compact.get("symbol_group") or "")
     system_prompt = (
         "あなたはトレードシグナルのリスク確認係です。売買を断定せず、"
         "与えられたpayloadだけを根拠に、運用上の注意度をJSONで返します。"
         "評価は normal/cautious/avoid の3段階。"
+        "payloadに含まれない外部ニュース、別銘柄、別ルールの話を理由に入れてはいけません。"
         "BTC M5追加ルールは高頻度なので、問題がなくても通常〜慎重の範囲で保守的に扱います。"
-        "danger regimeや不明点がある場合は慎重または見送り候補にします。"
+        "GOLDのdanger regimeはGOLDシグナルのときだけ考慮してください。"
     )
     user_prompt = (
-        "次のトレードシグナルpayloadを評価してください。"
+        f"次の {symbol_group} トレードシグナルpayloadを評価してください。"
+        "別銘柄の注意点は含めないでください。"
         "出力は必ず指定JSON Schemaに従ってください。\n\n"
         + json.dumps(compact, ensure_ascii=False, indent=2, default=str)
     )
