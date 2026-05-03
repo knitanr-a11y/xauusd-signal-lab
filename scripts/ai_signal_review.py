@@ -72,6 +72,7 @@ def gold_rule_profiles() -> dict[str, Any]:
             "total_r": 28.1,
             "pf": 3.16,
             "max_consecutive_losses": 2,
+            "risk_note": "補助候補だが高PF。トレード数44件なので通常〜慎重で扱う。",
         },
         "GOLD_EXTRA_BB_BALANCE": {
             "description": "GOLD EXTRA STANDARD。BBバランス系の補助候補。",
@@ -132,7 +133,7 @@ def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
     }
     if symbol_group == "GOLD" or strategy_label.startswith("GOLD"):
         guards["regime_guard"] = regime_guard
-        guards["regime_guard_instruction"] = "GOLD ABC BUY danger regime は GOLD_ABC_V3 の BUY のときだけ重要。GOLD EXTRAやSELLでは対象外として扱う。"
+        guards["regime_guard_instruction"] = "GOLD ABC BUY danger regime は GOLD_ABC_V3 の BUY のときだけ重要。trueでない場合、またはGOLD EXTRA/SELLの場合は理由や注意に含めない。"
 
     return {
         "symbol_group": symbol_group,
@@ -157,6 +158,18 @@ def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "guards": guards,
         "rule_profiles": rule_profiles,
+        "allowed_evidence": [
+            "current_signal_snapshot",
+            "price_context.trade_plan",
+            "guards",
+            "rule_profiles",
+        ],
+        "forbidden_claims": [
+            "外部ニュースや現在の市場環境が不透明という一般論",
+            "payloadにない直近相場・ファンダメンタル",
+            "rule_profilesに実績がある戦略について履歴不足・検証不足と言うこと",
+            "GOLD EXTRAやGOLD SELLでGOLD ABC BUY danger regimeを理由にすること",
+        ],
         "important_instruction": (
             f"これは {symbol_group} のシグナルです。payload内のrule_profilesを既知の検証結果として扱い、"
             "根拠なく『履歴がない』『検証不足』とは言わないでください。別銘柄のルールや警戒条件を理由に含めないでください。"
@@ -192,6 +205,69 @@ def extract_output_text(response: dict[str, Any]) -> str:
     return "\n".join(parts).strip()
 
 
+def normalize_decision_jp(review: dict[str, Any]) -> None:
+    mapping = {"normal": "通常", "cautious": "慎重", "avoid": "見送り候補"}
+    decision = str(review.get("decision", "cautious"))
+    review["decision_jp"] = mapping.get(decision, review.get("decision_jp", "慎重"))
+
+
+def sanitize_lot_multiplier(review: dict[str, Any]) -> None:
+    decision = str(review.get("decision", "cautious"))
+    try:
+        lot = float(review.get("lot_multiplier_hint", 0.5))
+    except Exception:
+        lot = 0.5
+
+    if decision == "normal":
+        lot = min(max(lot, 0.75), 1.0)
+    elif decision == "cautious":
+        lot = min(max(lot, 0.5), 1.0)
+    elif decision == "avoid":
+        # 見送り候補は通知上、0.0〜0.25を許容する。
+        lot = min(max(lot, 0.0), 0.25)
+    else:
+        lot = min(max(lot, 0.5), 1.0)
+    review["lot_multiplier_hint"] = round(lot, 2)
+
+
+def sanitize_review_text(review: dict[str, Any]) -> None:
+    forbidden_fragments = [
+        "市場環境が不透明",
+        "現在の市場状況が不安定",
+        "履歴がない",
+        "履歴不足",
+        "検証不足",
+        "過去のトレード履歴が限られている",
+        "GOLD ABC BUY danger regimeは発動しておらず",
+        "GOLD_ABC_BUYの危険レジームに該当しない",
+    ]
+
+    for key in ["reasons_jp", "warnings_jp", "checklist_jp"]:
+        values = review.get(key)
+        if not isinstance(values, list):
+            review[key] = []
+            continue
+        cleaned = []
+        for item in values:
+            text = str(item)
+            if any(fragment in text for fragment in forbidden_fragments):
+                continue
+            cleaned.append(text)
+        review[key] = cleaned
+
+
+def sanitize_review(review: dict[str, Any]) -> dict[str, Any]:
+    out = dict(review)
+    normalize_decision_jp(out)
+    sanitize_lot_multiplier(out)
+    sanitize_review_text(out)
+    if not out.get("reasons_jp"):
+        out["reasons_jp"] = ["payload内の戦略実績と価格条件をもとにした評価です。"]
+    if not out.get("warnings_jp"):
+        out["warnings_jp"] = ["実約定価格・スプレッド・直近急変動は手動確認してください。"]
+    return out
+
+
 def evaluate_signal_payload(
     payload: dict[str, Any],
     *,
@@ -211,10 +287,11 @@ def evaluate_signal_payload(
         "あなたはトレードシグナルのリスク確認係です。売買を断定せず、"
         "与えられたpayloadだけを根拠に、運用上の注意度をJSONで返します。"
         "評価は normal/cautious/avoid の3段階。"
-        "payloadに含まれない外部ニュース、別銘柄、別ルールの話を理由に入れてはいけません。"
-        "rule_profiles は検証済みの戦略実績として扱い、根拠なく履歴不足と言わないでください。"
+        "payloadに含まれない外部ニュース、別銘柄、別ルール、市場環境の一般論を理由に入れてはいけません。"
+        "rule_profiles は検証済みの戦略実績として扱い、根拠なく履歴不足・検証不足と言わないでください。"
+        "lot_multiplier_hintはnormalなら0.75〜1.0、cautiousなら0.5〜1.0、avoidなら0.0〜0.25にしてください。"
         "BTC M5追加ルールは高頻度なので、問題がなくても通常〜慎重の範囲で保守的に扱います。"
-        "GOLDのdanger regimeはGOLD_ABC_V3 BUYのときだけ考慮してください。"
+        "GOLDのdanger regimeはGOLD_ABC_V3 BUYかつtrueのときだけ考慮してください。"
     )
     user_prompt = (
         f"次の {symbol_group} トレードシグナルpayloadを評価してください。"
@@ -270,7 +347,7 @@ def evaluate_signal_payload(
     review["model"] = model_name
     review["ok"] = True
     review["error"] = ""
-    return review
+    return sanitize_review(review)
 
 
 def apply_ai_review(payload: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
