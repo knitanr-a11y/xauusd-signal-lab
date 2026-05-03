@@ -28,7 +28,8 @@ knitanr-a11y/xauusd-signal-lab
 ```text
 MT5 / MQL5側:
 - ローソク足取得
-- 確定足をCSV出力
+- 確定足のみCSV出力
+- Pythonが読みやすいMQL5\Files配下へ保存
 
 Python側:
 - CSV読込
@@ -60,78 +61,188 @@ btcusdsharp_h1.csv
 btcusdsharp_h4.csv
 ```
 
-## BTCの最新状態
+## MQL5 CSV Export EA
 
-BTCは一度、スプレッド考慮不足でM5追加ルールを過大評価しかけた。
-そのため、BTCは必ずCSVの `spread` 列を考慮して扱う。
-
-詳しくは必ず以下を読む。
+現在のEA：
 
 ```text
-docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
+mql5/Experts/ExportOhlcToCsv.mq5
 ```
 
-### BTC採用候補
+重要仕様：
 
 ```text
-1. BTC_RUNNER_RR2_RISK1
-   - スプレッド込みでも採用候補維持
-
-2. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
-   - 無条件通知は禁止
-   - CSV最頻スプレッド + 値幅フィルタ通過時のみ通知・採用候補
+#property version "1.20"
+InpIncludeCurrentBar = false
+InpAlignExportToMinute = true
+InpExportSecond = 0
+InpTimerSeconds = 1
 ```
 
-BTC M5の必須値幅フィルタ：
+意味：
 
 ```text
-net_tp_after_spread_pips >= 5.0
-spread_to_sl_ratio < 0.50
-effective_rr_after_spread >= 1.0
+- 未確定足はCSVへ出さない
+- CopyRates start_pos=1 で確定足だけ取得する
+- 毎分00秒にCSV更新を寄せる
+- Python側は毎分01秒にCSVを読む
 ```
 
-現在のBTC本番通知候補スクリプト：
+EAは追記方式ではない。
+
+```text
+初回:
+- 指定本数ぶんCopyRatesしてCSVを丸ごと作成
+
+次回以降:
+- 最終確定足時刻が同じなら InpSkipUnchangedFiles=true によりスキップ
+- 新しい確定足があれば、指定本数ぶんCSVを丸ごと再作成
+```
+
+MQL5側の出力本数：
+
+```text
+M5: 30000
+M15: 30000
+H1: 20000
+H4: 10000
+```
+
+## bar-offset の重要仕様
+
+MQL5 EA が確定足だけをCSVへ出すため、Python側は最新CSV行をそのまま使う。
+
+```text
+--bar-offset 0
+```
+
+`--bar-offset 1` は使わない。
+`--bar-offset 1` にすると、M5なら5分前、M15なら15分前の足を見てしまう。
+
+## 現在の本番ループ
+
+本番ループ用bat：
+
+```text
+scripts/run_live_portfolio_notifier_loop.bat
+```
+
+現在の動き：
+
+```text
+Timing: every minute at xx:01
+Bar offset: 0 (MQL5 CSV confirmed bars only)
+```
+
+起動コマンド：
+
+```bat
+scripts\run_live_portfolio_notifier_loop.bat
+```
+
+停止：
+
+```text
+Ctrl + C
+Y
+```
+
+理想タイミング：
+
+```text
+毎分00秒: MQL5 EA v1.20 が確定足CSVを書き出し
+毎分01秒: Python bat がCSVを読み、GOLD/BTCを判定して必要ならDiscord通知
+```
+
+## 統合ライブ通知スクリプト
+
+統合スクリプト：
+
+```text
+scripts/run_live_portfolio_notifier_from_csv.py
+```
+
+役割：
+
+```text
+- GOLD通知スクリプトを呼ぶ
+- BTC spread_filtered通知スクリプトを呼ぶ
+- 1回の実行でGOLD/BTC両方を確認
+- それぞれのledgerで再通知防止
+- Discordへ必要な通知だけ送る
+```
+
+現在batから呼ばれる主な引数：
+
+```text
+--gold-scan-recent-bars 60
+--btc-scan-recent-m5-bars 60
+--btc-scan-recent-m15-bars 20
+--bar-offset 0
+--btc-spread-mode csv_mode
+--btc-spread-source m5
+--btc-point-size 0.01
+--btc-pip-size 10
+--enable-ai-review
+--send-discord
+```
+
+## 直近の本番ループ確認結果
+
+2026-05-04 00:16〜00:17 JST付近のログで確認済み。
+
+確認済み：
+
+```text
+Timing: every minute at xx:01
+Run started: 00:16:01.05
+Run finished: 00:16:05.45
+Run started: 00:17:01.05
+Run finished: 00:17:05.35
+GOLD: OK returncode=0
+BTC: OK returncode=0
+```
+
+つまり、統合処理全体は約4秒台まで短縮済み。
+
+## 軽量化の最新状態
+
+MQL5の元CSVは大きいまま保持する。
+Python側の通知スクリプト内部だけで、`data/results/live_payloads/_runtime_tail/` に一時CSVを作り、直近本数だけでインジケーター計算する。
+
+GOLD軽量化：
+
+```text
+scripts/run_live_gold_notifier_from_csv.py
+M15: 3000 / 30000
+H1: 1500 / 20000
+```
+
+BTC軽量化：
 
 ```text
 scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
+M5: 3000 / 30000
+M15: 1500 / 30000
+H1: 1000 / 20000
+H4: 500 / 10000
 ```
 
-旧BTC通知スクリプトは本番では使わない。
+ログ確認例：
 
 ```text
-scripts/run_live_btc_mtf_notifier_from_csv.py
+GOLD:
+Rows: 3000
+Runtime context rows: M15 3000/30000 H1 1500/20000
+
+BTC:
+Rows: M5 3000 M15 1500
+Runtime context rows: M5 3000/30000 M15 1500/30000 H1 1000/20000 H4 500/10000
 ```
-
-## BTCで完了済みの主な作業
-
-```text
-- M5/M15/H1/H4 CSV読込
-- BTC RUNNER検出
-- BTC M5追加ルール検出
-- CSV spread列の最頻値採用
-- 実質TP幅 / spread-to-SL / 実質RR フィルタ
-- 小幅シグナルの通知除外
-- Discord通知文整備
-- AI評価接続
-- ledger再通知防止
-- スプレッド込み再検証
-- 値幅フィルタ後の採用候補集計
-```
-
-確認済みの小幅シグナル例：
-
-```text
-2026-05-03 14:05 BTC BUY
-net_tp_after_spread_pips = 2.99
-spread_to_sl_ratio = 85.9%
-effective_rr_after_spread = 0.61
-```
-
-これは検出されても通知しない。
 
 ## GOLDの最新状態
 
-GOLD通知スクリプトを追加済み。
+GOLD通知スクリプト：
 
 ```text
 scripts/run_live_gold_notifier_from_csv.py
@@ -150,6 +261,7 @@ scripts/run_live_gold_notifier_from_csv.py
 - Discord通知文生成
 - AI評価接続
 - ledger再通知防止
+- runtime tail CSVによる軽量化
 ```
 
 GOLD本番採用ラベル：
@@ -191,18 +303,9 @@ GOLD ABC BUYでdanger trueの場合だけ警戒表示にする。
 扱い: 警戒通知のみ / AI評価必須 / ロット低下候補
 ```
 
-## GOLD AI評価の最新修正
+## GOLD AI評価の最新状態
 
-GOLDのAI評価は、OpenAIの自由文が不安定だった。
-以下の問題が出た。
-
-```text
-- 54トレードなど存在しない数字が出る
-- GOLD ABC BUY danger regime falseを理由に混ぜる
-- 履歴不足・市場環境不透明などpayload外の曖昧表現が出る
-```
-
-そのため、`scripts/ai_signal_review.py` でGOLDは戦略別の定型評価で上書きするよう修正済み。
+GOLDのAI評価は、OpenAIの自由文が不安定だったため、`scripts/ai_signal_review.py` でGOLDは戦略別の定型評価で上書きするよう修正済み。
 
 GOLD AI評価に使う固定実績：
 
@@ -217,70 +320,61 @@ GOLD EXTRA STANDARD:
 17件 / 勝率52.94% / +5.5R / PF1.69
 ```
 
-次のチャットでは、この修正後にもう一度GOLD dry-runを実行して確認する。
+## BTCの最新状態
 
-## 直近で最後に行った修正
+BTCは一度、スプレッド考慮不足でM5追加ルールを過大評価しかけた。
+そのため、BTCは必ずCSVの `spread` 列を考慮して扱う。
 
-最後に行った修正：
-
-```text
-scripts/ai_signal_review.py
-```
-
-コミット：
+詳しくは必ず以下を読む。
 
 ```text
-27ba51d3c59965aff6724f154ef03d02778c4679
+docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 ```
 
-目的：
+BTC本番通知スクリプト：
 
 ```text
-GOLDのAI評価を戦略別の定型レビューで安定化する
+scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
 ```
 
-次のチャットでは、まずGitHub Desktopで `Fetch origin` → `Pull origin` して、この修正を取り込む。
-
-## 次にやること
-
-### 1. GOLD dry-runを再確認
-
-まず以下を実行する。
-
-```bat
-python scripts/run_live_gold_notifier_from_csv.py --m15-csv "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\goldsharp_m15.csv" --h1-csv "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\goldsharp_h1.csv" --history-csv data/results/gold_btc_final_portfolio_trades.csv --scan-recent-bars 3000 --enable-ai-review --dry-run --ledger-csv data/results/live_payloads/test_gold_notifier_ledger_5.csv
-```
-
-確認ポイント：
+旧BTC通知スクリプトは本番では使わない。
 
 ```text
-- Rows: 30000 付近になること
-- GOLD_COUNTER_BUY_ONLY がRejected excluded signalsに出ること
-- 通知候補には採用ラベルだけ出ること
-- regime guardがGOLD EXTRA/SELLでは対象外になること
-- AI評価に54件など誤った数字が出ないこと
-- AI評価にdanger regime falseを理由として出さないこと
-- AI評価が戦略別実績ベースになること
+scripts/run_live_btc_mtf_notifier_from_csv.py
 ```
 
-### 2. GOLD本番運用用のscan範囲を60にする
-
-デバッグでは `--scan-recent-bars 3000` を使って過去シグナルを確認した。
-本番では過去シグナルが大量に出るため、まずは以下を基本にする。
+### BTC採用候補
 
 ```text
---scan-recent-bars 60
+1. BTC_RUNNER_RR2_RISK1
+   - スプレッド込みでも採用候補維持
+
+2. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
+   - 無条件通知は禁止
+   - CSV最頻スプレッド + 値幅フィルタ通過時のみ通知・採用候補
 ```
 
-M15の60本なので約15時間分。
+BTC M5の必須値幅フィルタ：
 
-### 3. GOLD実送信テスト
-
-dry-runが問題なければ、GOLDをDiscordへ実送信する。
-
-```bat
-python scripts/run_live_gold_notifier_from_csv.py --m15-csv "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\goldsharp_m15.csv" --h1-csv "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\goldsharp_h1.csv" --history-csv data/results/gold_btc_final_portfolio_trades.csv --scan-recent-bars 60 --enable-ai-review --send-discord
+```text
+net_tp_after_spread_pips >= 5.0
+spread_to_sl_ratio < 0.50
+effective_rr_after_spread >= 1.0
 ```
+
+確認済みの小幅シグナル例：
+
+```text
+2026-05-03 14:05 BTC BUY
+net_tp_after_spread_pips = 2.99
+spread_to_sl_ratio = 85.9%
+effective_rr_after_spread = 0.61
+```
+
+これは検出されても通知しない。
+直近ログでもこのシグナルは検出され、値幅フィルタで正しく除外されている。
+
+## Discord / OpenAI env
 
 `.env` には以下が必要。
 
@@ -290,24 +384,50 @@ OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-4o-mini
 ```
 
-### 4. GOLD/BTC統合ライブ通知へ進む
+`--enable-ai-review` を付けているため、OpenAI APIキーが必要。
 
-GOLDとBTCの個別通知が問題なければ、次は統合スクリプトを作る。
-
-候補：
+## 直近の重要コミット
 
 ```text
-scripts/run_live_portfolio_notifier_from_csv.py
+b79abb9f4cc68e8d1c40c5ce9b495cda3b6d69c6
+- mql5/Experts/ExportOhlcToCsv.mq5 を復元
+
+4724cd279afe80b58ca997043f8bb8b1734fb22c
+- MQL5 CSV Export EAを毎分00秒寄せに変更（v1.20）
+
+bbf407fea142c54f96c1010ce8eb6a54ff8f80e2
+- Python本番batを毎分01秒起動に変更
+
+2653f25a9ce37e1e6d6fcf2728fbca4e20b52335
+- BTC live通知のruntime tail軽量化
+
+82c066ce0ed59f88a3cf0522ae8082997df67088
+- GOLD live通知のruntime tail軽量化
 ```
 
-役割：
+## 次にやること
+
+次のチャットでは、まず運用ログ確認から入る。
 
 ```text
-- GOLD通知スクリプトを呼ぶ/同等処理を実行
-- BTC spread_filtered通知スクリプトを呼ぶ/同等処理を実行
-- 1回の実行でGOLD/BTC両方を確認
-- それぞれのledgerで再通知防止
-- Discordへ必要な通知だけ送る
+1. docs/NEXT_CHAT_HANDOFF.md を読む
+2. docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読む
+3. GitHub Desktopで Fetch origin → Pull origin
+4. MT5側EAが ExportOhlcToCsv.mq5 v1.20 になっている前提で確認
+5. scripts\run_live_portfolio_notifier_loop.bat を起動
+6. Run started が毎分 xx:01 になっていることを確認
+7. GOLD/BTCとも Runtime context rows が出ることを確認
+8. GOLD/BTCとも returncode=0 を確認
+```
+
+今後の改善候補：
+
+```text
+- FutureWarningの解消
+- GOLD/BTC処理順序の再検討（必要ならBTC先行）
+- CSV読み込み中衝突に備えたリトライ処理
+- Discord通知が実際に出たときのledger確認
+- AI評価APIの失敗時フォールバック
 ```
 
 ## 次のチャットで絶対に避けること
@@ -318,19 +438,7 @@ scripts/run_live_portfolio_notifier_from_csv.py
 - BTC本番通知に旧スクリプトを使う
 - GOLD_COUNTER_BUY_ONLYを本番通知に戻す
 - GOLD EXTRA/SELLでdanger regimeを理由にする
+- --bar-offset 1 に戻す
+- MQL5 EAが未確定足を出している前提で話を進める
 - AI自由文を無条件に信用する
-```
-
-## 現在のおすすめ次ステップ
-
-次のチャットでは、まず以下の順番で進める。
-
-```text
-1. docs/NEXT_CHAT_HANDOFF.md を読む
-2. docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読む
-3. GitHub Desktopで Fetch origin → Pull origin
-4. GOLD dry-run ledger_5 を実行
-5. GOLD AI評価が定型レビューになったか確認
-6. 問題なければ GOLD実送信テスト
-7. その後、GOLD/BTC統合ライブ通知スクリプト作成
 ```
