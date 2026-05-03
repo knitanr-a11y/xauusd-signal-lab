@@ -3,7 +3,7 @@
 //|                         MT5 OHLC CSV Export EA for Python detector |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.10"
+#property version   "1.20"
 #property description "Export confirmed OHLC candles for GOLD#/BTCUSD# to CSV for Python detector."
 
 // -------------------------------------------------------------------
@@ -13,6 +13,7 @@
 // - シグナル判定、AI評価payload作成、Discord通知はPython側で行う。
 // - 確定足のみCSVへ出力する。
 // - 既存のGOLD/BTC M15/H1に加えて、BTC追加検証用にM5/H4も出力する。
+// - デフォルトでは毎分00秒にCSV更新を寄せ、Python側を毎分01秒に起動しやすくする。
 //
 // 出力先
 // -------------------------------------------------------------------
@@ -57,7 +58,9 @@ input bool   InpBtcH4Enabled  = true;
 // -------------------------------------------------------------------
 // Runtime
 // -------------------------------------------------------------------
-input int    InpTimerSeconds = 30;
+input bool   InpAlignExportToMinute = true; // trueなら毎分 InpExportSecond 秒だけExportAllする。
+input int    InpExportSecond = 0;           // Python側を毎分01秒で読むなら0推奨。
+input int    InpTimerSeconds = 1;           // Align=trueでは1秒推奨。Align=falseでは従来の周期実行。
 input int    InpBarsToExportM5  = 30000;
 input int    InpBarsToExportM15 = 30000;
 input int    InpBarsToExportH1  = 20000;
@@ -94,6 +97,7 @@ struct ExportJob
 
 string g_last_bar_key[];
 datetime g_last_bar_time[];
+int g_last_aligned_minute_key = -1;
 
 // -------------------------------------------------------------------
 // Utility
@@ -266,6 +270,25 @@ void RememberLastBar(const string key, const datetime last_bar_time)
       return;
    }
    g_last_bar_time[idx] = last_bar_time;
+}
+
+bool ShouldRunAlignedExport()
+{
+   if(!InpAlignExportToMinute)
+      return true;
+
+   MqlDateTime now;
+   TimeToStruct(TimeLocal(), now);
+   int target_second = MathMax(0, MathMin(59, InpExportSecond));
+   if(now.sec != target_second)
+      return false;
+
+   int minute_key = (int)(TimeLocal() / 60);
+   if(minute_key == g_last_aligned_minute_key)
+      return false;
+
+   g_last_aligned_minute_key = minute_key;
+   return true;
 }
 
 // -------------------------------------------------------------------
@@ -497,11 +520,20 @@ int OnInit()
       return INIT_PARAMETERS_INCORRECT;
    }
 
-   DebugLog("Initializing EA v1.10");
+   if(InpExportSecond < 0 || InpExportSecond > 59)
+   {
+      Print("[ExportOhlcToCsv] InpExportSecond must be between 0 and 59.");
+      return INIT_PARAMETERS_INCORRECT;
+   }
+
+   DebugLog("Initializing EA v1.20");
    DebugLog("GoldSymbol=" + InpGoldSymbol + ", BtcSymbol=" + InpBtcSymbol);
    DebugLog("OutputRoot=" + InpOutputRoot + ", UseCommonFolder=" + (InpUseCommonFolder ? "true" : "false"));
    DebugLog("IncludeCurrentBar=" + (InpIncludeCurrentBar ? "true" : "false"));
    DebugLog("SkipUnchangedFiles=" + (InpSkipUnchangedFiles ? "true" : "false"));
+   DebugLog("AlignExportToMinute=" + (InpAlignExportToMinute ? "true" : "false")
+            + ", ExportSecond=" + IntegerToString(InpExportSecond)
+            + ", TimerSeconds=" + IntegerToString(InpTimerSeconds));
 
    EnsureFolderTree();
    ExportAll();
@@ -518,7 +550,8 @@ void OnDeinit(const int reason)
 
 void OnTimer()
 {
-   ExportAll();
+   if(ShouldRunAlignedExport())
+      ExportAll();
 }
 
 void OnTick()
