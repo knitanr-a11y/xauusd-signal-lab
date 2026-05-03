@@ -1,4 +1,4 @@
-# IMPORTANT: BTCUSD# spread revalidation warning
+# IMPORTANT: BTCUSD# spread-aware adoption policy
 
 このドキュメントは、新しいチャットへ移行したときに最初に必ず読むこと。
 
@@ -6,9 +6,176 @@
 
 BTCUSD# の検証・通知・AI評価では、必ず実運用スプレッドを考慮する。
 
-これまで追加検討していた `BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8` は、スプレッド考慮が不十分な状態で候補化していたため、現時点では **未採用・再検証対象** とする。
+BTC系ルールは、ATRベースの理論TP/SLだけで採用判断してはいけない。必ず以下を使う。
 
-`BTC_RUNNER_RR2_RISK1` も含め、BTC系ルールはスプレッド込みで再集計するまで最終採用扱いにしない。
+```text
+採用スプレッド価格 = mode(spread列) × point_size
+```
+
+現時点のBTC採用候補は以下。
+
+```text
+1. BTC_RUNNER_RR2_RISK1
+   - 採用候補維持
+   - スプレッド込みでも成立
+
+2. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
+   - 無条件採用は禁止
+   - CSV最頻スプレッド + 値幅フィルタ通過時のみ通知・採用候補
+```
+
+## 最新の再検証結果
+
+再検証で使用したスプレッドは、M5 CSVの `spread` 列の最頻値。
+
+```text
+mode_spread_points: 2250
+mode_spread_price: 22.5
+sample_count: 30000
+pip_size: 10
+```
+
+つまり、今回のBTCUSD# CSVでは以下として扱う。
+
+```text
+採用スプレッド: 22.5ドル
+pip換算: 約2.25 pips
+```
+
+### BTC M5 REENTRY FILTERED
+
+対象：
+
+```text
+BTC_SCALP_H1_M5_REENTRY_FILTERED
+RR 2.0
+risk_atr 0.8
+max_bars 72/144/288
+```
+
+スプレッド・値幅フィルタ後：
+
+```text
+before: 120件
+after: 109件
+除外: 11件
+
+勝率: 64.22%
+total: +101.0R
+平均: +0.927R
+PF: 3.59
+最大DD: 4.0R
+最大連敗: 4
+月平均: 21.8件
+```
+
+値幅面：
+
+```text
+平均 実質TP幅: 約20.76 pips
+平均 実質SL負担: 約13.76 pips
+平均 spread/SL: 23.33%
+平均 実質RR: 1.45
+adoption_candidate: True
+```
+
+結論：
+
+```text
+BTC M5追加ルールは、低値幅シグナルを除外する前提なら採用候補に戻す。
+ただし、値幅フィルタを通過しないシグナルは通知しない。
+```
+
+### BTC RUNNER
+
+対象：
+
+```text
+BTC_RUNNER_RR2_RISK1_REVALIDATED
+RR 2.0
+risk_atr 1.0
+```
+
+スプレッド込み結果：
+
+```text
+77件
+勝率: 61.04%
+total: +64.0R
+PF: 3.13
+最大DD: 4.0R
+最大連敗: 4
+月平均: 6.42件
+平均 実質TP幅: 45.18 pips
+平均 実質SL負担: 25.97 pips
+平均 spread/SL: 12.54%
+平均 実質RR: 1.68
+adoption_candidate: True
+```
+
+結論：
+
+```text
+BTC RUNNERはスプレッド込みでも採用候補維持。
+```
+
+## BTC M5の必須値幅フィルタ
+
+BTC M5追加ルールは、以下を通過した場合だけ通知・採用候補にする。
+
+```text
+net_tp_after_spread_pips >= 5.0
+spread_to_sl_ratio < 0.50
+effective_rr_after_spread >= 1.0
+```
+
+直近の小幅シグナル例：
+
+```text
+2026-05-03 14:05 BUY
+net_tp_after_spread_pips = 2.99
+spread_to_sl_ratio = 85.9%
+effective_rr_after_spread = 0.61
+```
+
+このようなシグナルは、検出されても通知しない。
+
+```text
+シグナル検出: True
+通知: False
+理由:
+- 実質TP幅が小さすぎる
+- spread/SLが大きすぎる
+- 実質RRが悪い
+```
+
+## 本番BTC通知スクリプト
+
+BTCの本番通知は、以下を使う。
+
+```text
+scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
+```
+
+旧スクリプトは参考・開発用扱い。
+
+```text
+scripts/run_live_btc_mtf_notifier_from_csv.py
+```
+
+旧スクリプトをBTC本番通知に使わないこと。
+
+本番BTC通知は以下を必ず行う。
+
+```text
+1. CSV spread列の最頻値を取得
+2. spread価格 = mode(spread) × point_size
+3. 実質TP幅を計算
+4. spread/SL比率を計算
+5. スプレッド控除後の実質RRを計算
+6. 値幅条件を満たさないBTCシグナルは通知しない
+7. AI評価にもスプレッド込みtrade_planを渡す
+```
 
 ## スプレッド採用ルール
 
@@ -41,14 +208,14 @@ BTCUSD# は実運用スプレッドが大きい。
 ユーザーの運用前提では、BTCの想定スプレッドはおおむね以下の認識。
 
 ```text
-BTCUSD# spread = 約20ドル
+BTCUSD# spread = 約20ドル前後
 BTCUSD# pip size = 約10ドル
 20ドル = 約2 pips
 ```
 
 ただし、実際にはCSVの `spread` 列に履歴値があるため、再検証ではCSVの最頻値を優先する。
 
-そのため、ATRベースで出した理論上のTP/SLだけを見ると成績を過大評価する。
+ATRベースで出した理論上のTP/SLだけを見ると成績を過大評価する。
 
 例：
 
@@ -73,8 +240,7 @@ spread / SL = 20.00 / 26.19 = 約76.4%
 spread / TP = 20.00 / 52.38 = 約38.2%
 ```
 
-この状態では、理論上RR2.0でも実質RRが大きく悪化する。
-そのため、バックテスト上のPFもスプレッド込みで再計算すると大きく低下する可能性が高い。
+このような低値幅シグナルは、理論上RR2.0でも実質RRが大きく悪化するため、通知しない。
 
 ## 重要な反省点
 
@@ -89,8 +255,7 @@ spread / TP = 20.00 / 52.38 = 約38.2%
 
 しかし、本来は通知より先に、検証・探索・採用判断の段階でBTCスプレッドを考慮すべきだった。
 
-特に `BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8` は、M5高頻度ルールであり、値幅が小さいためスプレッド影響が非常に大きい。
-このルールはスプレッド込み再検証前に採用扱いしてはいけない。
+特に `BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8` は、M5高頻度ルールであり、値幅が小さいシグナルが混ざるためスプレッド影響が非常に大きい。
 
 ## 新チャットで必ず守ること
 
@@ -105,10 +270,10 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 そして、以下を前提に作業を再開すること。
 
 ```text
-1. BTC系ルールはスプレッド込みで再検証する
+1. BTC系ルールは必ずスプレッド込みで扱う
 2. BTCスプレッドはCSV spread列の最頻値を優先する
-3. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8 は未採用に戻す
-4. BTC RUNNER もスプレッド込み成績を確認する
+3. BTC M5追加ルールは値幅フィルタ通過時のみ通知・採用候補
+4. BTC RUNNERはスプレッド込み成績を確認済みの採用候補
 5. 通知・AI評価だけでなく、探索スクリプトとバックテスト自体にスプレッドコストを反映する
 6. PF、total R、勝率、最大DD、実質RRを再計算する
 7. スプレッド控除後も成立するBTCルールだけを採用候補にする
@@ -191,17 +356,13 @@ AI評価は、BTCでは理論RRではなく、スプレッド控除後の実質R
 
 ## 次にやること
 
-次の作業はAI評価拡張ではなく、BTCルールの再検証からやり直す。
-
-優先順：
+次の作業候補：
 
 ```text
-1. CSV spread列の最頻値を確認
-2. BTC_SCALP_H1_M5_REENTRY_FILTERED をCSV最頻スプレッド込みで再バックテスト
-3. BTC_RUNNER_RR2_RISK1 をCSV最頻スプレッド込みで再バックテスト
-4. net PF / net total R / effective RR を確認
-5. PFが大きく落ちる場合、BTC M5ルールは除外またはSL/TP幅を広げる方向で再探索
-6. 採用ポートフォリオもBTCスプレッド込みで再集計
+1. BTCの本番通知コマンドを spread_filtered 版に統一する
+2. GOLD通知側へ進む
+3. GOLD/BTC統合ライブ通知スクリプトを作る
+4. 最後にGOLD/BTC統合ポートフォリオを、BTC値幅フィルタ込みで再集計する
 ```
 
 ## 絶対に避けること
@@ -212,4 +373,5 @@ AI評価は、BTCでは理論RRではなく、スプレッド控除後の実質R
 - CSVにspread列があるのに固定20ドルだけで検証する
 - 通知側だけスプレッド表示して、バックテスト側で反映しない
 - AI評価に理論RRだけ渡して実質RRを渡さない
+- BTC本番通知に旧スクリプトを使う
 ```
