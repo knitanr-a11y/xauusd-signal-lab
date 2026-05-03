@@ -39,6 +39,14 @@ DEFAULT_MIN_NET_TP_PIPS = 5.0
 DEFAULT_MAX_SPREAD_TO_SL_RATIO = 0.50
 DEFAULT_MIN_EFFECTIVE_RR = 1.0
 
+# Live notifier only needs enough warm-up bars for indicators + recent scan.
+# The source CSV can remain large for research/backtests; these defaults only trim
+# temporary runtime inputs before the expensive indicator calculations.
+DEFAULT_M5_CONTEXT_BARS = 3000
+DEFAULT_M15_CONTEXT_BARS = 1500
+DEFAULT_H1_CONTEXT_BARS = 1000
+DEFAULT_H4_CONTEXT_BARS = 500
+
 
 def safe_float(value: Any) -> float | None:
     try:
@@ -48,6 +56,31 @@ def safe_float(value: Any) -> float | None:
     if pd.isna(number):
         return None
     return number
+
+
+def make_runtime_tail_csv(source_csv: Path, out_dir: Path, *, max_bars: int, label: str) -> tuple[Path, int, int]:
+    """Create a small runtime CSV for live indicator calculation.
+
+    Reading 30k rows is cheap; recalculating RCI/indicators over 30k rows for every
+    loop is not. This keeps the original MQL5 CSV untouched and writes a temporary
+    tail file under live_payloads/_runtime_tail/.
+
+    max_bars <= 0 disables trimming and returns the original path.
+    """
+    if max_bars <= 0:
+        df = pd.read_csv(source_csv)
+        return source_csv, len(df), len(df)
+
+    df = pd.read_csv(source_csv)
+    original_rows = len(df)
+    if original_rows <= max_bars:
+        return source_csv, original_rows, original_rows
+
+    runtime_dir = out_dir / "_runtime_tail"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    runtime_csv = runtime_dir / f"{source_csv.stem}_{label}_tail_{max_bars}.csv"
+    df.tail(max_bars).to_csv(runtime_csv, index=False)
+    return runtime_csv, original_rows, max_bars
 
 
 def resolve_btc_spread_price(
@@ -189,6 +222,10 @@ def main() -> int:
     parser.add_argument("--min-net-tp-pips", type=float, default=DEFAULT_MIN_NET_TP_PIPS)
     parser.add_argument("--max-spread-to-sl-ratio", type=float, default=DEFAULT_MAX_SPREAD_TO_SL_RATIO)
     parser.add_argument("--min-effective-rr", type=float, default=DEFAULT_MIN_EFFECTIVE_RR)
+    parser.add_argument("--m5-context-bars", type=int, default=DEFAULT_M5_CONTEXT_BARS)
+    parser.add_argument("--m15-context-bars", type=int, default=DEFAULT_M15_CONTEXT_BARS)
+    parser.add_argument("--h1-context-bars", type=int, default=DEFAULT_H1_CONTEXT_BARS)
+    parser.add_argument("--h4-context-bars", type=int, default=DEFAULT_H4_CONTEXT_BARS)
     parser.add_argument("--enable-ai-review", action="store_true")
     parser.add_argument("--ai-model", default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -221,7 +258,32 @@ def main() -> int:
         include_zero_spread_in_mode=args.include_zero_spread_in_mode,
     )
 
-    m5_ctx, m15_runner_df = load_contexts(m5_csv, m15_csv, h1_csv, h4_csv)
+    m5_runtime_csv, m5_original_rows, m5_runtime_rows = make_runtime_tail_csv(
+        m5_csv,
+        out_dir,
+        max_bars=args.m5_context_bars,
+        label="m5",
+    )
+    m15_runtime_csv, m15_original_rows, m15_runtime_rows = make_runtime_tail_csv(
+        m15_csv,
+        out_dir,
+        max_bars=args.m15_context_bars,
+        label="m15",
+    )
+    h1_runtime_csv, h1_original_rows, h1_runtime_rows = make_runtime_tail_csv(
+        h1_csv,
+        out_dir,
+        max_bars=args.h1_context_bars,
+        label="h1",
+    )
+    h4_runtime_csv, h4_original_rows, h4_runtime_rows = make_runtime_tail_csv(
+        h4_csv,
+        out_dir,
+        max_bars=args.h4_context_bars,
+        label="h4",
+    )
+
+    m5_ctx, m15_runner_df = load_contexts(m5_runtime_csv, m15_runtime_csv, h1_runtime_csv, h4_runtime_csv)
     notified_keys = load_notified_keys(ledger_csv)
     raw_payloads = collect_unnotified_payloads(
         m5_ctx=m5_ctx,
@@ -267,6 +329,13 @@ def main() -> int:
     print("Ledger CSV:", ledger_csv)
     print("Env file:", env_file, "exists=" + str(env_file.exists()))
     print("Rows:", "M5", len(m5_ctx), "M15", len(m15_runner_df))
+    print(
+        "Runtime context rows:",
+        f"M5 {m5_runtime_rows}/{m5_original_rows}",
+        f"M15 {m15_runtime_rows}/{m15_original_rows}",
+        f"H1 {h1_runtime_rows}/{h1_original_rows}",
+        f"H4 {h4_runtime_rows}/{h4_original_rows}",
+    )
     print("Spread mode:", effective_spread_mode)
     print("Spread source:", args.spread_source)
     print("Spread info:", spread_info)
