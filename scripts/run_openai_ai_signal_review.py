@@ -14,6 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_PAYLOAD_JSON = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_signal_review_payload_row_0.json"
 DEFAULT_OUT_DIR = PROJECT_ROOT / "data" / "results" / "ai_reviews"
+DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "ai_reviews" / "ai_review_ledger.csv"
 DEFAULT_MODEL = "gpt-5-mini"
 
 REQUIRED_RESPONSE_KEYS = [
@@ -29,6 +30,10 @@ REQUIRED_RESPONSE_KEYS = [
 ALLOWED_WIN_MATCH = {"high", "medium", "low"}
 ALLOWED_LOSS_SIM = {"high", "medium", "low"}
 ALLOWED_RISK_LABEL = {"normal", "caution", "strong_caution", "skip_candidate"}
+
+
+def resolve_path(path: Path) -> Path:
+    return path if path.is_absolute() else PROJECT_ROOT / path
 
 
 def load_dotenv_if_exists(path: Path) -> None:
@@ -197,7 +202,7 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
 
-def run_save_ledger(payload_json: Path, ai_response_json: Path) -> None:
+def run_save_ledger(payload_json: Path, ai_response_json: Path, ledger_csv: Path) -> None:
     command = [
         sys.executable,
         str(PROJECT_ROOT / "scripts" / "save_ai_review_record.py"),
@@ -205,6 +210,8 @@ def run_save_ledger(payload_json: Path, ai_response_json: Path) -> None:
         str(payload_json),
         "--ai-response-json",
         str(ai_response_json),
+        "--ledger-csv",
+        str(ledger_csv),
         "--notes",
         "openai_api_shadow_review",
     ]
@@ -215,16 +222,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Call OpenAI API for one AI signal review payload and save the response.")
     parser.add_argument("--payload-json", type=Path, default=DEFAULT_PAYLOAD_JSON)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL)
     parser.add_argument("--max-output-tokens", type=int, default=3000)
-    parser.add_argument("--save-ledger", action="store_true", help="Append the AI response to ai_review_ledger.csv after validation.")
+    parser.add_argument("--save-ledger", action="store_true", help="Append the AI response to the selected ledger CSV after validation.")
     parser.add_argument("--dry-run", action="store_true", help="Validate payload and print output paths without calling OpenAI.")
     args = parser.parse_args()
 
     load_dotenv_if_exists(PROJECT_ROOT / ".env")
 
-    payload_json = args.payload_json if args.payload_json.is_absolute() else PROJECT_ROOT / args.payload_json
-    out_dir = args.out_dir if args.out_dir.is_absolute() else PROJECT_ROOT / args.out_dir
+    payload_json = resolve_path(args.payload_json)
+    out_dir = resolve_path(args.out_dir)
+    ledger_csv = resolve_path(args.ledger_csv)
     payload = load_json(payload_json)
 
     source_row = payload.get("metadata", {}).get("current_case_source_row", "unknown")
@@ -239,6 +248,8 @@ def main() -> int:
     print("Output JSON:", out_response)
     print("Output raw:", out_raw)
     print("Output debug:", out_debug)
+    if args.save_ledger:
+        print("Ledger CSV:", ledger_csv)
 
     if args.dry_run:
         print("Dry run only. No OpenAI API call was made.")
@@ -261,7 +272,7 @@ def main() -> int:
     print("AI labels:", parsed["winning_pattern_match"], parsed["losing_pattern_similarity"], parsed["final_risk_label"])
 
     if args.save_ledger:
-        run_save_ledger(payload_json, out_response)
+        run_save_ledger(payload_json, out_response, ledger_csv)
 
     return 0
 
