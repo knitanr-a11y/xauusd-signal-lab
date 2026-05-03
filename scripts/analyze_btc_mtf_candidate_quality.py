@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_TRADES_CSV = PROJECT_ROOT / "data" / "results" / "btc_mtf_extra_edge_trades.csv"
 DEFAULT_RUNNER_CSV = PROJECT_ROOT / "data" / "results" / "gold_btc_final_portfolio_trades.csv"
 DEFAULT_OUT_DIR = PROJECT_ROOT / "data" / "results"
+DEFAULT_RULE_NAME = "BTC_SCALP_H1_M5_REENTRY_rr2.0_risk0.8_max72"
 DEFAULT_RULE_PREFIX = "BTC_SCALP_H1_M5_REENTRY_rr2.0_risk0.8"
 
 
@@ -106,15 +107,25 @@ def summarize_group(df: pd.DataFrame, group_col: str, *, sort_col: str = "total_
     return out
 
 
-def load_candidate_trades(path: Path, rule_prefix: str) -> pd.DataFrame:
+def load_candidate_trades(path: Path, *, rule_name: str | None, rule_prefix: str | None, dedupe_signals: bool) -> pd.DataFrame:
     df = read_csv(path)
     df = parse_time_columns(df, ["signal_time", "entry_time", "exit_time"])
     if "rule_name" not in df.columns:
         raise ValueError(f"Missing rule_name in {path}")
-    out = df[df["rule_name"].astype(str).str.startswith(rule_prefix)].copy()
+
+    if rule_name:
+        out = df[df["rule_name"].astype(str).eq(rule_name)].copy()
+        selector_label = f"rule_name={rule_name}"
+    elif rule_prefix:
+        out = df[df["rule_name"].astype(str).str.startswith(rule_prefix)].copy()
+        selector_label = f"rule_prefix={rule_prefix}"
+    else:
+        raise ValueError("Either rule_name or rule_prefix is required.")
+
     if out.empty:
-        available = sorted(df["rule_name"].astype(str).unique().tolist())[:20]
-        raise ValueError(f"No trades found for rule_prefix={rule_prefix}. First available rules={available}")
+        available = sorted(df["rule_name"].astype(str).unique().tolist())[:30]
+        raise ValueError(f"No trades found for {selector_label}. First available rules={available}")
+
     out["r"] = pd.to_numeric(out["r"], errors="coerce")
     if "entry_hour" not in out.columns:
         out["entry_hour"] = out["entry_time"].dt.hour
@@ -122,7 +133,18 @@ def load_candidate_trades(path: Path, rule_prefix: str) -> pd.DataFrame:
     out["entry_month"] = out["entry_time"].dt.to_period("M").astype(str)
     out["entry_dow"] = out["entry_time"].dt.day_name()
     out["result"] = np.where(out["r"] > 0, "win", np.where(out["r"] < 0, "loss", "breakeven"))
-    return out.sort_values("entry_time", kind="mergesort").reset_index(drop=True)
+    out = out.sort_values("entry_time", kind="mergesort").reset_index(drop=True)
+
+    if dedupe_signals:
+        before = len(out)
+        dedupe_cols = [c for c in ["signal_time", "entry_time", "side"] if c in out.columns]
+        if dedupe_cols:
+            out = out.drop_duplicates(subset=dedupe_cols, keep="first").sort_values("entry_time", kind="mergesort").reset_index(drop=True)
+        after = len(out)
+        if before != after:
+            print(f"Deduped candidate trades: {before} -> {after} using {dedupe_cols}")
+
+    return out
 
 
 def normalize_runner_trades(path: Path) -> pd.DataFrame:
@@ -186,12 +208,14 @@ def add_runner_overlap(candidate: pd.DataFrame, runner: pd.DataFrame, tolerance_
     return out
 
 
-def apply_filters(df: pd.DataFrame, *, exclude_hours: set[int], exclude_sides: set[str]) -> pd.DataFrame:
+def apply_filters(df: pd.DataFrame, *, exclude_hours: set[int], exclude_sides: set[str], exclude_dows: set[str]) -> pd.DataFrame:
     out = df.copy()
     if exclude_hours:
         out = out[~out["entry_hour"].isin(exclude_hours)].copy()
     if exclude_sides:
         out = out[~out["side"].astype(str).str.upper().isin(exclude_sides)].copy()
+    if exclude_dows:
+        out = out[~out["entry_dow"].astype(str).isin(exclude_dows)].copy()
     return out.sort_values("entry_time", kind="mergesort").reset_index(drop=True)
 
 
@@ -203,11 +227,10 @@ def build_filter_ideas(df: pd.DataFrame) -> pd.DataFrame:
     hour_stats = summarize_group(df, "entry_hour", sort_col="total_r")
     bad_hours = hour_stats[(hour_stats["trades"] >= 3) & ((hour_stats["total_r"] < 0) | (hour_stats["pf"].fillna(0) < 1.0))]
     for hour in bad_hours["name"].astype(int).tolist():
-        filtered = apply_filters(df, exclude_hours={hour}, exclude_sides=set())
+        filtered = apply_filters(df, exclude_hours={hour}, exclude_sides=set(), exclude_dows=set())
         rows.append({"filter_name": f"exclude_hour_{hour}", "excluded": f"hour={hour}", **summarize(filtered, name=f"exclude_hour_{hour}")})
 
-    # Greedy hour removal: remove worst hours while not deleting too many trades.
-    excluded: set[int] = set()
+    excluded_hours: set[int] = set()
     current = df.copy()
     for step in range(1, 5):
         hs = summarize_group(current, "entry_hour", sort_col="total_r")
@@ -215,17 +238,25 @@ def build_filter_ideas(df: pd.DataFrame) -> pd.DataFrame:
         if hs.empty:
             break
         worst_hour = int(hs.iloc[0]["name"])
-        if float(hs.iloc[0]["total_r"]) >= 0 and float(hs.iloc[0]["pf"] or 0) >= 1.0:
+        worst_total = float(hs.iloc[0]["total_r"])
+        worst_pf = float(hs.iloc[0]["pf"] or 0)
+        if worst_total >= 0 and worst_pf >= 1.0:
             break
-        excluded.add(worst_hour)
-        current = apply_filters(df, exclude_hours=excluded, exclude_sides=set())
+        excluded_hours.add(worst_hour)
+        current = apply_filters(df, exclude_hours=excluded_hours, exclude_sides=set(), exclude_dows=set())
         if len(current) < max(30, int(len(df) * 0.65)):
             break
-        rows.append({"filter_name": f"greedy_exclude_bad_hours_step{step}", "excluded": ",".join(map(str, sorted(excluded))), **summarize(current, name=f"greedy_step{step}")})
+        rows.append({"filter_name": f"greedy_exclude_bad_hours_step{step}", "excluded": ",".join(map(str, sorted(excluded_hours))), **summarize(current, name=f"greedy_step{step}")})
 
     for side in sorted(df["side"].astype(str).str.upper().dropna().unique().tolist()):
-        filtered = apply_filters(df, exclude_hours=set(), exclude_sides={side})
+        filtered = apply_filters(df, exclude_hours=set(), exclude_sides={side}, exclude_dows=set())
         rows.append({"filter_name": f"exclude_side_{side}", "excluded": f"side={side}", **summarize(filtered, name=f"exclude_side_{side}")})
+
+    dow_stats = summarize_group(df, "entry_dow", sort_col="total_r")
+    bad_dows = dow_stats[(dow_stats["trades"] >= 5) & ((dow_stats["total_r"] < 0) | (dow_stats["pf"].fillna(0) < 1.2))]
+    for dow in bad_dows["name"].astype(str).tolist():
+        filtered = apply_filters(df, exclude_hours=set(), exclude_sides=set(), exclude_dows={dow})
+        rows.append({"filter_name": f"exclude_dow_{dow}", "excluded": f"dow={dow}", **summarize(filtered, name=f"exclude_dow_{dow}")})
 
     return pd.DataFrame(rows).sort_values(["total_r", "pf", "trades"], ascending=[False, False, False], kind="mergesort")
 
@@ -249,7 +280,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze BTC MTF candidate quality, runner overlap, and improvement filters.")
     parser.add_argument("--candidate-trades-csv", type=Path, default=DEFAULT_TRADES_CSV)
     parser.add_argument("--runner-trades-csv", type=Path, default=DEFAULT_RUNNER_CSV)
-    parser.add_argument("--rule-prefix", default=DEFAULT_RULE_PREFIX)
+    parser.add_argument("--rule-name", default=DEFAULT_RULE_NAME, help="Exact rule_name to analyze. Preferred to avoid duplicate max-bars variants.")
+    parser.add_argument("--rule-prefix", default=None, help="Optional fallback. Use with --dedupe-signals if matching multiple variants.")
+    parser.add_argument("--dedupe-signals", action="store_true", help="Drop duplicate signal_time/entry_time/side rows after prefix matching.")
     parser.add_argument("--overlap-minutes", type=int, default=60)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     args = parser.parse_args()
@@ -258,7 +291,7 @@ def main() -> int:
     runner_csv = resolve_path(args.runner_trades_csv)
     out_dir = resolve_path(args.out_dir)
 
-    cand = load_candidate_trades(candidate_csv, args.rule_prefix)
+    cand = load_candidate_trades(candidate_csv, rule_name=args.rule_name, rule_prefix=args.rule_prefix, dedupe_signals=args.dedupe_signals)
     runner = normalize_runner_trades(runner_csv)
     cand = add_runner_overlap(cand, runner, args.overlap_minutes)
 
@@ -275,7 +308,8 @@ def main() -> int:
     by_dow = summarize_group(cand, "entry_dow", sort_col="total_r")
     filter_ideas = build_filter_ideas(cand)
 
-    base_name = args.rule_prefix.replace(".", "p")
+    selected_name = args.rule_name or str(args.rule_prefix)
+    base_name = selected_name.replace(".", "p")
     out_overall = out_dir / f"{base_name}_quality_overall.csv"
     out_month = out_dir / f"{base_name}_quality_by_month.csv"
     out_hour = out_dir / f"{base_name}_quality_by_hour.csv"
@@ -294,6 +328,7 @@ def main() -> int:
 
     print("Candidate trades CSV:", candidate_csv)
     print("Runner trades CSV:", runner_csv)
+    print("Rule name:", args.rule_name)
     print("Rule prefix:", args.rule_prefix)
     print("Candidate trades:", len(cand), cand["entry_time"].min(), "to", cand["entry_time"].max())
     print("Runner trades loaded:", len(runner))
@@ -311,6 +346,7 @@ def main() -> int:
     print_table("MONTHLY", by_month[display], max_rows=50)
     print_table("BY HOUR", by_hour[display], max_rows=30)
     print_table("BY SIDE", by_side[display], max_rows=10)
+    print_table("BY DOW", by_dow[display], max_rows=10)
     filter_display = ["filter_name", "excluded", "trades", "win_rate", "total_r", "avg_r", "pf", "max_consecutive_losses", "max_dd_r"]
     print_table("FILTER IDEAS", filter_ideas[filter_display], max_rows=30)
     return 0
