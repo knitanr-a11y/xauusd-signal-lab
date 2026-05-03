@@ -92,6 +92,12 @@ def normalize_list(value: Any) -> str:
     return str(value)
 
 
+def normalize_optional(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value)
+
+
 def validate_ai_response(response: dict[str, Any]) -> None:
     missing = [key for key in REQUIRED_AI_RESPONSE_KEYS if key not in response]
     if missing:
@@ -124,6 +130,37 @@ def build_signal_id(payload: dict[str, Any]) -> str:
     raw = "|".join(parts)
     digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
     return f"sig_{digest}"
+
+
+def infer_actual_outcome_from_payload(
+    payload: dict[str, Any],
+    *,
+    actual_result_arg: str,
+    actual_r_arg: str,
+    actual_exit_reason_arg: str,
+) -> tuple[str, str, str, str]:
+    """Resolve actual outcome fields for the ledger.
+
+    Live/shadow-forward payloads usually do not know the outcome yet, so CLI args stay empty.
+    Historical case-db replay payloads can include `current_row_label_audit_not_sent_as_features`.
+    That audit block is not part of `current_signal_snapshot` and is not used as an AI input feature,
+    but it is safe and useful for post-review ledger analysis.
+    """
+    audit = payload.get("current_row_label_audit_not_sent_as_features", {})
+    if not isinstance(audit, dict):
+        audit = {}
+
+    actual_result = actual_result_arg or normalize_optional(audit.get("result"))
+    actual_r = actual_r_arg or normalize_optional(audit.get("r"))
+    actual_exit_reason = actual_exit_reason_arg or normalize_optional(audit.get("exit_reason"))
+
+    source = "cli_args"
+    if not any([actual_result_arg, actual_r_arg, actual_exit_reason_arg]) and any([actual_result, actual_r, actual_exit_reason]):
+        source = "payload_current_row_label_audit"
+    elif not any([actual_result, actual_r, actual_exit_reason]):
+        source = "empty_unknown_outcome"
+
+    return actual_result, actual_r, actual_exit_reason, source
 
 
 def build_ledger_row(
@@ -243,15 +280,25 @@ def main() -> int:
     response = load_json(response_path)
     validate_ai_response(response)
 
+    actual_result, actual_r, actual_exit_reason, actual_source = infer_actual_outcome_from_payload(
+        payload,
+        actual_result_arg=args.actual_result,
+        actual_r_arg=args.actual_r,
+        actual_exit_reason_arg=args.actual_exit_reason,
+    )
+    notes = args.notes
+    if actual_source == "payload_current_row_label_audit":
+        notes = (notes + " | " if notes else "") + "actual_outcome_from_payload_audit"
+
     row = build_ledger_row(
         payload=payload,
         response=response,
         payload_path=payload_path,
         response_path=response_path,
-        actual_result=args.actual_result,
-        actual_r=args.actual_r,
-        actual_exit_reason=args.actual_exit_reason,
-        notes=args.notes,
+        actual_result=actual_result,
+        actual_r=actual_r,
+        actual_exit_reason=actual_exit_reason,
+        notes=notes,
     )
     append_ledger(ledger_path, row)
 
@@ -259,8 +306,9 @@ def main() -> int:
     print("signal_id:", row["signal_id"])
     print("model/side/time:", row["signal_model"], row["side"], row["jst_entry_time"])
     print("AI labels:", row["winning_pattern_match"], row["losing_pattern_similarity"], row["final_risk_label"])
-    if not args.actual_result:
-        print("actual_result is empty. This is OK for shadow mode before outcome is known.")
+    print("actual outcome:", row["actual_result"], row["actual_r"], row["actual_exit_reason"], f"source={actual_source}")
+    if not args.actual_result and actual_source == "empty_unknown_outcome":
+        print("actual_result is empty. This is OK for live/shadow-forward mode before outcome is known.")
 
     return 0
 
