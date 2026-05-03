@@ -25,21 +25,16 @@ def read_json(path: Path) -> dict[str, Any]:
     return data
 
 
-def extract_current_signal(payload: dict[str, Any]) -> dict[str, Any]:
-    current = payload.get("current_signal_snapshot") or payload.get("current_signal") or payload
-    if not isinstance(current, dict):
-        raise ValueError("current signal snapshot must be an object")
-    return current
-
-
 def attach_guard(payload: dict[str, Any], guard: dict[str, Any]) -> dict[str, Any]:
     out = dict(payload)
     out["regime_guard"] = guard
+
     guardrails = out.get("guardrails")
     if isinstance(guardrails, list):
         guardrails = list(guardrails)
     else:
         guardrails = []
+
     if guard.get("gold_abc_buy_danger_regime"):
         guardrails.append(
             "GOLD ABC BUY danger regime is active. This is a warning-only regime flag based on recent completed GOLD ABC BUY outcomes, not current-trade outcome leakage. Require stronger chart confirmation and treat caution/strong_caution as a likely no-trade."
@@ -63,9 +58,11 @@ def main() -> int:
     out_json = resolve_path(args.out_json) if args.out_json else DEFAULT_OUT_DIR / f"{payload_json.stem}_with_gold_regime_guard.json"
 
     payload = read_json(payload_json)
-    current = extract_current_signal(payload)
+
+    # Important: pass the full payload, not only current_signal_snapshot.
+    # Case DB payloads often store symbol/preset/context at top level or metadata.
     guard = evaluate_from_history_csv(
-        current,
+        payload,
         history_csv=history_csv,
         last_n=args.last_n,
         min_losses=args.min_losses,
@@ -82,6 +79,11 @@ def main() -> int:
     print("Saved guarded payload:", out_json)
     print("gold_abc_buy_danger_regime:", guard.get("gold_abc_buy_danger_regime"))
     print("warning_only:", guard.get("warning_only"))
+    print("checked:", guard.get("checked"))
+    print("current_symbol_group:", guard.get("current_symbol_group"))
+    print("current_portfolio_rank:", guard.get("current_portfolio_rank"))
+    print("current_side:", guard.get("current_side"))
+    print("current_time:", guard.get("current_time"))
     print("reason:", guard.get("reason"))
     print("recent_results:", guard.get("recent_results"))
     print("recent_r_values:", guard.get("recent_r_values"))
