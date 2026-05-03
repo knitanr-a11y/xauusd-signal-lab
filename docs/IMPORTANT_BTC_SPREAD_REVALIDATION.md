@@ -10,6 +10,31 @@ BTCUSD# の検証・通知・AI評価では、必ず実運用スプレッドを�
 
 `BTC_RUNNER_RR2_RISK1` も含め、BTC系ルールはスプレッド込みで再集計するまで最終採用扱いにしない。
 
+## スプレッド採用ルール
+
+BTCの検証では、固定20ドルを無条件採用してはいけない。
+
+MT5/MQL5 CSVに `spread` 列がある場合は、まずCSV内で一番頻出している `spread` 値を採用する。
+
+```text
+採用スプレッド価格 = mode(spread列) × point_size
+```
+
+現在の再検証スクリプトでは、デフォルトで以下の方針にする。
+
+```text
+--spread-mode csv_mode
+--spread-source m5
+--point-size 0.01
+--pip-size 10
+```
+
+固定値を使うのは、CSVのspread列が壊れている、または比較検証したい場合だけ。
+
+```text
+--spread-mode fixed --assumed-spread-price 20
+```
+
 ## 背景
 
 BTCUSD# は実運用スプレッドが大きい。
@@ -20,6 +45,8 @@ BTCUSD# spread = 約20ドル
 BTCUSD# pip size = 約10ドル
 20ドル = 約2 pips
 ```
+
+ただし、実際にはCSVの `spread` 列に履歴値があるため、再検証ではCSVの最頻値を優先する。
 
 そのため、ATRベースで出した理論上のTP/SLだけを見ると成績を過大評価する。
 
@@ -79,11 +106,12 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 
 ```text
 1. BTC系ルールはスプレッド込みで再検証する
-2. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8 は未採用に戻す
-3. BTC RUNNER もスプレッド込み成績を確認する
-4. 通知・AI評価だけでなく、探索スクリプトとバックテスト自体にスプレッドコストを反映する
-5. PF、total R、勝率、最大DD、実質RRを再計算する
-6. スプレッド控除後も成立するBTCルールだけを採用候補にする
+2. BTCスプレッドはCSV spread列の最頻値を優先する
+3. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8 は未採用に戻す
+4. BTC RUNNER もスプレッド込み成績を確認する
+5. 通知・AI評価だけでなく、探索スクリプトとバックテスト自体にスプレッドコストを反映する
+6. PF、total R、勝率、最大DD、実質RRを再計算する
+7. スプレッド控除後も成立するBTCルールだけを採用候補にする
 ```
 
 ## 再検証で必要な指標
@@ -91,6 +119,10 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 BTCルール再検証では、最低限以下を出す。
 
 ```text
+- spread_mode
+- spread_source
+- mode_spread_points
+- mode_spread_price
 - gross_total_r
 - net_total_r_after_spread
 - gross_pf
@@ -123,7 +155,7 @@ TP幅ドル / TP pips
 SL幅ドル / SL pips
 
 スプレッド考慮:
-想定スプレッドドル / spread pips
+採用スプレッドドル / spread pips
 実質TP幅ドル / 実質TP pips
 実質SL負担ドル / 実質SL pips
 
@@ -164,9 +196,9 @@ AI評価は、BTCでは理論RRではなく、スプレッド控除後の実質R
 優先順：
 
 ```text
-1. 既存BTC検証スクリプトのスプレッド計算仕様を確認
-2. BTC_SCALP_H1_M5_REENTRY_FILTERED をスプレッド込みで再バックテスト
-3. BTC_RUNNER_RR2_RISK1 をスプレッド込みで再バックテスト
+1. CSV spread列の最頻値を確認
+2. BTC_SCALP_H1_M5_REENTRY_FILTERED をCSV最頻スプレッド込みで再バックテスト
+3. BTC_RUNNER_RR2_RISK1 をCSV最頻スプレッド込みで再バックテスト
 4. net PF / net total R / effective RR を確認
 5. PFが大きく落ちる場合、BTC M5ルールは除外またはSL/TP幅を広げる方向で再探索
 6. 採用ポートフォリオもBTCスプレッド込みで再集計
@@ -177,6 +209,7 @@ AI評価は、BTCでは理論RRではなく、スプレッド控除後の実質R
 ```text
 - BTCでATRベースの理論TP/SLだけを見て採用判断する
 - スプレッド込みPFを確認せずにBTC M5ルールを採用扱いする
+- CSVにspread列があるのに固定20ドルだけで検証する
 - 通知側だけスプレッド表示して、バックテスト側で反映しない
 - AI評価に理論RRだけ渡して実質RRを渡さない
 ```
