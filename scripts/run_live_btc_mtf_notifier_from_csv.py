@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from build_latest_btc_mtf_signal_payload_from_csv import (
@@ -23,7 +24,6 @@ from build_latest_btc_mtf_signal_payload_from_csv import (
     detect_btc_scalp_m5_reentry_filtered,
     parse_int_set,
     resolve_path,
-    signal_item,
 )
 from build_latest_signal_payload_from_csv import DEFAULT_HISTORY_CSV, DEFAULT_OUT_DIR, PROJECT_ROOT, detect_btc_runner
 from search_btc_mtf_extra_edges import add_indicators, join_context
@@ -39,13 +39,7 @@ def now_str() -> str:
 
 
 def load_env_file(path: Path) -> None:
-    """Minimal .env loader without external dependencies.
-
-    Existing environment variables are not overwritten.
-    Supported format:
-      DISCORD_WEBHOOK_URL=https://...
-      KEY="quoted value"
-    """
+    """Minimal .env loader without external dependencies."""
     if not path.exists():
         return
     for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -59,8 +53,17 @@ def load_env_file(path: Path) -> None:
             os.environ[key] = value
 
 
-def make_notification_key(symbol: str, signal_time: str, signal: dict[str, Any]) -> str:
-    return "|".join([symbol, signal_time, str(signal.get("strategy_label")), str(signal.get("side"))])
+def row_number(row: pd.Series, key: str) -> float:
+    try:
+        value = float(row.get(key, np.nan))
+    except Exception:
+        return float("nan")
+    return value if np.isfinite(value) else float("nan")
+
+
+def make_notification_key(symbol: str, signal_time: str, signal: dict[str, Any], *, notification_type: str = "signal") -> str:
+    prefix = "" if notification_type == "signal" else f"{notification_type.upper()}|"
+    return prefix + "|".join([symbol, signal_time, str(signal.get("strategy_label")), str(signal.get("side"))])
 
 
 def load_notified_keys(path: Path) -> set[str]:
@@ -80,6 +83,7 @@ def append_ledger_rows(path: Path, rows: list[dict[str, Any]]) -> None:
     fieldnames = [
         "notified_at",
         "notification_key",
+        "notification_type",
         "symbol_group",
         "time",
         "strategy_label",
@@ -153,6 +157,8 @@ def readable_strategy(strategy: str, source_tf: str) -> str:
         return "BTC RUNNER（高信頼・低頻度）"
     if strategy == "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8":
         return "BTC M5追加ルール（高頻度・ロット小さめ候補）"
+    if strategy == "BTC_SCALP_H1_M5_REENTRY_FILTERED_STANDBY":
+        return "BTC M5追加ルールのスタンバイ"
     return f"{strategy}（{source_tf}）"
 
 
@@ -175,14 +181,24 @@ def format_discord_message(payload: dict[str, Any]) -> str:
     signal_time = payload.get("time", "")
     overlap = bool(payload.get("overlap_detected"))
     entry_time = cur.get("entry_time_proxy") or signal_time
+    notification_type = str(payload.get("notification_type", "signal"))
 
-    title_icon = "🟢" if side.upper() == "BUY" else "🔴" if side.upper() == "SELL" else "📣"
+    if notification_type == "standby":
+        title_icon = "🟡"
+        title = f"{title_icon} **BTC {readable_side(side)} スタンバイ**"
+        status_line = "状態: あと1条件でシグナル化する可能性"
+    else:
+        title_icon = "🟢" if side.upper() == "BUY" else "🔴" if side.upper() == "SELL" else "📣"
+        title = f"{title_icon} **BTC {readable_side(side)} シグナル**"
+        status_line = "状態: シグナル確定"
+
     risk_note = "ロット小さめ候補" if cur.get("lot_hint") == "reduced_candidate" else "通常候補"
     ai_note = "未接続（次工程で追加）" if payload.get("ai_review_status") == "not_connected_yet" else str(payload.get("ai_review_status", ""))
 
     lines = [
-        f"{title_icon} **BTC {readable_side(side)} シグナル**",
+        title,
         "",
+        status_line,
         f"時刻: {signal_time}",
         f"エントリー目安: {entry_time}",
         f"ルール: {readable_strategy(strategy, source_tf)}",
@@ -194,18 +210,21 @@ def format_discord_message(payload: dict[str, Any]) -> str:
     if cur.get("entry_hour") is not None:
         lines.append(f"時間フィルタ: {cur.get('entry_hour')}時 → 通過")
 
-    if overlap:
-        lines.append("重複: あり（" + " + ".join(payload.get("overlap_labels", [])) + "）")
+    if notification_type == "standby":
+        met = cur.get("standby_met_conditions", [])
+        missing = cur.get("standby_missing_conditions", [])
+        if met:
+            lines.append("満たしている条件: " + " / ".join(met))
+        if missing:
+            lines.append("不足条件: " + " / ".join(missing))
+        lines.append("次のM5確定足でシグナル化するか確認")
     else:
-        lines.append("重複: なし")
+        if overlap:
+            lines.append("重複: あり（" + " + ".join(payload.get("overlap_labels", [])) + "）")
+        else:
+            lines.append("重複: なし")
 
-    lines.extend(
-        [
-            "",
-            f"AI評価: {ai_note}",
-            f"内部名: {strategy}",
-        ]
-    )
+    lines.extend(["", f"AI評価: {ai_note}", f"内部名: {strategy}"])
     return "\n".join(lines)
 
 
@@ -220,6 +239,132 @@ def load_contexts(m5_csv: Path, m15_csv: Path, h1_csv: Path, h4_csv: Path) -> tu
     return m5_ctx, m15_runner_df
 
 
+def make_btc_scalp_standby_signal(side: str, *, met: list[str], missing: list[str], exclude_entry_hours: set[int]) -> dict[str, Any]:
+    return {
+        "side": side,
+        "signal_model": "BTC_SCALP_H1_M5_REENTRY_FILTERED_STANDBY",
+        "strategy_label": "BTC_SCALP_H1_M5_REENTRY_FILTERED_STANDBY",
+        "portfolio_rank": "BTC_SCALP_M5_STANDBY",
+        "rr": 2.0,
+        "risk_atr": 0.8,
+        "base_tf": "M5",
+        "ai_review_required": False,
+        "ai_review_mode": "standby",
+        "ai_risk_profile": "btc_m5_scalp_standby",
+        "lot_hint": "reduced_candidate",
+        "exclude_entry_hours": sorted(exclude_entry_hours),
+        "standby_met_conditions": met,
+        "standby_missing_conditions": missing,
+    }
+
+
+def detect_btc_scalp_m5_reentry_standby(row: pd.Series, *, exclude_entry_hours: set[int]) -> dict[str, Any] | None:
+    if detect_btc_scalp_m5_reentry_filtered(row, exclude_entry_hours=exclude_entry_hours) is not None:
+        return None
+
+    entry_hour_value = row.get("entry_hour")
+    if pd.isna(entry_hour_value):
+        return None
+    entry_hour = int(entry_hour_value)
+    if entry_hour in exclude_entry_hours:
+        return None
+
+    h1_bull = row_number(row, "h1_ema20") > row_number(row, "h1_ema50") and (row_number(row, "h1_macd_hist") > 0 or row_number(row, "h1_macd_delta3") > 0)
+    h1_bear = row_number(row, "h1_ema20") < row_number(row, "h1_ema50") and (row_number(row, "h1_macd_hist") < 0 or row_number(row, "h1_macd_delta3") < 0)
+    m15_ok_buy = row_number(row, "m15_close") >= row_number(row, "m15_ema20") - 0.25 * row_number(row, "m15_atr14") and row_number(row, "m15_macd_delta3") > -0.02
+    m15_ok_sell = row_number(row, "m15_close") <= row_number(row, "m15_ema20") + 0.25 * row_number(row, "m15_atr14") and row_number(row, "m15_macd_delta3") < 0.02
+    not_extended_m5 = abs(row_number(row, "close_change_6_atr")) <= 1.60
+    gap_buy = -0.20 <= row_number(row, "close_ema8_gap_atr") <= 0.70
+    gap_sell = -0.70 <= row_number(row, "close_ema8_gap_atr") <= 0.20
+
+    checks = {
+        "BUY": {
+            "direction_ok": h1_bull,
+            "m15_ok": m15_ok_buy,
+            "not_extended": not_extended_m5,
+            "gap_ok": gap_buy,
+            "ema8_reclaim": row_number(row, "low") <= row_number(row, "ema8") + 0.30 * row_number(row, "atr14") and row_number(row, "close") > row_number(row, "ema8"),
+            "macd_reaccel": row_number(row, "macd_delta") > 0 and row_number(row, "macd_delta3") > 0,
+            "rci_turn": row_number(row, "rci9") <= 30 and row_number(row, "rci9_delta") > 0 and row_number(row, "rci26") >= -75,
+        },
+        "SELL": {
+            "direction_ok": h1_bear,
+            "m15_ok": m15_ok_sell,
+            "not_extended": not_extended_m5,
+            "gap_ok": gap_sell,
+            "ema8_reclaim": row_number(row, "high") >= row_number(row, "ema8") - 0.30 * row_number(row, "atr14") and row_number(row, "close") < row_number(row, "ema8"),
+            "macd_reaccel": row_number(row, "macd_delta") < 0 and row_number(row, "macd_delta3") < 0,
+            "rci_turn": row_number(row, "rci9") >= -30 and row_number(row, "rci9_delta") < 0 and row_number(row, "rci26") <= 75,
+        },
+    }
+    labels = {
+        "direction_ok": "H1方向",
+        "m15_ok": "M15状態",
+        "not_extended": "伸びすぎ回避",
+        "gap_ok": "EMA8距離",
+        "ema8_reclaim": "M5 EMA8再取得",
+        "macd_reaccel": "M5 MACD再加速",
+        "rci_turn": "M5 RCI反転",
+    }
+
+    for side, side_checks in checks.items():
+        base_keys = ["direction_ok", "m15_ok", "not_extended", "gap_ok"]
+        trigger_keys = ["ema8_reclaim", "macd_reaccel", "rci_turn"]
+        if not all(side_checks[k] for k in base_keys):
+            continue
+        trigger_met = [k for k in trigger_keys if side_checks[k]]
+        trigger_missing = [k for k in trigger_keys if not side_checks[k]]
+        if len(trigger_met) == 2 and len(trigger_missing) == 1:
+            met = [labels[k] for k in base_keys + trigger_met]
+            missing = [labels[k] for k in trigger_missing]
+            return make_btc_scalp_standby_signal(side, met=met, missing=missing, exclude_entry_hours=exclude_entry_hours)
+    return None
+
+
+def build_standby_payload(row: pd.Series, signal: dict[str, Any], *, notification_type: str) -> dict[str, Any]:
+    signal_time = row.get("time").strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("time")) else ""
+    entry_time_proxy = row.get("entry_time_proxy").strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("entry_time_proxy")) else signal_time
+    current = {
+        "symbol_group": "BTC",
+        "portfolio_rank": signal["portfolio_rank"],
+        "strategy_label": signal["strategy_label"],
+        "signal_model": signal["signal_model"],
+        "side": signal["side"],
+        "entry_time": signal_time,
+        "time": signal_time,
+        "entry_time_proxy": entry_time_proxy,
+        "entry_hour": None if pd.isna(row.get("entry_hour")) else int(row.get("entry_hour")),
+        "close": float(row.get("close")),
+        "atr14": float(row.get("atr14")),
+        "rr": signal["rr"],
+        "risk_atr": signal["risk_atr"],
+        "source_tf": "M5",
+        "lot_hint": signal.get("lot_hint", "reduced_candidate"),
+        "ai_review_mode": signal.get("ai_review_mode", "standby"),
+        "ai_risk_profile": signal.get("ai_risk_profile", "btc_m5_scalp_standby"),
+        "standby_met_conditions": signal.get("standby_met_conditions", []),
+        "standby_missing_conditions": signal.get("standby_missing_conditions", []),
+    }
+    return {
+        "payload_type": "latest_btc_mtf_csv_standby_check",
+        "notification_type": notification_type,
+        "symbol_group": "BTC",
+        "signal_found": True,
+        "selection_mode": "standby_scan",
+        "time": signal_time,
+        "source_tf": "M5",
+        "current_signal_snapshot": current,
+        "ai_review_required": False,
+        "ai_review_status": "not_connected_yet",
+        "discord_priority": "standby",
+        "overlap_detected": False,
+        "overlap_signal_count": 1,
+        "overlap_labels": [signal["strategy_label"]],
+        "overlap_candidates": [candidate_snapshot(signal, source_tf="M5")],
+        "confidence_hint": "standby",
+    }
+
+
 def collect_unnotified_payloads(
     *,
     m5_ctx: pd.DataFrame,
@@ -228,12 +373,14 @@ def collect_unnotified_payloads(
     notified_keys: set[str],
     scan_recent_m5_bars: int,
     scan_recent_m15_bars: int,
+    scan_recent_standby_m5_bars: int,
     bar_offset: int,
     exclude_entry_hours: set[int],
+    enable_standby: bool,
 ) -> list[tuple[int, dict[str, Any]]]:
     payloads: list[tuple[int, dict[str, Any]]] = []
 
-    # M5 scalp candidates.
+    # M5 scalp confirmed signals.
     m5_end = len(m5_ctx) - 1 - bar_offset
     m5_start = max(300, m5_end - scan_recent_m5_bars + 1)
     for idx in range(m5_start, m5_end + 1):
@@ -242,7 +389,8 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m5_scan_{scan_recent_m5_bars}", source_tf="M5")
-        payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
+        payload["notification_type"] = "signal"
+        payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal, notification_type="signal")
         payload["overlap_detected"] = False
         payload["overlap_signal_count"] = 1
         payload["overlap_labels"] = [str(signal.get("strategy_label"))]
@@ -251,7 +399,20 @@ def collect_unnotified_payloads(
         if str(payload["notification_key"]) not in notified_keys:
             payloads.append((idx, payload))
 
-    # M15 BTC RUNNER candidates.
+    # M5 scalp standby signals.
+    if enable_standby:
+        standby_start = max(300, m5_end - scan_recent_standby_m5_bars + 1)
+        for idx in range(standby_start, m5_end + 1):
+            row = m5_ctx.iloc[idx]
+            signal = detect_btc_scalp_m5_reentry_standby(row, exclude_entry_hours=exclude_entry_hours)
+            if signal is None:
+                continue
+            payload = build_standby_payload(row, signal, notification_type="standby")
+            payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal, notification_type="standby")
+            if str(payload["notification_key"]) not in notified_keys:
+                payloads.append((idx, payload))
+
+    # M15 BTC RUNNER confirmed signals.
     m15_end = len(m15_runner_df) - 1 - bar_offset
     m15_start = max(220, m15_end - scan_recent_m15_bars + 1)
     for idx in range(m15_start, m15_end + 1):
@@ -260,7 +421,8 @@ def collect_unnotified_payloads(
         if signal is None:
             continue
         payload = build_btc_mtf_payload(row, signal, history_csv, selection_mode=f"live_btc_mtf_m15_scan_{scan_recent_m15_bars}", source_tf="M15")
-        payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal)
+        payload["notification_type"] = "signal"
+        payload["notification_key"] = make_notification_key("BTC", str(payload.get("time")), signal, notification_type="signal")
         payload["overlap_detected"] = False
         payload["overlap_signal_count"] = 1
         payload["overlap_labels"] = [str(signal.get("strategy_label"))]
@@ -283,10 +445,12 @@ def main() -> int:
     parser.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
-    parser.add_argument("--scan-recent-m5-bars", type=int, default=60, help="Use a small value in live mode to avoid backfilling old M5 signals.")
-    parser.add_argument("--scan-recent-m15-bars", type=int, default=20, help="Use a small value in live mode to avoid backfilling old M15 signals.")
+    parser.add_argument("--scan-recent-m5-bars", type=int, default=60)
+    parser.add_argument("--scan-recent-m15-bars", type=int, default=20)
+    parser.add_argument("--scan-recent-standby-m5-bars", type=int, default=12, help="Standby check range. 12 M5 bars = about 1 hour.")
     parser.add_argument("--bar-offset", type=int, default=1)
     parser.add_argument("--exclude-entry-hours", default="8,13,20,21")
+    parser.add_argument("--disable-standby", action="store_true", help="Disable yellow standby notifications.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--mark-dry-run-notified", action="store_true")
     parser.add_argument("--send-discord", action="store_true")
@@ -315,8 +479,10 @@ def main() -> int:
         notified_keys=notified_keys,
         scan_recent_m5_bars=args.scan_recent_m5_bars,
         scan_recent_m15_bars=args.scan_recent_m15_bars,
+        scan_recent_standby_m5_bars=args.scan_recent_standby_m5_bars,
         bar_offset=args.bar_offset,
         exclude_entry_hours=exclude_entry_hours,
+        enable_standby=not args.disable_standby,
     )
     if args.max_notifications > 0:
         payloads = payloads[-args.max_notifications :]
@@ -337,6 +503,8 @@ def main() -> int:
     print("Rows:", "M5", len(m5_ctx), "M15", len(m15_runner_df))
     print("Scan recent M5 bars:", args.scan_recent_m5_bars)
     print("Scan recent M15 bars:", args.scan_recent_m15_bars)
+    print("Scan recent standby M5 bars:", args.scan_recent_standby_m5_bars)
+    print("Standby enabled:", not args.disable_standby)
     print("Exclude entry hours:", sorted(exclude_entry_hours))
     print("Already notified keys:", len(notified_keys))
     print("Unnotified signals selected:", len(payloads))
@@ -367,6 +535,7 @@ def main() -> int:
                 {
                     "notified_at": now_str(),
                     "notification_key": payload.get("notification_key"),
+                    "notification_type": payload.get("notification_type", "signal"),
                     "symbol_group": payload.get("symbol_group"),
                     "time": payload.get("time"),
                     "strategy_label": cur.get("strategy_label"),
