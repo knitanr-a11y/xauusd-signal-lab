@@ -6,7 +6,7 @@ REM GOLD/BTC live portfolio notifier loop
 REM
 REM - GOLD: run_live_gold_notifier_from_csv.py via portfolio wrapper
 REM - BTC : run_live_btc_mtf_spread_filtered_notifier_from_csv.py via portfolio wrapper
-REM - Timing: run at every minute xx:00
+REM - Timing: run at every minute xx:01 after MQL5 CSV export at xx:00
 REM - Bar offset: 0 because MQL5 CSV exports confirmed/closed bars only
 REM - Stop: Ctrl+C, then Y
 REM ============================================================================
@@ -21,12 +21,12 @@ set "BTC_H1_CSV=C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7
 set "BTC_H4_CSV=C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\btcusdsharp_h4.csv"
 
 set "HISTORY_CSV=data\results\gold_btc_final_portfolio_trades.csv"
-set "RUN_SECOND=0"
+set "RUN_SECOND=1"
 
 echo ============================================================================
 echo GOLD/BTC live portfolio notifier loop
 echo Project: %CD%
-echo Timing: every minute at xx:00
+echo Timing: every minute at xx:01
 echo Bar offset: 0 ^(MQL5 CSV confirmed bars only^)
 echo Stop: Ctrl+C, then Y
 echo ============================================================================
@@ -48,7 +48,7 @@ echo Exit code: %EXIT_CODE%
 
 if not "%EXIT_CODE%"=="0" (
     echo WARNING: portfolio notifier returned a non-zero exit code.
-    echo The loop will continue at the next xx:00 slot.
+    echo The loop will continue at the next xx:01 slot.
 )
 
 goto LOOP
