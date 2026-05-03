@@ -33,6 +33,8 @@ DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
 DISCORD_USER_AGENT = "xauusd-signal-lab/1.0 (+https://github.com/knitanr-a11y/xauusd-signal-lab)"
 ADOPTED_GOLD_LABELS = {"GOLD_ABC_V3", "GOLD_EXTRA_HIGH_RSI_STOCH", "GOLD_EXTRA_BB_BALANCE"}
 EXCLUDED_GOLD_LABELS = {"GOLD_COUNTER_BUY_ONLY"}
+DEFAULT_M15_CONTEXT_BARS = 3000
+DEFAULT_H1_CONTEXT_BARS = 1500
 
 
 def now_str() -> str:
@@ -61,6 +63,24 @@ def safe_float(value: Any) -> float | None:
     if pd.isna(number):
         return None
     return number
+
+
+def make_runtime_tail_csv(source_csv: Path, out_dir: Path, *, max_bars: int, label: str) -> tuple[Path, int, int]:
+    """Create a small runtime CSV for live indicator calculation without touching the MQL5 source CSV."""
+    if max_bars <= 0:
+        df = pd.read_csv(source_csv)
+        return source_csv, len(df), len(df)
+
+    df = pd.read_csv(source_csv)
+    original_rows = len(df)
+    if original_rows <= max_bars:
+        return source_csv, original_rows, original_rows
+
+    runtime_dir = out_dir / "_runtime_tail"
+    runtime_dir.mkdir(parents=True, exist_ok=True)
+    runtime_csv = runtime_dir / f"{source_csv.stem}_{label}_tail_{max_bars}.csv"
+    df.tail(max_bars).to_csv(runtime_csv, index=False)
+    return runtime_csv, original_rows, max_bars
 
 
 def price_digits(price: float | None) -> int:
@@ -450,6 +470,8 @@ def main() -> int:
     parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     parser.add_argument("--scan-recent-bars", type=int, default=60)
     parser.add_argument("--bar-offset", type=int, default=1)
+    parser.add_argument("--m15-context-bars", type=int, default=DEFAULT_M15_CONTEXT_BARS)
+    parser.add_argument("--h1-context-bars", type=int, default=DEFAULT_H1_CONTEXT_BARS)
     parser.add_argument("--include-excluded", action="store_true", help="Debug only: include excluded labels such as GOLD_COUNTER_BUY_ONLY.")
     parser.add_argument("--enable-ai-review", action="store_true")
     parser.add_argument("--ai-model", default=None)
@@ -469,7 +491,20 @@ def main() -> int:
     ledger_csv = resolve_path(args.ledger_csv)
     out_dir = resolve_path(args.out_dir)
 
-    df = load_gold_context(m15_csv, h1_csv)
+    m15_runtime_csv, m15_original_rows, m15_runtime_rows = make_runtime_tail_csv(
+        m15_csv,
+        out_dir,
+        max_bars=args.m15_context_bars,
+        label="gold_m15",
+    )
+    h1_runtime_csv, h1_original_rows, h1_runtime_rows = make_runtime_tail_csv(
+        h1_csv,
+        out_dir,
+        max_bars=args.h1_context_bars,
+        label="gold_h1",
+    )
+
+    df = load_gold_context(m15_runtime_csv, h1_runtime_csv)
     notified_keys = load_notified_keys(ledger_csv)
     payloads, rejected = collect_unnotified_payloads(
         df=df,
@@ -494,6 +529,7 @@ def main() -> int:
     print("Ledger CSV:", ledger_csv)
     print("Env file:", env_file, "exists=" + str(env_file.exists()))
     print("Rows:", len(df))
+    print("Runtime context rows:", f"M15 {m15_runtime_rows}/{m15_original_rows}", f"H1 {h1_runtime_rows}/{h1_original_rows}")
     if not df.empty:
         print("First bar:", df["time"].iloc[0])
         print("Last bar:", df["time"].iloc[-1])
@@ -540,4 +576,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted by user. Exiting GOLD notifier.")
+        raise SystemExit(130)
