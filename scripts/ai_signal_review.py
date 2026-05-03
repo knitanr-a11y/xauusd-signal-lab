@@ -223,7 +223,6 @@ def sanitize_lot_multiplier(review: dict[str, Any]) -> None:
     elif decision == "cautious":
         lot = min(max(lot, 0.5), 1.0)
     elif decision == "avoid":
-        # 見送り候補は通知上、0.0〜0.25を許容する。
         lot = min(max(lot, 0.0), 0.25)
     else:
         lot = min(max(lot, 0.5), 1.0)
@@ -238,8 +237,15 @@ def sanitize_review_text(review: dict[str, Any]) -> None:
         "履歴不足",
         "検証不足",
         "過去のトレード履歴が限られている",
-        "GOLD ABC BUY danger regimeは発動しておらず",
-        "GOLD_ABC_BUYの危険レジームに該当しない",
+        "取引履歴が限られている",
+        "54トレード",
+        "54件",
+        "実績がさらに必要",
+        "現在の売りポジションはリスクの高い状況",
+        "急激な市場変動",
+        "GOLD ABC BUY danger regime",
+        "GOLD_ABC_BUY",
+        "危険レジーム",
     ]
 
     for key in ["reasons_jp", "warnings_jp", "checklist_jp"]:
@@ -256,11 +262,88 @@ def sanitize_review_text(review: dict[str, Any]) -> None:
         review[key] = cleaned
 
 
-def sanitize_review(review: dict[str, Any]) -> dict[str, Any]:
+def gold_deterministic_review(payload: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
+    cur = payload.get("current_signal_snapshot", {}) or {}
+    strategy = str(cur.get("strategy_label", ""))
+    side = str(cur.get("side", ""))
+    regime = payload.get("regime_guard", {}) or {}
+    danger = bool(regime.get("gold_abc_buy_danger_regime"))
+
+    if strategy == "GOLD_ABC_V3":
+        if side == "BUY" and danger:
+            return {
+                **review,
+                "decision": "cautious",
+                "decision_jp": "慎重",
+                "confidence": "medium",
+                "lot_multiplier_hint": 0.5,
+                "summary_jp": "GOLD ABC v3のBUYシグナルです。danger regimeが有効なため、警戒通知として慎重に扱います。",
+                "reasons_jp": [
+                    "GOLD ABC v3は216件・勝率59.26%・+104.0R・PF2.18の本命候補です。",
+                    "ただし現在はGOLD ABC BUY danger regimeが有効です。",
+                    "自動停止ではなく、AI評価必須・ロット低下候補として扱います。",
+                ],
+                "warnings_jp": ["直近のGOLD ABC BUY連敗リスクを手動確認してください。"],
+            }
+        return {
+            **review,
+            "decision": "normal",
+            "decision_jp": "通常",
+            "confidence": "medium",
+            "lot_multiplier_hint": 0.75,
+            "summary_jp": "GOLD ABC v3のシグナルです。本命候補として通常候補ですが、約定価格と直近急変動は確認してください。",
+            "reasons_jp": [
+                "GOLD ABC v3は216件・勝率59.26%・+104.0R・PF2.18の本命候補です。",
+                "現在のpayload上、GOLD ABC BUYの警戒条件は強制警戒扱いではありません。",
+            ],
+            "warnings_jp": ["実約定価格・スプレッド・直近急変動は手動確認してください。"],
+        }
+
+    if strategy == "GOLD_EXTRA_HIGH_RSI_STOCH":
+        return {
+            **review,
+            "decision": "cautious",
+            "decision_jp": "慎重",
+            "confidence": "medium",
+            "lot_multiplier_hint": 0.75,
+            "summary_jp": "GOLD EXTRA HIGHのシグナルです。高PFの補助候補ですが、本命ABCではないため慎重寄りで扱います。",
+            "reasons_jp": [
+                "GOLD EXTRA HIGHは44件・勝率70.45%・+28.1R・PF3.16・最大連敗2の高PF補助候補です。",
+                "補助候補のため、通常候補より少しロットを抑える運用が妥当です。",
+            ],
+            "warnings_jp": ["実約定価格・スプレッド・直近急変動は手動確認してください。"],
+        }
+
+    if strategy == "GOLD_EXTRA_BB_BALANCE":
+        return {
+            **review,
+            "decision": "cautious",
+            "decision_jp": "慎重",
+            "confidence": "medium",
+            "lot_multiplier_hint": 0.5,
+            "summary_jp": "GOLD EXTRA STANDARDのシグナルです。補助候補として慎重に扱います。",
+            "reasons_jp": [
+                "GOLD EXTRA STANDARDは17件・勝率52.94%・+5.5R・PF1.69の補助候補です。",
+                "GOLD ABCやEXTRA HIGHより控えめな扱いが妥当です。",
+            ],
+            "warnings_jp": ["実約定価格・スプレッド・直近急変動は手動確認してください。"],
+        }
+
+    return review
+
+
+def sanitize_review(review: dict[str, Any], payload: dict[str, Any] | None = None) -> dict[str, Any]:
     out = dict(review)
     normalize_decision_jp(out)
     sanitize_lot_multiplier(out)
     sanitize_review_text(out)
+    if payload is not None:
+        cur = payload.get("current_signal_snapshot", {}) or {}
+        if str(payload.get("symbol_group") or cur.get("symbol_group") or "") == "GOLD":
+            out = gold_deterministic_review(payload, out)
+            normalize_decision_jp(out)
+            sanitize_lot_multiplier(out)
+            sanitize_review_text(out)
     if not out.get("reasons_jp"):
         out["reasons_jp"] = ["payload内の戦略実績と価格条件をもとにした評価です。"]
     if not out.get("warnings_jp"):
@@ -347,7 +430,7 @@ def evaluate_signal_payload(
     review["model"] = model_name
     review["ok"] = True
     review["error"] = ""
-    return sanitize_review(review)
+    return sanitize_review(review, payload)
 
 
 def apply_ai_review(payload: dict[str, Any], review: dict[str, Any]) -> dict[str, Any]:
