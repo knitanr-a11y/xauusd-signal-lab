@@ -52,13 +52,5 @@ if not "%EXIT_CODE%"=="0" (
 goto LOOP
 
 :WAIT_UNTIL_RUN_SECOND
-for /f "tokens=1-4 delims=:. ," %%a in ("%TIME%") do (
-    set /a "NOW_SEC=1%%c-100"
-)
-
-set /a "WAIT_SEC=RUN_SECOND-NOW_SEC"
-if %WAIT_SEC% LEQ 0 set /a "WAIT_SEC=WAIT_SEC+60"
-
-echo Waiting %WAIT_SEC% seconds until next xx:0%RUN_SECOND% slot... Current time: %TIME%
-timeout /t %WAIT_SEC% /nobreak >nul
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$runSecond = [int]$env:RUN_SECOND; $now = Get-Date; $target = $now.Date.AddHours($now.Hour).AddMinutes($now.Minute).AddSeconds($runSecond); if ($now -ge $target) { $target = $target.AddMinutes(1) }; $waitMs = [int][Math]::Max(0, [Math]::Ceiling(($target - $now).TotalMilliseconds)); Write-Host ('Waiting until ' + $target.ToString('HH:mm:ss') + '... Current time: ' + $now.ToString('HH:mm:ss.fff') + ' / wait_ms=' + $waitMs); Start-Sleep -Milliseconds $waitMs"
 exit /b 0
