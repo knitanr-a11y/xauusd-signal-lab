@@ -148,39 +148,64 @@ def candidate_snapshot(signal: dict[str, Any], *, source_tf: str) -> dict[str, A
     }
 
 
+def readable_strategy(strategy: str, source_tf: str) -> str:
+    if strategy == "BTC_RUNNER_RR2_RISK1":
+        return "BTC RUNNER（高信頼・低頻度）"
+    if strategy == "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8":
+        return "BTC M5追加ルール（高頻度・ロット小さめ候補）"
+    return f"{strategy}（{source_tf}）"
+
+
+def readable_side(side: str) -> str:
+    side_upper = str(side).upper()
+    if side_upper == "BUY":
+        return "BUY（買い）"
+    if side_upper == "SELL":
+        return "SELL（売り）"
+    return side
+
+
 def format_discord_message(payload: dict[str, Any]) -> str:
     cur = payload.get("current_signal_snapshot", {})
-    strategy = cur.get("strategy_label", "")
-    side = cur.get("side", "")
+    strategy = str(cur.get("strategy_label", ""))
+    side = str(cur.get("side", ""))
     rr = cur.get("rr", "")
     risk_atr = cur.get("risk_atr", "")
-    source_tf = cur.get("source_tf", payload.get("source_tf", ""))
-    confidence = payload.get("confidence_hint", "single_signal")
+    source_tf = str(cur.get("source_tf", payload.get("source_tf", "")))
+    signal_time = payload.get("time", "")
+    overlap = bool(payload.get("overlap_detected"))
+    entry_time = cur.get("entry_time_proxy") or signal_time
+
+    title_icon = "🟢" if side.upper() == "BUY" else "🔴" if side.upper() == "SELL" else "📣"
+    risk_note = "ロット小さめ候補" if cur.get("lot_hint") == "reduced_candidate" else "通常候補"
+    ai_note = "未接続（次工程で追加）" if payload.get("ai_review_status") == "not_connected_yet" else str(payload.get("ai_review_status", ""))
 
     lines = [
-        "📣 BTC Trade Signal",
-        f"Time: {payload.get('time', '')}",
-        f"Signal: {strategy} {side}",
-        f"Source TF: {source_tf}",
-        f"RR: {rr} / risk_atr: {risk_atr}",
-        f"Confidence hint: {confidence}",
+        f"{title_icon} **BTC {readable_side(side)} シグナル**",
+        "",
+        f"時刻: {signal_time}",
+        f"エントリー目安: {entry_time}",
+        f"ルール: {readable_strategy(strategy, source_tf)}",
+        f"時間足: {source_tf}",
+        f"条件: RR {rr} / SL幅 ATR×{risk_atr}",
+        f"運用メモ: {risk_note}",
     ]
 
     if cur.get("entry_hour") is not None:
-        lines.append(f"Entry hour: {cur.get('entry_hour')}")
-    if cur.get("entry_time_proxy"):
-        lines.append(f"Entry time proxy: {cur.get('entry_time_proxy')}")
-    if cur.get("lot_hint"):
-        lines.append(f"Lot hint: {cur.get('lot_hint')}")
-    if cur.get("ai_risk_profile"):
-        lines.append(f"AI risk profile: {cur.get('ai_risk_profile')}")
+        lines.append(f"時間フィルタ: {cur.get('entry_hour')}時 → 通過")
 
-    if payload.get("overlap_detected"):
-        lines.append("Overlap: YES (" + " + ".join(payload.get("overlap_labels", [])) + ")")
+    if overlap:
+        lines.append("重複: あり（" + " + ".join(payload.get("overlap_labels", [])) + "）")
     else:
-        lines.append("Overlap: no")
+        lines.append("重複: なし")
 
-    lines.append("AI review: not connected yet")
+    lines.extend(
+        [
+            "",
+            f"AI評価: {ai_note}",
+            f"内部名: {strategy}",
+        ]
+    )
     return "\n".join(lines)
 
 
