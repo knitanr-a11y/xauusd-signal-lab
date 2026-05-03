@@ -31,6 +31,7 @@ from search_btc_mtf_extra_edges_livecsv import read_ohlc_live_csv
 
 DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "live_payloads" / "notified_signals_ledger.csv"
 DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
+DISCORD_USER_AGENT = "xauusd-signal-lab/1.0 (+https://github.com/knitanr-a11y/xauusd-signal-lab)"
 
 
 def now_str() -> str:
@@ -116,7 +117,11 @@ def send_discord_message(webhook_url: str, content: str) -> None:
     request = urllib.request.Request(
         webhook_url,
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": DISCORD_USER_AGENT,
+        },
         method="POST",
     )
     try:
