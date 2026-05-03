@@ -30,10 +30,32 @@ from search_btc_mtf_extra_edges import add_indicators, join_context
 from search_btc_mtf_extra_edges_livecsv import read_ohlc_live_csv
 
 DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "live_payloads" / "notified_signals_ledger.csv"
+DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
 
 
 def now_str() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def load_env_file(path: Path) -> None:
+    """Minimal .env loader without external dependencies.
+
+    Existing environment variables are not overwritten.
+    Supported format:
+      DISCORD_WEBHOOK_URL=https://...
+      KEY="quoted value"
+    """
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
 
 def make_notification_key(symbol: str, signal_time: str, signal: dict[str, Any]) -> str:
@@ -230,6 +252,7 @@ def main() -> int:
     parser.add_argument("--history-csv", type=Path, default=DEFAULT_HISTORY_CSV)
     parser.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     parser.add_argument("--scan-recent-m5-bars", type=int, default=60, help="Use a small value in live mode to avoid backfilling old M5 signals.")
     parser.add_argument("--scan-recent-m15-bars", type=int, default=20, help="Use a small value in live mode to avoid backfilling old M15 signals.")
     parser.add_argument("--bar-offset", type=int, default=1)
@@ -240,6 +263,9 @@ def main() -> int:
     parser.add_argument("--discord-webhook-url", default=None)
     parser.add_argument("--max-notifications", type=int, default=5)
     args = parser.parse_args()
+
+    env_file = resolve_path(args.env_file)
+    load_env_file(env_file)
 
     m5_csv = resolve_path(args.m5_csv)
     m15_csv = resolve_path(args.m15_csv)
@@ -267,7 +293,7 @@ def main() -> int:
 
     webhook_url = args.discord_webhook_url or os.environ.get("DISCORD_WEBHOOK_URL", "")
     if args.send_discord and not webhook_url:
-        raise ValueError("--send-discord requires --discord-webhook-url or DISCORD_WEBHOOK_URL environment variable.")
+        raise ValueError("--send-discord requires --discord-webhook-url, DISCORD_WEBHOOK_URL environment variable, or DISCORD_WEBHOOK_URL in .env.")
 
     print("Project root:", PROJECT_ROOT)
     print("Symbol: BTC")
@@ -277,6 +303,7 @@ def main() -> int:
     print("H4 CSV:", h4_csv)
     print("History CSV:", history_csv)
     print("Ledger CSV:", ledger_csv)
+    print("Env file:", env_file, "exists=" + str(env_file.exists()))
     print("Rows:", "M5", len(m5_ctx), "M15", len(m15_runner_df))
     print("Scan recent M5 bars:", args.scan_recent_m5_bars)
     print("Scan recent M15 bars:", args.scan_recent_m15_bars)
