@@ -53,23 +53,76 @@ def load_env_file(path: Path = DEFAULT_ENV_FILE) -> None:
             os.environ[key] = value
 
 
+def gold_rule_profiles() -> dict[str, Any]:
+    return {
+        "GOLD_ABC_V3": {
+            "description": "GOLD本命ABC v3。A=Hidden Divergence、B=EMA20反発+MACD再加速。",
+            "adoption_status": "adopted_candidate",
+            "trades": 216,
+            "win_rate": 0.5926,
+            "total_r": 104.0,
+            "pf": 2.18,
+            "risk_note": "GOLD ABC BUY danger regime が true のときだけ警戒強化。",
+        },
+        "GOLD_EXTRA_HIGH_RSI_STOCH": {
+            "description": "GOLD EXTRA HIGH。RSI/STOCH反発を使う高PF補助候補。",
+            "adoption_status": "adopted_candidate",
+            "trades": 44,
+            "win_rate": 0.7045,
+            "total_r": 28.1,
+            "pf": 3.16,
+            "max_consecutive_losses": 2,
+        },
+        "GOLD_EXTRA_BB_BALANCE": {
+            "description": "GOLD EXTRA STANDARD。BBバランス系の補助候補。",
+            "adoption_status": "adopted_candidate",
+            "trades": 17,
+            "win_rate": 0.5294,
+            "total_r": 5.5,
+            "pf": 1.69,
+            "risk_note": "補助候補なので、ABCやEXTRA HIGHより慎重寄りで扱う。",
+        },
+    }
+
+
+def btc_rule_profiles() -> dict[str, Any]:
+    return {
+        "BTC_RUNNER_RR2_RISK1": {
+            "description": "BTCの低頻度RUNNER。スプレッド込みでも採用候補。",
+            "adoption_status": "adopted_candidate",
+            "net_trades": 77,
+            "net_win_rate": 0.6104,
+            "net_total_r": 64.0,
+            "net_pf": 3.13,
+            "avg_effective_rr_after_spread": 1.68,
+        },
+        "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8": {
+            "description": "BTC M5追加ルール。CSV最頻スプレッド+値幅フィルタ通過時のみ通知・採用候補。",
+            "adoption_status": "filtered_adopted_candidate",
+            "value_filters": {
+                "net_tp_after_spread_pips_min": 5.0,
+                "spread_to_sl_ratio_max": 0.50,
+                "effective_rr_after_spread_min": 1.0,
+            },
+            "after_filter_trades": 109,
+            "after_filter_win_rate": 0.6422,
+            "after_filter_total_r": 101.0,
+            "after_filter_pf": 3.59,
+        },
+    }
+
+
 def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
     cur = payload.get("current_signal_snapshot", {}) or {}
     symbol_group = str(payload.get("symbol_group") or cur.get("symbol_group") or "")
     strategy_label = str(cur.get("strategy_label") or "")
 
-    rule_profiles: dict[str, str] = {}
     if symbol_group == "BTC":
-        rule_profiles = {
-            "BTC_RUNNER_RR2_RISK1": "BTCの低頻度RUNNER。通常候補。",
-            "BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8": "BTCのM5追加ルール。検証成績は良いが高頻度なのでロット小さめ候補。",
-        }
+        rule_profiles: dict[str, Any] = btc_rule_profiles()
     elif symbol_group == "GOLD":
-        rule_profiles = {
-            "GOLD_ABC_V3": "GOLD本命ABC。danger regimeがtrueなら慎重確認。",
-            "GOLD_EXTRA_HIGH_RSI_STOCH": "GOLD EXTRA HIGH。補助候補。",
-            "GOLD_EXTRA_BB_BALANCE": "GOLD EXTRA STANDARD。補助候補。",
-        }
+        rule_profiles = gold_rule_profiles()
+    else:
+        rule_profiles = {}
 
     regime_guard = payload.get("regime_guard", {}) or {}
     guards: dict[str, Any] = {
@@ -79,6 +132,7 @@ def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
     }
     if symbol_group == "GOLD" or strategy_label.startswith("GOLD"):
         guards["regime_guard"] = regime_guard
+        guards["regime_guard_instruction"] = "GOLD ABC BUY danger regime は GOLD_ABC_V3 の BUY のときだけ重要。GOLD EXTRAやSELLでは対象外として扱う。"
 
     return {
         "symbol_group": symbol_group,
@@ -103,7 +157,10 @@ def compact_payload_for_ai(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "guards": guards,
         "rule_profiles": rule_profiles,
-        "important_instruction": f"これは {symbol_group} のシグナルです。別銘柄のルールや警戒条件を理由に含めないでください。",
+        "important_instruction": (
+            f"これは {symbol_group} のシグナルです。payload内のrule_profilesを既知の検証結果として扱い、"
+            "根拠なく『履歴がない』『検証不足』とは言わないでください。別銘柄のルールや警戒条件を理由に含めないでください。"
+        ),
     }
 
 
@@ -155,12 +212,14 @@ def evaluate_signal_payload(
         "与えられたpayloadだけを根拠に、運用上の注意度をJSONで返します。"
         "評価は normal/cautious/avoid の3段階。"
         "payloadに含まれない外部ニュース、別銘柄、別ルールの話を理由に入れてはいけません。"
+        "rule_profiles は検証済みの戦略実績として扱い、根拠なく履歴不足と言わないでください。"
         "BTC M5追加ルールは高頻度なので、問題がなくても通常〜慎重の範囲で保守的に扱います。"
-        "GOLDのdanger regimeはGOLDシグナルのときだけ考慮してください。"
+        "GOLDのdanger regimeはGOLD_ABC_V3 BUYのときだけ考慮してください。"
     )
     user_prompt = (
         f"次の {symbol_group} トレードシグナルpayloadを評価してください。"
         "別銘柄の注意点は含めないでください。"
+        "rule_profilesに実績がある場合、履歴不足とは言わず、その実績を前提に慎重度を判断してください。"
         "出力は必ず指定JSON Schemaに従ってください。\n\n"
         + json.dumps(compact, ensure_ascii=False, indent=2, default=str)
     )
