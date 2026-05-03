@@ -31,6 +31,8 @@ DEFAULT_H1_CSV = PROJECT_ROOT / "data" / "raw" / "goldsharp_h1.csv"
 DEFAULT_LEDGER_CSV = PROJECT_ROOT / "data" / "results" / "live_payloads" / "notified_gold_signals_ledger.csv"
 DEFAULT_ENV_FILE = PROJECT_ROOT / ".env"
 DISCORD_USER_AGENT = "xauusd-signal-lab/1.0 (+https://github.com/knitanr-a11y/xauusd-signal-lab)"
+ADOPTED_GOLD_LABELS = {"GOLD_ABC_V3", "GOLD_EXTRA_HIGH_RSI_STOCH", "GOLD_EXTRA_BB_BALANCE"}
+EXCLUDED_GOLD_LABELS = {"GOLD_COUNTER_BUY_ONLY"}
 
 
 def now_str() -> str:
@@ -202,7 +204,12 @@ def enrich_payload_with_trade_plan(payload: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def detect_gold_candidates(row: pd.Series) -> list[dict[str, Any]]:
+def is_adopted_gold_signal(signal: dict[str, Any]) -> bool:
+    label = str(signal.get("strategy_label", ""))
+    return label in ADOPTED_GOLD_LABELS and label not in EXCLUDED_GOLD_LABELS
+
+
+def detect_gold_candidates(row: pd.Series, *, include_excluded: bool = False) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     abc = detect_gold_abc(row)
     extra = detect_gold_extra(row)
@@ -210,7 +217,9 @@ def detect_gold_candidates(row: pd.Series) -> list[dict[str, Any]]:
         candidates.append(abc)
     if extra is not None:
         candidates.append(extra)
-    return candidates
+    if include_excluded:
+        return candidates
+    return [c for c in candidates if is_adopted_gold_signal(c)]
 
 
 def format_side(side: str) -> str:
@@ -225,11 +234,13 @@ def readable_strategy(strategy: str, rank: str, abc_source: str | None = None) -
     if strategy == "GOLD_ABC_V3":
         src = f" / {abc_source}" if abc_source else ""
         return f"GOLD ABC v3（本命候補{src}）"
-    if rank == "GOLD_EXTRA_HIGH":
+    if strategy == "GOLD_EXTRA_HIGH_RSI_STOCH":
         return "GOLD EXTRA HIGH（高PF補助候補）"
-    if rank == "GOLD_EXTRA_STANDARD":
+    if strategy == "GOLD_EXTRA_BB_BALANCE":
         return "GOLD EXTRA STANDARD（補助候補）"
-    return strategy
+    if strategy == "GOLD_COUNTER_BUY_ONLY":
+        return "GOLD COUNTER BUY ONLY（本番除外）"
+    return strategy or rank
 
 
 def format_ai_review_lines(payload: dict[str, Any]) -> list[str]:
@@ -272,6 +283,24 @@ def format_trade_plan_lines(payload: dict[str, Any]) -> list[str]:
     ]
 
 
+def regime_display_lines(payload: dict[str, Any]) -> list[str]:
+    cur = payload.get("current_signal_snapshot", {}) or {}
+    strategy = str(cur.get("strategy_label", ""))
+    side = str(cur.get("side", ""))
+    regime = payload.get("regime_guard", {}) or {}
+    danger = bool(regime.get("gold_abc_buy_danger_regime"))
+    if strategy == "GOLD_ABC_V3" and side == "BUY":
+        if danger:
+            return [
+                "",
+                "⚠️ GOLD ABC BUY danger regime: TRUE",
+                "扱い: 警戒通知のみ / AI評価必須 / ロット低下候補",
+                f"理由: {regime.get('reason', '')}",
+            ]
+        return ["regime guard: GOLD ABC BUY対象 / danger=False"]
+    return ["regime guard: 対象外（GOLD ABC BUYのみ判定）"]
+
+
 def format_discord_message(payload: dict[str, Any]) -> str:
     cur = payload.get("current_signal_snapshot", {}) or {}
     side = str(cur.get("side", ""))
@@ -283,7 +312,6 @@ def format_discord_message(payload: dict[str, Any]) -> str:
     signal_time = payload.get("time", "")
     regime = payload.get("regime_guard", {}) or {}
     danger = bool(regime.get("gold_abc_buy_danger_regime"))
-    warning_only = bool(regime.get("warning_only"))
     overlap = bool(payload.get("overlap_detected"))
 
     icon = "🟢" if side == "BUY" else "🔴" if side == "SELL" else "📣"
@@ -298,20 +326,7 @@ def format_discord_message(payload: dict[str, Any]) -> str:
         f"条件: RR {rr} / SL幅 ATR×{risk_atr}",
     ]
     lines.extend(format_trade_plan_lines(payload))
-
-    if danger:
-        lines.extend(
-            [
-                "",
-                "⚠️ GOLD ABC BUY danger regime: TRUE",
-                "扱い: 警戒通知のみ / AI評価必須 / ロット低下候補",
-                f"理由: {regime.get('reason', '')}",
-            ]
-        )
-    elif warning_only:
-        lines.append("regime guard: warning_only")
-    else:
-        lines.append(f"regime guard: {regime.get('reason', 'normal')}")
+    lines.extend(regime_display_lines(payload))
 
     if overlap:
         lines.append("重複: あり（" + " + ".join(payload.get("overlap_labels", [])) + "）")
@@ -337,17 +352,34 @@ def collect_unnotified_payloads(
     notified_keys: set[str],
     scan_recent_bars: int,
     bar_offset: int,
-) -> list[tuple[int, dict[str, Any]]]:
+    include_excluded: bool,
+) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
     if df.empty:
-        return []
+        return [], []
     end_idx = len(df) - 1 - bar_offset
     if end_idx < 0:
-        return []
+        return [], []
     start_idx = max(220, end_idx - scan_recent_bars + 1)
     payloads: list[tuple[int, dict[str, Any]]] = []
+    rejected: list[dict[str, Any]] = []
     for idx in range(start_idx, end_idx + 1):
         row = df.iloc[idx]
-        candidates = detect_gold_candidates(row)
+        all_candidates = detect_gold_candidates(row, include_excluded=True)
+        if not all_candidates:
+            continue
+        adopted_candidates = [c for c in all_candidates if is_adopted_gold_signal(c)]
+        excluded_candidates = [c for c in all_candidates if not is_adopted_gold_signal(c)]
+        for c in excluded_candidates:
+            rejected.append(
+                {
+                    "idx": int(idx),
+                    "time": row.get("time"),
+                    "strategy_label": c.get("strategy_label"),
+                    "side": c.get("side"),
+                    "reason": "本番通知対象外",
+                }
+            )
+        candidates = all_candidates if include_excluded else adopted_candidates
         if not candidates:
             continue
         selected = candidates[0]
@@ -362,7 +394,7 @@ def collect_unnotified_payloads(
         if payload["notification_key"] not in notified_keys:
             payloads.append((idx, payload))
     payloads.sort(key=lambda x: str(x[1].get("time", "")))
-    return payloads
+    return payloads, rejected
 
 
 def maybe_apply_ai_review(payload: dict[str, Any], *, enable_ai_review: bool, env_file: Path, ai_model: str | None) -> dict[str, Any]:
@@ -418,6 +450,7 @@ def main() -> int:
     parser.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     parser.add_argument("--scan-recent-bars", type=int, default=60)
     parser.add_argument("--bar-offset", type=int, default=1)
+    parser.add_argument("--include-excluded", action="store_true", help="Debug only: include excluded labels such as GOLD_COUNTER_BUY_ONLY.")
     parser.add_argument("--enable-ai-review", action="store_true")
     parser.add_argument("--ai-model", default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -438,12 +471,13 @@ def main() -> int:
 
     df = load_gold_context(m15_csv, h1_csv)
     notified_keys = load_notified_keys(ledger_csv)
-    payloads = collect_unnotified_payloads(
+    payloads, rejected = collect_unnotified_payloads(
         df=df,
         history_csv=history_csv,
         notified_keys=notified_keys,
         scan_recent_bars=args.scan_recent_bars,
         bar_offset=args.bar_offset,
+        include_excluded=args.include_excluded,
     )
     if args.max_notifications > 0:
         payloads = payloads[-args.max_notifications:]
@@ -464,11 +498,20 @@ def main() -> int:
         print("First bar:", df["time"].iloc[0])
         print("Last bar:", df["time"].iloc[-1])
     print("Scan recent bars:", args.scan_recent_bars)
+    print("Adopted labels:", sorted(ADOPTED_GOLD_LABELS))
+    print("Excluded labels:", sorted(EXCLUDED_GOLD_LABELS))
+    print("Include excluded:", bool(args.include_excluded))
     print("AI review enabled:", bool(args.enable_ai_review))
     print("Already notified keys:", len(notified_keys))
+    print("Rejected excluded signals:", len(rejected))
     print("Unnotified signals selected:", len(payloads))
     print("Dry run:", bool(args.dry_run))
     print("Send Discord:", bool(args.send_discord))
+
+    if rejected:
+        print("\nRejected excluded GOLD signals:")
+        for item in rejected[-20:]:
+            print(f"  idx={item['idx']} time={item['time']} label={item['strategy_label']} side={item['side']} reason={item['reason']}")
 
     ledger_rows: list[dict[str, Any]] = []
     for idx, payload in payloads:
