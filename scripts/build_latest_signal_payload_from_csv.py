@@ -18,6 +18,15 @@ MACD_FAST = 6
 MACD_SLOW = 13
 MACD_SIGNAL = 4
 
+# XM KIWAMI GOLD# server time is normally JST - 6h during the current DST period.
+# This is used only for the GOLD ABC v3 hour filters.
+DEFAULT_SERVER_TO_JST_HOURS = 6
+
+GOLD_ABC_A_BUY_JST_HOURS = {7, 13}
+GOLD_ABC_A_SELL_JST_HOURS = {2, 13, 19}
+GOLD_ABC_B_BUY_JST_HOURS = {20, 21, 22, 23}
+GOLD_ABC_B_SELL_JST_HOURS = {10}
+
 
 def resolve_path(path: Path) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
@@ -35,7 +44,7 @@ def read_ohlc(path: Path) -> pd.DataFrame:
     if df["time"].isna().mean() > 0.5:
         df["time"] = pd.to_datetime(df["time"], errors="coerce")
     df = df.dropna(subset=["time"]).sort_values("time", kind="mergesort").reset_index(drop=True)
-    for col in ["open", "high", "low", "close", "volume", "spread"]:
+    for col in ["open", "high", "low", "close", "volume", "tick_volume", "spread", "real_volume"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
     if "spread" not in df.columns:
@@ -76,6 +85,76 @@ def rci_series(close: pd.Series, period: int) -> pd.Series:
     return pd.Series(out, index=close.index)
 
 
+def add_gold_abc_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Add no-lookahead helper features for GOLD ABC v3 live detection.
+
+    A component:
+    - BUY hidden divergence: price makes a higher low while MACD histogram makes a lower low.
+    - SELL hidden divergence: price makes a lower high while MACD histogram makes a higher high.
+
+    This intentionally does not use right-side pivot confirmation. The live detector can therefore
+    evaluate the latest confirmed M15 candle immediately after MQL5 writes it to CSV.
+    """
+    out = df.copy()
+    n = len(out)
+    low = out["low"].to_numpy(dtype=float)
+    high = out["high"].to_numpy(dtype=float)
+    macd = out["macd_hist"].to_numpy(dtype=float)
+
+    out["gold_abc_a_hidden_buy"] = False
+    out["gold_abc_a_hidden_sell"] = False
+    out["gold_abc_a_prev_price"] = np.nan
+    out["gold_abc_a_prev_macd"] = np.nan
+    out["gold_abc_a_price"] = np.nan
+    out["gold_abc_a_macd"] = np.nan
+
+    last_low_idx: int | None = None
+    last_low_price = np.nan
+    last_low_macd = np.nan
+    last_high_idx: int | None = None
+    last_high_price = np.nan
+    last_high_macd = np.nan
+
+    pivot_lookback = 7
+    min_pivot_sep = 4
+
+    for i in range(n):
+        if i < pivot_lookback or not np.isfinite(macd[i]):
+            continue
+
+        start = max(0, i - pivot_lookback + 1)
+        is_low_candidate = np.isfinite(low[i]) and low[i] <= np.nanmin(low[start : i + 1])
+        is_high_candidate = np.isfinite(high[i]) and high[i] >= np.nanmax(high[start : i + 1])
+
+        if is_low_candidate:
+            if last_low_idx is not None and i - last_low_idx >= min_pivot_sep:
+                if low[i] > last_low_price and macd[i] < last_low_macd:
+                    out.at[i, "gold_abc_a_hidden_buy"] = True
+                    out.at[i, "gold_abc_a_prev_price"] = last_low_price
+                    out.at[i, "gold_abc_a_prev_macd"] = last_low_macd
+                    out.at[i, "gold_abc_a_price"] = low[i]
+                    out.at[i, "gold_abc_a_macd"] = macd[i]
+            if last_low_idx is None or i - last_low_idx >= min_pivot_sep or low[i] < last_low_price:
+                last_low_idx = i
+                last_low_price = low[i]
+                last_low_macd = macd[i]
+
+        if is_high_candidate:
+            if last_high_idx is not None and i - last_high_idx >= min_pivot_sep:
+                if high[i] < last_high_price and macd[i] > last_high_macd:
+                    out.at[i, "gold_abc_a_hidden_sell"] = True
+                    out.at[i, "gold_abc_a_prev_price"] = last_high_price
+                    out.at[i, "gold_abc_a_prev_macd"] = last_high_macd
+                    out.at[i, "gold_abc_a_price"] = high[i]
+                    out.at[i, "gold_abc_a_macd"] = macd[i]
+            if last_high_idx is None or i - last_high_idx >= min_pivot_sep or high[i] > last_high_price:
+                last_high_idx = i
+                last_high_price = high[i]
+                last_high_macd = macd[i]
+
+    return out
+
+
 def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     close = out["close"]
@@ -112,8 +191,8 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     out["is_bear"] = close < open_
     out["prev_body"] = body.shift(1)
 
-    prev_is_bear = out["is_bear"].shift(1).fillna(False).astype(bool)
-    prev_is_bull = out["is_bull"].shift(1).fillna(False).astype(bool)
+    prev_is_bear = out["is_bear"].shift(1).infer_objects(copy=False).fillna(False).astype(bool)
+    prev_is_bull = out["is_bull"].shift(1).infer_objects(copy=False).fillna(False).astype(bool)
     out["bull_engulf"] = out["is_bull"] & prev_is_bear & (close >= open_.shift(1)) & (open_ <= close.shift(1)) & (body >= out["prev_body"] * 0.80)
     out["bear_engulf"] = out["is_bear"] & prev_is_bull & (open_ >= close.shift(1)) & (close <= open_.shift(1)) & (body >= out["prev_body"] * 0.80)
     out["bull_pin"] = (out["lower_wick_ratio"] >= 0.45) & (out["upper_wick_ratio"] <= 0.25) & (out["close_pos"] >= 0.55)
@@ -138,11 +217,11 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
         out[f"rci{period}"] = rci_series(close, period)
         out[f"rci{period}_delta"] = out[f"rci{period}"].diff()
 
-    return out
+    return add_gold_abc_features(out)
 
 
 def join_h1(m15: pd.DataFrame, h1: pd.DataFrame) -> pd.DataFrame:
-    h1_cols = ["time", "ema_align", "macd_delta3", "rsi14", "rci26", "rci52"]
+    h1_cols = ["time", "ema_align", "macd_hist", "macd_delta", "macd_delta3", "rsi14", "rci26", "rci52"]
     h1_feat = h1[[c for c in h1_cols if c in h1.columns]].copy()
     h1_feat = h1_feat.rename(columns={c: f"h1_{c}" for c in h1_feat.columns if c != "time"})
     h1_feat = h1_feat.rename(columns={"time": "h1_time"})
@@ -160,6 +239,44 @@ def bool_value(value: Any) -> bool:
         return bool(value)
     except Exception:
         return False
+
+
+def finite_number(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except Exception:
+        return None
+    return number if np.isfinite(number) else None
+
+
+def jst_hour_from_row(row: pd.Series, *, server_to_jst_hours: int = DEFAULT_SERVER_TO_JST_HOURS) -> int | None:
+    value = row.get("time")
+    if pd.isna(value):
+        return None
+    try:
+        return int((pd.Timestamp(value) + pd.Timedelta(hours=server_to_jst_hours)).hour)
+    except Exception:
+        return None
+
+
+def gold_abc_common_filters_ok(row: pd.Series) -> bool:
+    macd_delta = finite_number(row.get("macd_delta"))
+    if macd_delta is None:
+        return False
+    macd_delta_abs = abs(macd_delta)
+    if 0.40 <= macd_delta_abs <= 0.60:
+        return False
+
+    # Live proxy for the old risk_atr_ratio exclusion.
+    # The exact backtest SL-distance column is not available in the latest-bar payload builder.
+    ema_gap = finite_number(row.get("close_ema20_gap_atr"))
+    if ema_gap is None:
+        return False
+    ema_gap_abs = abs(ema_gap)
+    if 2.00 <= ema_gap_abs <= 2.40:
+        return False
+
+    return True
 
 
 def detect_btc_runner(row: pd.Series) -> dict[str, Any] | None:
@@ -180,6 +297,90 @@ def detect_btc_runner(row: pd.Series) -> dict[str, Any] | None:
         return {"side": "BUY", "signal_model": "BTC_RUNNER", "strategy_label": "BTC_RUNNER_RR2_RISK1", "portfolio_rank": "BTC_RUNNER", "rr": 2.0, "risk_atr": 1.0}
     if h1_bear and h1_macd_sell and ema20_pull_sell and m15_macd_sell and rci_sell and not_extended and gap_sell:
         return {"side": "SELL", "signal_model": "BTC_RUNNER", "strategy_label": "BTC_RUNNER_RR2_RISK1", "portfolio_rank": "BTC_RUNNER", "rr": 2.0, "risk_atr": 1.0}
+    return None
+
+
+def make_gold_abc_signal(side: str, abc_source: str) -> dict[str, Any]:
+    return {
+        "side": side,
+        "signal_model": "GOLD_ABC_V3",
+        "strategy_label": "GOLD_ABC_V3",
+        "portfolio_rank": "GOLD_ABC",
+        "rr": 1.5,
+        "risk_atr": 1.5,
+        "abc_source": abc_source,
+    }
+
+
+def detect_gold_abc(row: pd.Series) -> dict[str, Any] | None:
+    jst_hour = jst_hour_from_row(row)
+    if jst_hour is None:
+        return None
+
+    h1_bull = row.get("h1_ema_align") == "bull"
+    h1_bear = row.get("h1_ema_align") == "bear"
+    h1_macd_buy = row.get("h1_macd_delta3", np.nan) > 0 or row.get("h1_macd_hist", np.nan) > 0
+    h1_macd_sell = row.get("h1_macd_delta3", np.nan) < 0 or row.get("h1_macd_hist", np.nan) < 0
+
+    m15_macd_buy = row.get("macd_delta", np.nan) > 0 and row.get("macd_delta3", np.nan) > 0
+    m15_macd_sell = row.get("macd_delta", np.nan) < 0 and row.get("macd_delta3", np.nan) < 0
+    ema20_pull_buy = row.get("low", np.nan) <= row.get("ema20", np.nan) + 0.25 * row.get("atr14", np.nan) and row.get("close", np.nan) > row.get("ema20", np.nan)
+    ema20_pull_sell = row.get("high", np.nan) >= row.get("ema20", np.nan) - 0.25 * row.get("atr14", np.nan) and row.get("close", np.nan) < row.get("ema20", np.nan)
+    not_extended = abs(row.get("close_change_3_atr", np.nan)) <= 1.20
+    momentum_buy = row.get("close_change_3_atr", np.nan) > -0.35
+    momentum_sell = row.get("close_change_3_atr", np.nan) < 0.35
+    gap_buy = -0.35 <= row.get("close_ema20_gap_atr", np.nan) <= 0.70
+    gap_sell = -0.70 <= row.get("close_ema20_gap_atr", np.nan) <= 0.35
+    common_filters_ok = gold_abc_common_filters_ok(row)
+
+    a_buy = (
+        bool_value(row.get("gold_abc_a_hidden_buy"))
+        and jst_hour in GOLD_ABC_A_BUY_JST_HOURS
+        and h1_bull
+        and h1_macd_buy
+        and m15_macd_buy
+        and not_extended
+    )
+    a_sell = (
+        bool_value(row.get("gold_abc_a_hidden_sell"))
+        and jst_hour in GOLD_ABC_A_SELL_JST_HOURS
+        and h1_bear
+        and h1_macd_sell
+        and m15_macd_sell
+        and not_extended
+    )
+    if a_buy:
+        return make_gold_abc_signal("BUY", "A_HIDDEN_DIVERGENCE")
+    if a_sell:
+        return make_gold_abc_signal("SELL", "A_HIDDEN_DIVERGENCE")
+
+    b_buy = (
+        jst_hour in GOLD_ABC_B_BUY_JST_HOURS
+        and h1_bull
+        and h1_macd_buy
+        and ema20_pull_buy
+        and m15_macd_buy
+        and momentum_buy
+        and not_extended
+        and gap_buy
+        and common_filters_ok
+    )
+    b_sell = (
+        jst_hour in GOLD_ABC_B_SELL_JST_HOURS
+        and h1_bear
+        and h1_macd_sell
+        and ema20_pull_sell
+        and m15_macd_sell
+        and momentum_sell
+        and not_extended
+        and gap_sell
+        and common_filters_ok
+    )
+    if b_buy:
+        return make_gold_abc_signal("BUY", "B_EMA20_MACD_REACCEL")
+    if b_sell:
+        return make_gold_abc_signal("SELL", "B_EMA20_MACD_REACCEL")
+
     return None
 
 
@@ -219,8 +420,15 @@ def detect_gold_extra(row: pd.Series) -> dict[str, Any] | None:
     return None
 
 
+def detect_gold_signal(row: pd.Series) -> dict[str, Any] | None:
+    abc = detect_gold_abc(row)
+    if abc is not None:
+        return abc
+    return detect_gold_extra(row)
+
+
 def detect_signal(symbol: str, row: pd.Series) -> dict[str, Any] | None:
-    return detect_btc_runner(row) if symbol == "BTC" else detect_gold_extra(row)
+    return detect_btc_runner(row) if symbol == "BTC" else detect_gold_signal(row)
 
 
 def build_payload(symbol_group: str, row: pd.Series, signal: dict[str, Any] | None, history_csv: Path, *, selection_mode: str) -> dict[str, Any]:
@@ -248,6 +456,14 @@ def build_payload(symbol_group: str, row: pd.Series, signal: dict[str, Any] | No
         "rr": signal["rr"],
         "risk_atr": signal["risk_atr"],
     }
+    if "abc_source" in signal:
+        current["abc_source"] = signal["abc_source"]
+        current["server_to_jst_hours"] = DEFAULT_SERVER_TO_JST_HOURS
+        current["jst_hour"] = jst_hour_from_row(row)
+        for key in ["gold_abc_a_prev_price", "gold_abc_a_prev_macd", "gold_abc_a_price", "gold_abc_a_macd"]:
+            value = finite_number(row.get(key))
+            if value is not None:
+                current[key] = value
     base["current_signal_snapshot"] = current
     base["regime_guard"] = evaluate_from_history_csv(current, history_csv=history_csv)
     base["ai_review_required"] = bool(base["regime_guard"].get("gold_abc_buy_danger_regime"))
@@ -277,14 +493,17 @@ def select_target_row(df: pd.DataFrame, *, symbol: str, bar_offset: int, bar_tim
             row = df.iloc[idx]
             signal = detect_signal(symbol, row)
             if signal is not None:
-                found.append({
+                item = {
                     "idx": int(idx),
                     "time": row.get("time").strftime("%Y-%m-%d %H:%M:%S") if pd.notna(row.get("time")) else "",
                     "strategy_label": signal.get("strategy_label"),
                     "side": signal.get("side"),
                     "rr": signal.get("rr"),
                     "risk_atr": signal.get("risk_atr"),
-                })
+                }
+                if signal.get("abc_source"):
+                    item["abc_source"] = signal.get("abc_source")
+                found.append(item)
         if found:
             last = found[-1]
             idx = int(last["idx"])
@@ -359,6 +578,8 @@ def main() -> int:
     if payload.get("signal_found"):
         cur = payload["current_signal_snapshot"]
         print("Signal:", cur.get("strategy_label"), cur.get("side"), "rr", cur.get("rr"), "risk_atr", cur.get("risk_atr"))
+        if cur.get("abc_source"):
+            print("ABC source:", cur.get("abc_source"), "jst_hour", cur.get("jst_hour"))
         print("Regime guard:", payload.get("regime_guard", {}).get("gold_abc_buy_danger_regime"), payload.get("regime_guard", {}).get("reason"))
     print("Saved JSON:", out_json)
     return 0
