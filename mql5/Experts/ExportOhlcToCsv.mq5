@@ -3,7 +3,7 @@
 //|                         MT5 OHLC CSV Export EA for Python detector |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.30"
+#property version   "1.31"
 #property description "Export confirmed OHLC candles for GOLD#/BTCUSD# to CSV for Python detector."
 
 input string InpGoldSymbol = "GOLD#";
@@ -15,8 +15,8 @@ input bool   InpExportM5  = true;
 input bool   InpExportM15 = true;
 input bool   InpExportH1  = true;
 input bool   InpExportH4  = true;
-input bool   InpGoldM5Enabled = false;
-input bool   InpGoldH4Enabled = false;
+input bool   InpGoldM5Enabled = true;
+input bool   InpGoldH4Enabled = true;
 input bool   InpBtcM5Enabled  = true;
 input bool   InpBtcH4Enabled  = true;
 
@@ -522,11 +522,12 @@ int OnInit()
    if(InpAppendLookbackBars < 2)
       return INIT_PARAMETERS_INCORRECT;
 
-   DebugLog("Initializing EA v1.30");
+   DebugLog("Initializing EA v1.31");
    DebugLog("GoldSymbol=" + InpGoldSymbol + ", BtcSymbol=" + InpBtcSymbol);
    DebugLog("OutputRoot=" + InpOutputRoot + ", UseCommonFolder=" + (InpUseCommonFolder ? "true" : "false"));
    DebugLog("IncludeCurrentBar=" + (InpIncludeCurrentBar ? "true" : "false"));
    DebugLog("SkipUnchangedFiles=" + (InpSkipUnchangedFiles ? "true" : "false"));
+   DebugLog("GoldM5Enabled=" + (InpGoldM5Enabled ? "true" : "false") + ", GoldH4Enabled=" + (InpGoldH4Enabled ? "true" : "false"));
    DebugLog("AppendMode=" + (InpAppendMode ? "true" : "false") + ", AppendLookbackBars=" + IntegerToString(InpAppendLookbackBars));
    DebugLog("AlignExportToMinute=" + (InpAlignExportToMinute ? "true" : "false")
             + ", ExportSecond=" + IntegerToString(InpExportSecond)
