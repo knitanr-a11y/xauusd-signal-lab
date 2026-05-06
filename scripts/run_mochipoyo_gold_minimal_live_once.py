@@ -29,6 +29,7 @@ Safety:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -84,10 +85,29 @@ except ModuleNotFoundError:
     from mochipoyo_risk_enricher import RiskEnrichConfig  # type: ignore
 
 
+def windows_long_path(path: str | Path) -> str:
+    """Return a Windows extended-length path when running on Windows.
+
+    The project often runs under the MT5 roaming profile path, which is already
+    long.  Nested dry-loop outputs can exceed the classic MAX_PATH limit and
+    pandas/open may raise FileNotFoundError even after the parent directory was
+    created.  The \\?\ prefix avoids that Windows path-length edge case.
+    """
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
 def write_csv(df: pd.DataFrame, path: str | Path) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(p, index=False, encoding="utf-8-sig")
+    df.to_csv(windows_long_path(p), index=False, encoding="utf-8-sig")
 
 
 def safe_pair_name(pair_name: str) -> str:
