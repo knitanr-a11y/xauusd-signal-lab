@@ -25,6 +25,8 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 5. ledger判定後の送信候補CSVをDiscord送信スクリプトがdry-runで読める
 6. pair別trigger timeframeのclose_time更新を検出できる
 7. GOLD minimal live flow を単発CLIで安全に接続できる
+8. trigger更新窓の外にある過去候補をledger/Discordへ流さない
+9. 送信候補0件でも正常終了できる
 ```
 
 この段階では Discord実送信も自動売買も行わない。
@@ -88,6 +90,7 @@ trigger state
   -> should_scan=True のGOLD pairだけscan
   -> risk enrich
   -> notification eligibility
+  -> trigger更新窓フィルター
   -> ledger duplicate filter
   -> Discord dry-run preview
   -> 成功後だけ trigger state を進める
@@ -385,6 +388,7 @@ pair trigger state
   -> should_scan=True のGOLD pairだけscan
   -> risk enrich
   -> notification eligibility
+  -> trigger更新窓フィルター
   -> ledger duplicate filter
   -> Discord dry-run preview
   -> 成功後だけ trigger state を進める
@@ -486,6 +490,147 @@ ledger_append_rows は0件で、重複通知防止として期待どおり。
 Discord dry-run も成功。
 ```
 
+### 8.3 run3で見つかった問題: 初回scan pairの過去候補
+
+run3では、M5/M15/H1がすべて更新され、3pairがscan対象になった。
+
+結果:
+
+```text
+pairs_total = 3
+pairs_to_scan = 3
+scan_errors = 0
+notification_ok_rows = 46
+ledger_new_candidates = 2
+ledger_skipped_rows = 44
+ledger_append_rows = 2
+discord_status = OK
+success = True
+```
+
+新規2件:
+
+```text
+GOLD_D1_H1_DAYTRADE A BUY
+signal_close_time = 2026-04-15 18:00:00
+entry_time        = 2026-04-15 18:00:00
+entry_price       = 4815.47
+
+GOLD_D1_H1_DAYTRADE B BUY
+signal_close_time = 2026-04-16 18:00:00
+entry_time        = 2026-04-16 18:00:00
+entry_price       = 4788.67
+```
+
+問題:
+
+```text
+この2件は現在の最新H1更新で発生した候補ではない。
+GOLD_D1_H1_DAYTRADE を単発flowで初めてscanしたため、過去4月の候補がledger未登録で新規扱いになった。
+本番通知ではNG。
+```
+
+対策:
+
+```text
+run_mochipoyo_gold_minimal_live_once.py に trigger更新窓フィルターを追加。
+ledgerへ流す通知候補を以下に限定する。
+
+previous_close_time < signal_close_time <= latest_close_time
+```
+
+これにより、たとえばH1の更新窓が以下の場合、
+
+```text
+previous_close_time = 2026-05-06 12:00:00
+latest_close_time   = 2026-05-06 13:00:00
+```
+
+通知対象になるのは以下だけ。
+
+```text
+2026-05-06 12:00:00 より後
+かつ
+2026-05-06 13:00:00 以下
+```
+
+2026-04-15 / 2026-04-16 のような過去候補は `notification_outside_trigger_window` へ落とし、ledgerにもDiscordにも流さない。
+
+### 8.4 run4で見つかった問題: 送信候補0件のDiscord dry-run
+
+run4では、CSV更新がなく `pairs_to_scan=0` だった。
+
+結果:
+
+```text
+pairs_total = 3
+pairs_to_scan = 0
+scan_errors = 0
+notification_ok_live_rows = 0
+notification_outside_trigger_window_rows = 0
+ledger_new_candidates = 0
+ledger_append_rows = 0
+discord_status = ERROR
+discord_returncode = 1
+success = False
+```
+
+問題:
+
+```text
+送信候補0件の空CSVに対して Discord dry-run を呼び、送信スクリプト側がERROR終了した。
+```
+
+対策:
+
+```text
+run_mochipoyo_gold_minimal_live_once.py 側で、to_send が0件ならDiscord dry-runを呼ばない。
+この場合は以下として扱う。
+
+Discord status = SKIPPED_NO_ROWS
+Discord returncode = 0
+success = True
+```
+
+### 8.5 run5: 修正後確認
+
+実行:
+
+```cmd
+python scripts\run_mochipoyo_gold_minimal_live_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_live_once_test\run5 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --commit-trigger-state --commit-ledger --discord-dry-run --run-id gold_minimal_live_once_5
+```
+
+結果:
+
+```text
+pairs_total = 3
+pairs_to_scan = 1
+scan_errors = 0
+notification_ok_live_rows = 0
+notification_outside_trigger_window_rows = 37
+ledger_new_candidates = 0
+ledger_skipped_rows = 0
+ledger_append_rows = 0
+commit_ledger = True
+discord_dry_run = True
+discord_status = SKIPPED_NO_ROWS
+discord_returncode = 0
+commit_trigger_state = True
+trigger_state_advanced = True
+trigger_window_filter_enabled = True
+success = True
+```
+
+判定:
+
+```text
+run5は期待どおり。
+scanされたpairには過去候補37件があったが、すべてtrigger更新窓外として除外。
+ledgerにもDiscordにも流れていない。
+送信候補0件のためDiscord dry-runは SKIPPED_NO_ROWS として正常skip。
+success=True。
+```
+
 ---
 
 ## 9. GOLD minimal live flow 総合判定
@@ -495,8 +640,9 @@ GOLD_H4_M5_SCALP:
   candidate generation PASS
   risk enrich PASS
   notification eligibility PASS
+  trigger window filter PASS
   ledger duplicate filter PASS
-  Discord dry-run PASS
+  Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once PASS
 
@@ -504,8 +650,9 @@ GOLD_H4_M15_DAYTRADE:
   candidate generation PASS
   risk enrich PASS
   notification eligibility PASS
+  trigger window filter PASS
   ledger duplicate filter PASS
-  Discord dry-run PASS
+  Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once PASS
 
@@ -513,8 +660,9 @@ GOLD_D1_H1_DAYTRADE:
   candidate generation PASS
   risk enrich PASS
   notification eligibility PASS
+  trigger window filter PASS
   ledger duplicate filter PASS
-  Discord dry-run PASS
+  Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once PASS
 ```
@@ -523,8 +671,7 @@ GOLD_D1_H1_DAYTRADE:
 
 ```text
 GOLD 3pair は、単発 minimal live flow まで初期PASS扱い。
-まだ常時稼働ループにはしない。
-次は、数回連続で run_mochipoyo_gold_minimal_live_once.py を実行し、更新がある時だけ対象pairがscanされ、ledger重複で再通知されないことを追加確認する。
+ただし、常時稼働ループ化前に、trigger更新窓フィルターを含むrunを数回追加実行する。
 ```
 
 ---
@@ -540,8 +687,10 @@ GOLD minimal live once を追加で数回実行する。
 2. M5更新時は GOLD_H4_M5_SCALP だけscanされる
 3. M15更新時は GOLD_H4_M15_DAYTRADE もscanされる
 4. H1更新時は GOLD_D1_H1_DAYTRADE もscanされる
-5. 既存payload_keyは ledger_skipped_rows に入り、ledger_new_candidates は増えない
-6. success=True の時だけ trigger_state_advanced=True になる
+5. trigger更新窓外の過去候補は notification_outside_trigger_window に落ちる
+6. ledger_new_candidates / ledger_append_rows は live window 内の新規payload_keyだけ増える
+7. to_send 0件なら discord_status = SKIPPED_NO_ROWS / success=True
+8. success=True の時だけ trigger_state_advanced=True になる
 ```
 
 常時ループ化は、この追加連続実行が安定してから行う。
