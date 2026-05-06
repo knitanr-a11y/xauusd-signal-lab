@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -165,11 +166,15 @@ def build_once_command(args: argparse.Namespace, iteration: int, iteration_out_d
     return cmd
 
 
-def run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path) -> dict[str, Any]:
+def run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path, once_event: dict[str, Any] | None = None) -> dict[str, Any]:
     """Generate dry-run order payloads from NEW notification rows.
 
     This never places orders. It only calls build_mochipoyo_order_payloads.py
     to create order/order_payloads.csv for inspection.
+
+    When the live notification stage has zero rows, this stage is a safe skip.
+    It must not fail merely because notification_ledger_to_send.csv is missing
+    or empty.
     """
     order_dir = iteration_dir / "order"
     order_dir.mkdir(parents=True, exist_ok=True)
@@ -190,13 +195,34 @@ def run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path) -> di
         write_text(stdout_path, "SKIPPED_DISABLED\n")
         write_text(stderr_path, "")
         return {**base, "order_payload_status": "SKIPPED_DISABLED"}
+
+    expected_rows = None
+    if once_event is not None:
+        try:
+            expected_rows = int(once_event.get("ledger_new_candidates", once_event.get("notification_ok_live_rows", 0)) or 0)
+        except Exception:
+            expected_rows = None
+    if expected_rows == 0:
+        write_text(stdout_path, "SKIPPED_NO_ROWS_FROM_ONCE_SUMMARY\n")
+        write_text(stderr_path, "")
+        return {**base, "order_payload_status": "SKIPPED_NO_ROWS"}
+
     if not to_send_csv.exists():
         write_text(stdout_path, "SKIPPED_NO_TO_SEND_CSV\n")
         write_text(stderr_path, "")
         return {**base, "order_payload_status": "SKIPPED_NO_TO_SEND_CSV"}
     try:
         to_send = read_csv(to_send_csv)
+    except EmptyDataError:
+        write_text(stdout_path, "SKIPPED_EMPTY_TO_SEND_CSV\n")
+        write_text(stderr_path, "")
+        return {**base, "order_payload_status": "SKIPPED_NO_ROWS"}
     except Exception as e:
+        # If once summary says no rows, treat any empty/malformed to-send file as a safe skip.
+        if expected_rows in (0, None):
+            write_text(stdout_path, f"SKIPPED_UNREADABLE_TO_SEND_CSV_WITH_NO_EXPECTED_ROWS: {repr(e)}\n")
+            write_text(stderr_path, "")
+            return {**base, "order_payload_status": "SKIPPED_NO_ROWS"}
         write_text(stdout_path, "")
         write_text(stderr_path, repr(e) + "\n")
         return {**base, "order_payload_status": "ERROR_READ_TO_SEND", "order_payload_returncode": 1}
@@ -498,11 +524,15 @@ def main() -> int:
             write_text(iteration_dir / "once_stderr.txt", proc.stderr)
             write_text(iteration_dir / "once_command.txt", " ".join(cmd))
 
-            order_event = run_order_payload_stage(args, iteration_dir)
-            auto_trade_event = run_auto_trade_stage(args, iteration_dir, order_event)
-
             once_summary_path = iteration_dir / "minimal_live_once_summary.csv"
             once_summary = read_summary(once_summary_path)
+            once_row: dict[str, Any] = {}
+            if not once_summary.empty:
+                once_row = once_summary.iloc[0].to_dict()
+
+            order_event = run_order_payload_stage(args, iteration_dir, once_row)
+            auto_trade_event = run_auto_trade_stage(args, iteration_dir, order_event)
+
             if once_summary.empty:
                 event = {
                     "loop_iteration": iteration,
@@ -517,7 +547,7 @@ def main() -> int:
                     **auto_trade_event,
                 }
             else:
-                row = once_summary.iloc[0].to_dict()
+                row = once_row
                 combined_success = (
                     bool(row.get("success", False))
                     and int(order_event.get("order_payload_returncode", 0)) == 0
