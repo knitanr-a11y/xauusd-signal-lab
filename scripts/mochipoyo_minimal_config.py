@@ -38,11 +38,13 @@ TIMEFRAME_MINUTES: dict[str, int] = {
 }
 
 CSV_KEYS: dict[str, str] = {
+    "gold_m1": "goldsharp_m1.csv",
     "gold_m5": "goldsharp_m5.csv",
     "gold_m15": "goldsharp_m15.csv",
     "gold_h1": "goldsharp_h1.csv",
     "gold_h4": "goldsharp_h4.csv",
     "gold_d1": "goldsharp_d1.csv",
+    "btc_m1": "btcusdsharp_m1.csv",
     "btc_m5": "btcusdsharp_m5.csv",
     "btc_m15": "btcusdsharp_m15.csv",
     "btc_h1": "btcusdsharp_h1.csv",
@@ -86,11 +88,12 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
         "trigger_timeframe": "M5",
         "base_csv_key": "gold_m5",
         "context": {"H4": "gold_h4"},
+        "touch_csv_keys": {"M1": "gold_m1", "M5": "gold_m5"},
         "allowed_slices": [
             {"candidate_rank": "A", "direction": "SELL"},
             {"candidate_rank": "B", "direction": "SELL"},
         ],
-        "tail_bars": {"M5": 6000, "H4": 1500},
+        "tail_bars": {"M1": 12000, "M5": 6000, "H4": 1500},
         "price_digits": 2,
         "requires_spread": False,
     },
@@ -103,11 +106,12 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
         "trigger_timeframe": "M15",
         "base_csv_key": "gold_m15",
         "context": {"H4": "gold_h4"},
+        "touch_csv_keys": {"M5": "gold_m5"},
         "allowed_slices": [
             {"candidate_rank": "B", "direction": "BUY"},
             {"candidate_rank": "B", "direction": "SELL"},
         ],
-        "tail_bars": {"M15": 5000, "H4": 1500},
+        "tail_bars": {"M5": 6000, "M15": 5000, "H4": 1500},
         "price_digits": 2,
         "requires_spread": False,
     },
@@ -120,11 +124,12 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
         "trigger_timeframe": "H1",
         "base_csv_key": "gold_h1",
         "context": {"D1": "gold_d1"},
+        "touch_csv_keys": {"M5": "gold_m5"},
         "allowed_slices": [
             {"candidate_rank": "A", "direction": "BUY"},
             {"candidate_rank": "B", "direction": "BUY"},
         ],
-        "tail_bars": {"H1": 1500, "D1": 800},
+        "tail_bars": {"M5": 6000, "H1": 1500, "D1": 800},
         "price_digits": 2,
         "requires_spread": False,
     },
@@ -137,11 +142,12 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
         "trigger_timeframe": "M15",
         "base_csv_key": "btc_m15",
         "context": {"H4": "btc_h4"},
+        "touch_csv_keys": {"M1": "btc_m1", "M5": "btc_m5"},
         "allowed_slices": [
             {"candidate_rank": "A", "direction": "BUY"},
             {"candidate_rank": "A", "direction": "SELL"},
         ],
-        "tail_bars": {"M15": 5000, "H4": 1500},
+        "tail_bars": {"M1": 12000, "M5": 6000, "M15": 15000, "H4": 1500},
         "price_digits": 2,
         "requires_spread": True,
         "spread_source_csv_key": "btc_m15",
@@ -323,11 +329,13 @@ def build_csv_overrides_from_args(args: Any) -> dict[str, str | None]:
     Missing attributes are ignored.
     """
     mapping = {
+        "gold_m1": "gold_m1_csv",
         "gold_m5": "gold_m5_csv",
         "gold_m15": "gold_m15_csv",
         "gold_h1": "gold_h1_csv",
         "gold_h4": "gold_h4_csv",
         "gold_d1": "gold_d1_csv",
+        "btc_m1": "btc_m1_csv",
         "btc_m5": "btc_m5_csv",
         "btc_m15": "btc_m15_csv",
         "btc_h1": "btc_h1_csv",
