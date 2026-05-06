@@ -7,12 +7,14 @@ from scan_mochipoyo_multi_tf_candidates.py, but does not run that full scanner
 script or scan every pair.  Callers must pass the already-selected pair and the
 already-read base/context DataFrames.
 
-Initial scope:
-- GOLD_H4_M5_SCALP only
-- A/B SELL candidates only after allowed-slice filtering by the caller
+Current scope:
+- GOLD_H4_M5_SCALP
+- GOLD_H4_M15_DAYTRADE
 
 The generator returns candidate EVENTS, not raw persistent states, by applying
 the same event filter defaults used by filter_mochipoyo_candidate_events.py.
+Allowed-slice filtering is applied after normalization, so pair configs decide
+which ranks/directions survive.
 """
 from __future__ import annotations
 
@@ -33,7 +35,10 @@ except ModuleNotFoundError:  # Direct execution/import from scripts/.
     from mochipoyo_candidate_normalizer import normalize_minimal_candidates, split_risk_ok_ng  # type: ignore
     from scan_mochipoyo_multi_tf_candidates import add_indicators, confirmed_join, scan_pair  # type: ignore
 
-SUPPORTED_GENERATOR_PAIRS = {"GOLD_H4_M5_SCALP"}
+SUPPORTED_GENERATOR_PAIRS = {
+    "GOLD_H4_M5_SCALP",
+    "GOLD_H4_M15_DAYTRADE",
+}
 
 
 def default_scan_args(symbol: str) -> argparse.Namespace:
