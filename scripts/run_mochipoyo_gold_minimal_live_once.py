@@ -29,6 +29,9 @@ Safety:
 - In --discord-send mode, notification ledger commit is deferred until after
   Discord send succeeds.  This prevents a failed Discord send from marking a
   payload as already notified.
+- In --discord-send mode, partial sends are refused.  If --discord-max-rows is
+  smaller than the number of NEW live-window rows, the run exits before sending,
+  does not commit notification ledger, and does not advance trigger state.
 """
 from __future__ import annotations
 
@@ -383,6 +386,16 @@ def run_discord_stage(args: argparse.Namespace, to_send_csv: Path, to_send_rows:
         (preview_dir / f"discord_{mode}_stdout.txt").write_text("SKIPPED_NO_ROWS\n", encoding="utf-8")
         (preview_dir / f"discord_{mode}_stderr.txt").write_text("", encoding="utf-8")
         return 0, "SKIPPED_NO_ROWS"
+
+    if args.discord_send and int(args.discord_max_rows) > 0 and int(args.discord_max_rows) < int(to_send_rows):
+        msg = (
+            "ERROR_SEND_LIMIT_WOULD_DROP_ROWS: "
+            f"discord_max_rows={int(args.discord_max_rows)} is smaller than ledger_new_candidates={int(to_send_rows)}. "
+            "Refusing partial live Discord send so notification ledger and trigger state do not advance incorrectly."
+        )
+        (preview_dir / f"discord_{mode}_stdout.txt").write_text("", encoding="utf-8")
+        (preview_dir / f"discord_{mode}_stderr.txt").write_text(msg + "\n", encoding="utf-8")
+        return 1, "ERROR_SEND_LIMIT_WOULD_DROP_ROWS"
 
     cmd = [
         sys.executable,
