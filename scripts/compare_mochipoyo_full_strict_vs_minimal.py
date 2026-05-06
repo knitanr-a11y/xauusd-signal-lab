@@ -132,6 +132,15 @@ def empty_normalized_df() -> pd.DataFrame:
     return pd.DataFrame(columns=NORMALIZED_COLUMNS)
 
 
+def apply_pair_filter(df: pd.DataFrame, pair_name: str | None) -> pd.DataFrame:
+    if df.empty or not pair_name:
+        return df.copy()
+    if "pair_name" not in df.columns:
+        return df.iloc[0:0].copy()
+    pair = str(pair_name).strip().upper()
+    return df[df["pair_name"].astype("string").str.upper() == pair].copy()
+
+
 def apply_lookback(df: pd.DataFrame, lookback_candidates: int) -> pd.DataFrame:
     if df.empty or lookback_candidates <= 0:
         return df.copy()
@@ -339,17 +348,19 @@ def compare_full_vs_minimal(full_df: pd.DataFrame, minimal_df: pd.DataFrame) -> 
     }
 
 
-def normalize_full_csv(path: str | Path, allowed_slices: list[dict[str, str]], lookback_candidates: int) -> pd.DataFrame:
+def normalize_full_csv(path: str | Path, allowed_slices: list[dict[str, str]], lookback_candidates: int, pair_name: str | None = None) -> pd.DataFrame:
     raw = read_csv_safe(path)
     normalized = normalize_full_strict_candidates(raw)
     filtered = filter_allowed_slices(normalized, allowed_slices)
+    filtered = apply_pair_filter(filtered, pair_name)
     return apply_lookback(filtered, lookback_candidates)
 
 
-def normalize_minimal_csv(path: str | Path, allowed_slices: list[dict[str, str]], lookback_candidates: int) -> pd.DataFrame:
+def normalize_minimal_csv(path: str | Path, allowed_slices: list[dict[str, str]], lookback_candidates: int, pair_name: str | None = None) -> pd.DataFrame:
     raw = read_csv_safe(path)
     normalized = normalize_minimal_candidates(raw)
     filtered = filter_allowed_slices(normalized, allowed_slices)
+    filtered = apply_pair_filter(filtered, pair_name)
     return apply_lookback(filtered, lookback_candidates)
 
 
@@ -387,6 +398,7 @@ def build_summary(
         "run_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "full_csv": str(args.full_csv) if args.full_csv else "",
         "minimal_csv": str(args.minimal_csv) if args.minimal_csv else "",
+        "pair_name_filter": str(args.pair_name or ""),
         "as_of_time": str(args.as_of_time or ""),
         "lookback_candidates": int(args.lookback_candidates),
         "allowed_slices_count": int(len(allowed_slices)),
@@ -410,6 +422,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--full-csv", required=True, help="Existing full strict output CSV, usually payload/fixed candidate CSV.")
     parser.add_argument("--minimal-csv", default=None, help="Existing minimal output CSV. Optional until minimal scanner exists.")
     parser.add_argument("--allowed-slices-json", default=None, help="Optional JSON list of allowed slices. Defaults to built-in spec slices.")
+    parser.add_argument("--pair-name", default=None, help="Optional pair_name filter, e.g. GOLD_H4_M5_SCALP.")
     parser.add_argument("--out-dir", required=True, help="Directory for comparison outputs.")
     parser.add_argument("--as-of-time", default=None, help="Reserved for future scanner-run mode. Not used for CSV-only mode yet.")
     parser.add_argument("--lookback-candidates", type=int, default=50)
@@ -434,13 +447,13 @@ def main() -> int:
 
     if not errors:
         try:
-            full_df = normalize_full_csv(args.full_csv, allowed_slices, args.lookback_candidates)
+            full_df = normalize_full_csv(args.full_csv, allowed_slices, args.lookback_candidates, args.pair_name)
         except Exception as exc:
             errors.append({"stage": "normalize_full_csv", "error": str(exc), "path": str(args.full_csv)})
 
     if not errors and args.minimal_csv:
         try:
-            minimal_df = normalize_minimal_csv(args.minimal_csv, allowed_slices, args.lookback_candidates)
+            minimal_df = normalize_minimal_csv(args.minimal_csv, allowed_slices, args.lookback_candidates, args.pair_name)
         except Exception as exc:
             errors.append({"stage": "normalize_minimal_csv", "error": str(exc), "path": str(args.minimal_csv)})
 
