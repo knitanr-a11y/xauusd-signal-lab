@@ -1,0 +1,26 @@
+[
+  {
+    "pair_name": "BTC_M15_M1_SUPER_SCALP",
+    "style": "mochipoyo_full",
+    "context_tf": "M15",
+    "base_tf": "M1"
+  },
+  {
+    "pair_name": "BTC_H1_M5_SCALP",
+    "style": "mochipoyo_full",
+    "context_tf": "H1",
+    "base_tf": "M5"
+  },
+  {
+    "pair_name": "BTC_H4_M15_DAYTRADE",
+    "style": "mochipoyo_full",
+    "context_tf": "H4",
+    "base_tf": "M15"
+  },
+  {
+    "pair_name": "BTC_D1_H1_DAYTRADE",
+    "style": "mochipoyo_full",
+    "context_tf": "D1",
+    "base_tf": "H1"
+  }
+]
