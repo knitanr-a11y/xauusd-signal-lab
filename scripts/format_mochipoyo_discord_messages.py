@@ -59,6 +59,22 @@ def signal_time_short(row: pd.Series) -> str:
     return time_short(row, "signal_close_time")
 
 
+def compact_signal_id(row: pd.Series) -> str:
+    """Human-readable short ID for matching Discord text back to CSV/ledger."""
+    symbol = val(row, "symbol").upper()
+    pair_name = val(row, "pair_name")
+    rank = val(row, "candidate_rank")
+    direction = val(row, "direction").upper()
+    signal_time = signal_time_short(row)
+    entry = val(row, "entry_price")
+    try:
+        entry = f"{float(entry):.2f}"
+    except Exception:
+        pass
+    parts = [symbol, pair_name, rank, direction, signal_time, str(entry)]
+    return " / ".join([p for p in parts if p and p != "-"])
+
+
 def payload_key_label(row: pd.Series) -> str:
     key = val(row, "payload_key")
     if key != "-":
@@ -205,12 +221,8 @@ def compact_message(row: pd.Series) -> str:
         f"{symbol_emoji(symbol)} **{symbol} {direction}** {direction_emoji(direction)}",
         "━━━━━━━━━━━━━━",
         f"MT5時間: `{entry_time_short(row)}`",
-        f"Signal確定: `{signal_time_short(row)}`",
         f"足: `{timeframe_label(row)}`",
-        f"Pair: `{val(row, 'pair_name')}`",
-        f"候補: `{val(row, 'candidate_name')}` / Rank `{val(row, 'candidate_rank')}`",
-        f"Key: `{payload_key_label(row)}`",
-        f"形: `{granville_jp(row)}`",
+        f"戦略: `{timeframe_label(row)} / Rank {val(row, 'candidate_rank')}`",
         "",
         f"Entry: `{fnum(row, 'entry_price', price_digits)}`",
         f"SL:    `{fnum(row, 'sl_price', price_digits)}`",
@@ -236,6 +248,10 @@ def compact_message(row: pd.Series) -> str:
     ]
     for item in warning_items(row):
         lines.append(f"・{item}")
+    lines += [
+        "",
+        f"照合ID: `{compact_signal_id(row)}`",
+    ]
     return "\n".join(lines)
 
 
