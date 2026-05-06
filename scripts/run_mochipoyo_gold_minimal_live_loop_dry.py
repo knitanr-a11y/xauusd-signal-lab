@@ -251,6 +251,10 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
 
     This calls scripts/send_mt5_order_from_payload.py WITHOUT --send. It can
     connect to MT5 and run order_check, but never calls order_send.
+
+    Position-policy blocks are treated as safe dry-run skips when order_send was
+    not called. That means an existing-position guard can intentionally block a
+    candidate without failing the whole live notification loop.
     """
     auto_dir = iteration_dir / "auto_trade"
     auto_dir.mkdir(parents=True, exist_ok=True)
@@ -264,6 +268,7 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
         "auto_trade_returncode": 0,
         "auto_trade_rows": 0,
         "auto_trade_dry_run_check_ok_rows": 0,
+        "auto_trade_blocked_position_policy_rows": 0,
         "auto_trade_sent_rows": 0,
         "auto_trade_error_rows": 0,
         "auto_trade_order_send_called_count": 0,
@@ -319,18 +324,31 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
     report = read_json(report_json)
     rows = int(report.get("rows_out", 0) or 0)
     dry_ok = int(report.get("dry_run_check_ok_rows", 0) or 0)
+    blocked_policy = int(report.get("blocked_position_policy_rows", 0) or 0)
     sent = int(report.get("sent_rows", 0) or 0)
     errors = int(report.get("error_rows", 0) or 0)
     called = int(report.get("order_send_called_count", 0) or 0)
 
-    status = "OK" if proc.returncode == 0 and called == 0 and sent == 0 else "ERROR"
     if called > 0 or sent > 0:
         status = "ERROR_ORDER_SEND_WAS_CALLED_IN_DRY_RUN"
+        normalized_returncode = 1
+    elif proc.returncode == 0:
+        status = "OK"
+        normalized_returncode = 0
+    elif blocked_policy > 0 and rows > 0:
+        status = "OK_BLOCKED_POSITION_POLICY"
+        normalized_returncode = 0
+    else:
+        status = "ERROR"
+        normalized_returncode = int(proc.returncode)
+
     return {
         "auto_trade_status": status,
-        "auto_trade_returncode": int(proc.returncode),
+        "auto_trade_returncode": normalized_returncode,
+        "auto_trade_raw_returncode": int(proc.returncode),
         "auto_trade_rows": rows,
         "auto_trade_dry_run_check_ok_rows": dry_ok,
+        "auto_trade_blocked_position_policy_rows": blocked_policy,
         "auto_trade_sent_rows": sent,
         "auto_trade_error_rows": errors,
         "auto_trade_order_send_called_count": called,
@@ -511,6 +529,7 @@ def main() -> int:
                 "auto_trade_status",
                 "auto_trade_rows",
                 "auto_trade_dry_run_check_ok_rows",
+                "auto_trade_blocked_position_policy_rows",
                 "auto_trade_order_send_called_count",
                 "auto_trade_sent_rows",
                 "success",
