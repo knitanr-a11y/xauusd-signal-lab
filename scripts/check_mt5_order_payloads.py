@@ -14,6 +14,9 @@ This script is intentionally safe:
 Important:
 - order_check may still depend on terminal/account trading permissions.
 - If terminal Algo Trading is OFF, order_check can fail. That is not an order.
+- Some MT5/broker combinations return retcode=0/comment=Done for order_check success,
+  while order_send success commonly uses TRADE_RETCODE_DONE=10009.  This script
+  treats both as order_check OK.
 """
 from __future__ import annotations
 
@@ -36,8 +39,8 @@ else:
 
 
 ORDER_TYPE_MAP = {
-    "BUY": 0,   # mt5.ORDER_TYPE_BUY
-    "SELL": 1,  # mt5.ORDER_TYPE_SELL
+    "BUY": 0,
+    "SELL": 1,
 }
 
 
@@ -109,6 +112,10 @@ def clean_str(x: Any, default: str = "") -> str:
         pass
     s = str(x)
     return s if s else default
+
+
+def safe_bool_series(series: pd.Series) -> pd.Series:
+    return series.map(lambda x: bool(x) if not pd.isna(x) else False).astype(bool)
 
 
 def round_to_digits(value: float | None, digits: int) -> float | None:
@@ -201,6 +208,27 @@ def check_stop_level(direction: str, current_price: float | None, sl: float | No
     if tp_dist < min_distance:
         errors.append(f"TP distance below stops_level: distance={tp_dist}; min={min_distance}")
     return len(errors) == 0, errors
+
+
+def is_order_check_success(check_d: dict[str, Any]) -> bool:
+    """Interpret mt5.order_check result without ever sending an order.
+
+    In the MetaTrader5 Python binding, order_check can return retcode=0 and
+    comment='Done' when the pre-flight request is accepted. order_send success
+    commonly uses TRADE_RETCODE_DONE=10009. For order_check validation, accept
+    both forms.
+    """
+    ret_raw = check_d.get("retcode")
+    comment = str(check_d.get("comment", "")).strip().lower()
+    try:
+        retcode = int(ret_raw)
+    except Exception:
+        return False
+    if retcode == 0 and comment == "done":
+        return True
+    if mt5 is not None and retcode == int(mt5.TRADE_RETCODE_DONE):
+        return True
+    return False
 
 
 def make_order_check_request(row: pd.Series, symbol: str, direction: str, lot: float, price: float, sl: float, tp: float, deviation: int, magic: int, comment: str) -> dict[str, Any]:
@@ -375,13 +403,13 @@ def main() -> int:
             if lot is None:
                 errors.append("missing lot")
             else:
-                ok, e = is_volume_step_ok(lot, volume_min, volume_max, volume_step)
+                _, e = is_volume_step_ok(lot, volume_min, volume_max, volume_step)
                 errors.extend(e)
-            ok, e = validate_price_relation(direction, entry_ref, sl, tp)
+            _, e = validate_price_relation(direction, entry_ref, sl, tp)
             errors.extend(e)
-            ok, e = validate_current_price_relation(direction, current_price, sl, tp)
+            _, e = validate_current_price_relation(direction, current_price, sl, tp)
             errors.extend(e)
-            ok, e = check_stop_level(direction, current_price, sl, tp, point, stops_level)
+            _, e = check_stop_level(direction, current_price, sl, tp, point, stops_level)
             errors.extend(e)
 
             local_ok = len(errors) == 0
@@ -396,20 +424,24 @@ def main() -> int:
                 result["order_check_raw"] = json.dumps(check_d, ensure_ascii=False, default=str)
                 result["order_check_retcode"] = check_d.get("retcode")
                 result["order_check_comment"] = check_d.get("comment")
-                # TRADE_RETCODE_DONE is commonly 10009, but order_check may also return other acceptable broker-specific retcodes.
-                result["order_check_ok"] = bool(check is not None and int(check_d.get("retcode", -1)) == mt5.TRADE_RETCODE_DONE)
+                result["order_check_ok"] = bool(check is not None and is_order_check_success(check_d))
                 result["last_error_after_order_check"] = str(mt5.last_error())
             rows.append(result)
 
         out = pd.DataFrame(rows)
         write_csv(out, out_dir / "mt5_order_payload_check_results.csv")
+        local_ok_series = safe_bool_series(out["local_validation_ok"]) if "local_validation_ok" in out.columns and not out.empty else pd.Series(dtype=bool)
+        if args.run_order_check and "order_check_ok" in out.columns and not out.empty:
+            order_check_ok_series = safe_bool_series(out["order_check_ok"])
+        else:
+            order_check_ok_series = pd.Series(dtype=bool)
         report.update({
             "rows_in": int(len(df)),
             "rows_out": int(len(out)),
-            "local_validation_ok_rows": int(out["local_validation_ok"].fillna(False).astype(bool).sum()) if not out.empty else 0,
-            "local_validation_ng_rows": int((~out["local_validation_ok"].fillna(False).astype(bool)).sum()) if not out.empty else 0,
-            "order_check_ok_rows": int(out["order_check_ok"].fillna(False).astype(bool).sum()) if "order_check_ok" in out.columns and not out.empty else 0,
-            "order_check_ng_rows": int((~out["order_check_ok"].fillna(False).astype(bool)).sum()) if args.run_order_check and "order_check_ok" in out.columns and not out.empty else 0,
+            "local_validation_ok_rows": int(local_ok_series.sum()) if not local_ok_series.empty else 0,
+            "local_validation_ng_rows": int((~local_ok_series).sum()) if not local_ok_series.empty else 0,
+            "order_check_ok_rows": int(order_check_ok_series.sum()) if not order_check_ok_series.empty else 0,
+            "order_check_ng_rows": int((~order_check_ok_series).sum()) if args.run_order_check and not order_check_ok_series.empty else 0,
             "order_send_called": False,
             "results": rows,
         })
