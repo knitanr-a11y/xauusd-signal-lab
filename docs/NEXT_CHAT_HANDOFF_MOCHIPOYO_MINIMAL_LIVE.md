@@ -6,6 +6,77 @@
 
 ---
 
+## 0. 最新状況（次チャット最優先）
+
+ユーザーは新しいチャットへ移行し、**明日、デモ口座で回している loop の結果ログを報告する予定**。
+
+現在ユーザーPC側で想定される運用:
+
+```text
+デモ口座: XMTrading demo 75539039
+broker_symbol: GOLD#
+mode: live
+Discord送信: enabled
+auto_trade_send: enabled
+position_policy: block_any
+max_symbol_positions: 1
+max_symbol_lot: 0.01
+lot: 0.01
+```
+
+ユーザーは `run_mochipoyo_gold_minimal_live.bat` / ローカル編集した forever bat 相当を今日明日回し続けると言っている。
+GitHub上には安全チェックの都合で `forever + auto-trade send` bat はpushしていない。
+GitHub上にある公式batは短時間用:
+
+```text
+scripts/run_mochipoyo_gold_demo_autotrade_short.bat
+```
+
+ユーザーが確認済みの稼働ログ例:
+
+```text
+loop_iteration 1-7:
+  returncode = 0
+  notification_ok_live_rows = 0
+  ledger_new_candidates = 0
+  discord_status = SKIPPED_NO_ROWS
+  order_payload_status = SKIPPED_NO_ROWS
+  auto_trade_status = SKIPPED_NO_ORDER_PAYLOAD_ROWS
+  auto_trade_send_enabled = True
+  auto_trade_order_send_called_count = 0
+  auto_trade_sent_rows = 0
+  success = True
+```
+
+判定:
+
+```text
+forever demo loopは稼働中。
+ここまで通知候補なし。
+発注なし。
+全iteration正常。
+```
+
+次チャットでユーザーがログを貼ったら、まず以下を見る。
+
+```text
+success
+auto_trade_order_send_called_count
+auto_trade_sent_rows
+auto_trade_status
+discord_status
+notification_ok_live_rows
+ledger_new_candidates
+```
+
+ログ確認方法は以下にまとめ済み:
+
+```text
+docs/MOCHIPOYO_MINIMAL_LIVE_LOG_CHECK_GUIDE.md
+```
+
+---
+
 ## 1. 次チャットで最初に読むファイル
 
 必ず以下を読む。
@@ -18,6 +89,7 @@ docs/MOCHIPOYO_MINIMAL_LEDGER_VALIDATION.md
 docs/MOCHIPOYO_MINIMAL_RISK_NOTIFICATION_VALIDATION.md
 docs/MOCHIPOYO_MINIMAL_SCANNER_VALIDATION_LOG.md
 docs/MOCHIPOYO_MINIMAL_AUTOTRADE_VALIDATION.md
+docs/MOCHIPOYO_MINIMAL_LIVE_LOG_CHECK_GUIDE.md
 ```
 
 BTCを触る場合は以下も読む。
@@ -62,6 +134,8 @@ position policy guards: PASS
 live loop auto-trade dry-run: PASS
 live loop auto-trade send: PASS
 live loop auto-trade duplicate/position block: PASS
+候補0件時の全段safe skip: PASS
+ログ確認ガイド作成: PASS
 ```
 
 重要:
@@ -85,6 +159,8 @@ scripts/check_mt5_connection_and_symbol.py
 scripts/check_mt5_order_payloads.py
 scripts/build_mochipoyo_order_payloads.py
 scripts/send_mt5_order_from_payload.py
+scripts/run_mochipoyo_gold_demo_autotrade_short.bat
+docs/MOCHIPOYO_MINIMAL_LIVE_LOG_CHECK_GUIDE.md
 ```
 
 関連して既に使っている既存/追加部品:
@@ -126,8 +202,14 @@ scripts/mochipoyo_notification_filter.py
 fd4accb841c1d17c63c8ccc18f83dc51f8c703bf
   Add guarded MT5 auto-trade send mode to live loop
 
-623ad0aeb230ee062574804054ffb74df61ae132
-  Document Mochipoyo minimal auto-trade validation
+623faf954b4922f6a0dbcb21228c3a2224f635f2
+  Treat no notification rows as safe order-payload skip
+
+8d87321bfec641f7564b9fb3fb641d3f6af92b2c
+  Add short demo auto-trade loop batch file
+
+2c0024dd33cfb4d1323cf6ce9c36d9566611d9fa
+  Add Mochipoyo minimal live log check guide
 ```
 
 ---
@@ -233,6 +315,7 @@ Discord実送信はPASS済み。
 
 ```text
 docs/MOCHIPOYO_MINIMAL_AUTOTRADE_VALIDATION.md
+docs/MOCHIPOYO_MINIMAL_LIVE_LOG_CHECK_GUIDE.md
 ```
 
 現在のMT5デモ情報:
@@ -373,6 +456,35 @@ success = True
 既存ポジションありの追加発注ブロック: PASS
 ```
 
+### 8.4 forever demo loop 稼働開始
+
+ユーザーは新チャット移行前に、デモ口座で `forever` 相当の loop を起動した。
+
+確認ログ:
+
+```text
+loop_iteration 1-7:
+  returncode = 0
+  pairs_to_scan = 0/1/2
+  notification_ok_live_rows = 0
+  ledger_new_candidates = 0
+  discord_status = SKIPPED_NO_ROWS
+  order_payload_status = SKIPPED_NO_ROWS
+  auto_trade_status = SKIPPED_NO_ORDER_PAYLOAD_ROWS
+  auto_trade_send_enabled = True
+  auto_trade_order_send_called_count = 0
+  auto_trade_sent_rows = 0
+  success = True
+```
+
+判定:
+
+```text
+forever demo loop稼働中: PASS
+候補0件safe skip: PASS
+発注なし: PASS
+```
+
 ---
 
 ## 9. Windows long path 対応
@@ -405,35 +517,24 @@ data/results/mochipoyo/minimal_live_loop_... の深い階層
 
 ## 10. 次にやること
 
-次の推奨は、デモ口座で短時間の auto-trade send loop。
+次チャットでは、ユーザーが明日貼る loop 結果ログを確認する。
 
-目的:
+最初に見るコマンド例:
 
-```text
-人工stateではなく、通常のtrigger更新に合わせて
-no-row / outside-window / sent / blocked の挙動を確認する。
+```cmd
+python -c "import pandas as pd; p=r'data\ml_loop_demo_prod_forever\gold_minimal_live_loop_live_summary.csv'; df=pd.read_csv(p,encoding='utf-8-sig'); cols=[c for c in ['loop_iteration','returncode','pairs_to_scan','notification_ok_live_rows','ledger_new_candidates','discord_status','order_payload_status','auto_trade_status','auto_trade_send_enabled','auto_trade_order_send_called_count','auto_trade_sent_rows','success'] if c in df.columns]; print(df.tail(30)[cols].to_string(index=False))"
 ```
 
-推奨条件:
+ユーザーが別 `--out-dir` を使っている場合はパスを置き換える。
+
+判定基準:
 
 ```text
-account: XMTrading demo 75539039
-broker_symbol: GOLD#
-lot: 0.01
-position_policy: block_any
-max_symbol_positions: 1
-max_symbol_lot: 0.01
-auto_trade_max_orders: 1
-out-dir: data/ml_loop_demo_prod1 など短いパス
-```
-
-実行前に確認:
-
-```text
-MT5がデモ口座 75539039 でログイン中
-Algo Trading ON
-本口座ではない
-既存GOLD#ポジションの有無を把握している
+success が全て True か
+auto_trade_order_send_called_count / auto_trade_sent_rows が発生しているか
+SENT があれば MT5取引タブ/注文ledgerと照合する
+OK_BLOCKED_POSITION_POLICY があれば既存ポジションで安全に止まったか確認する
+ERROR系があれば該当iterationの stderr / report を読む
 ```
 
 ---
@@ -442,7 +543,6 @@ Algo Trading ON
 
 ```text
 本口座での自動売買
-長時間のデモ auto-trade send loop
 損益/ポジション管理
 自動決済
 建値移動
@@ -475,13 +575,12 @@ Algo Trading ON
 
 ## 13. 次の判断基準
 
-短時間デモ auto-trade send loopが安定した後の次候補:
+明日のログ確認後の次候補:
 
 ```text
-1. ポジション監視スクリプト追加
-2. order ledgerとMT5履歴の照合
-3. 約定後Discord追跡通知
-4. 日次損失制限・最大発注数制限
-5. デモ1日稼働
-6. 本口座検討はその後
+1. エラーなし・発注なしなら、そのままデモloop継続またはポジション監視ログ追加
+2. 発注ありなら、注文ledger/MT5取引履歴/Discord通知を照合
+3. ブロックありなら、position_policyが意図通りか確認
+4. ERRORありなら、該当iterationの stderr と auto_trade report を読む
+5. 次の実装はポジション監視スクリプト / 口座履歴export が優先
 ```
