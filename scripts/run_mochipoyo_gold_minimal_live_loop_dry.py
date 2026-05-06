@@ -9,6 +9,7 @@ This script is a safety-first scheduler wrapper around:
 Default behavior is dry-run only:
 - Discord messages are NOT sent unless --discord-send is explicitly passed.
 - Auto-trading is never performed.
+- Order payload generation is dry-run only and does NOT call MT5.
 
 It repeatedly runs the validated one-shot flow, collects each iteration summary,
 and exits safely on Ctrl+C.
@@ -79,12 +80,8 @@ def append_csv_row(row: dict[str, Any], path: str | Path) -> None:
 
 
 def precreate_iteration_dirs(iteration_dir: Path) -> None:
-    """Create output directories expected by the one-shot flow.
-
-    The one-shot script also creates parents, but the loop precreates them as a
-    defensive guard for Windows path/race edge cases and older local checkouts.
-    """
-    for name in ["scan", "notification", "ledger", "discord"]:
+    """Create output directories expected by the one-shot flow."""
+    for name in ["scan", "notification", "ledger", "discord", "order"]:
         (iteration_dir / name).mkdir(parents=True, exist_ok=True)
 
 
@@ -152,6 +149,89 @@ def build_once_command(args: argparse.Namespace, iteration: int, iteration_out_d
     return cmd
 
 
+def run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path) -> dict[str, Any]:
+    """Generate dry-run order payloads from NEW notification rows.
+
+    This never places orders.  It only calls build_mochipoyo_order_payloads.py
+    to create order/order_payloads.csv for inspection.
+    """
+    order_dir = iteration_dir / "order"
+    order_dir.mkdir(parents=True, exist_ok=True)
+    to_send_csv = iteration_dir / "ledger" / "notification_ledger_to_send.csv"
+    stdout_path = order_dir / "order_payload_stdout.txt"
+    stderr_path = order_dir / "order_payload_stderr.txt"
+    output_csv = order_dir / "order_payloads.csv"
+    output_json = order_dir / "order_payloads.json"
+
+    base = {
+        "order_payload_status": "SKIPPED",
+        "order_payload_returncode": 0,
+        "order_payload_rows": 0,
+        "valid_order_payloads": 0,
+        "invalid_order_payloads": 0,
+    }
+    if not args.enable_order_payload_dry_run:
+        write_text(stdout_path, "SKIPPED_DISABLED\n")
+        write_text(stderr_path, "")
+        return {**base, "order_payload_status": "SKIPPED_DISABLED"}
+    if not to_send_csv.exists():
+        write_text(stdout_path, "SKIPPED_NO_TO_SEND_CSV\n")
+        write_text(stderr_path, "")
+        return {**base, "order_payload_status": "SKIPPED_NO_TO_SEND_CSV"}
+    try:
+        to_send = read_csv(to_send_csv)
+    except Exception as e:
+        write_text(stdout_path, "")
+        write_text(stderr_path, repr(e) + "\n")
+        return {**base, "order_payload_status": "ERROR_READ_TO_SEND", "order_payload_returncode": 1}
+    if to_send.empty:
+        write_text(stdout_path, "SKIPPED_NO_ROWS\n")
+        write_text(stderr_path, "")
+        return {**base, "order_payload_status": "SKIPPED_NO_ROWS"}
+
+    cmd = [
+        sys.executable,
+        "scripts/build_mochipoyo_order_payloads.py",
+        "--input-csv", str(to_send_csv),
+        "--output-csv", str(output_csv),
+        "--output-json", str(output_json),
+        "--symbol", str(args.symbol),
+        "--fixed-lot", str(args.order_fixed_lot),
+        "--magic", str(args.order_magic),
+        "--max-orders", str(args.order_max_rows),
+    ]
+    if args.order_broker_symbol:
+        cmd.extend(["--broker-symbol", str(args.order_broker_symbol)])
+    if args.order_ledger_csv:
+        cmd.extend(["--order-ledger-csv", str(args.order_ledger_csv)])
+
+    proc = subprocess.run(cmd, text=True, capture_output=True)
+    write_text(stdout_path, proc.stdout)
+    write_text(stderr_path, proc.stderr)
+    write_text(order_dir / "order_payload_command.txt", " ".join(cmd))
+
+    rows = 0
+    valid = 0
+    invalid = 0
+    if output_csv.exists():
+        try:
+            out_df = read_csv(output_csv)
+            rows = int(len(out_df))
+            if "is_valid_order_payload" in out_df.columns:
+                valid = int(out_df["is_valid_order_payload"].fillna(False).astype(bool).sum())
+                invalid = int((~out_df["is_valid_order_payload"].fillna(False).astype(bool)).sum())
+        except Exception:
+            pass
+    status = "OK" if proc.returncode == 0 else "ERROR"
+    return {
+        "order_payload_status": status,
+        "order_payload_returncode": int(proc.returncode),
+        "order_payload_rows": rows,
+        "valid_order_payloads": valid,
+        "invalid_order_payloads": invalid,
+    }
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run GOLD minimal live once repeatedly.")
     p.add_argument("--csv-dir", required=True)
@@ -167,6 +247,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--commit-ledger", action="store_true")
     p.add_argument("--scan-on-initial-state", action="store_true")
     p.add_argument("--discord-send", action="store_true", help="Actually send NEW live-window rows to Discord. Without this, loop uses Discord dry-run.")
+    p.add_argument("--enable-order-payload-dry-run", action="store_true", help="Generate order/order_payloads.csv from notification_ledger_to_send.csv. No MT5 connection and no order placement.")
+    p.add_argument("--order-broker-symbol", default=None, help="Broker symbol for order payloads, e.g. GOLD, GOLD#, XAUUSD")
+    p.add_argument("--order-fixed-lot", type=float, default=0.01)
+    p.add_argument("--order-magic", type=int, default=26050601)
+    p.add_argument("--order-max-rows", type=int, default=5)
+    p.add_argument("--order-ledger-csv", default=None, help="Optional order ledger for duplicate order_key checks")
     p.add_argument("--csv-sep", default="auto")
     p.add_argument("--trigger-tail-bars", type=int, default=20)
     p.add_argument("--discord-max-rows", type=int, default=5)
@@ -219,8 +305,11 @@ def main() -> int:
     print(f"sleep_seconds: {args.sleep_seconds}")
     print(f"discord_send: {'enabled' if args.discord_send else 'disabled'}")
     print("auto_trade: disabled")
+    print(f"order_payload_dry_run: {'enabled' if args.enable_order_payload_dry_run else 'disabled'}")
     if args.discord_send:
         print("WARNING: --discord-send is enabled. Only NEW live-window rows will be sent, and once flow prevents partial live sends.")
+    if args.enable_order_payload_dry_run:
+        print("ORDER DRY-RUN: order payload CSVs may be generated, but MT5 is not called and no orders are placed.")
 
     iteration = 0
     exit_code = 0
@@ -241,6 +330,8 @@ def main() -> int:
             write_text(iteration_dir / "once_stderr.txt", proc.stderr)
             write_text(iteration_dir / "once_command.txt", " ".join(cmd))
 
+            order_event = run_order_payload_stage(args, iteration_dir)
+
             once_summary_path = iteration_dir / "minimal_live_once_summary.csv"
             once_summary = read_summary(once_summary_path)
             if once_summary.empty:
@@ -253,9 +344,11 @@ def main() -> int:
                     "returncode": int(proc.returncode),
                     "summary_status": "MISSING_ONCE_SUMMARY",
                     "success": False,
+                    **order_event,
                 }
             else:
                 row = once_summary.iloc[0].to_dict()
+                combined_success = bool(row.get("success", False)) and int(order_event.get("order_payload_returncode", 0)) == 0
                 event = {
                     "loop_iteration": iteration,
                     "started_at": start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -264,6 +357,8 @@ def main() -> int:
                     "returncode": int(proc.returncode),
                     "summary_status": "OK",
                     **row,
+                    **order_event,
+                    "success": combined_success,
                 }
             append_csv_row(event, loop_events_csv)
             append_csv_row(event, loop_summary_csv)
@@ -278,12 +373,15 @@ def main() -> int:
                 "ledger_append_rows",
                 "discord_send",
                 "discord_status",
+                "order_payload_status",
+                "order_payload_rows",
+                "valid_order_payloads",
                 "success",
             ] if k in event}
             print(pd.DataFrame([printable]).to_string(index=False))
 
-            if proc.returncode != 0:
-                exit_code = int(proc.returncode)
+            if proc.returncode != 0 or int(order_event.get("order_payload_returncode", 0)) != 0:
+                exit_code = int(proc.returncode) if proc.returncode != 0 else int(order_event.get("order_payload_returncode", 1))
                 if args.stop_on_error:
                     print("stop_on_error: stopping loop")
                     break
@@ -300,6 +398,7 @@ def main() -> int:
             "finished_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
             "mode": mode,
             "discord_send": bool(args.discord_send),
+            "order_payload_dry_run": bool(args.enable_order_payload_dry_run),
             "iterations_completed": iteration,
             "exit_code": exit_code,
             "loop_summary_csv": str(loop_summary_csv),
