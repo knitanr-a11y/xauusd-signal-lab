@@ -34,6 +34,35 @@ from format_mochipoyo_discord_messages import format_row, val  # type: ignore
 DISCORD_LIMIT = 2000
 
 
+def windows_long_path(path: str | Path) -> str:
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
+def write_text(path: str | Path, text: str, encoding: str = "utf-8") -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(windows_long_path(p), "w", encoding=encoding, newline="") as f:
+        f.write(text)
+
+
+def write_csv(df: pd.DataFrame, path: str | Path) -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(windows_long_path(p), index=False, encoding="utf-8-sig")
+
+
+def read_csv(path: str | Path) -> pd.DataFrame:
+    return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+
+
 def safe_text(text: object) -> str:
     s = str(text)
     enc = getattr(sys.stdout, "encoding", None) or "utf-8"
@@ -109,7 +138,7 @@ def make_payload_key(row: pd.Series) -> str:
 def load_sent_keys(send_ledger_csv: Path) -> set[str]:
     if not send_ledger_csv.exists():
         return set()
-    df = pd.read_csv(send_ledger_csv, encoding="utf-8-sig")
+    df = read_csv(send_ledger_csv)
     if "payload_key" not in df.columns:
         return set()
     return set(df["payload_key"].dropna().astype(str).tolist())
@@ -169,16 +198,16 @@ def append_send_ledger(rows: list[dict[str, Any]], send_ledger_csv: Path) -> Non
     send_ledger_csv.parent.mkdir(parents=True, exist_ok=True)
     new = pd.DataFrame(rows)
     if send_ledger_csv.exists():
-        old = pd.read_csv(send_ledger_csv, encoding="utf-8-sig")
+        old = read_csv(send_ledger_csv)
         all_cols = list(dict.fromkeys(list(old.columns) + list(new.columns)))
         out = pd.concat([old.reindex(columns=all_cols), new.reindex(columns=all_cols)], ignore_index=True)
     else:
         out = new
-    out.to_csv(send_ledger_csv, index=False, encoding="utf-8-sig")
+    write_csv(out, send_ledger_csv)
 
 
 def load_input_rows(input_csv: Path, symbol: str | None, max_rows: int) -> pd.DataFrame:
-    df = pd.read_csv(input_csv, encoding="utf-8-sig")
+    df = read_csv(input_csv)
     if symbol and "symbol" in df.columns:
         df = df[df["symbol"].astype(str).str.upper() == symbol.upper()].copy()
     if "entry_time" in df.columns:
@@ -244,9 +273,7 @@ def main() -> int:
             send_rows.append(rec)
         records.append(rec)
 
-    preview_txt.parent.mkdir(parents=True, exist_ok=True)
-    preview_txt.write_text(("\n\n" + "=" * 40 + "\n\n").join(messages_for_txt).strip() + "\n", encoding="utf-8")
-    preview_json.parent.mkdir(parents=True, exist_ok=True)
+    write_text(preview_txt, ("\n\n" + "=" * 40 + "\n\n").join(messages_for_txt).strip() + "\n")
 
     webhook_url = args.webhook_url or os.environ.get(args.webhook_env)
     sent_ledger_rows: list[dict[str, Any]] = []
@@ -256,7 +283,7 @@ def main() -> int:
             for rec in records:
                 if rec["send_status"] == "PENDING":
                     rec["send_status"] = "ERROR_NO_WEBHOOK_URL"
-            preview_json.write_text(json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_text(preview_json, json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2))
             safe_print("send_mochipoyo_discord_messages")
             safe_print("ERROR: --send was specified but webhook URL was not provided.")
             safe_print(f"Use --webhook-url, set environment variable {args.webhook_env}, or add it to .env.")
@@ -302,7 +329,7 @@ def main() -> int:
             else:
                 rec["send_status"] = "DRY_RUN_WOULD_SEND"
 
-    preview_json.write_text(json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_text(preview_json, json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2))
 
     total = len(records)
     duplicates = sum(1 for r in records if r["duplicate_existing"])
