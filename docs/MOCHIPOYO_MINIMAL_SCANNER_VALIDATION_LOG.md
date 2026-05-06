@@ -509,7 +509,275 @@ GOLD_D1_H1_DAYTRADE の共通期間では、H1 tail 1500 と 3000 の候補は�
 
 ---
 
-## 8. 現時点の判定
+## 8. BTC_H4_M15_DAYTRADE 検証結果
+
+対象slice:
+
+```text
+BTC_H4_M15_DAYTRADE|A|BUY
+BTC_H4_M15_DAYTRADE|A|SELL
+```
+
+実装:
+
+```text
+scripts/mochipoyo_candidate_generators.py の SUPPORTED_GENERATOR_PAIRS に BTC_H4_M15_DAYTRADE を追加。
+既存の add_indicators / confirmed_join / scan_pair / event filter 経路を再利用。
+```
+
+重要:
+
+```text
+BTCは candidate generation だけでは本番通知不可。
+spread込みrisk enrichが必須。
+通知には current_spread_price / mode_spread_price / effective_spread_price / spread_to_sl_ratio / effective_rr_after_spread / net_sl_after_spread_price / net_tp_after_spread_price を必ず含める。
+```
+
+### 8.1 minimal generator 初回出力
+
+実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_btc_h4_m15
+```
+
+結果:
+
+```text
+BTC_H4_M15_DAYTRADE:
+  scan_status = OK
+  base_rows = 5000
+  context_frames = H4
+  raw_candidates = 95
+  normalized_candidates = 72
+  risk_ok_candidates = 0
+  risk_ng_candidates = 0
+  error_count = 0
+```
+
+normalized candidates 内訳:
+
+```text
+BTC_H4_M15_DAYTRADE A BUY  = 52
+BTC_H4_M15_DAYTRADE A SELL = 20
+payload_ok = 72 / 72
+```
+
+### 8.2 full strict payload との比較
+
+比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\live_dryrun\btc_mochipoyo_live_dryrun_strict_payloads.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_btc_h4_m15_payload_overlap --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 20
+minimal_rows = 24
+matched_rows = 18
+full_only_rows = 2
+minimal_only_rows = 6
+value_diff_rows = 198
+payload_key_diff_rows = 0
+status = NORMALIZED_ONLY_NO_RISK
+```
+
+解釈:
+
+```text
+value_diff_rows が大きい主因は、full payload 側には risk/spread enrich済み列があり、minimal側にはまだ無いこと。
+現段階では candidate一致だけを見る。
+```
+
+### 8.3 full strict allowed_events との比較
+
+比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\live_dryrun\btc_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_btc_h4_m15_allowed_events_overlap --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 69
+minimal_rows = 72
+matched_rows = 48
+full_only_rows = 21
+minimal_only_rows = 24
+value_diff_rows = 0
+payload_key_diff_rows = 0
+status = NORMALIZED_ONLY_NO_RISK
+```
+
+解釈:
+
+```text
+GOLD 3pairより差分が大きい。
+BTC candidate generation は動作OKだが、初期PASSとはまだ扱わない。
+```
+
+### 8.4 tail本数感度: M15 5000 vs 10000
+
+実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail10000 --tail-m15 10000 --tail-h4 1500
+```
+
+結果:
+
+```text
+BTC_H4_M15_DAYTRADE:
+  base_rows = 10000
+  raw_candidates = 202
+  normalized_candidates = 160
+  error_count = 0
+```
+
+5000 vs 10000 の共通期間比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail10000\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_btc_h4_m15_tail5000_vs_tail10000 --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 72
+minimal_rows = 71
+matched_rows = 63
+full_only_rows = 9
+minimal_only_rows = 8
+value_diff_rows = 0
+payload_key_diff_rows = 0
+```
+
+結論:
+
+```text
+BTCは M15 tail 5000 では不足。
+ZigZag / pivot / divergence / cooldown の初期位置影響がGOLDより強い。
+```
+
+### 8.5 tail本数感度: M15 10000 vs 15000
+
+実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail15000 --tail-m15 15000 --tail-h4 1500
+```
+
+結果:
+
+```text
+BTC_H4_M15_DAYTRADE:
+  base_rows = 15000
+  raw_candidates = 305
+  normalized_candidates = 231
+  error_count = 0
+```
+
+10000 vs 15000 の共通期間比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail10000\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail15000\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_btc_h4_m15_tail10000_vs_tail15000 --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 160
+minimal_rows = 159
+matched_rows = 158
+full_only_rows = 2
+minimal_only_rows = 1
+value_diff_rows = 0
+payload_key_diff_rows = 0
+```
+
+### 8.6 tail本数感度: M15 15000 vs 20000
+
+実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail20000 --tail-m15 20000 --tail-h4 1500
+```
+
+結果:
+
+```text
+BTC_H4_M15_DAYTRADE:
+  base_rows = 20000
+  raw_candidates = 387
+  normalized_candidates = 293
+  error_count = 0
+```
+
+15000 vs 20000 の共通期間比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail15000\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_btc_h4_m15_tail20000\minimal_candidates_normalized_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_btc_h4_m15_tail15000_vs_tail20000 --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 231
+minimal_rows = 230
+matched_rows = 229
+full_only_rows = 2
+minimal_only_rows = 1
+value_diff_rows = 0
+payload_key_diff_rows = 0
+```
+
+差分確認:
+
+```text
+full_only:
+  2025-12-01 21:45 SELL
+  2025-12-02 13:45 SELL
+
+minimal_only:
+  2025-12-02 00:00 SELL
+```
+
+解釈:
+
+```text
+差分は tail overlap 開始直後の 2025-12-01〜2025-12-02 に集中。
+最新付近の差分ではない。
+したがって、tail開始直後の ZigZag / pivot / divergence / cooldown 初期化差と見る。
+```
+
+### 8.7 BTC candidate generation 現時点の結論
+
+```text
+BTC_H4_M15_DAYTRADE candidate generation:
+  実装状態: 動作OK。ただしGOLDほど完全一致ではないため初期PASS扱いは保留。
+  tail5000: 不足
+  tail10000: 大幅改善
+  tail15000以上: 差分はtail開始直後の数件に限定
+  本番通知利用: risk/spread enrich前なので不可
+```
+
+暫定仕様:
+
+```text
+BTC_H4_M15_DAYTRADE:
+  M15 tail は 15000 以上を採用候補にする。
+  tail全期間の完全一致は必須にしない。
+  tail開始直後の差分はwarmup影響として扱う。
+  live通知判定は最新確定足/直近数本だけに限定する。
+  最新側で full strict と一致するかを別途確認する。
+```
+
+---
+
+## 9. 現時点の判定
 
 ```text
 GOLD_H4_M5_SCALP candidate generation:
@@ -526,41 +794,41 @@ GOLD_D1_H1_DAYTRADE candidate generation:
   実装状態: 初期PASS相当
   risk/SL/TP enrich: 未接続
   本番通知利用: まだ不可
+
+BTC_H4_M15_DAYTRADE candidate generation:
+  実装状態: 動作OK。ただしtail全期間完全一致ではないため初期PASS扱いは保留
+  risk/spread enrich: 未接続
+  本番通知利用: 不可
 ```
 
 本番通知に進むための残課題:
 
 ```text
 1. GOLD candidates に risk/SL/TP enrich を接続
-2. risk_status OK のみ通知対象にする
-3. pair別更新トリガー確認
-4. ledger重複通知確認
-5. Discord dry-run確認
+2. BTC candidates に spread込みrisk enrich を接続
+3. risk_status OK / btc_live_risk_status OK のみ通知対象にする
+4. pair別更新トリガー確認
+5. ledger重複通知確認
+6. Discord dry-run確認
 ```
 
 ---
 
-## 9. 次の実装対象
+## 10. 次の実装対象
 
-次pair:
+次は candidate generation ではなく、risk enrich 接続へ進む。
+
+候補:
 
 ```text
-BTC_H4_M15_DAYTRADE
+scripts/enrich_mochipoyo_live_payload_risk.py
 ```
 
-理由:
+方針:
 
 ```text
-- context はH4
-- base はM15
-- 採用sliceは A BUY / A SELL
-- 候補生成は既存 generator 経路で追加可能
-```
-
-注意:
-
-```text
-BTCは候補生成だけでは本番通知不可。
-spread込みrisk enrichが必須。
-通知には current/mode/effective spread、spread_to_sl_ratio、effective_rr_after_spread、net SL/TP を必ず含める。
+- 既存 enrich ロジックを読み、minimal scanner output に接続できる最小I/Fを決める。
+- GOLDは live_risk_status == OK のみ通知候補。
+- BTCは btc_live_risk_status == OK かつ spread関連列が揃ったものだけ通知候補。
+- BTCは spread_to_sl_ratio / effective_rr_after_spread / net_sl_after_spread_price / net_tp_after_spread_price を比較必須項目にする。
 ```
