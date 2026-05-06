@@ -1,12 +1,47 @@
-# GOLD_MOCHIPOYO_RR12_REFINED_205
+# GOLD_MOCHIPOYO_RR12_REFINED
 
 ## Status
 
-`GOLD_MOCHIPOYO_RR12_REFINED_205` is the current provisional leading GOLD candidate.
+`GOLD_MOCHIPOYO_RR12_REFINED` is the current provisional leading GOLD candidate.
+
+The old working name was `GOLD_MOCHIPOYO_RR12_REFINED_205`. The candidate name is now **condition-based instead of row-count-based**, because future MT5 CSV updates can legitimately add new rows while preserving the same fixed-filter logic.
 
 This is **not** a live-notification preset yet.
 This is **not** an AI-review target yet.
-This candidate must remain in the review/backtest stage until the final trade CSV, regeneration path, and timing audit are manually checked.
+This candidate must remain in the review/backtest stage until the final trade CSV, fixed-preset regeneration path, and timing audit are manually checked.
+
+## Fixed-filter reproduction rule
+
+This candidate must now be reproduced from the fixed preset:
+
+```text
+config/mochipoyo/gold_mochipoyo_rr12_refined_fixed_filters.json
+```
+
+Do **not** reselect leaderboard top filters during normal reproduction.
+
+Correct fixed-preset build command:
+
+```cmd
+python scripts/build_mochipoyo_portfolio_from_fixed_preset.py --backtest-csv data/results/mochipoyo/selected/gold_mochipoyo_passed_backtest_rr12.csv --preset-json config/mochipoyo/gold_mochipoyo_rr12_refined_fixed_filters.json --output-prefix data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset
+```
+
+Expected fixed-preset review result from the reference run:
+
+```text
+fixed_filters: 20
+matched_filter_parts_rows: 767
+union_exact_deduped_rows: 265
+portfolio_before_exclusions_rows: 224
+removed_rows: 19
+final_rows: 205
+```
+
+Final fixed-preset CSV:
+
+```text
+data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset_final_portfolio.csv
+```
 
 ## Core idea
 
@@ -19,6 +54,7 @@ This candidate translates the Mochipoyo-style guide into a reproducible backtest
 5. Use MACD 6/13/4 divergence or hidden divergence as an additional reason.
 6. Drop to the lower timeframe for timing.
 7. Convert persistent good environments into event candidates before first-touch testing.
+8. Apply the fixed 20-filter preset and configured weak-slice exclusion.
 
 ## Mandatory anti-leak rules
 
@@ -73,6 +109,8 @@ scripts/refine_mochipoyo_gold_rr12_filters.py
 scripts/build_mochipoyo_refined_portfolio.py
 scripts/sweep_mochipoyo_refined_portfolio.py
 scripts/exclude_mochipoyo_portfolio_slices.py
+scripts/make_mochipoyo_fixed_filter_preset.py
+scripts/build_mochipoyo_portfolio_from_fixed_preset.py
 ```
 
 ## Timeframe pairs considered
@@ -125,18 +163,20 @@ filtered events: 4,105
 M1/M5 touch-range valid events: 2,364
 positive selected trades before RR refinement: 684
 refined portfolio before weak-slice removal: 224
-final candidate after weak-slice removal: 205
+final reference candidate after weak-slice removal: 205
 ```
+
+A later raw-CSV regeneration produced 206 rows because one additional valid historical row appeared in the updated MT5 CSV set. The shared 205 rows matched on common columns. For stable reproduction, use the fixed-filter preset rather than row-count naming.
 
 ## Removed weak slice
 
-Removed from the 224-trade refined portfolio:
+The fixed preset excludes:
 
 ```text
 GOLD_H4_M15_DAYTRADE|A|SELL
 ```
 
-Reason:
+Reference removed-slice stats:
 
 ```text
 trades: 19
@@ -152,9 +192,9 @@ max_consecutive_losses: 5
 
 Removing it improved PF and DD while barely reducing total R.
 
-## Final performance
+## Final fixed-preset reference performance
 
-`GOLD_MOCHIPOYO_RR12_REFINED_205`:
+`GOLD_MOCHIPOYO_RR12_REFINED` reference run:
 
 ```text
 trades: 205
@@ -186,22 +226,34 @@ All reviewed months are positive. March and April are weak but not negative.
 
 ## Important generated files
 
-Final portfolio:
+Fixed preset:
 
 ```text
-data/results/mochipoyo/selected/gold_mochipoyo_rr12_refined_224_minus_h4m15_a_sell_portfolio.csv
+config/mochipoyo/gold_mochipoyo_rr12_refined_fixed_filters.json
 ```
 
-Monthly summary:
+Fixed-preset final portfolio:
 
 ```text
-data/results/mochipoyo/selected/gold_mochipoyo_rr12_refined_224_minus_h4m15_a_sell_by_month.csv
+data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset_final_portfolio.csv
 ```
 
-Summary JSON:
+Fixed-preset month summary:
 
 ```text
-data/results/mochipoyo/selected/gold_mochipoyo_rr12_refined_224_minus_h4m15_a_sell_summary.json
+data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset_by_month.csv
+```
+
+Fixed-preset filter coverage:
+
+```text
+data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset_filter_coverage.csv
+```
+
+Fixed-preset summary:
+
+```text
+data/results/mochipoyo/selected/gold_mochipoyo_rr12_fixed_preset_summary.json
 ```
 
 ## Known strengths
@@ -213,12 +265,14 @@ data/results/mochipoyo/selected/gold_mochipoyo_rr12_refined_224_minus_h4m15_a_se
 - Does not rely on a single timeframe pair.
 - BUY and SELL both contribute, although SELL contributes more trades.
 - Filter reasons are consistent with the guide: Granville, EMA-band pullback/retrace, RCI zones/turns, MACD divergence/hidden divergence.
+- Fixed-filter preset removes leaderboard re-ranking instability.
 
 ## Known weaknesses
 
 - M1/M5 outcome window is short and starts around `2025-11-28`.
 - March and April are weak months.
 - The refined filters were selected using the same available window, so overfitting risk remains.
+- Row count can change when raw MT5 CSVs are updated.
 - This must not be mixed with BTC.
 - BTC requires separate spread-included net validation.
 
@@ -227,16 +281,14 @@ data/results/mochipoyo/selected/gold_mochipoyo_rr12_refined_224_minus_h4m15_a_se
 Before this can move toward notification or AI review:
 
 1. Manually inspect a sample of winning and losing rows.
-2. Confirm selected filters can be reconstructed from raw CSVs without manual edits.
-3. Create a deterministic preset/config for this candidate.
-4. Re-run from raw MT5 CSVs and confirm the same 205 trades are regenerated.
-5. Add an explicit timing-audit report for the final 205 trades.
-6. Keep BTC separate and perform BTC net spread-included validation independently.
+2. Add an explicit timing-audit report for the final fixed-preset trades.
+3. Confirm that fixed-preset final rows are stable for a frozen input CSV snapshot.
+4. Keep BTC separate and perform BTC net spread-included validation independently.
 
 ## Decision
 
 ```text
-GOLD_MOCHIPOYO_RR12_REFINED_205 = provisional leading GOLD candidate
+GOLD_MOCHIPOYO_RR12_REFINED = provisional leading GOLD candidate
 ```
 
 Not allowed yet:
