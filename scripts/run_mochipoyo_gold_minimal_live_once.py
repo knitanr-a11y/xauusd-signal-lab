@@ -105,6 +105,13 @@ def windows_long_path(path: str | Path) -> str:
     return "\\\\?\\" + text
 
 
+def write_text(path: str | Path, text: str, encoding: str = "utf-8") -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(windows_long_path(p), "w", encoding=encoding, newline="") as f:
+        f.write(text)
+
+
 def write_csv(df: pd.DataFrame, path: str | Path) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -383,8 +390,8 @@ def run_discord_stage(args: argparse.Namespace, to_send_csv: Path, to_send_rows:
     preview_dir.mkdir(parents=True, exist_ok=True)
 
     if int(to_send_rows) <= 0:
-        (preview_dir / f"discord_{mode}_stdout.txt").write_text("SKIPPED_NO_ROWS\n", encoding="utf-8")
-        (preview_dir / f"discord_{mode}_stderr.txt").write_text("", encoding="utf-8")
+        write_text(preview_dir / f"discord_{mode}_stdout.txt", "SKIPPED_NO_ROWS\n")
+        write_text(preview_dir / f"discord_{mode}_stderr.txt", "")
         return 0, "SKIPPED_NO_ROWS"
 
     if args.discord_send and int(args.discord_max_rows) > 0 and int(args.discord_max_rows) < int(to_send_rows):
@@ -393,8 +400,8 @@ def run_discord_stage(args: argparse.Namespace, to_send_csv: Path, to_send_rows:
             f"discord_max_rows={int(args.discord_max_rows)} is smaller than ledger_new_candidates={int(to_send_rows)}. "
             "Refusing partial live Discord send so notification ledger and trigger state do not advance incorrectly."
         )
-        (preview_dir / f"discord_{mode}_stdout.txt").write_text("", encoding="utf-8")
-        (preview_dir / f"discord_{mode}_stderr.txt").write_text(msg + "\n", encoding="utf-8")
+        write_text(preview_dir / f"discord_{mode}_stdout.txt", "")
+        write_text(preview_dir / f"discord_{mode}_stderr.txt", msg + "\n")
         return 1, "ERROR_SEND_LIMIT_WOULD_DROP_ROWS"
 
     cmd = [
@@ -412,8 +419,8 @@ def run_discord_stage(args: argparse.Namespace, to_send_csv: Path, to_send_rows:
         cmd.append("--send")
 
     proc = subprocess.run(cmd, text=True, capture_output=True)
-    (preview_dir / f"discord_{mode}_stdout.txt").write_text(proc.stdout, encoding="utf-8")
-    (preview_dir / f"discord_{mode}_stderr.txt").write_text(proc.stderr, encoding="utf-8")
+    write_text(preview_dir / f"discord_{mode}_stdout.txt", proc.stdout)
+    write_text(preview_dir / f"discord_{mode}_stderr.txt", proc.stderr)
     status = "SENT" if args.discord_send and proc.returncode == 0 else "OK" if proc.returncode == 0 else "ERROR"
     return int(proc.returncode), status
 
