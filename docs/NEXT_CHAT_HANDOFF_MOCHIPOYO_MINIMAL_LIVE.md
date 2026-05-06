@@ -2,7 +2,7 @@
 
 最終更新: 2026-05-06
 
-このドキュメントは、次チャットで `もちぽよ式 GOLD minimal live dry loop` の続きから始めるための引き継ぎである。
+このドキュメントは、次チャットで `もちぽよ式 GOLD minimal live / Discord / MT5 demo auto-trade` の続きから始めるための引き継ぎである。
 
 ---
 
@@ -17,6 +17,7 @@ docs/MOCHIPOYO_GOLD_MINIMAL_LIVE_ONCE_STABILITY.md
 docs/MOCHIPOYO_MINIMAL_LEDGER_VALIDATION.md
 docs/MOCHIPOYO_MINIMAL_RISK_NOTIFICATION_VALIDATION.md
 docs/MOCHIPOYO_MINIMAL_SCANNER_VALIDATION_LOG.md
+docs/MOCHIPOYO_MINIMAL_AUTOTRADE_VALIDATION.md
 ```
 
 BTCを触る場合は以下も読む。
@@ -29,7 +30,7 @@ docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 
 ## 2. 現在の到達点
 
-GOLD 3pair のもちぽよ式 minimal live flow は、Discord実送信なしの dry loop までPASS扱い。
+GOLD 3pair のもちぽよ式 minimal live flow は、Discord実送信、MT5デモ口座へのauto-trade sendまでPASS扱い。
 
 対象pair:
 
@@ -47,25 +48,43 @@ GOLD risk enrich: PASS
 GOLD notification eligibility: PASS
 GOLD trigger window filter: PASS
 GOLD ledger duplicate filter: PASS
-GOLD Discord dry-run / no-row skip: PASS
 GOLD pair trigger state: PASS
 GOLD minimal live once stability: PASS
 GOLD minimal live dry loop: PASS
+Discord compact message: PASS
+Discord実送信: PASS
+order payload generation: PASS
+MT5 demo connection: PASS
+GOLD# symbol/tick: PASS
+MT5 order_check: PASS
+MT5 demo single order_send: PASS
+position policy guards: PASS
+live loop auto-trade dry-run: PASS
+live loop auto-trade send: PASS
+live loop auto-trade duplicate/position block: PASS
 ```
 
-まだDiscord実送信はしていない。
-自動売買もしていない。
+重要:
+
+```text
+本口座での自動売買は未実施。
+検証済みの実発注は XMTrading デモ口座 75539039 のみ。
+```
 
 ---
 
 ## 3. 追加・修正済みファイル
 
-今回の主な追加/修正ファイル:
+主な追加/修正ファイル:
 
 ```text
 scripts/apply_mochipoyo_pair_trigger_state.py
 scripts/run_mochipoyo_gold_minimal_live_once.py
 scripts/run_mochipoyo_gold_minimal_live_loop_dry.py
+scripts/check_mt5_connection_and_symbol.py
+scripts/check_mt5_order_payloads.py
+scripts/build_mochipoyo_order_payloads.py
+scripts/send_mt5_order_from_payload.py
 ```
 
 関連して既に使っている既存/追加部品:
@@ -80,32 +99,35 @@ scripts/mochipoyo_risk_enricher.py
 scripts/mochipoyo_notification_filter.py
 ```
 
-重要コミット:
+重要コミット例:
 
 ```text
-d04e49d315e324add95a2c5e3af157dc85ef27ef
-  Add pair trigger state validator for minimal loop
-
-13139fb291753eef0ec592973225af7065700c3c
-  Add one-shot GOLD minimal live flow orchestrator
-
-0d897117218590ab8861c8f0554d6dfbc0320bac
-  Filter live once notifications to trigger window
-
-7c2fa1e5081997ef042f76eb8d32628edcec13b1
-  Skip Discord dry-run when no rows to send
-
 023c0e6507838b530715817f1a4b0c9397bde0e6
   Add dry loop wrapper for GOLD minimal live once
 
-566e321e541fc4c9b364f96c203bc7ca14f7f831
-  Precreate iteration output subdirectories in dry loop
+43ad4f240cdbcf11bd33e9ff7df631e6ea347aa7
+  Add read-only MT5 connection/symbol checker
 
-b3cdaa6dca64ef7c7bfa4027a10b32d941f99392
-  Support Windows long paths in minimal live once CSV writes
+130a1444de47eeaffc2ddb53ea0ce4b5073e6a56
+  Accept MT5 order_check retcode 0 Done as pass
 
-fb689df21faee997192d51094998619e18b78178
-  Document GOLD dry loop validation and long path fix
+3d80e86481c1fae60f50b41d57ed68060bcee295
+  Add guarded MT5 order sender for demo payload tests
+
+5558ab9e9865ccad6be05a5e7aeef4b0a77efa1d
+  Add MT5 position policy guards for same-direction scaling
+
+6ab99c54662126bd4be74e7ba81d675eea346eb3
+  Add MT5 auto-trade dry-run stage to minimal live loop
+
+22fc044146ca8f6ecf9a47b932c5ab0712938fba
+  Treat auto-trade dry-run position-policy blocks as safe skips
+
+fd4accb841c1d17c63c8ccc18f83dc51f8c703bf
+  Add guarded MT5 auto-trade send mode to live loop
+
+623ad0aeb230ee062574804054ffb74df61ae132
+  Document Mochipoyo minimal auto-trade validation
 ```
 
 ---
@@ -137,21 +159,6 @@ state CSV:
 data/results/mochipoyo/minimal_trigger_test/gold_pair_trigger_state.csv
 ```
 
-検証済み:
-
-```text
-初回 stateなし:
-  INITIALIZE_ONLY = 3
-  to_scan_rows = 0
-
-CSV更新なし:
-  SKIPPED_NO_NEW_BAR = 3
-  to_scan_rows = 0
-
-1pairだけstateを古くする:
-  対象pairだけ SCAN_REQUIRED
-```
-
 ---
 
 ## 5. trigger更新窓フィルターの仕様
@@ -170,195 +177,311 @@ previous_close_time < signal_close_time <= latest_close_time
 初回scanされたpairで、過去の候補がledger未登録という理由だけで新規通知される事故を防ぐため。
 ```
 
-実際にrun3で見つかった問題:
-
-```text
-GOLD_D1_H1_DAYTRADE を初めてscanした時、
-2026-04-15 / 2026-04-16 の過去候補2件が
-ledger未登録の新規候補として出た。
-```
-
 対策済み:
 
 ```text
 trigger更新窓外の候補は notification_outside_trigger_window へ落とす。
-ledgerにもDiscordにも流さない。
+ledgerにもDiscordにもMT5発注にも流さない。
+```
+
+このフィルターは無効化しない。
+
+---
+
+## 6. Discord通知の現在仕様
+
+Discord compact message は簡素化済み。
+
+現在の例:
+
+```text
+🟨 GOLD BUY 📈
+━━━━━━━━━━━━━━
+MT5時間: 2026-05-06 08:00
+足: H4 → M15
+戦略: H4 → M15 デイトレ / B条件
+
+Entry: 4648.770
+SL:    4546.230
+TP:    4771.818
+RR:    1.20
+
+根拠:
+・...
+
+注意:
+・特になし
+
+照合ID: GOLD / GOLD_H4_M15_DAYTRADE / B / BUY / 2026-05-06 08:00 / 4648.77
+```
+
+削ったもの:
+
+```text
+Signal確定の重複表示
+Pair/Rank/Keyの長い内部表現
+形: - / 買い候補
+```
+
+Discord実送信はPASS済み。
+
+---
+
+## 7. MT5 / auto-trade の現在仕様
+
+詳細ログは必ず以下を読む。
+
+```text
+docs/MOCHIPOYO_MINIMAL_AUTOTRADE_VALIDATION.md
+```
+
+現在のMT5デモ情報:
+
+```text
+account_login: 75539039
+account_server: XMTrading-MT5 3
+account_name: Demo Account
+broker_symbol: GOLD#
+volume_min: 0.01
+volume_step: 0.01
+```
+
+live loopに追加済み:
+
+```text
+--enable-auto-trade-dry-run
+--enable-auto-trade-send
+--auto-trade-broker-symbol
+--auto-trade-order-ledger-csv
+--auto-trade-expected-login
+--auto-trade-select-symbol
+--auto-trade-require-demo-account
+--auto-trade-position-policy
+--auto-trade-max-symbol-positions
+--auto-trade-max-symbol-lot
+--auto-trade-max-orders
+--auto-trade-deviation
+```
+
+安全仕様:
+
+```text
+--enable-auto-trade-send を明示した時だけ send_mt5_order_from_payload.py に --send を渡す
+--enable-auto-trade-dry-run と --enable-auto-trade-send の同時指定は禁止
+--enable-auto-trade-send では --auto-trade-expected-login が必須
+--enable-auto-trade-send では --auto-trade-require-demo-account が必須
+order_key重複 / account / demo / position_policy / order_check ガードを通った時だけ発注
+```
+
+position policy:
+
+```text
+block_any:
+  既存ポジションが1件でもあれば停止
+
+allow_same_direction:
+  同方向ポジションだけ追加許可
+  逆方向は停止
+  max-symbol-positions / max-symbol-lot で制限
+
+allow_any_until_max:
+  BUY/SELL問わず最大数・最大lotまで許可
+```
+
+現時点の推奨:
+
+```text
+--auto-trade-position-policy block_any
+--auto-trade-max-symbol-positions 1
+--auto-trade-max-symbol-lot 0.01
+--auto-trade-max-orders 1
 ```
 
 ---
 
-## 6. Discord dry-run / no-row skip の仕様
+## 8. 直近の重要成功検証
 
-Discord実送信はまだ行わない。
-`run_mochipoyo_gold_minimal_live_loop_dry.py` は常に one-shot を `--discord-dry-run` で呼ぶ。
+### 8.1 live loop auto-trade dry-run flat
 
-送信候補0件の場合:
-
-```text
-discord_status = SKIPPED_NO_ROWS
-discord_returncode = 0
-success = True
-```
-
-空CSVをDiscord送信スクリプトへ渡してERRORにしない。
-
----
-
-## 7. Windows long path 対応
-
-MT5のMQL5/Files配下はパスが長く、dry loopの深い出力先では `pandas.to_csv()` が `FileNotFoundError` になることがあった。
-
-発生例:
-
-```text
-FileNotFoundError:
-...\iter_0001\notification\minimal_candidates_notification_outside_trigger_window_gold_h4_m5_scalp.csv
-```
-
-対応済み:
-
-```text
-run_mochipoyo_gold_minimal_live_once.py:
-  Windowsでは CSV保存時に \\?\ 付き extended-length path を使う
-
-run_mochipoyo_gold_minimal_live_loop_dry.py:
-  iteration開始時に scan/notification/ledger/discord を事前作成
-```
-
-さらに検証時は短いout-dirを使う。
-
-推奨:
-
-```text
-data/ml_loop_runX
-```
-
-避けたい長いout-dir:
-
-```text
-data/results/mochipoyo/minimal_live_loop_dry_test/runX
-```
-
----
-
-## 8. 直近の成功検証: dry loop run4
-
-実行コマンド:
-
-```cmd
-python scripts\run_mochipoyo_gold_minimal_live_loop_dry.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\ml_loop_run4 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --iterations 3 --sleep-seconds 10 --commit-trigger-state --commit-ledger
-```
+ポジション0状態で実行。
 
 結果:
 
 ```text
-iteration 1:
-  returncode = 0
-  pairs_to_scan = 2
-  notification_ok_live_rows = 0
-  notification_outside_trigger_window_rows = 43
-  ledger_new_candidates = 0
-  ledger_append_rows = 0
-  discord_status = SKIPPED_NO_ROWS
-  success = True
+discord_status = SENT
+order_payload_status = OK
+order_payload_rows = 1
+valid_order_payloads = 1
+auto_trade_status = OK
+auto_trade_send_enabled = False
+auto_trade_rows = 1
+auto_trade_dry_run_check_ok_rows = 1
+auto_trade_blocked_position_policy_rows = 0
+auto_trade_order_send_called_count = 0
+auto_trade_sent_rows = 0
+success = True
+```
 
-iteration 2:
-  returncode = 0
-  pairs_to_scan = 0
-  notification_ok_live_rows = 0
-  notification_outside_trigger_window_rows = 0
-  ledger_new_candidates = 0
-  ledger_append_rows = 0
-  discord_status = SKIPPED_NO_ROWS
-  success = True
+### 8.2 live loop auto-trade send
 
-iteration 3:
-  returncode = 0
-  pairs_to_scan = 0
-  notification_ok_live_rows = 0
-  notification_outside_trigger_window_rows = 0
-  ledger_new_candidates = 0
-  ledger_append_rows = 0
-  discord_status = SKIPPED_NO_ROWS
-  success = True
+ポジション0状態で実行。
+
+結果:
+
+```text
+discord_status = SENT
+order_payload_status = OK
+order_payload_rows = 1
+valid_order_payloads = 1
+auto_trade_status = SENT
+auto_trade_send_enabled = True
+auto_trade_rows = 1
+auto_trade_order_send_called_count = 1
+auto_trade_sent_rows = 1
+success = True
+```
+
+MT5取引タブ確認:
+
+```text
+GOLD# BUY 0.01 が実際に表示された。
+```
+
+### 8.3 live loop auto-trade send duplicate/position block
+
+既存 `GOLD# BUY 0.01` がある状態で再実行。
+
+結果:
+
+```text
+discord_status = SENT
+order_payload_status = OK
+order_payload_rows = 1
+valid_order_payloads = 1
+auto_trade_status = OK_BLOCKED_POSITION_POLICY
+auto_trade_send_enabled = True
+auto_trade_rows = 1
+auto_trade_blocked_position_policy_rows = 1
+auto_trade_order_send_called_count = 0
+auto_trade_sent_rows = 0
+success = True
 ```
 
 判定:
 
 ```text
-dry loop wrapper: PASS
-once呼び出し: PASS
-Windows long path対応: PASS
-pair trigger state更新: PASS
-更新なしskip: PASS
-trigger window filter: PASS
-Discord no-row skip: PASS
+既存ポジションありの追加発注ブロック: PASS
 ```
 
 ---
 
-## 9. 次チャットでやること: A案 長めのdry loop
+## 9. Windows long path 対応
 
-ユーザー希望は A案。
+MT5のMQL5/Files配下はパスが長く、dry loopの深い出力先では `pandas.to_csv()` が `FileNotFoundError` になることがあった。
+
+対応済み:
+
+```text
+Windowsでは CSV保存時に \\?\ 付き extended-length path を使う
+iteration開始時に scan/notification/ledger/discord/order/auto_trade を事前作成
+```
+
+検証時は短いout-dirを使う。
+
+推奨:
+
+```text
+data/ml_loop_runX
+data/ml_loop_demo_prodX
+```
+
+避けたい長いout-dir:
+
+```text
+data/results/mochipoyo/minimal_live_loop_... の深い階層
+```
+
+---
+
+## 10. 次にやること
+
+次の推奨は、デモ口座で短時間の auto-trade send loop。
 
 目的:
 
 ```text
-iterations = 12
-sleep_seconds = 10〜30
+人工stateではなく、通常のtrigger更新に合わせて
+no-row / outside-window / sent / blocked の挙動を確認する。
 ```
 
-で、M5/M15/H1更新タイミングをまたいでも安定して動くか確認する。
-
-推奨コマンド:
-
-```cmd
-python scripts\run_mochipoyo_gold_minimal_live_loop_dry.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\ml_loop_run5 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --iterations 12 --sleep-seconds 15 --commit-trigger-state --commit-ledger
-```
-
-確認コマンド:
-
-```cmd
-python -c "import pandas as pd; p=r'data\ml_loop_run5\gold_minimal_live_loop_dry_summary.csv'; df=pd.read_csv(p,encoding='utf-8-sig'); cols=[c for c in ['loop_iteration','returncode','pairs_to_scan','notification_ok_live_rows','notification_outside_trigger_window_rows','ledger_new_candidates','ledger_append_rows','discord_status','success'] if c in df.columns]; print(df[cols].to_string(index=False))"
-```
-
-成功条件:
+推奨条件:
 
 ```text
-全iteration returncode = 0
-全iteration success = True
-Discord実送信なし
-自動売買なし
-pairs_to_scan は更新タイミングに応じて 0/1/2/3 で自然に変動
-trigger更新窓外の候補は notification_outside_trigger_window に落ちる
-ledger_new_candidates は live window 内の新規payload_keyがある時だけ増える
-送信候補0件なら discord_status = SKIPPED_NO_ROWS
+account: XMTrading demo 75539039
+broker_symbol: GOLD#
+lot: 0.01
+position_policy: block_any
+max_symbol_positions: 1
+max_symbol_lot: 0.01
+auto_trade_max_orders: 1
+out-dir: data/ml_loop_demo_prod1 など短いパス
+```
+
+実行前に確認:
+
+```text
+MT5がデモ口座 75539039 でログイン中
+Algo Trading ON
+本口座ではない
+既存GOLD#ポジションの有無を把握している
 ```
 
 ---
 
-## 10. 次チャットでやってはいけないこと
+## 11. まだやっていないこと
 
 ```text
-- Discord実送信へすぐ進む
-- 自動売買を入れる
-- 既存の run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py を使う
+本口座での自動売買
+長時間のデモ auto-trade send loop
+損益/ポジション管理
+自動決済
+建値移動
+トレーリング
+約定後のDiscord追跡通知
+ポジション一覧監視
+日次損失制限
+連続発注間隔制限
+時間帯停止
+```
+
+現状はエントリー自動発注まで。
+決済はSL/TPをMT5注文に付けているのみ。
+
+---
+
+## 12. 次チャットでやってはいけないこと
+
+```text
+- 本口座でいきなり --enable-auto-trade-send を使う
+- expected-loginなしでauto-trade sendを許す
+- require-demo-accountなしでauto-trade sendを許す
 - trigger更新窓フィルターを無効化する
+- 既存の run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py を使う
 - 長い out-dir を使ってWindows path問題を再発させる
-- notification_outside_trigger_window を通知候補として扱う
-- ledger_new_candidates が0だから異常と判断する
+- notification_outside_trigger_window を通知/発注候補として扱う
 ```
 
 ---
 
-## 11. 次の判断基準
+## 13. 次の判断基準
 
-長めdry loopが安定した後の次候補:
+短時間デモ auto-trade send loopが安定した後の次候補:
 
 ```text
-1. Discord本文preview確認
-2. 実Discord送信の1件dry-to-live切替テスト
-3. BTC minimal flowへ進む前のBTC spread再確認
+1. ポジション監視スクリプト追加
+2. order ledgerとMT5履歴の照合
+3. 約定後Discord追跡通知
+4. 日次損失制限・最大発注数制限
+5. デモ1日稼働
+6. 本口座検討はその後
 ```
-
-まだ実送信前なので、次チャットではまず A案の長めdry loopを完了させる。
