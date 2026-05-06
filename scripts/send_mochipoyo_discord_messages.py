@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -32,6 +33,20 @@ import pandas as pd
 from format_mochipoyo_discord_messages import format_row, val  # type: ignore
 
 DISCORD_LIMIT = 2000
+
+
+def safe_text(text: object) -> str:
+    """Return text printable even on Windows cp932 consoles.
+
+    Files and Discord keep the original UTF-8 message. This only protects stdout.
+    """
+    s = str(text)
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    return s.encode(enc, errors="backslashreplace").decode(enc, errors="replace")
+
+
+def safe_print(text: object = "") -> None:
+    print(safe_text(text))
 
 
 def make_payload_key(row: pd.Series) -> str:
@@ -68,7 +83,6 @@ def split_message(msg: str, limit: int = DISCORD_LIMIT) -> list[str]:
             if len(line) <= limit:
                 cur = line
             else:
-                # Hard split extremely long single line.
                 for i in range(0, len(line), limit):
                     part = line[i:i + limit]
                     if len(part) == limit:
@@ -194,25 +208,25 @@ def main() -> int:
                 if rec["send_status"] == "PENDING":
                     rec["send_status"] = "ERROR_NO_WEBHOOK_URL"
             preview_json.write_text(json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2), encoding="utf-8")
-            print("send_mochipoyo_discord_messages")
-            print("ERROR: --send was specified but webhook URL was not provided.")
-            print(f"Use --webhook-url or set environment variable {args.webhook_env}.")
-            print(f"preview_txt: {preview_txt}")
-            print(f"preview_json: {preview_json}")
+            safe_print("send_mochipoyo_discord_messages")
+            safe_print("ERROR: --send was specified but webhook URL was not provided.")
+            safe_print(f"Use --webhook-url or set environment variable {args.webhook_env}.")
+            safe_print(f"preview_txt: {preview_txt}")
+            safe_print(f"preview_json: {preview_json}")
             return 2
 
-        # Map payload_key to record object for updating.
         rec_by_key = {str(r["payload_key"]): r for r in records}
         for rec in send_rows:
             key = str(rec["payload_key"])
-            for part_i, part in enumerate(split_message(str(rec["message"])), start=1):
+            parts = split_message(str(rec["message"]))
+            for part_i, part in enumerate(parts, start=1):
                 result = post_discord(webhook_url, part, username=args.username)
                 if not result.get("ok"):
                     rec_by_key[key]["send_status"] = "ERROR_DISCORD_POST"
                     rec_by_key[key]["discord_status_code"] = result.get("status")
                     rec_by_key[key]["discord_response"] = result.get("body")
                     break
-                if part_i < len(split_message(str(rec["message"]))):
+                if part_i < len(parts):
                     time.sleep(args.sleep_seconds)
             else:
                 rec_by_key[key]["sent"] = True
@@ -231,7 +245,6 @@ def main() -> int:
             time.sleep(args.sleep_seconds)
 
         append_send_ledger(sent_ledger_rows, send_ledger_csv)
-        # Refresh records from rec_by_key updates
         records = list(rec_by_key.values())
     else:
         for rec in records:
@@ -248,20 +261,20 @@ def main() -> int:
     would_send = sum(1 for r in records if r["send_status"] == "DRY_RUN_WOULD_SEND")
     errors = sum(1 for r in records if str(r["send_status"]).startswith("ERROR"))
 
-    print("send_mochipoyo_discord_messages")
-    print(f"source: {input_csv}")
-    print(f"rows: {total}")
-    print(f"send: {args.send}")
-    print(f"duplicates_existing: {duplicates}")
-    print(f"dry_run_would_send: {would_send}")
-    print(f"sent: {sent}")
-    print(f"errors: {errors}")
-    print(f"send_ledger_csv: {send_ledger_csv}")
-    print(f"preview_txt: {preview_txt}")
-    print(f"preview_json: {preview_json}")
-    print("preview_last:")
-    print(records[-1]["message"] if records else "empty")
-    print("done")
+    safe_print("send_mochipoyo_discord_messages")
+    safe_print(f"source: {input_csv}")
+    safe_print(f"rows: {total}")
+    safe_print(f"send: {args.send}")
+    safe_print(f"duplicates_existing: {duplicates}")
+    safe_print(f"dry_run_would_send: {would_send}")
+    safe_print(f"sent: {sent}")
+    safe_print(f"errors: {errors}")
+    safe_print(f"send_ledger_csv: {send_ledger_csv}")
+    safe_print(f"preview_txt: {preview_txt}")
+    safe_print(f"preview_json: {preview_json}")
+    safe_print("preview_last:")
+    safe_print(records[-1]["message"] if records else "empty")
+    safe_print("done")
     return 0 if errors == 0 else 1
 
 
