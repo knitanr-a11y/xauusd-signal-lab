@@ -20,6 +20,29 @@
 5. ライブ通知専用 minimal scanner を作る前に仕様を固定し、full scan との一致検証を行う。
 ```
 
+## 詳細仕様ドキュメント
+
+live notification minimal scanner の詳細仕様は以下へ分離した。
+
+```text
+docs/MOCHIPOYO_MINIMAL_SCANNER_SPEC.md
+```
+
+今後、minimal scanner / 比較スクリプト / pair別live loop を実装する場合は、この詳細仕様を先に読むこと。
+
+この詳細仕様では、以下を固定している。
+
+```text
+- full scan結果保存方式ではなく、CSV末尾更新検知 + pair別minimal scan + ledger/state追記方式にする
+- live初回起動は通知せず、last_seen_base_close_time_by_pair の初期化のみ行う
+- goldsharp_d1.csv を使い、GOLD_D1_H1_DAYTRADE もminimal scanner対象に含める
+- payload_keyは symbol|pair_name|candidate_rank|direction|signal_close_time|entry_time|entry_price_normalized
+- payload_key用価格丸めは GOLD/BTC とも小数2桁
+- source_filter_name は payload_key に含めない
+- BTCは effective_spread_price = max(current_spread_price, mode_spread_price) を初期仕様にする
+- full strict scan vs minimal scan 比較にPASSするまで本番live通知に使わない
+```
+
 ## 既存スクリプトの扱い
 
 ### 使ってよい部品
@@ -142,6 +165,8 @@ InpSkipUnchangedFiles=true:
 ## ライブ通知 minimal scanner の必須仕様
 
 新規実装する場合、既存full scannerをそのまま呼ばない。
+
+詳細仕様は `docs/MOCHIPOYO_MINIMAL_SCANNER_SPEC.md` を正とする。
 
 ### 1. pair単位トリガー
 
@@ -270,18 +295,19 @@ source_filter_name を payload_key に含める
 同じシグナルでも、どの固定フィルターに先に一致したかでkeyが変わる可能性がある。
 ```
 
-推奨payload_key:
+固定payload_key:
 
 ```text
 symbol
 pair_name
 candidate_rank
 direction
+signal_close_time
 entry_time
-entry_price
+entry_price_normalized
 ```
 
-必要なら `base_close_time` / `signal_close_time` も含める。
+GOLD/BTCとも `entry_price_normalized` は小数2桁とする。
 
 ### 8. cooldown は ledger/state で管理する
 
@@ -290,9 +316,10 @@ entry_price
 必要なstate:
 
 ```text
+last_seen_base_close_time_by_pair
 last_notified_time_by_symbol_pair_direction
-last_signal_key
 send ledger
+payload_key
 ```
 
 ### 9. BTCスプレッドはライブでも必須
@@ -300,11 +327,19 @@ send ledger
 BTC通知には必ず以下を持たせる。
 
 ```text
-mode/current spread price
+current spread price
+mode spread price
+effective spread price
 spread_to_sl_ratio
 effective_rr_after_spread
 net_sl_after_spread_price
 net_tp_after_spread_price
+```
+
+判定用spread初期仕様:
+
+```text
+effective_spread_price = max(current_spread_price, mode_spread_price)
 ```
 
 自動売買では、通知より厳しく以下を拒否条件にする。
@@ -341,6 +376,22 @@ SL
 TP
 risk_status
 payload_key
+base_close_time
+signal_close_time
+context_close_time
+pivot_confirmed_time
+```
+
+BTCは追加で以下を比較する。
+
+```text
+current_spread_price
+mode_spread_price
+effective_spread_price
+spread_to_sl_ratio
+effective_rr_after_spread
+net_sl_after_spread_price
+net_tp_after_spread_price
 ```
 
 最新付近の通知候補が一致しない場合、minimal scannerは使わない。
@@ -380,15 +431,20 @@ BTC_H4_M15_DAYTRADE   -> M15更新で判定される
 
 ## 次にコードを書く前に決めること
 
+以下は固定済み。
+
 ```text
-1. GOLD_H4_M5 をM5ごとに通知するか -> 推奨: YES
-2. GOLD_H4_M15 をM15ごとに通知するか -> 推奨: YES
-3. GOLD_D1_H1 をH1ごとに通知するか -> 推奨: YES
-4. BTC_H4_M15 をM15ごとに通知するか -> 推奨: YES
-5. latest row を使うか -> EA設定上は YES。ただし不完全行対策必須。
-6. payload_keyから source_filter_name を外すか -> 推奨: YES
-7. risk_status NGを完全除外するか -> YES
-8. full scan一致テストを作るか -> YES
+1. GOLD_H4_M5 をM5ごとに通知する -> YES
+2. GOLD_H4_M15 をM15ごとに通知する -> YES
+3. GOLD_D1_H1 をH1ごとに通知する -> YES
+4. BTC_H4_M15 をM15ごとに通知する -> YES
+5. latest row を使う -> EA設定上 YES。ただし不完全行対策必須。
+6. payload_keyから source_filter_name を外す -> YES
+7. risk_status NGを完全除外する -> YES
+8. full scan一致テストを作る -> YES
+9. goldsharp_d1.csv を使う -> YES
+10. payload_key用価格丸めはGOLD/BTCとも小数2桁 -> YES
+11. live本番初回起動は通知せずstate初期化のみ -> YES
 ```
 
 ## 作業停止メモ
@@ -400,10 +456,15 @@ BTC_H4_M15_DAYTRADE   -> M15更新で判定される
 実装順は以下。
 
 ```text
-1. minimal scanner仕様固定
-2. full strict scan vs minimal scan 比較スクリプト
-3. minimal scanner本体
-4. pair別軽量loopへ差し替え
-5. Discord送信再確認
-6. デモ口座自動売買設計
+1. pair config
+2. safe CSV reader
+3. payload_key builder
+4. full strict scan出力の正規化
+5. minimal scan出力の正規化
+6. full strict scan vs minimal scan 比較スクリプト
+7. tail sensitivity mode
+8. minimal scanner本体
+9. pair別軽量loopへ差し替え
+10. Discord送信再確認
+11. デモ口座自動売買設計
 ```
