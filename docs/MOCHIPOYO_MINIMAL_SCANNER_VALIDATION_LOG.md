@@ -81,7 +81,7 @@ risk_ok_candidates が0なのは、現時点で minimal generator に risk/SL/TP
 
 ---
 
-## 3. full strict payload との比較
+## 3. GOLD_H4_M5_SCALP: full strict payload との比較
 
 比較対象:
 
@@ -123,7 +123,7 @@ minimal_only 26件は、full payloadが直近通知payloadに限定されてい�
 
 ---
 
-## 4. full strict allowed_events との比較
+## 4. GOLD_H4_M5_SCALP: full strict allowed_events との比較
 
 比較対象:
 
@@ -171,7 +171,7 @@ full_only / minimal_only は、tail開始位置による ZigZag / pivot / diverg
 
 ---
 
-## 5. tail本数感度: M5 6000 vs 12000
+## 5. GOLD_H4_M5_SCALP tail本数感度: M5 6000 vs 12000
 
 追加実行:
 
@@ -221,10 +221,161 @@ GOLD_H4_M5_SCALP の共通期間では、M5 tail 6000 と 12000 の候補は完�
 
 ---
 
-## 6. 現時点の判定
+## 6. GOLD_H4_M15_DAYTRADE 検証結果
+
+対象slice:
+
+```text
+GOLD_H4_M15_DAYTRADE|B|BUY
+GOLD_H4_M15_DAYTRADE|B|SELL
+```
+
+実装:
+
+```text
+scripts/mochipoyo_candidate_generators.py の SUPPORTED_GENERATOR_PAIRS に GOLD_H4_M15_DAYTRADE を追加。
+既存の add_indicators / confirmed_join / scan_pair / event filter 経路を再利用。
+```
+
+### 6.1 minimal generator 初回出力
+
+実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_gold_h4_m15
+```
+
+結果:
+
+```text
+GOLD_H4_M15_DAYTRADE:
+  scan_status = OK
+  base_rows = 5000
+  context_frames = H4
+  raw_candidates = 85
+  normalized_candidates = 23
+  risk_ok_candidates = 0
+  risk_ng_candidates = 0
+  error_count = 0
+```
+
+normalized candidates 内訳:
+
+```text
+GOLD_H4_M15_DAYTRADE B SELL = 13
+GOLD_H4_M15_DAYTRADE B BUY  = 10
+payload_ok = 23 / 23
+```
+
+### 6.2 full strict payload との比較
+
+比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\live_dryrun\gold_mochipoyo_live_dryrun_strict_payloads.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_gold_h4_m15\minimal_candidates_normalized_gold_h4_m15_daytrade.csv --pair-name GOLD_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_gold_h4_m15_payload_overlap --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 1
+minimal_rows = 1
+matched_rows = 1
+full_only_rows = 0
+minimal_only_rows = 0
+value_diff_rows = 0
+payload_key_diff_rows = 0
+status = NORMALIZED_ONLY_NO_RISK
+```
+
+結論:
+
+```text
+full strict payload に出ていた GOLD_H4_M15_DAYTRADE 1件は minimal側と完全一致。
+```
+
+### 6.3 full strict allowed_events との比較
+
+比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\live_dryrun\gold_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_gold_h4_m15\minimal_candidates_normalized_gold_h4_m15_daytrade.csv --pair-name GOLD_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_gold_h4_m15_allowed_events_overlap --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 36
+minimal_rows = 23
+matched_rows = 23
+full_only_rows = 13
+minimal_only_rows = 0
+value_diff_rows = 0
+payload_key_diff_rows = 0
+status = NORMALIZED_ONLY_NO_RISK
+```
+
+結論:
+
+```text
+minimal generator が出した GOLD_H4_M15_DAYTRADE 23件は、full strict allowed_events側に全件存在。
+full_only 13件は、tail開始位置またはwarmup差による可能性が高い。
+```
+
+### 6.4 tail本数感度: M15 5000 vs 10000
+
+追加実行:
+
+```cmd
+python scripts\mochipoyo_minimal_scanner.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_generator_test_gold_h4_m15_tail10000 --tail-m15 10000 --tail-h4 1500
+```
+
+結果:
+
+```text
+GOLD_H4_M15_DAYTRADE:
+  base_rows = 10000
+  raw_candidates = 168
+  normalized_candidates = 39
+  error_count = 0
+```
+
+5000 vs 10000 の共通期間比較:
+
+```cmd
+python scripts\compare_mochipoyo_full_strict_vs_minimal.py --full-csv data\results\mochipoyo\minimal_generator_test_gold_h4_m15\minimal_candidates_normalized_gold_h4_m15_daytrade.csv --minimal-csv data\results\mochipoyo\minimal_generator_test_gold_h4_m15_tail10000\minimal_candidates_normalized_gold_h4_m15_daytrade.csv --pair-name GOLD_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\minimal_compare_gold_h4_m15_tail5000_vs_tail10000 --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 23
+minimal_rows = 23
+matched_rows = 23
+full_only_rows = 0
+minimal_only_rows = 0
+value_diff_rows = 0
+payload_key_diff_rows = 0
+```
+
+結論:
+
+```text
+GOLD_H4_M15_DAYTRADE の共通期間では、M15 tail 5000 と 10000 の候補は完全一致。
+したがって、少なくとも直近範囲では tail 5000 の候補生成は安定。
+```
+
+---
+
+## 7. 現時点の判定
 
 ```text
 GOLD_H4_M5_SCALP candidate generation:
+  実装状態: 初期PASS相当
+  risk/SL/TP enrich: 未接続
+  本番通知利用: まだ不可
+
+GOLD_H4_M15_DAYTRADE candidate generation:
   実装状態: 初期PASS相当
   risk/SL/TP enrich: 未接続
   本番通知利用: まだ不可
@@ -233,7 +384,7 @@ GOLD_H4_M5_SCALP candidate generation:
 本番通知に進むための残課題:
 
 ```text
-1. GOLD_H4_M5_SCALP に risk/SL/TP enrich を接続
+1. GOLD candidates に risk/SL/TP enrich を接続
 2. risk_status OK のみ通知対象にする
 3. pair別更新トリガー確認
 4. ledger重複通知確認
@@ -242,25 +393,25 @@ GOLD_H4_M5_SCALP candidate generation:
 
 ---
 
-## 7. 次の実装対象
+## 8. 次の実装対象
 
 次pair:
 
 ```text
-GOLD_H4_M15_DAYTRADE
+GOLD_D1_H1_DAYTRADE
 ```
 
 理由:
 
 ```text
-- context は同じH4
-- base が M5 -> M15 に変わるだけ
-- 既存 generator の再利用経路で追加しやすい
-- 採用sliceは B BUY / B SELL
+- context はD1
+- base はH1
+- 採用sliceは A BUY / B BUY
+- goldsharp_d1.csv が存在し、safe CSV reader の読み込みは既に確認済み
 ```
 
 実装メモ:
 
 ```text
-scripts/mochipoyo_candidate_generators.py の SUPPORTED_GENERATOR_PAIRS に GOLD_H4_M15_DAYTRADE を追加済み。
+scripts/mochipoyo_candidate_generators.py の SUPPORTED_GENERATOR_PAIRS に GOLD_D1_H1_DAYTRADE を追加予定。
 ```
