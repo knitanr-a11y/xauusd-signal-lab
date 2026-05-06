@@ -2,7 +2,7 @@
 
 最終更新: 2026-05-06
 
-このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定とDiscord dry-run検証ログである。
+このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定・Discord dry-run・pair別更新トリガー検証ログである。
 
 関連ログ:
 
@@ -23,6 +23,7 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 3. 同一入力内に同じpayload_keyが複数存在しても、1回だけ通知候補になる
 4. last_notified_time_by_symbol_pair_direction 相当のstateをCSVで確認できる
 5. ledger判定後の送信候補CSVをDiscord送信スクリプトがdry-runで読める
+6. pair別trigger timeframeのclose_time更新を検出できる
 ```
 
 この段階では Discord実送信も自動売買も行わない。
@@ -34,6 +35,7 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 ```text
 scripts/apply_mochipoyo_notification_ledger.py
 scripts/send_mochipoyo_discord_messages.py
+scripts/apply_mochipoyo_pair_trigger_state.py
 ```
 
 `apply_mochipoyo_notification_ledger.py` の役割:
@@ -65,6 +67,15 @@ notification_ledger_summary.csv
 notification_ledger_to_send.csv を読む
 payload_key を維持したまま preview_txt / preview_json を生成
 Discordへは送信しない
+```
+
+`apply_mochipoyo_pair_trigger_state.py` の役割:
+
+```text
+pair別trigger timeframe CSVを読む
+最新確定足 close_time を取得
+state CSV の last_seen_close_time と比較
+更新pairだけ should_scan=True にする
 ```
 
 ---
@@ -194,41 +205,7 @@ preview_txt / preview_json も生成された。
 
 ---
 
-## 7. GOLD ledger / Discord dry-run 総合判定
-
-```text
-GOLD_H4_M5_SCALP:
-  candidate generation PASS
-  risk enrich PASS
-  notification eligibility PASS
-  ledger duplicate filter PASS
-  Discord dry-run PASS
-
-GOLD_H4_M15_DAYTRADE:
-  candidate generation PASS
-  risk enrich PASS
-  notification eligibility PASS
-  ledger duplicate filter PASS
-  Discord dry-run PASS
-
-GOLD_D1_H1_DAYTRADE:
-  candidate generation PASS
-  risk enrich PASS
-  notification eligibility PASS
-  ledger duplicate filter PASS
-  Discord dry-run PASS
-```
-
-結論:
-
-```text
-GOLD 3pair は、Discord実送信前のdry-runまで初期PASS扱い。
-次は pair別更新トリガー接続へ進む。
-```
-
----
-
-## 8. 次の検証: GOLD pair別更新トリガー接続
+## 7. GOLD pair別更新トリガー検証
 
 目的:
 
@@ -253,37 +230,200 @@ GOLD_D1_H1_DAYTRADE:
   H1 close_time が進んだ時だけ判定
 ```
 
-必要なstate:
+state:
 
 ```text
-last_seen_close_time_by_pair
-last_scan_status_by_pair
-last_notification_candidate_count_by_pair
-last_ledger_append_count_by_pair
+data/results/mochipoyo/minimal_trigger_test/gold_pair_trigger_state.csv
 ```
 
-最低限のテスト:
+### 7.1 1回目: stateなし初期化
+
+実行:
+
+```cmd
+python scripts\apply_mochipoyo_pair_trigger_state.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --out-dir data\results\mochipoyo\minimal_trigger_test\run1 --symbol GOLD --commit-state
+```
+
+結果:
 
 ```text
-1回目:
-  stateなし
-  各GOLD pairを初期化対象として扱う
-  ただし初期化モードでは送信しない
-  last_seen_close_time_by_pair を保存
+pairs = 3
+scan_required = 0
+initialize_only = 3
+skipped_no_new_bar = 0
+error = 0
+to_scan_rows = 0
+commit_state = True
+```
 
-2回目:
-  CSV更新なし
-  全GOLD pair skipped_no_new_bar
-  scanしない/通知しない
+判定:
 
-3回目:
-  任意pairの as_of_time またはstateを調整して更新扱いにする
-  対象pairだけ scan 対象になる
+```text
+初回は INITIALIZE_ONLY として state を保存。
+scan/通知対象は0件で期待どおり。
+```
+
+保存された state:
+
+```text
+GOLD_D1_H1_DAYTRADE:
+  last_seen_close_time = 2026-05-06 12:00:00
+
+GOLD_H4_M15_DAYTRADE:
+  last_seen_close_time = 2026-05-06 12:30:00
+
+GOLD_H4_M5_SCALP:
+  last_seen_close_time = 2026-05-06 12:35:00
+```
+
+### 7.2 2回目: CSV更新なし
+
+実行:
+
+```cmd
+python scripts\apply_mochipoyo_pair_trigger_state.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --out-dir data\results\mochipoyo\minimal_trigger_test\run2 --symbol GOLD --commit-state
+```
+
+結果:
+
+```text
+pairs = 3
+scan_required = 0
+initialize_only = 0
+skipped_no_new_bar = 3
+error = 0
+to_scan_rows = 0
+commit_state = True
+```
+
+判定:
+
+```text
+CSV更新なしでは全GOLD pairが SKIPPED_NO_NEW_BAR。
+scan/通知対象は0件で期待どおり。
+```
+
+### 7.3 3回目: GOLD_H4_M5_SCALP のstateだけ古くする
+
+事前操作:
+
+```cmd
+python -c "import pandas as pd; p=r'data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv'; df=pd.read_csv(p,encoding='utf-8-sig'); m=df['pair_name'].astype(str).eq('GOLD_H4_M5_SCALP'); df.loc[m,'last_seen_close_time']=(pd.to_datetime(df.loc[m,'last_seen_close_time'])-pd.Timedelta(minutes=5)).dt.strftime('%Y-%m-%d %H:%M:%S'); df.to_csv(p,index=False,encoding='utf-8-sig'); print(df.to_string(index=False))"
+```
+
+変更後:
+
+```text
+GOLD_H4_M5_SCALP:
+  last_seen_close_time 2026-05-06 12:35:00 -> 2026-05-06 12:30:00
+```
+
+実行:
+
+```cmd
+python scripts\apply_mochipoyo_pair_trigger_state.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --out-dir data\results\mochipoyo\minimal_trigger_test\run3 --symbol GOLD --commit-state
+```
+
+結果:
+
+```text
+pairs = 3
+scan_required = 1
+initialize_only = 0
+skipped_no_new_bar = 2
+error = 0
+to_scan_rows = 1
+commit_state = True
+commit_scan_required = False
+```
+
+判定:
+
+```text
+GOLD_H4_M5_SCALP だけ SCAN_REQUIRED。
+他2pairは SKIPPED_NO_NEW_BAR。
+pair別trigger stateは期待どおり動作。
 ```
 
 注意:
 
 ```text
-run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は本番常時稼働に使わない。
-新しい minimal loop は、pair別trigger state を持つ薄い制御層として作る。
+run3では --commit-scan-required を付けていないため、GOLD_H4_M5_SCALP のstateは進めない。
+これは、実運用で scan / risk / notification / ledger 処理が成功した後に last_seen_close_time を進めるための安全設計。
 ```
+
+---
+
+## 8. GOLD ledger / Discord / trigger 総合判定
+
+```text
+GOLD_H4_M5_SCALP:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+  ledger duplicate filter PASS
+  Discord dry-run PASS
+  pair trigger state PASS
+
+GOLD_H4_M15_DAYTRADE:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+  ledger duplicate filter PASS
+  Discord dry-run PASS
+  pair trigger state PASS
+
+GOLD_D1_H1_DAYTRADE:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+  ledger duplicate filter PASS
+  Discord dry-run PASS
+  pair trigger state PASS
+```
+
+結論:
+
+```text
+GOLD 3pair は、minimal live flow の部品検証として初期PASS扱い。
+次は GOLD minimal live flow の最小オーケストレーション仕様を固定する。
+```
+
+---
+
+## 9. 次の検証: GOLD minimal live flow 最小オーケストレーション
+
+目的:
+
+```text
+trigger state
+  -> 対象pairだけ minimal scan
+  -> risk enrich
+  -> notification eligibility
+  -> ledger duplicate filter
+  -> Discord dry-run / optional send
+  -> 成功後だけ trigger state を進める
+```
+
+重要方針:
+
+```text
+既存の full scan 系スクリプトを常時稼働ループに使わない。
+run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は本番常時稼働に使わない。
+新しい minimal live flow は、pair別trigger state を持つ薄い制御層として作る。
+```
+
+最初のオーケストレーションは、まだ常時ループにしない。
+単発CLIで以下を確認する。
+
+```text
+1. trigger state を読む
+2. should_scan=True のGOLD pairだけ処理対象にする
+3. minimal scanner は対象pairだけscanする
+4. notification_ok を作る
+5. ledger判定する
+6. Discord dry-run previewを作る
+7. 全処理成功後だけ trigger state を進める
+```
+
+この段階でも、`--send` を付けない限りDiscord実送信は行わない。
