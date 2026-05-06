@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Dry loop wrapper for GOLD minimal live once.
+"""Loop wrapper for GOLD minimal live once.
 
 This script is a safety-first scheduler wrapper around:
 
   scripts/run_mochipoyo_gold_minimal_live_once.py
 
-It does NOT send Discord messages and does NOT auto-trade.
-It repeatedly runs the validated one-shot flow with --discord-dry-run,
-collects each iteration summary, and exits safely on Ctrl+C.
+Default behavior is dry-run only:
+- Discord messages are NOT sent unless --discord-send is explicitly passed.
+- Auto-trading is never performed.
+
+It repeatedly runs the validated one-shot flow, collects each iteration summary,
+and exits safely on Ctrl+C.
 
 Default behavior is finite: --iterations 3.
-Use --forever explicitly for continuous dry-run operation.
+Use --forever explicitly for continuous operation.
 """
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -25,17 +29,40 @@ from typing import Any
 import pandas as pd
 
 
+def windows_long_path(path: str | Path) -> str:
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
+def write_text(path: str | Path, text: str, encoding: str = "utf-8") -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(windows_long_path(p), "w", encoding=encoding, newline="") as f:
+        f.write(text)
+
+
 def write_csv(df: pd.DataFrame, path: str | Path) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(p, index=False, encoding="utf-8-sig")
+    df.to_csv(windows_long_path(p), index=False, encoding="utf-8-sig")
+
+
+def read_csv(path: str | Path) -> pd.DataFrame:
+    return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
 
 
 def read_summary(path: str | Path) -> pd.DataFrame:
     p = Path(path)
     if not p.exists():
         return pd.DataFrame()
-    return pd.read_csv(p, encoding="utf-8-sig")
+    return read_csv(p)
 
 
 def append_csv_row(row: dict[str, Any], path: str | Path) -> None:
@@ -43,12 +70,12 @@ def append_csv_row(row: dict[str, Any], path: str | Path) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     new = pd.DataFrame([row])
     if p.exists():
-        old = pd.read_csv(p, encoding="utf-8-sig")
+        old = read_csv(p)
         all_cols = list(dict.fromkeys(list(old.columns) + list(new.columns)))
         out = pd.concat([old.reindex(columns=all_cols), new.reindex(columns=all_cols)], ignore_index=True)
     else:
         out = new
-    out.to_csv(p, index=False, encoding="utf-8-sig")
+    write_csv(out, p)
 
 
 def precreate_iteration_dirs(iteration_dir: Path) -> None:
@@ -103,8 +130,12 @@ def build_once_command(args: argparse.Namespace, iteration: int, iteration_out_d
     add_flag(cmd, "--scan-on-initial-state", args.scan_on_initial_state)
     add_flag(cmd, "--commit-trigger-state", args.commit_trigger_state)
     add_flag(cmd, "--commit-ledger", args.commit_ledger)
-    # This dry loop always runs the one-shot script in Discord dry-run mode.
-    cmd.append("--discord-dry-run")
+
+    if args.discord_send:
+        cmd.append("--discord-send")
+    else:
+        cmd.append("--discord-dry-run")
+
     add_flag(cmd, "--disable-trigger-window-filter", args.disable_trigger_window_filter)
 
     add_optional(cmd, "--gold-m1-csv", args.gold_m1_csv)
@@ -122,19 +153,20 @@ def build_once_command(args: argparse.Namespace, iteration: int, iteration_out_d
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run GOLD minimal live once repeatedly in dry mode.")
+    p = argparse.ArgumentParser(description="Run GOLD minimal live once repeatedly.")
     p.add_argument("--csv-dir", required=True)
     p.add_argument("--out-dir", required=True)
     p.add_argument("--symbol", default="GOLD")
     p.add_argument("--trigger-state-csv", required=True)
     p.add_argument("--notification-ledger-csv", required=True)
-    p.add_argument("--iterations", type=int, default=3, help="Finite dry-loop iterations. Ignored when --forever is used.")
+    p.add_argument("--iterations", type=int, default=3, help="Finite loop iterations. Ignored when --forever is used.")
     p.add_argument("--forever", action="store_true", help="Run until Ctrl+C. Explicit only.")
     p.add_argument("--sleep-seconds", type=float, default=10.0)
     p.add_argument("--stop-on-error", action="store_true", help="Stop loop if one-shot command returns non-zero.")
     p.add_argument("--commit-trigger-state", action="store_true")
     p.add_argument("--commit-ledger", action="store_true")
     p.add_argument("--scan-on-initial-state", action="store_true")
+    p.add_argument("--discord-send", action="store_true", help="Actually send NEW live-window rows to Discord. Without this, loop uses Discord dry-run.")
     p.add_argument("--csv-sep", default="auto")
     p.add_argument("--trigger-tail-bars", type=int, default=20)
     p.add_argument("--discord-max-rows", type=int, default=5)
@@ -171,27 +203,31 @@ def main() -> int:
     args = parse_args()
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    loop_summary_csv = out_dir / "gold_minimal_live_loop_dry_summary.csv"
-    loop_events_csv = out_dir / "gold_minimal_live_loop_dry_events.csv"
+    mode = "live" if args.discord_send else "dry"
+    loop_summary_csv = out_dir / f"gold_minimal_live_loop_{mode}_summary.csv"
+    loop_events_csv = out_dir / f"gold_minimal_live_loop_{mode}_events.csv"
 
     if args.forever:
         max_iterations: int | None = None
     else:
         max_iterations = max(0, int(args.iterations))
 
-    print("run_mochipoyo_gold_minimal_live_loop_dry")
+    print("run_mochipoyo_gold_minimal_live_loop")
     print(f"out_dir: {out_dir}")
+    print(f"mode: {mode}")
     print(f"iterations: {'forever' if max_iterations is None else max_iterations}")
     print(f"sleep_seconds: {args.sleep_seconds}")
-    print("discord_send: disabled")
+    print(f"discord_send: {'enabled' if args.discord_send else 'disabled'}")
     print("auto_trade: disabled")
+    if args.discord_send:
+        print("WARNING: --discord-send is enabled. Only NEW live-window rows will be sent, and once flow prevents partial live sends.")
 
     iteration = 0
     exit_code = 0
     try:
         while max_iterations is None or iteration < max_iterations:
             iteration += 1
-            run_id = f"gold_minimal_live_loop_dry_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}_i{iteration:04d}"
+            run_id = f"gold_minimal_live_loop_{mode}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}_i{iteration:04d}"
             iteration_dir = out_dir / f"iter_{iteration:04d}"
             iteration_dir.mkdir(parents=True, exist_ok=True)
             precreate_iteration_dirs(iteration_dir)
@@ -201,9 +237,9 @@ def main() -> int:
             end = pd.Timestamp.now()
             duration_sec = (end - start).total_seconds()
 
-            (iteration_dir / "once_stdout.txt").write_text(proc.stdout, encoding="utf-8")
-            (iteration_dir / "once_stderr.txt").write_text(proc.stderr, encoding="utf-8")
-            (iteration_dir / "once_command.txt").write_text(" ".join(cmd), encoding="utf-8")
+            write_text(iteration_dir / "once_stdout.txt", proc.stdout)
+            write_text(iteration_dir / "once_stderr.txt", proc.stderr)
+            write_text(iteration_dir / "once_command.txt", " ".join(cmd))
 
             once_summary_path = iteration_dir / "minimal_live_once_summary.csv"
             once_summary = read_summary(once_summary_path)
@@ -239,6 +275,8 @@ def main() -> int:
                 "notification_ok_live_rows",
                 "notification_outside_trigger_window_rows",
                 "ledger_new_candidates",
+                "ledger_append_rows",
+                "discord_send",
                 "discord_status",
                 "success",
             ] if k in event}
@@ -254,19 +292,21 @@ def main() -> int:
                 break
             time.sleep(max(0.0, float(args.sleep_seconds)))
     except KeyboardInterrupt:
-        print("KeyboardInterrupt: stopping dry loop safely")
+        print("KeyboardInterrupt: stopping loop safely")
         exit_code = 130
 
     final = pd.DataFrame([
         {
             "finished_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "mode": mode,
+            "discord_send": bool(args.discord_send),
             "iterations_completed": iteration,
             "exit_code": exit_code,
             "loop_summary_csv": str(loop_summary_csv),
             "loop_events_csv": str(loop_events_csv),
         }
     ])
-    write_csv(final, out_dir / "gold_minimal_live_loop_dry_final.csv")
+    write_csv(final, out_dir / f"gold_minimal_live_loop_{mode}_final.csv")
     print("done")
     print(f"loop_summary_csv: {loop_summary_csv}")
     return exit_code
