@@ -6,12 +6,13 @@ Current scope:
 - allowed_slices -> required pairs only
 - read only the required pair CSVs through the safe reader
 - build confirmed-time base/context joined frames
-- generate GOLD_H4_M5_SCALP A/B SELL events using the existing audited
-  Mochipoyo scoring functions
-- return structured scan results
+- generate pair-specific events using the existing audited Mochipoyo scoring functions
+- optionally enrich candidates with SL/TP/risk fields through mochipoyo_risk_enricher.py
 
-Other pairs still run through the safe skeleton path and return empty candidate
-DataFrames until their pair-specific generators are added.
+Important:
+- This script does not send Discord messages.
+- This script does not place orders.
+- Risk enrichment is opt-in through --enable-risk-enrich while the comparison work is still ongoing.
 """
 from __future__ import annotations
 
@@ -35,6 +36,7 @@ try:  # Package import from repository root.
         resolve_csv_path,
         validate_allowed_slices_against_pair_configs,
     )
+    from scripts.mochipoyo_risk_enricher import RiskEnrichConfig, enrich_candidates_risk, split_live_risk_ok_ng
     from scripts.mochipoyo_safe_csv_reader import CsvReadResult, read_ohlc_csv_safe
 except ModuleNotFoundError:  # Direct execution from scripts/.
     from mochipoyo_candidate_generators import SUPPORTED_GENERATOR_PAIRS, generate_pair_events  # type: ignore
@@ -49,6 +51,7 @@ except ModuleNotFoundError:  # Direct execution from scripts/.
         resolve_csv_path,
         validate_allowed_slices_against_pair_configs,
     )
+    from mochipoyo_risk_enricher import RiskEnrichConfig, enrich_candidates_risk, split_live_risk_ok_ng  # type: ignore
     from mochipoyo_safe_csv_reader import CsvReadResult, read_ohlc_csv_safe  # type: ignore
 
 SCAN_STATUS_OK = "OK"
@@ -58,10 +61,13 @@ SCAN_STATUS_SKIPPED = "SKIPPED"
 ERR_PAIR_CONFIG_MISSING = "PAIR_CONFIG_MISSING"
 ERR_BASE_CSV_READ_FAILED = "BASE_CSV_READ_FAILED"
 ERR_CONTEXT_CSV_READ_FAILED = "CONTEXT_CSV_READ_FAILED"
+ERR_TOUCH_CSV_READ_FAILED = "TOUCH_CSV_READ_FAILED"
 ERR_CONFIRMED_TIME_JOIN_FAILED = "CONFIRMED_TIME_JOIN_FAILED"
 ERR_CANDIDATE_GENERATION_FAILED = "CANDIDATE_GENERATION_FAILED"
+ERR_RISK_ENRICH_FAILED = "RISK_ENRICH_FAILED"
 ERR_NO_BASE_ROWS = "NO_BASE_ROWS"
 ERR_NO_CONTEXT_ROWS = "NO_CONTEXT_ROWS"
+ERR_NO_TOUCH_ROWS = "NO_TOUCH_ROWS"
 
 
 @dataclass
@@ -86,6 +92,7 @@ class MinimalPairScanResult:
     risk_ng_candidates_df: pd.DataFrame = field(default_factory=pd.DataFrame)
     base_df: pd.DataFrame = field(default_factory=pd.DataFrame)
     context_frames: dict[str, pd.DataFrame] = field(default_factory=dict)
+    touch_frames: dict[str, pd.DataFrame] = field(default_factory=dict)
     joined_frames: dict[str, pd.DataFrame] = field(default_factory=dict)
     errors: list[MinimalScanError] = field(default_factory=list)
     reader_metadata: list[dict[str, Any]] = field(default_factory=list)
@@ -112,6 +119,7 @@ class MinimalScanBatchResult:
                     "latest_base_close_time": r.latest_base_close_time,
                     "base_rows": int(len(r.base_df)),
                     "context_frames": ",".join(sorted(r.context_frames.keys())),
+                    "touch_frames": ",".join(sorted(r.touch_frames.keys())),
                     "raw_candidates": int(len(r.raw_candidates_df)),
                     "normalized_candidates": int(len(r.normalized_candidates_df)),
                     "risk_ok_candidates": int(len(r.risk_ok_candidates_df)),
@@ -163,29 +171,17 @@ def confirmed_time_join_base_context(
     *,
     context_label: str,
 ) -> pd.DataFrame:
-    """Diagnostic join: context_close_time <= base_close_time.
-
-    Candidate generation uses the legacy audited confirmed_join from
-    scan_mochipoyo_multi_tf_candidates.py to keep column names identical.  This
-    function remains useful for skeleton diagnostics and simple join audits.
-    """
+    """Diagnostic join: context_close_time <= base_close_time."""
     if base_df.empty:
         return pd.DataFrame()
     if context_df.empty:
-        out = pd.DataFrame(
-            {
-                "base_time": base_df["time"],
-                "base_close_time": base_df["close_time"],
-            }
-        )
+        out = pd.DataFrame({"base_time": base_df["time"], "base_close_time": base_df["close_time"]})
         return out
 
     base = base_df.copy().sort_values("close_time").reset_index(drop=True)
     context = context_df.copy().sort_values("close_time").reset_index(drop=True)
-
     base = base.rename(columns={"time": "base_time", "close_time": "base_close_time"})
     context = context.rename(columns={"time": "context_time", "close_time": "context_close_time"})
-
     joined = pd.merge_asof(
         base,
         context,
@@ -196,6 +192,38 @@ def confirmed_time_join_base_context(
     )
     joined["context_label"] = context_label
     return joined
+
+
+def _read_one_csv_frame(
+    *,
+    pair_name: str,
+    csv_dir: str | Path,
+    csv_overrides: Mapping[str, str | Path | None] | None,
+    csv_key: str,
+    timeframe: str,
+    tail_bars: int,
+    as_of_time: object | None,
+    csv_sep: str,
+    requires_spread: bool,
+    error_reason: str,
+) -> tuple[pd.DataFrame, dict[str, Any], list[MinimalScanError]]:
+    path = resolve_csv_path(csv_dir, csv_key, csv_overrides)
+    result = read_ohlc_csv_safe(
+        path,
+        timeframe,
+        tail_bars=tail_bars,
+        requires_spread=requires_spread,
+        as_of_time=as_of_time,
+        csv_sep=csv_sep,
+    )
+    meta = _reader_metadata(csv_key, result)
+    errors: list[MinimalScanError] = []
+    if not result.ok:
+        errors.append(MinimalScanError(pair_name=pair_name, error_reason=error_reason, detail=result.error_reason, csv_key=csv_key, path=str(path)))
+        return pd.DataFrame(), meta, errors
+    if result.df.empty:
+        errors.append(MinimalScanError(pair_name=pair_name, error_reason=ERR_NO_TOUCH_ROWS if error_reason == ERR_TOUCH_CSV_READ_FAILED else ERR_NO_CONTEXT_ROWS, csv_key=csv_key, path=str(path)))
+    return result.df, meta, errors
 
 
 def read_pair_frames(
@@ -226,15 +254,7 @@ def read_pair_frames(
     )
     reader_meta.append(_reader_metadata(base_csv_key, base_result))
     if not base_result.ok:
-        errors.append(
-            MinimalScanError(
-                pair_name=pair_name,
-                error_reason=ERR_BASE_CSV_READ_FAILED,
-                detail=base_result.error_reason,
-                csv_key=base_csv_key,
-                path=str(base_path),
-            )
-        )
+        errors.append(MinimalScanError(pair_name=pair_name, error_reason=ERR_BASE_CSV_READ_FAILED, detail=base_result.error_reason, csv_key=base_csv_key, path=str(base_path)))
         return pd.DataFrame(), {}, reader_meta, errors
     base_df = base_result.df
     if base_df.empty:
@@ -257,15 +277,7 @@ def read_pair_frames(
         )
         reader_meta.append(_reader_metadata(csv_key, result))
         if not result.ok:
-            errors.append(
-                MinimalScanError(
-                    pair_name=pair_name,
-                    error_reason=ERR_CONTEXT_CSV_READ_FAILED,
-                    detail=result.error_reason,
-                    csv_key=csv_key,
-                    path=str(path),
-                )
-            )
+            errors.append(MinimalScanError(pair_name=pair_name, error_reason=ERR_CONTEXT_CSV_READ_FAILED, detail=result.error_reason, csv_key=csv_key, path=str(path)))
             continue
         if result.df.empty:
             errors.append(MinimalScanError(pair_name=pair_name, error_reason=ERR_NO_CONTEXT_ROWS, csv_key=csv_key, path=str(path)))
@@ -273,6 +285,42 @@ def read_pair_frames(
         context_frames[tf] = result.df
 
     return base_df, context_frames, reader_meta, errors
+
+
+def read_pair_touch_frames(
+    pair_name: str,
+    cfg: Mapping[str, Any],
+    *,
+    csv_dir: str | Path,
+    csv_overrides: Mapping[str, str | Path | None] | None,
+    as_of_time: object | None,
+    tail_bars_override: Mapping[str, int] | None = None,
+    csv_sep: str = "auto",
+) -> tuple[dict[str, pd.DataFrame], list[dict[str, Any]], list[MinimalScanError]]:
+    touch_frames: dict[str, pd.DataFrame] = {}
+    reader_meta: list[dict[str, Any]] = []
+    errors: list[MinimalScanError] = []
+    for touch_tf, csv_key_value in dict(cfg.get("touch_csv_keys", {})).items():
+        tf = str(touch_tf).upper()
+        csv_key = str(csv_key_value)
+        tail = int((tail_bars_override or {}).get(tf, cfg.get("tail_bars", {}).get(tf, 0)))
+        df, meta, errs = _read_one_csv_frame(
+            pair_name=pair_name,
+            csv_dir=csv_dir,
+            csv_overrides=csv_overrides,
+            csv_key=csv_key,
+            timeframe=tf,
+            tail_bars=tail,
+            as_of_time=as_of_time,
+            csv_sep=csv_sep,
+            requires_spread=bool(str(cfg.get("symbol", "")).upper() == "BTC"),
+            error_reason=ERR_TOUCH_CSV_READ_FAILED,
+        )
+        reader_meta.append(meta)
+        errors.extend(errs)
+        if not df.empty:
+            touch_frames[tf] = df
+    return touch_frames, reader_meta, errors
 
 
 def _generate_candidates_if_supported(
@@ -298,6 +346,29 @@ def _generate_candidates_if_supported(
         return {}, [MinimalScanError(pair_name=pair_name, error_reason=ERR_CANDIDATE_GENERATION_FAILED, detail=str(exc))]
 
 
+def _enrich_risk_if_enabled(
+    pair_name: str,
+    normalized_df: pd.DataFrame,
+    touch_frames: dict[str, pd.DataFrame],
+    *,
+    enable_risk_enrich: bool,
+    risk_config: RiskEnrichConfig,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[MinimalScanError]]:
+    if normalized_df.empty:
+        empty = ensure_normalized_columns(normalized_df)
+        return empty, empty.copy(), empty.copy(), []
+    if not enable_risk_enrich:
+        ok, ng = split_live_risk_ok_ng(normalized_df)
+        return normalized_df, ok, ng, []
+    try:
+        enriched = enrich_candidates_risk(normalized_df, touch_data=touch_frames, config=risk_config)
+        ok, ng = split_live_risk_ok_ng(enriched)
+        return enriched, ok, ng, []
+    except Exception as exc:
+        ok, ng = split_live_risk_ok_ng(normalized_df)
+        return normalized_df, ok, ng, [MinimalScanError(pair_name=pair_name, error_reason=ERR_RISK_ENRICH_FAILED, detail=str(exc))]
+
+
 def scan_pair_minimal_skeleton(
     pair_name: str,
     *,
@@ -307,17 +378,14 @@ def scan_pair_minimal_skeleton(
     as_of_time: object | None = None,
     tail_bars_override: Mapping[str, int] | None = None,
     csv_sep: str = "auto",
+    enable_risk_enrich: bool = False,
+    risk_config: RiskEnrichConfig | None = None,
 ) -> MinimalPairScanResult:
     """Scan one pair through the current minimal scanner data path."""
     try:
         cfg = get_pair_config(pair_name)
     except Exception as exc:
-        return _empty_pair_result(
-            pair_name,
-            None,
-            SCAN_STATUS_ERROR,
-            [MinimalScanError(pair_name=pair_name, error_reason=ERR_PAIR_CONFIG_MISSING, detail=str(exc))],
-        )
+        return _empty_pair_result(pair_name, None, SCAN_STATUS_ERROR, [MinimalScanError(pair_name=pair_name, error_reason=ERR_PAIR_CONFIG_MISSING, detail=str(exc))])
 
     pair_allowed_slices = filter_allowed_slices_for_pair(allowed_slices, pair_name)
     if not pair_allowed_slices:
@@ -332,6 +400,20 @@ def scan_pair_minimal_skeleton(
         tail_bars_override=tail_bars_override,
         csv_sep=csv_sep,
     )
+    touch_frames: dict[str, pd.DataFrame] = {}
+    if enable_risk_enrich and not errors:
+        touch_frames, touch_meta, touch_errors = read_pair_touch_frames(
+            pair_name,
+            cfg,
+            csv_dir=csv_dir,
+            csv_overrides=csv_overrides,
+            as_of_time=as_of_time,
+            tail_bars_override=tail_bars_override,
+            csv_sep=csv_sep,
+        )
+        reader_meta.extend(touch_meta)
+        errors.extend(touch_errors)
+
     if errors:
         return MinimalPairScanResult(
             scan_status=SCAN_STATUS_ERROR,
@@ -341,6 +423,7 @@ def scan_pair_minimal_skeleton(
             latest_base_close_time=pd.Timestamp(base_df["close_time"].iloc[-1]) if not base_df.empty and "close_time" in base_df.columns else None,
             base_df=base_df,
             context_frames=context_frames,
+            touch_frames=touch_frames,
             raw_candidates_df=pd.DataFrame(),
             normalized_candidates_df=ensure_normalized_columns(pd.DataFrame()),
             risk_ok_candidates_df=ensure_normalized_columns(pd.DataFrame()),
@@ -359,11 +442,19 @@ def scan_pair_minimal_skeleton(
 
     generated, gen_errors = _generate_candidates_if_supported(pair_name, cfg, base_df, context_frames, pair_allowed_slices)
     if generated.get("joined_df") is not None and not generated.get("joined_df", pd.DataFrame()).empty:
-        # The generated joined frame has exact legacy column naming used by scan_pair.
         first_context = str(next(iter(dict(cfg.get("context", {})).keys()))).upper()
         joined_frames[first_context] = generated["joined_df"]
 
-    all_errors = errors + join_errors + gen_errors
+    normalized_df = generated.get("normalized_candidates_df", ensure_normalized_columns(pd.DataFrame()))
+    enriched_df, risk_ok_df, risk_ng_df, risk_errors = _enrich_risk_if_enabled(
+        pair_name,
+        normalized_df,
+        touch_frames,
+        enable_risk_enrich=enable_risk_enrich,
+        risk_config=risk_config or RiskEnrichConfig(),
+    )
+
+    all_errors = errors + join_errors + gen_errors + risk_errors
     status = SCAN_STATUS_ERROR if all_errors else SCAN_STATUS_OK
     return MinimalPairScanResult(
         scan_status=status,
@@ -373,11 +464,12 @@ def scan_pair_minimal_skeleton(
         latest_base_close_time=pd.Timestamp(base_df["close_time"].iloc[-1]) if not base_df.empty else None,
         base_df=base_df,
         context_frames=context_frames,
+        touch_frames=touch_frames,
         joined_frames=joined_frames,
         raw_candidates_df=generated.get("raw_candidates_df", pd.DataFrame()),
-        normalized_candidates_df=generated.get("normalized_candidates_df", ensure_normalized_columns(pd.DataFrame())),
-        risk_ok_candidates_df=generated.get("risk_ok_candidates_df", ensure_normalized_columns(pd.DataFrame())),
-        risk_ng_candidates_df=generated.get("risk_ng_candidates_df", ensure_normalized_columns(pd.DataFrame())),
+        normalized_candidates_df=enriched_df,
+        risk_ok_candidates_df=risk_ok_df,
+        risk_ng_candidates_df=risk_ng_df,
         errors=all_errors,
         reader_metadata=reader_meta,
     )
@@ -391,6 +483,8 @@ def scan_allowed_pairs_minimal_skeleton(
     as_of_time: object | None = None,
     tail_bars_override: Mapping[str, int] | None = None,
     csv_sep: str = "auto",
+    enable_risk_enrich: bool = False,
+    risk_config: RiskEnrichConfig | None = None,
 ) -> MinimalScanBatchResult:
     normalized_allowed = validate_allowed_slices_against_pair_configs(normalize_allowed_slices(allowed_slices or DEFAULT_ALLOWED_SLICES))
     pair_names = get_required_pair_names(normalized_allowed)
@@ -403,6 +497,8 @@ def scan_allowed_pairs_minimal_skeleton(
             as_of_time=as_of_time,
             tail_bars_override=tail_bars_override,
             csv_sep=csv_sep,
+            enable_risk_enrich=enable_risk_enrich,
+            risk_config=risk_config,
         )
         for pair_name in pair_names
     ]
@@ -421,45 +517,40 @@ def errors_frame(batch: MinimalScanBatchResult) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for result in batch.results:
         for err in result.errors:
-            rows.append(
-                {
-                    "pair_name": err.pair_name,
-                    "error_reason": err.error_reason,
-                    "detail": err.detail,
-                    "csv_key": err.csv_key,
-                    "path": err.path,
-                }
-            )
+            rows.append({"pair_name": err.pair_name, "error_reason": err.error_reason, "detail": err.detail, "csv_key": err.csv_key, "path": err.path})
     return pd.DataFrame(rows)
 
 
 def parse_tail_overrides(args: argparse.Namespace) -> dict[str, int]:
-    values = {
-        "M5": args.tail_m5,
-        "M15": args.tail_m15,
-        "H1": args.tail_h1,
-        "H4": args.tail_h4,
-        "D1": args.tail_d1,
-    }
+    values = {"M1": args.tail_m1, "M5": args.tail_m5, "M15": args.tail_m15, "H1": args.tail_h1, "H4": args.tail_h4, "D1": args.tail_d1}
     return {tf: int(v) for tf, v in values.items() if v is not None and int(v) > 0}
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the initial Mochipoyo minimal scanner skeleton.")
+    parser = argparse.ArgumentParser(description="Run the Mochipoyo minimal scanner.")
     parser.add_argument("--csv-dir", required=True, help="MQL5/Files directory containing exported OHLC CSVs.")
-    parser.add_argument("--out-dir", required=True, help="Output directory for skeleton scan diagnostics.")
+    parser.add_argument("--out-dir", required=True, help="Output directory for minimal scan diagnostics.")
     parser.add_argument("--as-of-time", default=None)
     parser.add_argument("--csv-sep", default="auto")
+    parser.add_argument("--tail-m1", type=int, default=12000)
     parser.add_argument("--tail-m5", type=int, default=6000)
     parser.add_argument("--tail-m15", type=int, default=5000)
     parser.add_argument("--tail-h1", type=int, default=1500)
     parser.add_argument("--tail-h4", type=int, default=1500)
     parser.add_argument("--tail-d1", type=int, default=800)
+    parser.add_argument("--enable-risk-enrich", action="store_true")
+    parser.add_argument("--risk-rr", type=float, default=1.2)
+    parser.add_argument("--gold-min-stop-distance", type=float, default=1.0)
+    parser.add_argument("--btc-min-stop-distance", type=float, default=50.0)
+    parser.add_argument("--btc-point-size", type=float, default=0.01)
+    parser.add_argument("--btc-spread-caution-threshold", type=float, default=0.07)
+    parser.add_argument("--gold-m1-csv")
     parser.add_argument("--gold-m5-csv")
     parser.add_argument("--gold-m15-csv")
     parser.add_argument("--gold-h1-csv")
     parser.add_argument("--gold-h4-csv")
     parser.add_argument("--gold-d1-csv")
+    parser.add_argument("--btc-m1-csv")
     parser.add_argument("--btc-m5-csv")
     parser.add_argument("--btc-m15-csv")
     parser.add_argument("--btc-h1-csv")
@@ -471,19 +562,26 @@ def main() -> int:
     args = parse_args()
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-
+    risk_config = RiskEnrichConfig(
+        rr=float(args.risk_rr),
+        gold_min_stop_distance=float(args.gold_min_stop_distance),
+        btc_min_stop_distance=float(args.btc_min_stop_distance),
+        btc_point_size=float(args.btc_point_size),
+        btc_spread_caution_threshold=float(args.btc_spread_caution_threshold),
+    )
     batch = scan_allowed_pairs_minimal_skeleton(
         csv_dir=args.csv_dir,
         csv_overrides=build_csv_overrides_from_args(args),
         as_of_time=args.as_of_time,
         tail_bars_override=parse_tail_overrides(args),
         csv_sep=args.csv_sep,
+        enable_risk_enrich=bool(args.enable_risk_enrich),
+        risk_config=risk_config,
     )
 
     summary = batch.summary_frame()
     metadata = reader_metadata_frame(batch)
     errors = errors_frame(batch)
-
     summary.to_csv(out_dir / "minimal_skeleton_summary.csv", index=False, encoding="utf-8-sig")
     metadata.to_csv(out_dir / "minimal_skeleton_reader_metadata.csv", index=False, encoding="utf-8-sig")
     errors.to_csv(out_dir / "minimal_skeleton_errors.csv", index=False, encoding="utf-8-sig")
@@ -494,6 +592,10 @@ def main() -> int:
             result.raw_candidates_df.to_csv(out_dir / f"minimal_candidates_raw_{safe_pair}.csv", index=False, encoding="utf-8-sig")
         if not result.normalized_candidates_df.empty:
             result.normalized_candidates_df.to_csv(out_dir / f"minimal_candidates_normalized_{safe_pair}.csv", index=False, encoding="utf-8-sig")
+        if not result.risk_ok_candidates_df.empty:
+            result.risk_ok_candidates_df.to_csv(out_dir / f"minimal_candidates_risk_ok_{safe_pair}.csv", index=False, encoding="utf-8-sig")
+        if not result.risk_ng_candidates_df.empty:
+            result.risk_ng_candidates_df.to_csv(out_dir / f"minimal_candidates_risk_ng_{safe_pair}.csv", index=False, encoding="utf-8-sig")
         for context_tf, joined in result.joined_frames.items():
             sample = joined.tail(200).copy() if len(joined) > 200 else joined.copy()
             sample.to_csv(out_dir / f"minimal_skeleton_joined_{safe_pair}_{context_tf.lower()}.csv", index=False, encoding="utf-8-sig")
@@ -514,7 +616,10 @@ __all__ = [
     "ERR_CONTEXT_CSV_READ_FAILED",
     "ERR_NO_BASE_ROWS",
     "ERR_NO_CONTEXT_ROWS",
+    "ERR_NO_TOUCH_ROWS",
     "ERR_PAIR_CONFIG_MISSING",
+    "ERR_RISK_ENRICH_FAILED",
+    "ERR_TOUCH_CSV_READ_FAILED",
     "MinimalPairScanResult",
     "MinimalScanBatchResult",
     "MinimalScanError",
@@ -524,6 +629,7 @@ __all__ = [
     "confirmed_time_join_base_context",
     "errors_frame",
     "read_pair_frames",
+    "read_pair_touch_frames",
     "reader_metadata_frame",
     "scan_allowed_pairs_minimal_skeleton",
     "scan_pair_minimal_skeleton",
