@@ -8,10 +8,12 @@ This script is a safety-first scheduler wrapper around:
 
 Default behavior is dry-run only:
 - Discord messages are NOT sent unless --discord-send is explicitly passed.
-- Auto-trading is never performed unless a future explicit live-send flag is added.
+- Auto-trading is NOT performed unless --enable-auto-trade-send is explicitly passed.
 - Order payload generation is dry-run only and does NOT call MT5.
 - Auto-trade dry-run can call MT5 order_check via send_mt5_order_from_payload.py,
   but DOES NOT call order_send.
+- Auto-trade send mode calls order_send only through send_mt5_order_from_payload.py,
+  after its duplicate/order_check/account/position guards pass.
 
 It repeatedly runs the validated one-shot flow, collects each iteration summary,
 and exits safely on Ctrl+C.
@@ -246,14 +248,14 @@ def run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path) -> di
     }
 
 
-def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, order_event: dict[str, Any]) -> dict[str, Any]:
-    """Run guarded MT5 auto-trade dry-run from generated order payloads.
+def run_auto_trade_stage(args: argparse.Namespace, iteration_dir: Path, order_event: dict[str, Any]) -> dict[str, Any]:
+    """Run guarded MT5 auto-trade stage from generated order payloads.
 
-    This calls scripts/send_mt5_order_from_payload.py WITHOUT --send. It can
-    connect to MT5 and run order_check, but never calls order_send.
+    Dry-run mode calls scripts/send_mt5_order_from_payload.py WITHOUT --send.
+    Send mode calls it WITH --send only when --enable-auto-trade-send is set.
 
-    Position-policy blocks are treated as safe dry-run skips when order_send was
-    not called. That means an existing-position guard can intentionally block a
+    Position-policy blocks are treated as safe skips when order_send was not
+    called. That means an existing-position guard can intentionally block a
     candidate without failing the whole live notification loop.
     """
     auto_dir = iteration_dir / "auto_trade"
@@ -263,8 +265,11 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
     input_csv = iteration_dir / "order" / "order_payloads.csv"
     report_json = auto_dir / "mt5_order_send_report.json"
 
+    enabled = bool(args.enable_auto_trade_dry_run or args.enable_auto_trade_send)
+    send_enabled = bool(args.enable_auto_trade_send)
     base = {
         "auto_trade_status": "SKIPPED",
+        "auto_trade_send_enabled": send_enabled,
         "auto_trade_returncode": 0,
         "auto_trade_rows": 0,
         "auto_trade_dry_run_check_ok_rows": 0,
@@ -273,7 +278,7 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
         "auto_trade_error_rows": 0,
         "auto_trade_order_send_called_count": 0,
     }
-    if not args.enable_auto_trade_dry_run:
+    if not enabled:
         write_text(stdout_path, "SKIPPED_DISABLED\n")
         write_text(stderr_path, "")
         return {**base, "auto_trade_status": "SKIPPED_DISABLED"}
@@ -287,8 +292,16 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
         return {**base, "auto_trade_status": "SKIPPED_NO_ORDER_PAYLOAD_CSV"}
     if not args.auto_trade_order_ledger_csv:
         write_text(stdout_path, "")
-        write_text(stderr_path, "ERROR: --auto-trade-order-ledger-csv is required when --enable-auto-trade-dry-run is used.\n")
+        write_text(stderr_path, "ERROR: --auto-trade-order-ledger-csv is required when auto-trade stage is used.\n")
         return {**base, "auto_trade_status": "ERROR_MISSING_ORDER_LEDGER", "auto_trade_returncode": 1}
+    if send_enabled and args.auto_trade_expected_login is None:
+        write_text(stdout_path, "")
+        write_text(stderr_path, "ERROR: --auto-trade-expected-login is required when --enable-auto-trade-send is used.\n")
+        return {**base, "auto_trade_status": "ERROR_MISSING_EXPECTED_LOGIN", "auto_trade_returncode": 1}
+    if send_enabled and not args.auto_trade_require_demo_account:
+        write_text(stdout_path, "")
+        write_text(stderr_path, "ERROR: --auto-trade-require-demo-account is required when --enable-auto-trade-send is used.\n")
+        return {**base, "auto_trade_status": "ERROR_DEMO_GUARD_REQUIRED", "auto_trade_returncode": 1}
 
     cmd = [
         sys.executable,
@@ -314,8 +327,9 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
         cmd.extend(["--terminal-path", str(args.auto_trade_terminal_path)])
     if args.auto_trade_portable:
         cmd.append("--portable")
+    if send_enabled:
+        cmd.append("--send")
 
-    # Deliberately no --send here. This stage is dry-run only.
     proc = subprocess.run(cmd, text=True, capture_output=True)
     write_text(stdout_path, proc.stdout)
     write_text(stderr_path, proc.stderr)
@@ -329,21 +343,28 @@ def run_auto_trade_dry_run_stage(args: argparse.Namespace, iteration_dir: Path, 
     errors = int(report.get("error_rows", 0) or 0)
     called = int(report.get("order_send_called_count", 0) or 0)
 
-    if called > 0 or sent > 0:
+    if not send_enabled and (called > 0 or sent > 0):
         status = "ERROR_ORDER_SEND_WAS_CALLED_IN_DRY_RUN"
         normalized_returncode = 1
-    elif proc.returncode == 0:
+    elif send_enabled and proc.returncode == 0 and sent > 0 and called > 0:
+        status = "SENT"
+        normalized_returncode = 0
+    elif send_enabled and blocked_policy > 0 and called == 0 and sent == 0:
+        status = "OK_BLOCKED_POSITION_POLICY"
+        normalized_returncode = 0
+    elif not send_enabled and proc.returncode == 0:
         status = "OK"
         normalized_returncode = 0
-    elif blocked_policy > 0 and rows > 0:
+    elif not send_enabled and blocked_policy > 0 and rows > 0 and called == 0 and sent == 0:
         status = "OK_BLOCKED_POSITION_POLICY"
         normalized_returncode = 0
     else:
         status = "ERROR"
-        normalized_returncode = int(proc.returncode)
+        normalized_returncode = int(proc.returncode) if int(proc.returncode) != 0 else 1
 
     return {
         "auto_trade_status": status,
+        "auto_trade_send_enabled": send_enabled,
         "auto_trade_returncode": normalized_returncode,
         "auto_trade_raw_returncode": int(proc.returncode),
         "auto_trade_rows": rows,
@@ -378,7 +399,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--order-ledger-csv", default=None, help="Optional order ledger for duplicate order_key checks during payload build")
 
     p.add_argument("--enable-auto-trade-dry-run", action="store_true", help="Run MT5 guarded dry-run/order_check from generated order payloads. Never calls order_send.")
-    p.add_argument("--auto-trade-broker-symbol", default=None, help="Broker symbol override for MT5 dry-run, e.g. GOLD#")
+    p.add_argument("--enable-auto-trade-send", action="store_true", help="Actually call guarded MT5 sender with --send. Requires expected-login and demo-account guard.")
+    p.add_argument("--auto-trade-broker-symbol", default=None, help="Broker symbol override for MT5 auto-trade, e.g. GOLD#")
     p.add_argument("--auto-trade-order-ledger-csv", default=None, help="Order ledger used by MT5 sender duplicate guard")
     p.add_argument("--auto-trade-expected-login", type=int, default=None)
     p.add_argument("--auto-trade-select-symbol", action="store_true")
@@ -420,7 +442,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--btc-m15-csv")
     p.add_argument("--btc-h1-csv")
     p.add_argument("--btc-h4-csv")
-    return p.parse_args()
+    args = p.parse_args()
+    if args.enable_auto_trade_send and args.enable_auto_trade_dry_run:
+        raise SystemExit("ERROR: choose either --enable-auto-trade-dry-run or --enable-auto-trade-send, not both.")
+    return args
 
 
 def main() -> int:
@@ -442,7 +467,7 @@ def main() -> int:
     print(f"iterations: {'forever' if max_iterations is None else max_iterations}")
     print(f"sleep_seconds: {args.sleep_seconds}")
     print(f"discord_send: {'enabled' if args.discord_send else 'disabled'}")
-    print("auto_trade_live: disabled")
+    print(f"auto_trade_live: {'enabled' if args.enable_auto_trade_send else 'disabled'}")
     print(f"order_payload_dry_run: {'enabled' if args.enable_order_payload_dry_run else 'disabled'}")
     print(f"auto_trade_dry_run: {'enabled' if args.enable_auto_trade_dry_run else 'disabled'}")
     if args.discord_send:
@@ -451,6 +476,8 @@ def main() -> int:
         print("ORDER DRY-RUN: order payload CSVs may be generated, but MT5 is not called by that stage and no orders are placed.")
     if args.enable_auto_trade_dry_run:
         print("AUTO-TRADE DRY-RUN: MT5 order_check may run, but order_send is not called.")
+    if args.enable_auto_trade_send:
+        print("WARNING: AUTO-TRADE SEND is enabled. MT5 order_send may be called after all sender guards pass.")
 
     iteration = 0
     exit_code = 0
@@ -472,7 +499,7 @@ def main() -> int:
             write_text(iteration_dir / "once_command.txt", " ".join(cmd))
 
             order_event = run_order_payload_stage(args, iteration_dir)
-            auto_trade_event = run_auto_trade_dry_run_stage(args, iteration_dir, order_event)
+            auto_trade_event = run_auto_trade_stage(args, iteration_dir, order_event)
 
             once_summary_path = iteration_dir / "minimal_live_once_summary.csv"
             once_summary = read_summary(once_summary_path)
@@ -495,9 +522,9 @@ def main() -> int:
                     bool(row.get("success", False))
                     and int(order_event.get("order_payload_returncode", 0)) == 0
                     and int(auto_trade_event.get("auto_trade_returncode", 0)) == 0
-                    and int(auto_trade_event.get("auto_trade_order_send_called_count", 0)) == 0
-                    and int(auto_trade_event.get("auto_trade_sent_rows", 0)) == 0
                 )
+                if args.enable_auto_trade_dry_run:
+                    combined_success = combined_success and int(auto_trade_event.get("auto_trade_order_send_called_count", 0)) == 0 and int(auto_trade_event.get("auto_trade_sent_rows", 0)) == 0
                 event = {
                     "loop_iteration": iteration,
                     "started_at": start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -527,6 +554,7 @@ def main() -> int:
                 "order_payload_rows",
                 "valid_order_payloads",
                 "auto_trade_status",
+                "auto_trade_send_enabled",
                 "auto_trade_rows",
                 "auto_trade_dry_run_check_ok_rows",
                 "auto_trade_blocked_position_policy_rows",
@@ -540,9 +568,9 @@ def main() -> int:
                 proc.returncode != 0
                 or int(order_event.get("order_payload_returncode", 0)) != 0
                 or int(auto_trade_event.get("auto_trade_returncode", 0)) != 0
-                or int(auto_trade_event.get("auto_trade_order_send_called_count", 0)) != 0
-                or int(auto_trade_event.get("auto_trade_sent_rows", 0)) != 0
             )
+            if args.enable_auto_trade_dry_run:
+                has_error = has_error or int(auto_trade_event.get("auto_trade_order_send_called_count", 0)) != 0 or int(auto_trade_event.get("auto_trade_sent_rows", 0)) != 0
             if has_error:
                 exit_code = int(proc.returncode) if proc.returncode != 0 else int(order_event.get("order_payload_returncode", 0) or auto_trade_event.get("auto_trade_returncode", 1))
                 if exit_code == 0:
@@ -565,6 +593,7 @@ def main() -> int:
             "discord_send": bool(args.discord_send),
             "order_payload_dry_run": bool(args.enable_order_payload_dry_run),
             "auto_trade_dry_run": bool(args.enable_auto_trade_dry_run),
+            "auto_trade_send": bool(args.enable_auto_trade_send),
             "iterations_completed": iteration,
             "exit_code": exit_code,
             "loop_summary_csv": str(loop_summary_csv),
