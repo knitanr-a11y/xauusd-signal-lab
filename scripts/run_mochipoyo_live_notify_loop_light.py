@@ -9,10 +9,11 @@ Instead it:
 1. Reads only the latest timestamp from trigger CSVs.
 2. Compares with a state JSON.
 3. Skips all heavy work if there is no new confirmed trigger bar.
-4. Runs the existing strict scanner + risk enrichment + Discord sender only when needed.
+4. When triggered, creates small tail CSVs and runs strict scanner on those.
+5. Sends only new payload_key messages.
 
-This is the first lightweight stage. The strict scanner still performs the
-validated full scan when triggered. A later stage can add tail-row scanning.
+This keeps the confirmed-time / pivot-confirmed rules intact while avoiding
+full-history scans every 15 minutes.
 
 Safety:
 - No AI review.
@@ -20,9 +21,6 @@ Safety:
 - Discord sending requires --send.
 - Duplicate Discord sending is handled by send ledger payload_key.
 - Webhook URL is read from --webhook-url, environment variable, or .env.
-
-.env example:
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 """
 from __future__ import annotations
 
@@ -43,6 +41,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATE_JSON = "data/results/mochipoyo/live_dryrun/mochipoyo_live_notify_loop_light_state.json"
 DEFAULT_LEDGER = "data/results/mochipoyo/live_dryrun/mochipoyo_live_dryrun_strict_ledger.csv"
 DEFAULT_SEND_LEDGER = "data/results/mochipoyo/live_dryrun/mochipoyo_discord_send_ledger.csv"
+DEFAULT_TAIL_DIR = "data/results/mochipoyo/live_dryrun/tail_csv"
 
 GOLD_STRICT_PAYLOAD = "data/results/mochipoyo/live_dryrun/gold_mochipoyo_live_dryrun_strict_payloads.csv"
 GOLD_ENRICHED_PAYLOAD = "data/results/mochipoyo/live_dryrun/gold_mochipoyo_live_dryrun_strict_payloads_enriched.csv"
@@ -117,15 +116,9 @@ def sniff_sep_from_text(sample: str) -> str:
 
 
 def latest_csv_time(path: str | Path) -> str | None:
-    """Read only the tail of a CSV and return the last parseable time.
-
-    MT5 export files are time-ascending. This function avoids loading the whole
-    file each loop.
-    """
     p = Path(path)
     if not p.exists():
         return None
-    # Read tail bytes. Handles very long CSVs cheaply.
     size = p.stat().st_size
     read_size = min(size, 65536)
     with p.open("rb") as f:
@@ -134,12 +127,10 @@ def latest_csv_time(path: str | Path) -> str | None:
     lines = [x for x in raw.splitlines() if x.strip()]
     if not lines:
         return None
-    # If we started mid-line, the first line may be partial. Ignore it unless file is tiny.
     if size > read_size and len(lines) > 1:
         lines = lines[1:]
     if not lines:
         return None
-    header_sample = ""
     try:
         with p.open("r", encoding="utf-8-sig", errors="replace") as f:
             header_sample = f.readline()
@@ -182,18 +173,68 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
 
 
 # -----------------------------------------------------------------------------
+# Tail CSV generation
+# -----------------------------------------------------------------------------
+
+def read_csv_tail_rows(path: str | Path, rows: int) -> pd.DataFrame:
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"CSV not found: {p}")
+    # For MT5 CSV sizes here, pandas full read is acceptable only when triggered.
+    # The output tail files are what prevents the strict scanner from scanning all history.
+    sample = p.read_text(encoding="utf-8-sig", errors="replace")[:4096]
+    sep = sniff_sep_from_text(sample)
+    df = pd.read_csv(p, sep=sep, encoding="utf-8-sig")
+    if rows > 0 and len(df) > rows:
+        df = df.tail(rows).copy()
+    return df
+
+
+def write_tail_csv(src: str, dst: Path, rows: int) -> str:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    df = read_csv_tail_rows(src, rows)
+    df.to_csv(dst, sep=";", index=False, encoding="utf-8-sig")
+    return str(dst)
+
+
+def prepare_tail_csvs(args: argparse.Namespace, symbol: str) -> dict[str, str]:
+    tail_dir = ROOT / args.tail-dir if False else ROOT / args.tail_dir
+    symbol_dir = tail_dir / symbol.lower()
+    symbol_dir.mkdir(parents=True, exist_ok=True)
+    if symbol == "GOLD":
+        sources = {
+            "m1": (args.gold_m1_csv, args.tail_m1_rows),
+            "m5": (args.gold_m5_csv, args.tail_m5_rows),
+            "m15": (args.gold_m15_csv, args.tail_m15_rows),
+            "h1": (args.gold_h1_csv, args.tail_h1_rows),
+            "h4": (args.gold_h4_csv, args.tail_h4_rows),
+            "d1": (args.gold_d1_csv, args.tail_d1_rows),
+        }
+    elif symbol == "BTC":
+        sources = {
+            "m1": (args.btc_m1_csv, args.tail_m1_rows),
+            "m5": (args.btc_m5_csv, args.tail_m5_rows),
+            "m15": (args.btc_m15_csv, args.tail_m15_rows),
+            "h1": (args.btc_h1_csv, args.tail_h1_rows),
+            "h4": (args.btc_h4_csv, args.tail_h4_rows),
+            "d1": (args.btc_d1_csv, args.tail_d1_rows),
+        }
+    else:
+        raise RuntimeError(f"unknown symbol: {symbol}")
+    out: dict[str, str] = {}
+    safe_print(f"PREPARE TAIL CSV {symbol}")
+    for tf, (src, rows) in sources.items():
+        dst = symbol_dir / f"{symbol.lower()}_{tf}_tail.csv"
+        out[tf] = write_tail_csv(src, dst, rows)
+        safe_print(f"  {tf.upper()}: last {rows} rows -> {dst}")
+    return out
+
+
+# -----------------------------------------------------------------------------
 # Trigger detection
 # -----------------------------------------------------------------------------
 
 def trigger_files_for_symbol(args: argparse.Namespace, symbol: str) -> dict[str, str]:
-    """Return trigger timeframe CSVs.
-
-    We intentionally use M15 and H1 as the first lightweight gate because:
-    - GOLD notification universe includes M5/M15/H1 base pairs, but scanning every
-      M1/M5 update is too heavy.
-    - BTC validated universe is H4 -> M15, so M15 is the key trigger.
-    - H1 catches D1 -> H1 and slower context/base updates.
-    """
     if symbol == "GOLD":
         return {"M15": args.gold_m15_csv, "H1": args.gold_h1_csv}
     if symbol == "BTC":
@@ -235,7 +276,7 @@ def mark_symbol_processed(state: dict[str, Any], symbol: str, signature: dict[st
 # Commands
 # -----------------------------------------------------------------------------
 
-def strict_scan_cmd(args: argparse.Namespace, symbol: str) -> list[str]:
+def strict_scan_cmd(args: argparse.Namespace, symbol: str, csvs: dict[str, str]) -> list[str]:
     cmd = [
         args.python,
         "scripts/run_mochipoyo_live_dryrun_strict.py",
@@ -245,21 +286,21 @@ def strict_scan_cmd(args: argparse.Namespace, symbol: str) -> list[str]:
     ]
     if symbol == "GOLD":
         cmd += [
-            "--gold-m1-csv", args.gold_m1_csv,
-            "--gold-m5-csv", args.gold_m5_csv,
-            "--gold-m15-csv", args.gold_m15_csv,
-            "--gold-h1-csv", args.gold_h1_csv,
-            "--gold-h4-csv", args.gold_h4_csv,
-            "--gold-d1-csv", args.gold_d1_csv,
+            "--gold-m1-csv", csvs["m1"],
+            "--gold-m5-csv", csvs["m5"],
+            "--gold-m15-csv", csvs["m15"],
+            "--gold-h1-csv", csvs["h1"],
+            "--gold-h4-csv", csvs["h4"],
+            "--gold-d1-csv", csvs["d1"],
         ]
     elif symbol == "BTC":
         cmd += [
-            "--btc-m1-csv", args.btc_m1_csv,
-            "--btc-m5-csv", args.btc_m5_csv,
-            "--btc-m15-csv", args.btc_m15_csv,
-            "--btc-h1-csv", args.btc_h1_csv,
-            "--btc-h4-csv", args.btc_h4_csv,
-            "--btc-d1-csv", args.btc_d1_csv,
+            "--btc-m1-csv", csvs["m1"],
+            "--btc-m5-csv", csvs["m5"],
+            "--btc-m15-csv", csvs["m15"],
+            "--btc-h1-csv", csvs["h1"],
+            "--btc-h4-csv", csvs["h4"],
+            "--btc-d1-csv", csvs["d1"],
             "--btc-rr", str(args.btc_rr),
             "--btc-point-size", str(args.btc_point_size),
             "--btc-min-stop-distance", str(args.btc_min_stop_distance),
@@ -269,15 +310,15 @@ def strict_scan_cmd(args: argparse.Namespace, symbol: str) -> list[str]:
     return cmd
 
 
-def enrich_gold_cmd(args: argparse.Namespace) -> list[str]:
+def enrich_gold_cmd(args: argparse.Namespace, csvs: dict[str, str]) -> list[str]:
     return [
         args.python,
         "scripts/enrich_mochipoyo_live_payload_risk.py",
         "--symbol", "GOLD",
         "--input-csv", GOLD_STRICT_PAYLOAD,
         "--output-csv", GOLD_ENRICHED_PAYLOAD,
-        "--m1-csv", args.gold_m1_csv,
-        "--m5-csv", args.gold_m5_csv,
+        "--m1-csv", csvs["m1"],
+        "--m5-csv", csvs["m5"],
         "--rr", str(args.gold_rr),
         "--min-stop-distance", str(args.gold_min_stop_distance),
     ]
@@ -305,16 +346,25 @@ def send_cmd(args: argparse.Namespace, symbol: str, input_csv: str) -> list[str]
 
 def run_heavy_for_symbol(args: argparse.Namespace, symbol: str) -> None:
     safe_print("-" * 88)
-    safe_print(f"RUN HEAVY SCAN {symbol}")
-    run_cmd(strict_scan_cmd(args, symbol), cwd=ROOT, stop_on_error=not args.continue_on_error)
+    safe_print(f"RUN TAIL SCAN {symbol}")
+    csvs = prepare_tail_csvs(args, symbol) if args.use_tail_csv else original_csvs(args, symbol)
+    run_cmd(strict_scan_cmd(args, symbol, csvs), cwd=ROOT, stop_on_error=not args.continue_on_error)
     if symbol == "GOLD":
         safe_print("ENRICH GOLD")
-        run_cmd(enrich_gold_cmd(args), cwd=ROOT, stop_on_error=not args.continue_on_error)
+        run_cmd(enrich_gold_cmd(args, csvs), cwd=ROOT, stop_on_error=not args.continue_on_error)
         input_csv = GOLD_ENRICHED_PAYLOAD
     else:
         input_csv = BTC_STRICT_PAYLOAD
     safe_print(f"SEND/PREVIEW {symbol}")
     run_cmd(send_cmd(args, symbol, input_csv), cwd=ROOT, stop_on_error=not args.continue_on_error)
+
+
+def original_csvs(args: argparse.Namespace, symbol: str) -> dict[str, str]:
+    if symbol == "GOLD":
+        return {"m1": args.gold_m1_csv, "m5": args.gold_m5_csv, "m15": args.gold_m15_csv, "h1": args.gold_h1_csv, "h4": args.gold_h4_csv, "d1": args.gold_d1_csv}
+    if symbol == "BTC":
+        return {"m1": args.btc_m1_csv, "m5": args.btc_m5_csv, "m15": args.btc_m15_csv, "h1": args.btc_h1_csv, "h4": args.btc_h4_csv, "d1": args.btc_d1_csv}
+    raise RuntimeError(f"unknown symbol: {symbol}")
 
 
 # -----------------------------------------------------------------------------
@@ -325,12 +375,9 @@ def run_cycle(args: argparse.Namespace, symbols: list[str], cycle_no: int, state
     safe_print("=" * 88)
     safe_print(f"MOCHIPOYO LIGHT NOTIFY LOOP CYCLE {cycle_no}")
     safe_print(f"send_enabled: {args.send}")
+    safe_print(f"use_tail_csv: {args.use_tail_csv}")
     safe_print(f"symbols: {symbols}")
-    cycle = {
-        "cycle_no": cycle_no,
-        "started_at_utc": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M:%S%z"),
-        "symbols": [],
-    }
+    cycle = {"cycle_no": cycle_no, "started_at_utc": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M:%S%z"), "symbols": []}
     for symbol in symbols:
         should, info = should_run_symbol(args, state, symbol)
         safe_print("-" * 88)
@@ -354,18 +401,17 @@ def run_cycle(args: argparse.Namespace, symbols: list[str], cycle_no: int, state
         cycle["symbols"].append(info)
     cycle["finished_at_utc"] = pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M:%S%z")
     state.setdefault("cycles", []).append(cycle)
-    # Keep state compact.
     state["cycles"] = state["cycles"][-50:]
     return cycle
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run lightweight Mochipoyo live notification loop with update gating.")
+    p = argparse.ArgumentParser(description="Run lightweight Mochipoyo live notification loop with update gating and tail scans.")
     p.add_argument("--symbols", default="GOLD,BTC")
     p.add_argument("--interval-seconds", type=int, default=60)
     p.add_argument("--once", action="store_true")
     p.add_argument("--send", action="store_true")
-    p.add_argument("--force-scan", action="store_true", help="Run heavy scan even if trigger timestamps did not change.")
+    p.add_argument("--force-scan", action="store_true", help="Run scan even if trigger timestamps did not change.")
     p.add_argument("--max-send-rows", type=int, default=5)
     p.add_argument("--scan-recent-events", type=int, default=20)
     p.add_argument("--state-json", default=DEFAULT_STATE_JSON)
@@ -376,6 +422,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--webhook-env", default="DISCORD_WEBHOOK_URL")
     p.add_argument("--webhook-url", default=None)
     p.add_argument("--continue-on-error", action="store_true")
+
+    p.add_argument("--use-tail-csv", action=argparse.BooleanOptionalAction, default=True)
+    p.add_argument("--tail-dir", default=DEFAULT_TAIL_DIR)
+    p.add_argument("--tail-m1-rows", type=int, default=12000)
+    p.add_argument("--tail-m5-rows", type=int, default=6000)
+    p.add_argument("--tail-m15-rows", type=int, default=3000)
+    p.add_argument("--tail-h1-rows", type=int, default=1500)
+    p.add_argument("--tail-h4-rows", type=int, default=800)
+    p.add_argument("--tail-d1-rows", type=int, default=400)
 
     p.add_argument("--gold-rr", type=float, default=1.2)
     p.add_argument("--gold-min-stop-distance", type=float, default=1.0)
