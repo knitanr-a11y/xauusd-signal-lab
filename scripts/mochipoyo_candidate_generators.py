@@ -10,6 +10,7 @@ already-read base/context DataFrames.
 Current scope:
 - GOLD_H4_M5_SCALP
 - GOLD_H4_M15_DAYTRADE
+- GOLD_D1_H1_DAYTRADE
 
 The generator returns candidate EVENTS, not raw persistent states, by applying
 the same event filter defaults used by filter_mochipoyo_candidate_events.py.
@@ -38,6 +39,7 @@ except ModuleNotFoundError:  # Direct execution/import from scripts/.
 SUPPORTED_GENERATOR_PAIRS = {
     "GOLD_H4_M5_SCALP",
     "GOLD_H4_M15_DAYTRADE",
+    "GOLD_D1_H1_DAYTRADE",
 }
 
 
