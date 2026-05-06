@@ -31,6 +31,7 @@ candidate generation
 scripts/mochipoyo_risk_enricher.py
 scripts/mochipoyo_notification_filter.py
 scripts/apply_mochipoyo_notification_eligibility.py
+scripts/compare_mochipoyo_flexible_csvs.py
 ```
 
 関連設定:
@@ -257,58 +258,283 @@ GOLDは risk_ok がそのまま notification_ok になる。
 
 ---
 
-## 8. 現時点の判定
+## 8. Full strict allowed_events vs minimal notification_ok 比較
+
+比較には、正規化済み/enriched済みCSVを再正規化せず扱える以下を使用する。
 
 ```text
-risk enrich:
-  初期PASS相当
+scripts/compare_mochipoyo_flexible_csvs.py
+```
 
-notification eligibility:
-  初期PASS相当
+比較の主目的:
 
-minimal scanner 本体への notification eligibility 統合:
-  まだ保留
+```text
+minimal notification_ok が full strict allowed_events 側に存在するか確認する。
 
-本番通知:
-  まだ不可
+重視:
+  matched_rows
+  minimal_only_rows
+  payload_key_diff_rows
+
+参考扱い:
+  full_only_rows
+  value_diff_rows
+```
+
+理由:
+
+```text
+full strict allowed_events は risk/notification 前の母集団に近い。
+そのため full_only_rows は残り得る。
+また full側にrisk/SL/TP/spread列が無い場合、value_diff_rows は大きく出る。
+```
+
+---
+
+## 9. GOLD notification comparison 結果
+
+### 9.1 GOLD_H4_M5_SCALP
+
+実行:
+
+```cmd
+python scripts\compare_mochipoyo_flexible_csvs.py --full-csv data\results\mochipoyo\live_dryrun\gold_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_notification_filter_test\minimal_candidates_notification_ok_gold_h4_m5_scalp.csv --pair-name GOLD_H4_M5_SCALP --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\flex_compare_gold_h4_m5_notification_ok_vs_allowed_events --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 38
+minimal_rows = 37
+matched_rows = 37
+full_only_rows = 1
+minimal_only_rows = 0
+payload_key_diff_rows = 0
+```
+
+full_only 1件:
+
+```text
+GOLD_H4_M5_SCALP A SELL
+signal_close_time = 2026-05-02 00:00:00
+entry_time        = 2026-05-04 01:00:00
+entry_price       = 4632.78
+risk_status       = NaN
+```
+
+解釈:
+
+```text
+minimal notification_ok 37件は、full strict allowed_events 側に全件存在。
+full_only 1件は signal_close_time と entry_time が約2日ズレており、通知候補として除外されるのは自然。
+```
+
+判定:
+
+```text
+GOLD_H4_M5_SCALP notification candidate generation: PASS扱い
+```
+
+### 9.2 GOLD_H4_M15_DAYTRADE
+
+実行:
+
+```cmd
+python scripts\compare_mochipoyo_flexible_csvs.py --full-csv data\results\mochipoyo\live_dryrun\gold_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_notification_filter_test\minimal_candidates_notification_ok_gold_h4_m15_daytrade.csv --pair-name GOLD_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\flex_compare_gold_h4_m15_notification_ok_vs_allowed_events --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 9
+minimal_rows = 7
+matched_rows = 7
+full_only_rows = 2
+minimal_only_rows = 0
+payload_key_diff_rows = 0
+```
+
+解釈:
+
+```text
+minimal notification_ok 7件は、full strict allowed_events 側に全件存在。
+full_only 2件は full側のrisk/notification前候補として扱う。
+```
+
+判定:
+
+```text
+GOLD_H4_M15_DAYTRADE notification candidate generation: PASS扱い
+```
+
+### 9.3 GOLD_D1_H1_DAYTRADE
+
+実行:
+
+```cmd
+python scripts\compare_mochipoyo_flexible_csvs.py --full-csv data\results\mochipoyo\live_dryrun\gold_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_notification_filter_test\minimal_candidates_notification_ok_gold_d1_h1_daytrade.csv --pair-name GOLD_D1_H1_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\flex_compare_gold_d1_h1_notification_ok_vs_allowed_events --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 2
+minimal_rows = 2
+matched_rows = 2
+full_only_rows = 0
+minimal_only_rows = 0
+payload_key_diff_rows = 0
+```
+
+解釈:
+
+```text
+minimal notification_ok 2件は、full strict allowed_events 側と完全一致。
+```
+
+判定:
+
+```text
+GOLD_D1_H1_DAYTRADE notification candidate generation: PASS扱い
+```
+
+### 9.4 GOLD 3pair 総合判定
+
+```text
+GOLD_H4_M5_SCALP:
+  matched 37 / minimal_only 0 / payload_key_diff 0
+
+GOLD_H4_M15_DAYTRADE:
+  matched 7 / minimal_only 0 / payload_key_diff 0
+
+GOLD_D1_H1_DAYTRADE:
+  matched 2 / minimal_only 0 / payload_key_diff 0
+```
+
+結論:
+
+```text
+GOLD 3pair は、candidate generation / risk enrich / notification eligibility まで初期PASS扱い。
+次は GOLD だけ先に ledger重複判定へ進めてよい。
+```
+
+---
+
+## 10. BTC notification comparison 結果
+
+比較:
+
+```cmd
+python scripts\compare_mochipoyo_flexible_csvs.py --full-csv data\results\mochipoyo\live_dryrun\btc_mochipoyo_live_dryrun_strict_allowed_events.csv --minimal-csv data\results\mochipoyo\minimal_notification_filter_test\minimal_candidates_notification_ok_btc_h4_m15_daytrade.csv --pair-name BTC_H4_M15_DAYTRADE --align-both-to-overlap-time-range --out-dir data\results\mochipoyo\flex_compare_btc_notification_ok_vs_allowed_events --lookback-candidates 0
+```
+
+結果:
+
+```text
+full_rows = 4
+minimal_rows = 4
+matched_rows = 2
+full_only_rows = 2
+minimal_only_rows = 2
+payload_key_diff_rows = 0
+```
+
+full_only:
+
+```text
+2026-05-02 10:45 BUY
+2026-05-03 18:45 BUY
+```
+
+minimal_only:
+
+```text
+2026-05-03 16:00 BUY
+2026-05-04 00:00 BUY
+```
+
+解釈:
+
+```text
+BTCは payload_key ルールの問題ではなく、候補時刻そのものがズレている。
+これまでのtail感度でも見えていた通り、tail/warmup/cooldown/pivot初期化影響がGOLDより強い。
+```
+
+判定:
+
+```text
+BTC risk/spread enrich: 動作OK
+BTC notification eligibility: 動作OK
+BTC notification candidate generation: 未PASS
+```
+
+BTCの次工程:
+
+```text
+full期間全体ではなく、最新確定足/直近数本だけで比較する設計に切り替える。
+```
+
+---
+
+## 11. 現時点の判定
+
+```text
+GOLD_H4_M5_SCALP:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+
+GOLD_H4_M15_DAYTRADE:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+
+GOLD_D1_H1_DAYTRADE:
+  candidate generation PASS
+  risk enrich PASS
+  notification eligibility PASS
+
+BTC_H4_M15_DAYTRADE:
+  candidate generation 動作OK。ただし候補時刻一致は未PASS
+  risk/spread enrich PASS
+  notification eligibility PASS
 ```
 
 本番通知前に必要な残作業:
 
 ```text
-1. full strict / risk enriched 側との比較
-2. 最新確定足/直近数本だけの notification candidate 比較
-3. ledger重複判定
-4. Discord dry-run
-5. pair別更新トリガーとの接続
+1. GOLD ledger重複判定
+2. GOLD Discord dry-run
+3. GOLD pair別更新トリガー接続
+4. BTC 最新確定足/直近数本限定比較
+5. BTC ledger/DiscordはBTC候補時刻比較が通ってから
 ```
 
 ---
 
-## 9. 次の検証
+## 12. 次の検証
 
-次は、別CLI運用のまま full strict / risk enriched 側との比較を行う。
+GOLDだけ先に ledger重複判定へ進む。
 
-比較候補:
+必要状態:
 
 ```text
-minimal notification_ok CSV
-vs
-既存 full strict payload / allowed_events / risk enriched payload
+payload_key
+last_notified_time_by_symbol_pair_direction
+send ledger
 ```
 
-比較時の注意:
+最低限のテスト:
 
 ```text
-GOLD:
-  live_risk_status == OK
+1回目:
+  notification_ok CSV を入力
+  payload_key未送信なら送信候補として残る
 
-BTC:
-  btc_live_risk_status == OK
-  spread_to_sl_ratio <= 0.07
-  effective_rr_after_spread >= 1.0
+2回目:
+  同じCSVを入力
+  sent 0 / duplicate skip
 
-payload_key:
-  source_filter_name は含めない
-  stable key の一致を優先
+同一payload_keyが複数CSV/複数フィルターに存在しても:
+  1回だけ通知候補
 ```
