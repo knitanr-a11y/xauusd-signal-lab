@@ -2,6 +2,64 @@
 
 このドキュメントは、新しいチャットへ移行した直後に必ず読むこと。
 
+## 2026-05-06 追記: もちぽよ式 GOLD minimal live dry loop の続き
+
+直近チャットでは、白紙からの候補探索ではなく、もちぽよ式 GOLD minimal live flow の部品検証とdry loop化を進めた。
+
+次チャットでその続きから始める場合は、まず以下を読むこと。
+
+```text
+docs/NEXT_CHAT_HANDOFF_MOCHIPOYO_MINIMAL_LIVE.md
+docs/MOCHIPOYO_GOLD_MINIMAL_LIVE_ONCE_STABILITY.md
+docs/MOCHIPOYO_MINIMAL_LEDGER_VALIDATION.md
+docs/MOCHIPOYO_MINIMAL_RISK_NOTIFICATION_VALIDATION.md
+docs/MOCHIPOYO_MINIMAL_SCANNER_VALIDATION_LOG.md
+```
+
+現在の到達点:
+
+```text
+GOLD candidate generation: PASS
+GOLD risk enrich: PASS
+GOLD notification eligibility: PASS
+GOLD trigger window filter: PASS
+GOLD ledger duplicate filter: PASS
+GOLD Discord dry-run / no-row skip: PASS
+GOLD pair trigger state: PASS
+GOLD minimal live once stability: PASS
+GOLD minimal live dry loop: PASS
+```
+
+まだDiscord実送信はしていない。
+自動売買もしていない。
+
+次にやることは A案。
+
+```text
+長めのdry loop:
+  iterations = 12
+  sleep_seconds = 15
+  out-dir は短く data/ml_loop_run5 推奨
+```
+
+実行予定コマンド:
+
+```cmd
+python scripts\run_mochipoyo_gold_minimal_live_loop_dry.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\ml_loop_run5 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --iterations 12 --sleep-seconds 15 --commit-trigger-state --commit-ledger
+```
+
+注意:
+
+```text
+- Discord実送信へすぐ進まない
+- 自動売買を入れない
+- 既存の run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は使わない
+- trigger更新窓フィルターを無効化しない
+- 長い out-dir を使わない
+```
+
+---
+
 ## 最重要結論：GOLD/BTCのシグナル候補は一旦すべて白紙
 
 2026-05-06時点で、GOLD/BTCの既存採用候補はすべて白紙に戻す。
