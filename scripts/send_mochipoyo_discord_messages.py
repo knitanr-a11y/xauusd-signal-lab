@@ -11,10 +11,9 @@ Safety:
 - no AI review
 - no order placement
 
-Input should usually be one of:
-- data/results/mochipoyo/live_dryrun/gold_mochipoyo_live_dryrun_strict_payloads_enriched.csv
-- data/results/mochipoyo/live_dryrun/btc_mochipoyo_live_dryrun_strict_payloads.csv
-- data/results/mochipoyo/live_dryrun/mochipoyo_live_dryrun_strict_ledger.csv
+Console output is deliberately summary-only. Full Discord messages are written to
+UTF-8 preview files instead of being printed to Windows cmd.exe, which avoids
+cp932/emoji mojibake and crashes.
 """
 from __future__ import annotations
 
@@ -36,10 +35,6 @@ DISCORD_LIMIT = 2000
 
 
 def safe_text(text: object) -> str:
-    """Return text printable even on Windows cp932 consoles.
-
-    Files and Discord keep the original UTF-8 message. This only protects stdout.
-    """
     s = str(text)
     enc = getattr(sys.stdout, "encoding", None) or "utf-8"
     return s.encode(enc, errors="backslashreplace").decode(enc, errors="replace")
@@ -272,8 +267,7 @@ def main() -> int:
     safe_print(f"send_ledger_csv: {send_ledger_csv}")
     safe_print(f"preview_txt: {preview_txt}")
     safe_print(f"preview_json: {preview_json}")
-    safe_print("preview_last:")
-    safe_print(records[-1]["message"] if records else "empty")
+    safe_print("preview_last: omitted from console; open preview_txt for the full UTF-8 message.")
     safe_print("done")
     return 0 if errors == 0 else 1
 
