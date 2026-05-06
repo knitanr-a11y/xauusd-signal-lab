@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Initial Mochipoyo minimal scanner skeleton.
+"""Mochipoyo minimal scanner.
 
-This first version intentionally does not reimplement Mochipoyo signal logic yet.
-Its purpose is to establish the safe live-scanner data path:
-
+Current scope:
 - allowed_slices -> required pairs only
 - read only the required pair CSVs through the safe reader
 - build confirmed-time base/context joined frames
-- return structured scan results with empty candidate DataFrames
+- generate GOLD_H4_M5_SCALP A/B SELL events using the existing audited
+  Mochipoyo scoring functions
+- return structured scan results
 
-Later commits will add pair-specific raw candidate generation on top of this
-foundation, then risk/spread enrichment, then comparison against full strict
-scan outputs.
+Other pairs still run through the safe skeleton path and return empty candidate
+DataFrames until their pair-specific generators are added.
 """
 from __future__ import annotations
 
 import argparse
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -25,6 +23,7 @@ from typing import Any, Iterable, Mapping
 import pandas as pd
 
 try:  # Package import from repository root.
+    from scripts.mochipoyo_candidate_generators import SUPPORTED_GENERATOR_PAIRS, generate_pair_events
     from scripts.mochipoyo_candidate_normalizer import ensure_normalized_columns
     from scripts.mochipoyo_minimal_config import (
         DEFAULT_ALLOWED_SLICES,
@@ -38,6 +37,7 @@ try:  # Package import from repository root.
     )
     from scripts.mochipoyo_safe_csv_reader import CsvReadResult, read_ohlc_csv_safe
 except ModuleNotFoundError:  # Direct execution from scripts/.
+    from mochipoyo_candidate_generators import SUPPORTED_GENERATOR_PAIRS, generate_pair_events  # type: ignore
     from mochipoyo_candidate_normalizer import ensure_normalized_columns  # type: ignore
     from mochipoyo_minimal_config import (  # type: ignore
         DEFAULT_ALLOWED_SLICES,
@@ -59,6 +59,7 @@ ERR_PAIR_CONFIG_MISSING = "PAIR_CONFIG_MISSING"
 ERR_BASE_CSV_READ_FAILED = "BASE_CSV_READ_FAILED"
 ERR_CONTEXT_CSV_READ_FAILED = "CONTEXT_CSV_READ_FAILED"
 ERR_CONFIRMED_TIME_JOIN_FAILED = "CONFIRMED_TIME_JOIN_FAILED"
+ERR_CANDIDATE_GENERATION_FAILED = "CANDIDATE_GENERATION_FAILED"
 ERR_NO_BASE_ROWS = "NO_BASE_ROWS"
 ERR_NO_CONTEXT_ROWS = "NO_CONTEXT_ROWS"
 
@@ -162,10 +163,11 @@ def confirmed_time_join_base_context(
     *,
     context_label: str,
 ) -> pd.DataFrame:
-    """Join context rows to base rows using context_close_time <= base_close_time.
+    """Diagnostic join: context_close_time <= base_close_time.
 
-    Input frames must already contain `time` and `close_time`.
-    The returned frame contains base_* columns and context_* columns.
+    Candidate generation uses the legacy audited confirmed_join from
+    scan_mochipoyo_multi_tf_candidates.py to keep column names identical.  This
+    function remains useful for skeleton diagnostics and simple join audits.
     """
     if base_df.empty:
         return pd.DataFrame()
@@ -273,6 +275,29 @@ def read_pair_frames(
     return base_df, context_frames, reader_meta, errors
 
 
+def _generate_candidates_if_supported(
+    pair_name: str,
+    cfg: Mapping[str, Any],
+    base_df: pd.DataFrame,
+    context_frames: dict[str, pd.DataFrame],
+    allowed_slices: list[dict[str, str]],
+) -> tuple[dict[str, pd.DataFrame], list[MinimalScanError]]:
+    if pair_name not in SUPPORTED_GENERATOR_PAIRS:
+        return {}, []
+    context_map = dict(cfg.get("context", {}))
+    if not context_map:
+        return {}, [MinimalScanError(pair_name=pair_name, error_reason=ERR_NO_CONTEXT_ROWS, detail="pair has no context config")]
+    context_tf = str(next(iter(context_map.keys()))).upper()
+    context_df = context_frames.get(context_tf)
+    if context_df is None or context_df.empty:
+        return {}, [MinimalScanError(pair_name=pair_name, error_reason=ERR_NO_CONTEXT_ROWS, detail=f"missing context {context_tf}")]
+    try:
+        generated = generate_pair_events(base_df, context_df, cfg, allowed_slices=allowed_slices)
+        return generated, []
+    except Exception as exc:
+        return {}, [MinimalScanError(pair_name=pair_name, error_reason=ERR_CANDIDATE_GENERATION_FAILED, detail=str(exc))]
+
+
 def scan_pair_minimal_skeleton(
     pair_name: str,
     *,
@@ -283,11 +308,7 @@ def scan_pair_minimal_skeleton(
     tail_bars_override: Mapping[str, int] | None = None,
     csv_sep: str = "auto",
 ) -> MinimalPairScanResult:
-    """Scan one pair through the current skeleton data path.
-
-    Candidate generation is intentionally not implemented yet, so candidate
-    frames are empty but normalized.
-    """
+    """Scan one pair through the current minimal scanner data path."""
     try:
         cfg = get_pair_config(pair_name)
     except Exception as exc:
@@ -334,12 +355,16 @@ def scan_pair_minimal_skeleton(
         try:
             joined_frames[context_tf] = confirmed_time_join_base_context(base_df, context_df, context_label=context_tf)
         except Exception as exc:
-            join_errors.append(
-                MinimalScanError(pair_name=pair_name, error_reason=ERR_CONFIRMED_TIME_JOIN_FAILED, detail=str(exc))
-            )
+            join_errors.append(MinimalScanError(pair_name=pair_name, error_reason=ERR_CONFIRMED_TIME_JOIN_FAILED, detail=str(exc)))
 
-    status = SCAN_STATUS_ERROR if join_errors else SCAN_STATUS_OK
-    all_errors = errors + join_errors
+    generated, gen_errors = _generate_candidates_if_supported(pair_name, cfg, base_df, context_frames, pair_allowed_slices)
+    if generated.get("joined_df") is not None and not generated.get("joined_df", pd.DataFrame()).empty:
+        # The generated joined frame has exact legacy column naming used by scan_pair.
+        first_context = str(next(iter(dict(cfg.get("context", {})).keys()))).upper()
+        joined_frames[first_context] = generated["joined_df"]
+
+    all_errors = errors + join_errors + gen_errors
+    status = SCAN_STATUS_ERROR if all_errors else SCAN_STATUS_OK
     return MinimalPairScanResult(
         scan_status=status,
         pair_name=pair_name,
@@ -349,10 +374,10 @@ def scan_pair_minimal_skeleton(
         base_df=base_df,
         context_frames=context_frames,
         joined_frames=joined_frames,
-        raw_candidates_df=pd.DataFrame(),
-        normalized_candidates_df=ensure_normalized_columns(pd.DataFrame()),
-        risk_ok_candidates_df=ensure_normalized_columns(pd.DataFrame()),
-        risk_ng_candidates_df=ensure_normalized_columns(pd.DataFrame()),
+        raw_candidates_df=generated.get("raw_candidates_df", pd.DataFrame()),
+        normalized_candidates_df=generated.get("normalized_candidates_df", ensure_normalized_columns(pd.DataFrame())),
+        risk_ok_candidates_df=generated.get("risk_ok_candidates_df", ensure_normalized_columns(pd.DataFrame())),
+        risk_ng_candidates_df=generated.get("risk_ng_candidates_df", ensure_normalized_columns(pd.DataFrame())),
         errors=all_errors,
         reader_metadata=reader_meta,
     )
@@ -463,12 +488,14 @@ def main() -> int:
     metadata.to_csv(out_dir / "minimal_skeleton_reader_metadata.csv", index=False, encoding="utf-8-sig")
     errors.to_csv(out_dir / "minimal_skeleton_errors.csv", index=False, encoding="utf-8-sig")
 
-    # Write per-pair joined frame samples only.  These are diagnostic files, not
-    # signal candidates.
     for result in batch.results:
+        safe_pair = result.pair_name.lower()
+        if not result.raw_candidates_df.empty:
+            result.raw_candidates_df.to_csv(out_dir / f"minimal_candidates_raw_{safe_pair}.csv", index=False, encoding="utf-8-sig")
+        if not result.normalized_candidates_df.empty:
+            result.normalized_candidates_df.to_csv(out_dir / f"minimal_candidates_normalized_{safe_pair}.csv", index=False, encoding="utf-8-sig")
         for context_tf, joined in result.joined_frames.items():
             sample = joined.tail(200).copy() if len(joined) > 200 else joined.copy()
-            safe_pair = result.pair_name.lower()
             sample.to_csv(out_dir / f"minimal_skeleton_joined_{safe_pair}_{context_tf.lower()}.csv", index=False, encoding="utf-8-sig")
 
     print(summary.to_string(index=False))
@@ -482,6 +509,7 @@ if __name__ == "__main__":
 
 __all__ = [
     "ERR_BASE_CSV_READ_FAILED",
+    "ERR_CANDIDATE_GENERATION_FAILED",
     "ERR_CONFIRMED_TIME_JOIN_FAILED",
     "ERR_CONTEXT_CSV_READ_FAILED",
     "ERR_NO_BASE_ROWS",
