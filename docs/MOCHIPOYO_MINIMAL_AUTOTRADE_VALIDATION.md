@@ -23,6 +23,8 @@ position policy: PASS
 live loop内 auto-trade dry-run: PASS
 live loop内 auto-trade send: PASS
 既存ポジション時の追加発注ブロック: PASS
+候補0件時の全段safe skip: PASS
+短時間デモauto-trade bat作成: PASS
 ```
 
 重要:
@@ -566,12 +568,123 @@ success: True
 live loop auto-trade send duplicate/position block: PASS
 ```
 
+### 8.3 候補0件 / 全段safe skip
+
+通常のtrigger state / production ledgerで短時間loopを実行。
+候補が0件の場合、以前は `notification_ledger_to_send.csv` 読み込みで `ERROR_READ_TO_SEND` になっていた。
+修正後は候補0件を正常スキップ扱いにした。
+
+修正コミット:
+
+```text
+623faf954b4922f6a0dbcb21228c3a2224f635f2
+  Treat no notification rows as safe order-payload skip
+```
+
+確認結果:
+
+```text
+iteration 1:
+  pairs_to_scan = 3
+  notification_ok_live_rows = 0
+  notification_outside_trigger_window_rows = 45
+  ledger_new_candidates = 0
+  discord_status = SKIPPED_NO_ROWS
+  order_payload_status = SKIPPED_NO_ROWS
+  auto_trade_status = SKIPPED_NO_ORDER_PAYLOAD_ROWS
+  auto_trade_order_send_called_count = 0
+  auto_trade_sent_rows = 0
+  success = True
+
+iteration 2:
+  pairs_to_scan = 0
+  discord_status = SKIPPED_NO_ROWS
+  order_payload_status = SKIPPED_NO_ROWS
+  auto_trade_status = SKIPPED_NO_ORDER_PAYLOAD_ROWS
+  success = True
+
+iteration 3:
+  pairs_to_scan = 0
+  discord_status = SKIPPED_NO_ROWS
+  order_payload_status = SKIPPED_NO_ROWS
+  auto_trade_status = SKIPPED_NO_ORDER_PAYLOAD_ROWS
+  success = True
+```
+
+判定:
+
+```text
+候補0件時の全段safe skip: PASS
+order_send未呼び出し: PASS
+```
+
 ---
 
-## 9. 現在の安全な運用方針
+## 9. 短時間デモauto-trade bat
+
+追加済み:
+
+```text
+scripts/run_mochipoyo_gold_demo_autotrade_short.bat
+```
+
+目的:
+
+```text
+長いコマンドを毎回手入力しない。
+デモ口座限定で、短時間だけDiscord送信 + MT5 auto-trade send loopを起動する。
+```
+
+batの固定安全設定:
+
+```text
+account expected-login: 75539039
+require demo account: ON
+broker_symbol: GOLD#
+lot: 0.01
+position_policy: block_any
+max_symbol_positions: 1
+max_symbol_lot: 0.01
+auto_trade_max_orders: 1
+iterations: 3
+sleep_seconds: 10
+out-dir: data\ml_loop_demo_prod_short
+```
+
+使い方:
+
+```cmd
+scripts\run_mochipoyo_gold_demo_autotrade_short.bat
+```
+
+実行前チェック:
+
+```text
+MT5がXMTradingデモ口座 75539039 でログイン中
+Algo Trading ON
+.env にDiscord Webhookあり
+本口座ではない
+既存GOLD#ポジションの有無を把握している
+```
+
+既存ポジションがある場合:
+
+```text
+position_policy block_any により追加発注はブロックされる。
+```
+
+候補0件の場合:
+
+```text
+Discord / order payload / auto-trade は全段safe skipされる。
+```
+
+---
+
+## 10. 現在の安全な運用方針
 
 まだ本口座では使わない。
-次の段階は、デモ口座で短時間の実loopを行うこと。
+次の段階は、デモ口座で短時間の実loopを必要な時だけ行うこと。
 
 推奨方針:
 
@@ -599,7 +712,7 @@ data/results/mochipoyo/... の深いout-dir
 
 ---
 
-## 10. まだやっていないこと
+## 11. まだやっていないこと
 
 ```text
 本口座での自動売買
@@ -620,17 +733,18 @@ data/results/mochipoyo/... の深いout-dir
 
 ---
 
-## 11. 次にやるなら
+## 12. 次にやるなら
 
+長めloopはユーザー希望により行わない。
 推奨順:
 
 ```text
-1. デモ口座で短時間の auto-trade send loop
+1. 必要な時だけ短時間batでデモ稼働
 2. loop中の no-row / blocked / sent のsummary確認
 3. order ledgerとMT5履歴の照合
 4. ポジション監視スクリプト追加
-5. デモで1日程度の限定稼働
-6. 本口座検討はその後
+5. 約定後Discord追跡通知
+6. 本口座検討は十分なデモ確認後
 ```
 
 最重要注意:
