@@ -14,6 +14,13 @@ Important design rule:
     allowed_slices -> required pairs -> scan required pairs only.
 
 Do not use this module to run a broad full scan and then filter afterwards.
+
+Future auto-trade bridge rule:
+    This notification system remains Python-side decision logic.  If/when auto
+    trading is enabled, Python should write an order_intent file and a single
+    MQL5 Bridge EA should execute it inside MT5.  Therefore pair configs include
+    mt5_symbol / auto_trade_enabled placeholders now, but auto_trade_enabled is
+    intentionally False for every pair at this stage.
 """
 from __future__ import annotations
 
@@ -42,6 +49,13 @@ CSV_KEYS: dict[str, str] = {
     "btc_h4": "btcusdsharp_h4.csv",
 }
 
+# Broker-facing MT5 symbols are intentionally separated from internal symbols.
+# Adjust these when moving between brokers/accounts (for example XAUUSD vs GOLD#).
+DEFAULT_MT5_SYMBOL_BY_SYMBOL: dict[str, str] = {
+    "GOLD": "GOLD#",
+    "BTC": "BTCUSD#",
+}
+
 DEFAULT_TAIL_BARS: dict[str, int] = {
     "M1": 12000,
     "M5": 6000,
@@ -66,6 +80,8 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
     "GOLD_H4_M5_SCALP": {
         "pair_name": "GOLD_H4_M5_SCALP",
         "symbol": "GOLD",
+        "mt5_symbol": "GOLD#",
+        "auto_trade_enabled": False,
         "base_timeframe": "M5",
         "trigger_timeframe": "M5",
         "base_csv_key": "gold_m5",
@@ -81,6 +97,8 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
     "GOLD_H4_M15_DAYTRADE": {
         "pair_name": "GOLD_H4_M15_DAYTRADE",
         "symbol": "GOLD",
+        "mt5_symbol": "GOLD#",
+        "auto_trade_enabled": False,
         "base_timeframe": "M15",
         "trigger_timeframe": "M15",
         "base_csv_key": "gold_m15",
@@ -96,6 +114,8 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
     "GOLD_D1_H1_DAYTRADE": {
         "pair_name": "GOLD_D1_H1_DAYTRADE",
         "symbol": "GOLD",
+        "mt5_symbol": "GOLD#",
+        "auto_trade_enabled": False,
         "base_timeframe": "H1",
         "trigger_timeframe": "H1",
         "base_csv_key": "gold_h1",
@@ -111,6 +131,8 @@ PAIR_CONFIGS: dict[str, dict[str, Any]] = {
     "BTC_H4_M15_DAYTRADE": {
         "pair_name": "BTC_H4_M15_DAYTRADE",
         "symbol": "BTC",
+        "mt5_symbol": "BTCUSD#",
+        "auto_trade_enabled": False,
         "base_timeframe": "M15",
         "trigger_timeframe": "M15",
         "base_csv_key": "btc_m15",
@@ -138,6 +160,13 @@ def normalize_pair_name(pair_name: object) -> str:
     return value
 
 
+def normalize_symbol(symbol: object) -> str:
+    value = str(symbol or "").strip().upper()
+    if not value:
+        raise MinimalConfigError("symbol is required")
+    return value
+
+
 def normalize_candidate_rank(candidate_rank: object) -> str:
     value = str(candidate_rank or "").strip().upper()
     if not value:
@@ -149,6 +178,13 @@ def normalize_direction(direction: object) -> str:
     value = str(direction or "").strip().upper()
     if value not in {"BUY", "SELL"}:
         raise MinimalConfigError(f"direction must be BUY or SELL, got {direction!r}")
+    return value
+
+
+def normalize_mt5_symbol(mt5_symbol: object) -> str:
+    value = str(mt5_symbol or "").strip()
+    if not value:
+        raise MinimalConfigError("mt5_symbol is required")
     return value
 
 
@@ -213,6 +249,17 @@ def get_pair_config(pair_name: str) -> dict[str, Any]:
     if pair not in PAIR_CONFIGS:
         raise MinimalConfigError(f"Unknown pair_name: {pair}")
     return deepcopy(PAIR_CONFIGS[pair])
+
+
+def get_pair_mt5_symbol(pair_name: str) -> str:
+    cfg = get_pair_config(pair_name)
+    mt5_symbol = cfg.get("mt5_symbol") or DEFAULT_MT5_SYMBOL_BY_SYMBOL.get(str(cfg.get("symbol", "")).upper())
+    return normalize_mt5_symbol(mt5_symbol)
+
+
+def is_auto_trade_enabled(pair_name: str) -> bool:
+    cfg = get_pair_config(pair_name)
+    return bool(cfg.get("auto_trade_enabled", False))
 
 
 def get_csv_filename(csv_key: str) -> str:
@@ -297,6 +344,7 @@ def build_csv_overrides_from_args(args: Any) -> dict[str, str | None]:
 __all__ = [
     "CSV_KEYS",
     "DEFAULT_ALLOWED_SLICES",
+    "DEFAULT_MT5_SYMBOL_BY_SYMBOL",
     "DEFAULT_TAIL_BARS",
     "MinimalConfigError",
     "PAIR_CONFIGS",
@@ -307,10 +355,14 @@ __all__ = [
     "get_csv_filename",
     "get_pair_allowed_slice_set",
     "get_pair_config",
+    "get_pair_mt5_symbol",
     "get_required_pair_names",
     "get_timeframe_minutes",
+    "is_auto_trade_enabled",
     "normalize_allowed_slice",
     "normalize_allowed_slices",
+    "normalize_mt5_symbol",
+    "normalize_symbol",
     "resolve_csv_path",
     "validate_allowed_slices_against_pair_configs",
 ]
