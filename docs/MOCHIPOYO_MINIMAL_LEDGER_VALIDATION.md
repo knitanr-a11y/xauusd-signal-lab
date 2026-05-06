@@ -2,7 +2,7 @@
 
 最終更新: 2026-05-06
 
-このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定・Discord dry-run・pair別更新トリガー検証ログである。
+このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定・Discord dry-run・pair別更新トリガー・単発minimal live flow検証ログである。
 
 関連ログ:
 
@@ -24,6 +24,7 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 4. last_notified_time_by_symbol_pair_direction 相当のstateをCSVで確認できる
 5. ledger判定後の送信候補CSVをDiscord送信スクリプトがdry-runで読める
 6. pair別trigger timeframeのclose_time更新を検出できる
+7. GOLD minimal live flow を単発CLIで安全に接続できる
 ```
 
 この段階では Discord実送信も自動売買も行わない。
@@ -36,6 +37,7 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 scripts/apply_mochipoyo_notification_ledger.py
 scripts/send_mochipoyo_discord_messages.py
 scripts/apply_mochipoyo_pair_trigger_state.py
+scripts/run_mochipoyo_gold_minimal_live_once.py
 ```
 
 `apply_mochipoyo_notification_ledger.py` の役割:
@@ -76,6 +78,19 @@ pair別trigger timeframe CSVを読む
 最新確定足 close_time を取得
 state CSV の last_seen_close_time と比較
 更新pairだけ should_scan=True にする
+```
+
+`run_mochipoyo_gold_minimal_live_once.py` の役割:
+
+```text
+常時ループではない単発CLI
+trigger state
+  -> should_scan=True のGOLD pairだけscan
+  -> risk enrich
+  -> notification eligibility
+  -> ledger duplicate filter
+  -> Discord dry-run preview
+  -> 成功後だけ trigger state を進める
 ```
 
 ---
@@ -354,7 +369,126 @@ run3では --commit-scan-required を付けていないため、GOLD_H4_M5_SCALP
 
 ---
 
-## 8. GOLD ledger / Discord / trigger 総合判定
+## 8. GOLD minimal live once 検証
+
+実装:
+
+```text
+scripts/run_mochipoyo_gold_minimal_live_once.py
+```
+
+このスクリプトは常時ループではない。
+1回分だけ以下を接続する。
+
+```text
+pair trigger state
+  -> should_scan=True のGOLD pairだけscan
+  -> risk enrich
+  -> notification eligibility
+  -> ledger duplicate filter
+  -> Discord dry-run preview
+  -> 成功後だけ trigger state を進める
+```
+
+### 8.1 run1
+
+実行:
+
+```cmd
+python scripts\run_mochipoyo_gold_minimal_live_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_live_once_test\run1 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --commit-trigger-state --commit-ledger --discord-dry-run --run-id gold_minimal_live_once_1
+```
+
+結果:
+
+```text
+pairs_total = 3
+pairs_to_scan = 2
+scan_errors = 0
+notification_ok_rows = 44
+ledger_new_candidates = 44
+ledger_skipped_rows = 0
+ledger_append_rows = 44
+commit_ledger = True
+discord_dry_run = True
+discord_status = OK
+discord_returncode = 0
+commit_trigger_state = True
+trigger_state_advanced = True
+success = True
+```
+
+scan対象:
+
+```text
+GOLD_H4_M5_SCALP:
+  previous_close_time = 2026-05-06 12:30:00
+  latest_close_time   = 2026-05-06 12:50:00
+  trigger_status      = SCAN_REQUIRED
+
+GOLD_H4_M15_DAYTRADE:
+  previous_close_time = 2026-05-06 12:30:00
+  latest_close_time   = 2026-05-06 12:45:00
+  trigger_status      = SCAN_REQUIRED
+```
+
+判定:
+
+```text
+GOLD minimal live once run1 は成功。
+GOLD_H4_M5_SCALP と GOLD_H4_M15_DAYTRADE だけがscan対象になった。
+notification_ok 44件が ledger新規候補になり、Discord dry-run も成功。
+処理成功後に trigger state も進んだ。
+```
+
+### 8.2 run2
+
+実行:
+
+```cmd
+python scripts\run_mochipoyo_gold_minimal_live_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\results\mochipoyo\minimal_live_once_test\run2 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --commit-trigger-state --commit-ledger --discord-dry-run --run-id gold_minimal_live_once_2
+```
+
+結果:
+
+```text
+pairs_total = 3
+pairs_to_scan = 1
+scan_errors = 0
+notification_ok_rows = 37
+ledger_new_candidates = 0
+ledger_skipped_rows = 37
+ledger_append_rows = 0
+commit_ledger = True
+discord_dry_run = True
+discord_status = OK
+discord_returncode = 0
+commit_trigger_state = True
+trigger_state_advanced = True
+success = True
+```
+
+scan対象:
+
+```text
+GOLD_H4_M5_SCALP:
+  previous_close_time = 2026-05-06 12:50:00
+  latest_close_time   = 2026-05-06 12:55:00
+  trigger_status      = SCAN_REQUIRED
+```
+
+判定:
+
+```text
+GOLD minimal live once run2 も成功。
+M5 close_time が 12:50 -> 12:55 に進んだため、GOLD_H4_M5_SCALP だけがscan対象になった。
+notification_ok 37件はすべて既存ledgerにより重複skip。
+ledger_append_rows は0件で、重複通知防止として期待どおり。
+Discord dry-run も成功。
+```
+
+---
+
+## 9. GOLD minimal live flow 総合判定
 
 ```text
 GOLD_H4_M5_SCALP:
@@ -364,6 +498,7 @@ GOLD_H4_M5_SCALP:
   ledger duplicate filter PASS
   Discord dry-run PASS
   pair trigger state PASS
+  minimal live once PASS
 
 GOLD_H4_M15_DAYTRADE:
   candidate generation PASS
@@ -372,6 +507,7 @@ GOLD_H4_M15_DAYTRADE:
   ledger duplicate filter PASS
   Discord dry-run PASS
   pair trigger state PASS
+  minimal live once PASS
 
 GOLD_D1_H1_DAYTRADE:
   candidate generation PASS
@@ -380,50 +516,32 @@ GOLD_D1_H1_DAYTRADE:
   ledger duplicate filter PASS
   Discord dry-run PASS
   pair trigger state PASS
+  minimal live once PASS
 ```
 
 結論:
 
 ```text
-GOLD 3pair は、minimal live flow の部品検証として初期PASS扱い。
-次は GOLD minimal live flow の最小オーケストレーション仕様を固定する。
+GOLD 3pair は、単発 minimal live flow まで初期PASS扱い。
+まだ常時稼働ループにはしない。
+次は、数回連続で run_mochipoyo_gold_minimal_live_once.py を実行し、更新がある時だけ対象pairがscanされ、ledger重複で再通知されないことを追加確認する。
 ```
 
 ---
 
-## 9. 次の検証: GOLD minimal live flow 最小オーケストレーション
+## 10. 次の検証
 
-目的:
+GOLD minimal live once を追加で数回実行する。
 
-```text
-trigger state
-  -> 対象pairだけ minimal scan
-  -> risk enrich
-  -> notification eligibility
-  -> ledger duplicate filter
-  -> Discord dry-run / optional send
-  -> 成功後だけ trigger state を進める
-```
-
-重要方針:
+確認項目:
 
 ```text
-既存の full scan 系スクリプトを常時稼働ループに使わない。
-run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は本番常時稼働に使わない。
-新しい minimal live flow は、pair別trigger state を持つ薄い制御層として作る。
+1. CSV更新なしなら pairs_to_scan = 0 になる
+2. M5更新時は GOLD_H4_M5_SCALP だけscanされる
+3. M15更新時は GOLD_H4_M15_DAYTRADE もscanされる
+4. H1更新時は GOLD_D1_H1_DAYTRADE もscanされる
+5. 既存payload_keyは ledger_skipped_rows に入り、ledger_new_candidates は増えない
+6. success=True の時だけ trigger_state_advanced=True になる
 ```
 
-最初のオーケストレーションは、まだ常時ループにしない。
-単発CLIで以下を確認する。
-
-```text
-1. trigger state を読む
-2. should_scan=True のGOLD pairだけ処理対象にする
-3. minimal scanner は対象pairだけscanする
-4. notification_ok を作る
-5. ledger判定する
-6. Discord dry-run previewを作る
-7. 全処理成功後だけ trigger state を進める
-```
-
-この段階でも、`--send` を付けない限りDiscord実送信は行わない。
+常時ループ化は、この追加連続実行が安定してから行う。
