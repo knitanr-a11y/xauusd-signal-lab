@@ -102,6 +102,19 @@ def timeframe_label(row: pd.Series) -> str:
     return pair
 
 
+def strategy_label(row: pd.Series) -> str:
+    pair = val(row, "pair_name")
+    rank = val(row, "candidate_rank")
+    label = timeframe_label(row)
+    if pair.endswith("_SCALP"):
+        label = f"{label} スキャル"
+    elif pair.endswith("_DAYTRADE"):
+        label = f"{label} デイトレ"
+    if rank != "-":
+        label = f"{label} / {rank}条件"
+    return label
+
+
 def granville_jp(row: pd.Series) -> str:
     g = val(row, "context_granville_type")
     d = val(row, "direction").upper()
@@ -222,7 +235,7 @@ def compact_message(row: pd.Series) -> str:
         "━━━━━━━━━━━━━━",
         f"MT5時間: `{entry_time_short(row)}`",
         f"足: `{timeframe_label(row)}`",
-        f"戦略: `{timeframe_label(row)} / Rank {val(row, 'candidate_rank')}`",
+        f"戦略: `{strategy_label(row)}`",
         "",
         f"Entry: `{fnum(row, 'entry_price', price_digits)}`",
         f"SL:    `{fnum(row, 'sl_price', price_digits)}`",
