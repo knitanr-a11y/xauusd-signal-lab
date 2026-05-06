@@ -42,13 +42,40 @@ def fnum(row: pd.Series, name: str, ndigits: int = 2, default: str = "-") -> str
     return f"{x:.{ndigits}f}"
 
 
-def entry_time_short(row: pd.Series) -> str:
-    raw = val(row, "entry_time")
+def time_short(row: pd.Series, name: str) -> str:
+    raw = val(row, name)
     try:
         t = pd.to_datetime(raw)
         return t.strftime("%Y-%m-%d %H:%M")
     except Exception:
         return raw
+
+
+def entry_time_short(row: pd.Series) -> str:
+    return time_short(row, "entry_time")
+
+
+def signal_time_short(row: pd.Series) -> str:
+    return time_short(row, "signal_close_time")
+
+
+def payload_key_label(row: pd.Series) -> str:
+    key = val(row, "payload_key")
+    if key != "-":
+        return key
+    fields = [
+        "symbol",
+        "candidate_name",
+        "entry_time",
+        "pair_name",
+        "candidate_rank",
+        "direction",
+        "entry_price",
+        "source_filter_name",
+    ]
+    vals = [val(row, c, "") for c in fields]
+    fallback = "|".join(vals).strip("|")
+    return fallback if fallback else "-"
 
 
 def timeframe_label(row: pd.Series) -> str:
@@ -178,7 +205,11 @@ def compact_message(row: pd.Series) -> str:
         f"{symbol_emoji(symbol)} **{symbol} {direction}** {direction_emoji(direction)}",
         "━━━━━━━━━━━━━━",
         f"MT5時間: `{entry_time_short(row)}`",
+        f"Signal確定: `{signal_time_short(row)}`",
         f"足: `{timeframe_label(row)}`",
+        f"Pair: `{val(row, 'pair_name')}`",
+        f"候補: `{val(row, 'candidate_name')}` / Rank `{val(row, 'candidate_rank')}`",
+        f"Key: `{payload_key_label(row)}`",
         f"形: `{granville_jp(row)}`",
         "",
         f"Entry: `{fnum(row, 'entry_price', price_digits)}`",
@@ -217,8 +248,10 @@ def detailed_message(row: pd.Series) -> str:
         "━━━━━━━━━━━━━━",
         f"Candidate: `{val(row, 'candidate_name')}`",
         f"Payload: `{val(row, 'payload_id')}`",
+        f"Payload key: `{payload_key_label(row)}`",
         f"Pair: `{val(row, 'pair_name')}`  Slice: `{val(row, 'selected_slice')}`",
         f"Rank: `{val(row, 'candidate_rank')}`",
+        f"MT5 signal close time: `{signal_time_short(row)}`",
         f"MT5 entry time: `{entry_time_short(row)}`",
         f"Entry: `{fnum(row, 'entry_price', price_digits)}`  SL: `{fnum(row, 'sl_price', price_digits)}`  TP: `{fnum(row, 'tp_price', price_digits)}`  RR: `{fnum(row, 'rr', 2)}`",
         f"Granville: `{val(row, 'context_granville_type')}`",
