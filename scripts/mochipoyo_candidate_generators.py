@@ -11,11 +11,16 @@ Current scope:
 - GOLD_H4_M5_SCALP
 - GOLD_H4_M15_DAYTRADE
 - GOLD_D1_H1_DAYTRADE
+- BTC_H4_M15_DAYTRADE
 
 The generator returns candidate EVENTS, not raw persistent states, by applying
 the same event filter defaults used by filter_mochipoyo_candidate_events.py.
 Allowed-slice filtering is applied after normalization, so pair configs decide
 which ranks/directions survive.
+
+Important:
+BTC candidate generation alone is not enough for live notification. BTC must be
+risk/spread enriched before any real notification or auto-trade decision.
 """
 from __future__ import annotations
 
@@ -40,6 +45,7 @@ SUPPORTED_GENERATOR_PAIRS = {
     "GOLD_H4_M5_SCALP",
     "GOLD_H4_M15_DAYTRADE",
     "GOLD_D1_H1_DAYTRADE",
+    "BTC_H4_M15_DAYTRADE",
 }
 
 
