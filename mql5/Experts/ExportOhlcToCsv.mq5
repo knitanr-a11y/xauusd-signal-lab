@@ -3,7 +3,7 @@
 //|                         MT5 OHLC CSV Export EA for Python detector |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.31"
+#property version   "1.32"
 #property description "Export confirmed OHLC candles for GOLD#/BTCUSD# to CSV for Python detector."
 
 input string InpGoldSymbol = "GOLD#";
@@ -11,13 +11,20 @@ input string InpBtcSymbol  = "BTCUSD#";
 input bool   InpExportGold = true;
 input bool   InpExportBtc  = true;
 
+input bool   InpExportM1  = true;
 input bool   InpExportM5  = true;
 input bool   InpExportM15 = true;
 input bool   InpExportH1  = true;
 input bool   InpExportH4  = true;
+input bool   InpExportD1  = true;
+
+input bool   InpGoldM1Enabled = true;
 input bool   InpGoldM5Enabled = true;
+input bool   InpGoldD1Enabled = true;
 input bool   InpGoldH4Enabled = true;
+input bool   InpBtcM1Enabled  = true;
 input bool   InpBtcM5Enabled  = true;
+input bool   InpBtcD1Enabled  = true;
 input bool   InpBtcH4Enabled  = true;
 
 input bool   InpAlignExportToMinute = true;
@@ -25,10 +32,12 @@ input int    InpExportSecond = 0;
 input int    InpTimerSeconds = 1;
 input bool   InpAppendMode = true;
 input int    InpAppendLookbackBars = 20;
+input int    InpBarsToExportM1  = 150000;
 input int    InpBarsToExportM5  = 30000;
 input int    InpBarsToExportM15 = 30000;
 input int    InpBarsToExportH1  = 20000;
 input int    InpBarsToExportH4  = 10000;
+input int    InpBarsToExportD1  = 5000;
 
 input bool   InpUseCommonFolder = false;
 input string InpOutputRoot = "";
@@ -37,14 +46,18 @@ input bool   InpForceSymbolSelect = true;
 input bool   InpWriteDebugLog = true;
 input bool   InpSkipUnchangedFiles = true;
 
+input string InpGoldM1File  = "goldsharp_m1.csv";
 input string InpGoldM5File  = "goldsharp_m5.csv";
 input string InpGoldM15File = "goldsharp_m15.csv";
 input string InpGoldH1File  = "goldsharp_h1.csv";
 input string InpGoldH4File  = "goldsharp_h4.csv";
+input string InpGoldD1File  = "goldsharp_d1.csv";
+input string InpBtcM1File   = "btcusdsharp_m1.csv";
 input string InpBtcM5File   = "btcusdsharp_m5.csv";
 input string InpBtcM15File  = "btcusdsharp_m15.csv";
 input string InpBtcH1File   = "btcusdsharp_h1.csv";
 input string InpBtcH4File   = "btcusdsharp_h4.csv";
+input string InpBtcD1File   = "btcusdsharp_d1.csv";
 
 struct ExportJob
 {
@@ -117,10 +130,12 @@ string TimeframeName(const ENUM_TIMEFRAMES timeframe)
 {
    switch(timeframe)
    {
+      case PERIOD_M1:  return "M1";
       case PERIOD_M5:  return "M5";
       case PERIOD_M15: return "M15";
       case PERIOD_H1:  return "H1";
       case PERIOD_H4:  return "H4";
+      case PERIOD_D1:  return "D1";
       default:         return EnumToString(timeframe);
    }
 }
@@ -129,10 +144,12 @@ int BarsToExportForTimeframe(const ENUM_TIMEFRAMES timeframe)
 {
    switch(timeframe)
    {
+      case PERIOD_M1:  return MathMax(100, InpBarsToExportM1);
       case PERIOD_M5:  return MathMax(100, InpBarsToExportM5);
       case PERIOD_M15: return MathMax(100, InpBarsToExportM15);
       case PERIOD_H1:  return MathMax(100, InpBarsToExportH1);
       case PERIOD_H4:  return MathMax(100, InpBarsToExportH4);
+      case PERIOD_D1:  return MathMax(100, InpBarsToExportD1);
       default:         return MathMax(100, InpBarsToExportM15);
    }
 }
@@ -477,17 +494,21 @@ void BuildJobs(ExportJob &jobs[])
    ArrayResize(jobs, 0);
    if(InpExportGold)
    {
+      AddJob(jobs, InpGoldSymbol, PERIOD_M1,  InpGoldM1File,  InpExportM1  && InpGoldM1Enabled);
       AddJob(jobs, InpGoldSymbol, PERIOD_M5,  InpGoldM5File,  InpExportM5  && InpGoldM5Enabled);
       AddJob(jobs, InpGoldSymbol, PERIOD_M15, InpGoldM15File, InpExportM15);
       AddJob(jobs, InpGoldSymbol, PERIOD_H1,  InpGoldH1File,  InpExportH1);
       AddJob(jobs, InpGoldSymbol, PERIOD_H4,  InpGoldH4File,  InpExportH4  && InpGoldH4Enabled);
+      AddJob(jobs, InpGoldSymbol, PERIOD_D1,  InpGoldD1File,  InpExportD1  && InpGoldD1Enabled);
    }
    if(InpExportBtc)
    {
+      AddJob(jobs, InpBtcSymbol, PERIOD_M1,  InpBtcM1File,  InpExportM1  && InpBtcM1Enabled);
       AddJob(jobs, InpBtcSymbol, PERIOD_M5,  InpBtcM5File,  InpExportM5  && InpBtcM5Enabled);
       AddJob(jobs, InpBtcSymbol, PERIOD_M15, InpBtcM15File, InpExportM15);
       AddJob(jobs, InpBtcSymbol, PERIOD_H1,  InpBtcH1File,  InpExportH1);
       AddJob(jobs, InpBtcSymbol, PERIOD_H4,  InpBtcH4File,  InpExportH4  && InpBtcH4Enabled);
+      AddJob(jobs, InpBtcSymbol, PERIOD_D1,  InpBtcD1File,  InpExportD1  && InpBtcD1Enabled);
    }
 }
 
@@ -522,12 +543,31 @@ int OnInit()
    if(InpAppendLookbackBars < 2)
       return INIT_PARAMETERS_INCORRECT;
 
-   DebugLog("Initializing EA v1.31");
+   DebugLog("Initializing EA v1.32");
    DebugLog("GoldSymbol=" + InpGoldSymbol + ", BtcSymbol=" + InpBtcSymbol);
    DebugLog("OutputRoot=" + InpOutputRoot + ", UseCommonFolder=" + (InpUseCommonFolder ? "true" : "false"));
    DebugLog("IncludeCurrentBar=" + (InpIncludeCurrentBar ? "true" : "false"));
    DebugLog("SkipUnchangedFiles=" + (InpSkipUnchangedFiles ? "true" : "false"));
-   DebugLog("GoldM5Enabled=" + (InpGoldM5Enabled ? "true" : "false") + ", GoldH4Enabled=" + (InpGoldH4Enabled ? "true" : "false"));
+   DebugLog("Export TFs: M1=" + (InpExportM1 ? "true" : "false")
+            + ", M5=" + (InpExportM5 ? "true" : "false")
+            + ", M15=" + (InpExportM15 ? "true" : "false")
+            + ", H1=" + (InpExportH1 ? "true" : "false")
+            + ", H4=" + (InpExportH4 ? "true" : "false")
+            + ", D1=" + (InpExportD1 ? "true" : "false"));
+   DebugLog("BarsToExport: M1=" + IntegerToString(InpBarsToExportM1)
+            + ", M5=" + IntegerToString(InpBarsToExportM5)
+            + ", M15=" + IntegerToString(InpBarsToExportM15)
+            + ", H1=" + IntegerToString(InpBarsToExportH1)
+            + ", H4=" + IntegerToString(InpBarsToExportH4)
+            + ", D1=" + IntegerToString(InpBarsToExportD1));
+   DebugLog("GoldM1Enabled=" + (InpGoldM1Enabled ? "true" : "false")
+            + ", GoldM5Enabled=" + (InpGoldM5Enabled ? "true" : "false")
+            + ", GoldH4Enabled=" + (InpGoldH4Enabled ? "true" : "false")
+            + ", GoldD1Enabled=" + (InpGoldD1Enabled ? "true" : "false"));
+   DebugLog("BtcM1Enabled=" + (InpBtcM1Enabled ? "true" : "false")
+            + ", BtcM5Enabled=" + (InpBtcM5Enabled ? "true" : "false")
+            + ", BtcH4Enabled=" + (InpBtcH4Enabled ? "true" : "false")
+            + ", BtcD1Enabled=" + (InpBtcD1Enabled ? "true" : "false"));
    DebugLog("AppendMode=" + (InpAppendMode ? "true" : "false") + ", AppendLookbackBars=" + IntegerToString(InpAppendLookbackBars));
    DebugLog("AlignExportToMinute=" + (InpAlignExportToMinute ? "true" : "false")
             + ", ExportSecond=" + IntegerToString(InpExportSecond)
