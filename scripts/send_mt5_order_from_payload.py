@@ -8,6 +8,7 @@ explicitly provided.
 Safety guards:
 - max one order by default
 - duplicate order_key prevention via order ledger
+- existing symbol position guard by default
 - optional expected account login guard
 - optional require demo-account guard based on account name/server/company heuristics
 - local payload validation
@@ -83,6 +84,15 @@ def asdict_obj(obj: Any) -> dict[str, Any]:
             out[k] = v
         except TypeError:
             out[k] = str(v)
+    return out
+
+
+def asdict_list(items: Any) -> list[dict[str, Any]]:
+    if items is None:
+        return []
+    out: list[dict[str, Any]] = []
+    for item in list(items):
+        out.append(asdict_obj(item))
     return out
 
 
@@ -254,6 +264,24 @@ def build_request(symbol: str, direction: str, lot: float, price: float, sl: flo
     }
 
 
+def get_symbol_positions(symbol: str) -> list[dict[str, Any]]:
+    if mt5 is None:
+        return []
+    positions = mt5.positions_get(symbol=symbol)
+    return asdict_list(positions)
+
+
+def summarize_positions(positions: list[dict[str, Any]]) -> str:
+    if not positions:
+        return ""
+    parts: list[str] = []
+    for p in positions:
+        parts.append(
+            f"ticket={p.get('ticket')},symbol={p.get('symbol')},type={p.get('type')},volume={p.get('volume')},price_open={p.get('price_open')},sl={p.get('sl')},tp={p.get('tp')}"
+        )
+    return " | ".join(parts)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Guarded MT5 order sender from order_payloads.csv. Default is dry-run only.")
     p.add_argument("--input-csv", required=True)
@@ -266,6 +294,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--expected-login", type=int, default=None)
     p.add_argument("--require-demo-account", action="store_true", help="Refuse --send unless account name/server/company contains 'demo'.")
     p.add_argument("--allow-live-account", action="store_true", help="Override --require-demo-account guard. Not recommended.")
+    p.add_argument("--block-if-symbol-position-exists", action=argparse.BooleanOptionalAction, default=True, help="Block new orders when an open position already exists for the broker symbol. Default: true.")
+    p.add_argument("--max-existing-symbol-positions", type=int, default=0, help="Maximum allowed existing open positions for the broker symbol before blocking. Default 0.")
     p.add_argument("--deviation", type=int, default=50)
     p.add_argument("--terminal-path", default=None)
     p.add_argument("--portable", action="store_true")
@@ -287,6 +317,8 @@ def main() -> int:
         "mt5_import_ok": mt5 is not None,
         "mt5_import_error": MT5_IMPORT_ERROR,
         "initialize_ok": False,
+        "block_if_symbol_position_exists": bool(args.block_if_symbol_position_exists),
+        "max_existing_symbol_positions": int(args.max_existing_symbol_positions),
     }
 
     if mt5 is None:
@@ -375,6 +407,18 @@ def main() -> int:
             if args.select_symbol:
                 result["symbol_select_ok"] = bool(mt5.symbol_select(broker_symbol, True))
                 result["last_error_after_symbol_select"] = str(mt5.last_error())
+
+            symbol_positions = get_symbol_positions(broker_symbol)
+            result["existing_symbol_positions"] = len(symbol_positions)
+            result["existing_symbol_positions_detail"] = summarize_positions(symbol_positions)
+            if args.block_if_symbol_position_exists and len(symbol_positions) > int(args.max_existing_symbol_positions):
+                errors.append(
+                    f"existing position guard blocked order: symbol={broker_symbol}; existing_positions={len(symbol_positions)}; max_allowed={int(args.max_existing_symbol_positions)}"
+                )
+                result["order_status"] = "BLOCKED_EXISTING_SYMBOL_POSITION"
+                result["validation_errors"] = "; ".join(errors)
+                rows.append(result)
+                continue
 
             info = asdict_obj(mt5.symbol_info(broker_symbol))
             tick = asdict_obj(mt5.symbol_info_tick(broker_symbol))
@@ -475,6 +519,7 @@ def main() -> int:
                 "sl": sl,
                 "tp": tp,
                 "magic": magic,
+                "existing_symbol_positions_before_send": len(symbol_positions),
                 "order_status": result["order_status"],
                 "order_send_ok": result["order_send_ok"],
                 "order_send_retcode": result.get("order_send_retcode"),
@@ -494,6 +539,7 @@ def main() -> int:
             "rows_out": int(len(out)),
             "dry_run_check_ok_rows": int((out.get("order_status", pd.Series(dtype=str)) == "DRY_RUN_ORDER_CHECK_OK").sum()) if not out.empty else 0,
             "sent_rows": int((out.get("order_status", pd.Series(dtype=str)) == "SENT").sum()) if not out.empty else 0,
+            "blocked_existing_symbol_position_rows": int((out.get("order_status", pd.Series(dtype=str)) == "BLOCKED_EXISTING_SYMBOL_POSITION").sum()) if not out.empty else 0,
             "error_rows": int(out["order_status"].astype(str).str.startswith(("ERROR", "BLOCKED")).sum()) if "order_status" in out.columns and not out.empty else 0,
             "results": rows,
         })
@@ -509,9 +555,12 @@ def main() -> int:
         print(f"account_name: {account_info.get('name')}")
         print(f"terminal_trade_allowed: {terminal_info.get('trade_allowed')}")
         print(f"account_trade_allowed: {account_info.get('trade_allowed')}")
+        print(f"block_if_symbol_position_exists: {args.block_if_symbol_position_exists}")
+        print(f"max_existing_symbol_positions: {args.max_existing_symbol_positions}")
         print(f"order_send_called_count: {report['order_send_called_count']}")
         print(f"dry_run_check_ok_rows: {report['dry_run_check_ok_rows']}")
         print(f"sent_rows: {report['sent_rows']}")
+        print(f"blocked_existing_symbol_position_rows: {report['blocked_existing_symbol_position_rows']}")
         print(f"error_rows: {report['error_rows']}")
         cols = [
             "row_index",
@@ -519,6 +568,7 @@ def main() -> int:
             "broker_symbol",
             "direction",
             "lot",
+            "existing_symbol_positions",
             "current_execution_price",
             "sl_price",
             "tp_price",
