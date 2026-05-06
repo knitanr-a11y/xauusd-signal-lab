@@ -7,6 +7,7 @@ import pandas as pd
 
 import search_btc_mtf_extra_edges as base
 from confirmed_time_join import join_context_confirmed
+from search_btc_mtf_extra_edges_livecsv import read_ohlc_live_csv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -58,9 +59,11 @@ def ensure_default_confirmed_outputs() -> None:
 
 
 def main() -> int:
+    base.read_ohlc = read_ohlc_live_csv
     base.join_context = confirmed_join_context_adapter
     ensure_default_confirmed_outputs()
     print("Confirmed-time BTC MTF revalidation enabled.")
+    print("MQL5 live CSV reader enabled: accepts YYYY.MM.DD HH:MM:SS time format.")
     print("Context features are joined only when context_close_time <= base_close_time.")
     print("Default output summary:", DEFAULT_CONFIRMED_SUMMARY)
     print("Default output trades :", DEFAULT_CONFIRMED_TRADES)
