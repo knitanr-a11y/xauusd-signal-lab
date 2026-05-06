@@ -21,13 +21,15 @@ from __future__ import annotations
 import csv
 import time as time_module
 from dataclasses import dataclass
-from io import StringIO
 from pathlib import Path
 from typing import Iterable, Sequence
 
 import pandas as pd
 
-from mochipoyo_minimal_config import get_timeframe_minutes
+try:  # Package import when called as: from scripts.mochipoyo_safe_csv_reader import ...
+    from scripts.mochipoyo_minimal_config import get_timeframe_minutes
+except ModuleNotFoundError:  # Direct script import/execution from inside scripts/.
+    from mochipoyo_minimal_config import get_timeframe_minutes  # type: ignore
 
 READ_STATUS_OK = "OK"
 READ_STATUS_ERROR = "ERROR"
