@@ -51,6 +51,16 @@ def append_csv_row(row: dict[str, Any], path: str | Path) -> None:
     out.to_csv(p, index=False, encoding="utf-8-sig")
 
 
+def precreate_iteration_dirs(iteration_dir: Path) -> None:
+    """Create output directories expected by the one-shot flow.
+
+    The one-shot script also creates parents, but the loop precreates them as a
+    defensive guard for Windows path/race edge cases and older local checkouts.
+    """
+    for name in ["scan", "notification", "ledger", "discord"]:
+        (iteration_dir / name).mkdir(parents=True, exist_ok=True)
+
+
 def add_optional(cmd: list[str], name: str, value: Any) -> None:
     if value is not None:
         cmd.extend([name, str(value)])
@@ -183,13 +193,14 @@ def main() -> int:
             iteration += 1
             run_id = f"gold_minimal_live_loop_dry_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}_i{iteration:04d}"
             iteration_dir = out_dir / f"iter_{iteration:04d}"
+            iteration_dir.mkdir(parents=True, exist_ok=True)
+            precreate_iteration_dirs(iteration_dir)
             cmd = build_once_command(args, iteration, iteration_dir, run_id)
             start = pd.Timestamp.now()
             proc = subprocess.run(cmd, text=True, capture_output=True)
             end = pd.Timestamp.now()
             duration_sec = (end - start).total_seconds()
 
-            iteration_dir.mkdir(parents=True, exist_ok=True)
             (iteration_dir / "once_stdout.txt").write_text(proc.stdout, encoding="utf-8")
             (iteration_dir / "once_stderr.txt").write_text(proc.stderr, encoding="utf-8")
             (iteration_dir / "once_command.txt").write_text(" ".join(cmd), encoding="utf-8")
