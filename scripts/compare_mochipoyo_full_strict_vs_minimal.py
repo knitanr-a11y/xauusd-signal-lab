@@ -11,6 +11,11 @@ Initial implementation scope:
 This script intentionally does not run the full strict scanner and does not run
 minimal scanner logic yet.  It is the comparison/reporting skeleton that will be
 wired to real scanner calls after the minimal scanner module exists.
+
+Readiness statuses:
+- PLACEHOLDER_NO_MINIMAL_CSV: full side normalized, but no minimal side supplied.
+- NORMALIZED_ONLY_NO_RISK: normalization succeeded, but risk_status or SL/TP are not ready.
+- PASS/FAIL: only used when both sides are supplied and risk fields are ready.
 """
 from __future__ import annotations
 
@@ -156,6 +161,73 @@ def logical_key_frame(df: pd.DataFrame) -> pd.Series:
     return key
 
 
+def _non_empty_notna(df: pd.DataFrame, col: str) -> bool:
+    return bool(col in df.columns and len(df) > 0 and df[col].notna().any())
+
+
+def risk_readiness(df: pd.DataFrame, *, require_btc_spread: bool = True) -> dict[str, bool]:
+    """Return readiness flags for risk-enriched comparison inputs."""
+    if df.empty:
+        return {
+            "risk_ready": False,
+            "risk_price_ready": False,
+            "btc_spread_required": False,
+            "btc_spread_ready": False,
+            "comparison_ready": False,
+        }
+    risk_ready = _non_empty_notna(df, "risk_status")
+    risk_price_ready = _non_empty_notna(df, "sl_price") and _non_empty_notna(df, "tp_price")
+    has_btc = bool("symbol" in df.columns and df["symbol"].astype("string").str.upper().eq("BTC").any())
+    btc_spread_required = bool(require_btc_spread and has_btc)
+    btc_spread_cols = [
+        "current_spread_price",
+        "mode_spread_price",
+        "effective_spread_price",
+        "spread_to_sl_ratio",
+        "effective_rr_after_spread",
+        "net_sl_after_spread_price",
+        "net_tp_after_spread_price",
+    ]
+    if btc_spread_required:
+        btc_df = df[df["symbol"].astype("string").str.upper() == "BTC"].copy()
+        btc_spread_ready = all(_non_empty_notna(btc_df, col) for col in btc_spread_cols)
+    else:
+        btc_spread_ready = True
+    comparison_ready = bool(risk_ready and risk_price_ready and btc_spread_ready)
+    return {
+        "risk_ready": bool(risk_ready),
+        "risk_price_ready": bool(risk_price_ready),
+        "btc_spread_required": bool(btc_spread_required),
+        "btc_spread_ready": bool(btc_spread_ready),
+        "comparison_ready": bool(comparison_ready),
+    }
+
+
+def combined_readiness(full_df: pd.DataFrame, minimal_df: pd.DataFrame, *, has_minimal: bool) -> dict[str, bool]:
+    full_flags = risk_readiness(full_df)
+    minimal_flags = risk_readiness(minimal_df) if has_minimal else {
+        "risk_ready": False,
+        "risk_price_ready": False,
+        "btc_spread_required": False,
+        "btc_spread_ready": False,
+        "comparison_ready": False,
+    }
+    both_comparison_ready = bool(full_flags["comparison_ready"] and (minimal_flags["comparison_ready"] if has_minimal else False))
+    return {
+        "full_risk_ready": full_flags["risk_ready"],
+        "full_risk_price_ready": full_flags["risk_price_ready"],
+        "full_btc_spread_required": full_flags["btc_spread_required"],
+        "full_btc_spread_ready": full_flags["btc_spread_ready"],
+        "full_comparison_ready": full_flags["comparison_ready"],
+        "minimal_risk_ready": minimal_flags["risk_ready"],
+        "minimal_risk_price_ready": minimal_flags["risk_price_ready"],
+        "minimal_btc_spread_required": minimal_flags["btc_spread_required"],
+        "minimal_btc_spread_ready": minimal_flags["btc_spread_ready"],
+        "minimal_comparison_ready": minimal_flags["comparison_ready"],
+        "both_comparison_ready": both_comparison_ready,
+    }
+
+
 def _same_value(left: Any, right: Any, col: str) -> bool:
     if pd.isna(left) and pd.isna(right):
         return True
@@ -290,6 +362,8 @@ def build_summary(
     comparison: dict[str, pd.DataFrame] | None,
     errors: list[dict[str, Any]],
 ) -> pd.DataFrame:
+    has_minimal = bool(args.minimal_csv)
+    readiness = combined_readiness(full_df, minimal_df, has_minimal=has_minimal)
     if comparison is None:
         matched_rows = 0
         full_only_rows = 0
@@ -303,31 +377,32 @@ def build_summary(
         minimal_only_rows = int(len(comparison["minimal_only"]))
         value_diff_rows = int(len(comparison["value_diff"]))
         payload_key_diff_rows = int(len(comparison["payload_key_diff"]))
-        status = "PASS" if all(x == 0 for x in [full_only_rows, minimal_only_rows, value_diff_rows, payload_key_diff_rows]) else "FAIL"
+        if not readiness["both_comparison_ready"]:
+            status = "NORMALIZED_ONLY_NO_RISK"
+        else:
+            status = "PASS" if all(x == 0 for x in [full_only_rows, minimal_only_rows, value_diff_rows, payload_key_diff_rows]) else "FAIL"
     if errors:
         status = "ERROR"
-    return pd.DataFrame(
-        [
-            {
-                "run_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "full_csv": str(args.full_csv) if args.full_csv else "",
-                "minimal_csv": str(args.minimal_csv) if args.minimal_csv else "",
-                "as_of_time": str(args.as_of_time or ""),
-                "lookback_candidates": int(args.lookback_candidates),
-                "allowed_slices_count": int(len(allowed_slices)),
-                "allowed_slices": ",".join(allowed_slice_to_string(x) for x in allowed_slices),
-                "full_rows": int(len(full_df)),
-                "minimal_rows": int(len(minimal_df)),
-                "matched_rows": matched_rows,
-                "full_only_rows": full_only_rows,
-                "minimal_only_rows": minimal_only_rows,
-                "value_diff_rows": value_diff_rows,
-                "payload_key_diff_rows": payload_key_diff_rows,
-                "error_rows": int(len(errors)),
-                "status": status,
-            }
-        ]
-    )
+    row = {
+        "run_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "full_csv": str(args.full_csv) if args.full_csv else "",
+        "minimal_csv": str(args.minimal_csv) if args.minimal_csv else "",
+        "as_of_time": str(args.as_of_time or ""),
+        "lookback_candidates": int(args.lookback_candidates),
+        "allowed_slices_count": int(len(allowed_slices)),
+        "allowed_slices": ",".join(allowed_slice_to_string(x) for x in allowed_slices),
+        "full_rows": int(len(full_df)),
+        "minimal_rows": int(len(minimal_df)),
+        "matched_rows": matched_rows,
+        "full_only_rows": full_only_rows,
+        "minimal_only_rows": minimal_only_rows,
+        "value_diff_rows": value_diff_rows,
+        "payload_key_diff_rows": payload_key_diff_rows,
+        "error_rows": int(len(errors)),
+        "status": status,
+    }
+    row.update(readiness)
+    return pd.DataFrame([row])
 
 
 def parse_args() -> argparse.Namespace:
