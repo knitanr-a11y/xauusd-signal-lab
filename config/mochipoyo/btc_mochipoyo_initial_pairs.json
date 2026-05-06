@@ -1,0 +1,14 @@
+[
+  {
+    "pair_name": "BTC_H1_M5_CONFIRMED",
+    "style": "btc_m15plus_initial",
+    "context_tf": "H1",
+    "base_tf": "M5"
+  },
+  {
+    "pair_name": "BTC_H4_M15_CONFIRMED",
+    "style": "btc_m15plus_initial",
+    "context_tf": "H4",
+    "base_tf": "M15"
+  }
+]
