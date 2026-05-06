@@ -9,6 +9,8 @@ This script is intentionally conservative:
 - it moves files, never deletes them
 - it only scans known generated-output directories
 - it never touches MQL5/Files source CSVs, scripts, docs, or raw market-data inputs
+- it supports Windows long paths via the \\?\ prefix
+- it continues with warnings if a file disappeared between planning and moving
 
 Typical usage from repository root:
 
@@ -26,6 +28,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import shutil
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -86,8 +89,34 @@ class ArchiveItem:
     suffix: str
 
 
+@dataclass(frozen=True)
+class MoveResult:
+    source: str
+    destination: str
+    status: str
+    message: str
+
+
 def repo_root_from_script() -> Path:
     return Path(__file__).resolve().parents[1]
+
+
+def to_windows_long_path(path: Path) -> str:
+    """Return a Windows extended-length path when running on Windows.
+
+    Python/shutil can fail with WinError 3 when the final archive path becomes
+    too long. The \\?\ prefix lets Windows APIs handle paths beyond the old
+    MAX_PATH limit in most normal cases.
+    """
+    resolved = str(path.resolve())
+    if os.name != "nt":
+        return resolved
+    if resolved.startswith("\\\\?\\"):
+        return resolved
+    if resolved.startswith("\\\\"):
+        # UNC path: \\server\share -> \\?\UNC\server\share
+        return "\\\\?\\UNC\\" + resolved.lstrip("\\")
+    return "\\\\?\\" + resolved
 
 
 def is_under_excluded_dir(path: Path, root: Path) -> bool:
@@ -154,11 +183,17 @@ def build_archive_plan(
     return items
 
 
-def write_manifest(root: Path, archive_root: Path, items: list[ArchiveItem]) -> None:
+def write_manifest(
+    root: Path,
+    archive_root: Path,
+    items: list[ArchiveItem],
+    move_results: list[MoveResult],
+) -> None:
     archive_root.mkdir(parents=True, exist_ok=True)
 
     csv_path = archive_root / "archive_manifest.csv"
     json_path = archive_root / "archive_manifest.json"
+    results_csv_path = archive_root / "archive_move_results.csv"
 
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(
@@ -172,16 +207,49 @@ def write_manifest(root: Path, archive_root: Path, items: list[ArchiveItem]) -> 
     with json_path.open("w", encoding="utf-8") as f:
         json.dump([asdict(item) for item in items], f, ensure_ascii=False, indent=2)
 
+    with results_csv_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["source", "destination", "status", "message"],
+        )
+        writer.writeheader()
+        for result in move_results:
+            writer.writerow(asdict(result))
+
     print(f"manifest_csv: {csv_path.relative_to(root)}")
     print(f"manifest_json: {json_path.relative_to(root)}")
+    print(f"move_results_csv: {results_csv_path.relative_to(root)}")
 
 
-def apply_archive(root: Path, items: list[ArchiveItem]) -> None:
+def move_one(root: Path, item: ArchiveItem) -> MoveResult:
+    src = root / item.source
+    dest = root / item.destination
+
+    if not src.exists():
+        return MoveResult(item.source, item.destination, "missing_source", "source file did not exist at move time")
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # Use extended-length paths on Windows to avoid WinError 3 from deep archive paths.
+        shutil.move(to_windows_long_path(src), to_windows_long_path(dest))
+        return MoveResult(item.source, item.destination, "moved", "")
+    except FileNotFoundError as exc:
+        # Keep going. This commonly happens if a previous partial run already moved the file,
+        # or if Windows path handling failed for a deep path.
+        return MoveResult(item.source, item.destination, "failed_file_not_found", repr(exc))
+    except OSError as exc:
+        return MoveResult(item.source, item.destination, "failed_os_error", repr(exc))
+
+
+def apply_archive(root: Path, items: list[ArchiveItem]) -> list[MoveResult]:
+    results: list[MoveResult] = []
     for item in items:
-        src = root / item.source
-        dest = root / item.destination
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(src), str(dest))
+        result = move_one(root, item)
+        results.append(result)
+        if result.status != "moved":
+            print(f"WARNING {result.status}: {result.source} -> {result.destination} :: {result.message}")
+    return results
 
 
 def parse_args() -> argparse.Namespace:
@@ -223,7 +291,10 @@ def main() -> int:
 
     safe_label = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in args.label).strip("_")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    archive_root = root / "_archive" / "backtest_outputs" / f"{timestamp}_{safe_label}"
+
+    # Keep this path reasonably short. Windows users often run this repo under a very deep
+    # MQL5\Files path, and a long archive prefix can push files over MAX_PATH.
+    archive_root = root / "_archive" / "bt" / f"{timestamp}_{safe_label}"
 
     items = build_archive_plan(root, archive_root, scan_dirs, extensions)
 
@@ -247,10 +318,21 @@ def main() -> int:
         print("DRY-RUN only. Add --apply to move files.")
         return 0
 
-    apply_archive(root, items)
-    write_manifest(root, archive_root, items)
+    move_results = apply_archive(root, items)
+    write_manifest(root, archive_root, items, move_results)
+
+    moved = sum(1 for r in move_results if r.status == "moved")
+    failed = sum(1 for r in move_results if r.status.startswith("failed"))
+    missing = sum(1 for r in move_results if r.status == "missing_source")
+
+    print(f"moved: {moved}")
+    print(f"missing_source: {missing}")
+    print(f"failed: {failed}")
     print("done")
-    return 0
+
+    # Missing sources are not fatal because a previous partial run may already have moved them.
+    # Real OS failures are reported but do not crash halfway through the archive operation.
+    return 0 if failed == 0 else 2
 
 
 if __name__ == "__main__":
