@@ -2,7 +2,7 @@
 
 最終更新: 2026-05-06
 
-このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定検証ログである。
+このドキュメントは、もちぽよ式 live notification minimal scanner の ledger重複判定とDiscord dry-run検証ログである。
 
 関連ログ:
 
@@ -22,9 +22,10 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 2. ledgerへ記録後、同じCSVを再実行すると全件duplicate skipになる
 3. 同一入力内に同じpayload_keyが複数存在しても、1回だけ通知候補になる
 4. last_notified_time_by_symbol_pair_direction 相当のstateをCSVで確認できる
+5. ledger判定後の送信候補CSVをDiscord送信スクリプトがdry-runで読める
 ```
 
-この段階では Discord送信も自動売買も行わない。
+この段階では Discord実送信も自動売買も行わない。
 
 ---
 
@@ -32,9 +33,10 @@ Discord送信へ進む前に、`payload_key` ベースで以下を保証する�
 
 ```text
 scripts/apply_mochipoyo_notification_ledger.py
+scripts/send_mochipoyo_discord_messages.py
 ```
 
-役割:
+`apply_mochipoyo_notification_ledger.py` の役割:
 
 ```text
 notification_ok CSV を入力
@@ -45,7 +47,7 @@ NEW / DUPLICATE_EXISTING / DUPLICATE_IN_INPUT_BATCH / NOT_NOTIFICATION_ELIGIBLE 
 state CSV を出力
 ```
 
-出力:
+ledger判定出力:
 
 ```text
 notification_ledger_classified.csv
@@ -54,6 +56,15 @@ notification_ledger_skipped.csv
 notification_ledger_append_preview.csv
 notification_ledger_state.csv
 notification_ledger_summary.csv
+```
+
+`send_mochipoyo_discord_messages.py` の今回の役割:
+
+```text
+--send を付けずにdry-run実行
+notification_ledger_to_send.csv を読む
+payload_key を維持したまま preview_txt / preview_json を生成
+Discordへは送信しない
 ```
 
 ---
@@ -83,7 +94,7 @@ data/results/mochipoyo/minimal_ledger_test/gold_notification_ledger.csv
 
 ---
 
-## 4. 1回目実行
+## 4. 1回目 ledger 実行
 
 実行:
 
@@ -113,7 +124,7 @@ ledger_append_rows も46件で期待どおり。
 
 ---
 
-## 5. 2回目実行
+## 5. 2回目 ledger 実行
 
 実行:
 
@@ -143,7 +154,47 @@ ledger_append_rows は0件で期待どおり。
 
 ---
 
-## 6. GOLD ledger重複判定 総合判定
+## 6. GOLD Discord dry-run
+
+実送信は行わず、`--send` なしで preview のみ生成した。
+
+入力:
+
+```text
+data/results/mochipoyo/minimal_ledger_test/run1/notification_ledger_to_send.csv
+```
+
+実行:
+
+```cmd
+python scripts\send_mochipoyo_discord_messages.py --input-csv data\results\mochipoyo\minimal_ledger_test\run1\notification_ledger_to_send.csv --send-ledger-csv data\results\mochipoyo\minimal_ledger_test\discord_dryrun_send_ledger.csv --preview-txt data\results\mochipoyo\minimal_ledger_test\discord_dryrun_preview.txt --preview-json data\results\mochipoyo\minimal_ledger_test\discord_dryrun_preview.json --symbol GOLD --max-rows 5 --style compact
+```
+
+結果:
+
+```text
+rows = 5
+send = False
+duplicates_existing = 0
+dry_run_would_send = 5
+sent = 0
+errors = 0
+preview_txt = data/results/mochipoyo/minimal_ledger_test/discord_dryrun_preview.txt
+preview_json = data/results/mochipoyo/minimal_ledger_test/discord_dryrun_preview.json
+```
+
+判定:
+
+```text
+Discord dry-run は期待どおり通過。
+--send を付けていないためDiscordへ実送信はされていない。
+ledger判定後の notification_ledger_to_send.csv を、既存Discord送信スクリプトが読めることを確認。
+preview_txt / preview_json も生成された。
+```
+
+---
+
+## 7. GOLD ledger / Discord dry-run 総合判定
 
 ```text
 GOLD_H4_M5_SCALP:
@@ -151,51 +202,88 @@ GOLD_H4_M5_SCALP:
   risk enrich PASS
   notification eligibility PASS
   ledger duplicate filter PASS
+  Discord dry-run PASS
 
 GOLD_H4_M15_DAYTRADE:
   candidate generation PASS
   risk enrich PASS
   notification eligibility PASS
   ledger duplicate filter PASS
+  Discord dry-run PASS
 
 GOLD_D1_H1_DAYTRADE:
   candidate generation PASS
   risk enrich PASS
   notification eligibility PASS
   ledger duplicate filter PASS
+  Discord dry-run PASS
 ```
 
 結論:
 
 ```text
-GOLD 3pair は、Discord送信前の ledger重複判定まで初期PASS扱い。
-次は Discord dry-run に進める。
+GOLD 3pair は、Discord実送信前のdry-runまで初期PASS扱い。
+次は pair別更新トリガー接続へ進む。
 ```
 
 ---
 
-## 7. 次の検証
+## 8. 次の検証: GOLD pair別更新トリガー接続
 
-Discord送信はまだ行わず、既存の送信スクリプトを dry-run で使う。
-
-候補入力:
+目的:
 
 ```text
-data/results/mochipoyo/minimal_ledger_test/run1/notification_ledger_to_send.csv
+常時稼働ループで全pairを毎回scanしない。
+CSVの最新確定足 close_time が更新されたpairだけを判定する。
+```
+
+GOLDのtrigger timeframe:
+
+```text
+GOLD_H4_M5_SCALP:
+  trigger_timeframe = M5
+  M5 close_time が進んだ時だけ判定
+
+GOLD_H4_M15_DAYTRADE:
+  trigger_timeframe = M15
+  M15 close_time が進んだ時だけ判定
+
+GOLD_D1_H1_DAYTRADE:
+  trigger_timeframe = H1
+  H1 close_time が進んだ時だけ判定
+```
+
+必要なstate:
+
+```text
+last_seen_close_time_by_pair
+last_scan_status_by_pair
+last_notification_candidate_count_by_pair
+last_ledger_append_count_by_pair
+```
+
+最低限のテスト:
+
+```text
+1回目:
+  stateなし
+  各GOLD pairを初期化対象として扱う
+  ただし初期化モードでは送信しない
+  last_seen_close_time_by_pair を保存
+
+2回目:
+  CSV更新なし
+  全GOLD pair skipped_no_new_bar
+  scanしない/通知しない
+
+3回目:
+  任意pairの as_of_time またはstateを調整して更新扱いにする
+  対象pairだけ scan 対象になる
 ```
 
 注意:
 
 ```text
-run2/notification_ledger_to_send.csv は0件のため、dry-run対象はrun1側を使う。
-実運用では ledger判定後の notification_ledger_to_send.csv だけを送信スクリプトへ渡す。
-```
-
-次の確認項目:
-
-```text
-1. 送信候補46件を読み込めるか
-2. payload_keyを保持したままDiscord previewを作れるか
-3. preview_txt / preview_json が生成されるか
-4. --send を付けない限りDiscordへ送信されないか
+run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は本番常時稼働に使わない。
+新しい minimal loop は、pair別trigger state を持つ薄い制御層として作る。
 ```
