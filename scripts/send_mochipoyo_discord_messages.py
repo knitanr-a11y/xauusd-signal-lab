@@ -7,7 +7,7 @@ Default behavior is dry-run only. Messages are sent only when --send is passed.
 Safety:
 - payload_key based duplicate-send prevention
 - send ledger CSV
-- webhook URL from --webhook-url or environment variable
+- webhook URL from --webhook-url, environment variable, or local .env
 - no AI review
 - no order placement
 
@@ -42,6 +42,58 @@ def safe_text(text: object) -> str:
 
 def safe_print(text: object = "") -> None:
     print(safe_text(text))
+
+
+def parse_dotenv_line(line: str) -> tuple[str, str] | None:
+    s = line.strip()
+    if not s or s.startswith("#") or "=" not in s:
+        return None
+    key, value = s.split("=", 1)
+    key = key.strip()
+    value = value.strip()
+    if not key:
+        return None
+    if len(value) >= 2 and ((value[0] == value[-1] == '"') or (value[0] == value[-1] == "'")):
+        value = value[1:-1]
+    return key, value
+
+
+def load_dotenv_file(dotenv_path: Path) -> dict[str, str]:
+    if not dotenv_path.exists() or not dotenv_path.is_file():
+        return {}
+    loaded: dict[str, str] = {}
+    try:
+        for line in dotenv_path.read_text(encoding="utf-8-sig").splitlines():
+            parsed = parse_dotenv_line(line)
+            if parsed is None:
+                continue
+            key, value = parsed
+            loaded[key] = value
+            os.environ.setdefault(key, value)
+    except Exception as e:
+        safe_print(f"WARNING: failed to read .env file: {dotenv_path} ({e!r})")
+    return loaded
+
+
+def load_local_dotenv() -> dict[str, str]:
+    """Load .env from current working directory, then repo root fallback.
+
+    This is intentionally tiny and dependency-free. Explicit --webhook-url and
+    already-set environment variables still take precedence over .env values.
+    """
+    loaded: dict[str, str] = {}
+    candidates = [Path.cwd() / ".env", Path(__file__).resolve().parents[1] / ".env"]
+    seen: set[Path] = set()
+    for path in candidates:
+        try:
+            resolved = path.resolve()
+        except Exception:
+            resolved = path
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        loaded.update(load_dotenv_file(path))
+    return loaded
 
 
 def make_payload_key(row: pd.Series) -> str:
@@ -154,6 +206,8 @@ def main() -> int:
     p.add_argument("--sleep-seconds", type=float, default=1.0)
     args = p.parse_args()
 
+    load_local_dotenv()
+
     input_csv = Path(args.input_csv)
     send_ledger_csv = Path(args.send_ledger_csv)
     preview_txt = Path(args.preview_txt)
@@ -205,7 +259,7 @@ def main() -> int:
             preview_json.write_text(json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2), encoding="utf-8")
             safe_print("send_mochipoyo_discord_messages")
             safe_print("ERROR: --send was specified but webhook URL was not provided.")
-            safe_print(f"Use --webhook-url or set environment variable {args.webhook_env}.")
+            safe_print(f"Use --webhook-url, set environment variable {args.webhook_env}, or add it to .env.")
             safe_print(f"preview_txt: {preview_txt}")
             safe_print(f"preview_json: {preview_json}")
             return 2
