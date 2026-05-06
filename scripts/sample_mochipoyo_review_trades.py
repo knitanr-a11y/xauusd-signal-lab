@@ -29,6 +29,17 @@ REVIEW_COLUMNS = [
 ]
 
 
+def unique_keep_order(values: list[str]) -> list[str]:
+    seen = set()
+    out = []
+    for v in values:
+        v = str(v)
+        if v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out
+
+
 def pick_cols(df: pd.DataFrame) -> pd.DataFrame:
     cols = [c for c in REVIEW_COLUMNS if c in df.columns]
     rest = [c for c in df.columns if c not in cols]
@@ -40,7 +51,6 @@ def sample_group(df: pd.DataFrame, name: str, n: int) -> pd.DataFrame:
         return df.copy()
     out = df.copy()
     if "entry_month" in out.columns:
-        # Try to keep month diversity.
         parts = []
         per_month = max(1, n // max(1, out["entry_month"].nunique()))
         for _, g in out.groupby("entry_month", sort=True):
@@ -88,6 +98,7 @@ def main() -> int:
     p.add_argument("--weak-month", action="append", default=["2026-03", "2026-04"])
     p.add_argument("--streak-window", type=int, default=3)
     args = p.parse_args()
+    args.weak_month = unique_keep_order(args.weak_month)
 
     df = pd.read_csv(args.portfolio_csv, encoding="utf-8-sig")
     df["entry_time"] = pd.to_datetime(df["entry_time"], errors="coerce")
@@ -135,10 +146,7 @@ def main() -> int:
         "input_rows": int(len(df)),
         "review_rows": int(len(review)),
         "weak_months": args.weak_month,
-        "files": {
-            "review_csv": str(review_csv),
-            "by_bucket_csv": str(by_bucket_csv),
-        },
+        "files": {"review_csv": str(review_csv), "by_bucket_csv": str(by_bucket_csv)},
         "by_bucket": by_bucket.to_dict("records"),
     }
     summary_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
