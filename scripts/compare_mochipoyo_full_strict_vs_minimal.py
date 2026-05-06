@@ -2,19 +2,13 @@
 # -*- coding: utf-8 -*-
 """Compare Mochipoyo full strict scan output with minimal scan output.
 
-Initial implementation scope:
-- Normalize an existing full strict output CSV.
-- Optionally normalize an existing minimal output CSV.
-- If both sides are provided, compare by payload_key and fallback logical key.
-- Write comparison CSVs and a summary CSV.
-
-This script intentionally does not run the full strict scanner and does not run
-minimal scanner logic yet.  It is the comparison/reporting skeleton that will be
-wired to real scanner calls after the minimal scanner module exists.
+This script normalizes existing full strict and minimal candidate CSVs, optionally
+filters by pair, optionally aligns the minimal side to the full side's
+signal_close_time range, and writes comparison CSVs.
 
 Readiness statuses:
 - PLACEHOLDER_NO_MINIMAL_CSV: full side normalized, but no minimal side supplied.
-- NORMALIZED_ONLY_NO_RISK: normalization succeeded, but risk_status or SL/TP are not ready.
+- NORMALIZED_ONLY_NO_RISK: comparison rows exist, but risk_status or SL/TP are not ready.
 - PASS/FAIL: only used when both sides are supplied and risk fields are ready.
 """
 from __future__ import annotations
@@ -27,7 +21,7 @@ from typing import Any, Iterable, Mapping
 
 import pandas as pd
 
-try:  # Package import from repository root.
+try:
     from scripts.mochipoyo_candidate_normalizer import (
         NORMALIZED_COLUMNS,
         filter_allowed_slices,
@@ -40,7 +34,7 @@ try:  # Package import from repository root.
         normalize_allowed_slices,
         validate_allowed_slices_against_pair_configs,
     )
-except ModuleNotFoundError:  # Direct execution from scripts/.
+except ModuleNotFoundError:
     from mochipoyo_candidate_normalizer import (  # type: ignore
         NORMALIZED_COLUMNS,
         filter_allowed_slices,
@@ -153,6 +147,47 @@ def apply_lookback(df: pd.DataFrame, lookback_candidates: int) -> pd.DataFrame:
     return work.reset_index(drop=True)
 
 
+def align_minimal_to_full_time_range(full_df: pd.DataFrame, minimal_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Filter minimal rows to full_df's signal_close_time min/max range."""
+    info: dict[str, Any] = {
+        "alignment_enabled": True,
+        "alignment_status": "NOT_APPLIED",
+        "alignment_full_min_signal_close_time": "",
+        "alignment_full_max_signal_close_time": "",
+        "alignment_minimal_rows_before": int(len(minimal_df)),
+        "alignment_minimal_rows_after": int(len(minimal_df)),
+    }
+    if full_df.empty or minimal_df.empty:
+        info["alignment_status"] = "EMPTY_SIDE"
+        return minimal_df.copy(), info
+    if "signal_close_time" not in full_df.columns or "signal_close_time" not in minimal_df.columns:
+        info["alignment_status"] = "MISSING_SIGNAL_CLOSE_TIME"
+        return minimal_df.copy(), info
+
+    full_times = pd.to_datetime(full_df["signal_close_time"], errors="coerce").dropna()
+    if full_times.empty:
+        info["alignment_status"] = "FULL_TIME_RANGE_EMPTY"
+        return minimal_df.copy(), info
+
+    start = full_times.min()
+    end = full_times.max()
+    minimal = minimal_df.copy()
+    minimal_times = pd.to_datetime(minimal["signal_close_time"], errors="coerce")
+    mask = minimal_times.between(start, end, inclusive="both")
+    aligned = minimal.loc[mask].copy().reset_index(drop=True)
+
+    info.update(
+        {
+            "alignment_status": "APPLIED",
+            "alignment_full_min_signal_close_time": start.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_full_max_signal_close_time": end.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_minimal_rows_before": int(len(minimal_df)),
+            "alignment_minimal_rows_after": int(len(aligned)),
+        }
+    )
+    return aligned, info
+
+
 def logical_key_frame(df: pd.DataFrame) -> pd.Series:
     if df.empty:
         return pd.Series(dtype="string")
@@ -175,7 +210,6 @@ def _non_empty_notna(df: pd.DataFrame, col: str) -> bool:
 
 
 def risk_readiness(df: pd.DataFrame, *, require_btc_spread: bool = True) -> dict[str, bool]:
-    """Return readiness flags for risk-enriched comparison inputs."""
     if df.empty:
         return {
             "risk_ready": False,
@@ -221,7 +255,6 @@ def combined_readiness(full_df: pd.DataFrame, minimal_df: pd.DataFrame, *, has_m
         "btc_spread_ready": False,
         "comparison_ready": False,
     }
-    both_comparison_ready = bool(full_flags["comparison_ready"] and (minimal_flags["comparison_ready"] if has_minimal else False))
     return {
         "full_risk_ready": full_flags["risk_ready"],
         "full_risk_price_ready": full_flags["risk_price_ready"],
@@ -233,7 +266,7 @@ def combined_readiness(full_df: pd.DataFrame, minimal_df: pd.DataFrame, *, has_m
         "minimal_btc_spread_required": minimal_flags["btc_spread_required"],
         "minimal_btc_spread_ready": minimal_flags["btc_spread_ready"],
         "minimal_comparison_ready": minimal_flags["comparison_ready"],
-        "both_comparison_ready": both_comparison_ready,
+        "both_comparison_ready": bool(full_flags["comparison_ready"] and (minimal_flags["comparison_ready"] if has_minimal else False)),
     }
 
 
@@ -286,14 +319,7 @@ def compare_value_diffs(matched: pd.DataFrame) -> pd.DataFrame:
             full_value = row.get(full_col)
             minimal_value = row.get(minimal_col)
             if not _same_value(full_value, minimal_value, col):
-                rows.append(
-                    {
-                        "payload_key": payload_key,
-                        "column": col,
-                        "full_value": full_value,
-                        "minimal_value": minimal_value,
-                    }
-                )
+                rows.append({"payload_key": payload_key, "column": col, "full_value": full_value, "minimal_value": minimal_value})
     return pd.DataFrame(rows, columns=["payload_key", "column", "full_value", "minimal_value"])
 
 
@@ -330,21 +356,13 @@ def compare_full_vs_minimal(full_df: pd.DataFrame, minimal_df: pd.DataFrame) -> 
     full_only = full_valid[~full_valid["payload_key"].astype(str).isin(matched_keys)].copy()
     minimal_only = minimal_valid[~minimal_valid["payload_key"].astype(str).isin(matched_keys)].copy()
 
-    matched = full_valid.merge(
-        minimal_valid,
-        on="payload_key",
-        how="inner",
-        suffixes=("__full", "__minimal"),
-    )
-    value_diff = compare_value_diffs(matched)
-    payload_key_diff = compare_payload_keys_by_logical_key(full_valid, minimal_valid)
-
+    matched = full_valid.merge(minimal_valid, on="payload_key", how="inner", suffixes=("__full", "__minimal"))
     return {
         "matched": matched,
         "full_only": full_only,
         "minimal_only": minimal_only,
-        "value_diff": value_diff,
-        "payload_key_diff": payload_key_diff,
+        "value_diff": compare_value_diffs(matched),
+        "payload_key_diff": compare_payload_keys_by_logical_key(full_valid, minimal_valid),
     }
 
 
@@ -372,15 +390,12 @@ def build_summary(
     minimal_df: pd.DataFrame,
     comparison: dict[str, pd.DataFrame] | None,
     errors: list[dict[str, Any]],
+    alignment_info: dict[str, Any],
 ) -> pd.DataFrame:
     has_minimal = bool(args.minimal_csv)
     readiness = combined_readiness(full_df, minimal_df, has_minimal=has_minimal)
     if comparison is None:
-        matched_rows = 0
-        full_only_rows = 0
-        minimal_only_rows = 0
-        value_diff_rows = 0
-        payload_key_diff_rows = 0
+        matched_rows = full_only_rows = minimal_only_rows = value_diff_rows = payload_key_diff_rows = 0
         status = "PLACEHOLDER_NO_MINIMAL_CSV"
     else:
         matched_rows = int(len(comparison["matched"]))
@@ -399,6 +414,7 @@ def build_summary(
         "full_csv": str(args.full_csv) if args.full_csv else "",
         "minimal_csv": str(args.minimal_csv) if args.minimal_csv else "",
         "pair_name_filter": str(args.pair_name or ""),
+        "align_minimal_to_full_time_range": bool(args.align_minimal_to_full_time_range),
         "as_of_time": str(args.as_of_time or ""),
         "lookback_candidates": int(args.lookback_candidates),
         "allowed_slices_count": int(len(allowed_slices)),
@@ -413,6 +429,7 @@ def build_summary(
         "error_rows": int(len(errors)),
         "status": status,
     }
+    row.update(alignment_info)
     row.update(readiness)
     return pd.DataFrame([row])
 
@@ -423,6 +440,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--minimal-csv", default=None, help="Existing minimal output CSV. Optional until minimal scanner exists.")
     parser.add_argument("--allowed-slices-json", default=None, help="Optional JSON list of allowed slices. Defaults to built-in spec slices.")
     parser.add_argument("--pair-name", default=None, help="Optional pair_name filter, e.g. GOLD_H4_M5_SCALP.")
+    parser.add_argument("--align-minimal-to-full-time-range", action="store_true", help="Filter minimal rows to full side's signal_close_time min/max range.")
     parser.add_argument("--out-dir", required=True, help="Directory for comparison outputs.")
     parser.add_argument("--as-of-time", default=None, help="Reserved for future scanner-run mode. Not used for CSV-only mode yet.")
     parser.add_argument("--lookback-candidates", type=int, default=50)
@@ -434,6 +452,14 @@ def main() -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     errors: list[dict[str, Any]] = []
+    alignment_info: dict[str, Any] = {
+        "alignment_enabled": bool(args.align_minimal_to_full_time_range),
+        "alignment_status": "DISABLED",
+        "alignment_full_min_signal_close_time": "",
+        "alignment_full_max_signal_close_time": "",
+        "alignment_minimal_rows_before": 0,
+        "alignment_minimal_rows_after": 0,
+    }
 
     try:
         allowed_slices = load_allowed_slices(args.allowed_slices_json)
@@ -454,6 +480,8 @@ def main() -> int:
     if not errors and args.minimal_csv:
         try:
             minimal_df = normalize_minimal_csv(args.minimal_csv, allowed_slices, args.lookback_candidates, args.pair_name)
+            if args.align_minimal_to_full_time_range:
+                minimal_df, alignment_info = align_minimal_to_full_time_range(full_df, minimal_df)
         except Exception as exc:
             errors.append({"stage": "normalize_minimal_csv", "error": str(exc), "path": str(args.minimal_csv)})
 
@@ -486,6 +514,7 @@ def main() -> int:
         minimal_df=minimal_df,
         comparison=comparison,
         errors=errors,
+        alignment_info=alignment_info,
     )
     write_csv(summary, out_dir / "comparison_summary.csv")
 
