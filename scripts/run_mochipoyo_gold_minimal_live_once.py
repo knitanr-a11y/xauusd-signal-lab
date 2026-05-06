@@ -11,20 +11,24 @@ This is a thin orchestration layer for validating the minimal live flow:
     -> notification eligibility
     -> filter notifications to the current trigger window
     -> ledger duplicate filter
-    -> optional Discord dry-run preview
+    -> optional Discord dry-run preview or one-shot Discord send
     -> update trigger state only after successful processing
 
 Safety:
 - Default behavior does not send Discord messages.
+- Discord messages are sent only when --discord-send is explicitly passed.
 - No auto-trading.
 - Missing initial trigger state is INITIALIZE_ONLY by default.
 - Trigger state for SCAN_REQUIRED rows is advanced only after the scan/risk/
-  notification/ledger stages complete without errors.
+  notification/ledger/Discord stages complete without errors.
 - Historical candidates from a newly scanned pair are not sent.  By default,
   only rows with previous_close_time < signal_close_time <= latest_close_time
   are allowed into the live notification ledger.
-- If there are no rows to send, Discord dry-run is skipped and the run can
-  still succeed.
+- If there are no rows to send, Discord is skipped and the run can still
+  succeed.
+- In --discord-send mode, notification ledger commit is deferred until after
+  Discord send succeeds.  This prevents a failed Discord send from marking a
+  payload as already notified.
 """
 from __future__ import annotations
 
@@ -86,13 +90,7 @@ except ModuleNotFoundError:
 
 
 def windows_long_path(path: str | Path) -> str:
-    """Return a Windows extended-length path when running on Windows.
-
-    The project often runs under the MT5 roaming profile path, which is already
-    long.  Nested dry-loop outputs can exceed the classic MAX_PATH limit and
-    pandas/open may raise FileNotFoundError even after the parent directory was
-    created.  The \\?\ prefix avoids that Windows path-length edge case.
-    """
+    """Return a Windows extended-length path when running on Windows."""
     p = Path(path)
     if os.name != "nt":
         return str(p)
@@ -328,7 +326,7 @@ def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to
     return summary, notification_ok, notification_outside, results
 
 
-def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, bool]:
     ledger_dir = Path(args.out_dir) / "ledger"
     ledger_dir.mkdir(parents=True, exist_ok=True)
     source = notification_ok.copy()
@@ -341,12 +339,14 @@ def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tup
         write_csv(to_send, ledger_dir / "notification_ledger_to_send.csv")
         write_csv(skipped, ledger_dir / "notification_ledger_skipped.csv")
         write_csv(append_rows, ledger_dir / "notification_ledger_append_preview.csv")
-        return classified, to_send, skipped, append_rows
+        return classified, to_send, skipped, append_rows, False
 
     ledger_before = load_existing_ledger(args.notification_ledger_csv)
     classified = classify_rows(source, ledger_before)
     append_rows = build_ledger_append_rows(classified, run_id=args.run_id)
-    if args.commit_ledger:
+    defer_commit_for_live_send = bool(args.discord_send and args.commit_ledger)
+    commit_now = bool(args.commit_ledger and not defer_commit_for_live_send)
+    if commit_now:
         ledger_after = append_ledger(args.notification_ledger_csv, append_rows)
     else:
         ledger_after = ledger_before.copy()
@@ -358,35 +358,51 @@ def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tup
     write_csv(skipped, ledger_dir / "notification_ledger_skipped.csv")
     write_csv(append_rows, ledger_dir / "notification_ledger_append_preview.csv")
     write_csv(state, ledger_dir / "notification_ledger_state.csv")
-    return classified, to_send, skipped, append_rows
+    return classified, to_send, skipped, append_rows, defer_commit_for_live_send
 
 
-def run_discord_dry_run(args: argparse.Namespace, to_send_csv: Path, to_send_rows: int) -> tuple[int, str]:
-    if not args.discord_dry_run:
+def commit_deferred_notification_ledger(args: argparse.Namespace, append_rows: pd.DataFrame) -> bool:
+    if append_rows.empty:
+        return False
+    ledger_after = append_ledger(args.notification_ledger_csv, append_rows)
+    state = build_notification_state(ledger_after)
+    ledger_dir = Path(args.out_dir) / "ledger"
+    write_csv(state, ledger_dir / "notification_ledger_state_after_send.csv")
+    return True
+
+
+def run_discord_stage(args: argparse.Namespace, to_send_csv: Path, to_send_rows: int) -> tuple[int, str]:
+    if not args.discord_dry_run and not args.discord_send:
         return 0, "SKIPPED"
-    if int(to_send_rows) <= 0:
-        preview_dir = Path(args.out_dir) / "discord"
-        preview_dir.mkdir(parents=True, exist_ok=True)
-        (preview_dir / "discord_dryrun_stdout.txt").write_text("SKIPPED_NO_ROWS\n", encoding="utf-8")
-        (preview_dir / "discord_dryrun_stderr.txt").write_text("", encoding="utf-8")
-        return 0, "SKIPPED_NO_ROWS"
+
+    mode = "live" if args.discord_send else "dryrun"
     preview_dir = Path(args.out_dir) / "discord"
     preview_dir.mkdir(parents=True, exist_ok=True)
+
+    if int(to_send_rows) <= 0:
+        (preview_dir / f"discord_{mode}_stdout.txt").write_text("SKIPPED_NO_ROWS\n", encoding="utf-8")
+        (preview_dir / f"discord_{mode}_stderr.txt").write_text("", encoding="utf-8")
+        return 0, "SKIPPED_NO_ROWS"
+
     cmd = [
         sys.executable,
         "scripts/send_mochipoyo_discord_messages.py",
         "--input-csv", str(to_send_csv),
-        "--send-ledger-csv", str(preview_dir / "discord_dryrun_send_ledger.csv"),
-        "--preview-txt", str(preview_dir / "discord_dryrun_preview.txt"),
-        "--preview-json", str(preview_dir / "discord_dryrun_preview.json"),
+        "--send-ledger-csv", str(preview_dir / f"discord_{mode}_send_ledger.csv"),
+        "--preview-txt", str(preview_dir / f"discord_{mode}_preview.txt"),
+        "--preview-json", str(preview_dir / f"discord_{mode}_preview.json"),
         "--symbol", str(args.symbol),
         "--max-rows", str(args.discord_max_rows),
         "--style", str(args.discord_style),
     ]
+    if args.discord_send:
+        cmd.append("--send")
+
     proc = subprocess.run(cmd, text=True, capture_output=True)
-    (preview_dir / "discord_dryrun_stdout.txt").write_text(proc.stdout, encoding="utf-8")
-    (preview_dir / "discord_dryrun_stderr.txt").write_text(proc.stderr, encoding="utf-8")
-    return int(proc.returncode), "OK" if proc.returncode == 0 else "ERROR"
+    (preview_dir / f"discord_{mode}_stdout.txt").write_text(proc.stdout, encoding="utf-8")
+    (preview_dir / f"discord_{mode}_stderr.txt").write_text(proc.stderr, encoding="utf-8")
+    status = "SENT" if args.discord_send and proc.returncode == 0 else "OK" if proc.returncode == 0 else "ERROR"
+    return int(proc.returncode), status
 
 
 def commit_trigger_state_after_success(args: argparse.Namespace, previous_state: pd.DataFrame, decisions_df: pd.DataFrame, success: bool) -> pd.DataFrame:
@@ -416,6 +432,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--commit-ledger", action="store_true")
     p.add_argument("--run-id", default=None)
     p.add_argument("--discord-dry-run", action="store_true")
+    p.add_argument("--discord-send", action="store_true", help="Actually send NEW live-window rows to Discord once. Requires webhook via .env/env/--webhook-url in sender script.")
     p.add_argument("--discord-max-rows", type=int, default=5)
     p.add_argument("--discord-style", choices=["compact", "detailed"], default="compact")
     p.add_argument("--disable-trigger-window-filter", action="store_true", help="Unsafe/debug only: allow historical notification_ok rows into ledger.")
@@ -444,6 +461,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--btc-h1-csv")
     p.add_argument("--btc-h4-csv")
     args = p.parse_args()
+    if args.discord_dry_run and args.discord_send:
+        raise SystemExit("ERROR: choose either --discord-dry-run or --discord-send, not both.")
     if not args.run_id:
         args.run_id = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
     return args
@@ -460,12 +479,16 @@ def main() -> int:
     write_csv(to_scan, out_dir / "pair_trigger_to_scan.csv")
 
     scan_summary, notification_ok, notification_outside, scan_results = run_scans(args, csv_overrides, to_scan)
-    classified, to_send, skipped, append_rows = apply_ledger(args, notification_ok)
+    classified, to_send, skipped, append_rows, ledger_commit_deferred = apply_ledger(args, notification_ok)
     to_send_csv = Path(args.out_dir) / "ledger" / "notification_ledger_to_send.csv"
-    discord_returncode, discord_status = run_discord_dry_run(args, to_send_csv, to_send_rows=len(to_send))
+    discord_returncode, discord_status = run_discord_stage(args, to_send_csv, to_send_rows=len(to_send))
 
     scan_errors = int(scan_summary["error_count"].sum()) if not scan_summary.empty and "error_count" in scan_summary.columns else 0
     success = bool(scan_errors == 0 and discord_returncode == 0)
+    deferred_ledger_committed = False
+    if success and ledger_commit_deferred:
+        deferred_ledger_committed = commit_deferred_notification_ledger(args, append_rows)
+
     state_after = commit_trigger_state_after_success(args, previous_state, decisions_df, success=success)
     write_csv(state_after, out_dir / "pair_trigger_state_after.csv")
 
@@ -483,7 +506,10 @@ def main() -> int:
             "ledger_skipped_rows": int(len(skipped)),
             "ledger_append_rows": int(len(append_rows)),
             "commit_ledger": bool(args.commit_ledger),
+            "ledger_commit_deferred_for_discord_send": bool(ledger_commit_deferred),
+            "deferred_ledger_committed_after_send": bool(deferred_ledger_committed),
             "discord_dry_run": bool(args.discord_dry_run),
+            "discord_send": bool(args.discord_send),
             "discord_status": discord_status,
             "discord_returncode": int(discord_returncode),
             "commit_trigger_state": bool(args.commit_trigger_state),
