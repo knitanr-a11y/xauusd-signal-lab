@@ -9,6 +9,7 @@ This is a thin orchestration layer for validating the minimal live flow:
     -> scan only should_scan=True GOLD pairs
     -> risk enrich
     -> notification eligibility
+    -> filter notifications to the current trigger window
     -> ledger duplicate filter
     -> optional Discord dry-run preview
     -> update trigger state only after successful processing
@@ -19,6 +20,9 @@ Safety:
 - Missing initial trigger state is INITIALIZE_ONLY by default.
 - Trigger state for SCAN_REQUIRED rows is advanced only after the scan/risk/
   notification/ledger stages complete without errors.
+- Historical candidates from a newly scanned pair are not sent.  By default,
+  only rows with previous_close_time < signal_close_time <= latest_close_time
+  are allowed into the live notification ledger.
 """
 from __future__ import annotations
 
@@ -40,8 +44,6 @@ try:
         STATUS_NEW,
     )
     from scripts.apply_mochipoyo_pair_trigger_state import (
-        STATUS_INITIALIZE_ONLY,
-        STATUS_SCAN_REQUIRED,
         allowed_for_symbol,
         build_updated_state,
         classify_pair,
@@ -67,8 +69,6 @@ except ModuleNotFoundError:
         STATUS_NEW,
     )
     from apply_mochipoyo_pair_trigger_state import (  # type: ignore
-        STATUS_INITIALIZE_ONLY,
-        STATUS_SCAN_REQUIRED,
         allowed_for_symbol,
         build_updated_state,
         classify_pair,
@@ -143,7 +143,70 @@ def tail_overrides(args: argparse.Namespace) -> dict[str, int]:
     return {tf: int(v) for tf, v in values.items() if v is not None and int(v) > 0}
 
 
-def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to_scan: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, list[Any]]:
+def trigger_window_map(to_scan: pd.DataFrame) -> dict[str, dict[str, pd.Timestamp | None]]:
+    out: dict[str, dict[str, pd.Timestamp | None]] = {}
+    if to_scan.empty:
+        return out
+    for _, row in to_scan.iterrows():
+        pair = str(row.get("pair_name", "")).strip().upper()
+        if not pair:
+            continue
+        prev = pd.to_datetime(row.get("previous_close_time"), errors="coerce")
+        latest = pd.to_datetime(row.get("latest_close_time"), errors="coerce")
+        out[pair] = {
+            "previous_close_time": None if pd.isna(prev) else pd.Timestamp(prev),
+            "latest_close_time": None if pd.isna(latest) else pd.Timestamp(latest),
+        }
+    return out
+
+
+def filter_to_trigger_window(df: pd.DataFrame, pair_name: str, to_scan: pd.DataFrame, *, enabled: bool) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Split notification rows into live-window OK and outside-window rows.
+
+    Default live rule:
+      previous_close_time < signal_close_time <= latest_close_time
+
+    If previous_close_time is missing, no row is allowed into live notifications.
+    That protects the initial-state case from sending historical candidates.
+    """
+    if df.empty:
+        empty = df.copy()
+        return empty, empty.copy()
+    if not enabled:
+        out = df.copy()
+        out["live_window_status"] = "NOT_FILTERED"
+        out["live_window_reject_reason"] = "trigger window filter disabled"
+        return out, df.iloc[0:0].copy()
+
+    windows = trigger_window_map(to_scan)
+    window = windows.get(str(pair_name).strip().upper())
+    work = df.copy()
+    work["signal_close_time_dt"] = pd.to_datetime(work.get("signal_close_time"), errors="coerce")
+    if not window or window.get("previous_close_time") is None or window.get("latest_close_time") is None:
+        work["live_window_status"] = "OUTSIDE_TRIGGER_WINDOW"
+        work["live_window_reject_reason"] = "missing trigger window"
+        return work.iloc[0:0].copy(), work.drop(columns=["signal_close_time_dt"], errors="ignore")
+
+    previous_close = window["previous_close_time"]
+    latest_close = window["latest_close_time"]
+    assert previous_close is not None
+    assert latest_close is not None
+    mask = (work["signal_close_time_dt"] > previous_close) & (work["signal_close_time_dt"] <= latest_close)
+    accepted = work.loc[mask].copy()
+    rejected = work.loc[~mask].copy()
+    accepted["live_window_status"] = "IN_TRIGGER_WINDOW"
+    accepted["live_window_reject_reason"] = "OK"
+    rejected["live_window_status"] = "OUTSIDE_TRIGGER_WINDOW"
+    rejected["live_window_reject_reason"] = (
+        "requires previous_close_time < signal_close_time <= latest_close_time; "
+        f"previous={previous_close.strftime('%Y-%m-%d %H:%M:%S')}; latest={latest_close.strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    accepted = accepted.drop(columns=["signal_close_time_dt"], errors="ignore")
+    rejected = rejected.drop(columns=["signal_close_time_dt"], errors="ignore")
+    return accepted, rejected
+
+
+def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to_scan: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[Any]]:
     allowed = allowed_for_symbol(args.symbol)
     risk_config = RiskEnrichConfig(
         rr=float(args.risk_rr),
@@ -159,6 +222,7 @@ def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to
 
     results = []
     notification_ok_frames: list[pd.DataFrame] = []
+    notification_outside_window_frames: list[pd.DataFrame] = []
     notification_marked_frames: list[pd.DataFrame] = []
     out_dir = Path(args.out_dir)
     scan_dir = out_dir / "scan"
@@ -188,13 +252,23 @@ def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to
         if not result.risk_ok_candidates_df.empty:
             write_csv(result.risk_ok_candidates_df, scan_dir / f"minimal_candidates_risk_ok_{safe}.csv")
             marked = apply_notification_eligibility(result.risk_ok_candidates_df, config=notif_config)
-            ok, ng = split_notification_eligible(marked)
+            ok_all, ng = split_notification_eligible(marked)
+            ok_live, ok_outside_window = filter_to_trigger_window(
+                ok_all,
+                pair_name,
+                to_scan,
+                enabled=not bool(args.disable_trigger_window_filter),
+            )
             write_csv(marked, notif_dir / f"minimal_candidates_notification_marked_{safe}.csv")
-            write_csv(ok, notif_dir / f"minimal_candidates_notification_ok_{safe}.csv")
+            write_csv(ok_all, notif_dir / f"minimal_candidates_notification_ok_all_{safe}.csv")
+            write_csv(ok_live, notif_dir / f"minimal_candidates_notification_ok_live_{safe}.csv")
+            write_csv(ok_outside_window, notif_dir / f"minimal_candidates_notification_outside_trigger_window_{safe}.csv")
             write_csv(ng, notif_dir / f"minimal_candidates_notification_ng_{safe}.csv")
             notification_marked_frames.append(marked)
-            if not ok.empty:
-                notification_ok_frames.append(ok)
+            if not ok_live.empty:
+                notification_ok_frames.append(ok_live)
+            if not ok_outside_window.empty:
+                notification_outside_window_frames.append(ok_outside_window)
         if not result.risk_ng_candidates_df.empty:
             write_csv(result.risk_ng_candidates_df, scan_dir / f"minimal_candidates_risk_ng_{safe}.csv")
 
@@ -224,10 +298,12 @@ def run_scans(args: argparse.Namespace, csv_overrides: dict[str, str | None], to
     write_csv(errs, scan_dir / "scan_errors.csv")
 
     notification_ok = pd.concat(notification_ok_frames, ignore_index=True, sort=False) if notification_ok_frames else pd.DataFrame()
+    notification_outside = pd.concat(notification_outside_window_frames, ignore_index=True, sort=False) if notification_outside_window_frames else pd.DataFrame()
     notification_marked = pd.concat(notification_marked_frames, ignore_index=True, sort=False) if notification_marked_frames else pd.DataFrame()
     write_csv(notification_marked, notif_dir / "notification_marked_all.csv")
-    write_csv(notification_ok, notif_dir / "notification_ok_all.csv")
-    return summary, notification_ok, results
+    write_csv(notification_ok, notif_dir / "notification_ok_live_all.csv")
+    write_csv(notification_outside, notif_dir / "notification_outside_trigger_window_all.csv")
+    return summary, notification_ok, notification_outside, results
 
 
 def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -314,6 +390,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--discord-dry-run", action="store_true")
     p.add_argument("--discord-max-rows", type=int, default=5)
     p.add_argument("--discord-style", choices=["compact", "detailed"], default="compact")
+    p.add_argument("--disable-trigger-window-filter", action="store_true", help="Unsafe/debug only: allow historical notification_ok rows into ledger.")
     p.add_argument("--tail-m1", type=int, default=12000)
     p.add_argument("--tail-m5", type=int, default=6000)
     p.add_argument("--tail-m15", type=int, default=5000)
@@ -354,7 +431,7 @@ def main() -> int:
     write_csv(decisions_df, out_dir / "pair_trigger_decisions.csv")
     write_csv(to_scan, out_dir / "pair_trigger_to_scan.csv")
 
-    scan_summary, notification_ok, scan_results = run_scans(args, csv_overrides, to_scan)
+    scan_summary, notification_ok, notification_outside, scan_results = run_scans(args, csv_overrides, to_scan)
     classified, to_send, skipped, append_rows = apply_ledger(args, notification_ok)
     to_send_csv = Path(args.out_dir) / "ledger" / "notification_ledger_to_send.csv"
     discord_returncode, discord_status = run_discord_dry_run(args, to_send_csv)
@@ -372,7 +449,8 @@ def main() -> int:
             "pairs_total": int(len(decisions_df)),
             "pairs_to_scan": int(len(to_scan)),
             "scan_errors": scan_errors,
-            "notification_ok_rows": int(len(notification_ok)),
+            "notification_ok_live_rows": int(len(notification_ok)),
+            "notification_outside_trigger_window_rows": int(len(notification_outside)),
             "ledger_new_candidates": int(len(to_send)),
             "ledger_skipped_rows": int(len(skipped)),
             "ledger_append_rows": int(len(append_rows)),
@@ -382,6 +460,7 @@ def main() -> int:
             "discord_returncode": int(discord_returncode),
             "commit_trigger_state": bool(args.commit_trigger_state),
             "trigger_state_advanced": bool(args.commit_trigger_state and success),
+            "trigger_window_filter_enabled": not bool(args.disable_trigger_window_filter),
             "success": success,
         }
     ])
