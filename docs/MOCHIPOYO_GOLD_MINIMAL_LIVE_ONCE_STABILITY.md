@@ -2,7 +2,7 @@
 
 最終更新: 2026-05-06
 
-このドキュメントは、`scripts/run_mochipoyo_gold_minimal_live_once.py` の修正後安定確認ログである。
+このドキュメントは、`scripts/run_mochipoyo_gold_minimal_live_once.py` と `scripts/run_mochipoyo_gold_minimal_live_loop_dry.py` の修正後安定確認ログである。
 
 関連ログ:
 
@@ -18,9 +18,10 @@ docs/MOCHIPOYO_MINIMAL_SCANNER_VALIDATION_LOG.md
 
 ```text
 scripts/run_mochipoyo_gold_minimal_live_once.py
+scripts/run_mochipoyo_gold_minimal_live_loop_dry.py
 ```
 
-このスクリプトは常時ループではない。
+`run_mochipoyo_gold_minimal_live_once.py` は常時ループではない。
 GOLD minimal live flow を1回だけ実行する単発CLIである。
 
 接続順:
@@ -34,6 +35,17 @@ pair trigger state
   -> ledger duplicate filter
   -> Discord dry-run / no-row skip
   -> 成功後だけ trigger state を進める
+```
+
+`run_mochipoyo_gold_minimal_live_loop_dry.py` は、上記の単発CLIを一定間隔で繰り返すdry loopである。
+
+安全方針:
+
+```text
+Discord実送信なし
+自動売買なし
+Ctrl+Cで安全終了
+各iterationのsummaryをCSVへ追記
 ```
 
 ---
@@ -85,6 +97,32 @@ success = True
 
 ```text
 更新なし、またはlive window内候補なしの正常ケースをエラー扱いしない。
+```
+
+### 2.3 Windows long path 対応
+
+MT5のMQL5/Files配下はパスが長く、dry loopではさらに以下のように階層が深くなる。
+
+```text
+...
+  data/results/mochipoyo/minimal_live_loop_dry_test/runX/iter_0001/notification/...
+```
+
+そのため、Windowsの classic MAX_PATH 制限により、親ディレクトリ作成済みでも `pandas.to_csv()` が `FileNotFoundError` になるケースがあった。
+
+対策:
+
+```text
+run_mochipoyo_gold_minimal_live_once.py のCSV保存で、Windowsの場合は \\?\ 付き extended-length path を使う。
+```
+
+また、dry loop側でも各iteration開始時に以下を先に作成する。
+
+```text
+iter_xxxx/scan
+iter_xxxx/notification
+iter_xxxx/ledger
+iter_xxxx/discord
 ```
 
 ---
@@ -239,9 +277,115 @@ success=True。
 
 ---
 
-## 6. 安定確認まとめ
+## 6. dry loop 初回検証で見つかった問題
 
-run5〜run7 の結果:
+対象:
+
+```text
+scripts/run_mochipoyo_gold_minimal_live_loop_dry.py
+```
+
+最初のdry loop実行では、各iterationで `returncode=1` となった。
+
+エラー:
+
+```text
+FileNotFoundError:
+...\iter_0001\notification\minimal_candidates_notification_outside_trigger_window_gold_h4_m5_scalp.csv
+```
+
+確認結果:
+
+```text
+run_mochipoyo_gold_minimal_live_once.py の write_csv() には p.parent.mkdir(parents=True, exist_ok=True) が入っていた。
+それでも pandas.to_csv() で FileNotFoundError になっていた。
+```
+
+原因推定:
+
+```text
+Windows classic MAX_PATH 制限。
+MT5 roaming profile + repo path + data/results/... + iter_0001/notification + 長いファイル名でパスが長くなりすぎた可能性が高い。
+```
+
+対策:
+
+```text
+1. run_mochipoyo_gold_minimal_live_once.py に Windows long path 対応を追加。
+2. run_mochipoyo_gold_minimal_live_loop_dry.py で iteration_dir 配下の scan/notification/ledger/discord を事前作成。
+3. 検証時の --out-dir を短くする。
+```
+
+---
+
+## 7. dry loop run4: 短いout-dirで成功確認
+
+実行:
+
+```cmd
+python scripts\run_mochipoyo_gold_minimal_live_loop_dry.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\ml_loop_run4 --symbol GOLD --trigger-state-csv data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv --notification-ledger-csv data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv --iterations 3 --sleep-seconds 10 --commit-trigger-state --commit-ledger
+```
+
+結果:
+
+```text
+iteration 1:
+  returncode = 0
+  pairs_to_scan = 2
+  notification_ok_live_rows = 0
+  notification_outside_trigger_window_rows = 43
+  ledger_new_candidates = 0
+  ledger_append_rows = 0
+  discord_status = SKIPPED_NO_ROWS
+  success = True
+
+iteration 2:
+  returncode = 0
+  pairs_to_scan = 0
+  notification_ok_live_rows = 0
+  notification_outside_trigger_window_rows = 0
+  ledger_new_candidates = 0
+  ledger_append_rows = 0
+  discord_status = SKIPPED_NO_ROWS
+  success = True
+
+iteration 3:
+  returncode = 0
+  pairs_to_scan = 0
+  notification_ok_live_rows = 0
+  notification_outside_trigger_window_rows = 0
+  ledger_new_candidates = 0
+  ledger_append_rows = 0
+  discord_status = SKIPPED_NO_ROWS
+  success = True
+```
+
+判定:
+
+```text
+dry loop run4 は成功。
+1回目だけ更新pairを処理し、2回目/3回目は pairs_to_scan = 0。
+trigger更新窓外候補はledger/Discordへ流れない。
+to_send 0件は SKIPPED_NO_ROWS として正常終了。
+```
+
+確認できたこと:
+
+```text
+dry loop wrapper: PASS
+once呼び出し: PASS
+Windows long path対応: PASS
+pair trigger state更新: PASS
+更新なしskip: PASS
+trigger window filter: PASS
+Discord no-row skip: PASS
+```
+
+---
+
+## 8. 安定確認まとめ
+
+run5〜run7 と dry loop run4 の結果:
 
 ```text
 run5:
@@ -267,6 +411,13 @@ run7:
   ledger_new_candidates = 0
   discord_status = SKIPPED_NO_ROWS
   success = True
+
+dry loop run4:
+  iterations = 3
+  returncode = 0 / 0 / 0
+  success = True / True / True
+  pairs_to_scan = 2 / 0 / 0
+  discord_status = SKIPPED_NO_ROWS / SKIPPED_NO_ROWS / SKIPPED_NO_ROWS
 ```
 
 確認できたこと:
@@ -280,11 +431,13 @@ run7:
 6. trigger更新窓外候補は Discord に流れない。
 7. to_send 0件では Discord dry-run は SKIPPED_NO_ROWS として正常skip。
 8. success=True の時だけ trigger_state_advanced=True。
+9. dry loopで単発flowを複数回繰り返せる。
+10. 更新なしiterationでは pairs_to_scan = 0 になる。
 ```
 
 ---
 
-## 7. GOLD minimal live once 総合判定
+## 9. GOLD minimal live flow 総合判定
 
 ```text
 GOLD_H4_M5_SCALP:
@@ -296,6 +449,7 @@ GOLD_H4_M5_SCALP:
   Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once stability PASS
+  minimal live dry loop PASS
 
 GOLD_H4_M15_DAYTRADE:
   candidate generation PASS
@@ -306,6 +460,7 @@ GOLD_H4_M15_DAYTRADE:
   Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once stability PASS
+  minimal live dry loop PASS
 
 GOLD_D1_H1_DAYTRADE:
   candidate generation PASS
@@ -316,38 +471,41 @@ GOLD_D1_H1_DAYTRADE:
   Discord dry-run / no-row skip PASS
   pair trigger state PASS
   minimal live once stability PASS
+  minimal live dry loop PASS
 ```
 
 結論:
 
 ```text
-GOLD 3pair は、単発 minimal live flow の安定確認までPASS扱い。
-次は、常時稼働ループ化する前に、Discord実送信を行わない light loop / scheduler 相当のdry-run制御を作る。
+GOLD 3pair は、Discord実送信なしの minimal live dry loop までPASS扱い。
+次は、もう少し長めのdry loop、または実Discord送信に進む前のpreview/本文確認を行う。
 ```
 
 ---
 
-## 8. 次の作業
+## 10. 次の作業
 
-常時稼働化の前段として、以下を作る。
+次のどちらかを行う。
+
+### A. 長めのdry loop
 
 ```text
-scripts/run_mochipoyo_gold_minimal_live_loop_dry.py
+iterations = 12
+sleep_seconds = 10〜30
 ```
 
 目的:
 
 ```text
-一定間隔で run_mochipoyo_gold_minimal_live_once.py 相当の処理を呼ぶ。
-Discord実送信はまだ行わない。
-自動売買もしない。
-Ctrl+Cで安全終了する。
-各iterationの summary を append ledger として保存する。
+M5/M15/H1更新タイミングをまたいでも安定して動くか確認する。
 ```
 
-注意:
+### B. Discord本文preview確認
+
+目的:
 
 ```text
-既存の run_mochipoyo_live_notify_loop.py / run_mochipoyo_live_notify_loop_light.py は使わない。
-新しい minimal live loop は、今回検証済みの単発flowを薄く繰り返す制御層として作る。
+実送信前に、通知本文が読みやすいか、payload_keyやentry情報が欠けていないか確認する。
 ```
+
+まだ自動売買は行わない。
