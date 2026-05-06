@@ -23,6 +23,8 @@ Safety:
 - Historical candidates from a newly scanned pair are not sent.  By default,
   only rows with previous_close_time < signal_close_time <= latest_close_time
   are allowed into the live notification ledger.
+- If there are no rows to send, Discord dry-run is skipped and the run can
+  still succeed.
 """
 from __future__ import annotations
 
@@ -339,9 +341,15 @@ def apply_ledger(args: argparse.Namespace, notification_ok: pd.DataFrame) -> tup
     return classified, to_send, skipped, append_rows
 
 
-def run_discord_dry_run(args: argparse.Namespace, to_send_csv: Path) -> tuple[int, str]:
+def run_discord_dry_run(args: argparse.Namespace, to_send_csv: Path, to_send_rows: int) -> tuple[int, str]:
     if not args.discord_dry_run:
         return 0, "SKIPPED"
+    if int(to_send_rows) <= 0:
+        preview_dir = Path(args.out_dir) / "discord"
+        preview_dir.mkdir(parents=True, exist_ok=True)
+        (preview_dir / "discord_dryrun_stdout.txt").write_text("SKIPPED_NO_ROWS\n", encoding="utf-8")
+        (preview_dir / "discord_dryrun_stderr.txt").write_text("", encoding="utf-8")
+        return 0, "SKIPPED_NO_ROWS"
     preview_dir = Path(args.out_dir) / "discord"
     preview_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
@@ -434,7 +442,7 @@ def main() -> int:
     scan_summary, notification_ok, notification_outside, scan_results = run_scans(args, csv_overrides, to_scan)
     classified, to_send, skipped, append_rows = apply_ledger(args, notification_ok)
     to_send_csv = Path(args.out_dir) / "ledger" / "notification_ledger_to_send.csv"
-    discord_returncode, discord_status = run_discord_dry_run(args, to_send_csv)
+    discord_returncode, discord_status = run_discord_dry_run(args, to_send_csv, to_send_rows=len(to_send))
 
     scan_errors = int(scan_summary["error_count"].sum()) if not scan_summary.empty and "error_count" in scan_summary.columns else 0
     success = bool(scan_errors == 0 and discord_returncode == 0)
