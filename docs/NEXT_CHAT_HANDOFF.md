@@ -2,74 +2,274 @@
 
 このドキュメントは、新しいチャットへ移行した直後に必ず読むこと。
 
-## 最初に読むGitHub上の注意事項
+## 最重要結論：GOLD/BTCのシグナル候補は一旦すべて白紙
 
-新しいチャットでは、作業開始前に必ず以下を読む。
+2026-05-06時点で、GOLD/BTCの既存採用候補はすべて白紙に戻す。
+
+```text
+GOLD_ABC_V3
+GOLD_EXTRA_HIGH_RSI_STOCH
+GOLD_EXTRA_BB_BALANCE
+GOLD_COUNTER_BUY_ONLY
+BTC_RUNNER_RR2_RISK1
+BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
+```
+
+上記を次チャットで「採用済み」「本命候補」「通知対象」として扱ってはいけない。
+
+理由：
+
+```text
+1. MTF結合で上位足の確定時刻を考慮していない可能性が発覚した。
+2. M5/M15に対して、未確定だったH1/H4足をバックテスト上で使っていた可能性がある。
+3. BTC M5スキャルは confirmed-time 再検証で大幅悪化した。
+4. GOLDは history の最終成績と現在ライブ検出ロジックのシグナル集合がほぼ一致していなかった。
+5. したがって、既存候補を延命せず、シグナル探索を最初からやり直す。
+```
+
+今後は「旧候補の再現性修復」ではなく、**confirmed-time基準でゼロから新しい候補を探索する**。
+
+## 作業開始時に必ず読むファイル
 
 ```text
 docs/NEXT_CHAT_HANDOFF.md
 docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
 ```
 
-特にBTCについては、`docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md` を読まずに通知・検証・採用判断を進めてはいけない。
+BTCについてはスプレッド注意も必ず読む。ただし、この注意ファイルに過去候補が出ていても、それは履歴として扱い、採用済みとは見なさない。
 
-## 最重要：本番ループ起動コマンド
-
-通常運用で起動するコマンドはこれ。
-
-```bat
-scripts\run_live_portfolio_notifier_loop.bat
-```
-
-停止する場合：
+## 現在やってはいけないこと
 
 ```text
-Ctrl + C
-Y
+- 本番ループを稼働させる
+- GOLD/BTCの旧候補をDiscord通知対象に戻す
+- AI評価の整備を先に進める
+- 旧バックテスト成績を根拠に採用判断する
+- 未確定上位足を使うMTF結合で探索する
+- start time基準のmerge_asofをそのまま使う
 ```
 
-起動後に見るポイント：
+次にやるべきことは、AI評価や通知ではなく、**リーク防止済みの候補探索基盤を作り直すこと**。
+
+## 今回発覚した重要な反省点
+
+以前、「未来情報を拾っていないか」という確認に対して、明確に否定してしまったが、それは誤りだった。
+
+正確には、以下のような分かりやすいリークだけを見て、MTF確定時刻リークを見落としていた。
 
 ```text
-Timing: every minute at xx:01
-Bar offset: 0 (MQL5 CSV confirmed bars only)
-Run started: xx:xx:01.xx
-GOLD: OK returncode=0
-BTC: OK returncode=0
+- shift(-1) で未来足を直接見る
+- 右側ピボット確定を使う
+- 結果ラベルを特徴量へ混ぜる
 ```
 
-## 現在の全体方針
-
-MT5 + Pythonで、GOLD/XAUUSD・BTCUSD用のトレードシグナル検証/通知ツールを作成中。
-
-GitHubリポジトリ：
+実際に見落としていた可能性があるもの：
 
 ```text
-knitanr-a11y/xauusd-signal-lab
+上位足の time はバー開始時刻なのに、下位足の time とそのまま merge_asof していた。
+
+例：
+M5 00:00 に H1 00:00 を結合。
+しかし H1 00:00 足が確定するのは 01:00。
+ライブ時点では M5 00:00 で H1 00:00 の終値/MACD/EMAは使えない。
 ```
 
-最終構成：
+今後は、MTF結合は必ず以下を満たすこと。
 
 ```text
-MT5 / MQL5側:
-- ローソク足取得
-- 確定足のみCSV出力
-- Pythonが読みやすいMQL5\Files配下へ保存
-
-Python側:
-- CSV読込
-- シグナル判定
-- payload生成
-- AI評価
-- Discord通知
-- ledgerで再通知防止
+context_close_time <= base_close_time
 ```
 
-PythonからMT5 APIでローソク足取得する方針ではない。
+例：
+
+```text
+M5 00:50 close_time = 00:55
+H1 00:00 close_time = 01:00
+=> M5 00:50ではH1 00:00を使わない
+
+M5 00:55 close_time = 01:00
+H1 00:00 close_time = 01:00
+=> M5 00:55ではH1 00:00を使ってよい
+```
+
+## confirmed-time join の追加済みファイル
+
+以下は今後の探索・検証で使う土台として残す。
+
+```text
+scripts/confirmed_time_join.py
+```
+
+主な考え方：
+
+```text
+base_close_time = base_time + base_timeframe_minutes
+context_close_time = context_time + context_timeframe_minutes
+merge_asof(left_on=base_close_time, right_on=context_close_time, direction='backward')
+```
+
+追加済みの確認/暫定スクリプト：
+
+```text
+scripts/run_live_gold_notifier_confirmed_from_csv.py
+scripts/run_live_btc_mtf_spread_filtered_confirmed_notifier_from_csv.py
+scripts/run_live_portfolio_confirmed_notifier_from_csv.py
+scripts/search_btc_mtf_extra_edges_confirmed.py
+scripts/revalidate_current_btc_confirmed_rules.py
+scripts/revalidate_current_gold_confirmed_rules.py
+scripts/audit_gold_confirmed_vs_history.py
+scripts/compare_gold_history_confirmed_keys.py
+scripts/fuzzy_compare_gold_history_confirmed.py
+```
+
+注意：これらは検証・監査用に作ったものであり、旧候補を採用し続けるための根拠ではない。
+
+## BTC再検証で分かったこと
+
+### BTC M5スキャル
+
+旧候補：
+
+```text
+BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
+```
+
+confirmed-time再検証結果：
+
+```text
+trades: 71
+wins: 20
+losses: 51
+win_rate: 28.17%
+total_r: -11.0R
+avg_r: -0.155R
+PF: 0.78
+max_consecutive_losses: 12
+max_dd_r: 19.0R
+```
+
+結論：
+
+```text
+採用停止。旧成績 109件 / 勝率64.22% / +101R / PF3.59 は使わない。
+```
+
+### BTC RUNNER
+
+旧候補：
+
+```text
+BTC_RUNNER_RR2_RISK1
+```
+
+confirmed-time再検証では一応プラス：
+
+```text
+trades: 101
+wins: 48
+losses: 53
+win_rate: 47.52%
+total_r: +43.0R
+avg_r: +0.426R
+PF: 1.81
+max_consecutive_losses: 6
+max_dd_r: 6.0R
+avg_effective_rr_after_spread: 1.67
+```
+
+ただし今回の方針では、これも採用済みには戻さない。白紙に戻して、次回の探索候補の比較対象または参考値としてのみ扱う。
+
+## GOLD再検証で分かったこと
+
+GOLDは、history上の成績と現在ライブ検出ロジックのシグナル集合がほぼ一致していなかった。
+
+history overlap：
+
+```text
+GOLD_ABC_V3: 213件 / 勝率59.62% / +104.5R / PF2.22
+GOLD_EXTRA_BB_BALANCE: 17件 / 勝率52.94% / +5.5R / PF1.69
+GOLD_EXTRA_HIGH_RSI_STOCH: 19件 / 勝率68.42% / +13.5R / PF3.25
+```
+
+現在ライブ検出 confirmed-time：
+
+```text
+GOLD_ABC_V3: 66件 / 勝率13.64% / -42.52R / PF0.24
+GOLD_EXTRA_BB_BALANCE: 76件 / 勝率28.95% / -24.05R / PF0.55
+GOLD_EXTRA_HIGH_RSI_STOCH: 213件 / 勝率32.39% / -44.22R / PF0.69
+ALL_ADOPTED: 355件 / 勝率28.17% / -110.79R / PF0.56
+```
+
+完全一致キー比較：
+
+```text
+GOLD_ABC_V3:
+both 2件 / confirmed_only 64件 / history_only 211件
+
+GOLD_EXTRA_BB_BALANCE:
+both 3件 / confirmed_only 73件 / history_only 14件
+
+GOLD_EXTRA_HIGH_RSI_STOCH:
+both 14件 / confirmed_only 199件 / history_only 5件
+```
+
+結論：
+
+```text
+GOLDは旧history成績そのものより、ライブ検出実装がhistoryの最終ルールと一致していない。
+ただし、旧ルール修復ではなく、新しい探索をconfirmed-time基準でやり直す。
+```
+
+## MQL5 CSV Export EA の現状
+
+現在のEA：
+
+```text
+mql5/Experts/ExportOhlcToCsv.mq5
+```
+
+現在バージョン：
+
+```text
+#property version "1.31"
+```
+
+重要仕様：
+
+```text
+InpIncludeCurrentBar = false
+InpAlignExportToMinute = true
+InpExportSecond = 0
+InpTimerSeconds = 1
+InpAppendMode = true
+InpAppendLookbackBars = 20
+InpGoldM5Enabled = true
+InpGoldH4Enabled = true
+InpBtcM5Enabled = true
+InpBtcH4Enabled = true
+```
+
+CSV出力対象：
+
+```text
+goldsharp_m5.csv
+goldsharp_m15.csv
+goldsharp_h1.csv
+goldsharp_h4.csv
+btcusdsharp_m5.csv
+btcusdsharp_m15.csv
+btcusdsharp_h1.csv
+btcusdsharp_h4.csv
+```
+
+確認済み：
+
+```text
+GOLD M5/H4 CSV生成確認済み。
+BTC M5/M15 追記モード確認済み。
+```
 
 ## MT5 CSVの場所
-
-MQL5で出力されたローソク足CSVは以下に生成される。
 
 ```text
 C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files
@@ -78,429 +278,113 @@ C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F
 主なCSV：
 
 ```text
+goldsharp_m5.csv
 goldsharp_m15.csv
 goldsharp_h1.csv
+goldsharp_h4.csv
 btcusdsharp_m5.csv
 btcusdsharp_m15.csv
 btcusdsharp_h1.csv
 btcusdsharp_h4.csv
 ```
 
-## MQL5 CSV Export EA
+## bar-offset の仕様
 
-現在のEA：
-
-```text
-mql5/Experts/ExportOhlcToCsv.mq5
-```
-
-重要仕様：
-
-```text
-#property version "1.30"
-InpIncludeCurrentBar = false
-InpAlignExportToMinute = true
-InpExportSecond = 0
-InpTimerSeconds = 1
-InpAppendMode = true
-InpAppendLookbackBars = 20
-```
-
-意味：
-
-```text
-- 未確定足はCSVへ出さない
-- CopyRates start_pos=1 で確定足だけ取得する
-- 毎分00秒にCSV更新を寄せる
-- Python側は毎分01秒にCSVを読む
-- 起動時は指定本数ぶんCSVを全件作成
-- 通常運用時は新しい確定足だけ追記
-```
-
-EA v1.30の追記モードはBTCで確認済み。
-
-確認ログ：
-
-```text
-btcusdsharp_m5.csv:
-rows=30002 -> 30003
-last_time=2026.05.03 18:35:00 -> 2026.05.03 18:40:00
-mtime_changed=True
-rows_changed=True
-last_time_changed=True
-
-btcusdsharp_m15.csv:
-rows=30000 -> 30001
-last_time=2026.05.03 18:15:00 -> 2026.05.03 18:30:00
-mtime_changed=True
-rows_changed=True
-last_time_changed=True
-
-btcusdsharp_h1.csv / btcusdsharp_h4.csv:
-確認時間内では未確定のため変化なし。正常。
-```
-
-MQL5側の初回出力本数：
-
-```text
-M5: 30000
-M15: 30000
-H1: 20000
-H4: 10000
-```
-
-## bar-offset の重要仕様
-
-MQL5 EA が確定足だけをCSVへ出すため、Python側は最新CSV行をそのまま使う。
+MQL5 EA は未確定足をCSVへ出さない。
+そのため、ライブで使うなら Python 側は最新CSV行を使う。
 
 ```text
 --bar-offset 0
 ```
 
-`--bar-offset 1` は使わない。
-`--bar-offset 1` にすると、M5なら5分前、M15なら15分前の足を見てしまう。
+ただし、現時点では本番通知を止めるため、この仕様は将来再開時の注意として残す。
 
-## 現在の本番ループ
+## runtime health log
 
-本番ループ用bat：
+統合wrapperには、年フォルダ/月CSVで簡潔なヘルスログを残す機能を追加済み。
 
-```text
-scripts/run_live_portfolio_notifier_loop.bat
-```
-
-現在の動き：
+保存先：
 
 ```text
-Timing: every minute at xx:01
-Bar offset: 0 (MQL5 CSV confirmed bars only)
+data/results/live_payloads/runtime_logs/2026/portfolio_loop_health_202605.csv
 ```
 
-起動コマンド：
-
-```bat
-scripts\run_live_portfolio_notifier_loop.bat
-```
-
-理想タイミング：
+毎分1行だけで、以下を記録する。
 
 ```text
-毎分00秒: MQL5 EA v1.30 が確定足CSVを追記/必要時更新
-毎分01秒: Python bat がCSVを読み、GOLD/BTCを判定して必要ならDiscord通知
+run_started_at
+run_finished_at
+duration_sec
+overall_returncode
+gold_returncode
+btc_returncode
+gold_unnotified_selected
+btc_raw_unnotified
+btc_rejected_spread_value
+btc_unnotified_selected
+ledger_rows_appended
+error_summary
 ```
 
-## 統合ライブ通知スクリプト
+ただし、現時点では本番ループは動かさない。
 
-統合スクリプト：
+## BTCスプレッド注意
+
+BTCは今後の新規探索でも、必ずスプレッド込みで検証する。
+
+CSVの `spread` 列を使い、少なくとも以下を出すこと。
 
 ```text
-scripts/run_live_portfolio_notifier_from_csv.py
+mode_spread_points
+mode_spread_price
+net_tp_after_spread_pips
+spread_to_sl_ratio
+effective_rr_after_spread
+net PF / net total R / max DD
 ```
 
-役割：
+旧BTC M5ルールのように、理論RRだけで良く見える候補を採用しない。
+
+## 次チャットで最初にやること
+
+方針：**候補探索を白紙から再開する。**
+
+優先順：
 
 ```text
-- GOLD通知スクリプトを呼ぶ
-- BTC spread_filtered通知スクリプトを呼ぶ
-- 1回の実行でGOLD/BTC両方を確認
-- それぞれのledgerで再通知防止
-- Discordへ必要な通知だけ送る
+1. confirmed-time join を使った共通バックテスト基盤を作る
+2. GOLDとBTCを分けて、シンプルな候補から再探索する
+3. MTFを使う場合は context_close_time <= base_close_time を厳守する
+4. BTCはスプレッド込みnet成績を必須にする
+5. GOLDもM5 first-touchで勝敗判定する
+6. 候補が出てもすぐ通知/AI評価へ進まず、キー・時刻・勝敗・月別成績をCSVで確認する
 ```
 
-現在batから呼ばれる主な引数：
-
-```text
---gold-scan-recent-bars 60
---btc-scan-recent-m5-bars 60
---btc-scan-recent-m15-bars 20
---bar-offset 0
---btc-spread-mode csv_mode
---btc-spread-source m5
---btc-point-size 0.01
---btc-pip-size 10
---enable-ai-review
---send-discord
-```
-
-## 直近の本番ループ確認結果
-
-2026-05-04 00:16〜00:17 JST付近のログで確認済み。
-
-確認済み：
-
-```text
-Timing: every minute at xx:01
-Run started: 00:16:01.05
-Run finished: 00:16:05.45
-Run started: 00:17:01.05
-Run finished: 00:17:05.35
-GOLD: OK returncode=0
-BTC: OK returncode=0
-```
-
-つまり、統合処理全体は約4秒台まで短縮済み。
-
-## 軽量化の最新状態
-
-MQL5の元CSVは大きいまま保持する。
-Python側の通知スクリプト内部だけで、`data/results/live_payloads/_runtime_tail/` に一時CSVを作り、直近本数だけでインジケーター計算する。
-
-GOLD軽量化：
-
-```text
-scripts/run_live_gold_notifier_from_csv.py
-M15: 3000 / 30000
-H1: 1500 / 20000
-```
-
-BTC軽量化：
-
-```text
-scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
-M5: 3000 / 30000
-M15: 1500 / 30000
-H1: 1000 / 20000
-H4: 500 / 10000
-```
-
-ログ確認例：
+候補探索の初期方針案：
 
 ```text
 GOLD:
-Rows: 3000
-Runtime context rows: M15 3000/30000 H1 1500/20000
+- M15ベースを基本にする
+- H1/H4を使うなら confirmed-time join
+- outcomeはM5 first-touch
+- まずは少数条件で件数/勝率/PF/月別/最大DDを見る
 
 BTC:
-Rows: M5 3000 M15 1500
-Runtime context rows: M5 3000/30000 M15 1500/30000 H1 1000/20000 H4 500/10000
+- M15 RUNNER系から再探索
+- M5スキャルは一旦後回し
+- スプレッド込みnet RRを必須評価
+- H1/H4はconfirmed-time join
 ```
 
-## GOLDの最新状態
-
-GOLD通知スクリプト：
+## 次チャットで絶対に避けること
 
 ```text
-scripts/run_live_gold_notifier_from_csv.py
-```
-
-対応済み：
-
-```text
-- MQL5 Files直下CSVのlive形式読み込み
-- GOLD ABC v3検出
-- GOLD EXTRA HIGH検出
-- GOLD EXTRA STANDARD検出
-- GOLD_COUNTER_BUY_ONLYを本番通知から除外
-- regime guard表示整理
-- TP/SL価格目安表示
-- Discord通知文生成
-- AI評価接続
-- ledger再通知防止
-- runtime tail CSVによる軽量化
-```
-
-GOLD本番採用ラベル：
-
-```text
-GOLD_ABC_V3
-GOLD_EXTRA_HIGH_RSI_STOCH
-GOLD_EXTRA_BB_BALANCE
-```
-
-本番除外ラベル：
-
-```text
-GOLD_COUNTER_BUY_ONLY
-```
-
-`GOLD_COUNTER_BUY_ONLY` は `--include-excluded` を付けたデバッグ時のみ表示可能。
-
-## GOLD regime guardの扱い
-
-GOLD ABC BUY danger regime は以下だけ対象。
-
-```text
-strategy_label == GOLD_ABC_V3
-side == BUY
-```
-
-GOLD EXTRAやSELLでは対象外。
-通知では以下のように表示する。
-
-```text
-regime guard: 対象外（GOLD ABC BUYのみ判定）
-```
-
-GOLD ABC BUYでdanger trueの場合だけ警戒表示にする。
-
-```text
-⚠️ GOLD ABC BUY danger regime: TRUE
-扱い: 警戒通知のみ / AI評価必須 / ロット低下候補
-```
-
-## GOLD AI評価の最新状態
-
-GOLDのAI評価は、OpenAIの自由文が不安定だったため、`scripts/ai_signal_review.py` でGOLDは戦略別の定型評価で上書きするよう修正済み。
-
-GOLD AI評価に使う固定実績：
-
-```text
-GOLD ABC v3:
-216件 / 勝率59.26% / +104.0R / PF2.18
-
-GOLD EXTRA HIGH:
-44件 / 勝率70.45% / +28.1R / PF3.16 / 最大連敗2
-
-GOLD EXTRA STANDARD:
-17件 / 勝率52.94% / +5.5R / PF1.69
-```
-
-## BTCの最新状態
-
-BTCは一度、スプレッド考慮不足でM5追加ルールを過大評価しかけた。
-そのため、BTCは必ずCSVの `spread` 列を考慮して扱う。
-
-詳しくは必ず以下を読む。
-
-```text
-docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md
-```
-
-BTC本番通知スクリプト：
-
-```text
-scripts/run_live_btc_mtf_spread_filtered_notifier_from_csv.py
-```
-
-旧BTC通知スクリプトは本番では使わない。
-
-```text
-scripts/run_live_btc_mtf_notifier_from_csv.py
-```
-
-### BTC採用候補
-
-```text
-1. BTC_RUNNER_RR2_RISK1
-   - スプレッド込みでも採用候補維持
-
-2. BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8
-   - 無条件通知は禁止
-   - CSV最頻スプレッド + 値幅フィルタ通過時のみ通知・採用候補
-```
-
-BTC M5の必須値幅フィルタ：
-
-```text
-net_tp_after_spread_pips >= 5.0
-spread_to_sl_ratio < 0.50
-effective_rr_after_spread >= 1.0
-```
-
-確認済みの小幅シグナル例：
-
-```text
-2026-05-03 14:05 BTC BUY
-net_tp_after_spread_pips = 2.99
-spread_to_sl_ratio = 85.9%
-effective_rr_after_spread = 0.61
-```
-
-これは検出されても通知しない。
-直近ログでもこのシグナルは検出され、値幅フィルタで正しく除外されている。
-
-## Discord / OpenAI env
-
-`.env` には以下が必要。
-
-```env
-DISCORD_WEBHOOK_URL=...
-OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-4o-mini
-```
-
-`--enable-ai-review` を付けているため、OpenAI APIキーが必要。
-
-## 直近の重要コミット
-
-```text
-f0056d40690dbb413b0db67cfff51fcd276df79b
-- MQL5 CSV Export EAをv1.30へ更新。起動時全件作成 + 通常時追記モード。
-
-ca258317b23f74e0a5fa05d3d9ae802b0ae04c46
-- BTC CSV出力確認用スクリプト追加。
-
-4724cd279afe80b58ca997043f8bb8b1734fb22c
-- MQL5 CSV Export EAを毎分00秒寄せに変更（v1.20時点）
-
-bbf407fea142c54f96c1010ce8eb6a54ff8f80e2
-- Python本番batを毎分01秒起動に変更
-
-2653f25a9ce37e1e6d6fcf2728fbca4e20b52335
-- BTC live通知のruntime tail軽量化
-
-82c066ce0ed59f88a3cf0522ae8082997df67088
-- GOLD live通知のruntime tail軽量化
-```
-
-## 次にやること
-
-次回はAI評価の続きから進める。
-
-```text
-1. docs/NEXT_CHAT_HANDOFF.md を読む
-2. docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読む
-3. GitHub Desktopで Fetch origin → Pull origin
-4. 本番ループを起動する場合は scripts\run_live_portfolio_notifier_loop.bat
-5. AI評価はBTC側の定型評価追加から進める
-```
-
-AI評価の現状：
-
-```text
-GOLD:
-- 定型評価済み
-- 戦略別固定実績で上書き
-
-BTC:
-- rule_profilesはある
-- acceptedになった通知対象だけOpenAI評価される
-- GOLDのような btc_deterministic_review() は未実装
-```
-
-次回のAI評価タスク：
-
-```text
-scripts/ai_signal_review.py に btc_deterministic_review() を追加する。
-
-BTC_RUNNER_RR2_RISK1:
-- スプレッド込みでも採用候補
-- 77件 / 勝率61.04% / +64.0R / PF3.13 / 平均実質RR1.68
-- 通常〜慎重
-
-BTC_SCALP_H1_M5_REENTRY_FILTERED_RR2_RISK0.8:
-- 値幅フィルタ通過時のみ評価対象
-- 109件 / 勝率64.22% / +101.0R / PF3.59
-- M5短期なので慎重寄り
-```
-
-今後の改善候補：
-
-```text
-- FutureWarningの解消
-- CSV読み込み中衝突に備えたリトライ処理
-- Discord通知が実際に出たときのledger確認
-- AI評価APIの失敗時フォールバック強化
-```
-
-## 次のチャットで絶対に避けること
-
-```text
-- docs/IMPORTANT_BTC_SPREAD_REVALIDATION.md を読まずにBTCを触る
+- 旧候補を採用済みとして扱う
+- GOLD/BTC通知ループを再開する
+- AI評価整備を先に進める
+- old history成績をそのまま根拠にする
+- 未確定上位足を使うバックテストをする
+- start time基準のMTF merge_asofを使う
 - BTCでスプレッドなしの理論RRだけを見る
-- BTC本番通知に旧スクリプトを使う
-- GOLD_COUNTER_BUY_ONLYを本番通知に戻す
-- GOLD EXTRA/SELLでdanger regimeを理由にする
-- --bar-offset 1 に戻す
-- MQL5 EAが未確定足を出している前提で話を進める
-- AI自由文を無条件に信用する
+- 「未来情報はない」と検証なしに断言する
 ```
