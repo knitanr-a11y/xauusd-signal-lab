@@ -4,6 +4,7 @@
 
 Default output is intentionally trader-facing and compact:
 - first line is SYMBOL + BUY/SELL
+- time is labeled as MT5 time because Discord already shows local/JST send time
 - no internal Candidate/Quality/Caution jargon
 - Entry / SL / TP / RR are prominent
 - warnings are written in plain Japanese
@@ -53,7 +54,6 @@ def entry_time_short(row: pd.Series) -> str:
 def timeframe_label(row: pd.Series) -> str:
     pair = val(row, "pair_name")
     parts = pair.split("_")
-    # Examples: GOLD_H4_M5_SCALP / BTC_H4_M15_DAYTRADE
     if len(parts) >= 3:
         return f"{parts[1]} → {parts[2]}"
     return pair
@@ -177,7 +177,7 @@ def compact_message(row: pd.Series) -> str:
     lines = [
         f"{symbol_emoji(symbol)} **{symbol} {direction}** {direction_emoji(direction)}",
         "━━━━━━━━━━━━━━",
-        f"時間: `{entry_time_short(row)}`",
+        f"MT5時間: `{entry_time_short(row)}`",
         f"足: `{timeframe_label(row)}`",
         f"形: `{granville_jp(row)}`",
         "",
@@ -209,7 +209,6 @@ def compact_message(row: pd.Series) -> str:
 
 
 def detailed_message(row: pd.Series) -> str:
-    # Internal/debug view. Kept available with --style detailed.
     symbol = val(row, "symbol").upper()
     direction = val(row, "direction").upper()
     price_digits = 2 if symbol == "BTC" else 3
@@ -220,7 +219,7 @@ def detailed_message(row: pd.Series) -> str:
         f"Payload: `{val(row, 'payload_id')}`",
         f"Pair: `{val(row, 'pair_name')}`  Slice: `{val(row, 'selected_slice')}`",
         f"Rank: `{val(row, 'candidate_rank')}`",
-        f"Entry time: `{entry_time_short(row)}`",
+        f"MT5 entry time: `{entry_time_short(row)}`",
         f"Entry: `{fnum(row, 'entry_price', price_digits)}`  SL: `{fnum(row, 'sl_price', price_digits)}`  TP: `{fnum(row, 'tp_price', price_digits)}`  RR: `{fnum(row, 'rr', 2)}`",
         f"Granville: `{val(row, 'context_granville_type')}`",
         f"EMA: context=`{val(row, 'context_ema_order')}` / base=`{val(row, 'base_ema_order')}`",
