@@ -2,21 +2,26 @@
 # -*- coding: utf-8 -*-
 """Send MT5 orders from Mochipoyo order payloads with strong guards.
 
-Default behavior is dry-run only.  mt5.order_send is called only when --send is
+Default behavior is dry-run only. mt5.order_send is called only when --send is
 explicitly provided.
 
 Safety guards:
 - max one order by default
 - duplicate order_key prevention via order ledger
-- existing symbol position guard by default
+- position policy guard by default
 - optional expected account login guard
 - optional require demo-account guard based on account name/server/company heuristics
 - local payload validation
 - mt5.order_check must pass before order_send
 - writes detailed CSV/JSON reports
 
-This script is intended for the first DEMO account order test, not production
-fully automated trading.
+Position policies:
+- block_any: block if any open position exists for the broker symbol
+- allow_same_direction: allow additional same-direction positions up to max count/lot; block opposite direction
+- allow_any_until_max: allow any direction up to max count/lot
+
+This script is intended for DEMO account order tests first, not production fully
+automated trading.
 """
 from __future__ import annotations
 
@@ -37,6 +42,10 @@ except Exception as e:  # pragma: no cover
     MT5_IMPORT_ERROR = repr(e)
 else:
     MT5_IMPORT_ERROR = ""
+
+POSITION_POLICY_BLOCK_ANY = "block_any"
+POSITION_POLICY_ALLOW_SAME_DIRECTION = "allow_same_direction"
+POSITION_POLICY_ALLOW_ANY_UNTIL_MAX = "allow_any_until_max"
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -155,10 +164,7 @@ def is_order_send_success(send_d: dict[str, Any]) -> bool:
 
 
 def account_looks_demo(account_info: dict[str, Any]) -> bool:
-    haystack = " ".join(
-        str(account_info.get(k, ""))
-        for k in ["name", "server", "company"]
-    ).lower()
+    haystack = " ".join(str(account_info.get(k, "")) for k in ["name", "server", "company"]).lower()
     return "demo" in haystack
 
 
@@ -271,15 +277,106 @@ def get_symbol_positions(symbol: str) -> list[dict[str, Any]]:
     return asdict_list(positions)
 
 
+def mt5_position_direction(position: dict[str, Any]) -> str:
+    """Convert MT5 position type to BUY/SELL string.
+
+    In MT5, POSITION_TYPE_BUY is 0 and POSITION_TYPE_SELL is 1.
+    """
+    try:
+        t = int(position.get("type"))
+    except Exception:
+        return "UNKNOWN"
+    if mt5 is not None:
+        if t == int(mt5.POSITION_TYPE_BUY):
+            return "BUY"
+        if t == int(mt5.POSITION_TYPE_SELL):
+            return "SELL"
+    if t == 0:
+        return "BUY"
+    if t == 1:
+        return "SELL"
+    return "UNKNOWN"
+
+
+def position_volume(position: dict[str, Any]) -> float:
+    try:
+        return float(position.get("volume", 0.0) or 0.0)
+    except Exception:
+        return 0.0
+
+
 def summarize_positions(positions: list[dict[str, Any]]) -> str:
     if not positions:
         return ""
     parts: list[str] = []
     for p in positions:
         parts.append(
-            f"ticket={p.get('ticket')},symbol={p.get('symbol')},type={p.get('type')},volume={p.get('volume')},price_open={p.get('price_open')},sl={p.get('sl')},tp={p.get('tp')}"
+            "ticket={ticket},symbol={symbol},direction={direction},type={type},volume={volume},price_open={price_open},sl={sl},tp={tp}".format(
+                ticket=p.get("ticket"),
+                symbol=p.get("symbol"),
+                direction=mt5_position_direction(p),
+                type=p.get("type"),
+                volume=p.get("volume"),
+                price_open=p.get("price_open"),
+                sl=p.get("sl"),
+                tp=p.get("tp"),
+            )
         )
     return " | ".join(parts)
+
+
+def position_policy_errors(
+    *,
+    policy: str,
+    requested_direction: str,
+    requested_lot: float,
+    positions: list[dict[str, Any]],
+    max_symbol_positions: int,
+    max_symbol_lot: float,
+) -> list[str]:
+    errors: list[str] = []
+    count = len(positions)
+    existing_lot = sum(position_volume(p) for p in positions)
+    after_count = count + 1
+    after_lot = existing_lot + float(requested_lot)
+    directions = [mt5_position_direction(p) for p in positions]
+    opposite = [d for d in directions if d in {"BUY", "SELL"} and d != requested_direction.upper()]
+
+    if policy == POSITION_POLICY_BLOCK_ANY:
+        if count > 0:
+            errors.append(
+                f"position policy block_any blocked order: existing_positions={count}; existing_lot={existing_lot:.2f}"
+            )
+        return errors
+
+    if policy == POSITION_POLICY_ALLOW_SAME_DIRECTION:
+        if opposite:
+            errors.append(
+                f"position policy allow_same_direction blocked opposite position: requested={requested_direction}; existing_directions={directions}"
+            )
+        if after_count > int(max_symbol_positions):
+            errors.append(
+                f"position count limit exceeded: after_count={after_count}; max_symbol_positions={int(max_symbol_positions)}"
+            )
+        if after_lot > float(max_symbol_lot) + 1e-9:
+            errors.append(
+                f"position lot limit exceeded: after_lot={after_lot:.2f}; max_symbol_lot={float(max_symbol_lot):.2f}"
+            )
+        return errors
+
+    if policy == POSITION_POLICY_ALLOW_ANY_UNTIL_MAX:
+        if after_count > int(max_symbol_positions):
+            errors.append(
+                f"position count limit exceeded: after_count={after_count}; max_symbol_positions={int(max_symbol_positions)}"
+            )
+        if after_lot > float(max_symbol_lot) + 1e-9:
+            errors.append(
+                f"position lot limit exceeded: after_lot={after_lot:.2f}; max_symbol_lot={float(max_symbol_lot):.2f}"
+            )
+        return errors
+
+    errors.append(f"unknown position policy: {policy}")
+    return errors
 
 
 def parse_args() -> argparse.Namespace:
@@ -294,13 +391,28 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--expected-login", type=int, default=None)
     p.add_argument("--require-demo-account", action="store_true", help="Refuse --send unless account name/server/company contains 'demo'.")
     p.add_argument("--allow-live-account", action="store_true", help="Override --require-demo-account guard. Not recommended.")
-    p.add_argument("--block-if-symbol-position-exists", action=argparse.BooleanOptionalAction, default=True, help="Block new orders when an open position already exists for the broker symbol. Default: true.")
-    p.add_argument("--max-existing-symbol-positions", type=int, default=0, help="Maximum allowed existing open positions for the broker symbol before blocking. Default 0.")
+    p.add_argument(
+        "--position-policy",
+        choices=[POSITION_POLICY_BLOCK_ANY, POSITION_POLICY_ALLOW_SAME_DIRECTION, POSITION_POLICY_ALLOW_ANY_UNTIL_MAX],
+        default=POSITION_POLICY_BLOCK_ANY,
+        help="Open-position policy for the broker symbol. Default: block_any.",
+    )
+    p.add_argument("--max-symbol-positions", type=int, default=1, help="Max positions after the new order for allow_* policies. Default 1.")
+    p.add_argument("--max-symbol-lot", type=float, default=0.01, help="Max total symbol lot after the new order for allow_* policies. Default 0.01.")
+    p.add_argument("--block-if-symbol-position-exists", action=argparse.BooleanOptionalAction, default=None, help="Deprecated compatibility flag. If true, forces --position-policy block_any.")
+    p.add_argument("--max-existing-symbol-positions", type=int, default=None, help="Deprecated compatibility flag mapped to --max-symbol-positions for allow_* policies.")
     p.add_argument("--deviation", type=int, default=50)
     p.add_argument("--terminal-path", default=None)
     p.add_argument("--portable", action="store_true")
     p.add_argument("--sleep-seconds", type=float, default=0.5)
-    return p.parse_args()
+    args = p.parse_args()
+    if args.block_if_symbol_position_exists is True:
+        args.position_policy = POSITION_POLICY_BLOCK_ANY
+    elif args.block_if_symbol_position_exists is False and args.position_policy == POSITION_POLICY_BLOCK_ANY:
+        args.position_policy = POSITION_POLICY_ALLOW_ANY_UNTIL_MAX
+    if args.max_existing_symbol_positions is not None:
+        args.max_symbol_positions = int(args.max_existing_symbol_positions) + 1
+    return args
 
 
 def main() -> int:
@@ -317,8 +429,9 @@ def main() -> int:
         "mt5_import_ok": mt5 is not None,
         "mt5_import_error": MT5_IMPORT_ERROR,
         "initialize_ok": False,
-        "block_if_symbol_position_exists": bool(args.block_if_symbol_position_exists),
-        "max_existing_symbol_positions": int(args.max_existing_symbol_positions),
+        "position_policy": args.position_policy,
+        "max_symbol_positions": int(args.max_symbol_positions),
+        "max_symbol_lot": float(args.max_symbol_lot),
     }
 
     if mt5 is None:
@@ -386,6 +499,9 @@ def main() -> int:
                 "direction": direction,
                 "lot": lot,
                 "send_requested": bool(args.send),
+                "position_policy": args.position_policy,
+                "max_symbol_positions": int(args.max_symbol_positions),
+                "max_symbol_lot": float(args.max_symbol_lot),
                 "order_send_called": False,
                 "order_send_ok": False,
                 "order_status": "PENDING",
@@ -409,16 +525,27 @@ def main() -> int:
                 result["last_error_after_symbol_select"] = str(mt5.last_error())
 
             symbol_positions = get_symbol_positions(broker_symbol)
+            existing_lot = sum(position_volume(p) for p in symbol_positions)
+            existing_directions = [mt5_position_direction(p) for p in symbol_positions]
             result["existing_symbol_positions"] = len(symbol_positions)
+            result["existing_symbol_lot"] = existing_lot
+            result["existing_symbol_directions"] = ",".join(existing_directions)
             result["existing_symbol_positions_detail"] = summarize_positions(symbol_positions)
-            if args.block_if_symbol_position_exists and len(symbol_positions) > int(args.max_existing_symbol_positions):
-                errors.append(
-                    f"existing position guard blocked order: symbol={broker_symbol}; existing_positions={len(symbol_positions)}; max_allowed={int(args.max_existing_symbol_positions)}"
+            if lot is not None:
+                policy_errors = position_policy_errors(
+                    policy=args.position_policy,
+                    requested_direction=direction,
+                    requested_lot=lot,
+                    positions=symbol_positions,
+                    max_symbol_positions=int(args.max_symbol_positions),
+                    max_symbol_lot=float(args.max_symbol_lot),
                 )
-                result["order_status"] = "BLOCKED_EXISTING_SYMBOL_POSITION"
-                result["validation_errors"] = "; ".join(errors)
-                rows.append(result)
-                continue
+                if policy_errors:
+                    errors.extend(policy_errors)
+                    result["order_status"] = "BLOCKED_POSITION_POLICY"
+                    result["validation_errors"] = "; ".join(errors)
+                    rows.append(result)
+                    continue
 
             info = asdict_obj(mt5.symbol_info(broker_symbol))
             tick = asdict_obj(mt5.symbol_info_tick(broker_symbol))
@@ -519,7 +646,9 @@ def main() -> int:
                 "sl": sl,
                 "tp": tp,
                 "magic": magic,
+                "position_policy": args.position_policy,
                 "existing_symbol_positions_before_send": len(symbol_positions),
+                "existing_symbol_lot_before_send": existing_lot,
                 "order_status": result["order_status"],
                 "order_send_ok": result["order_send_ok"],
                 "order_send_retcode": result.get("order_send_retcode"),
@@ -539,7 +668,8 @@ def main() -> int:
             "rows_out": int(len(out)),
             "dry_run_check_ok_rows": int((out.get("order_status", pd.Series(dtype=str)) == "DRY_RUN_ORDER_CHECK_OK").sum()) if not out.empty else 0,
             "sent_rows": int((out.get("order_status", pd.Series(dtype=str)) == "SENT").sum()) if not out.empty else 0,
-            "blocked_existing_symbol_position_rows": int((out.get("order_status", pd.Series(dtype=str)) == "BLOCKED_EXISTING_SYMBOL_POSITION").sum()) if not out.empty else 0,
+            "blocked_position_policy_rows": int((out.get("order_status", pd.Series(dtype=str)) == "BLOCKED_POSITION_POLICY").sum()) if not out.empty else 0,
+            "blocked_existing_symbol_position_rows": int((out.get("order_status", pd.Series(dtype=str)).isin(["BLOCKED_EXISTING_SYMBOL_POSITION", "BLOCKED_POSITION_POLICY"])).sum()) if not out.empty else 0,
             "error_rows": int(out["order_status"].astype(str).str.startswith(("ERROR", "BLOCKED")).sum()) if "order_status" in out.columns and not out.empty else 0,
             "results": rows,
         })
@@ -555,12 +685,13 @@ def main() -> int:
         print(f"account_name: {account_info.get('name')}")
         print(f"terminal_trade_allowed: {terminal_info.get('trade_allowed')}")
         print(f"account_trade_allowed: {account_info.get('trade_allowed')}")
-        print(f"block_if_symbol_position_exists: {args.block_if_symbol_position_exists}")
-        print(f"max_existing_symbol_positions: {args.max_existing_symbol_positions}")
+        print(f"position_policy: {args.position_policy}")
+        print(f"max_symbol_positions: {args.max_symbol_positions}")
+        print(f"max_symbol_lot: {args.max_symbol_lot}")
         print(f"order_send_called_count: {report['order_send_called_count']}")
         print(f"dry_run_check_ok_rows: {report['dry_run_check_ok_rows']}")
         print(f"sent_rows: {report['sent_rows']}")
-        print(f"blocked_existing_symbol_position_rows: {report['blocked_existing_symbol_position_rows']}")
+        print(f"blocked_position_policy_rows: {report['blocked_position_policy_rows']}")
         print(f"error_rows: {report['error_rows']}")
         cols = [
             "row_index",
@@ -569,6 +700,8 @@ def main() -> int:
             "direction",
             "lot",
             "existing_symbol_positions",
+            "existing_symbol_lot",
+            "existing_symbol_directions",
             "current_execution_price",
             "sl_price",
             "tp_price",
