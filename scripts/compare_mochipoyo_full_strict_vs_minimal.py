@@ -3,8 +3,7 @@
 """Compare Mochipoyo full strict scan output with minimal scan output.
 
 This script normalizes existing full strict and minimal candidate CSVs, optionally
-filters by pair, optionally aligns the minimal side to the full side's
-signal_close_time range, and writes comparison CSVs.
+filters by pair, optionally aligns time ranges, and writes comparison CSVs.
 
 Readiness statuses:
 - PLACEHOLDER_NO_MINIMAL_CSV: full side normalized, but no minimal side supplied.
@@ -147,45 +146,91 @@ def apply_lookback(df: pd.DataFrame, lookback_candidates: int) -> pd.DataFrame:
     return work.reset_index(drop=True)
 
 
-def align_minimal_to_full_time_range(full_df: pd.DataFrame, minimal_df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Filter minimal rows to full_df's signal_close_time min/max range."""
+def _time_range(df: pd.DataFrame) -> tuple[pd.Timestamp | None, pd.Timestamp | None]:
+    if df.empty or "signal_close_time" not in df.columns:
+        return None, None
+    times = pd.to_datetime(df["signal_close_time"], errors="coerce").dropna()
+    if times.empty:
+        return None, None
+    return pd.Timestamp(times.min()), pd.Timestamp(times.max())
+
+
+def _filter_time_range(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    if df.empty or "signal_close_time" not in df.columns:
+        return df.copy()
+    times = pd.to_datetime(df["signal_close_time"], errors="coerce")
+    return df.loc[times.between(start, end, inclusive="both")].copy().reset_index(drop=True)
+
+
+def apply_time_alignment(
+    full_df: pd.DataFrame,
+    minimal_df: pd.DataFrame,
+    *,
+    align_minimal_to_full: bool,
+    align_both_to_overlap: bool,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Apply requested time alignment and return updated frames plus summary info."""
     info: dict[str, Any] = {
-        "alignment_enabled": True,
-        "alignment_status": "NOT_APPLIED",
+        "alignment_enabled": bool(align_minimal_to_full or align_both_to_overlap),
+        "alignment_mode": "DISABLED",
+        "alignment_status": "DISABLED",
         "alignment_full_min_signal_close_time": "",
         "alignment_full_max_signal_close_time": "",
+        "alignment_minimal_min_signal_close_time": "",
+        "alignment_minimal_max_signal_close_time": "",
+        "alignment_start_signal_close_time": "",
+        "alignment_end_signal_close_time": "",
+        "alignment_full_rows_before": int(len(full_df)),
+        "alignment_full_rows_after": int(len(full_df)),
         "alignment_minimal_rows_before": int(len(minimal_df)),
         "alignment_minimal_rows_after": int(len(minimal_df)),
     }
+    if not (align_minimal_to_full or align_both_to_overlap):
+        return full_df.copy(), minimal_df.copy(), info
     if full_df.empty or minimal_df.empty:
-        info["alignment_status"] = "EMPTY_SIDE"
-        return minimal_df.copy(), info
-    if "signal_close_time" not in full_df.columns or "signal_close_time" not in minimal_df.columns:
-        info["alignment_status"] = "MISSING_SIGNAL_CLOSE_TIME"
-        return minimal_df.copy(), info
+        info.update({"alignment_mode": "OVERLAP" if align_both_to_overlap else "MINIMAL_TO_FULL", "alignment_status": "EMPTY_SIDE"})
+        return full_df.copy(), minimal_df.copy(), info
 
-    full_times = pd.to_datetime(full_df["signal_close_time"], errors="coerce").dropna()
-    if full_times.empty:
-        info["alignment_status"] = "FULL_TIME_RANGE_EMPTY"
-        return minimal_df.copy(), info
+    f_start, f_end = _time_range(full_df)
+    m_start, m_end = _time_range(minimal_df)
+    if f_start is None or f_end is None or m_start is None or m_end is None:
+        info.update({"alignment_mode": "OVERLAP" if align_both_to_overlap else "MINIMAL_TO_FULL", "alignment_status": "TIME_RANGE_EMPTY"})
+        return full_df.copy(), minimal_df.copy(), info
 
-    start = full_times.min()
-    end = full_times.max()
-    minimal = minimal_df.copy()
-    minimal_times = pd.to_datetime(minimal["signal_close_time"], errors="coerce")
-    mask = minimal_times.between(start, end, inclusive="both")
-    aligned = minimal.loc[mask].copy().reset_index(drop=True)
+    info.update(
+        {
+            "alignment_full_min_signal_close_time": f_start.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_full_max_signal_close_time": f_end.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_minimal_min_signal_close_time": m_start.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_minimal_max_signal_close_time": m_end.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+    )
+
+    if align_both_to_overlap:
+        start = max(f_start, m_start)
+        end = min(f_end, m_end)
+        info["alignment_mode"] = "OVERLAP"
+        if start > end:
+            info["alignment_status"] = "NO_OVERLAP"
+            return full_df.iloc[0:0].copy(), minimal_df.iloc[0:0].copy(), info
+        out_full = _filter_time_range(full_df, start, end)
+        out_minimal = _filter_time_range(minimal_df, start, end)
+    else:
+        start, end = f_start, f_end
+        info["alignment_mode"] = "MINIMAL_TO_FULL"
+        out_full = full_df.copy()
+        out_minimal = _filter_time_range(minimal_df, start, end)
 
     info.update(
         {
             "alignment_status": "APPLIED",
-            "alignment_full_min_signal_close_time": start.strftime("%Y-%m-%d %H:%M:%S"),
-            "alignment_full_max_signal_close_time": end.strftime("%Y-%m-%d %H:%M:%S"),
-            "alignment_minimal_rows_before": int(len(minimal_df)),
-            "alignment_minimal_rows_after": int(len(aligned)),
+            "alignment_start_signal_close_time": start.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_end_signal_close_time": end.strftime("%Y-%m-%d %H:%M:%S"),
+            "alignment_full_rows_after": int(len(out_full)),
+            "alignment_minimal_rows_after": int(len(out_minimal)),
         }
     )
-    return aligned, info
+    return out_full.reset_index(drop=True), out_minimal.reset_index(drop=True), info
 
 
 def logical_key_frame(df: pd.DataFrame) -> pd.Series:
@@ -211,50 +256,28 @@ def _non_empty_notna(df: pd.DataFrame, col: str) -> bool:
 
 def risk_readiness(df: pd.DataFrame, *, require_btc_spread: bool = True) -> dict[str, bool]:
     if df.empty:
-        return {
-            "risk_ready": False,
-            "risk_price_ready": False,
-            "btc_spread_required": False,
-            "btc_spread_ready": False,
-            "comparison_ready": False,
-        }
+        return {"risk_ready": False, "risk_price_ready": False, "btc_spread_required": False, "btc_spread_ready": False, "comparison_ready": False}
     risk_ready = _non_empty_notna(df, "risk_status")
     risk_price_ready = _non_empty_notna(df, "sl_price") and _non_empty_notna(df, "tp_price")
     has_btc = bool("symbol" in df.columns and df["symbol"].astype("string").str.upper().eq("BTC").any())
     btc_spread_required = bool(require_btc_spread and has_btc)
-    btc_spread_cols = [
-        "current_spread_price",
-        "mode_spread_price",
-        "effective_spread_price",
-        "spread_to_sl_ratio",
-        "effective_rr_after_spread",
-        "net_sl_after_spread_price",
-        "net_tp_after_spread_price",
-    ]
+    btc_spread_cols = ["current_spread_price", "mode_spread_price", "effective_spread_price", "spread_to_sl_ratio", "effective_rr_after_spread", "net_sl_after_spread_price", "net_tp_after_spread_price"]
+    btc_spread_ready = True
     if btc_spread_required:
         btc_df = df[df["symbol"].astype("string").str.upper() == "BTC"].copy()
         btc_spread_ready = all(_non_empty_notna(btc_df, col) for col in btc_spread_cols)
-    else:
-        btc_spread_ready = True
-    comparison_ready = bool(risk_ready and risk_price_ready and btc_spread_ready)
     return {
         "risk_ready": bool(risk_ready),
         "risk_price_ready": bool(risk_price_ready),
         "btc_spread_required": bool(btc_spread_required),
         "btc_spread_ready": bool(btc_spread_ready),
-        "comparison_ready": bool(comparison_ready),
+        "comparison_ready": bool(risk_ready and risk_price_ready and btc_spread_ready),
     }
 
 
 def combined_readiness(full_df: pd.DataFrame, minimal_df: pd.DataFrame, *, has_minimal: bool) -> dict[str, bool]:
     full_flags = risk_readiness(full_df)
-    minimal_flags = risk_readiness(minimal_df) if has_minimal else {
-        "risk_ready": False,
-        "risk_price_ready": False,
-        "btc_spread_required": False,
-        "btc_spread_ready": False,
-        "comparison_ready": False,
-    }
+    minimal_flags = risk_readiness(minimal_df) if has_minimal else {"risk_ready": False, "risk_price_ready": False, "btc_spread_required": False, "btc_spread_ready": False, "comparison_ready": False}
     return {
         "full_risk_ready": full_flags["risk_ready"],
         "full_risk_price_ready": full_flags["risk_price_ready"],
@@ -281,20 +304,7 @@ def _same_value(left: Any, right: Any, col: str) -> bool:
         if pd.isna(ldt) and pd.isna(rdt):
             return True
         return bool(ldt == rdt)
-    if col in {
-        "sl_price",
-        "tp_price",
-        "risk_distance",
-        "reward_distance",
-        "rr",
-        "current_spread_price",
-        "mode_spread_price",
-        "effective_spread_price",
-        "spread_to_sl_ratio",
-        "effective_rr_after_spread",
-        "net_sl_after_spread_price",
-        "net_tp_after_spread_price",
-    }:
+    if col in {"sl_price", "tp_price", "risk_distance", "reward_distance", "rr", "current_spread_price", "mode_spread_price", "effective_spread_price", "spread_to_sl_ratio", "effective_rr_after_spread", "net_sl_after_spread_price", "net_tp_after_spread_price"}:
         lf = pd.to_numeric(pd.Series([left]), errors="coerce").iloc[0]
         rf = pd.to_numeric(pd.Series([right]), errors="coerce").iloc[0]
         if pd.isna(lf) and pd.isna(rf):
@@ -330,12 +340,7 @@ def compare_payload_keys_by_logical_key(full_df: pd.DataFrame, minimal_df: pd.Da
     minimal = minimal_df.copy()
     full["logical_key"] = logical_key_frame(full)
     minimal["logical_key"] = logical_key_frame(minimal)
-    merged = full[["logical_key", "payload_key"]].merge(
-        minimal[["logical_key", "payload_key"]],
-        on="logical_key",
-        how="inner",
-        suffixes=("_full", "_minimal"),
-    )
+    merged = full[["logical_key", "payload_key"]].merge(minimal[["logical_key", "payload_key"]], on="logical_key", how="inner", suffixes=("_full", "_minimal"))
     if merged.empty:
         return pd.DataFrame(columns=["logical_key", "payload_key_full", "payload_key_minimal"])
     return merged[merged["payload_key_full"].astype(str) != merged["payload_key_minimal"].astype(str)].copy()
@@ -348,19 +353,14 @@ def compare_full_vs_minimal(full_df: pd.DataFrame, minimal_df: pd.DataFrame) -> 
         full["payload_key"] = pd.NA
     if "payload_key" not in minimal.columns:
         minimal["payload_key"] = pd.NA
-
     full_valid = full[full["payload_key"].notna()].copy()
     minimal_valid = minimal[minimal["payload_key"].notna()].copy()
-
     matched_keys = set(full_valid["payload_key"].astype(str)).intersection(set(minimal_valid["payload_key"].astype(str)))
-    full_only = full_valid[~full_valid["payload_key"].astype(str).isin(matched_keys)].copy()
-    minimal_only = minimal_valid[~minimal_valid["payload_key"].astype(str).isin(matched_keys)].copy()
-
     matched = full_valid.merge(minimal_valid, on="payload_key", how="inner", suffixes=("__full", "__minimal"))
     return {
         "matched": matched,
-        "full_only": full_only,
-        "minimal_only": minimal_only,
+        "full_only": full_valid[~full_valid["payload_key"].astype(str).isin(matched_keys)].copy(),
+        "minimal_only": minimal_valid[~minimal_valid["payload_key"].astype(str).isin(matched_keys)].copy(),
         "value_diff": compare_value_diffs(matched),
         "payload_key_diff": compare_payload_keys_by_logical_key(full_valid, minimal_valid),
     }
@@ -415,6 +415,7 @@ def build_summary(
         "minimal_csv": str(args.minimal_csv) if args.minimal_csv else "",
         "pair_name_filter": str(args.pair_name or ""),
         "align_minimal_to_full_time_range": bool(args.align_minimal_to_full_time_range),
+        "align_both_to_overlap_time_range": bool(args.align_both_to_overlap_time_range),
         "as_of_time": str(args.as_of_time or ""),
         "lookback_candidates": int(args.lookback_candidates),
         "allowed_slices_count": int(len(allowed_slices)),
@@ -436,13 +437,14 @@ def build_summary(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Normalize and compare Mochipoyo full strict vs minimal candidate CSVs.")
-    parser.add_argument("--full-csv", required=True, help="Existing full strict output CSV, usually payload/fixed candidate CSV.")
-    parser.add_argument("--minimal-csv", default=None, help="Existing minimal output CSV. Optional until minimal scanner exists.")
-    parser.add_argument("--allowed-slices-json", default=None, help="Optional JSON list of allowed slices. Defaults to built-in spec slices.")
-    parser.add_argument("--pair-name", default=None, help="Optional pair_name filter, e.g. GOLD_H4_M5_SCALP.")
+    parser.add_argument("--full-csv", required=True)
+    parser.add_argument("--minimal-csv", default=None)
+    parser.add_argument("--allowed-slices-json", default=None)
+    parser.add_argument("--pair-name", default=None)
     parser.add_argument("--align-minimal-to-full-time-range", action="store_true", help="Filter minimal rows to full side's signal_close_time min/max range.")
-    parser.add_argument("--out-dir", required=True, help="Directory for comparison outputs.")
-    parser.add_argument("--as-of-time", default=None, help="Reserved for future scanner-run mode. Not used for CSV-only mode yet.")
+    parser.add_argument("--align-both-to-overlap-time-range", action="store_true", help="Filter both full and minimal rows to their overlapping signal_close_time range.")
+    parser.add_argument("--out-dir", required=True)
+    parser.add_argument("--as-of-time", default=None)
     parser.add_argument("--lookback-candidates", type=int, default=50)
     return parser.parse_args()
 
@@ -453,10 +455,17 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     errors: list[dict[str, Any]] = []
     alignment_info: dict[str, Any] = {
-        "alignment_enabled": bool(args.align_minimal_to_full_time_range),
+        "alignment_enabled": bool(args.align_minimal_to_full_time_range or args.align_both_to_overlap_time_range),
+        "alignment_mode": "DISABLED",
         "alignment_status": "DISABLED",
         "alignment_full_min_signal_close_time": "",
         "alignment_full_max_signal_close_time": "",
+        "alignment_minimal_min_signal_close_time": "",
+        "alignment_minimal_max_signal_close_time": "",
+        "alignment_start_signal_close_time": "",
+        "alignment_end_signal_close_time": "",
+        "alignment_full_rows_before": 0,
+        "alignment_full_rows_after": 0,
         "alignment_minimal_rows_before": 0,
         "alignment_minimal_rows_after": 0,
     }
@@ -480,8 +489,12 @@ def main() -> int:
     if not errors and args.minimal_csv:
         try:
             minimal_df = normalize_minimal_csv(args.minimal_csv, allowed_slices, args.lookback_candidates, args.pair_name)
-            if args.align_minimal_to_full_time_range:
-                minimal_df, alignment_info = align_minimal_to_full_time_range(full_df, minimal_df)
+            full_df, minimal_df, alignment_info = apply_time_alignment(
+                full_df,
+                minimal_df,
+                align_minimal_to_full=bool(args.align_minimal_to_full_time_range),
+                align_both_to_overlap=bool(args.align_both_to_overlap_time_range),
+            )
         except Exception as exc:
             errors.append({"stage": "normalize_minimal_csv", "error": str(exc), "path": str(args.minimal_csv)})
 
@@ -490,7 +503,6 @@ def main() -> int:
 
     write_csv(full_df, out_dir / "comparison_full_filtered.csv")
     write_csv(minimal_df, out_dir / "comparison_minimal.csv")
-
     if comparison is None:
         write_csv(pd.DataFrame(), out_dir / "comparison_matched.csv")
         write_csv(pd.DataFrame(), out_dir / "comparison_full_only.csv")
@@ -506,18 +518,8 @@ def main() -> int:
 
     errors_df = pd.DataFrame(errors, columns=["stage", "error", "path"])
     write_csv(errors_df, out_dir / "comparison_errors.csv")
-
-    summary = build_summary(
-        args=args,
-        allowed_slices=allowed_slices,
-        full_df=full_df,
-        minimal_df=minimal_df,
-        comparison=comparison,
-        errors=errors,
-        alignment_info=alignment_info,
-    )
+    summary = build_summary(args=args, allowed_slices=allowed_slices, full_df=full_df, minimal_df=minimal_df, comparison=comparison, errors=errors, alignment_info=alignment_info)
     write_csv(summary, out_dir / "comparison_summary.csv")
-
     print(summary.to_string(index=False))
     print(f"out_dir: {out_dir}")
     return 1 if not summary.empty and str(summary.iloc[0]["status"]) == "ERROR" else 0
