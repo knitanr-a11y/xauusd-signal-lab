@@ -3,21 +3,17 @@
 """Aligned scheduler wrapper for GOLD minimal live loop.
 
 This wrapper reuses the validated stages from
-scripts/run_mochipoyo_gold_minimal_live_loop_dry.py, but starts each
-iteration at a fixed second of every minute.
+scripts/run_mochipoyo_gold_minimal_live_loop_dry.py, but starts each iteration
+at a fixed second of every minute.
 
-Primary use:
-  MT5 ExportOhlcToCsv writes confirmed CSVs at second 00.
-  This wrapper can start Python reads at second 02, giving the EA roughly
-  1-2 seconds to finish FileWrite/FileFlush/FileClose before Python reads.
-
-Safety additions:
-- Reuses the same Discord / order payload / MT5 auto-trade guards as the
-  existing loop wrapper.
-- Adds a lock file under --out-dir by default to avoid two live loops writing
-  the same summary/ledger/out-dir at the same time.
-- Keeps --forever explicit; without --forever, original --iterations behavior
-  is preserved.
+Safety rules:
+- MT5 ExportOhlcToCsv writes confirmed CSVs at second 00.
+- This wrapper can start Python reads at second 02.
+- A lock file prevents two live loops from using the same out-dir.
+- Auto-trade/order-payload stages are allowed only after the one-shot live flow
+  succeeds. If the one-shot flow fails because of scan errors, Discord errors,
+  partial-send protection, or a missing summary, order payload and MT5
+  auto-trade are skipped.
 """
 from __future__ import annotations
 
@@ -38,11 +34,7 @@ import run_mochipoyo_gold_minimal_live_loop_dry as base  # noqa: E402
 
 
 class LoopLock:
-    """Small cross-process lock using O_EXCL file creation.
-
-    This is intentionally simple and Windows-friendly. If the previous process
-    crashed, remove the lock file manually after confirming no loop is running.
-    """
+    """Small cross-process lock using O_EXCL file creation."""
 
     def __init__(self, path: Path, enabled: bool = True) -> None:
         self.path = path
@@ -83,7 +75,7 @@ class LoopLock:
 
 
 def split_aligned_args(argv: list[str]) -> argparse.Namespace:
-    """Parse only new aligned-loop args, then delegate the rest to base.parse_args()."""
+    """Parse only aligned-loop args, then delegate the rest to base.parse_args()."""
     align_parser = argparse.ArgumentParser(add_help=False)
     align_parser.add_argument(
         "--align-to-second",
@@ -103,7 +95,6 @@ def split_aligned_args(argv: list[str]) -> argparse.Namespace:
     )
 
     aligned_args, remaining = align_parser.parse_known_args(argv)
-
     old_argv = sys.argv[:]
     try:
         sys.argv = [old_argv[0]] + remaining
@@ -125,7 +116,6 @@ def seconds_until_next_aligned_second(target_second: int) -> float:
     current = float(now.second) + float(now.microsecond) / 1_000_000.0
     target = float(target_second)
     wait = (target - current) % 60.0
-    # If we are effectively already on the target second, start immediately.
     if wait < 0.005:
         return 0.0
     return wait
@@ -138,6 +128,36 @@ def sleep_before_iteration(args: argparse.Namespace) -> float:
     if wait > 0:
         time.sleep(wait)
     return wait
+
+
+def skipped_order_event(reason: str) -> dict[str, Any]:
+    return {
+        "order_payload_status": reason,
+        "order_payload_returncode": 0,
+        "order_payload_rows": 0,
+        "valid_order_payloads": 0,
+    }
+
+
+def skipped_auto_trade_event(reason: str, send_enabled: bool) -> dict[str, Any]:
+    return {
+        "auto_trade_status": reason,
+        "auto_trade_returncode": 0,
+        "auto_trade_send_enabled": bool(send_enabled),
+        "auto_trade_rows": 0,
+        "auto_trade_dry_run_check_ok_rows": 0,
+        "auto_trade_blocked_position_policy_rows": 0,
+        "auto_trade_order_send_called_count": 0,
+        "auto_trade_sent_rows": 0,
+    }
+
+
+def once_flow_succeeded(proc_returncode: int, once_row: dict[str, Any], once_summary_empty: bool) -> bool:
+    if once_summary_empty:
+        return False
+    if int(proc_returncode) != 0:
+        return False
+    return bool(once_row.get("success", False))
 
 
 def main() -> int:
@@ -153,10 +173,7 @@ def main() -> int:
     loop_summary_csv = out_dir / f"gold_minimal_live_loop_{mode}_summary.csv"
     loop_events_csv = out_dir / f"gold_minimal_live_loop_{mode}_events.csv"
 
-    if args.forever:
-        max_iterations: int | None = None
-    else:
-        max_iterations = max(0, int(args.iterations))
+    max_iterations: int | None = None if args.forever else max(0, int(args.iterations))
 
     print("run_mochipoyo_gold_minimal_live_loop_aligned")
     print(f"out_dir: {out_dir}")
@@ -178,7 +195,7 @@ def main() -> int:
     if args.enable_auto_trade_dry_run:
         print("AUTO-TRADE DRY-RUN: MT5 order_check may run, but order_send is not called.")
     if args.enable_auto_trade_send:
-        print("WARNING: AUTO-TRADE SEND is enabled. MT5 order_send may be called after all sender guards pass.")
+        print("WARNING: AUTO-TRADE SEND is enabled. MT5 order_send may be called only after once flow succeeds.")
 
     iteration = 0
     exit_code = 0
@@ -191,6 +208,7 @@ def main() -> int:
                 iteration_dir = out_dir / f"iter_{iteration:04d}"
                 iteration_dir.mkdir(parents=True, exist_ok=True)
                 base.precreate_iteration_dirs(iteration_dir)
+
                 cmd = base.build_once_command(args, iteration, iteration_dir, run_id)
                 start = pd.Timestamp.now()
                 proc = base.subprocess.run(cmd, text=True, capture_output=True)
@@ -207,28 +225,43 @@ def main() -> int:
                 if not once_summary.empty:
                     once_row = once_summary.iloc[0].to_dict()
 
-                order_event = base.run_order_payload_stage(args, iteration_dir, once_row)
-                auto_trade_event = base.run_auto_trade_stage(args, iteration_dir, order_event)
+                once_ok = once_flow_succeeded(proc.returncode, once_row, once_summary.empty)
+                if once_ok:
+                    order_event = base.run_order_payload_stage(args, iteration_dir, once_row)
+                    auto_trade_event = base.run_auto_trade_stage(args, iteration_dir, order_event)
+                else:
+                    reason = "SKIPPED_ONCE_FAILED"
+                    order_event = skipped_order_event(reason)
+                    auto_trade_event = skipped_auto_trade_event(reason, bool(args.enable_auto_trade_send))
+                    print(
+                        "SAFETY: once flow failed; skipped order payload and auto-trade. "
+                        f"returncode={int(proc.returncode)}, once_success={bool(once_row.get('success', False))}, "
+                        f"discord_status={once_row.get('discord_status', 'UNKNOWN')}"
+                    )
+
+                base_event = {
+                    "loop_iteration": iteration,
+                    "run_id": run_id,
+                    "scheduled_align_second": args.align_to_second,
+                    "align_wait_sec": align_wait_sec,
+                    "started_at": start.strftime("%Y-%m-%d %H:%M:%S"),
+                    "finished_at": end.strftime("%Y-%m-%d %H:%M:%S"),
+                    "duration_sec": duration_sec,
+                    "returncode": int(proc.returncode),
+                }
 
                 if once_summary.empty:
                     event = {
-                        "loop_iteration": iteration,
-                        "run_id": run_id,
-                        "scheduled_align_second": args.align_to_second,
-                        "align_wait_sec": align_wait_sec,
-                        "started_at": start.strftime("%Y-%m-%d %H:%M:%S"),
-                        "finished_at": end.strftime("%Y-%m-%d %H:%M:%S"),
-                        "duration_sec": duration_sec,
-                        "returncode": int(proc.returncode),
+                        **base_event,
                         "summary_status": "MISSING_ONCE_SUMMARY",
-                        "success": False,
                         **order_event,
                         **auto_trade_event,
+                        "success": False,
                     }
                 else:
-                    row = once_row
                     combined_success = (
-                        bool(row.get("success", False))
+                        bool(once_row.get("success", False))
+                        and int(proc.returncode) == 0
                         and int(order_event.get("order_payload_returncode", 0)) == 0
                         and int(auto_trade_event.get("auto_trade_returncode", 0)) == 0
                     )
@@ -239,15 +272,9 @@ def main() -> int:
                             and int(auto_trade_event.get("auto_trade_sent_rows", 0)) == 0
                         )
                     event = {
-                        "loop_iteration": iteration,
-                        "scheduled_align_second": args.align_to_second,
-                        "align_wait_sec": align_wait_sec,
-                        "started_at": start.strftime("%Y-%m-%d %H:%M:%S"),
-                        "finished_at": end.strftime("%Y-%m-%d %H:%M:%S"),
-                        "duration_sec": duration_sec,
-                        "returncode": int(proc.returncode),
+                        **base_event,
                         "summary_status": "OK",
-                        **row,
+                        **once_row,
                         **order_event,
                         **auto_trade_event,
                         "success": combined_success,
@@ -284,7 +311,7 @@ def main() -> int:
                 print(pd.DataFrame([printable]).to_string(index=False))
 
                 has_error = (
-                    proc.returncode != 0
+                    int(proc.returncode) != 0
                     or int(order_event.get("order_payload_returncode", 0)) != 0
                     or int(auto_trade_event.get("auto_trade_returncode", 0)) != 0
                 )
@@ -294,8 +321,9 @@ def main() -> int:
                         or int(auto_trade_event.get("auto_trade_order_send_called_count", 0)) != 0
                         or int(auto_trade_event.get("auto_trade_sent_rows", 0)) != 0
                     )
+
                 if has_error:
-                    exit_code = int(proc.returncode) if proc.returncode != 0 else int(
+                    exit_code = int(proc.returncode) if int(proc.returncode) != 0 else int(
                         order_event.get("order_payload_returncode", 0)
                         or auto_trade_event.get("auto_trade_returncode", 1)
                     )
