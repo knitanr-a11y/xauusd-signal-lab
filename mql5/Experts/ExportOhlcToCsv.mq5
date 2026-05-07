@@ -3,7 +3,7 @@
 //|                         MT5 OHLC CSV Export EA for Python detector |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.32"
+#property version   "1.33"
 #property description "Export confirmed OHLC candles for GOLD#/BTCUSD# to CSV for Python detector."
 
 input string InpGoldSymbol = "GOLD#";
@@ -45,6 +45,7 @@ input bool   InpIncludeCurrentBar = false;
 input bool   InpForceSymbolSelect = true;
 input bool   InpWriteDebugLog = true;
 input bool   InpSkipUnchangedFiles = true;
+input bool   InpValidateAppendTarget = true;
 
 input string InpGoldM1File  = "goldsharp_m1.csv";
 input string InpGoldM5File  = "goldsharp_m5.csv";
@@ -93,6 +94,55 @@ int AppendFileFlags()
    if(InpUseCommonFolder)
       flags |= FILE_COMMON;
    return flags;
+}
+
+int CommonFileFlag()
+{
+   return InpUseCommonFolder ? FILE_COMMON : 0;
+}
+
+bool CsvFileHasValidHeader(const string filename)
+{
+   string path = BuildPath(filename);
+   ResetLastError();
+   if(!FileIsExist(path, CommonFileFlag()))
+      return false;
+
+   int flags = FILE_READ | FILE_CSV | FILE_ANSI;
+   if(InpUseCommonFolder)
+      flags |= FILE_COMMON;
+
+   int handle = FileOpen(path, flags, ',');
+   if(handle == INVALID_HANDLE)
+   {
+      DebugLog("Append target header check FileOpen failed: " + path + ", err=" + IntegerToString(GetLastError()));
+      return false;
+   }
+
+   if(FileIsEnding(handle))
+   {
+      FileClose(handle);
+      return false;
+   }
+
+   string h0 = FileReadString(handle);
+   string h1 = FileReadString(handle);
+   string h2 = FileReadString(handle);
+   string h3 = FileReadString(handle);
+   string h4 = FileReadString(handle);
+   string h5 = FileReadString(handle);
+   string h6 = FileReadString(handle);
+   string h7 = FileReadString(handle);
+   FileClose(handle);
+
+   return (h0 == "time"
+           && h1 == "open"
+           && h2 == "high"
+           && h3 == "low"
+           && h4 == "close"
+           && h5 == "tick_volume"
+           && h6 == "spread"
+           && h7 == "real_volume");
 }
 
 string TrimSlashes(const string value)
@@ -431,6 +481,9 @@ bool AppendNewBarsOne(const string symbol, const ENUM_TIMEFRAMES timeframe, cons
    if(idx < 0)
       return RewriteFullOne(symbol, timeframe, filename, bars_to_export, "no remembered last bar");
 
+   if(InpValidateAppendTarget && !CsvFileHasValidHeader(filename))
+      return RewriteFullOne(symbol, timeframe, filename, bars_to_export, "append target missing or header invalid");
+
    datetime last_exported_time = g_last_bar_time[idx];
    int lookback = MathMax(2, InpAppendLookbackBars);
    MqlRates rates[];
@@ -543,11 +596,12 @@ int OnInit()
    if(InpAppendLookbackBars < 2)
       return INIT_PARAMETERS_INCORRECT;
 
-   DebugLog("Initializing EA v1.32");
+   DebugLog("Initializing EA v1.33");
    DebugLog("GoldSymbol=" + InpGoldSymbol + ", BtcSymbol=" + InpBtcSymbol);
    DebugLog("OutputRoot=" + InpOutputRoot + ", UseCommonFolder=" + (InpUseCommonFolder ? "true" : "false"));
    DebugLog("IncludeCurrentBar=" + (InpIncludeCurrentBar ? "true" : "false"));
    DebugLog("SkipUnchangedFiles=" + (InpSkipUnchangedFiles ? "true" : "false"));
+   DebugLog("ValidateAppendTarget=" + (InpValidateAppendTarget ? "true" : "false"));
    DebugLog("Export TFs: M1=" + (InpExportM1 ? "true" : "false")
             + ", M5=" + (InpExportM5 ? "true" : "false")
             + ", M15=" + (InpExportM15 ? "true" : "false")
