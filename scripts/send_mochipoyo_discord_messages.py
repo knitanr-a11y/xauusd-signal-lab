@@ -10,6 +10,7 @@ Safety:
 - webhook URL from --webhook-url, environment variable, or local .env
 - no AI review
 - no order placement
+- transient Discord/webhook failures are retried before returning ERROR
 
 Console output is deliberately summary-only. Full Discord messages are written to
 UTF-8 preview files instead of being printed to Windows cmd.exe, which avoids
@@ -32,6 +33,7 @@ import pandas as pd
 from format_mochipoyo_discord_messages import format_row, val  # type: ignore
 
 DISCORD_LIMIT = 2000
+TRANSIENT_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -105,11 +107,6 @@ def load_dotenv_file(dotenv_path: Path) -> dict[str, str]:
 
 
 def load_local_dotenv() -> dict[str, str]:
-    """Load .env from current working directory, then repo root fallback.
-
-    This is intentionally tiny and dependency-free. Explicit --webhook-url and
-    already-set environment variables still take precedence over .env values.
-    """
     loaded: dict[str, str] = {}
     candidates = [Path.cwd() / ".env", Path(__file__).resolve().parents[1] / ".env"]
     seen: set[Path] = set()
@@ -184,12 +181,79 @@ def post_discord(webhook_url: str, content: str, username: str | None = None) ->
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             body = resp.read().decode("utf-8", errors="replace")
-            return {"ok": True, "status": int(resp.status), "body": body}
+            return {"ok": True, "status": int(resp.status), "body": body, "exception_type": None}
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")
-        return {"ok": False, "status": int(e.code), "body": body}
+        retry_after = None
+        try:
+            retry_after = e.headers.get("Retry-After")
+        except Exception:
+            retry_after = None
+        return {"ok": False, "status": int(e.code), "body": body, "retry_after": retry_after, "exception_type": "HTTPError"}
     except Exception as e:
-        return {"ok": False, "status": None, "body": repr(e)}
+        return {"ok": False, "status": None, "body": repr(e), "retry_after": None, "exception_type": type(e).__name__}
+
+
+def is_transient_discord_error(result: dict[str, Any]) -> bool:
+    if result.get("ok"):
+        return False
+    status = result.get("status")
+    if status is None:
+        return True
+    try:
+        return int(status) in TRANSIENT_STATUS_CODES
+    except Exception:
+        return True
+
+
+def retry_sleep_seconds(base_sleep: float, attempt_index: int, result: dict[str, Any]) -> float:
+    retry_after = result.get("retry_after")
+    if retry_after not in (None, ""):
+        try:
+            return max(0.0, float(retry_after))
+        except Exception:
+            pass
+    # attempt_index is 1-based. Keep this small enough for live use, but avoid
+    # hammering Discord during 503/504/429 windows.
+    return max(0.0, float(base_sleep)) * float(attempt_index)
+
+
+def post_discord_with_retries(
+    webhook_url: str,
+    content: str,
+    username: str | None,
+    *,
+    retry_count: int,
+    retry_sleep_sec: float,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    attempts: list[dict[str, Any]] = []
+    total_attempts = max(1, int(retry_count) + 1)
+    final_result: dict[str, Any] = {"ok": False, "status": None, "body": "not attempted"}
+
+    for attempt in range(1, total_attempts + 1):
+        result = post_discord(webhook_url, content, username=username)
+        final_result = result
+        attempts.append(
+            {
+                "attempt": attempt,
+                "ok": bool(result.get("ok")),
+                "status": result.get("status"),
+                "body": result.get("body"),
+                "exception_type": result.get("exception_type"),
+                "transient": is_transient_discord_error(result),
+            }
+        )
+        if result.get("ok"):
+            break
+        if attempt >= total_attempts:
+            break
+        if not is_transient_discord_error(result):
+            break
+        time.sleep(retry_sleep_seconds(retry_sleep_sec, attempt, result))
+
+    final_result = dict(final_result)
+    final_result["attempt_count"] = len(attempts)
+    return final_result, attempts
 
 
 def append_send_ledger(rows: list[dict[str, Any]], send_ledger_csv: Path) -> None:
@@ -233,6 +297,8 @@ def main() -> int:
     p.add_argument("--send", action="store_true", help="Actually send to Discord. Without this, dry-run only.")
     p.add_argument("--allow-duplicates", action="store_true", help="Allow sending payload_key already in send ledger.")
     p.add_argument("--sleep-seconds", type=float, default=1.0)
+    p.add_argument("--discord-retry-count", type=int, default=3, help="Retry transient Discord failures this many times after the first attempt.")
+    p.add_argument("--discord-retry-sleep-seconds", type=float, default=2.0, help="Base sleep seconds for transient Discord retries.")
     args = p.parse_args()
 
     load_local_dotenv()
@@ -267,6 +333,8 @@ def main() -> int:
             "send_status": "DRY_RUN" if not args.send else "PENDING",
             "discord_status_code": None,
             "discord_response": None,
+            "discord_attempt_count": 0,
+            "discord_attempts": [],
             "message": message,
         }
         if args.send and (args.allow_duplicates or not duplicate):
@@ -295,12 +363,25 @@ def main() -> int:
         for rec in send_rows:
             key = str(rec["payload_key"])
             parts = split_message(str(rec["message"]))
+            all_attempts: list[dict[str, Any]] = []
+            final_error_result: dict[str, Any] | None = None
             for part_i, part in enumerate(parts, start=1):
-                result = post_discord(webhook_url, part, username=args.username)
+                result, attempts = post_discord_with_retries(
+                    webhook_url,
+                    part,
+                    username=args.username,
+                    retry_count=int(args.discord_retry_count),
+                    retry_sleep_sec=float(args.discord_retry_sleep_seconds),
+                )
+                for attempt in attempts:
+                    all_attempts.append({"part": part_i, **attempt})
                 if not result.get("ok"):
+                    final_error_result = result
                     rec_by_key[key]["send_status"] = "ERROR_DISCORD_POST"
                     rec_by_key[key]["discord_status_code"] = result.get("status")
                     rec_by_key[key]["discord_response"] = result.get("body")
+                    rec_by_key[key]["discord_attempt_count"] = len(all_attempts)
+                    rec_by_key[key]["discord_attempts"] = all_attempts
                     break
                 if part_i < len(parts):
                     time.sleep(args.sleep_seconds)
@@ -309,6 +390,8 @@ def main() -> int:
                 rec_by_key[key]["send_status"] = "SENT"
                 rec_by_key[key]["discord_status_code"] = 204
                 rec_by_key[key]["discord_response"] = ""
+                rec_by_key[key]["discord_attempt_count"] = len(all_attempts)
+                rec_by_key[key]["discord_attempts"] = all_attempts
                 sent_ledger_rows.append({
                     "sent_at_utc": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M:%S%z"),
                     "payload_id": rec.get("payload_id"),
@@ -317,7 +400,12 @@ def main() -> int:
                     "direction": rec.get("direction"),
                     "entry_time": rec.get("entry_time"),
                     "message": rec.get("message"),
+                    "discord_attempt_count": len(all_attempts),
                 })
+            if final_error_result is not None:
+                # Preserve per-attempt details in preview_json; do not append to
+                # send ledger because Discord delivery was not confirmed.
+                pass
             time.sleep(args.sleep_seconds)
 
         append_send_ledger(sent_ledger_rows, send_ledger_csv)
@@ -336,6 +424,7 @@ def main() -> int:
     sent = sum(1 for r in records if r["sent"])
     would_send = sum(1 for r in records if r["send_status"] == "DRY_RUN_WOULD_SEND")
     errors = sum(1 for r in records if str(r["send_status"]).startswith("ERROR"))
+    max_attempts = max([int(r.get("discord_attempt_count") or 0) for r in records] + [0])
 
     safe_print("send_mochipoyo_discord_messages")
     safe_print(f"source: {input_csv}")
@@ -345,6 +434,9 @@ def main() -> int:
     safe_print(f"dry_run_would_send: {would_send}")
     safe_print(f"sent: {sent}")
     safe_print(f"errors: {errors}")
+    safe_print(f"max_discord_attempts: {max_attempts}")
+    safe_print(f"discord_retry_count: {int(args.discord_retry_count)}")
+    safe_print(f"discord_retry_sleep_seconds: {float(args.discord_retry_sleep_seconds)}")
     safe_print(f"send_ledger_csv: {send_ledger_csv}")
     safe_print(f"preview_txt: {preview_txt}")
     safe_print(f"preview_json: {preview_json}")
