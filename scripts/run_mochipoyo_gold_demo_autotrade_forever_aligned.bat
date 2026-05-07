@@ -11,14 +11,19 @@ rem - Position policy: block_any, max 1 position / 0.01 lot
 rem - Starts each Python iteration at second 02 of every minute
 rem - MT5 ExportOhlcToCsv should export at second 00
 rem - Do NOT run this together with run_mochipoyo_gold_minimal_live.bat
+rem - If the loop stops with a non-zero exit code, Discord stop notification is sent.
 rem
 rem Before running:
 rem - MT5 must be logged in to XMTrading demo account 75539039
 rem - Algo Trading must be ON
-rem - .env must contain the Discord webhook if Discord send is used
+rem - .env must contain the Discord webhook if Discord send / stop notification is used
 rem - Confirm whether an existing GOLD# position is open. If open, auto-trade send will be blocked by block_any.
 
 cd /d "%~dp0\.."
+
+set SUMMARY_CSV=data\ml_loop_demo_prod_forever\gold_minimal_live_loop_live_summary.csv
+set STOP_PREVIEW_TXT=data\ml_loop_demo_prod_forever\loop_stopped_discord_preview.txt
+set STOP_PREVIEW_JSON=data\ml_loop_demo_prod_forever\loop_stopped_discord_preview.json
 
 python scripts\run_mochipoyo_gold_minimal_live_loop_aligned.py ^
   --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
@@ -53,9 +58,17 @@ python scripts\run_mochipoyo_gold_minimal_live_loop_aligned.py ^
 
 set EXIT_CODE=%ERRORLEVEL%
 
+python scripts\notify_mochipoyo_loop_stopped.py ^
+  --loop-name mochipoyo_gold_demo_autotrade_forever_aligned ^
+  --exit-code %EXIT_CODE% ^
+  --summary-csv "%SUMMARY_CSV%" ^
+  --preview-txt "%STOP_PREVIEW_TXT%" ^
+  --preview-json "%STOP_PREVIEW_JSON%"
+
 echo.
 echo Finished with exit code %EXIT_CODE%.
-echo Summary CSV: data\ml_loop_demo_prod_forever\gold_minimal_live_loop_live_summary.csv
+echo Summary CSV: %SUMMARY_CSV%
+echo Stop notification preview: %STOP_PREVIEW_TXT%
 echo.
 pause
 exit /b %EXIT_CODE%
