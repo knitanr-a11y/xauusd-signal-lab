@@ -23,13 +23,17 @@ Important live detail:
     Therefore this script computes A/B conditions on the full historical M15
     context first, then uses the latest confirmed M15 close as the live entry
     reference when the next M15 open is unavailable.
+
+Duplicate handling:
+    If the same signal_key already exists in signal_ledger.csv, this script does
+    not append the ledger row and writes order_intent_dry_run.json with
+    intent_type=DUPLICATE_SKIP instead of OPEN_POSITION.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -141,11 +145,6 @@ def latest_confirmed_m15_row(m15: pd.DataFrame, *, policy: str) -> pd.Series | N
 
 
 def compute_live_ab_flags(m15_ctx: pd.DataFrame) -> pd.DataFrame:
-    """Compute A/B flags without requiring next M15 open.
-
-    This mirrors build_signal_candidates(), but intentionally keeps the latest
-    row even when there is no following M15 open yet.
-    """
     out = m15_ctx.copy().sort_values("time", kind="mergesort").reset_index(drop=True)
     out["m15_prev_low16"] = out["low"].shift(1).rolling(16, min_periods=16).min()
     out["m15_prev_low6"] = out["low"].shift(1).rolling(6, min_periods=6).min()
@@ -231,15 +230,45 @@ def force_live_entry_fields(row: pd.Series, args: argparse.Namespace) -> pd.Seri
     return out
 
 
-def build_order_intent(row: pd.Series, *, dry_run: bool = True) -> dict[str, Any]:
+def build_order_intent(
+    row: pd.Series,
+    *,
+    dry_run: bool = True,
+    duplicate: bool = False,
+    signal_key: str = "",
+    reason: str = "",
+) -> dict[str, Any]:
     payload = build_payload(row)
+    if duplicate:
+        return {
+            "schema_version": "gold_h1h4_bear_ab_classifier_order_intent_v1",
+            "dry_run": bool(dry_run),
+            "intent_type": "DUPLICATE_SKIP",
+            "action": "NO_OPEN_POSITION_INTENT",
+            "reason": reason or "DUPLICATE_SIGNAL_KEY",
+            "condition_family_id": CONDITION_FAMILY_ID,
+            "condition_id": payload["condition_id"],
+            "strategy_id": payload["strategy_id"],
+            "signal_key": signal_key,
+            "symbol": payload["symbol"],
+            "direction": payload["direction"],
+            "rank": payload["rank"],
+            "a_pass": payload["a_pass"],
+            "b_pass": payload["b_pass"],
+            "trade_enabled": False,
+            "lot": {"base_lot": 0.0, "lot_multiplier": 0.0, "effective_lot": 0.0},
+            "source_signal": payload,
+        }
     return {
         "schema_version": "gold_h1h4_bear_ab_classifier_order_intent_v1",
         "dry_run": bool(dry_run),
         "intent_type": "OPEN_POSITION" if payload["trade_enabled"] else "OBSERVE_ONLY",
+        "action": "DRY_RUN_ONLY_NO_MT5_ORDER" if payload["trade_enabled"] else "OBSERVE_ONLY_NO_ORDER",
+        "reason": reason or ("NEW_DRY_RUN_SIGNAL_CREATED" if payload["trade_enabled"] else "OBSERVE_ONLY_SIGNAL"),
         "condition_family_id": CONDITION_FAMILY_ID,
         "condition_id": payload["condition_id"],
         "strategy_id": payload["strategy_id"],
+        "signal_key": signal_key,
         "symbol": payload["symbol"],
         "direction": payload["direction"],
         "rank": payload["rank"],
@@ -332,7 +361,6 @@ def main() -> int:
 
     signal_key = build_signal_key(signal_row)
     payload = build_payload(signal_row)
-    intent = build_order_intent(signal_row, dry_run=True)
     text = build_notification_text(payload)
     duplicate = False
 
@@ -340,6 +368,8 @@ def main() -> int:
     if should_ledger:
         ledger = read_ledger(ledger_path)
         duplicate = signal_key in set(ledger["signal_key"].astype(str)) if not ledger.empty else False
+    reason = "DUPLICATE_SIGNAL_KEY" if duplicate else ("NEW_DRY_RUN_SIGNAL_CREATED" if should_ledger else "OBSERVE_ONLY_SIGNAL_NOT_LEDGERED")
+    intent = build_order_intent(signal_row, dry_run=True, duplicate=duplicate, signal_key=signal_key, reason=reason)
 
     result = {
         "scan_time_utc": scan_time,
@@ -355,7 +385,7 @@ def main() -> int:
         "trade_enabled": bool(signal_row.get("trade_enabled", False)),
         "duplicate": bool(duplicate),
         "signal_key": signal_key,
-        "reason": "DUPLICATE_SIGNAL_KEY" if duplicate else ("NEW_DRY_RUN_SIGNAL_CREATED" if should_ledger else "OBSERVE_ONLY_SIGNAL_NOT_LEDGERED"),
+        "reason": reason,
         "lot_multiplier": float(signal_row.get("lot_multiplier", 0.0)),
         "effective_lot": float(signal_row.get("effective_lot", 0.0)),
     }
@@ -394,6 +424,9 @@ def main() -> int:
             "status": "DRY_RUN_SIGNAL_CREATED" if bool(signal_row.get("trade_enabled", False)) else "OBSERVE_ONLY_SIGNAL",
         }
         append_csv_row(ledger_path, ledger_row, LEDGER_COLUMNS)
+        print("[INFO] ledger appended: new signal_key")
+    elif duplicate:
+        print("[INFO] duplicate signal_key detected; ledger append skipped; order intent is DUPLICATE_SKIP")
 
     print(f"[INFO] signal_found rank={result['rank']} duplicate={duplicate} trade_enabled={result['trade_enabled']}")
     print(text)
