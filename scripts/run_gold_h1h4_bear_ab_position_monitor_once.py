@@ -9,7 +9,7 @@ It reads the dedicated SELL signal ledger created by:
 
     scripts/run_gold_h1h4_bear_ab_live_scan_once.py
 
-and checks each DRY_RUN_SIGNAL_CREATED row against confirmed M1 data.
+and checks each unresolved DRY_RUN_SIGNAL_CREATED row against confirmed M1 data.
 
 SELL-specific rules:
 - TP touch: M1 low <= tp_price
@@ -17,6 +17,11 @@ SELL-specific rules:
 - same-M1 conflict: default conservative SL priority
 - realized R: (entry_price - exit_price) / risk_price
 - close_side for close intent: BUY
+
+Resolved-position handling:
+- TP/SL/TIME_EXIT terminal outcomes are appended once to position_result_ledger.csv
+- Any signal_key already present in position_result_ledger.csv is skipped on later monitor runs
+- signal_ledger.csv is not mutated
 
 No Discord send.
 No MT5 order placement.
@@ -130,12 +135,47 @@ CLOSE_INTENT_LOG_COLUMNS = [
     "action",
 ]
 
+POSITION_RESULT_LEDGER_COLUMNS = [
+    "resolved_at_utc",
+    "condition_family_id",
+    "condition_id",
+    "signal_key",
+    "symbol",
+    "direction",
+    "rank",
+    "signal_group",
+    "entry_time",
+    "entry_price_reference",
+    "sl_price",
+    "tp_price",
+    "risk_price",
+    "reward_price",
+    "rr",
+    "max_hold_hours",
+    "base_lot",
+    "lot_multiplier",
+    "effective_lot",
+    "horizon_time",
+    "outcome",
+    "position_status",
+    "exit_time_reference",
+    "exit_price_reference",
+    "realized_r_reference",
+    "lot_weighted_r_reference",
+    "bars_checked",
+    "close_key",
+    "close_intent_required",
+    "close_intent_duplicate",
+    "reason",
+]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Dry-run M1 position monitor once for GOLD bearish A/B classifier.")
     parser.add_argument("--csv-dir", type=Path, required=True, help="Directory containing goldsharp_m1.csv.")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--ledger-csv", type=Path, default=None, help="Default: <out-dir>/signal_ledger.csv")
+    parser.add_argument("--position-result-ledger-csv", type=Path, default=None, help="Default: <out-dir>/position_result_ledger.csv")
     parser.add_argument("--m1-filename", type=str, default=DEFAULT_M1_FILENAME)
     parser.add_argument("--max-hold-hours", type=float, default=12.0)
     parser.add_argument("--inbar-priority", choices=["SL", "TP"], default="SL")
@@ -150,6 +190,11 @@ def parse_args() -> argparse.Namespace:
         choices=["last", "second_last"],
         default=None,
         help="Deprecated compatibility alias. If provided, it is mapped to --latest-confirmed-m1-policy.",
+    )
+    parser.add_argument(
+        "--include-resolved",
+        action="store_true",
+        help="Re-monitor already resolved signal_keys. Default skips rows found in position_result_ledger.csv.",
     )
     return parser.parse_args()
 
@@ -233,6 +278,23 @@ def normalize_signal_ledger(df: pd.DataFrame) -> pd.DataFrame:
     out["entry_time"] = pd.to_datetime(out["entry_time"], errors="coerce")
     out = out.dropna(subset=["entry_time"]).copy()
     return out.sort_values(["entry_time", "signal_key"], kind="mergesort").reset_index(drop=True)
+
+
+def normalize_position_result_ledger(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return pd.DataFrame(columns=POSITION_RESULT_LEDGER_COLUMNS)
+    out = df.copy()
+    for col in POSITION_RESULT_LEDGER_COLUMNS:
+        if col not in out.columns:
+            out[col] = ""
+    out = out[out["condition_family_id"].astype(str).eq(CONDITION_FAMILY_ID)].copy()
+    return out[POSITION_RESULT_LEDGER_COLUMNS].copy()
+
+
+def resolved_signal_keys(position_result_ledger: pd.DataFrame) -> set[str]:
+    if position_result_ledger.empty or "signal_key" not in position_result_ledger.columns:
+        return set()
+    return set(position_result_ledger["signal_key"].astype(str))
 
 
 def load_confirmed_m1(csv_dir: Path, filename: str, policy: str) -> pd.DataFrame:
@@ -355,7 +417,6 @@ def evaluate_signal(
     rr = row_float(signal, "rr", 2.0)
     max_hold_hours = row_max_hold_hours(signal, max_hold_fallback)
     lot_multiplier = row_float(signal, "lot_multiplier", 0.0)
-    effective_lot = row_float(signal, "effective_lot", 0.0)
     horizon_time = entry_time + pd.to_timedelta(max_hold_hours, unit="h")
     row.update({"entry_time": entry_time, "horizon_time": horizon_time, "max_hold_hours": max_hold_hours})
 
@@ -451,7 +512,7 @@ def evaluate_signal(
         "max_hold_hours": max_hold_hours,
         "base_lot": row_float(signal, "base_lot", 0.0),
         "lot_multiplier": lot_multiplier,
-        "effective_lot": effective_lot,
+        "effective_lot": row_float(signal, "effective_lot", 0.0),
         "horizon_time": horizon_time.strftime("%Y-%m-%d %H:%M:%S"),
         "exit_time_reference": exit_time.strftime("%Y-%m-%d %H:%M:%S"),
         "exit_price_reference": exit_price,
@@ -464,6 +525,19 @@ def evaluate_signal(
 
 def flatten_close_intent(intent: dict[str, Any], created_at_utc: str) -> dict[str, Any]:
     return {col: (created_at_utc if col == "created_at_utc" else intent.get(col, "")) for col in CLOSE_INTENT_LOG_COLUMNS}
+
+
+def is_terminal_monitor_row(row: dict[str, Any]) -> bool:
+    return str(row.get("position_status", "")) in {
+        "TP_TOUCHED_DRY_RUN",
+        "SL_TOUCHED_DRY_RUN",
+        "TIME_EXIT_CLOSE_INTENT_REQUIRED",
+        "TIME_EXIT_ALREADY_LOGGED",
+    }
+
+
+def build_position_result_row(row: dict[str, Any], resolved_at_utc: str) -> dict[str, Any]:
+    return {col: (resolved_at_utc if col == "resolved_at_utc" else row.get(col, "")) for col in POSITION_RESULT_LEDGER_COLUMNS}
 
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, int]:
@@ -497,16 +571,18 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def write_empty_outputs(*, out_dir: Path, monitor_log_path: Path, close_log_path: Path, latest_result_path: Path, monitor_time: str, ledger_path: Path) -> None:
+def write_empty_outputs(*, out_dir: Path, monitor_log_path: Path, close_log_path: Path, position_result_ledger_path: Path, latest_result_path: Path, monitor_time: str, ledger_path: Path, reason: str = "NO_DRY_RUN_SIGNAL_CREATED_ROWS", resolved_skipped: int = 0) -> None:
     latest_rows_path = out_dir / "latest_position_monitor_rows.csv"
     close_intent_path = out_dir / "close_intent_dry_run.json"
     write_csv(pd.DataFrame(columns=MONITOR_LOG_COLUMNS), latest_rows_path)
     ensure_empty_csv(monitor_log_path, MONITOR_LOG_COLUMNS)
     ensure_empty_csv(close_log_path, CLOSE_INTENT_LOG_COLUMNS)
+    ensure_empty_csv(position_result_ledger_path, POSITION_RESULT_LEDGER_COLUMNS)
     result = {
         "scan_time_utc": monitor_time,
         "condition_family_id": CONDITION_FAMILY_ID,
         "signals_monitored": 0,
+        "resolved_skipped": int(resolved_skipped),
         "open_unresolved": 0,
         "tp_touched": 0,
         "sl_touched": 0,
@@ -514,12 +590,15 @@ def write_empty_outputs(*, out_dir: Path, monitor_log_path: Path, close_log_path
         "time_exit_already_logged": 0,
         "no_m1_path": 0,
         "invalid_risk": 0,
+        "position_results_created": 0,
         "close_intent_created": 0,
-        "reason": "NO_DRY_RUN_SIGNAL_CREATED_ROWS",
+        "reason": reason,
         "ledger_csv": str(ledger_path),
+        "position_result_ledger_csv": str(position_result_ledger_path),
         "outputs": {
             "latest_position_monitor_rows": str(latest_rows_path),
             "position_monitor_log": str(monitor_log_path),
+            "position_result_ledger": str(position_result_ledger_path),
             "close_intent_log": str(close_log_path),
             "close_intent_dry_run": str(close_intent_path) if close_intent_path.exists() else "",
         },
@@ -534,6 +613,7 @@ def main() -> int:
     args.out_dir.mkdir(parents=True, exist_ok=True)
     monitor_time = utc_now_text()
     ledger_path = args.ledger_csv if args.ledger_csv is not None else args.out_dir / "signal_ledger.csv"
+    position_result_ledger_path = args.position_result_ledger_csv if args.position_result_ledger_csv is not None else args.out_dir / "position_result_ledger.csv"
     close_log_path = args.out_dir / "close_intent_log.csv"
     monitor_log_path = args.out_dir / "position_monitor_log.csv"
     latest_result_path = args.out_dir / "latest_position_monitor_result.json"
@@ -543,19 +623,33 @@ def main() -> int:
     print(f"[INFO] csv_dir={args.csv_dir}")
     print(f"[INFO] out_dir={args.out_dir}")
     print(f"[INFO] ledger_csv={ledger_path}")
+    print(f"[INFO] position_result_ledger_csv={position_result_ledger_path}")
     print(f"[INFO] m1_filename={args.m1_filename}")
 
     ledger = normalize_signal_ledger(read_csv_or_empty(ledger_path))
+    position_result_ledger = normalize_position_result_ledger(read_csv_or_empty(position_result_ledger_path))
+    ensure_empty_csv(position_result_ledger_path, POSITION_RESULT_LEDGER_COLUMNS)
+    resolved_keys = resolved_signal_keys(position_result_ledger)
+    resolved_skipped = 0
+    if not ledger.empty and not args.include_resolved:
+        before = len(ledger)
+        ledger = ledger[~ledger["signal_key"].astype(str).isin(resolved_keys)].copy().reset_index(drop=True)
+        resolved_skipped = before - len(ledger)
+
     close_log = read_csv_or_empty(close_log_path)
     existing_close_keys = close_log_keys(close_log)
     if ledger.empty:
-        write_empty_outputs(out_dir=args.out_dir, monitor_log_path=monitor_log_path, close_log_path=close_log_path, latest_result_path=latest_result_path, monitor_time=monitor_time, ledger_path=ledger_path)
-        print("[INFO] no DRY_RUN_SIGNAL_CREATED rows to monitor")
+        reason = "NO_UNRESOLVED_DRY_RUN_SIGNAL_ROWS" if resolved_skipped else "NO_DRY_RUN_SIGNAL_CREATED_ROWS"
+        write_empty_outputs(out_dir=args.out_dir, monitor_log_path=monitor_log_path, close_log_path=close_log_path, position_result_ledger_path=position_result_ledger_path, latest_result_path=latest_result_path, monitor_time=monitor_time, ledger_path=ledger_path, reason=reason, resolved_skipped=resolved_skipped)
+        print(f"[INFO] {reason}")
         return 0
 
     m1 = load_confirmed_m1(args.csv_dir, args.m1_filename, args.latest_confirmed_m1_policy)
     rows: list[dict[str, Any]] = []
     intents: list[dict[str, Any]] = []
+    position_results_created = 0
+    current_resolved_keys = set(resolved_keys)
+
     for _, signal in ledger.iterrows():
         monitor_row, intent = evaluate_signal(
             signal=signal,
@@ -572,11 +666,18 @@ def main() -> int:
             existing_close_keys.add(str(intent["close_key"]))
             append_csv_row(close_log_path, flatten_close_intent(intent, monitor_time), CLOSE_INTENT_LOG_COLUMNS)
 
+        signal_key = str(monitor_row.get("signal_key", ""))
+        if is_terminal_monitor_row(monitor_row) and signal_key and signal_key not in current_resolved_keys:
+            append_csv_row(position_result_ledger_path, build_position_result_row(monitor_row, monitor_time), POSITION_RESULT_LEDGER_COLUMNS)
+            current_resolved_keys.add(signal_key)
+            position_results_created += 1
+
     monitor_df = pd.DataFrame(rows)
     write_csv(monitor_df, args.out_dir / "latest_position_monitor_rows.csv")
     for row in rows:
         append_csv_row(monitor_log_path, row, MONITOR_LOG_COLUMNS)
     ensure_empty_csv(close_log_path, CLOSE_INTENT_LOG_COLUMNS)
+    ensure_empty_csv(position_result_ledger_path, POSITION_RESULT_LEDGER_COLUMNS)
 
     if intents:
         write_json(close_intent_path, {
@@ -592,13 +693,17 @@ def main() -> int:
         "scan_time_utc": monitor_time,
         "condition_family_id": CONDITION_FAMILY_ID,
         **summarize(rows),
+        "resolved_skipped": int(resolved_skipped),
+        "position_results_created": int(position_results_created),
         "close_intent_created": len(intents),
         "latest_m1_time": "" if m1.empty else str(pd.Timestamp(m1["time"].max())),
         "latest_m1_close_time": "" if m1.empty else str(pd.Timestamp(m1["close_time"].max())),
         "ledger_csv": str(ledger_path),
+        "position_result_ledger_csv": str(position_result_ledger_path),
         "outputs": {
             "latest_position_monitor_rows": str(args.out_dir / "latest_position_monitor_rows.csv"),
             "position_monitor_log": str(monitor_log_path),
+            "position_result_ledger": str(position_result_ledger_path),
             "close_intent_log": str(close_log_path),
             "close_intent_dry_run": str(close_intent_path) if intents else "",
         },
