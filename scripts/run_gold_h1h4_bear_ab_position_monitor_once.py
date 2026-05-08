@@ -9,12 +9,12 @@ It reads the dedicated SELL signal ledger created by:
 
     scripts/run_gold_h1h4_bear_ab_live_scan_once.py
 
-and checks each DRY_RUN_SIGNAL_CREATED row against confirmed M5 data.
+and checks each DRY_RUN_SIGNAL_CREATED row against confirmed M1 data.
 
 SELL-specific rules:
-- TP touch: M5 low <= tp_price
-- SL touch: M5 high >= sl_price
-- same-M5 conflict: default conservative SL priority
+- TP touch: M1 low <= tp_price
+- SL touch: M1 high >= sl_price
+- same-M1 conflict: default conservative SL priority
 - realized R: (entry_price - exit_price) / risk_price
 - close_side for close intent: BUY
 
@@ -25,6 +25,10 @@ No Mochipoyo ledger update.
 No existing autotrade/order-intent file update.
 No mutation of MT5 source candle CSVs.
 No mutation of signal_ledger.csv.
+
+Backup note:
+    The previous M5 monitor version is preserved on branch:
+    backup/sell-ab-m5-monitor-before-m1-20260508
 """
 
 from __future__ import annotations
@@ -52,7 +56,7 @@ from scripts.research_gold_h1h4_bear_m15_low_break_ab_classifier import (  # noq
 )
 
 DEFAULT_OUT_DIR = Path("data/research_results/gold_h1h4_bear_ab_live_scan")
-DEFAULT_M5_FILENAME = "goldsharp_m5.csv"
+DEFAULT_M1_FILENAME = "goldsharp_m1.csv"
 SIGNAL_STATUS_CREATED = "DRY_RUN_SIGNAL_CREATED"
 
 MONITOR_LOG_COLUMNS = [
@@ -77,10 +81,10 @@ MONITOR_LOG_COLUMNS = [
     "lot_multiplier",
     "effective_lot",
     "horizon_time",
-    "latest_m5_time",
-    "latest_m5_close_time",
-    "m5_first_time",
-    "m5_last_time",
+    "latest_m1_time",
+    "latest_m1_close_time",
+    "m1_first_time",
+    "m1_last_time",
     "bars_checked",
     "outcome",
     "position_status",
@@ -128,18 +132,24 @@ CLOSE_INTENT_LOG_COLUMNS = [
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Dry-run position monitor once for GOLD bearish A/B classifier.")
-    parser.add_argument("--csv-dir", type=Path, required=True, help="Directory containing goldsharp_m5.csv.")
+    parser = argparse.ArgumentParser(description="Dry-run M1 position monitor once for GOLD bearish A/B classifier.")
+    parser.add_argument("--csv-dir", type=Path, required=True, help="Directory containing goldsharp_m1.csv.")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--ledger-csv", type=Path, default=None, help="Default: <out-dir>/signal_ledger.csv")
-    parser.add_argument("--m5-filename", type=str, default=DEFAULT_M5_FILENAME)
+    parser.add_argument("--m1-filename", type=str, default=DEFAULT_M1_FILENAME)
     parser.add_argument("--max-hold-hours", type=float, default=12.0)
     parser.add_argument("--inbar-priority", choices=["SL", "TP"], default="SL")
     parser.add_argument(
-        "--latest-confirmed-m5-policy",
+        "--latest-confirmed-m1-policy",
         choices=["last", "second_last"],
         default="last",
-        help="Use second_last if the live M5 CSV includes a forming candle as the last row.",
+        help="Use second_last if the live M1 CSV includes a forming candle as the last row.",
+    )
+    parser.add_argument(
+        "--latest-confirmed-m5-policy",
+        choices=["last", "second_last"],
+        default=None,
+        help="Deprecated compatibility alias. If provided, it is mapped to --latest-confirmed-m1-policy.",
     )
     return parser.parse_args()
 
@@ -225,12 +235,12 @@ def normalize_signal_ledger(df: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values(["entry_time", "signal_key"], kind="mergesort").reset_index(drop=True)
 
 
-def load_confirmed_m5(csv_dir: Path, filename: str, policy: str) -> pd.DataFrame:
-    m5 = read_ohlc_csv(csv_dir / filename).sort_values("time", kind="mergesort").reset_index(drop=True)
-    if policy == "second_last" and len(m5) >= 2:
-        m5 = m5.iloc[:-1].copy().reset_index(drop=True)
-    m5["close_time"] = m5["time"] + pd.to_timedelta(5, unit="m")
-    return m5
+def load_confirmed_m1(csv_dir: Path, filename: str, policy: str) -> pd.DataFrame:
+    m1 = read_ohlc_csv(csv_dir / filename).sort_values("time", kind="mergesort").reset_index(drop=True)
+    if policy == "second_last" and len(m1) >= 2:
+        m1 = m1.iloc[:-1].copy().reset_index(drop=True)
+    m1["close_time"] = m1["time"] + pd.to_timedelta(1, unit="m")
+    return m1
 
 
 def row_float(row: pd.Series, col: str, default: float = float("nan")) -> float:
@@ -266,10 +276,10 @@ def build_base_monitor_row(
     monitor_time: str,
     csv_dir: Path,
     signal: pd.Series,
-    latest_m5_time: object = "",
-    latest_m5_close_time: object = "",
-    m5_first_time: object = "",
-    m5_last_time: object = "",
+    latest_m1_time: object = "",
+    latest_m1_close_time: object = "",
+    m1_first_time: object = "",
+    m1_last_time: object = "",
 ) -> dict[str, Any]:
     return {
         "monitor_time_utc": monitor_time,
@@ -293,10 +303,10 @@ def build_base_monitor_row(
         "lot_multiplier": row_float(signal, "lot_multiplier", 0.0),
         "effective_lot": row_float(signal, "effective_lot", 0.0),
         "horizon_time": "",
-        "latest_m5_time": latest_m5_time,
-        "latest_m5_close_time": latest_m5_close_time,
-        "m5_first_time": m5_first_time,
-        "m5_last_time": m5_last_time,
+        "latest_m1_time": latest_m1_time,
+        "latest_m1_close_time": latest_m1_close_time,
+        "m1_first_time": m1_first_time,
+        "m1_last_time": m1_last_time,
         "bars_checked": 0,
         "outcome": "",
         "position_status": "",
@@ -314,25 +324,25 @@ def build_base_monitor_row(
 def evaluate_signal(
     *,
     signal: pd.Series,
-    m5: pd.DataFrame,
+    m1: pd.DataFrame,
     monitor_time: str,
     csv_dir: Path,
     max_hold_fallback: float,
     inbar_priority: str,
     existing_close_keys: set[str],
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
-    latest_m5_time = "" if m5.empty else pd.Timestamp(m5["time"].max())
-    latest_m5_close_time = "" if m5.empty else pd.Timestamp(m5["close_time"].max())
-    m5_first_time = "" if m5.empty else pd.Timestamp(m5["time"].min())
-    m5_last_time = "" if m5.empty else pd.Timestamp(m5["time"].max())
+    latest_m1_time = "" if m1.empty else pd.Timestamp(m1["time"].max())
+    latest_m1_close_time = "" if m1.empty else pd.Timestamp(m1["close_time"].max())
+    m1_first_time = "" if m1.empty else pd.Timestamp(m1["time"].min())
+    m1_last_time = "" if m1.empty else pd.Timestamp(m1["time"].max())
     row = build_base_monitor_row(
         monitor_time=monitor_time,
         csv_dir=csv_dir,
         signal=signal,
-        latest_m5_time=latest_m5_time,
-        latest_m5_close_time=latest_m5_close_time,
-        m5_first_time=m5_first_time,
-        m5_last_time=m5_last_time,
+        latest_m1_time=latest_m1_time,
+        latest_m1_close_time=latest_m1_close_time,
+        m1_first_time=m1_first_time,
+        m1_last_time=m1_last_time,
     )
 
     signal_key = row_str(signal, "signal_key")
@@ -352,17 +362,17 @@ def evaluate_signal(
     if not all(math.isfinite(v) for v in [entry_price, sl_price, tp_price, risk_price]) or risk_price <= 0:
         row.update({"outcome": "INVALID_RISK", "position_status": "INVALID_SIGNAL_RISK", "reason": "Entry/SL/TP/risk values are invalid."})
         return row, None
-    if m5.empty:
-        row.update({"outcome": "NO_M5_PATH", "position_status": "NO_M5_DATA", "reason": "M5 CSV has no confirmed rows."})
+    if m1.empty:
+        row.update({"outcome": "NO_M1_PATH", "position_status": "NO_M1_DATA", "reason": "M1 CSV has no confirmed rows."})
         return row, None
-    if entry_time < pd.Timestamp(m5_first_time):
-        row.update({"outcome": "NO_M5_PATH", "position_status": "NO_M5_PATH", "reason": "Entry time is earlier than first available M5 candle."})
+    if entry_time < pd.Timestamp(m1_first_time):
+        row.update({"outcome": "NO_M1_PATH", "position_status": "NO_M1_PATH", "reason": "Entry time is earlier than first available M1 candle."})
         return row, None
-    if pd.Timestamp(latest_m5_close_time) <= entry_time:
-        row.update({"outcome": "OPEN", "position_status": "WAITING_FOR_M5_AFTER_ENTRY", "reason": "No confirmed M5 bar after entry yet."})
+    if pd.Timestamp(latest_m1_close_time) <= entry_time:
+        row.update({"outcome": "OPEN", "position_status": "WAITING_FOR_M1_AFTER_ENTRY", "reason": "No confirmed M1 bar after entry yet."})
         return row, None
 
-    path = m5[(m5["time"] >= entry_time) & (m5["time"] < horizon_time)].copy()
+    path = m1[(m1["time"] >= entry_time) & (m1["time"] < horizon_time)].copy()
     path = path.sort_values("time", kind="mergesort").reset_index(drop=True)
     row["bars_checked"] = int(len(path))
 
@@ -375,9 +385,9 @@ def evaluate_signal(
         if hit_tp and hit_sl:
             if str(inbar_priority).upper() == "TP":
                 realized_r = (entry_price - tp_price) / risk_price
-                row.update({"bars_checked": checked, "outcome": "WIN", "position_status": "TP_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": tp_price, "realized_r_reference": realized_r, "lot_weighted_r_reference": realized_r * lot_multiplier, "reason": "TP and SL touched in same M5 bar; TP priority was requested."})
+                row.update({"bars_checked": checked, "outcome": "WIN", "position_status": "TP_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": tp_price, "realized_r_reference": realized_r, "lot_weighted_r_reference": realized_r * lot_multiplier, "reason": "TP and SL touched in same M1 bar; TP priority was requested."})
             else:
-                row.update({"bars_checked": checked, "outcome": "LOSS", "position_status": "SL_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": sl_price, "realized_r_reference": -1.0, "lot_weighted_r_reference": -1.0 * lot_multiplier, "reason": "TP and SL touched in same M5 bar; SL priority was used."})
+                row.update({"bars_checked": checked, "outcome": "LOSS", "position_status": "SL_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": sl_price, "realized_r_reference": -1.0, "lot_weighted_r_reference": -1.0 * lot_multiplier, "reason": "TP and SL touched in same M1 bar; SL priority was used."})
             return row, None
         if hit_sl:
             row.update({"bars_checked": checked, "outcome": "LOSS", "position_status": "SL_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": sl_price, "realized_r_reference": -1.0, "lot_weighted_r_reference": -1.0 * lot_multiplier, "reason": "SL was touched before TP."})
@@ -387,12 +397,12 @@ def evaluate_signal(
             row.update({"bars_checked": checked, "outcome": "WIN", "position_status": "TP_TOUCHED_DRY_RUN", "exit_time_reference": bar_time, "exit_price_reference": tp_price, "realized_r_reference": realized_r, "lot_weighted_r_reference": realized_r * lot_multiplier, "reason": "TP was touched before SL."})
             return row, None
 
-    if pd.Timestamp(latest_m5_close_time) < horizon_time:
-        row.update({"outcome": "OPEN", "position_status": "OPEN_UNRESOLVED_BEFORE_HORIZON", "reason": "No TP/SL touch yet and confirmed M5 data has not reached the horizon."})
+    if pd.Timestamp(latest_m1_close_time) < horizon_time:
+        row.update({"outcome": "OPEN", "position_status": "OPEN_UNRESOLVED_BEFORE_HORIZON", "reason": "No TP/SL touch yet and confirmed M1 data has not reached the horizon."})
         return row, None
 
     if path.empty:
-        row.update({"outcome": "NO_M5_PATH", "position_status": "NO_M5_PATH_TO_HORIZON", "reason": "No M5 rows were available between entry and horizon."})
+        row.update({"outcome": "NO_M1_PATH", "position_status": "NO_M1_PATH_TO_HORIZON", "reason": "No M1 rows were available between entry and horizon."})
         return row, None
 
     last = path.iloc[-1]
@@ -464,13 +474,13 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, int]:
         "sl_touched": 0,
         "time_exit_required": 0,
         "time_exit_already_logged": 0,
-        "no_m5_path": 0,
+        "no_m1_path": 0,
         "invalid_risk": 0,
     }
     for row in rows:
         status = str(row.get("position_status", ""))
         outcome = str(row.get("outcome", ""))
-        if status in {"OPEN_UNRESOLVED_BEFORE_HORIZON", "WAITING_FOR_M5_AFTER_ENTRY"}:
+        if status in {"OPEN_UNRESOLVED_BEFORE_HORIZON", "WAITING_FOR_M1_AFTER_ENTRY"}:
             counts["open_unresolved"] += 1
         if status == "TP_TOUCHED_DRY_RUN":
             counts["tp_touched"] += 1
@@ -480,8 +490,8 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, int]:
             counts["time_exit_required"] += 1
         if status == "TIME_EXIT_ALREADY_LOGGED":
             counts["time_exit_already_logged"] += 1
-        if outcome == "NO_M5_PATH":
-            counts["no_m5_path"] += 1
+        if outcome == "NO_M1_PATH":
+            counts["no_m1_path"] += 1
         if outcome == "INVALID_RISK":
             counts["invalid_risk"] += 1
     return counts
@@ -502,7 +512,7 @@ def write_empty_outputs(*, out_dir: Path, monitor_log_path: Path, close_log_path
         "sl_touched": 0,
         "time_exit_required": 0,
         "time_exit_already_logged": 0,
-        "no_m5_path": 0,
+        "no_m1_path": 0,
         "invalid_risk": 0,
         "close_intent_created": 0,
         "reason": "NO_DRY_RUN_SIGNAL_CREATED_ROWS",
@@ -519,6 +529,8 @@ def write_empty_outputs(*, out_dir: Path, monitor_log_path: Path, close_log_path
 
 def main() -> int:
     args = parse_args()
+    if args.latest_confirmed_m5_policy is not None:
+        args.latest_confirmed_m1_policy = args.latest_confirmed_m5_policy
     args.out_dir.mkdir(parents=True, exist_ok=True)
     monitor_time = utc_now_text()
     ledger_path = args.ledger_csv if args.ledger_csv is not None else args.out_dir / "signal_ledger.csv"
@@ -531,6 +543,7 @@ def main() -> int:
     print(f"[INFO] csv_dir={args.csv_dir}")
     print(f"[INFO] out_dir={args.out_dir}")
     print(f"[INFO] ledger_csv={ledger_path}")
+    print(f"[INFO] m1_filename={args.m1_filename}")
 
     ledger = normalize_signal_ledger(read_csv_or_empty(ledger_path))
     close_log = read_csv_or_empty(close_log_path)
@@ -540,13 +553,13 @@ def main() -> int:
         print("[INFO] no DRY_RUN_SIGNAL_CREATED rows to monitor")
         return 0
 
-    m5 = load_confirmed_m5(args.csv_dir, args.m5_filename, args.latest_confirmed_m5_policy)
+    m1 = load_confirmed_m1(args.csv_dir, args.m1_filename, args.latest_confirmed_m1_policy)
     rows: list[dict[str, Any]] = []
     intents: list[dict[str, Any]] = []
     for _, signal in ledger.iterrows():
         monitor_row, intent = evaluate_signal(
             signal=signal,
-            m5=m5,
+            m1=m1,
             monitor_time=monitor_time,
             csv_dir=args.csv_dir,
             max_hold_fallback=float(args.max_hold_hours),
@@ -580,8 +593,8 @@ def main() -> int:
         "condition_family_id": CONDITION_FAMILY_ID,
         **summarize(rows),
         "close_intent_created": len(intents),
-        "latest_m5_time": "" if m5.empty else str(pd.Timestamp(m5["time"].max())),
-        "latest_m5_close_time": "" if m5.empty else str(pd.Timestamp(m5["close_time"].max())),
+        "latest_m1_time": "" if m1.empty else str(pd.Timestamp(m1["time"].max())),
+        "latest_m1_close_time": "" if m1.empty else str(pd.Timestamp(m1["close_time"].max())),
         "ledger_csv": str(ledger_path),
         "outputs": {
             "latest_position_monitor_rows": str(args.out_dir / "latest_position_monitor_rows.csv"),
