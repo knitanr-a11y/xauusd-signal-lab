@@ -12,11 +12,11 @@ The current goal is to move beyond the existing sender-level `block_any` policy 
 block_same_strategy_and_opposite_direction
 ```
 
-The key decision is:
+The key decision remains:
 
 ```text
 Do not modify send_mt5_order_from_payload.py yet.
-Validate the future position policy with a preflight-only checker first.
+Validate the future position policy with preflight-only checkers first.
 ```
 
 ## Safety boundary
@@ -32,7 +32,7 @@ No existing BAT mutation.
 No close-position execution.
 ```
 
-The existing sender is still the only script that can eventually call order_check/order_send, and it must not be changed until the strategy-aware policy behavior is validated.
+The existing sender is still the only script that can eventually call `order_check` / `order_send`, and it must not be changed until the strategy-aware policy behavior and metadata design are validated.
 
 ## Current existing sender limitation
 
@@ -57,98 +57,6 @@ block_same_strategy_and_opposite_direction
 ```
 
 Therefore, all strategy-aware validation is currently done outside the sender.
-
-## Implemented preflight scripts
-
-### v1 preflight
-
-Script:
-
-```text
-scripts/run_gold_multi_strategy_position_policy_preflight.py
-```
-
-Status:
-
-```text
-Created.
-Safe, but v1 exits early when order_payloads.csv has no rows.
-Because of that, v1 does not read MT5 positions on empty-payload cycles.
-```
-
-### v2 preflight
-
-Script:
-
-```text
-scripts/run_gold_multi_strategy_position_policy_preflight_v2.py
-```
-
-Status:
-
-```text
-PASS.
-```
-
-Important v2 improvement:
-
-```text
-Even when order_payloads.csv is missing or empty, v2 still initializes MT5,
-checks the expected account guard,
-checks the demo account guard,
-reads current open positions,
-and writes the current MT5 position snapshot.
-```
-
-Primary outputs:
-
-```text
-data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight.csv
-data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight.json
-data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight_positions.csv
-```
-
-Default command:
-
-```cmd
-python scripts\run_gold_multi_strategy_position_policy_preflight_v2.py --input-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\order_payloads.csv --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --symbol GOLD# --expected-login 75539039 --require-demo-account --select-symbol --max-total-positions 5 --max-lot-per-order 0.02
-```
-
-## Implemented controlled payload builder
-
-Script:
-
-```text
-scripts/build_gold_multi_strategy_position_policy_test_payload.py
-```
-
-Status:
-
-```text
-PASS.
-```
-
-Purpose:
-
-Create controlled local `order_payloads.csv` files for policy preflight validation.
-
-Safety:
-
-```text
-No MT5 import.
-No order_check.
-No order_send.
-No ledger write.
-```
-
-Supported scenarios:
-
-```text
-opposite_sell
-same_direction_buy
-over_lot_sell
-duplicate_pair
-```
 
 ## Policy candidate
 
@@ -188,7 +96,170 @@ Total account lot cap: none for now
 Per order lot cap: 0.02
 ```
 
-## Current MT5 snapshot validation
+## Implemented scripts
+
+### v1 preflight
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_position_policy_preflight.py
+```
+
+Status:
+
+```text
+Created.
+Safe, but v1 exits early when order_payloads.csv has no rows.
+Because of that, v1 does not read MT5 positions on empty-payload cycles.
+Superseded by v2/v3 for validation work.
+```
+
+### v2 preflight
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_position_policy_preflight_v2.py
+```
+
+Status:
+
+```text
+PASS.
+```
+
+Important v2 improvement:
+
+```text
+Even when order_payloads.csv is missing or empty, v2 still initializes MT5,
+checks the expected account guard,
+checks the demo account guard,
+reads current open positions,
+and writes the current MT5 position snapshot.
+```
+
+Primary outputs:
+
+```text
+data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight.csv
+data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight.json
+data/research_results/gold_multi_strategy_position_policy_preflight/strategy_position_policy_preflight_positions.csv
+```
+
+### v3 preflight with mock positions
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_position_policy_preflight_v3.py
+```
+
+Status:
+
+```text
+PASS.
+```
+
+Purpose:
+
+```text
+Validate same_strategy and total_position_cap rules without opening real demo positions.
+```
+
+Modes:
+
+```text
+Default mode:
+  reads real MT5 positions, same as v2-style snapshot behavior.
+
+--mock-positions-csv mode:
+  skips MT5 initialize by default,
+  reads mock positions from CSV,
+  evaluates the exact same policy against controlled position snapshots.
+```
+
+Safety confirmed in mock mode:
+
+```text
+mt5_initialize_skipped: true
+order_send_called_count: 0
+order_check_called_count: 0
+```
+
+### Controlled payload builder
+
+Script:
+
+```text
+scripts/build_gold_multi_strategy_position_policy_test_payload.py
+```
+
+Status:
+
+```text
+PASS.
+```
+
+Purpose:
+
+Create controlled local `order_payloads.csv` files for policy preflight validation.
+
+Safety:
+
+```text
+No MT5 import.
+No order_check.
+No order_send.
+No ledger write.
+```
+
+Supported scenarios:
+
+```text
+opposite_sell
+same_direction_buy
+over_lot_sell
+duplicate_pair
+```
+
+### Mock positions builder
+
+Script:
+
+```text
+scripts/build_gold_multi_strategy_mock_positions.py
+```
+
+Status:
+
+```text
+PASS.
+```
+
+Purpose:
+
+Create controlled mock position snapshots for `run_gold_multi_strategy_position_policy_preflight_v3.py`.
+
+Safety:
+
+```text
+No MT5 import.
+No order_check.
+No order_send.
+No ledger write.
+```
+
+Supported scenarios:
+
+```text
+same_strategy_buy_c
+same_strategy_sell_ab
+total_cap_5
+opposite_buy
+```
+
+## Current real MT5 snapshot validation
 
 Validated account:
 
@@ -210,11 +281,11 @@ comment: mochipoyo GOLD B
 Important observation:
 
 ```text
-The current MT5 position comment does not contain a stable strategy key.
+The current real MT5 position comment does not contain a stable strategy key.
 detected_strategy is empty.
 ```
 
-This means exact same-strategy detection is not reliable from current MT5 comments alone.
+This means exact same-strategy detection is not reliable from current real MT5 comments alone.
 
 ## Validated preflight paths
 
@@ -365,44 +436,124 @@ Decision:
 PASS.
 ```
 
-## Remaining policy validations
+### Same strategy max 1 block with mock positions
 
-Not yet fully validated:
+Build mock position:
 
-```text
-total open positions >= 5 block
-same strategy max 1 position block
+```cmd
+python scripts\build_gold_multi_strategy_mock_positions.py --scenario same_strategy_buy_c --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --broker-symbol GOLD#
 ```
 
-### Total open positions cap
+Build controlled payload:
 
-This can be validated later either by:
-
-```text
-1. creating a test mode that injects mocked position rows into preflight, or
-2. waiting until a demo environment has >=5 open positions, which is not recommended just for testing.
+```cmd
+python scripts\build_gold_multi_strategy_position_policy_test_payload.py --scenario same_direction_buy --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --broker-symbol GOLD# --entry-price 4727.67
 ```
 
-Recommended next implementation for testing only:
+Run preflight v3:
 
-```text
-Add optional --mock-positions-csv to preflight v2 or a v3 script.
+```cmd
+python scripts\run_gold_multi_strategy_position_policy_preflight_v3.py --input-csv data\research_results\gold_multi_strategy_position_policy_preflight\order_payloads_policy_test_same_direction_buy.csv --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --symbol GOLD# --mock-positions-csv data\research_results\gold_multi_strategy_position_policy_preflight\mock_positions_same_strategy_buy_c.csv --max-total-positions 5 --max-lot-per-order 0.02
 ```
 
-This would allow total-position-cap tests without opening real positions.
-
-### Same strategy max 1 position
-
-Current blocker:
+Mock existing position:
 
 ```text
-MT5 position comment currently has no stable strategy key.
-Example current comment: mochipoyo GOLD B
+GOLD# BUY 0.01
+comment: ms BUY_C BUY_C_ENV_RR2_72H
+external_id: BUY_C_ENV_RR2_72H|MOCK
 ```
 
-Therefore, preflight cannot reliably know which strategy owns an existing position from MT5 alone.
+Observed:
 
-Do not implement sender same-strategy blocking until position ownership metadata is defined.
+```text
+position_source: MOCK_CSV
+rows_in: 1
+rows_out: 1
+blocked_rows: 1
+same_strategy_blocked_rows: 1
+opposite_direction_blocked_rows: 0
+total_position_cap_blocked_rows: 0
+per_order_lot_blocked_rows: 0
+final_policy_decision: BLOCK
+order_send_called_count: 0
+order_check_called_count: 0
+```
+
+Reason:
+
+```text
+same_strategy: existing same-strategy position(s) detected: count=1; strategy_key=BUY_C_ENV_RR2_72H; detected=['BUY_C_ENV_RR2_72H']
+```
+
+Decision:
+
+```text
+PASS.
+```
+
+### Total open positions >= 5 block with mock positions
+
+Build mock positions:
+
+```cmd
+python scripts\build_gold_multi_strategy_mock_positions.py --scenario total_cap_5 --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --broker-symbol GOLD#
+```
+
+Run preflight v3:
+
+```cmd
+python scripts\run_gold_multi_strategy_position_policy_preflight_v3.py --input-csv data\research_results\gold_multi_strategy_position_policy_preflight\order_payloads_policy_test_same_direction_buy.csv --out-dir data\research_results\gold_multi_strategy_position_policy_preflight --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --symbol GOLD# --mock-positions-csv data\research_results\gold_multi_strategy_position_policy_preflight\mock_positions_total_cap_5.csv --max-total-positions 5 --max-lot-per-order 0.02
+```
+
+Mock existing positions:
+
+```text
+5 positions total
+GOLD# BUY 0.01 included
+```
+
+Observed:
+
+```text
+position_source: MOCK_CSV
+existing_total_positions: 5
+rows_in: 1
+rows_out: 1
+blocked_rows: 1
+same_strategy_blocked_rows: 1
+total_position_cap_blocked_rows: 1
+opposite_direction_blocked_rows: 0
+per_order_lot_blocked_rows: 0
+final_policy_decision: BLOCK
+order_send_called_count: 0
+order_check_called_count: 0
+```
+
+Reason includes:
+
+```text
+total_position_cap: total open positions cap reached: existing_total_positions=5; max_total_positions=5
+```
+
+Decision:
+
+```text
+PASS.
+```
+
+## Validation matrix
+
+Current validation state:
+
+```text
+payloadなしでもMT5 position snapshot取得: PASS
+same symbol opposite direction block: PASS
+per-order lot > 0.02 block: PASS
+same signal_key / order_key duplicate block: PASS
+same strategy max 1 block: PASS via v3 mock positions
+total open positions >= 5 block: PASS via v3 mock positions
+```
 
 ## Strategy ownership design options
 
@@ -563,12 +714,12 @@ Do not implement all at once.
 Recommended sequence:
 
 ```text
-1. Keep preflight v2 as the validation layer.
-2. Add optional mocked position input to preflight for total-cap and same-strategy tests.
-3. Design position_registry.csv schema and reconciliation rules.
-4. Add registry write only after successful sender SENT result.
+1. Keep preflight v3 as the validation layer.
+2. Design position_registry.csv schema and reconciliation rules.
+3. Add registry write only after successful sender SENT result.
+4. Add short MT5 comment aliases for human readability.
 5. Add sender policy block_same_strategy_and_opposite_direction in dry-run mode first.
-6. Validate sender WITHOUT --send using controlled payloads.
+6. Validate sender WITHOUT --send using controlled payloads and registry/mock cases.
 7. Validate sender WITH --send only after explicit approval and demo account guard.
 ```
 
@@ -621,10 +772,11 @@ Do not implement MT5 close execution before the registry/matching rules are fina
 Next safe step:
 
 ```text
-Add mocked-position support to preflight, or create a v3 preflight, so same_strategy and total_position_cap can be tested without opening real demo positions.
+Design and implement an isolated position registry dry-run / reconciliation layer.
+Do not modify the real sender until registry semantics are clear.
 ```
 
-Do not modify:
+Do not modify yet:
 
 ```text
 scripts/send_mt5_order_from_payload.py
