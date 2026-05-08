@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -129,7 +130,10 @@ def utc_now_text() -> str:
 
 
 def read_csv(path: Path) -> pd.DataFrame:
-    return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+    try:
+        return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+    except EmptyDataError:
+        return pd.DataFrame()
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
@@ -140,6 +144,26 @@ def write_csv(df: pd.DataFrame, path: Path) -> None:
 def write_json(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def write_no_rows_outputs(*, reason: str, input_csv: Path, output_csv: Path, output_json: Path, rejects_csv: Path) -> None:
+    write_csv(pd.DataFrame(columns=OUTPUT_COLUMNS), output_csv)
+    write_csv(pd.DataFrame(columns=REJECT_COLUMNS), rejects_csv)
+    summary = {
+        "schema_version": "gold_multi_strategy_mochipoyo_payload_bridge_dry_run_v1",
+        "bridge_ok": True,
+        "reason": reason,
+        "input_csv": str(input_csv),
+        "rows_in": 0,
+        "rows_out": 0,
+        "valid_order_payloads": 0,
+        "rejects": 0,
+        "output_csv": str(output_csv),
+        "output_json": str(output_json),
+        "rejects_csv": str(rejects_csv),
+    }
+    write_json(output_json, summary)
+    print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
 
 
 def safe_float(value: Any, default: float = float("nan")) -> float:
@@ -318,43 +342,12 @@ def main() -> int:
     now = utc_now_text()
 
     if not input_csv.exists():
-        empty = pd.DataFrame(columns=OUTPUT_COLUMNS)
-        write_csv(empty, output_csv)
-        write_csv(pd.DataFrame(columns=REJECT_COLUMNS), rejects_csv)
-        summary = {
-            "schema_version": "gold_multi_strategy_mochipoyo_payload_bridge_dry_run_v1",
-            "bridge_ok": True,
-            "reason": "NO_ADAPTER_ORDER_PREVIEW_CSV",
-            "input_csv": str(input_csv),
-            "rows_in": 0,
-            "rows_out": 0,
-            "valid_order_payloads": 0,
-            "rejects": 0,
-            "output_csv": str(output_csv),
-            "rejects_csv": str(rejects_csv),
-        }
-        write_json(output_json, summary)
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+        write_no_rows_outputs(reason="NO_ADAPTER_ORDER_PREVIEW_CSV", input_csv=input_csv, output_csv=output_csv, output_json=output_json, rejects_csv=rejects_csv)
         return 0
 
     src = read_csv(input_csv)
     if src.empty:
-        write_csv(pd.DataFrame(columns=OUTPUT_COLUMNS), output_csv)
-        write_csv(pd.DataFrame(columns=REJECT_COLUMNS), rejects_csv)
-        summary = {
-            "schema_version": "gold_multi_strategy_mochipoyo_payload_bridge_dry_run_v1",
-            "bridge_ok": True,
-            "reason": "NO_ADAPTER_ORDER_PREVIEW_ROWS",
-            "input_csv": str(input_csv),
-            "rows_in": 0,
-            "rows_out": 0,
-            "valid_order_payloads": 0,
-            "rejects": 0,
-            "output_csv": str(output_csv),
-            "rejects_csv": str(rejects_csv),
-        }
-        write_json(output_json, summary)
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+        write_no_rows_outputs(reason="NO_ADAPTER_ORDER_PREVIEW_ROWS", input_csv=input_csv, output_csv=output_csv, output_json=output_json, rejects_csv=rejects_csv)
         return 0
 
     if args.max_orders > 0:
