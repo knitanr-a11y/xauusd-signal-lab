@@ -86,6 +86,71 @@ close intent aggregation: PASS
 aggregate-only mode: PASS
 ```
 
+### Autotrade adapter dry-run
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_autotrade_adapter_dry_run.py
+```
+
+Validated output directory:
+
+```text
+data/research_results/gold_multi_strategy_autotrade_adapter_dry_run_time_exit
+```
+
+Validated input router directory:
+
+```text
+data/research_results/gold_multi_strategy_dry_run_aggregate_only_time_exit
+```
+
+Validated outputs:
+
+```text
+latest_adapter_result.json
+adapter_cycle_log.csv
+adapter_order_preview.csv
+adapter_order_preview.jsonl
+adapter_close_preview.csv
+adapter_close_preview.jsonl
+adapter_rejects.csv
+adapter_preview_ledger.csv
+```
+
+Validation result, first run with `--reset-ledger`:
+
+```text
+adapter_ok: true
+order_intents_read: 1
+close_intents_read: 1
+order_previews_created: 1
+close_previews_created: 1
+duplicate_previews_skipped: 0
+rejects: 0
+```
+
+Validation result, second run without `--reset-ledger`:
+
+```text
+adapter_ok: true
+order_intents_read: 1
+close_intents_read: 1
+order_previews_created: 0
+close_previews_created: 0
+duplicate_previews_skipped: 2
+rejects: 0
+```
+
+Decision:
+
+```text
+Adapter dry-run layer: PASS
+Adapter duplicate preview ledger: PASS
+Existing Mochipoyo/demo autotrade: still NOT CONNECTED
+```
+
 ## Non-goals for the next step
 
 Do not do these yet:
@@ -99,11 +164,11 @@ Do not place MT5 orders.
 Do not create live close orders.
 ```
 
-The next step is only a dry-run adapter layer.
+The next step is still a dry-run adapter and schema-discovery layer.
 
-## Proposed next script
+## Implemented adapter script
 
-Recommended script name:
+Script name:
 
 ```text
 scripts/run_gold_multi_strategy_autotrade_adapter_dry_run.py
@@ -117,6 +182,7 @@ Validate schema and safety fields.
 Normalize BUY/SELL order intents into one adapter preview schema.
 Normalize close intents into one adapter close preview schema.
 Write adapter-only dry-run outputs.
+Maintain adapter_preview_ledger.csv for duplicate preview prevention.
 Do not call MT5.
 Do not call existing Mochipoyo autotrade code.
 ```
@@ -144,7 +210,7 @@ strategy_status_latest.csv
 latest_multi_strategy_cycle_result.json
 ```
 
-The adapter should also support explicitly passing an alternate router directory:
+The adapter also supports explicitly passing an alternate router directory:
 
 ```cmd
 --router-out-dir data\research_results\gold_multi_strategy_dry_run_aggregate_only_time_exit
@@ -154,7 +220,7 @@ This is useful for controlled aggregate-only validation.
 
 ## Adapter output files
 
-Recommended files:
+Files:
 
 ```text
 latest_adapter_result.json
@@ -164,6 +230,7 @@ adapter_order_preview.jsonl
 adapter_close_preview.csv
 adapter_close_preview.jsonl
 adapter_rejects.csv
+adapter_preview_ledger.csv
 ```
 
 ## Order intent handling
@@ -184,11 +251,11 @@ OPEN_POSITION:
 
 OBSERVE_ONLY:
   do not create an executable order preview
-  log as observe-only or skip reason
+  count as observe_only_skipped
 
 DUPLICATE_SKIP:
   do not create an executable order preview
-  log as duplicate skip
+  count as duplicate_signal_skipped
 ```
 
 Required checks for OPEN_POSITION:
@@ -221,17 +288,19 @@ SELL:
   tp_price < entry_price_reference
 ```
 
-The adapter preview should include:
+The adapter preview includes:
 
 ```text
 adapter_action = WOULD_OPEN_POSITION_DRY_RUN
 side = BUY or SELL
 symbol
+broker_symbol
 strategy_id
 condition_id
 signal_key
 rank
 entry_type
+signal_time
 entry_price_reference
 sl_price
 tp_price
@@ -243,6 +312,7 @@ base_lot
 lot_multiplier
 effective_lot
 router_strategy_slot
+router_strategy_id
 router_source_path
 ```
 
@@ -285,11 +355,12 @@ source direction BUY  => close_side SELL
 source direction SELL => close_side BUY
 ```
 
-The adapter close preview should include:
+The adapter close preview includes:
 
 ```text
 adapter_action = WOULD_CLOSE_POSITION_DRY_RUN
 symbol
+broker_symbol
 strategy_id
 condition_id
 signal_key
@@ -305,18 +376,19 @@ realized_r_reference
 lot_weighted_r_reference
 effective_lot
 router_strategy_slot
+router_strategy_id
 router_source_path
 ```
 
 ## Reject handling
 
-Any intent that fails validation should be written to:
+Any intent that fails validation is written to:
 
 ```text
 adapter_rejects.csv
 ```
 
-Recommended reject fields:
+Reject fields:
 
 ```text
 reject_time_utc
@@ -325,32 +397,37 @@ intent_type
 strategy_id
 condition_id
 signal_key
+close_key
 router_strategy_slot
+router_strategy_id
 router_source_path
 reject_reason
 raw_json
 ```
 
-The adapter should not fail the whole run for one rejected intent unless `--strict` is provided.
+The adapter does not fail the whole run for one rejected intent unless `--strict` is provided.
 
-Recommended options:
+Options:
 
 ```text
 --strict
   return non-zero if any reject exists
 
---allow-symbol GOLD
+--allowed-symbol GOLD
   default allowed symbol
 
 --broker-symbol GOLD# or XAUUSD
   optional mapping target, but do not place order yet
+
+--reset-ledger
+  delete adapter_preview_ledger.csv before processing
 ```
 
 ## Duplicate handling at adapter level
 
-The adapter should keep its own preview ledger to avoid repeatedly emitting the same adapter preview.
+The adapter keeps its own preview ledger to avoid repeatedly emitting the same adapter preview.
 
-Recommended file:
+File:
 
 ```text
 adapter_preview_ledger.csv
@@ -371,10 +448,10 @@ close_preview_key = strategy_id | close_key | CLOSE_POSITION
 If already seen:
 
 ```text
-adapter_action = DUPLICATE_PREVIEW_SKIP
+duplicate_previews_skipped += 1
 ```
 
-and do not write a second executable preview row.
+and no second executable preview row is written.
 
 ## Recommended validation order
 
@@ -388,7 +465,7 @@ Input router directory:
 data/research_results/gold_multi_strategy_dry_run_aggregate_only_time_exit
 ```
 
-Expected adapter result:
+Observed adapter result:
 
 ```text
 router_ok: true
@@ -399,17 +476,29 @@ close_previews_created: 1
 rejects: 0
 ```
 
+Status:
+
+```text
+PASS
+```
+
 ### Step 2: Adapter duplicate preview test
 
 Run the same adapter command twice with the same adapter out directory.
 
-Expected second run:
+Observed second run:
 
 ```text
 order_previews_created: 0
 close_previews_created: 0
 duplicate_previews_skipped: 2
 rejects: 0
+```
+
+Status:
+
+```text
+PASS
 ```
 
 ### Step 3: Adapter normal router no-signal test
@@ -430,9 +519,15 @@ close_previews_created: 0
 rejects: 0
 ```
 
+Status:
+
+```text
+TODO
+```
+
 ## Later connection to existing demo autotrade
 
-Only after the adapter passes should actual connection design begin.
+Only after the adapter passes and the existing demo/autotrade schema is fully understood should actual connection design begin.
 
 Potential final flow:
 
@@ -463,6 +558,6 @@ Before writing into existing demo autotrade inputs, confirm:
 
 ## Current recommendation
 
-Implement the adapter as a separate dry-run script next.
+Next, inspect existing Mochipoyo/demo autotrade scripts and document the expected input schema.
 
-Do not connect the router directly to existing Mochipoyo/demo autotrade yet.
+Do not connect the router or adapter directly to existing Mochipoyo/demo autotrade yet.
