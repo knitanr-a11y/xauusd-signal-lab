@@ -25,6 +25,9 @@ The only close intent this script creates is a dry-run TIME_EXIT close intent
 for a signal that has not touched TP/SL and has enough confirmed M5 data to
 reach entry_time + max_hold_hours.
 
+Even when there are no signals to monitor, this script writes empty CSVs with
+headers so the dry-run lifecycle can be validated by file existence.
+
 Example:
 
     python scripts\run_gold_c_env_rr2_72h_position_monitor_once.py ^
@@ -38,7 +41,7 @@ import argparse
 import json
 import math
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -56,7 +59,6 @@ from scripts.research_gold_c_strict_h1_regular_bullish_m15_break import (  # noq
 
 DEFAULT_OUT_DIR = Path("data/research_results/gold_c_env_rr2_72h_live_scan")
 DEFAULT_M5_FILENAME = "goldsharp_m5.csv"
-
 SIGNAL_STATUS_CREATED = "DRY_RUN_SIGNAL_CREATED"
 
 MONITOR_LOG_COLUMNS = [
@@ -138,7 +140,18 @@ def parse_args() -> argparse.Namespace:
 
 
 def utc_now_text() -> str:
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def write_csv(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False, encoding="utf-8-sig")
+
+
+def ensure_empty_csv(path: Path, columns: list[str]) -> None:
+    if path.exists():
+        return
+    write_csv(pd.DataFrame(columns=columns), path)
 
 
 def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
@@ -146,11 +159,6 @@ def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
     df = pd.DataFrame([{col: row.get(col, "") for col in columns}])
     header = not path.exists()
     df.to_csv(path, mode="a", header=header, index=False, encoding="utf-8-sig")
-
-
-def write_csv(df: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(path, index=False, encoding="utf-8-sig")
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -554,7 +562,7 @@ def summarize_monitor_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
     for row in rows:
         status = str(row.get("position_status", ""))
         outcome = str(row.get("outcome", ""))
-        if status == "OPEN_UNRESOLVED_BEFORE_72H" or status == "WAITING_FOR_M5_AFTER_ENTRY":
+        if status in {"OPEN_UNRESOLVED_BEFORE_72H", "WAITING_FOR_M5_AFTER_ENTRY"}:
             counts["open_unresolved"] += 1
         if status == "TP_TOUCHED_DRY_RUN":
             counts["tp_touched"] += 1
@@ -569,6 +577,46 @@ def summarize_monitor_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
         if outcome == "INVALID_RISK":
             counts["invalid_risk"] += 1
     return counts
+
+
+def write_empty_outputs_for_no_signals(
+    *,
+    out_dir: Path,
+    monitor_log_path: Path,
+    close_log_path: Path,
+    latest_result_path: Path,
+    monitor_time: str,
+    ledger_path: Path,
+) -> None:
+    latest_rows_path = out_dir / "latest_position_monitor_rows.csv"
+    close_intent_path = out_dir / "close_intent_dry_run.json"
+
+    write_csv(pd.DataFrame(columns=MONITOR_LOG_COLUMNS), latest_rows_path)
+    ensure_empty_csv(monitor_log_path, MONITOR_LOG_COLUMNS)
+    ensure_empty_csv(close_log_path, CLOSE_INTENT_LOG_COLUMNS)
+
+    result = {
+        "scan_time_utc": monitor_time,
+        "condition_id": CONDITION_ID,
+        "signals_monitored": 0,
+        "open_unresolved": 0,
+        "tp_touched": 0,
+        "sl_touched": 0,
+        "time_exit_required": 0,
+        "time_exit_already_logged": 0,
+        "no_m5_path": 0,
+        "invalid_risk": 0,
+        "close_intent_created": 0,
+        "reason": "NO_DRY_RUN_SIGNAL_CREATED_ROWS",
+        "ledger_csv": str(ledger_path),
+        "outputs": {
+            "latest_position_monitor_rows": str(latest_rows_path),
+            "position_monitor_log": str(monitor_log_path),
+            "close_intent_log": str(close_log_path),
+            "close_intent_dry_run": str(close_intent_path) if close_intent_path.exists() else "",
+        },
+    }
+    write_json(latest_result_path, result)
 
 
 def main() -> int:
@@ -593,17 +641,18 @@ def main() -> int:
     existing_close_keys = close_log_keys(close_log)
 
     if signals.empty:
-        result = {
-            "scan_time_utc": monitor_time,
-            "condition_id": CONDITION_ID,
-            "signals_monitored": 0,
-            "close_intent_created": 0,
-            "reason": "NO_DRY_RUN_SIGNAL_CREATED_ROWS",
-            "ledger_csv": str(ledger_path),
-            "close_intent_log": str(close_log_path),
-        }
-        write_json(latest_result_path, result)
+        write_empty_outputs_for_no_signals(
+            out_dir=args.out_dir,
+            monitor_log_path=monitor_log_path,
+            close_log_path=close_log_path,
+            latest_result_path=latest_result_path,
+            monitor_time=monitor_time,
+            ledger_path=ledger_path,
+        )
         print("[INFO] no DRY_RUN_SIGNAL_CREATED rows to monitor")
+        print(f"[INFO] wrote empty latest rows: {args.out_dir / 'latest_position_monitor_rows.csv'}")
+        print(f"[INFO] ensured monitor log: {monitor_log_path}")
+        print(f"[INFO] ensured close intent log: {close_log_path}")
         return 0
 
     print(f"[INFO] loading M5: {args.csv_dir / args.m5_filename}")
@@ -636,6 +685,7 @@ def main() -> int:
     write_csv(monitor_df, args.out_dir / "latest_position_monitor_rows.csv")
     for row in monitor_rows:
         append_csv_row(monitor_log_path, row, MONITOR_LOG_COLUMNS)
+    ensure_empty_csv(close_log_path, CLOSE_INTENT_LOG_COLUMNS)
 
     if new_close_intents:
         write_json(
