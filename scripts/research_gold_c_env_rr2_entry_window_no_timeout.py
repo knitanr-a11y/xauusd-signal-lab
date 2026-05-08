@@ -39,6 +39,11 @@ Common rule:
         M5 first-touch without timeout: hold until TP or SL is touched.
         If TP and SL touch in the same M5 candle, SL wins by default.
 
+Important M5 coverage rule:
+    If entry_time is earlier than the first available M5 candle, the trade is
+    NO_M5_PATH. No-timeout evaluation must not skip months of missing M5 data
+    and judge an old entry using the first later M5 candle.
+
 Example:
     python scripts\research_gold_c_env_rr2_entry_window_no_timeout.py ^
       --csv-dir data\research_csv_snapshots\gold_cb_20260508_01 ^
@@ -259,6 +264,41 @@ def judge_buy_first_touch_no_timeout(
             "realized_r": np.nan,
             "bars_checked": 0,
             "hold_minutes": np.nan,
+            "m5_first_time": pd.NaT,
+            "m5_last_time": pd.NaT,
+            "m5_coverage_ok": False,
+        }
+
+    if m5.empty:
+        return {
+            "outcome": "NO_M5_PATH",
+            "exit_time": pd.NaT,
+            "exit_price": np.nan,
+            "realized_r": np.nan,
+            "bars_checked": 0,
+            "hold_minutes": np.nan,
+            "m5_first_time": pd.NaT,
+            "m5_last_time": pd.NaT,
+            "m5_coverage_ok": False,
+        }
+
+    m5_first_time = pd.Timestamp(m5["time"].min())
+    m5_last_time = pd.Timestamp(m5["time"].max())
+
+    # Critical no-timeout safety:
+    # If the entry occurred before the available M5 history starts, we cannot
+    # judge first-touch. Do not skip missing months and use the first later M5 bar.
+    if entry_time < m5_first_time:
+        return {
+            "outcome": "NO_M5_PATH",
+            "exit_time": pd.NaT,
+            "exit_price": np.nan,
+            "realized_r": np.nan,
+            "bars_checked": 0,
+            "hold_minutes": np.nan,
+            "m5_first_time": m5_first_time,
+            "m5_last_time": m5_last_time,
+            "m5_coverage_ok": False,
         }
 
     path = m5[m5["time"] >= entry_time].copy().sort_values("time", kind="mergesort").reset_index(drop=True)
@@ -270,6 +310,9 @@ def judge_buy_first_touch_no_timeout(
             "realized_r": np.nan,
             "bars_checked": 0,
             "hold_minutes": np.nan,
+            "m5_first_time": m5_first_time,
+            "m5_last_time": m5_last_time,
+            "m5_coverage_ok": False,
         }
 
     for checked, (_, bar) in enumerate(path.iterrows(), start=1):
@@ -286,6 +329,9 @@ def judge_buy_first_touch_no_timeout(
                     "realized_r": (tp_price - entry_price) / risk,
                     "bars_checked": checked,
                     "hold_minutes": hold_minutes,
+                    "m5_first_time": m5_first_time,
+                    "m5_last_time": m5_last_time,
+                    "m5_coverage_ok": True,
                 }
             return {
                 "outcome": "LOSS",
@@ -294,6 +340,9 @@ def judge_buy_first_touch_no_timeout(
                 "realized_r": -1.0,
                 "bars_checked": checked,
                 "hold_minutes": hold_minutes,
+                "m5_first_time": m5_first_time,
+                "m5_last_time": m5_last_time,
+                "m5_coverage_ok": True,
             }
         if hit_sl:
             return {
@@ -303,6 +352,9 @@ def judge_buy_first_touch_no_timeout(
                 "realized_r": -1.0,
                 "bars_checked": checked,
                 "hold_minutes": hold_minutes,
+                "m5_first_time": m5_first_time,
+                "m5_last_time": m5_last_time,
+                "m5_coverage_ok": True,
             }
         if hit_tp:
             return {
@@ -312,6 +364,9 @@ def judge_buy_first_touch_no_timeout(
                 "realized_r": (tp_price - entry_price) / risk,
                 "bars_checked": checked,
                 "hold_minutes": hold_minutes,
+                "m5_first_time": m5_first_time,
+                "m5_last_time": m5_last_time,
+                "m5_coverage_ok": True,
             }
 
     return {
@@ -321,6 +376,9 @@ def judge_buy_first_touch_no_timeout(
         "realized_r": np.nan,
         "bars_checked": int(len(path)),
         "hold_minutes": (pd.Timestamp(path.iloc[-1]["time"]) - entry_time).total_seconds() / 60.0 if not path.empty else np.nan,
+        "m5_first_time": m5_first_time,
+        "m5_last_time": m5_last_time,
+        "m5_coverage_ok": True,
     }
 
 
@@ -338,6 +396,9 @@ def evaluate_trades_no_timeout(trades: pd.DataFrame, m5: pd.DataFrame, args: arg
                 "realized_r": np.nan,
                 "bars_checked": 0,
                 "hold_minutes": np.nan,
+                "m5_first_time": pd.Timestamp(m5["time"].min()) if not m5.empty else pd.NaT,
+                "m5_last_time": pd.Timestamp(m5["time"].max()) if not m5.empty else pd.NaT,
+                "m5_coverage_ok": False,
             }
         else:
             result = judge_buy_first_touch_no_timeout(
@@ -522,11 +583,14 @@ def main() -> int:
         write_csv(pending, args.out_dir / f"trades_pending_{suffix}.csv")
         write_csv(evaluated, args.out_dir / f"trades_all_candidates_{suffix}.csv")
         evaluated_only = evaluated[evaluated["outcome"].isin(EVALUATED_OUTCOMES)].copy() if not evaluated.empty else pd.DataFrame()
+        no_m5_path = evaluated[evaluated["outcome"].eq("NO_M5_PATH")].copy() if not evaluated.empty else pd.DataFrame()
         write_csv(evaluated_only, args.out_dir / f"trades_evaluated_only_{suffix}.csv")
+        write_csv(no_m5_path, args.out_dir / f"trades_no_m5_path_{suffix}.csv")
 
     trades_pending_all = pd.concat(all_pending, ignore_index=True) if all_pending else pd.DataFrame()
     trades_all = pd.concat(all_evaluated, ignore_index=True) if all_evaluated else pd.DataFrame()
     trades_eval = trades_all[trades_all["outcome"].isin(EVALUATED_OUTCOMES)].copy() if not trades_all.empty else pd.DataFrame()
+    trades_no_m5 = trades_all[trades_all["outcome"].eq("NO_M5_PATH")].copy() if not trades_all.empty else pd.DataFrame()
 
     trigger_cols = [
         "condition_id",
@@ -552,6 +616,7 @@ def main() -> int:
     write_csv(select_cols(trades_pending_all, trigger_cols), args.out_dir / "m15_trigger_candidates_all_windows.csv")
     write_csv(trades_all, args.out_dir / "trades_all_candidates_all_windows.csv")
     write_csv(trades_eval, args.out_dir / "trades_evaluated_only_all_windows.csv")
+    write_csv(trades_no_m5, args.out_dir / "trades_no_m5_path_all_windows.csv")
     write_csv(summarize_all_by_condition(trades_all), args.out_dir / "summary_all_candidates_by_window.csv")
     write_csv(summarize_evaluated_by_condition(trades_eval), args.out_dir / "summary_evaluated_only_by_window.csv")
     write_csv(summarize_monthly_by_condition(trades_eval), args.out_dir / "monthly_evaluated_only_by_window.csv")
@@ -559,7 +624,7 @@ def main() -> int:
     summary = summarize_evaluated_by_condition(trades_eval)
     print("[INFO] completed")
     print(f"[INFO] h1_events={len(h1_events)} m15_base_triggers={len(m15_base)}")
-    print(f"[INFO] all_candidates={len(trades_all)} evaluated={len(trades_eval)}")
+    print(f"[INFO] all_candidates={len(trades_all)} evaluated={len(trades_eval)} no_m5_path={len(trades_no_m5)}")
     print(summary.to_string(index=False) if not summary.empty else "[INFO] no evaluated trades")
     print(f"[INFO] wrote outputs to: {args.out_dir}")
     return 0
