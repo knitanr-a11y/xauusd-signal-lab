@@ -9,6 +9,10 @@ The script also supports duplicate-path validation: when the same signal_key is
 already present in signal_ledger.csv, it marks duplicate=True, does not append a
 second ledger row, and writes a DUPLICATE_SKIP order intent instead of an
 OPEN_POSITION intent.
+
+Entry mode:
+- live_close: use the signal M15 close as the live-style entry reference.
+- next_m15_open: use the next M15 bar open, matching backtest-style entry.
 """
 
 from __future__ import annotations
@@ -20,6 +24,7 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -54,6 +59,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--csv-dir", type=Path, required=True)
     p.add_argument("--out-dir", type=Path, default=Path("data/research_results/gold_h1h4_bear_ab_historical_replay_simple"))
     p.add_argument("--as-of-m15-close-time", required=True)
+    p.add_argument(
+        "--entry-mode",
+        choices=["live_close", "next_m15_open"],
+        default="live_close",
+        help="live_close uses signal M15 close. next_m15_open uses the following M15 open, matching backtest-style entry.",
+    )
     p.add_argument("--reset-out-dir", action="store_true")
     p.add_argument("--sl-usd", type=float, default=10.0)
     p.add_argument("--tp-usd", type=float, default=20.0)
@@ -104,6 +115,64 @@ def ledger_has_signal_key(path: Path, signal_key: str) -> bool:
     return signal_key in set(ledger["signal_key"].astype(str))
 
 
+def apply_entry_mode(row: pd.Series, *, m15: pd.DataFrame, args: argparse.Namespace) -> pd.Series:
+    """Apply live_close or next_m15_open entry reference to a selected signal row."""
+    out = force_live_entry_fields(row, args)
+    out["entry_mode"] = str(args.entry_mode)
+
+    if args.entry_mode == "live_close":
+        out["entry_price_source"] = "signal_m15_close"
+        return out
+
+    close_time = pd.Timestamp(out.get("m15_close_time", out.get("close_time")))
+    m15_sorted = m15.sort_values("time", kind="mergesort").copy()
+    m15_sorted["time"] = pd.to_datetime(m15_sorted["time"], errors="coerce")
+    next_rows = m15_sorted[m15_sorted["time"].eq(close_time)].copy()
+    if next_rows.empty:
+        raise RuntimeError(
+            "--entry-mode next_m15_open requires a next M15 bar whose time equals "
+            f"the signal close_time. Missing next M15 open for close_time={close_time}."
+        )
+    next_bar = next_rows.iloc[0]
+    entry_price = float(next_bar["open"])
+    out["entry_time"] = close_time
+    out["entry_price"] = entry_price
+    out["sl_price"] = entry_price + float(args.sl_usd)
+    out["tp_price"] = entry_price - float(args.tp_usd)
+    out["risk_price"] = float(args.sl_usd)
+    out["reward_price"] = float(args.tp_usd)
+    out["rr"] = float(args.rr)
+    out["entry_price_source"] = "next_m15_open"
+    out["next_m15_open_time"] = close_time
+    out["next_m15_open_price"] = entry_price
+    return out
+
+
+def build_result_payload(*, row: pd.Series, key: str, duplicate: bool, reason: str, scan_time: str, asof: pd.Timestamp, args: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "scan_time_utc": scan_time,
+        "condition_family_id": CONDITION_FAMILY_ID,
+        "condition_id": str(row["condition_id"]),
+        "signal_found": True,
+        "rank": str(row["rank"]),
+        "a_pass": bool(row["a_pass"]),
+        "b_pass": bool(row["b_pass"]),
+        "trade_enabled": bool(row["trade_enabled"]),
+        "duplicate": bool(duplicate),
+        "signal_key": key,
+        "lot_multiplier": float(row["lot_multiplier"]),
+        "effective_lot": float(row["effective_lot"]),
+        "as_of_m15_close_time": str(asof),
+        "entry_mode": str(args.entry_mode),
+        "entry_time": str(row.get("entry_time", "")),
+        "entry_price_reference": float(row.get("entry_price")),
+        "entry_price_source": str(row.get("entry_price_source", "")),
+        "sl_price": float(row.get("sl_price")),
+        "tp_price": float(row.get("tp_price")),
+        "reason": reason,
+    }
+
+
 def main() -> int:
     args = parse_args()
     out_dir = repo_abs(args.out_dir)
@@ -115,6 +184,7 @@ def main() -> int:
     print(f"[INFO] condition_family_id={CONDITION_FAMILY_ID}")
     print(f"[INFO] out_dir={out_dir}")
     print(f"[INFO] as_of_m15_close_time={asof}")
+    print(f"[INFO] entry_mode={args.entry_mode}")
 
     frames = load_frames(args.csv_dir)
     write_csv(build_data_coverage(frames), out_dir / "data_coverage.csv")
@@ -130,14 +200,20 @@ def main() -> int:
     target = flags[pd.to_datetime(flags["close_time"], errors="coerce").eq(asof)].copy()
     target = target[target["rank"] != "NO_SIGNAL"].copy()
     if target.empty:
-        result = {"signal_found": False, "condition_family_id": CONDITION_FAMILY_ID, "as_of_m15_close_time": str(asof), "reason": "NO_SIGNAL_ON_AS_OF_M15_CLOSE_TIME"}
+        result = {
+            "signal_found": False,
+            "condition_family_id": CONDITION_FAMILY_ID,
+            "as_of_m15_close_time": str(asof),
+            "entry_mode": str(args.entry_mode),
+            "reason": "NO_SIGNAL_ON_AS_OF_M15_CLOSE_TIME",
+        }
         write_json(out_dir / "latest_historical_replay_simple_result.json", result)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
 
     priority = {"CORE_AB_CONFIRM": 100, "B_ONLY_SAFE": 50, "A_ONLY_OBSERVE": 10}
     target["priority"] = target["rank"].map(priority).fillna(0)
-    row = force_live_entry_fields(target.sort_values("priority", ascending=False).iloc[0], args)
+    row = apply_entry_mode(target.sort_values("priority", ascending=False).iloc[0], m15=m15, args=args)
     payload = build_payload(row)
     text = build_notification_text(payload)
     key = build_signal_key(row)
@@ -148,22 +224,7 @@ def main() -> int:
     reason = "DUPLICATE_SIGNAL_KEY" if duplicate else "NEW_HISTORICAL_DRY_RUN_SIGNAL_CREATED"
     intent = build_order_intent(row, dry_run=True, duplicate=duplicate, signal_key=key, reason=reason)
 
-    result = {
-        "scan_time_utc": scan_time,
-        "condition_family_id": CONDITION_FAMILY_ID,
-        "condition_id": str(row["condition_id"]),
-        "signal_found": True,
-        "rank": str(row["rank"]),
-        "a_pass": bool(row["a_pass"]),
-        "b_pass": bool(row["b_pass"]),
-        "trade_enabled": trade_enabled,
-        "duplicate": duplicate,
-        "signal_key": key,
-        "lot_multiplier": float(row["lot_multiplier"]),
-        "effective_lot": float(row["effective_lot"]),
-        "as_of_m15_close_time": str(asof),
-        "reason": reason,
-    }
+    result = build_result_payload(row=row, key=key, duplicate=duplicate, reason=reason, scan_time=scan_time, asof=asof, args=args)
     write_json(out_dir / "latest_scan_result.json", result)
     write_json(out_dir / "latest_signal_payload.json", payload)
     write_json(out_dir / "order_intent_dry_run.json", intent)
@@ -203,7 +264,7 @@ def main() -> int:
 
     print(text)
 
-    monitor = {}
+    monitor: dict[str, Any] = {}
     rc: int | str = "SKIPPED"
     if not args.skip_monitor:
         cmd = [
@@ -222,7 +283,12 @@ def main() -> int:
         if p.exists():
             monitor = json.loads(p.read_text(encoding="utf-8"))
 
-    final = {"cycle_ok": rc == 0 or rc == "SKIPPED", "position_monitor_returncode": rc, "historical_live_scan_result": result, "position_monitor_result": monitor}
+    final = {
+        "cycle_ok": rc == 0 or rc == "SKIPPED",
+        "position_monitor_returncode": rc,
+        "historical_live_scan_result": result,
+        "position_monitor_result": monitor,
+    }
     write_json(out_dir / "latest_historical_replay_simple_result.json", final)
     print(json.dumps(final, ensure_ascii=False, indent=2, sort_keys=True))
     return 0 if final["cycle_ok"] else 1
