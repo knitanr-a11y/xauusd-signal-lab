@@ -180,7 +180,20 @@ def ensure_ledger_columns(path: Path) -> pd.DataFrame:
     return df[LEDGER_COLUMNS].copy()
 
 
+def resolve_output_path(path: Path) -> Path:
+    """Resolve output paths relative to the repository root.
+
+    The script is normally executed from the repository root, but making this
+    explicit prevents FileNotFoundError when subprocess logging uses relative
+    paths after a reset-out-dir operation.
+    """
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
 def run_position_monitor(args: argparse.Namespace, log_dir: Path) -> tuple[int, Path, Path]:
+    log_dir_abs = resolve_output_path(log_dir)
+    log_dir_abs.mkdir(parents=True, exist_ok=True)
+
     cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_h1h4_bear_ab_position_monitor_once.py"),
@@ -206,8 +219,8 @@ def run_position_monitor(args: argparse.Namespace, log_dir: Path) -> tuple[int, 
         errors="replace",
     )
     stamp = utc_stamp()
-    stdout_path = log_dir / f"historical_replay_{stamp}_position_monitor_stdout.txt"
-    stderr_path = log_dir / f"historical_replay_{stamp}_position_monitor_stderr.txt"
+    stdout_path = log_dir_abs / f"historical_replay_{stamp}_position_monitor_stdout.txt"
+    stderr_path = log_dir_abs / f"historical_replay_{stamp}_position_monitor_stderr.txt"
     stdout_path.parent.mkdir(parents=True, exist_ok=True)
     stdout_path.write_text(completed.stdout or "", encoding="utf-8")
     stderr_path.write_text(completed.stderr or "", encoding="utf-8")
@@ -243,6 +256,7 @@ def main() -> int:
     cycle_result_path = args.out_dir / "latest_historical_dry_run_cycle_result.json"
     cycle_log_path = args.out_dir / "historical_dry_run_cycle_log.csv"
     command_log_dir = args.out_dir / "historical_dry_run_command_logs"
+    resolve_output_path(command_log_dir).mkdir(parents=True, exist_ok=True)
 
     print(f"[INFO] condition_family_id={CONDITION_FAMILY_ID}")
     print(f"[INFO] csv_dir={args.csv_dir}")
