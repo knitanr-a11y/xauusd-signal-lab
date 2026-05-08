@@ -4,6 +4,10 @@
 
 This avoids long Windows command-log paths. It replays one historical M15
 close_time, writes signal_ledger/previews, then calls the M1 position monitor.
+
+The script also supports duplicate-path validation: when the same signal_key is
+already present in signal_ledger.csv, it marks duplicate=True and does not append
+a second ledger row.
 """
 
 from __future__ import annotations
@@ -82,6 +86,23 @@ def append_row(path: Path, row: dict, columns: list[str]) -> None:
     pd.DataFrame([{c: row.get(c, "") for c in columns}]).to_csv(path, mode="a", header=not path.exists(), index=False, encoding="utf-8-sig")
 
 
+def read_ledger(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame(columns=LEDGER_COLUMNS)
+    df = pd.read_csv(path, encoding="utf-8-sig")
+    for col in LEDGER_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+    return df[LEDGER_COLUMNS].copy()
+
+
+def ledger_has_signal_key(path: Path, signal_key: str) -> bool:
+    ledger = read_ledger(path)
+    if ledger.empty or "signal_key" not in ledger.columns:
+        return False
+    return signal_key in set(ledger["signal_key"].astype(str))
+
+
 def main() -> int:
     args = parse_args()
     out_dir = repo_abs(args.out_dir)
@@ -121,6 +142,9 @@ def main() -> int:
     text = build_notification_text(payload)
     key = build_signal_key(row)
     scan_time = now_utc()
+    ledger_path = out_dir / "signal_ledger.csv"
+    duplicate = ledger_has_signal_key(ledger_path, key)
+    trade_enabled = bool(row["trade_enabled"])
 
     result = {
         "scan_time_utc": scan_time,
@@ -130,18 +154,20 @@ def main() -> int:
         "rank": str(row["rank"]),
         "a_pass": bool(row["a_pass"]),
         "b_pass": bool(row["b_pass"]),
-        "trade_enabled": bool(row["trade_enabled"]),
+        "trade_enabled": trade_enabled,
+        "duplicate": duplicate,
         "signal_key": key,
         "lot_multiplier": float(row["lot_multiplier"]),
         "effective_lot": float(row["effective_lot"]),
         "as_of_m15_close_time": str(asof),
+        "reason": "DUPLICATE_SIGNAL_KEY" if duplicate else "NEW_HISTORICAL_DRY_RUN_SIGNAL_CREATED",
     }
     write_json(out_dir / "latest_scan_result.json", result)
     write_json(out_dir / "latest_signal_payload.json", payload)
     write_json(out_dir / "order_intent_dry_run.json", intent)
     (out_dir / "notification_preview_latest.txt").write_text(text + "\n", encoding="utf-8")
 
-    if bool(row["trade_enabled"]):
+    if trade_enabled and not duplicate:
         ledger_row = {
             "created_at_utc": scan_time,
             "signal_key": key,
@@ -162,13 +188,16 @@ def main() -> int:
             "max_hold_hours": float(row["max_hold_hours"]),
             "a_pass": bool(row["a_pass"]),
             "b_pass": bool(row["b_pass"]),
-            "trade_enabled": bool(row["trade_enabled"]),
+            "trade_enabled": trade_enabled,
             "base_lot": float(row["base_lot"]),
             "lot_multiplier": float(row["lot_multiplier"]),
             "effective_lot": float(row["effective_lot"]),
             "status": "DRY_RUN_SIGNAL_CREATED",
         }
-        append_row(out_dir / "signal_ledger.csv", ledger_row, LEDGER_COLUMNS)
+        append_row(ledger_path, ledger_row, LEDGER_COLUMNS)
+        print("[INFO] ledger appended: new signal_key")
+    elif duplicate:
+        print("[INFO] duplicate signal_key detected; ledger append skipped")
 
     print(text)
 
