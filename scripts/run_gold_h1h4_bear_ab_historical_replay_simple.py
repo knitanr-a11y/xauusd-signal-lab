@@ -6,8 +6,9 @@ This avoids long Windows command-log paths. It replays one historical M15
 close_time, writes signal_ledger/previews, then calls the M1 position monitor.
 
 The script also supports duplicate-path validation: when the same signal_key is
-already present in signal_ledger.csv, it marks duplicate=True and does not append
-a second ledger row.
+already present in signal_ledger.csv, it marks duplicate=True, does not append a
+second ledger row, and writes a DUPLICATE_SKIP order intent instead of an
+OPEN_POSITION intent.
 """
 
 from __future__ import annotations
@@ -138,13 +139,14 @@ def main() -> int:
     target["priority"] = target["rank"].map(priority).fillna(0)
     row = force_live_entry_fields(target.sort_values("priority", ascending=False).iloc[0], args)
     payload = build_payload(row)
-    intent = build_order_intent(row, dry_run=True)
     text = build_notification_text(payload)
     key = build_signal_key(row)
     scan_time = now_utc()
     ledger_path = out_dir / "signal_ledger.csv"
     duplicate = ledger_has_signal_key(ledger_path, key)
     trade_enabled = bool(row["trade_enabled"])
+    reason = "DUPLICATE_SIGNAL_KEY" if duplicate else "NEW_HISTORICAL_DRY_RUN_SIGNAL_CREATED"
+    intent = build_order_intent(row, dry_run=True, duplicate=duplicate, signal_key=key, reason=reason)
 
     result = {
         "scan_time_utc": scan_time,
@@ -160,7 +162,7 @@ def main() -> int:
         "lot_multiplier": float(row["lot_multiplier"]),
         "effective_lot": float(row["effective_lot"]),
         "as_of_m15_close_time": str(asof),
-        "reason": "DUPLICATE_SIGNAL_KEY" if duplicate else "NEW_HISTORICAL_DRY_RUN_SIGNAL_CREATED",
+        "reason": reason,
     }
     write_json(out_dir / "latest_scan_result.json", result)
     write_json(out_dir / "latest_signal_payload.json", payload)
@@ -197,7 +199,7 @@ def main() -> int:
         append_row(ledger_path, ledger_row, LEDGER_COLUMNS)
         print("[INFO] ledger appended: new signal_key")
     elif duplicate:
-        print("[INFO] duplicate signal_key detected; ledger append skipped")
+        print("[INFO] duplicate signal_key detected; ledger append skipped; order intent is DUPLICATE_SKIP")
 
     print(text)
 
