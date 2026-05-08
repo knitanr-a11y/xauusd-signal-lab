@@ -13,11 +13,16 @@ Mochipoyo/autotrade files.
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-from scripts.research_gold_h1h4_bear_m15_low_break_ab_classifier import (
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.research_gold_h1h4_bear_m15_low_break_ab_classifier import (  # noqa: E402
     CONDITION_FAMILY_ID,
     add_indicators,
     attach_context,
@@ -25,7 +30,7 @@ from scripts.research_gold_h1h4_bear_m15_low_break_ab_classifier import (
     load_frames,
     write_csv,
 )
-from scripts.run_gold_h1h4_bear_ab_live_scan_once import compute_live_ab_flags
+from scripts.run_gold_h1h4_bear_ab_live_scan_once import compute_live_ab_flags  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,7 +41,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--start", type=str, default="")
     p.add_argument("--end", type=str, default="")
     p.add_argument("--limit", type=int, default=30)
-    p.add_argument("--prefer-with-backtest-outcome", action="store_true")
     p.add_argument("--sl-usd", type=float, default=10.0)
     p.add_argument("--tp-usd", type=float, default=20.0)
     p.add_argument("--rr", type=float, default=2.0)
@@ -76,7 +80,6 @@ def main() -> int:
     if args.end:
         candidates = candidates[candidates["as_of_m15_close_time"] <= pd.Timestamp(args.end)].copy()
 
-    # Backtest-style rows are useful because they carry next-M15-open entry references.
     bt = build_signal_candidates(ctx, args)
     if not bt.empty:
         bt_key = bt[["m15_close_time", "entry_time", "entry_price", "sl_price", "tp_price", "rank", "condition_id"]].copy()
@@ -89,43 +92,15 @@ def main() -> int:
             "rank": "backtest_rank",
             "condition_id": "backtest_condition_id",
         })
-        candidates = candidates.merge(
-            bt_key.drop(columns=["m15_close_time"]),
-            on="as_of_m15_close_time",
-            how="left",
-        )
+        candidates = candidates.merge(bt_key.drop(columns=["m15_close_time"]), on="as_of_m15_close_time", how="left")
 
     cols = [
-        "rank",
-        "condition_id",
-        "signal_bar_time",
-        "as_of_m15_close_time",
-        "a_pass",
-        "b_pass",
-        "trade_enabled",
-        "close",
-        "low",
-        "high",
-        "close_pos",
-        "range_atr_ratio",
-        "macd_hist",
-        "macd_hist_delta",
-        "h1_close_time",
-        "h1_close",
-        "h1_ema20",
-        "h1_ema50",
-        "h1_dist_e20_atr_sell",
-        "h4_close_time",
-        "h4_close",
-        "h4_ema20",
-        "h4_ema50",
-        "d1_close_time",
-        "d1_close",
-        "d1_ema20",
-        "backtest_entry_time",
-        "backtest_entry_price",
-        "backtest_sl_price",
-        "backtest_tp_price",
+        "rank", "condition_id", "signal_bar_time", "as_of_m15_close_time", "a_pass", "b_pass", "trade_enabled",
+        "close", "low", "high", "close_pos", "range_atr_ratio", "macd_hist", "macd_hist_delta",
+        "h1_close_time", "h1_close", "h1_ema20", "h1_ema50", "h1_dist_e20_atr_sell",
+        "h4_close_time", "h4_close", "h4_ema20", "h4_ema50",
+        "d1_close_time", "d1_close", "d1_ema20",
+        "backtest_entry_time", "backtest_entry_price", "backtest_sl_price", "backtest_tp_price",
     ]
     for col in cols:
         if col not in candidates.columns:
