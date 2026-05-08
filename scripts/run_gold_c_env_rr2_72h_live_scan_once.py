@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Dry-run live scan once for GOLD C_ENV RR2 72h setup.
+r"""Dry-run live scan once for GOLD C_ENV RR2 72h setup.
 
 This is intentionally separated from Mochipoyo live/demo/autotrade code.
 It reads GOLD CSVs, checks only the latest confirmed M15 signal point, and
