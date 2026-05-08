@@ -22,6 +22,10 @@ Important safety boundaries:
 - Strategy-specific outputs remain in strategy-specific out directories.
 - Router only reads/copies/references strategy dry-run outputs.
 
+Modes:
+- Default: run each enabled strategy once, then aggregate outputs.
+- --aggregate-only: do not run strategy scripts; only aggregate existing outputs.
+
 Example:
 
     python scripts\run_gold_multi_strategy_dry_run_cycle.py ^
@@ -90,6 +94,7 @@ ROUTER_CYCLE_LOG_COLUMNS = [
     "router_cycle_start_utc",
     "router_cycle_end_utc",
     "router_ok",
+    "router_mode",
     "csv_dir",
     "router_out_dir",
     "buy_enabled",
@@ -99,6 +104,7 @@ ROUTER_CYCLE_LOG_COLUMNS = [
     "strategies_ok",
     "signals_found_count",
     "open_order_intent_count",
+    "observe_only_intent_count",
     "duplicate_skip_count",
     "close_intent_count",
     "strategy_status_latest",
@@ -116,6 +122,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--sell-out-dir", type=Path, default=DEFAULT_SELL_OUT_DIR)
     p.add_argument("--disable-buy", action="store_true")
     p.add_argument("--disable-sell", action="store_true")
+    p.add_argument("--aggregate-only", action="store_true", help="Do not run strategy scripts; only aggregate existing strategy outputs.")
     p.add_argument("--latest-confirmed-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m5-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m1-policy", choices=["last", "second_last"], default="last")
@@ -200,6 +207,17 @@ def load_strategy_outputs(strategy_out_dir: Path) -> dict[str, Any]:
     }
 
 
+def aggregate_only_cycle_ok(strategy_out_dir: Path) -> bool:
+    outputs = load_strategy_outputs(strategy_out_dir)
+    if outputs["latest_dry_run_cycle_result"]:
+        return bool(outputs["latest_dry_run_cycle_result"].get("cycle_ok", False))
+    if outputs["latest_dry_run_loop_cycle_result"]:
+        return bool(outputs["latest_dry_run_loop_cycle_result"].get("cycle", {}).get("cycle_ok", False))
+    scan = outputs["latest_scan_result"]
+    monitor = outputs["latest_position_monitor_result"]
+    return bool(scan or monitor)
+
+
 def normalize_buy_status(router_cycle_start: str, out_dir: Path, returncode: int | str) -> dict[str, Any]:
     outputs = load_strategy_outputs(out_dir)
     scan = outputs["latest_scan_result"]
@@ -214,7 +232,7 @@ def normalize_buy_status(router_cycle_start: str, out_dir: Path, returncode: int
         "direction": "BUY",
         "strategy_out_dir": str(out_dir),
         "runner_returncode": returncode,
-        "cycle_ok": cycle.get("cycle_ok", returncode == 0),
+        "cycle_ok": cycle.get("cycle_ok", aggregate_only_cycle_ok(out_dir) if returncode == "AGGREGATE_ONLY" else returncode == 0),
         "signal_found": scan.get("signal_found", ""),
         "rank": scan.get("rank", ""),
         "trade_enabled": scan.get("trade_enabled", ""),
@@ -254,7 +272,7 @@ def normalize_sell_status(router_cycle_start: str, out_dir: Path, returncode: in
         "direction": "SELL",
         "strategy_out_dir": str(out_dir),
         "runner_returncode": returncode,
-        "cycle_ok": cycle.get("cycle", {}).get("cycle_ok", returncode == 0),
+        "cycle_ok": cycle.get("cycle", {}).get("cycle_ok", aggregate_only_cycle_ok(out_dir) if returncode == "AGGREGATE_ONLY" else returncode == 0),
         "signal_found": scan.get("signal_found", ""),
         "rank": scan.get("rank", ""),
         "trade_enabled": scan.get("trade_enabled", ""),
@@ -317,11 +335,19 @@ def count_order_intents(order_intents: list[dict[str, Any]], intent_type: str) -
     return sum(1 for item in order_intents if str(item.get("intent_type", "")) == intent_type)
 
 
+def boolish(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
+
+
 def main() -> int:
     args = parse_args()
     args.router_out_dir.mkdir(parents=True, exist_ok=True)
     router_start = utc_now_text()
+    router_mode = "AGGREGATE_ONLY" if args.aggregate_only else "RUN_AND_AGGREGATE"
     print(f"[INFO] router_start_utc={router_start}")
+    print(f"[INFO] router_mode={router_mode}")
     print(f"[INFO] csv_dir={args.csv_dir}")
     print(f"[INFO] router_out_dir={args.router_out_dir}")
     print(f"[INFO] buy_enabled={not args.disable_buy} sell_enabled={not args.disable_sell}")
@@ -329,14 +355,20 @@ def main() -> int:
     buy_rc: int | str = "DISABLED"
     sell_rc: int | str = "DISABLED"
 
-    if not args.disable_buy:
-        buy_rc = run_cmd(build_buy_cmd(args))
-        if buy_rc != 0 and not args.continue_on_strategy_error:
-            print("[ERROR] BUY strategy runner failed; stopping router", flush=True)
-    if (buy_rc == 0 or args.disable_buy or args.continue_on_strategy_error) and not args.disable_sell:
-        sell_rc = run_cmd(build_sell_cmd(args))
-        if sell_rc != 0 and not args.continue_on_strategy_error:
-            print("[ERROR] SELL strategy runner failed", flush=True)
+    if args.aggregate_only:
+        if not args.disable_buy:
+            buy_rc = "AGGREGATE_ONLY"
+        if not args.disable_sell:
+            sell_rc = "AGGREGATE_ONLY"
+    else:
+        if not args.disable_buy:
+            buy_rc = run_cmd(build_buy_cmd(args))
+            if buy_rc != 0 and not args.continue_on_strategy_error:
+                print("[ERROR] BUY strategy runner failed; stopping router", flush=True)
+        if (buy_rc == 0 or args.disable_buy or args.continue_on_strategy_error) and not args.disable_sell:
+            sell_rc = run_cmd(build_sell_cmd(args))
+            if sell_rc != 0 and not args.continue_on_strategy_error:
+                print("[ERROR] SELL strategy runner failed", flush=True)
 
     statuses: list[dict[str, Any]] = []
     if not args.disable_buy:
@@ -352,12 +384,16 @@ def main() -> int:
     for status in statuses:
         order_intent = read_order_intent(str(status.get("order_intent_path", "")))
         if order_intent is not None:
+            order_intent = dict(order_intent)
             order_intent["router_strategy_slot"] = status["strategy_slot"]
             order_intent["router_strategy_id"] = status["strategy_id"]
+            order_intent["router_source_path"] = status.get("order_intent_path", "")
             order_intents.append(order_intent)
         for close_intent in read_close_intents(str(status.get("close_intent_path", ""))):
+            close_intent = dict(close_intent)
             close_intent["router_strategy_slot"] = status["strategy_slot"]
             close_intent["router_strategy_id"] = status["strategy_id"]
+            close_intent["router_source_path"] = status.get("close_intent_path", "")
             close_intents.append(close_intent)
 
     order_intents_path = args.router_out_dir / "combined_order_intent_dry_run.jsonl"
@@ -365,13 +401,15 @@ def main() -> int:
     write_jsonl(order_intents_path, order_intents)
     write_jsonl(close_intents_path, close_intents)
 
-    strategies_ok = all(bool(status.get("cycle_ok", False)) for status in statuses) if statuses else True
+    strategies_ok = all(boolish(status.get("cycle_ok", False)) for status in statuses) if statuses else True
     router_end = utc_now_text()
-    router_ok = strategies_ok and (buy_rc in [0, "DISABLED"]) and (sell_rc in [0, "DISABLED"])
+    rc_ok = (buy_rc in [0, "DISABLED", "AGGREGATE_ONLY"]) and (sell_rc in [0, "DISABLED", "AGGREGATE_ONLY"])
+    router_ok = strategies_ok and rc_ok
     summary = {
-        "schema_version": "gold_multi_strategy_dry_run_router_v1",
+        "schema_version": "gold_multi_strategy_dry_run_router_v2",
         "router_cycle_start_utc": router_start,
         "router_cycle_end_utc": router_end,
+        "router_mode": router_mode,
         "router_ok": bool(router_ok),
         "csv_dir": str(args.csv_dir),
         "router_out_dir": str(args.router_out_dir),
@@ -380,8 +418,9 @@ def main() -> int:
         "buy_returncode": buy_rc,
         "sell_returncode": sell_rc,
         "strategies_ok": bool(strategies_ok),
-        "signals_found_count": int(sum(1 for s in statuses if str(s.get("signal_found", "")).lower() == "true" or s.get("signal_found") is True)),
+        "signals_found_count": int(sum(1 for s in statuses if boolish(s.get("signal_found", False)))),
         "open_order_intent_count": int(count_order_intents(order_intents, "OPEN_POSITION")),
+        "observe_only_intent_count": int(count_order_intents(order_intents, "OBSERVE_ONLY")),
         "duplicate_skip_count": int(count_order_intents(order_intents, "DUPLICATE_SKIP")),
         "close_intent_count": int(len(close_intents)),
         "strategy_status": statuses,
@@ -400,6 +439,7 @@ def main() -> int:
         "router_cycle_start_utc": router_start,
         "router_cycle_end_utc": router_end,
         "router_ok": bool(router_ok),
+        "router_mode": router_mode,
         "csv_dir": str(args.csv_dir),
         "router_out_dir": str(args.router_out_dir),
         "buy_enabled": not args.disable_buy,
@@ -409,6 +449,7 @@ def main() -> int:
         "strategies_ok": bool(strategies_ok),
         "signals_found_count": summary["signals_found_count"],
         "open_order_intent_count": summary["open_order_intent_count"],
+        "observe_only_intent_count": summary["observe_only_intent_count"],
         "duplicate_skip_count": summary["duplicate_skip_count"],
         "close_intent_count": summary["close_intent_count"],
         "strategy_status_latest": str(strategy_status_path),
