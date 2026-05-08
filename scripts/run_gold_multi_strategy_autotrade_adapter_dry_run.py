@@ -49,6 +49,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -252,7 +253,10 @@ def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
 def read_ledger(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame(columns=LEDGER_COLUMNS)
-    df = pd.read_csv(path, encoding="utf-8-sig")
+    try:
+        df = pd.read_csv(path, encoding="utf-8-sig")
+    except EmptyDataError:
+        return pd.DataFrame(columns=LEDGER_COLUMNS)
     for col in LEDGER_COLUMNS:
         if col not in df.columns:
             df[col] = ""
