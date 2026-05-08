@@ -14,9 +14,9 @@ This strategy is still separated from:
 
 - Mochipoyo live/demo/autotrade flow
 - Existing `run_mochipoyo_gold_demo_autotrade_forever_aligned.bat`
-- GOLD C_ENV BUY strategy
-- Multi-strategy router
 - Real MT5 order placement
+
+It is now also readable by the isolated BUY/SELL multi-strategy dry-run router.
 
 ## Current strategy ranks
 
@@ -248,6 +248,8 @@ resolved signal skip path: PASS
 duplicate order intent safety path: PASS
 entry_mode live_close path: PASS
 entry_mode next_m15_open path: PASS
+TIME_EXIT close intent path: PASS
+2-cycle SELL isolated dry-run loop path: PASS
 ```
 
 ## Resolved-position handling
@@ -282,13 +284,135 @@ lot.effective_lot = 0.0
 
 This prevents a duplicate signal from leaving an `OPEN_POSITION`-like order intent file behind.
 
+## TIME_EXIT validation
+
+Validated TIME_EXIT case:
+
+```text
+as_of_m15_close_time: 2026-03-13 21:45:00
+entry_mode: next_m15_open
+rank: B_ONLY_SAFE
+entry: 5025.38
+SL: 5035.38
+TP: 5005.38
+```
+
+Position monitor result:
+
+```text
+signals_monitored: 1
+tp_touched: 0
+sl_touched: 0
+time_exit_required: 1
+close_intent_created: 1
+position_results_created: 1
+```
+
+Close intent result:
+
+```text
+intent_type: CLOSE_POSITION
+close_reason: TIME_EXIT_12H
+direction: SELL
+close_side: BUY
+dry_run: true
+action: DRY_RUN_ONLY_NO_MT5_CLOSE_ORDER
+```
+
+Note:
+
+This case is Friday night / weekend-close-adjacent. The horizon was `2026-03-14 09:45:00`, while `exit_time_reference` was `2026-03-13 22:57:00`, because available M1 data ended before the 12h horizon. The close intent path is valid, but future production integration should distinguish true 12h TIME_EXIT from market-close/data-gap exit references.
+
+## SELL isolated loop validation
+
+Script:
+
+```text
+scripts/run_gold_h1h4_bear_ab_dry_run_loop.py
+```
+
+Validation command pattern:
+
+```cmd
+python scripts\run_gold_h1h4_bear_ab_dry_run_loop.py --csv-dir "<MT5_FILES_DIR>" --out-dir data\research_results\gold_h1h4_bear_ab_live_loop --iterations 2 --interval-seconds 0
+```
+
+Observed result:
+
+```text
+cycle_ok: true on both cycles
+signal_found: false
+scan_reason: NO_SIGNAL_ON_LATEST_CONFIRMED_M15
+monitor_reason: NO_DRY_RUN_SIGNAL_CREATED_ROWS
+```
+
+## Multi-strategy router validation
+
+Router script:
+
+```text
+scripts/run_gold_multi_strategy_dry_run_cycle.py
+```
+
+Router output directory:
+
+```text
+data/research_results/gold_multi_strategy_dry_run
+```
+
+Router outputs:
+
+```text
+latest_multi_strategy_cycle_result.json
+multi_strategy_cycle_log.csv
+strategy_status_latest.csv
+combined_order_intent_dry_run.jsonl
+combined_close_intent_dry_run.jsonl
+```
+
+Validated no-signal run:
+
+```text
+router_ok: true
+buy_returncode: 0
+sell_returncode: 0
+strategies_ok: true
+signals_found_count: 0
+open_order_intent_count: 0
+close_intent_count: 0
+```
+
+Validated aggregate-only mode:
+
+```text
+--aggregate-only
+```
+
+Using SELL TIME_EXIT output as `--sell-out-dir`, the router correctly aggregated:
+
+```text
+router_mode: AGGREGATE_ONLY
+router_ok: true
+signals_found_count: 1
+open_order_intent_count: 1
+close_intent_count: 1
+```
+
+The aggregated order/close intents include:
+
+```text
+router_strategy_slot: SELL_H1H4_BEAR_AB
+router_strategy_id: GOLD_H1H4_BEAR_M15_LOW_BREAK_AB_CLASSIFIER_FIXED10_RR2_12H
+router_source_path: <strategy-specific intent path>
+```
+
 ## Remaining validation items
 
 Next items:
 
 ```text
-TIME_EXIT path validation
-15-minute continuous dry-run loop validation
-BUY/SELL router integration preparation
-Existing Mochipoyo/demo/autotrade integration planning
+Existing Mochipoyo/demo/autotrade connection design
+Router-to-autotrade dry-run adapter design
+Optional: BUY-side resolved-ledger parity review
+Optional: distinguish market-close/data-gap TIME_EXIT references from true 12h horizon exits
 ```
