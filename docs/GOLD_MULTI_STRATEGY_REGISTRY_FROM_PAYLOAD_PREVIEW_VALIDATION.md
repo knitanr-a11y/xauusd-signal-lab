@@ -196,6 +196,80 @@ Decision:
 PASS.
 ```
 
+## End-to-end policy preview validation
+
+After generating and reconciling the preview registry row, the registry-aware policy preview was run using the generated registry row.
+
+Command:
+
+```cmd
+python scripts\run_gold_multi_strategy_registry_policy_preview.py --input-csv data\research_results\gold_multi_strategy_position_policy_preflight\order_payloads_policy_test_same_direction_buy.csv --positions-csv data\research_results\gold_multi_strategy_position_policy_preflight\mock_positions_same_strategy_buy_c.csv --registry-csv data\research_results\gold_multi_strategy_position_registry\position_registry_from_payload_preview.csv --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --out-dir data\research_results\gold_multi_strategy_position_registry --symbol GOLD# --max-total-positions 5 --max-lot-per-order 0.02
+```
+
+Observed summary:
+
+```text
+preview_ok: true
+reason: POLICY_PREVIEW_EVALUATED
+rows_in: 1
+rows_out: 1
+allow_rows: 0
+blocked_rows: 1
+same_strategy_blocked_rows: 1
+opposite_direction_blocked_rows: 0
+total_position_cap_blocked_rows: 0
+per_order_lot_blocked_rows: 0
+duplicate_key_blocked_rows: 0
+registry_inconsistency_blocked_rows: 0
+reconcile_status_counts:
+  REGISTRY_ACTIVE_MATCHED: 1
+```
+
+Observed row:
+
+```text
+requested_strategy_key=BUY_C_ENV_RR2_72H
+requested_symbol=GOLD#
+requested_direction=BUY
+requested_lot=0.01
+existing_total_positions=1
+existing_symbol_positions=1
+existing_symbol_directions=BUY
+registry_matched_rows=1
+registry_missing_position_rows=0
+unregistered_position_rows=0
+same_strategy_blocked=true
+opposite_direction_blocked=false
+total_position_cap_blocked=false
+per_order_lot_blocked=false
+duplicate_key_blocked=false
+registry_inconsistency_blocked=false
+final_policy_decision=BLOCK
+```
+
+Final policy reason:
+
+```text
+same_strategy: ACTIVE matched registry position already exists for strategy=BUY_C_ENV_RR2_72H; tickets=['990001']
+```
+
+Safety output:
+
+```text
+mt5_imported: false
+order_check_called_count: 0
+order_send_called_count: 0
+registry_mutated: false
+ledger_mutated: false
+trigger_state_mutated: false
+```
+
+Decision:
+
+```text
+PASS.
+```
+
 ## Validation matrix
 
 Current registry-from-payload preview state:
@@ -205,7 +279,22 @@ Payload row converted to registry preview row: PASS
 Synthetic ticket/order/deal metadata stored: PASS
 strategy_key and strategy_alias inferred correctly: PASS
 Preview registry row reconciles with matching mock position: PASS
+Generated registry row feeds registry-aware policy preview: PASS
+same_strategy BLOCK from generated registry row: PASS
 Read-only safety counters: PASS
+```
+
+## End-to-end validated chain
+
+The following chain is now validated without touching the real sender:
+
+```text
+controlled payload
+→ synthetic successful send result
+→ preview position_registry row
+→ registry reconciliation
+→ registry-aware policy preview
+→ same_strategy BLOCK
 ```
 
 ## Design implication
@@ -227,30 +316,33 @@ scripts/run_gold_multi_strategy_position_registry_reconcile_dry_run.py
 scripts/run_gold_multi_strategy_registry_policy_preview.py
 ```
 
-## Recommended next validation
-
-Run registry-aware policy preview using the generated registry row:
-
-```cmd
-python scripts\run_gold_multi_strategy_registry_policy_preview.py --input-csv data\research_results\gold_multi_strategy_position_policy_preflight\order_payloads_policy_test_same_direction_buy.csv --positions-csv data\research_results\gold_multi_strategy_position_policy_preflight\mock_positions_same_strategy_buy_c.csv --registry-csv data\research_results\gold_multi_strategy_position_registry\position_registry_from_payload_preview.csv --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --out-dir data\research_results\gold_multi_strategy_position_registry --symbol GOLD# --max-total-positions 5 --max-lot-per-order 0.02
-```
-
-Expected:
-
-```text
-same_strategy_blocked_rows: 1
-registry_inconsistency_blocked_rows: 0
-final_policy_decision: BLOCK
-```
-
 ## Current recommendation
 
 Do not modify the real sender yet.
 
-Next safe step after policy-preview validation:
+Next safe step:
 
 ```text
 Design sender-adjacent dry-run integration for registry row creation after simulated successful send.
+```
+
+The next layer should still be dry-run only and should not call `order_send`.
+
+Potential next script:
+
+```text
+scripts/run_gold_multi_strategy_demo_send_registry_preview_cycle.py
+```
+
+Purpose:
+
+```text
+Take current payload output from the guarded demo send chain,
+simulate a successful send result,
+build a preview registry row,
+run reconciliation,
+run registry-aware policy preview,
+and write a single summary JSON/CSV.
 ```
 
 Do not modify yet:
