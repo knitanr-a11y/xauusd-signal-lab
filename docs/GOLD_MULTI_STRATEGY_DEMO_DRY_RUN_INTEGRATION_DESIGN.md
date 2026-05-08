@@ -136,6 +136,48 @@ order_send_called_count: 0
 sent_rows: 0
 ```
 
+### One-cycle multi-strategy demo dry-run runner
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_demo_dry_run_cycle.py
+```
+
+Validated command pattern:
+
+```cmd
+python scripts\run_gold_multi_strategy_demo_dry_run_cycle.py --csv-dir "<MT5_FILES_DIR>" --out-dir data\research_results\gold_multi_strategy_demo_dry_run_cycle --router-out-dir data\research_results\gold_multi_strategy_dry_run --buy-out-dir data\research_results\gold_c_env_rr2_72h_live_scan --sell-out-dir data\research_results\gold_h1h4_bear_ab_live_loop --adapter-out-dir data\research_results\gold_multi_strategy_autotrade_adapter_dry_run --payload-out-dir data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run --mt5-dry-run-out-dir data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\mt5_order_check_dry_run --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run\dry_run_order_ledger.csv --broker-symbol GOLD# --fixed-lot 0.01 --magic 26050601 --expected-login 75539039 --position-policy block_any --max-symbol-positions 1 --max-symbol-lot 0.01 --max-orders 1
+```
+
+Validated result on latest no-signal cycle:
+
+```text
+cycle_ok: true
+safe_no_send: true
+router_returncode: 0
+adapter_returncode: 0
+payload_bridge_returncode: 0
+mt5_dry_run_returncode: SKIPPED_NO_PAYLOAD_ROWS
+signals_found_count: 0
+open_order_intent_count: 0
+close_intent_count: 0
+order_intents_read: 0
+order_previews_created: 0
+payload_rows_out: 0
+mt5_order_send_called_count: 0
+mt5_sent_rows: 0
+```
+
+Decision:
+
+```text
+One-cycle integrated dry-run no-signal path: PASS
+safe_no_send: PASS
+Existing Mochipoyo BAT unchanged: PASS
+Real order send: NOT CALLED
+```
+
 ## Non-goals for the next integration step
 
 Do not do these yet:
@@ -151,9 +193,9 @@ Do not pass --send to send_mt5_order_from_payload.py.
 Do not create live close orders.
 ```
 
-## Proposed new runner
+## Implemented one-cycle runner
 
-Recommended script:
+Script:
 
 ```text
 scripts/run_gold_multi_strategy_demo_dry_run_cycle.py
@@ -172,38 +214,38 @@ Run one full multi-strategy dry-run cycle:
 6. Append one combined cycle log row
 ```
 
-Recommended output directory:
+Default output directory:
 
 ```text
 data/research_results/gold_multi_strategy_demo_dry_run_cycle
 ```
 
-Recommended strategy-specific output directories:
+Strategy-specific output directories:
 
 ```text
 data/research_results/gold_c_env_rr2_72h_live_scan
 data/research_results/gold_h1h4_bear_ab_live_loop
 ```
 
-Recommended router output directory:
+Router output directory:
 
 ```text
 data/research_results/gold_multi_strategy_dry_run
 ```
 
-Recommended adapter output directory:
+Adapter output directory:
 
 ```text
 data/research_results/gold_multi_strategy_autotrade_adapter_dry_run
 ```
 
-Recommended payload bridge output directory:
+Payload bridge output directory:
 
 ```text
 data/research_results/gold_multi_strategy_mochipoyo_payload_bridge_dry_run
 ```
 
-Recommended MT5 dry-run output directory:
+MT5 dry-run output directory:
 
 ```text
 data/research_results/gold_multi_strategy_mochipoyo_payload_bridge_dry_run/mt5_order_check_dry_run
@@ -266,9 +308,9 @@ Recommended BAT behavior:
 - stop on cycle errors unless explicitly disabled
 ```
 
-## Proposed one-cycle runner arguments
+## One-cycle runner arguments
 
-Recommended core arguments:
+Core arguments:
 
 ```text
 --csv-dir <MT5_FILES_DIR>
@@ -301,14 +343,14 @@ Do not include:
 
 ## Combined cycle output files
 
-Recommended outputs:
+Outputs:
 
 ```text
 latest_multi_strategy_demo_dry_run_cycle_result.json
 multi_strategy_demo_dry_run_cycle_log.csv
 ```
 
-Recommended cycle summary fields:
+Cycle summary fields:
 
 ```text
 cycle_start_utc
@@ -372,9 +414,9 @@ safe_no_send: true
 cycle_ok: true, if and only if blocked policy is explicitly allowed as safe
 ```
 
-The one-cycle runner should normalize this as a safe block, not a fatal error, when `--treat-position-block-as-safe` is true.
+The one-cycle runner normalizes this as a safe block, not a fatal error, when `--treat-position-block-as-safe` is true.
 
-Recommended default:
+Default:
 
 ```text
 --treat-position-block-as-safe enabled
@@ -417,36 +459,18 @@ market-close/data-gap TIME_EXIT handling
 
 ## Recommended validation sequence
 
-### Step 1: Create one-cycle dry-run runner
+### Step 1: One-cycle dry-run runner
 
-Implement:
+Implemented and validated:
 
 ```text
 scripts/run_gold_multi_strategy_demo_dry_run_cycle.py
 ```
 
-Run with the current open demo position.
-
-Expected if no fresh router signal:
+Status:
 
 ```text
-cycle_ok: true
-router_ok: true
-safe_no_send: true
-payload_rows_out: 0 or no new payload
-mt5_order_send_called_count: 0
-mt5_sent_rows: 0
-```
-
-Expected if using aggregate-only TIME_EXIT input or a forced payload with existing position:
-
-```text
-cycle_ok: true
-payload_rows_out: 1
-mt5_blocked_position_policy_rows: 1
-mt5_order_send_called_count: 0
-mt5_sent_rows: 0
-safe_no_send: true
+PASS
 ```
 
 ### Step 2: Create aligned loop wrapper
@@ -503,10 +527,10 @@ manual confirmation that no unwanted position is open
 
 ## Current recommendation
 
-Proceed with Step 1 only:
+Proceed with Step 2 only:
 
 ```text
-Implement scripts/run_gold_multi_strategy_demo_dry_run_cycle.py
+Implement scripts/run_gold_multi_strategy_demo_dry_run_loop_aligned.py
 ```
 
 Do not implement send mode.
