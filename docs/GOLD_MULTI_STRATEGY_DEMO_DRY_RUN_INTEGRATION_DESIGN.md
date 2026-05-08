@@ -41,6 +41,7 @@ aggregate-only mode: PASS
 ```text
 adapter preview creation: PASS
 adapter duplicate preview ledger: PASS
+adapter empty ledger CSV handling: PASS
 OPEN_POSITION preview: PASS
 CLOSE_POSITION preview: PASS
 rejects: 0 in validated TIME_EXIT case
@@ -178,6 +179,48 @@ Existing Mochipoyo BAT unchanged: PASS
 Real order send: NOT CALLED
 ```
 
+### Aligned loop wrapper
+
+Script:
+
+```text
+scripts/run_gold_multi_strategy_demo_dry_run_loop_aligned.py
+```
+
+Validated command:
+
+```cmd
+python scripts\run_gold_multi_strategy_demo_dry_run_loop_aligned.py --csv-dir "<MT5_FILES_DIR>" --iterations 2 --interval-seconds 0
+```
+
+Validated result:
+
+```text
+loop lock: acquired
+cycle 1: cycle_ok true / safe_no_send true
+cycle 2: cycle_ok true / safe_no_send true
+loop lock: released
+signals_found_count: 0
+open_order_intent_count: 0
+close_intent_count: 0
+payload_rows_out: 0
+mt5_dry_run: SKIPPED_NO_PAYLOAD_ROWS
+mt5_order_send_called_count: 0
+mt5_sent_rows: 0
+```
+
+Decision:
+
+```text
+multi-strategy demo dry-run aligned loop: PASS
+2-cycle finite loop: PASS
+lock acquire/release: PASS
+no-signal/no-payload path: PASS
+safe_no_send: PASS
+Existing Mochipoyo BAT unchanged: PASS
+Real order send: NOT CALLED
+```
+
 ## Non-goals for the next integration step
 
 Do not do these yet:
@@ -251,9 +294,9 @@ MT5 dry-run output directory:
 data/research_results/gold_multi_strategy_mochipoyo_payload_bridge_dry_run/mt5_order_check_dry_run
 ```
 
-## Proposed new aligned loop wrapper
+## Implemented aligned loop wrapper
 
-Recommended script:
+Script:
 
 ```text
 scripts/run_gold_multi_strategy_demo_dry_run_loop_aligned.py
@@ -271,10 +314,16 @@ align_to_second: 2
 
 Because existing MT5 CSV export writes around second 00, this matches the existing Mochipoyo aligned-loop idea while remaining isolated.
 
-Recommended lock file:
+Lock file:
 
 ```text
 <data out dir>/gold_multi_strategy_demo_dry_run_loop.lock
+```
+
+Validated status:
+
+```text
+PASS
 ```
 
 ## Proposed BAT file
@@ -473,27 +522,18 @@ Status:
 PASS
 ```
 
-### Step 2: Create aligned loop wrapper
+### Step 2: Aligned loop wrapper
 
-Implement:
+Implemented and validated:
 
 ```text
 scripts/run_gold_multi_strategy_demo_dry_run_loop_aligned.py
 ```
 
-Run finite iterations first:
-
-```cmd
-python scripts\run_gold_multi_strategy_demo_dry_run_loop_aligned.py --csv-dir "<MT5_FILES_DIR>" --iterations 2 --align-to-second 2
-```
-
-Expected:
+Status:
 
 ```text
-2 cycles complete
-no send
-lock file works
-cycle log has 2 rows
+PASS
 ```
 
 ### Step 3: Create new BAT
@@ -527,10 +567,10 @@ manual confirmation that no unwanted position is open
 
 ## Current recommendation
 
-Proceed with Step 2 only:
+Proceed with Step 3 only:
 
 ```text
-Implement scripts/run_gold_multi_strategy_demo_dry_run_loop_aligned.py
+Implement scripts/run_gold_multi_strategy_demo_dry_run_aligned.bat
 ```
 
 Do not implement send mode.
