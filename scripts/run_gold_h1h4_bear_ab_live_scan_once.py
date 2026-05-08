@@ -31,7 +31,7 @@ import argparse
 import json
 import math
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -107,7 +107,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def utc_now_text() -> str:
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
