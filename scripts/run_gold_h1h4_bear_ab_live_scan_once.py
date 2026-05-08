@@ -18,17 +18,18 @@ Final rank:
     B_ONLY_SAFE     = B and not A, trade_enabled=True, lot_multiplier=1.0
     A_ONLY_OBSERVE  = A and not B, trade_enabled=False, lot_multiplier=0.0
 
-Example:
-    python scripts\run_gold_h1h4_bear_ab_live_scan_once.py ^
-      --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-      --out-dir data\research_results\gold_h1h4_bear_ab_live_scan ^
-      --latest-confirmed-policy second_last
+Important live detail:
+    The latest confirmed M15 bar often has no next M15 open row yet.
+    Therefore this script computes A/B conditions on the full historical M15
+    context first, then uses the latest confirmed M15 close as the live entry
+    reference when the next M15 open is unavailable.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -43,6 +44,9 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.research_gold_h1h4_bear_m15_low_break_ab_classifier import (  # noqa: E402
     CONDITION_FAMILY_ID,
+    CONDITION_ID_A_ONLY,
+    CONDITION_ID_B_ONLY,
+    CONDITION_ID_CORE,
     DIRECTION,
     LEDGER_COLUMNS,
     SYMBOL,
@@ -136,8 +140,66 @@ def latest_confirmed_m15_row(m15: pd.DataFrame, *, policy: str) -> pd.Series | N
     return m15_sorted.iloc[-1]
 
 
+def compute_live_ab_flags(m15_ctx: pd.DataFrame) -> pd.DataFrame:
+    """Compute A/B flags without requiring next M15 open.
+
+    This mirrors build_signal_candidates(), but intentionally keeps the latest
+    row even when there is no following M15 open yet.
+    """
+    out = m15_ctx.copy().sort_values("time", kind="mergesort").reset_index(drop=True)
+    out["m15_prev_low16"] = out["low"].shift(1).rolling(16, min_periods=16).min()
+    out["m15_prev_low6"] = out["low"].shift(1).rolling(6, min_periods=6).min()
+
+    a_h1 = (
+        (out["h1_close"] < out["h1_ema20"])
+        & (out["h1_ema20"] < out["h1_ema50"])
+        & (out["h1_ema20_slope3"] < 0)
+        & (out["h1_dist_e20_atr_sell"] <= 1.60)
+    )
+    a_h4 = (out["h4_close"] < out["h4_ema20"]) & (out["h4_ema20"] < out["h4_ema50"])
+    d1_bear = out["d1_close"] < out["d1_ema20"]
+    a_m15 = (
+        (out["low"] < out["m15_prev_low16"])
+        & (out["close_pos"] <= 0.45)
+        & (out["macd_hist_delta"] < 0)
+        & (out["range_atr_ratio"] >= 0.90)
+    )
+
+    b_h1 = (
+        (out["h1_close"] < out["h1_ema50"])
+        & (out["h1_ema20"] < out["h1_ema50"])
+        & (out["h1_dist_e20_atr_sell"] <= 1.60)
+    )
+    b_h4 = out["h4_ema20"] < out["h4_ema50"]
+    b_m15 = (
+        (out["low"] < out["m15_prev_low6"])
+        & (out["close_pos"] <= 0.50)
+        & (out["macd_hist"] < 0)
+        & (out["macd_hist_delta"] < 0)
+    )
+
+    out["a_pass"] = (a_h1 & a_h4 & d1_bear & a_m15).fillna(False)
+    out["b_pass"] = (b_h1 & b_h4 & d1_bear & b_m15).fillna(False)
+    out["rank"] = np.select(
+        [out["a_pass"] & out["b_pass"], out["b_pass"] & ~out["a_pass"], out["a_pass"] & ~out["b_pass"]],
+        ["CORE_AB_CONFIRM", "B_ONLY_SAFE", "A_ONLY_OBSERVE"],
+        default="NO_SIGNAL",
+    )
+    out["trade_enabled"] = out["rank"].isin(["CORE_AB_CONFIRM", "B_ONLY_SAFE"])
+    out["condition_id"] = np.select(
+        [out["rank"].eq("CORE_AB_CONFIRM"), out["rank"].eq("B_ONLY_SAFE"), out["rank"].eq("A_ONLY_OBSERVE")],
+        [CONDITION_ID_CORE, CONDITION_ID_B_ONLY, CONDITION_ID_A_ONLY],
+        default="",
+    )
+    out["signal_group"] = out["rank"]
+    out["symbol"] = SYMBOL
+    out["direction"] = DIRECTION
+    out["signal_time"] = out["time"]
+    out["m15_close_time"] = out["close_time"]
+    return out
+
+
 def force_live_entry_fields(row: pd.Series, args: argparse.Namespace) -> pd.Series:
-    """Use signal close/current reference when next M15 open is not available yet."""
     out = row.copy()
     out["symbol"] = SYMBOL
     out["direction"] = DIRECTION
@@ -147,7 +209,9 @@ def force_live_entry_fields(row: pd.Series, args: argparse.Namespace) -> pd.Seri
     entry_price = out.get("entry_price", np.nan)
     if pd.isna(entry_price):
         entry_price = out.get("close", np.nan)
-    out["entry_price"] = entry_price
+    if pd.isna(entry_price):
+        raise RuntimeError("Cannot build live SELL entry reference because entry_price and close are NaN.")
+    out["entry_price"] = float(entry_price)
     out["sl_price"] = float(entry_price) + float(args.sl_usd)
     out["tp_price"] = float(entry_price) - float(args.tp_usd)
     out["risk_price"] = float(args.sl_usd)
@@ -175,6 +239,7 @@ def build_order_intent(row: pd.Series, *, dry_run: bool = True) -> dict[str, Any
         "intent_type": "OPEN_POSITION" if payload["trade_enabled"] else "OBSERVE_ONLY",
         "condition_family_id": CONDITION_FAMILY_ID,
         "condition_id": payload["condition_id"],
+        "strategy_id": payload["strategy_id"],
         "symbol": payload["symbol"],
         "direction": payload["direction"],
         "rank": payload["rank"],
@@ -219,13 +284,7 @@ def main() -> int:
 
     latest_row = latest_confirmed_m15_row(m15, policy=args.latest_confirmed_policy)
     if latest_row is None:
-        result = {
-            "scan_time_utc": scan_time,
-            "condition_family_id": CONDITION_FAMILY_ID,
-            "signal_found": False,
-            "duplicate": False,
-            "reason": "NO_M15_ROWS",
-        }
+        result = {"scan_time_utc": scan_time, "condition_family_id": CONDITION_FAMILY_ID, "signal_found": False, "duplicate": False, "reason": "NO_M15_ROWS"}
         result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
         append_csv_row(log_path, {**result, "csv_dir": str(args.csv_dir)}, LOG_COLUMNS)
         return 0
@@ -236,14 +295,13 @@ def main() -> int:
     print(f"[INFO] latest_m15_close_time={latest_close_time}")
 
     m15_ctx = attach_context(m15, h1, h4, d1)
-    raw = build_signal_candidates(m15_ctx, args)
-    write_csv(raw, args.out_dir / "latest_raw_candidates.csv")
+    raw_backtest_style = build_signal_candidates(m15_ctx, args)
+    write_csv(raw_backtest_style, args.out_dir / "latest_raw_candidates.csv")
 
-    latest_candidates = raw[pd.to_datetime(raw["m15_close_time"], errors="coerce") == latest_close_time].copy()
-    if latest_candidates.empty:
-        # The latest confirmed row may have no next M15 open yet, so classify directly from the context row.
-        latest_ctx = m15_ctx[pd.to_datetime(m15_ctx["close_time"], errors="coerce") == latest_close_time].copy()
-        latest_candidates = build_signal_candidates(latest_ctx, args).copy()
+    live_flags = compute_live_ab_flags(m15_ctx)
+    write_csv(live_flags[live_flags["rank"] != "NO_SIGNAL"].copy(), args.out_dir / "latest_live_flag_candidates.csv")
+    latest_candidates = live_flags[pd.to_datetime(live_flags["close_time"], errors="coerce") == latest_close_time].copy()
+    latest_candidates = latest_candidates[latest_candidates["rank"] != "NO_SIGNAL"].copy()
 
     if latest_candidates.empty:
         result = {
@@ -269,7 +327,7 @@ def main() -> int:
 
     priority = {"CORE_AB_CONFIRM": 100, "B_ONLY_SAFE": 50, "A_ONLY_OBSERVE": 10}
     latest_candidates["priority"] = latest_candidates["rank"].map(priority).fillna(0)
-    signal_row = latest_candidates.sort_values(["priority", "m15_close_time"], ascending=[False, True], kind="mergesort").iloc[0]
+    signal_row = latest_candidates.sort_values(["priority", "close_time"], ascending=[False, True], kind="mergesort").iloc[0]
     signal_row = force_live_entry_fields(signal_row, args)
 
     signal_key = build_signal_key(signal_row)
