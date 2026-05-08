@@ -10,6 +10,9 @@ It runs two dedicated SELL dry-run components in sequence:
 1. scripts/run_gold_h1h4_bear_ab_live_scan_once.py
 2. scripts/run_gold_h1h4_bear_ab_position_monitor_once.py
 
+The SELL position monitor uses M1 first-touch to align with the existing
+Mochipoyo demo/autotrade monitor convention and the original SELL A/B research.
+
 No Discord send.
 No MT5 order placement.
 No Mochipoyo trigger-state update.
@@ -19,6 +22,10 @@ No existing autotrade order-intent file update.
 Default behavior is a single cycle. For repeated dry-run operation, pass
 --cycles and --sleep-seconds. Use --cycles 0 for an intentionally infinite local
 loop.
+
+Backup note:
+    The previous M5 cycle runner version is preserved on branch:
+    backup/sell-ab-m5-monitor-before-m1-20260508
 """
 
 from __future__ import annotations
@@ -66,7 +73,7 @@ CYCLE_LOG_COLUMNS = [
     "monitor_tp_touched",
     "monitor_sl_touched",
     "monitor_time_exit_required",
-    "monitor_no_m5_path",
+    "monitor_no_m1_path",
     "live_stdout_log",
     "live_stderr_log",
     "monitor_stdout_log",
@@ -75,7 +82,7 @@ CYCLE_LOG_COLUMNS = [
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run GOLD bearish A/B live scan + position monitor dry-run cycle.")
+    parser = argparse.ArgumentParser(description="Run GOLD bearish A/B live scan + M1 position monitor dry-run cycle.")
     parser.add_argument("--csv-dir", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--cycles", type=int, default=1, help="Number of cycles. Use 0 for an intentionally infinite local loop.")
@@ -96,10 +103,16 @@ def parse_args() -> argparse.Namespace:
         help="M15 confirmation policy passed to live scan.",
     )
     parser.add_argument(
-        "--latest-confirmed-m5-policy",
+        "--latest-confirmed-m1-policy",
         choices=["last", "second_last"],
         default="last",
-        help="M5 confirmation policy passed to position monitor.",
+        help="M1 confirmation policy passed to position monitor.",
+    )
+    parser.add_argument(
+        "--latest-confirmed-m5-policy",
+        choices=["last", "second_last"],
+        default=None,
+        help="Deprecated compatibility alias. If provided, it is mapped to --latest-confirmed-m1-policy.",
     )
     parser.add_argument(
         "--observe-only-ledger",
@@ -220,8 +233,8 @@ def build_position_monitor_command(args: argparse.Namespace) -> list[str]:
         str(args.horizon_hours),
         "--inbar-priority",
         str(args.inbar_priority),
-        "--latest-confirmed-m5-policy",
-        str(args.latest_confirmed_m5_policy),
+        "--latest-confirmed-m1-policy",
+        str(args.latest_confirmed_m1_policy),
     ]
 
 
@@ -274,7 +287,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
         "monitor_tp_touched": monitor_result.get("tp_touched", ""),
         "monitor_sl_touched": monitor_result.get("sl_touched", ""),
         "monitor_time_exit_required": monitor_result.get("time_exit_required", ""),
-        "monitor_no_m5_path": monitor_result.get("no_m5_path", ""),
+        "monitor_no_m1_path": monitor_result.get("no_m1_path", ""),
         "live_stdout_log": str(live_stdout),
         "live_stderr_log": str(live_stderr),
         "monitor_stdout_log": str(monitor_stdout) if monitor_stdout else "",
@@ -317,6 +330,8 @@ def should_continue(args: argparse.Namespace, completed_cycles: int) -> bool:
 
 def main() -> int:
     args = parse_args()
+    if args.latest_confirmed_m5_policy is not None:
+        args.latest_confirmed_m1_policy = args.latest_confirmed_m5_policy
     if args.cycles < 0:
         raise ValueError("--cycles must be >= 0. Use 0 for an intentionally infinite loop.")
     if args.sleep_seconds < 0:
@@ -328,6 +343,7 @@ def main() -> int:
     print(f"[INFO] out_dir={args.out_dir}")
     print(f"[INFO] cycles={'infinite' if args.cycles == 0 else args.cycles}")
     print(f"[INFO] sleep_seconds={args.sleep_seconds}")
+    print(f"[INFO] latest_confirmed_m1_policy={args.latest_confirmed_m1_policy}")
 
     completed = 0
     last_ok = True
