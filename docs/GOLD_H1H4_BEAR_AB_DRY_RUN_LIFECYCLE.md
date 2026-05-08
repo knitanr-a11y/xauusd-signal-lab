@@ -81,16 +81,34 @@ scripts/run_gold_h1h4_bear_ab_dry_run_cycle.py
 
 ## SELL-specific monitor rules
 
+The active SELL monitor uses M1 first-touch to align with the original SELL A/B research and the existing Mochipoyo demo/autotrade monitor convention.
+
 ```text
 Direction: SELL
 TP is below entry
 SL is above entry
-TP touch: M5 low <= tp_price
-SL touch: M5 high >= sl_price
-Same M5 TP/SL conflict: SL priority by default
+TP touch: M1 low <= tp_price
+SL touch: M1 high >= sl_price
+Same M1 TP/SL conflict: SL priority by default
 R calculation: (entry_price - exit_price) / risk_price
 close_side for close intent: BUY
 ```
+
+## Backup before M1 switch
+
+Before switching the active SELL monitor from M5 to M1, the M5-state repository was preserved as a backup branch:
+
+```text
+backup/sell-ab-m5-monitor-before-m1-20260508
+```
+
+A small reference backup file also exists under:
+
+```text
+backups/20260508_sell_ab_m5_monitor/run_gold_h1h4_bear_ab_position_monitor_once_m5.py
+```
+
+For a full rollback of the M5 implementation, use the backup branch rather than the reference stub.
 
 ## Dedicated output directory
 
@@ -149,16 +167,24 @@ python scripts\run_gold_h1h4_bear_ab_live_scan_once.py --csv-dir "C:\Users\regen
 python scripts\run_gold_h1h4_bear_ab_position_monitor_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\research_results\gold_h1h4_bear_ab_live_scan
 ```
 
-If the M5 CSV includes a forming candle as the last row:
+If the M1 CSV includes a forming candle as the last row:
 
 ```cmd
-python scripts\run_gold_h1h4_bear_ab_position_monitor_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\research_results\gold_h1h4_bear_ab_live_scan --latest-confirmed-m5-policy second_last
+python scripts\run_gold_h1h4_bear_ab_position_monitor_once.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\research_results\gold_h1h4_bear_ab_live_scan --latest-confirmed-m1-policy second_last
 ```
+
+For compatibility, the old `--latest-confirmed-m5-policy` argument is still accepted and mapped to the M1 policy. Prefer the M1 argument going forward.
 
 ### Combined dry-run cycle
 
 ```cmd
 python scripts\run_gold_h1h4_bear_ab_dry_run_cycle.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\research_results\gold_h1h4_bear_ab_live_scan
+```
+
+If the M1 CSV includes a forming candle as the last row:
+
+```cmd
+python scripts\run_gold_h1h4_bear_ab_dry_run_cycle.py --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" --out-dir data\research_results\gold_h1h4_bear_ab_live_scan --latest-confirmed-m1-policy second_last
 ```
 
 ### Repeated 15-minute dry-run cycle
@@ -189,7 +215,8 @@ when next M15 open is unavailable.
 
 ## Validation status
 
-The scripts have been added to GitHub. They still need to be run on the user's local Windows/MT5 CSV directory for runtime validation.
+The scripts have been added to GitHub and the active SELL monitor/cycle were switched to M1.
+They still need to be run on the user's local Windows/MT5 CSV directory for runtime validation.
 
 Recommended validation order:
 
@@ -197,8 +224,8 @@ Recommended validation order:
 1. research/backtest command
 2. preview export command
 3. live scan once command
-4. position monitor once command
-5. combined dry-run cycle command
+4. M1 position monitor once command
+5. M1 combined dry-run cycle command
 6. inspect latest_dry_run_cycle_result.json
 ```
 
