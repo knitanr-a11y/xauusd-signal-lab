@@ -171,6 +171,13 @@ def windows_long_path(path: str | Path) -> str:
     return "\\\\?\\" + text
 
 
+def path_exists(path: Path) -> bool:
+    try:
+        return Path(windows_long_path(path)).exists()
+    except Exception:
+        return path.exists()
+
+
 def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -183,13 +190,16 @@ def read_csv(path: Path) -> pd.DataFrame:
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
     df.to_csv(windows_long_path(path), index=False, encoding="utf-8-sig")
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path)).write_text(
+        json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
 
 
 def clean_str(value: Any, default: str = "") -> str:
@@ -307,7 +317,7 @@ def detect_strategy_in_position(position: dict[str, Any], strategy_key: str, str
 
 
 def read_registry(path: Path) -> tuple[pd.DataFrame, str, bool]:
-    if not path.exists():
+    if not path_exists(path):
         return pd.DataFrame(columns=REGISTRY_COLUMNS), "REGISTRY_NOT_FOUND", False
     df = read_csv(path)
     if df.empty:
@@ -391,7 +401,7 @@ def get_positions(args: argparse.Namespace) -> tuple[bool, int, str, dict[str, A
             "order_send_called_count": 0,
             "order_check_called_count": 0,
         }
-        if not args.positions_csv.exists():
+        if not path_exists(args.positions_csv):
             report["fatal_error"] = "POSITIONS_CSV_NOT_FOUND"
             return False, 20, "POSITIONS_CSV", report, []
         try:
@@ -590,7 +600,7 @@ def position_fields(position: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     args = parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(args.out_dir)).mkdir(parents=True, exist_ok=True)
     output_csv = args.output_csv if args.output_csv is not None else args.out_dir / RECONCILE_CSV_NAME
     output_json = args.output_json if args.output_json is not None else args.out_dir / SUMMARY_JSON_NAME
     positions_snapshot_csv = args.positions_snapshot_csv if args.positions_snapshot_csv is not None else args.out_dir / POSITIONS_SNAPSHOT_CSV_NAME
