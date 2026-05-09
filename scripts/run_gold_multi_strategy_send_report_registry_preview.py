@@ -85,18 +85,28 @@ def windows_long_path(path: str | Path) -> str:
     return "\\\\?\\" + text
 
 
+def path_exists(path: Path) -> bool:
+    try:
+        return Path(windows_long_path(path)).exists()
+    except Exception:
+        return path.exists()
+
+
 def read_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    if not path_exists(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(Path(windows_long_path(path)).read_text(encoding="utf-8"))
     except Exception as e:
         return {"_read_error": repr(e), "_path": str(path)}
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path)).write_text(
+        json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
 
 
 def write_summary_csv(path: Path, summary: dict[str, Any]) -> None:
@@ -127,12 +137,12 @@ def write_summary_csv(path: Path, summary: dict[str, Any]) -> None:
         "ledger_mutated": summary.get("safety", {}).get("ledger_mutated", False),
         "trigger_state_mutated": summary.get("safety", {}).get("trigger_state_mutated", False),
     }
-    path.parent.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
     pd.DataFrame([row]).to_csv(windows_long_path(path), index=False, encoding="utf-8-sig")
 
 
 def read_csv_len(path: Path) -> int:
-    if not path.exists():
+    if not path_exists(path):
         return 0
     try:
         return int(len(pd.read_csv(windows_long_path(path), encoding="utf-8-sig")))
@@ -187,7 +197,6 @@ def extract_payload_csv(send_report: dict[str, Any]) -> Path:
     payload_out_dir = as_str(send_report.get("payload_out_dir"))
     if payload_out_dir:
         return Path(payload_out_dir) / "order_payloads.csv"
-    # Fall back to embedded bridge result path if future reports include it.
     bridge = send_report.get("payload_bridge_result", {})
     if isinstance(bridge, dict):
         for key in ["output_csv", "order_payloads_csv", "payload_csv"]:
@@ -303,7 +312,7 @@ def safety_summary() -> dict[str, Any]:
 
 def main() -> int:
     args = parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(args.out_dir)).mkdir(parents=True, exist_ok=True)
     now = utc_now_text()
     summary_json = args.out_dir / "send_report_registry_preview_summary.json"
     summary_csv = args.out_dir / "send_report_registry_preview_summary.csv"
@@ -316,6 +325,7 @@ def main() -> int:
     policy_preview_json = args.out_dir / "registry_policy_preview_from_send_report.json"
     policy_reconcile_csv = args.out_dir / "registry_policy_preview_reconcile_from_send_report.csv"
 
+    send_report_exists = path_exists(args.send_report_json)
     send_report = read_json(args.send_report_json)
     payload_csv = extract_payload_csv(send_report)
     payload_rows = read_csv_len(payload_csv)
@@ -329,7 +339,7 @@ def main() -> int:
         "cycle_ok": False,
         "reason": "STARTED",
         "send_report_json": str(args.send_report_json),
-        "send_report_exists": bool(args.send_report_json.exists()),
+        "send_report_exists": bool(send_report_exists),
         "payload_csv": str(payload_csv),
         "payload_rows": int(payload_rows),
         "positions_csv": str(args.positions_csv),
@@ -356,7 +366,7 @@ def main() -> int:
         "steps": [],
     }
 
-    if not args.send_report_json.exists():
+    if not send_report_exists:
         return finish(summary, summary_json, summary_csv, "SEND_REPORT_NOT_FOUND", 2)
     if payload_rows <= 0:
         return finish(summary, summary_json, summary_csv, "NO_PAYLOAD_ROWS_IN_SEND_REPORT_PAYLOAD_CSV", 0)
