@@ -87,12 +87,15 @@ def read_payload(path: Path) -> pd.DataFrame:
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path)).write_text(
+        json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
 
 
 def copy_payload(src: Path, dst: Path) -> int:
-    dst.parent.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(dst.parent)).mkdir(parents=True, exist_ok=True)
     shutil.copyfile(windows_long_path(src), windows_long_path(dst))
     return int(len(read_payload(dst)))
 
@@ -210,12 +213,12 @@ def build_report(args: argparse.Namespace, payload_out_dir: Path, payload_rows: 
 
 def ensure_output_dirs(*paths: Path) -> None:
     for path in paths:
-        path.parent.mkdir(parents=True, exist_ok=True)
+        Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
 
 
 def main() -> int:
     args = parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(args.out_dir)).mkdir(parents=True, exist_ok=True)
     output_json = args.output_json if args.output_json is not None else args.out_dir / "latest_multi_strategy_demo_autotrade_send_cycle_result_controlled_payload.json"
     payload_out_dir = args.payload_out_dir if args.payload_out_dir is not None else args.out_dir / "payload_bridge_send_controlled"
     payload_out_csv = payload_out_dir / "order_payloads.csv"
