@@ -121,6 +121,13 @@ def windows_long_path(path: str | Path) -> str:
     return "\\\\?\\" + text
 
 
+def path_exists(path: Path) -> bool:
+    try:
+        return Path(windows_long_path(path)).exists()
+    except Exception:
+        return path.exists()
+
+
 def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -133,13 +140,16 @@ def read_csv(path: Path) -> pd.DataFrame:
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
     df.to_csv(windows_long_path(path), index=False, encoding="utf-8-sig")
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(path)).write_text(
+        json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
 
 
 def clean_str(value: Any, default: str = "") -> str:
@@ -305,12 +315,12 @@ def build_registry_row(
 
 def main() -> int:
     args = parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    Path(windows_long_path(args.out_dir)).mkdir(parents=True, exist_ok=True)
     output_csv = args.output_csv if args.output_csv is not None else args.out_dir / "position_registry_from_payload_preview.csv"
     output_json = args.output_json if args.output_json is not None else args.out_dir / "position_registry_from_payload_preview.json"
     now = utc_now_text()
 
-    if not args.input_csv.exists():
+    if not path_exists(args.input_csv):
         empty = pd.DataFrame(columns=REGISTRY_COLUMNS)
         write_csv(empty, output_csv)
         summary = {
@@ -377,7 +387,7 @@ def main() -> int:
         )
 
     new_df = pd.DataFrame([{col: row.get(col, "") for col in REGISTRY_COLUMNS} for row in rows], columns=REGISTRY_COLUMNS)
-    if args.append and output_csv.exists():
+    if args.append and path_exists(output_csv):
         old_df = read_csv(output_csv)
         for col in REGISTRY_COLUMNS:
             if col not in old_df.columns:
