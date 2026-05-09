@@ -208,12 +208,19 @@ def build_report(args: argparse.Namespace, payload_out_dir: Path, payload_rows: 
     }
 
 
+def ensure_output_dirs(*paths: Path) -> None:
+    for path in paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+
 def main() -> int:
     args = parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
     output_json = args.output_json if args.output_json is not None else args.out_dir / "latest_multi_strategy_demo_autotrade_send_cycle_result_controlled_payload.json"
     payload_out_dir = args.payload_out_dir if args.payload_out_dir is not None else args.out_dir / "payload_bridge_send_controlled"
     payload_out_csv = payload_out_dir / "order_payloads.csv"
+    summary_json = args.out_dir / "controlled_send_report_build_summary.json"
+    ensure_output_dirs(output_json, payload_out_csv, summary_json)
 
     if not args.payload_csv.exists():
         summary = {
@@ -246,7 +253,6 @@ def main() -> int:
         "payload_metadata": payload_meta,
         "safety": safety_summary(),
     }
-    summary_json = args.out_dir / "controlled_send_report_build_summary.json"
     write_json(summary_json, summary)
 
     print("build_gold_multi_strategy_controlled_send_report")
