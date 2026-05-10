@@ -7,6 +7,7 @@ REM - This BAT never passes --send directly to any MT5 sender.
 REM - It runs only safe dry-run / validation BATs.
 REM - Guarded demo-send validation uses a zero-payload fixture for the
 REM   --allow-demo-send --send suppression case and never runs live CSV with both flags.
+REM - Armed suppression validation checks no flags / --send only / --allow-demo-send only.
 REM - It does not write production position_registry.csv.
 REM - It does not modify existing Mochipoyo production/demo BATs.
 REM - Python validators write their own outputs with Windows long-path support.
@@ -31,6 +32,10 @@ REM    - no flags suppression
 REM    - --send only suppression
 REM    - --allow-demo-send only suppression
 REM    - zero-payload fixture suppression for --allow-demo-send --send
+REM 5. Guarded demo-send armed suppression validation
+REM    - no flags suppression through real armed runner
+REM    - --send only suppression through real armed runner
+REM    - --allow-demo-send only suppression through real armed runner
 
 cd /d "%~dp0\.."
 
@@ -38,6 +43,7 @@ set OUT_DIR=data\research_results\gold_multi_strategy_case_matrix_validation
 set MONITOR_AB_OUT_DIR=data\r\msab
 set SAME_M15_AB_OUT_DIR=data\r\sm15ab
 set GUARDED_DEMO_SEND_SAFETY_OUT_DIR=data\r\gdsafe
+set GUARDED_ARMED_SUPPRESSION_OUT_DIR=data\r\gdarmed_suppression
 
 echo ============================================================
 echo GOLD multi-strategy standard validation
@@ -46,6 +52,7 @@ echo OUT_DIR=%OUT_DIR%
 echo MONITOR_AB_OUT_DIR=%MONITOR_AB_OUT_DIR%
 echo SAME_M15_AB_OUT_DIR=%SAME_M15_AB_OUT_DIR%
 echo GUARDED_DEMO_SEND_SAFETY_OUT_DIR=%GUARDED_DEMO_SEND_SAFETY_OUT_DIR%
+echo GUARDED_ARMED_SUPPRESSION_OUT_DIR=%GUARDED_ARMED_SUPPRESSION_OUT_DIR%
 echo ============================================================
 
 python scripts\run_gold_multi_strategy_case_matrix_validation.py --out-dir "%OUT_DIR%"
@@ -124,11 +131,33 @@ if not "%GUARDED_DEMO_SEND_SAFETY_EXIT_CODE%"=="0" (
 )
 
 echo ============================================================
+echo GOLD guarded demo-send armed suppression validation
+echo Confirms real armed runner suppresses no flags / --send only / --allow-demo-send only
+echo The --allow-demo-send --send case is NOT executed here
+echo NO MT5 order_send / NO production registry write
+echo GUARDED_ARMED_SUPPRESSION_OUT_DIR=%GUARDED_ARMED_SUPPRESSION_OUT_DIR%
+echo ============================================================
+
+python scripts\run_gold_guarded_demo_send_once_armed_suppression_validation.py --out-dir "%GUARDED_ARMED_SUPPRESSION_OUT_DIR%"
+set GUARDED_ARMED_SUPPRESSION_EXIT_CODE=%ERRORLEVEL%
+
+echo ============================================================
+echo GOLD guarded armed suppression validation exit code: %GUARDED_ARMED_SUPPRESSION_EXIT_CODE%
+echo summary_json: %GUARDED_ARMED_SUPPRESSION_OUT_DIR%\latest_gold_guarded_demo_send_once_armed_suppression_validation_result.json
+echo ============================================================
+
+if not "%GUARDED_ARMED_SUPPRESSION_EXIT_CODE%"=="0" (
+  echo [ERROR] Guarded armed suppression validation failed.
+  exit /b %GUARDED_ARMED_SUPPRESSION_EXIT_CODE%
+)
+
+echo ============================================================
 echo GOLD standard validation ALL PASS
 echo Case Matrix summary: %OUT_DIR%\latest_gold_multi_strategy_case_matrix_validation_result.json
 echo Monitor skip A/B summary: %MONITOR_AB_OUT_DIR%\latest_gold_multi_strategy_monitor_skip_ab_validation_result.json
 echo Same-M15 skip A/B summary: %SAME_M15_AB_OUT_DIR%\latest_gold_multi_strategy_same_m15_skip_ab_validation_result.json
 echo Guarded demo-send safety summary: %GUARDED_DEMO_SEND_SAFETY_OUT_DIR%\latest_gold_multi_strategy_guarded_demo_send_safety_validation_result.json
+echo Guarded armed suppression summary: %GUARDED_ARMED_SUPPRESSION_OUT_DIR%\latest_gold_guarded_demo_send_once_armed_suppression_validation_result.json
 echo ============================================================
 
 exit /b 0
