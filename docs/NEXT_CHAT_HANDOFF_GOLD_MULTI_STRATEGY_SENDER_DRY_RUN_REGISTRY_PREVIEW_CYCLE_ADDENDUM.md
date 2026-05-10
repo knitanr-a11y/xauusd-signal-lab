@@ -9,13 +9,14 @@ docs/NEXT_CHAT_HANDOFF_GOLD_MULTI_STRATEGY_DEMO_AUTOTRADE.md
 docs/NEXT_CHAT_HANDOFF_GOLD_MULTI_STRATEGY_DEMO_AUTOTRADE_LONGPATH_ADDENDUM.md
 docs/GOLD_MULTI_STRATEGY_SENDER_REGISTRY_PREVIEW_FROM_REPORT_VALIDATION.md
 docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_DRY_RUN_REGISTRY_PREVIEW_VALIDATION.md
+docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_VALIDATION.md
 ```
 
 ## Why this addendum exists
 
-After the sender-registry preview validation doc was updated, additional one-command wrapper validations were completed.
+After the sender-registry preview validation doc was updated, additional wrapper validations were completed.
 
-New wrapper:
+One-command sender preview wrapper:
 
 ```text
 scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
@@ -27,18 +28,28 @@ Fresh payload builder:
 scripts/build_gold_multi_strategy_fresh_sender_valid_payload_from_mt5_tick.py
 ```
 
+Full-cycle wrapper:
+
+```text
+scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
+```
+
 Purpose:
 
 ```text
-send_mt5_order_from_payload.py dry-run
+fresh MT5 tick payload
+→ send_mt5_order_from_payload.py dry-run
 → sender report/results
 → sender-adjacent registry preview from report
+→ mock position from registry
+→ exact reconcile
+→ registry-aware policy preview
 ```
 
 Important safety boundary:
 
 ```text
-The wrapper never passes --send.
+The wrappers never pass --send.
 The real sender script remains unchanged.
 Production position_registry.csv is not written.
 Existing Mochipoyo ledger files are not mutated by helper scripts.
@@ -46,7 +57,7 @@ Trigger-state files are not mutated.
 Existing Mochipoyo BAT files are not modified.
 ```
 
-## Implementation update
+## Implementation update 1: blocked sender report handling
 
 Initial wrapper behavior stopped when `send_mt5_order_from_payload.py` returned non-zero.
 
@@ -75,6 +86,58 @@ Implementation commit:
 
 ```text
 16fe4a9216dc432d5afe7c0d297dc5c2ea930618
+```
+
+## Implementation update 2: console output and Windows path safety
+
+Two issues were found and fixed while building the full-cycle wrapper.
+
+### cp932 console output
+
+`stdout_tail` / `stderr_tail` may include replacement characters from child process output. On Windows cp932 console, this caused:
+
+```text
+UnicodeEncodeError: 'cp932' codec can't encode character '\ufffd'
+```
+
+Fix:
+
+```text
+Console JSON uses ensure_ascii=True.
+safe_print() is used for terminal output.
+UTF-8 file output remains unchanged.
+```
+
+Commit:
+
+```text
+e00de1a55f66028eaa3f6336b409a5eac54a6c88
+```
+
+### long path in sender out-dir
+
+`send_mt5_order_from_payload.py` still uses plain `Path.mkdir()` for its output directory. A deep full-cycle path triggered:
+
+```text
+FileNotFoundError: [WinError 206]
+```
+
+Fix:
+
+```text
+Full-cycle wrapper now uses short internal work paths:
+f = fresh payload
+c = sender dry-run registry preview cycle
+r = reconcile
+p = policy preview
+mp.csv = mock positions
+summary.json = full-cycle summary
+```
+
+Commit:
+
+```text
+aba2c061b41a67c0d027a573d88708b8c3449666
 ```
 
 ## Validation 1: stale real payload blocked but safely evaluated
@@ -330,7 +393,114 @@ Decision:
 PASS.
 ```
 
-## Safety observations
+## Validation 4: full-cycle one-command wrapper PASS
+
+Validation doc:
+
+```text
+docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_VALIDATION.md
+```
+
+Full-cycle wrapper:
+
+```text
+scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
+```
+
+Validated command:
+
+```cmd
+python scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py --out-dir data\r\ff --broker-symbol GOLD# --symbol GOLD --direction SELL --lot 0.01 --sl-distance 10 --tp-distance 20 --expected-login 75539039 --require-demo-account --select-symbol --position-policy allow_any_until_max --max-symbol-positions 5 --max-symbol-lot 0.05 --max-total-positions 5 --max-lot-per-order 0.02
+```
+
+Observed result:
+
+```text
+cycle_ok=true
+reason=FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_PASS
+send_requested=false
+summary_json=data/r/ff/summary.json
+```
+
+Observed fresh payload:
+
+```text
+build_ok=true
+reason=FRESH_SENDER_VALID_PAYLOAD_BUILT
+rows_out=1
+bid=4715.02
+ask=4715.97
+entry=4715.02
+sl=4725.02
+tp=4695.02
+validation_errors=[]
+```
+
+Observed sender cycle:
+
+```text
+cycle_ok=true
+reason=SENDER_DRY_RUN_REGISTRY_PREVIEW_EVALUATED
+registry_preview_reason=REGISTRY_PREVIEW_ROWS_BUILT
+registry_preview_rows=1
+sender_metrics:
+  rows_in=1
+  rows_out=1
+  dry_run_check_ok_rows=1
+  sent_rows=0
+  blocked_position_policy_rows=0
+  error_rows=0
+  order_send_called_count=0
+```
+
+Observed mock positions:
+
+```text
+build_ok=true
+reason=MOCK_POSITIONS_BUILT_FROM_REGISTRY
+rows_out=1
+```
+
+Observed reconcile:
+
+```text
+reconcile_ok=true
+reason=RECONCILE_EVALUATED
+matched_active_registry_rows=1
+matched_with_mismatch_rows=0
+missing_position_rows=0
+unregistered_position_rows=0
+status_counts:
+  REGISTRY_ACTIVE_MATCHED: 1
+```
+
+Observed policy preview:
+
+```text
+preview_ok=true
+reason=POLICY_PREVIEW_EVALUATED
+rows_in=1
+rows_out=1
+allow_rows=0
+blocked_rows=1
+same_strategy_blocked_rows=1
+opposite_direction_blocked_rows=0
+registry_inconsistency_blocked_rows=0
+reconcile_status_counts:
+  REGISTRY_ACTIVE_MATCHED: 1
+```
+
+Step table:
+
+```text
+build_fresh_sender_valid_payload: true / returncode 0
+sender_dry_run_registry_preview_cycle: true / returncode 0
+build_mock_positions_from_registry: true / returncode 0
+reconcile_registry_with_mock_positions: true / returncode 0
+registry_policy_preview: true / returncode 0
+```
+
+Safety:
 
 ```text
 wrapper_passed_send_flag=false
@@ -339,8 +509,7 @@ order_send_called_count=0
 production_registry_mutated=false
 trigger_state_mutated=false
 existing_sender_modified=false
-ledger_mutated=false
-registry_mutated=false
+existing_bat_modified=false
 ```
 
 Decision:
@@ -351,10 +520,24 @@ PASS.
 
 ## Current implication
 
-The project now has a one-command, sender-adjacent dry-run registry preview validation path:
+The project now has two safe wrappers:
 
 ```text
 scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
+scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
+```
+
+The full-cycle wrapper can reproduce this entire path with one command:
+
+```text
+fresh MT5 tick payload
+→ real sender dry-run
+→ DRY_RUN_ORDER_CHECK_OK
+→ registry preview row
+→ registry-derived mock position
+→ exact reconcile
+→ registry-aware policy preview
+→ same_strategy BLOCK
 ```
 
 This wrapper path is validated in both important cases:
@@ -376,8 +559,8 @@ This is safer than modifying the real sender immediately.
 Recommended next step:
 
 ```text
-Keep this wrapper as the next integration layer for one more round.
-Then decide whether to fold disabled-by-default registry preview flags into send_mt5_order_from_payload.py.
+Use scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py as the canonical dry-run validation command for the sender/registry/policy path.
+After another stable round, decide whether to fold disabled-by-default registry preview flags into send_mt5_order_from_payload.py.
 ```
 
 Do not modify yet:
