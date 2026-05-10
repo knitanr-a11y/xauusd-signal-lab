@@ -36,6 +36,9 @@ Recommended flow:
 Important:
 - This file is capable of passing --send to send_mt5_order_from_payload.py, but
   only when the two explicit flags are both present and repeat-send guard allows it.
+- If the repeat-send success marker blocks the attempt, this runner short-circuits
+  before invoking the sender so an existing BTC position does not turn the safe
+  repeat block into a failed sender dry-run.
 - Do not use this as a strategy integration path.
 """
 
@@ -65,6 +68,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = Path("data/r/btc_manual_demo_order_send_smoke_test_send_once")
 SUMMARY_FILENAME = "latest_btc_manual_demo_order_send_smoke_test_send_once_result.json"
 SUCCESS_MARKER_FILENAME = "btc_manual_send_once_success_marker.json"
+REPEAT_BLOCK_REASON = "SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED"
 
 PAYLOAD_COLUMNS = [
     "payload_key",
@@ -97,6 +101,7 @@ SUMMARY_PRINT_KEYS = [
     "allow_demo_send",
     "allow_repeat_send",
     "success_marker_exists_before_run",
+    "sender_invoked",
     "send_flag_passed_to_sender",
     "send_suppressed_reason",
     "symbol",
@@ -346,7 +351,7 @@ def decide_send_pass(args: argparse.Namespace, payload_rows: int, success_marker
     if not bool(args.allow_demo_send):
         return False, "ALLOW_DEMO_SEND_NOT_SET"
     if success_marker_exists and not bool(args.allow_repeat_send):
-        return False, "SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED"
+        return False, REPEAT_BLOCK_REASON
     if payload_rows <= 0:
         return False, "NO_PAYLOAD_ROWS"
     if payload_rows > 1:
@@ -482,34 +487,70 @@ def main() -> int:
 
     payload_rows = 1
     pass_send, suppressed_reason = decide_send_pass(args, payload_rows, success_marker_exists_before_run)
-    sender_rc, sender_seconds = run_sender(build_sender_cmd(args, paths, resolved_symbol, pass_send=pass_send))
-    sender_report = read_json_or_empty(paths["sender_out_dir"] / "mt5_order_send_report.json")
-    rows_out = safe_int(sender_report, "rows_out", 0)
-    dry_run_check_ok_rows = safe_int(sender_report, "dry_run_check_ok_rows", 0)
-    sent_rows = safe_int(sender_report, "sent_rows", 0)
-    error_rows = safe_int(sender_report, "error_rows", 0)
-    order_send_called_count = safe_int(sender_report, "order_send_called_count", 0)
+    repeat_blocked = bool(suppressed_reason == REPEAT_BLOCK_REASON)
 
-    if pass_send:
-        cycle_ok = bool(sender_rc == 0 and rows_out == 1 and order_send_called_count == 1 and sent_rows == 1 and error_rows == 0)
+    sender_invoked = False
+    sender_rc = 0
+    sender_seconds = 0.0
+    sender_report: dict[str, Any] = {}
+    rows_out = payload_rows if repeat_blocked else 0
+    dry_run_check_ok_rows = 0
+    sent_rows = 0
+    error_rows = 0
+    order_send_called_count = 0
+
+    if repeat_blocked:
+        print("=" * 80, flush=True)
+        print("[GUARD] repeat send blocked by success marker; sender will NOT be invoked", flush=True)
+        print(f"success_marker_json={paths['success_marker_json']}", flush=True)
+        print("=" * 80, flush=True)
+        sender_report = {
+            "rows_in": payload_rows,
+            "rows_out": payload_rows,
+            "send_requested": False,
+            "order_send_called_count": 0,
+            "dry_run_check_ok_rows": 0,
+            "sent_rows": 0,
+            "blocked_position_policy_rows": 0,
+            "error_rows": 0,
+            "guard_blocked_before_sender": True,
+            "guard_block_reason": REPEAT_BLOCK_REASON,
+        }
+        cycle_ok = True
     else:
-        cycle_ok = bool(sender_rc == 0 and rows_out == 1 and order_send_called_count == 0 and sent_rows == 0 and dry_run_check_ok_rows >= 1)
-    reason = "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_PASS" if cycle_ok and pass_send else (
-        "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SUPPRESSED_NO_SEND_PASS" if cycle_ok else "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_FAILED"
+        sender_invoked = True
+        sender_rc, sender_seconds = run_sender(build_sender_cmd(args, paths, resolved_symbol, pass_send=pass_send))
+        sender_report = read_json_or_empty(paths["sender_out_dir"] / "mt5_order_send_report.json")
+        rows_out = safe_int(sender_report, "rows_out", 0)
+        dry_run_check_ok_rows = safe_int(sender_report, "dry_run_check_ok_rows", 0)
+        sent_rows = safe_int(sender_report, "sent_rows", 0)
+        error_rows = safe_int(sender_report, "error_rows", 0)
+        order_send_called_count = safe_int(sender_report, "order_send_called_count", 0)
+        if pass_send:
+            cycle_ok = bool(sender_rc == 0 and rows_out == 1 and order_send_called_count == 1 and sent_rows == 1 and error_rows == 0)
+        else:
+            cycle_ok = bool(sender_rc == 0 and rows_out == 1 and order_send_called_count == 0 and sent_rows == 0 and dry_run_check_ok_rows >= 1)
+
+    reason = "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_REPEAT_BLOCKED_PASS" if cycle_ok and repeat_blocked else (
+        "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_PASS" if cycle_ok and pass_send else (
+            "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SUPPRESSED_NO_SEND_PASS" if cycle_ok else "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_FAILED"
+        )
     )
+    mode = "REPEAT_SEND_BLOCKED_NO_SENDER" if repeat_blocked else ("GUARDED_SEND_ONCE" if pass_send else "SUPPRESSED_NO_SEND_ORDER_CHECK_ONLY")
 
     summary = {
-        "schema_version": "btc_manual_demo_order_send_smoke_test_send_once_v2_repeat_marker_guard",
+        "schema_version": "btc_manual_demo_order_send_smoke_test_send_once_v3_repeat_block_short_circuit",
         "cycle_start_utc": utc_now_text(),
         "cycle_ok": cycle_ok,
         "reason": reason,
-        "mode": "GUARDED_SEND_ONCE" if pass_send else "SUPPRESSED_NO_SEND_ORDER_CHECK_ONLY",
+        "mode": mode,
         "summary_json": str(paths["summary_json"]),
         "send_requested": bool(args.send),
         "allow_demo_send": bool(args.allow_demo_send),
         "allow_repeat_send": bool(args.allow_repeat_send),
         "success_marker_exists_before_run": bool(success_marker_exists_before_run),
         "success_marker_json": str(paths["success_marker_json"]),
+        "sender_invoked": bool(sender_invoked),
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
         "symbol": resolved_symbol,
@@ -540,11 +581,12 @@ def main() -> int:
         "sender_error_rows": error_rows,
         "sender_order_send_called_count": order_send_called_count,
         "safety": {
+            "sender_invoked": bool(sender_invoked),
             "send_flag_passed": bool(pass_send),
             "order_send_called_count": order_send_called_count,
             "sent_rows": sent_rows,
             "success_marker_exists_before_run": bool(success_marker_exists_before_run),
-            "repeat_send_blocked": bool(suppressed_reason == "SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED"),
+            "repeat_send_blocked": bool(repeat_blocked),
             "production_registry_mutated": False,
             "gold_strategy_signal_used": False,
             "btc_strategy_integration_used": False,
