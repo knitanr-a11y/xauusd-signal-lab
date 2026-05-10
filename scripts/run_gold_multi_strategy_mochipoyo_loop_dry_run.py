@@ -28,9 +28,9 @@ Important no-signal rule:
   mark the overall cycle as PASS when no payload/send work is required.
 
 Runtime/lightweight policy:
-- This wrapper now records per-stage timing without changing signal logic.
-- Timing is the first step before applying heavier optimizations such as
-  same-M15 no-signal skip, monitor skip, recent-window scan, or in-process router.
+- This wrapper records per-stage timing without changing signal logic.
+- It can pass --skip-monitor-when-no-open-signals to the strategy router.
+- Monitor skip only applies when a strategy ledger has no DRY_RUN_SIGNAL_CREATED rows.
 
 Windows path policy:
 - This wrapper writes its own JSON/CSV outputs through Windows long-path helpers.
@@ -68,6 +68,7 @@ CYCLE_LOG_COLUMNS = [
     "cycle_ok",
     "csv_dir",
     "out_dir",
+    "skip_monitor_when_no_open_signals",
     "router_returncode",
     "adapter_returncode",
     "payload_bridge_returncode",
@@ -152,6 +153,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--reset-adapter-ledger", action="store_true")
     p.add_argument("--use-adapter-lot", action="store_true", help="Use adapter effective_lot in payload bridge. Default is fixed lot 0.01.")
     p.add_argument("--disable-registry-preview", action="store_true", help="Do not request sender-native registry preview outputs.")
+    p.add_argument("--skip-monitor-when-no-open-signals", action="store_true")
     p.add_argument("--continue-on-stage-error", action="store_true")
     return p.parse_args()
 
@@ -236,7 +238,7 @@ def build_paths(out_dir: Path) -> dict[str, Path]:
 
 
 def build_router_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[str]:
-    return [
+    cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_dry_run_cycle.py"),
         "--csv-dir", str(args.csv_dir),
@@ -248,6 +250,9 @@ def build_router_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[s
         "--latest-confirmed-m1-policy", str(args.latest_confirmed_m1_policy),
         "--continue-on-strategy-error",
     ]
+    if args.skip_monitor_when_no_open_signals:
+        cmd.append("--skip-monitor-when-no-open-signals")
+    return cmd
 
 
 def build_adapter_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[str]:
@@ -319,7 +324,6 @@ def is_no_signal_strategy_status(status: dict[str, Any]) -> bool:
 
 
 def is_safe_no_signal_router_result(router_result: dict[str, Any], router_rc: int | str) -> bool:
-    """Return True when router failure is only a no-signal dry-run condition."""
     if router_rc in [0, "SKIPPED"]:
         return False
     if not router_result:
@@ -348,6 +352,7 @@ def main() -> int:
     print("NO --send / NO existing Mochipoyo BAT mutation / NO production registry write", flush=True)
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
+    print(f"skip_monitor_when_no_open_signals={args.skip_monitor_when_no_open_signals}", flush=True)
     print("=" * 80, flush=True)
 
     timing = {
@@ -392,7 +397,6 @@ def main() -> int:
     elif sender_cmd is None:
         print("[INFO] sender skipped because order_payloads.csv has no rows", flush=True)
 
-    # Re-read outputs after all stages.
     router_result = read_json_or_empty(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json")
     adapter_result = read_json_or_empty(paths["adapter_out_dir"] / "latest_adapter_result.json")
     payload_result = read_json_or_empty(paths["payload_out_dir"] / "order_payloads.json")
@@ -416,12 +420,13 @@ def main() -> int:
     timing["total_seconds"] = round(time.perf_counter() - loop_started_perf, 3)
 
     summary = {
-        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v2",
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v3",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
         "reason": "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_PASS" if cycle_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_FAILED",
         "router_safe_no_signal": bool(router_safe_no_signal),
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
         "timing": timing,
         "safety": {
             "send_flag_passed": False,
@@ -474,6 +479,7 @@ def main() -> int:
         "cycle_ok": cycle_ok,
         "csv_dir": str(args.csv_dir),
         "out_dir": str(args.out_dir),
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
         "router_returncode": router_rc,
         "adapter_returncode": adapter_rc,
         "payload_bridge_returncode": payload_rc,
@@ -490,6 +496,7 @@ def main() -> int:
         "cycle_ok": cycle_ok,
         "reason": summary["reason"],
         "router_safe_no_signal": bool(router_safe_no_signal),
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
         "returncodes": summary["returncodes"],
         "key_metrics": metrics,
         "timing": timing,
