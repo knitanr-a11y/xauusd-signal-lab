@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -114,6 +115,26 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def windows_long_path(path: str | Path) -> str:
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
+def ensure_parent_dir(path: Path) -> None:
+    Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
+
+
+def mkdir_path(path: Path) -> None:
+    Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
+
+
 def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -123,8 +144,9 @@ def utc_stamp() -> str:
 
 
 def write_text(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
+    ensure_parent_dir(path)
+    with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
+        f.write(text)
 
 
 def read_json_or_empty(path: Path) -> dict[str, Any]:
@@ -137,21 +159,20 @@ def read_json_or_empty(path: Path) -> dict[str, Any]:
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    write_text(path, json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
 
 
 def append_cycle_log(path: Path, row: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_parent_dir(path)
     df = pd.DataFrame([{col: row.get(col, "") for col in CYCLE_LOG_COLUMNS}])
-    header = not path.exists()
-    df.to_csv(path, mode="a", header=header, index=False, encoding="utf-8-sig")
+    header = not Path(windows_long_path(path)).exists()
+    df.to_csv(windows_long_path(path), mode="a", header=header, index=False, encoding="utf-8-sig")
 
 
 def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int) -> tuple[int, Path, Path]:
     print(f"[INFO] running {label}")
     print("[CMD] " + " ".join(command))
-    log_dir.mkdir(parents=True, exist_ok=True)
+    mkdir_path(log_dir)
     completed = subprocess.run(
         command,
         cwd=str(REPO_ROOT),
@@ -225,9 +246,9 @@ def build_position_monitor_command(args: argparse.Namespace) -> list[str]:
 
 def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     cycle_start = utc_now_text()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    mkdir_path(args.out_dir)
     log_dir = args.out_dir / "dry_run_cycle_command_logs"
-    log_dir.mkdir(parents=True, exist_ok=True)
+    mkdir_path(log_dir)
     cycle_log_path = args.out_dir / "dry_run_cycle_log.csv"
     latest_cycle_result_path = args.out_dir / "latest_dry_run_cycle_result.json"
 
