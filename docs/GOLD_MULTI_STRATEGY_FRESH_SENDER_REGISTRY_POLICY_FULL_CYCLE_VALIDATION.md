@@ -4,11 +4,12 @@ Last updated: 2026-05-10
 
 ## Purpose
 
-This document records validation for the one-command full-cycle wrapper and its dry-run BAT:
+This document records validation for the one-command full-cycle wrapper, its dry-run BAT, and its read-only verifier:
 
 ```text
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
+scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
 ```
 
 Validated chain:
@@ -22,6 +23,7 @@ fresh MT5 tick-based payload
 → exact registry reconciliation
 → registry-aware policy preview
 → same_strategy BLOCK
+→ read-only summary verification
 ```
 
 ## Safety boundary
@@ -40,6 +42,8 @@ The wrapper does call the real sender in dry-run mode only.
 The fresh payload builder reads MT5 account/symbol/tick metadata.
 
 The real sender dry-run may call `mt5.order_check`, but never `mt5.order_send` because `--send` is not passed.
+
+The verifier is read-only and does not import MT5.
 
 ## Implementation note: short work paths
 
@@ -400,9 +404,88 @@ Decision:
 PASS.
 ```
 
+## Read-only summary verifier validation
+
+New verifier:
+
+```text
+scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
+```
+
+Implementation commit:
+
+```text
+2620a396927fbb15e76700dd2a329c6d8b8b4dd8
+```
+
+Command:
+
+```cmd
+python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py --summary-json data\r\ff\summary.json --out-json data\r\ff\summary_verify.json --out-csv data\r\ff\summary_verify_checks.csv
+```
+
+Observed result:
+
+```text
+verify_ok=true
+reason=SUMMARY_VERIFY_PASS
+checks_total=26
+checks_failed=0
+failed_check_names=[]
+```
+
+Verified key checks:
+
+```text
+cycle_ok=true
+reason=FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_PASS
+send_requested=false
+safety.wrapper_passed_send_flag=false
+safety.production_registry_mutated=false
+safety.trigger_state_mutated=false
+safety.existing_sender_modified=false
+safety.existing_bat_modified=false
+sender_cycle.cycle_ok=true
+sender_cycle.sender_metrics.dry_run_check_ok_rows=1
+sender_cycle.sender_metrics.order_send_called_count=0
+sender_cycle.sender_metrics.sent_rows=0
+sender_cycle.sender_metrics.error_rows=0
+sender_cycle.registry_preview_rows=1
+mock_positions.build_ok=true
+mock_positions.rows_out=1
+reconcile.reconcile_ok=true
+reconcile.matched_active_registry_rows=1
+reconcile.matched_with_mismatch_rows=0
+reconcile.missing_position_rows=0
+reconcile.unregistered_position_rows=0
+policy_preview.preview_ok=true
+policy_preview.same_strategy_blocked_rows=1
+policy_preview.registry_inconsistency_blocked_rows=0
+policy_preview.allow_rows=0
+policy_preview.blocked_rows=1
+```
+
+Verifier safety:
+
+```text
+read_only=true
+mt5_imported=false
+order_check_called=false
+order_send_called=false
+ledger_mutated=false
+registry_mutated=false
+trigger_state_mutated=false
+```
+
+Decision:
+
+```text
+PASS.
+```
+
 ## Current implication
 
-The following can now be reproduced with one BAT command:
+The following can now be reproduced with one BAT command and verified with one read-only verifier command:
 
 ```text
 fresh MT5 tick payload
@@ -413,6 +496,7 @@ fresh MT5 tick payload
 → exact reconcile
 → registry-aware policy preview
 → same_strategy BLOCK
+→ read-only summary verification
 ```
 
 Canonical dry-run command:
@@ -421,7 +505,13 @@ Canonical dry-run command:
 scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
 ```
 
-This full-cycle wrapper/BAT is now the safest next integration layer before modifying the real sender or writing production registry.
+Canonical verifier command:
+
+```cmd
+python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py --summary-json data\r\ff\summary.json --out-json data\r\ff\summary_verify.json --out-csv data\r\ff\summary_verify_checks.csv
+```
+
+This full-cycle wrapper/BAT/verifier set is now the safest next integration layer before modifying the real sender or writing production registry.
 
 ## Recommended next step
 
@@ -430,13 +520,13 @@ Do not write production registry yet.
 Recommended next step:
 
 ```text
-Use scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat as the canonical dry-run validation command for the sender/registry/policy path.
+Use the BAT + verifier pair above as the canonical dry-run validation commands for the sender/registry/policy path.
 ```
 
 After another stable round, decide whether to:
 
 ```text
-A. keep wrapper/BAT-only integration for demo dry-run validation, or
+A. keep wrapper/BAT/verifier-only integration for demo dry-run validation, or
 B. add disabled-by-default registry preview flags directly to send_mt5_order_from_payload.py.
 ```
 
