@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-r"""M15-aligned GOLD multi-strategy Mochipoyo-loop dry-run runner.
+r"""Minute-aligned GOLD multi-strategy Mochipoyo-loop dry-run runner.
 
 This script repeatedly calls the independent dry-run wrapper BAT:
 
@@ -14,8 +14,14 @@ Safety boundaries:
 - It does not intentionally mutate existing Mochipoyo ledgers or trigger-state.
 - It writes its own loop logs under --out-dir with Windows long-path support.
 
+Timing policy:
+- Default cadence is every 1 minute at second 02.
+- This matches the existing Mochipoyo-style minute loop timing.
+- The strategy still evaluates the latest confirmed M15 bar; running every minute
+  only improves CSV update pickup timing and does not change the signal timeframe.
+
 Purpose:
-- Validate the new GOLD BUY/SELL multi-strategy path on a repeated or M15-aligned cadence.
+- Validate the new GOLD BUY/SELL multi-strategy path on a repeated minute-aligned cadence.
 - Keep this separate from the existing Mochipoyo loop until explicitly approved.
 """
 
@@ -172,11 +178,11 @@ def run_wrapper_bat(cycle_index: int, out_dir: Path) -> tuple[int, Path, Path]:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run independent GOLD multi-strategy Mochipoyo-loop dry-run wrapper on an aligned cadence.")
+    p = argparse.ArgumentParser(description="Run independent GOLD multi-strategy Mochipoyo-loop dry-run wrapper on a minute-aligned cadence.")
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     p.add_argument("--max-cycles", type=int, default=1, help="Number of cycles to run. Use 0 for infinite dry-run loop.")
-    p.add_argument("--interval-minutes", type=int, default=15)
-    p.add_argument("--offset-seconds", type=int, default=8, help="Run this many seconds after each aligned interval boundary.")
+    p.add_argument("--interval-minutes", type=int, default=1)
+    p.add_argument("--offset-seconds", type=int, default=2, help="Run this many seconds after each aligned minute boundary.")
     p.add_argument("--run-immediately", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--stop-on-error", action=argparse.BooleanOptionalAction, default=False)
     return p.parse_args()
@@ -193,7 +199,7 @@ def main() -> int:
     mkdir_path(args.out_dir)
 
     print("=" * 80, flush=True)
-    print("GOLD multi-strategy Mochipoyo-loop aligned DRY-RUN runner", flush=True)
+    print("GOLD multi-strategy Mochipoyo-loop minute-aligned DRY-RUN runner", flush=True)
     print("NO --send / independent wrapper only / Windows long-path outputs", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"max_cycles={'infinite' if args.max_cycles == 0 else args.max_cycles}", flush=True)
@@ -274,7 +280,7 @@ def main() -> int:
         }
         write_json(args.out_dir / "latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_result.json", loop_summary)
         print("=" * 80, flush=True)
-        print("aligned dry-run loop cycle summary", flush=True)
+        print("minute-aligned dry-run loop cycle summary", flush=True)
         print(json.dumps(loop_summary, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
         print("=" * 80, flush=True)
 
