@@ -21,6 +21,12 @@ Purpose:
 
 This script does NOT send Discord messages, place orders, write live ledgers,
 write trigger state, or touch Mochipoyo live/demo/autotrade files.
+
+Lot policy:
+    GOLD C_ENV BUY is a single-confirmation BUY strategy in the current
+    multi-strategy plan. Its order-intent base lot is 0.01 unless explicitly
+    changed by a future caller. This avoids leaking lot=None into the guarded
+    sender/payload path during integration.
 """
 
 from __future__ import annotations
@@ -41,6 +47,7 @@ DEFAULT_NOTIFICATION_TXT = DEFAULT_RESULT_DIR / "notification_preview_72h.txt"
 DEFAULT_NOTIFICATION_CSV = DEFAULT_RESULT_DIR / "notification_preview_72h.csv"
 DEFAULT_INTENT_JSONL = DEFAULT_RESULT_DIR / "order_intent_preview_72h.jsonl"
 DEFAULT_INTENT_CSV = DEFAULT_RESULT_DIR / "order_intent_preview_72h.csv"
+DEFAULT_BASE_LOT = 0.01
 
 REQUIRED_COLUMNS = [
     "symbol",
@@ -78,7 +85,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--notification-csv", type=Path, default=DEFAULT_NOTIFICATION_CSV)
     parser.add_argument("--intent-jsonl", type=Path, default=DEFAULT_INTENT_JSONL)
     parser.add_argument("--intent-csv", type=Path, default=DEFAULT_INTENT_CSV)
-    parser.add_argument("--risk-mode", type=str, default="dry_run_no_lot")
+    parser.add_argument("--risk-mode", type=str, default="base_lot_0_01_dry_run")
+    parser.add_argument("--base-lot", type=float, default=DEFAULT_BASE_LOT)
     parser.add_argument("--dry-run", action="store_true", default=True)
     return parser.parse_args()
 
@@ -118,6 +126,16 @@ def fmt_num(value: Any, digits: int = 3) -> str:
         return f"{float(value):.{digits}f}"
     except Exception:
         return str(value)
+
+
+def normalize_lot(base_lot: float) -> float:
+    try:
+        lot = float(base_lot)
+    except Exception:
+        lot = DEFAULT_BASE_LOT
+    if pd.isna(lot) or lot <= 0:
+        lot = DEFAULT_BASE_LOT
+    return round(lot, 8)
 
 
 def build_signal_payload(row: pd.Series) -> dict[str, Any]:
@@ -180,10 +198,11 @@ def build_signal_payload(row: pd.Series) -> dict[str, Any]:
     }
 
 
-def build_order_intent(row: pd.Series, *, risk_mode: str, dry_run: bool) -> dict[str, Any]:
+def build_order_intent(row: pd.Series, *, risk_mode: str, dry_run: bool, base_lot: float = DEFAULT_BASE_LOT) -> dict[str, Any]:
     payload = build_signal_payload(row)
+    lot = normalize_lot(base_lot)
     return {
-        "schema_version": "gold_c_env_rr2_72h_order_intent_v1",
+        "schema_version": "gold_c_env_rr2_72h_order_intent_v2_base_lot",
         "dry_run": bool(dry_run),
         "intent_type": "OPEN_POSITION",
         "strategy_id": STRATEGY_ID,
@@ -200,9 +219,11 @@ def build_order_intent(row: pd.Series, *, risk_mode: str, dry_run: bool) -> dict
         "max_hold_hours": payload["risk"]["max_hold_hours"],
         "time_exit_required": True,
         "risk_mode": risk_mode,
-        "lot": None,
-        "volume": None,
-        "lot_status": "NOT_CALCULATED_RESEARCH_PREVIEW",
+        "base_lot": lot,
+        "lot_multiplier": 1.0,
+        "lot": lot,
+        "volume": lot,
+        "lot_status": "CALCULATED_BASE_LOT",
         "source_signal": payload,
     }
 
@@ -256,6 +277,10 @@ def flatten_for_csv(payload: dict[str, Any], intent: dict[str, Any], text: str) 
         "time_exit_required": intent["time_exit_required"],
         "risk_mode": intent["risk_mode"],
         "dry_run": intent["dry_run"],
+        "base_lot": intent["base_lot"],
+        "lot_multiplier": intent["lot_multiplier"],
+        "lot": intent["lot"],
+        "volume": intent["volume"],
         "lot_status": intent["lot_status"],
         "h4_env_close_time": payload["context"]["h4"]["env_close_time"],
         "h1_pivot_confirm_time": payload["context"]["h1"]["pivot_confirm_time"],
@@ -285,7 +310,7 @@ def main() -> int:
 
     for _, row in df.sort_values("entry_time", kind="mergesort").iterrows():
         payload = build_signal_payload(row)
-        intent = build_order_intent(row, risk_mode=args.risk_mode, dry_run=args.dry_run)
+        intent = build_order_intent(row, risk_mode=args.risk_mode, dry_run=args.dry_run, base_lot=args.base_lot)
         text = notification_text(payload)
         notification_blocks.append(text)
         flat = flatten_for_csv(payload, intent, text)
