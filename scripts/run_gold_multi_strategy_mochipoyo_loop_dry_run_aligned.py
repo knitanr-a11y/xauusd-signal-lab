@@ -34,6 +34,11 @@ Stop policy:
 - If at least one cycle completed, latest_*_aligned_result.json is updated with
   stopped_by_user=true while keeping the latest completed cycle details.
 
+Log schema policy:
+- If aligned_loop_log.csv exists with an older header, it is rotated to a
+  timestamped .legacy_* file and a fresh CSV with the current header is created.
+  This prevents old/new CSV header drift from corrupting status viewer fields.
+
 Purpose:
 - Validate the new GOLD BUY/SELL multi-strategy path on a repeated minute-aligned cadence.
 - Keep this separate from the existing Mochipoyo loop until explicitly approved.
@@ -124,9 +129,36 @@ def write_json(path: Path, obj: dict[str, Any]) -> None:
     write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str))
 
 
+def read_csv_header(path: Path) -> list[str]:
+    try:
+        with open(windows_long_path(path), "r", encoding="utf-8-sig", newline="") as f:
+            reader = csv.reader(f)
+            return next(reader, [])
+    except FileNotFoundError:
+        return []
+    except StopIteration:
+        return []
+
+
+def rotate_legacy_csv(path: Path, reason: str) -> Path:
+    stamp = utc_now().strftime("%Y%m%d_%H%M%S")
+    rotated = path.with_name(f"{path.stem}.legacy_{reason}_{stamp}{path.suffix}")
+    os.replace(windows_long_path(path), windows_long_path(rotated))
+    return rotated
+
+
 def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
     ensure_parent_dir(path)
     exists = Path(windows_long_path(path)).exists()
+    if exists:
+        existing_header = read_csv_header(path)
+        if existing_header != columns:
+            rotated = rotate_legacy_csv(path, "header_mismatch")
+            print(
+                f"[WARN] rotated legacy CSV due to header mismatch: {path} -> {rotated}",
+                flush=True,
+            )
+            exists = False
     with open(windows_long_path(path), "a", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
         if not exists:
@@ -250,7 +282,7 @@ def build_loop_summary(
         "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_ALIGNED_PASS" if loop_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_ALIGNED_HAS_FAILURES"
     )
     return {
-        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_aligned_v4_compact_console_preserve_summary_on_precycle_stop",
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_aligned_v5_compact_console_rotating_csv_schema",
         "started_at_utc": started_at,
         "updated_at_utc": utc_text(),
         "loop_ok": loop_ok,
