@@ -2,35 +2,30 @@
 # -*- coding: utf-8 -*-
 r"""Validate GOLD multi-strategy signal-present path with a safe mock intent.
 
-This script does NOT wait for a real market signal. It creates a router-compatible
-mock OPEN_POSITION intent and validates the downstream path:
+This script creates a router-compatible mock OPEN_POSITION intent and validates:
 
-    mock router combined_order_intent_dry_run.jsonl
-      -> autotrade adapter dry-run
+    mock router intent
+      -> adapter dry-run first pass
       -> payload bridge
       -> send_mt5_order_from_payload.py dry-run WITHOUT --send
-      -> sender-native registry preview
+      -> sender-native registry preview from DRY_RUN_ORDER_CHECK_OK rows
       -> mock position
       -> reconcile
       -> registry-aware same_strategy BLOCK policy preview
-      -> duplicate preview skip check
+      -> adapter duplicate preview skip check
 
 Safety boundaries:
 - Never passes --send.
 - Does not write production position_registry.csv.
-- Does not call or modify existing Mochipoyo production/demo BATs.
-- Does not intentionally mutate existing Mochipoyo ledgers or trigger-state files.
-- Uses its own output directory by default.
+- Does not call existing Mochipoyo production/demo BATs.
+- Uses only its own output directory.
 - Uses Windows long-path helpers for its own outputs.
 
-The mock intent uses the current MT5 tick by default to keep SL/TP near current
-market and make sender order_check dry-run realistic:
-
-    SELL entry = bid
-    SL = entry + 10.00
-    TP = entry - 20.00
-
-This is a validation fixture only, not a trading signal.
+Important implementation detail:
+- The duplicate adapter pass is intentionally run AFTER payload/sender/policy.
+  The adapter writes adapter_order_preview.csv on every run. If duplicate check is
+  run before payload bridge, it overwrites the first non-empty preview with an
+  empty duplicate-skip output.
 """
 
 from __future__ import annotations
@@ -54,14 +49,14 @@ STRATEGY_SLOT = "SELL_H1H4_BEAR_AB"
 STRATEGY_ID = "GOLD_H1H4_BEAR_M15_LOW_BREAK_AB_CLASSIFIER_FIXED10_RR2_12H"
 CONDITION_ID = "GOLD_H1H4_BEAR_M15_LOW_BREAK_AB_CLASSIFIER_FIXED10_RR2_12H"
 
-CASE_LOG_COLUMNS = [
+STAGE_LOG_COLUMNS = [
     "stage",
     "started_at_utc",
     "ended_at_utc",
     "returncode",
     "ok",
-    "reason",
-    "details_json",
+    "stdout_log",
+    "stderr_log",
 ]
 
 
@@ -170,6 +165,43 @@ def read_csv_len(path: Path) -> int:
         return 0
 
 
+def run_cmd(stage: str, cmd: list[str], out_dir: Path) -> int:
+    started = utc_now_text()
+    log_dir = out_dir / "command_logs"
+    mkdir_path(log_dir)
+    stdout_path = log_dir / f"{stage}_stdout.txt"
+    stderr_path = log_dir / f"{stage}_stderr.txt"
+    print("=" * 80, flush=True)
+    print(f"[STAGE] {stage}", flush=True)
+    print("[CMD] " + " ".join(cmd), flush=True)
+    completed = subprocess.run(
+        cmd,
+        cwd=str(REPO_ROOT),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    write_text(stdout_path, completed.stdout or "")
+    write_text(stderr_path, completed.stderr or "")
+    if completed.stdout:
+        print(completed.stdout.rstrip(), flush=True)
+    if completed.stderr:
+        print(completed.stderr.rstrip(), file=sys.stderr, flush=True)
+    ended = utc_now_text()
+    append_csv_row(out_dir / "stage_log.csv", {
+        "stage": stage,
+        "started_at_utc": started,
+        "ended_at_utc": ended,
+        "returncode": int(completed.returncode),
+        "ok": int(completed.returncode) == 0,
+        "stdout_log": str(stdout_path),
+        "stderr_log": str(stderr_path),
+    }, STAGE_LOG_COLUMNS)
+    print(f"[STAGE] {stage} returncode={completed.returncode}", flush=True)
+    return int(completed.returncode)
+
+
 def get_mt5_tick(*, broker_symbol: str, expected_login: int | None, require_demo_account: bool, select_symbol: bool) -> dict[str, Any]:
     try:
         import MetaTrader5 as mt5  # type: ignore
@@ -189,10 +221,8 @@ def get_mt5_tick(*, broker_symbol: str, expected_login: int | None, require_demo
             name = str(getattr(account, "name", ""))
             if "demo" not in server.lower() and "demo" not in name.lower():
                 raise RuntimeError(f"demo account required: login={account.login} server={server} name={name}")
-        if select_symbol:
-            selected = mt5.symbol_select(broker_symbol, True)
-            if not selected:
-                raise RuntimeError(f"symbol_select failed for {broker_symbol}: {mt5.last_error()}")
+        if select_symbol and not mt5.symbol_select(broker_symbol, True):
+            raise RuntimeError(f"symbol_select failed for {broker_symbol}: {mt5.last_error()}")
         info = mt5.symbol_info(broker_symbol)
         if info is None:
             raise RuntimeError(f"symbol_info failed for {broker_symbol}: {mt5.last_error()}")
@@ -268,44 +298,6 @@ def build_mock_open_intent(price_meta: dict[str, Any], *, direction: str, lot: f
     }
 
 
-def run_cmd(stage: str, cmd: list[str], out_dir: Path, *, continue_on_error: bool = False) -> tuple[int, Path, Path]:
-    started = utc_now_text()
-    log_dir = out_dir / "command_logs"
-    mkdir_path(log_dir)
-    stdout_path = log_dir / f"{stage}_stdout.txt"
-    stderr_path = log_dir / f"{stage}_stderr.txt"
-    print("=" * 80, flush=True)
-    print(f"[STAGE] {stage}", flush=True)
-    print("[CMD] " + " ".join(cmd), flush=True)
-    completed = subprocess.run(
-        cmd,
-        cwd=str(REPO_ROOT),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    write_text(stdout_path, completed.stdout or "")
-    write_text(stderr_path, completed.stderr or "")
-    if completed.stdout:
-        print(completed.stdout.rstrip(), flush=True)
-    if completed.stderr:
-        print(completed.stderr.rstrip(), file=sys.stderr, flush=True)
-    ended = utc_now_text()
-    append_csv_row(out_dir / "stage_log.csv", {
-        "stage": stage,
-        "started_at_utc": started,
-        "ended_at_utc": ended,
-        "returncode": int(completed.returncode),
-        "ok": int(completed.returncode) == 0,
-        "reason": "RETURN_CODE_ZERO" if int(completed.returncode) == 0 else "RETURN_CODE_NONZERO",
-        "details_json": "",
-    }, CASE_LOG_COLUMNS)
-    if completed.returncode != 0 and not continue_on_error:
-        print(f"[ERROR] stage failed: {stage} returncode={completed.returncode}", flush=True)
-    return int(completed.returncode), stdout_path, stderr_path
-
-
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Validate mock signal-present path through adapter/payload/sender dry-run/registry preview.")
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
@@ -333,7 +325,6 @@ def main() -> int:
 
     router_out_dir = args.out_dir / "router_mock"
     adapter_out_dir = args.out_dir / "adapter"
-    adapter_dup_out_dir = args.out_dir / "adapter_duplicate_check"
     payload_out_dir = args.out_dir / "payload"
     sender_out_dir = args.out_dir / "sender"
     registry_dir = args.out_dir / "registry_preview"
@@ -372,28 +363,22 @@ def main() -> int:
         ],
     }
     write_json(router_out_dir / "latest_multi_strategy_cycle_result.json", router_summary)
-    write_csv_rows(router_out_dir / "strategy_status_latest.csv", router_summary["strategy_status"], ["strategy_slot", "strategy_id", "direction", "signal_found", "signal_key", "trade_enabled", "scan_reason", "cycle_ok"])
+    write_csv_rows(
+        router_out_dir / "strategy_status_latest.csv",
+        router_summary["strategy_status"],
+        ["strategy_slot", "strategy_id", "direction", "signal_found", "signal_key", "trade_enabled", "scan_reason", "cycle_ok"],
+    )
 
-    rc_adapter, _, _ = run_cmd("adapter_first_pass", [
+    rc_adapter = run_cmd("adapter_first_pass", [
         sys.executable, str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_autotrade_adapter_dry_run.py"),
         "--router-out-dir", str(router_out_dir),
         "--out-dir", str(adapter_out_dir),
         "--broker-symbol", str(args.broker_symbol),
         "--reset-ledger",
     ], args.out_dir)
+    adapter_first = read_json_or_empty(adapter_out_dir / "latest_adapter_result.json")
 
-    rc_adapter_dup, _, _ = run_cmd("adapter_duplicate_pass", [
-        sys.executable, str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_autotrade_adapter_dry_run.py"),
-        "--router-out-dir", str(router_out_dir),
-        "--out-dir", str(adapter_out_dir),
-        "--broker-symbol", str(args.broker_symbol),
-    ], args.out_dir)
-
-    # Copy duplicate result details to separate folder summary for easier inspection.
-    dup_result = read_json_or_empty(adapter_out_dir / "latest_adapter_result.json")
-    write_json(adapter_dup_out_dir / "latest_adapter_duplicate_result.json", dup_result)
-
-    rc_payload, _, _ = run_cmd("payload_bridge", [
+    rc_payload = run_cmd("payload_bridge", [
         sys.executable, str(REPO_ROOT / "scripts" / "build_gold_multi_strategy_mochipoyo_order_payloads_dry_run.py"),
         "--adapter-out-dir", str(adapter_out_dir),
         "--out-dir", str(payload_out_dir),
@@ -406,7 +391,7 @@ def main() -> int:
     payload_csv = payload_out_dir / "order_payloads.csv"
     registry_csv = registry_dir / "registry_preview.csv"
     registry_json = registry_dir / "registry_preview.json"
-    rc_sender, _, _ = run_cmd("sender_dry_run_registry_preview", [
+    rc_sender = run_cmd("sender_dry_run_registry_preview", [
         sys.executable, str(REPO_ROOT / "scripts" / "send_mt5_order_from_payload.py"),
         "--input-csv", str(payload_csv),
         "--order-ledger-csv", str(order_ledger_csv),
@@ -422,15 +407,16 @@ def main() -> int:
         "--require-demo-account",
         "--registry-preview-out-csv", str(registry_csv),
         "--registry-preview-out-json", str(registry_json),
+        "--registry-preview-include-dry-run-check-ok",
     ], args.out_dir)
 
-    rc_mock_positions, _, _ = run_cmd("mock_positions", [
+    rc_mock_positions = run_cmd("mock_positions", [
         sys.executable, str(REPO_ROOT / "scripts" / "build_gold_multi_strategy_mock_positions_from_registry.py"),
         "--registry-csv", str(registry_csv),
         "--output-csv", str(mock_positions_csv),
     ], args.out_dir)
 
-    rc_reconcile, _, _ = run_cmd("reconcile", [
+    rc_reconcile = run_cmd("reconcile", [
         sys.executable, str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_position_registry_reconcile_dry_run.py"),
         "--registry-csv", str(registry_csv),
         "--positions-csv", str(mock_positions_csv),
@@ -438,7 +424,7 @@ def main() -> int:
         "--symbol", str(args.broker_symbol),
     ], args.out_dir)
 
-    rc_policy, _, _ = run_cmd("policy_same_strategy_block", [
+    rc_policy = run_cmd("policy_same_strategy_block", [
         sys.executable, str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_registry_policy_preview_longpath.py"),
         "--input-csv", str(payload_csv),
         "--positions-csv", str(mock_positions_csv),
@@ -451,7 +437,15 @@ def main() -> int:
         "--max-lot-per-order", "0.02",
     ], args.out_dir)
 
-    adapter_first = read_json_or_empty(adapter_out_dir / "latest_adapter_result.json")
+    # Duplicate check intentionally after downstream path, because adapter rewrites output CSVs.
+    rc_adapter_dup = run_cmd("adapter_duplicate_pass", [
+        sys.executable, str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_autotrade_adapter_dry_run.py"),
+        "--router-out-dir", str(router_out_dir),
+        "--out-dir", str(adapter_out_dir),
+        "--broker-symbol", str(args.broker_symbol),
+    ], args.out_dir)
+    dup_result = read_json_or_empty(adapter_out_dir / "latest_adapter_result.json")
+
     payload_summary = read_json_or_empty(payload_out_dir / "order_payloads.json")
     sender_report = read_json_or_empty(sender_out_dir / "mt5_order_send_report.json")
     registry_preview = read_json_or_empty(registry_json)
@@ -461,7 +455,6 @@ def main() -> int:
 
     checks = {
         "adapter_first_created_one": as_int(adapter_first.get("order_previews_created"), 0) >= 1,
-        "adapter_duplicate_skipped_one": as_int(dup_result.get("duplicate_previews_skipped"), 0) >= 1,
         "payload_rows_out_one": as_int(payload_summary.get("rows_out"), 0) >= 1,
         "sender_no_send": not as_bool(sender_report.get("send_requested"), False) and as_int(sender_report.get("order_send_called_count"), 0) == 0 and as_int(sender_report.get("sent_rows"), 0) == 0,
         "sender_dry_run_check_ok": as_int(sender_report.get("dry_run_check_ok_rows"), 0) >= 1,
@@ -469,12 +462,13 @@ def main() -> int:
         "mock_positions_rows": read_csv_len(mock_positions_csv) >= 1,
         "reconcile_ok": as_bool(reconcile_summary.get("reconcile_ok"), False) and as_int(reconcile_summary.get("matched_active_registry_rows"), 0) >= 1,
         "policy_same_strategy_block": as_bool(policy_summary.get("preview_ok"), False) and as_int(policy_summary.get("same_strategy_blocked_rows"), 0) >= 1 and as_int(policy_summary.get("allow_rows"), 0) == 0,
-        "all_returncodes_zero": all(rc == 0 for rc in [rc_adapter, rc_adapter_dup, rc_payload, rc_sender, rc_mock_positions, rc_reconcile, rc_policy]),
+        "adapter_duplicate_skipped_one": as_int(dup_result.get("duplicate_previews_skipped"), 0) >= 1,
+        "all_returncodes_zero": all(rc == 0 for rc in [rc_adapter, rc_payload, rc_sender, rc_mock_positions, rc_reconcile, rc_policy, rc_adapter_dup]),
     }
     checks_failed = [name for name, ok in checks.items() if not ok]
     ended = utc_now_text()
     summary = {
-        "schema_version": "gold_multi_strategy_mock_signal_path_validation_v1",
+        "schema_version": "gold_multi_strategy_mock_signal_path_validation_v2",
         "started_at_utc": started,
         "ended_at_utc": ended,
         "validation_ok": len(checks_failed) == 0,
@@ -483,12 +477,12 @@ def main() -> int:
         "checks_failed": checks_failed,
         "returncodes": {
             "adapter_first_pass": rc_adapter,
-            "adapter_duplicate_pass": rc_adapter_dup,
             "payload_bridge": rc_payload,
             "sender_dry_run_registry_preview": rc_sender,
             "mock_positions": rc_mock_positions,
             "reconcile": rc_reconcile,
             "policy_same_strategy_block": rc_policy,
+            "adapter_duplicate_pass": rc_adapter_dup,
         },
         "safety": {
             "send_flag_passed": False,
