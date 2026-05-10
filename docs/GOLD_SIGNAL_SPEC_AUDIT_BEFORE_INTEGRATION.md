@@ -10,11 +10,14 @@ GOLD統合前に、既存もちぽよGOLDと新GOLD multi-strategyのシグナ�
 BUY_C_ENV_RR2_72H:
   条件仕様は概ね一致。
   ただし統合時に保持すべき重要条件が棚卸しdocだけでは薄い。
+  統合時のpayload lotは base_lot 0.01 等で明示する必要がある。
 
 SELL_H1H4_BEAR_AB:
   条件仕様・rank仕様は一致。
-  ただし live scan / dry-run loop のデフォルト base_lot が 0.10 で、想定している base_lot 0.01 と相違。
-  このまま統合すると B_ONLY_SAFE=0.10、CORE_AB_CONFIRM=0.20 になる可能性があるため修正必須。
+  base_lot default 0.10 問題は修正済み。
+  現在は base_lot 0.01 に統一済み。
+  B_ONLY_SAFE=0.01、CORE_AB_CONFIRM=0.02 の想定に戻っている。
+  sender lot passthrough validation も PASS 済み。
 ```
 
 ---
@@ -35,6 +38,8 @@ scripts/research_gold_c_env_rr2_72h_notification_and_intent_preview.py
 scripts/run_gold_h1h4_bear_ab_live_scan_once.py
 scripts/run_gold_h1h4_bear_ab_dry_run_loop.py
 scripts/run_gold_multi_strategy_dry_run_cycle.py
+scripts/send_mt5_order_from_payload.py
+scripts/run_gold_sender_lot_passthrough_validation.py
 ```
 
 ---
@@ -196,9 +201,35 @@ M15:
   MACD hist delta < 0
 ```
 
-### 重大な相違: base_lot default
+### base_lot default 相違と修正結果
 
-決定時/運用想定:
+修正前:
+
+```text
+scripts/run_gold_h1h4_bear_ab_live_scan_once.py:
+  --base-lot default = 0.10
+
+scripts/run_gold_h1h4_bear_ab_dry_run_loop.py:
+  --base-lot default = 0.10
+
+scripts/run_gold_multi_strategy_dry_run_cycle.py:
+  SELL runner呼び出し時に --base-lot 0.01 を明示していなかった
+```
+
+修正後:
+
+```text
+scripts/run_gold_h1h4_bear_ab_live_scan_once.py:
+  --base-lot default = 0.01
+
+scripts/run_gold_h1h4_bear_ab_dry_run_loop.py:
+  --base-lot default = 0.01
+
+scripts/run_gold_multi_strategy_dry_run_cycle.py:
+  SELL runner呼び出し時に --base-lot 0.01 を明示
+```
+
+現在の想定lot:
 
 ```text
 base_lot 0.01 の場合:
@@ -207,61 +238,36 @@ base_lot 0.01 の場合:
   A_ONLY_OBSERVE  -> 0.00 / 注文なし
 ```
 
-現在コード:
+### sender lot passthrough validation
+
+追加済み:
 
 ```text
-scripts/run_gold_h1h4_bear_ab_live_scan_once.py:
-  --base-lot default = 0.10
-  --core-lot-multiplier default = 2.0
-  --standard-lot-multiplier default = 1.0
-
-scripts/run_gold_h1h4_bear_ab_dry_run_loop.py:
-  --base-lot default = 0.10
-  --core-lot-multiplier default = 2.0
-  --standard-lot-multiplier default = 1.0
+scripts/run_gold_sender_lot_passthrough_validation.py
 ```
 
-現在のmulti-strategy router:
+実行結果:
 
 ```text
-scripts/run_gold_multi_strategy_dry_run_cycle.py
+validation_ok=true
+reason=GOLD_SENDER_LOT_PASSTHROUGH_VALIDATION_PASS
+payload_lot=0.02
+sender_lot_values=[0.02]
+sender_lot_ok=true
+registry_lot_values=[0.02]
+registry_lot_ok=true
+sender_dry_run_check_ok_rows=1
+sender_error_rows=0
+sender_order_send_called_count=0
+sender_sent_rows=0
 ```
 
-はSELL runner呼び出し時に `--base-lot 0.01` を明示していない。
-
-したがって、現在のまま統合すると:
+確認できたこと:
 
 ```text
-B_ONLY_SAFE     -> 0.10
-CORE_AB_CONFIRM -> 0.20
-```
-
-になる可能性がある。
-
-これはユーザーが想定している:
-
-```text
-B_ONLY_SAFE     -> 0.01
-CORE_AB_CONFIRM -> 0.02
-```
-
-と相違する。
-
-### 修正方針
-
-統合前に必ずどちらかを実施する。
-
-```text
-案A:
-  SELL live scan / dry-run loop の default base_lot を 0.01 に変更する。
-
-案B:
-  multi-strategy router / guarded send wrapper から SELL runner を呼ぶ時に
-  --base-lot 0.01 を明示する。
-
-推奨:
-  両方。
-  研究用に0.10を使いたい場合だけ明示引数で上書きする。
+payload lot=0.02 は sender 側で 0.02 のまま保持される。
+registry preview でも 0.02 のまま保持される。
+NO --send のため order_send は呼ばれていない。
 ```
 
 ---
@@ -296,14 +302,23 @@ BUY保有中という理由だけでSELLを止める。
 
 ---
 
-## 統合前ブロッカー
+## 統合前チェック状態
 
 ```text
 1. SELL base_lot default 0.10 問題を修正する。
+   -> DONE
+
 2. BUY_C_ENV のlotを統合時に明示する。
+   -> TODO
+
 3. sender側でpayload lot/effective_lotを尊重する経路を確認する。
+   -> DONE: lot passthrough validation PASS
+
 4. 新GOLD multi-strategyを銘柄単位block_anyではなく、signal/order key単位重複防止で接続する。
+   -> TODO
+
 5. 既存もちぽよGOLD実運用BATは、上記修正後に統合する。
+   -> TODO
 ```
 
 ---
@@ -312,6 +327,7 @@ BUY保有中という理由だけでSELLを止める。
 
 ```text
 シグナル条件そのものは、BUY/SELLとも決定時仕様と大筋一致。
-ただし、SELLのロット default が決定時/運用想定と相違している。
-この相違を直すまで、実運用統合に進んではいけない。
+SELLのロットdefault相違は修正済み。
+A+B 0.02 lot は sender でも 0.02 のまま通ることを確認済み。
+残る統合前論点は BUY_C_ENV の lot 明示と、signal/order key 単位の重複防止接続。
 ```
