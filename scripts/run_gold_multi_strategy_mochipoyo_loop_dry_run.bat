@@ -8,6 +8,11 @@ REM - It does not call or modify the existing Mochipoyo production/demo BAT.
 REM - It does not write production position_registry.csv.
 REM - It does not intentionally mutate existing Mochipoyo ledgers or trigger-state files.
 REM - Outputs are written under data\research_results\gold_multi_strategy_mochipoyo_loop_dry_run.
+REM
+REM Runtime/lightweight:
+REM - Enables --skip-monitor-when-no-open-signals.
+REM - This skips BUY/SELL position monitor only when the strategy ledger has no DRY_RUN_SIGNAL_CREATED rows.
+REM - Signal detection logic is unchanged.
 
 cd /d "%~dp0\.."
 
@@ -19,6 +24,7 @@ echo GOLD multi-strategy Mochipoyo-loop DRY-RUN wrapper
 echo NO --send / NO existing Mochipoyo BAT mutation
 echo CSV_DIR=%CSV_DIR%
 echo OUT_DIR=%OUT_DIR%
+echo lightweight: skip monitor when no open dry-run signals
 echo ============================================================
 
 python scripts\run_gold_multi_strategy_mochipoyo_loop_dry_run.py ^
@@ -34,7 +40,8 @@ python scripts\run_gold_multi_strategy_mochipoyo_loop_dry_run.py ^
   --deviation 50 ^
   --position-policy allow_any_until_max ^
   --max-symbol-positions 5 ^
-  --max-symbol-lot 0.05
+  --max-symbol-lot 0.05 ^
+  --skip-monitor-when-no-open-signals
 
 set EXIT_CODE=%ERRORLEVEL%
 
