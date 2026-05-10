@@ -96,6 +96,20 @@ def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def console_json(obj: Any) -> str:
+    """Return ASCII-only JSON for Windows cp932 consoles.
+
+    File outputs remain UTF-8/ensure_ascii=False. Console output is ASCII-only to
+    avoid UnicodeEncodeError when captured child output contains U+FFFD or other
+    non-cp932 characters.
+    """
+    return json.dumps(obj, ensure_ascii=True, indent=2, sort_keys=True, default=str)
+
+
+def safe_print(text: Any) -> None:
+    print(str(text).encode("ascii", errors="backslashreplace").decode("ascii"))
+
+
 def write_json(path: Path, obj: dict[str, Any]) -> None:
     Path(windows_long_path(path.parent)).mkdir(parents=True, exist_ok=True)
     Path(windows_long_path(path)).write_text(
@@ -246,15 +260,15 @@ def main() -> int:
     if (not sender_step["ok"]) and args.strict_sender_returncode:
         summary["reason"] = "SENDER_DRY_RUN_FAILED_STRICT"
         write_json(summary_json, summary)
-        print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+        safe_print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
+        safe_print(console_json(summary))
         return 10
 
     if (not sender_step["ok"]) and (not sender_outputs_exist):
         summary["reason"] = "SENDER_DRY_RUN_FAILED_NO_REPORT"
         write_json(summary_json, summary)
-        print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+        safe_print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
+        safe_print(console_json(summary))
         return 11
 
     preview_cmd = build_registry_preview_cmd(args, sender_out_dir, registry_out_dir)
@@ -269,8 +283,6 @@ def main() -> int:
     summary["registry_preview_reason"] = preview_report.get("reason", "")
     summary["registry_preview_ok"] = bool(preview_report.get("preview_ok", False))
 
-    # A non-zero sender returncode is acceptable when the sender produced report/results
-    # and preview builder confirms a valid safe outcome such as NO_ELIGIBLE_SENDER_ROWS.
     cycle_ok = bool(preview_step["ok"] and summary["registry_preview_ok"] and sender_outputs_exist)
     summary["cycle_ok"] = cycle_ok
     if cycle_ok and not sender_step["ok"]:
@@ -281,13 +293,13 @@ def main() -> int:
         summary["reason"] = "SENDER_DRY_RUN_REGISTRY_PREVIEW_COMPLETED_WITH_ERRORS"
     write_json(summary_json, summary)
 
-    print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
-    print(json.dumps({k: v for k, v in summary.items() if k != "steps"}, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+    safe_print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
+    safe_print(console_json({k: v for k, v in summary.items() if k != "steps"}))
     if summary["steps"]:
         df = pd.DataFrame([{"name": s["name"], "ok": s["ok"], "returncode": s["returncode"]} for s in summary["steps"]])
-        print(df.to_string(index=False))
-    print(f"summary_json: {summary_json}")
-    print("done")
+        safe_print(df.to_string(index=False))
+    safe_print(f"summary_json: {summary_json}")
+    safe_print("done")
     return 0 if cycle_ok else 1
 
 
