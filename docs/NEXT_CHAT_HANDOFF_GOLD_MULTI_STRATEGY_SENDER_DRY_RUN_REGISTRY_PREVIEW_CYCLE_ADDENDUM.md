@@ -10,11 +10,12 @@ docs/NEXT_CHAT_HANDOFF_GOLD_MULTI_STRATEGY_DEMO_AUTOTRADE_LONGPATH_ADDENDUM.md
 docs/GOLD_MULTI_STRATEGY_SENDER_REGISTRY_PREVIEW_FROM_REPORT_VALIDATION.md
 docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_DRY_RUN_REGISTRY_PREVIEW_VALIDATION.md
 docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_VALIDATION.md
+docs/GOLD_MULTI_STRATEGY_SENDER_DISABLED_BY_DEFAULT_REGISTRY_PREVIEW_HOOK_DESIGN.md
 ```
 
 ## Why this addendum exists
 
-After the sender-registry preview validation doc was updated, additional wrapper, BAT, and verifier validations were completed.
+After the sender-registry preview validation doc was updated, additional wrapper, BAT, verifier, and design validations were completed.
 
 One-command sender preview wrapper:
 
@@ -46,6 +47,12 @@ Read-only full-cycle verifier:
 scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
 ```
 
+Disabled-by-default sender hook design:
+
+```text
+docs/GOLD_MULTI_STRATEGY_SENDER_DISABLED_BY_DEFAULT_REGISTRY_PREVIEW_HOOK_DESIGN.md
+```
+
 Purpose:
 
 ```text
@@ -69,6 +76,7 @@ Existing Mochipoyo ledger files are not mutated by helper scripts.
 Trigger-state files are not mutated.
 Existing Mochipoyo BAT files are not modified.
 The verifier is read-only and does not import MT5.
+The disabled-by-default sender hook is design-only at this point.
 ```
 
 ## Implementation update 1: blocked sender report handling
@@ -749,15 +757,93 @@ Decision:
 PASS.
 ```
 
+## Design: disabled-by-default sender registry preview hook
+
+Design doc:
+
+```text
+docs/GOLD_MULTI_STRATEGY_SENDER_DISABLED_BY_DEFAULT_REGISTRY_PREVIEW_HOOK_DESIGN.md
+```
+
+Implementation commit:
+
+```text
+06a4a562a22117d091ee02d6ada203391e383990
+```
+
+Important:
+
+```text
+send_mt5_order_from_payload.py has not been modified yet.
+This is a design-only stage.
+```
+
+Proposed sender flags:
+
+```text
+--registry-preview-out-csv <path>
+--registry-preview-out-json <path>
+--registry-preview-position-status ACTIVE
+--registry-preview-position-ticket-start 990001
+--registry-preview-order-ticket-start 880001
+--registry-preview-deal-ticket-start 770001
+--registry-preview-include-dry-run-check-ok
+--registry-preview-include-sent
+```
+
+Key safety rules:
+
+```text
+If no registry preview output flags are provided, sender behavior must be unchanged.
+The hook must never write production position_registry.csv.
+The hook must not mutate existing ledgers or trigger-state files.
+The hook must not affect order validation, order_check, or order_send decisions.
+Preview export runs only after sender result rows are already determined.
+```
+
+Eligibility rules:
+
+```text
+DRY_RUN_ORDER_CHECK_OK rows are eligible for dry-run preview rows.
+SENT rows may be supported later only with explicit --registry-preview-include-sent.
+Blocked/error rows must not create preview rows.
+```
+
+Pre-implementation accepted baseline:
+
+```text
+BAT PASS
+verifier PASS
+external builder output remains the canonical reference
+```
+
+Required post-implementation tests:
+
+```text
+1. no flags regression: no preview files, same sender behavior
+2. fresh payload + preview flags: registry_preview_rows=1
+3. blocked payload + preview flags: registry_preview_rows=0
+4. compare sender-native preview CSV with external builder fields
+5. exact reconcile + same_strategy BLOCK using sender-native preview CSV
+```
+
+Current recommendation:
+
+```text
+Do not implement the sender hook until one more stable BAT + verifier run passes,
+or until the user explicitly chooses to fold the preview hook into send_mt5_order_from_payload.py.
+```
+
 ## Current implication
 
-The project now has two safe wrappers, one canonical dry-run BAT, and one canonical read-only verifier:
+The project now has two safe wrappers, one canonical dry-run BAT, one canonical read-only verifier, and one sender-hook design doc:
 
 ```text
 scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
 scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
+docs/GOLD_MULTI_STRATEGY_SENDER_DISABLED_BY_DEFAULT_REGISTRY_PREVIEW_HOOK_DESIGN.md
 ```
 
 The BAT + verifier pair can reproduce and independently verify this entire path:
@@ -789,7 +875,7 @@ This wrapper path is validated in both important cases:
    → SUMMARY_VERIFY_PASS
 ```
 
-This is safer than modifying the real sender immediately.
+This remains safer than modifying the real sender immediately.
 
 Canonical dry-run command:
 
@@ -806,8 +892,8 @@ python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycl
 Recommended next step:
 
 ```text
-Use the BAT + verifier pair above as the canonical dry-run validation commands for the sender/registry/policy path.
-After another stable round, decide whether to fold disabled-by-default registry preview flags into send_mt5_order_from_payload.py.
+Run one more stable BAT + verifier pair.
+Then decide whether to keep wrapper/BAT/verifier-only integration, or implement the disabled-by-default preview hook in send_mt5_order_from_payload.py.
 ```
 
 Do not modify yet:
