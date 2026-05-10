@@ -34,6 +34,12 @@ Important:
 - Duplicate prevention is by order_key/order ledger. Do not force block_any here,
   because separate GOLD signals may intentionally hold multiple or opposite
   positions.
+
+Safe no-payload behavior:
+- No signal / no payload is a normal operational state.
+- If payload_rows_out=0, sender --send was not passed, order_send_called_count=0,
+  and sent_rows=0, this wrapper returns success even if the dry-run stage itself
+  returned 1 for a no-payload/no-signal path.
 """
 
 from __future__ import annotations
@@ -59,6 +65,7 @@ LOG_COLUMNS = [
     "cycle_start_utc",
     "cycle_end_utc",
     "cycle_ok",
+    "cycle_ok_classification",
     "reason",
     "allow_demo_send",
     "send_requested",
@@ -257,6 +264,19 @@ def decide_send_suppression(args: argparse.Namespace, payload_rows: int) -> tupl
     return True, ""
 
 
+def is_safe_no_payload_cycle(*, args: argparse.Namespace, dry_rc: int, dry_cycle_ok: bool, payload_rows: int, pass_send: bool, guarded_report: dict[str, Any]) -> bool:
+    return bool(
+        payload_rows == 0
+        and not pass_send
+        and safe_int(guarded_report, "rows_out", 0) == 0
+        and safe_int(guarded_report, "order_send_called_count", 0) == 0
+        and safe_int(guarded_report, "sent_rows", 0) == 0
+        and str(args.position_policy) == "allow_any_until_max"
+        and dry_rc in {0, 1}
+        and not dry_cycle_ok
+    )
+
+
 def main() -> int:
     args = parse_args()
     started_perf = time.perf_counter()
@@ -319,14 +339,31 @@ def main() -> int:
     guarded_sender_ok = guarded_sender_rc in [0, "SKIPPED_NO_PAYLOAD_ROWS"]
     if not pass_send and sender_order_send_called_count != 0:
         guarded_sender_ok = False
-    cycle_ok = bool(dry_rc == 0 and dry_cycle_ok and guarded_sender_ok)
+    natural_ok = bool(dry_rc == 0 and dry_cycle_ok and guarded_sender_ok)
+    safe_no_payload_ok = is_safe_no_payload_cycle(
+        args=args,
+        dry_rc=dry_rc,
+        dry_cycle_ok=dry_cycle_ok,
+        payload_rows=payload_rows,
+        pass_send=pass_send,
+        guarded_report=guarded_report,
+    )
+    cycle_ok = bool(natural_ok or safe_no_payload_ok)
+    cycle_ok_classification = "NATURAL_PASS" if natural_ok else ("SAFE_NO_PAYLOAD_PASS" if safe_no_payload_ok else "FAILED")
+
+    reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_PASS"
+    if safe_no_payload_ok:
+        reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_SAFE_NO_PAYLOAD_PASS"
+    elif not cycle_ok:
+        reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_FAILED"
 
     summary = {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v2_integration_policy",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v3_safe_no_payload_pass",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
-        "reason": "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_PASS" if cycle_ok else "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_FAILED",
+        "cycle_ok_classification": cycle_ok_classification,
+        "reason": reason,
         "allow_demo_send": bool(args.allow_demo_send),
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
@@ -378,7 +415,8 @@ def main() -> int:
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
-        "reason": summary["reason"],
+        "cycle_ok_classification": cycle_ok_classification,
+        "reason": reason,
         "allow_demo_send": bool(args.allow_demo_send),
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
@@ -402,7 +440,8 @@ def main() -> int:
     print("GOLD multi-strategy guarded demo-send once summary", flush=True)
     print(json.dumps({
         "cycle_ok": cycle_ok,
-        "reason": summary["reason"],
+        "cycle_ok_classification": cycle_ok_classification,
+        "reason": reason,
         "allow_demo_send": bool(args.allow_demo_send),
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
