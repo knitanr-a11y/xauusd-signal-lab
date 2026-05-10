@@ -10,9 +10,11 @@ REM - It does not intentionally mutate existing Mochipoyo ledgers or trigger-sta
 REM - Outputs are written under data\research_results\gold_multi_strategy_mochipoyo_loop_dry_run.
 REM
 REM Runtime/lightweight:
+REM - Uses run_gold_multi_strategy_mochipoyo_loop_dry_run_fast_m15_patch.py.
 REM - Enables --skip-monitor-when-no-open-signals.
-REM - This skips BUY/SELL position monitor only when the strategy ledger has no DRY_RUN_SIGNAL_CREATED rows.
+REM - Enables --skip-same-m15-no-signal.
 REM - Signal detection logic is unchanged.
+REM - Same-M15 skip fires only when previous cycle was no-signal/no-intent and no DRY_RUN_SIGNAL_CREATED rows exist.
 
 cd /d "%~dp0\.."
 
@@ -24,10 +26,10 @@ echo GOLD multi-strategy Mochipoyo-loop DRY-RUN wrapper
 echo NO --send / NO existing Mochipoyo BAT mutation
 echo CSV_DIR=%CSV_DIR%
 echo OUT_DIR=%OUT_DIR%
-echo lightweight: skip monitor when no open dry-run signals
+echo lightweight: monitor skip + same-M15 no-signal skip
 echo ============================================================
 
-python scripts\run_gold_multi_strategy_mochipoyo_loop_dry_run.py ^
+python scripts\run_gold_multi_strategy_mochipoyo_loop_dry_run_fast_m15_patch.py ^
   --csv-dir "%CSV_DIR%" ^
   --out-dir "%OUT_DIR%" ^
   --broker-symbol GOLD# ^
@@ -41,7 +43,8 @@ python scripts\run_gold_multi_strategy_mochipoyo_loop_dry_run.py ^
   --position-policy allow_any_until_max ^
   --max-symbol-positions 5 ^
   --max-symbol-lot 0.05 ^
-  --skip-monitor-when-no-open-signals
+  --skip-monitor-when-no-open-signals ^
+  --skip-same-m15-no-signal
 
 set EXIT_CODE=%ERRORLEVEL%
 
