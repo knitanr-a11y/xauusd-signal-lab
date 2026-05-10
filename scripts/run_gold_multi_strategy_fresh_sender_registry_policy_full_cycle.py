@@ -18,6 +18,11 @@ Safety:
 - It does not modify existing BAT files.
 - It only reads MT5 tick/account/symbol metadata via the fresh-payload builder and
   order_check via the sender dry-run. It never calls mt5.order_send.
+
+Windows path note:
+- send_mt5_order_from_payload.py still uses a plain Path.mkdir for its out-dir.
+- Therefore this wrapper intentionally uses very short work subdirectories:
+  f / c / r / p, and short summary filenames.
 """
 from __future__ import annotations
 
@@ -79,6 +84,14 @@ def windows_long_path(path: str | Path) -> str:
 
 def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def console_json(obj: Any) -> str:
+    return json.dumps(obj, ensure_ascii=True, indent=2, sort_keys=True, default=str)
+
+
+def safe_print(text: Any) -> None:
+    print(str(text).encode("ascii", errors="backslashreplace").decode("ascii"))
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
@@ -146,17 +159,26 @@ def add_common_mt5_args(cmd: list[str], args: argparse.Namespace) -> list[str]:
     return cmd
 
 
+def stop(summary: dict[str, Any], summary_json: Path, reason: str, code: int) -> int:
+    summary["reason"] = reason
+    write_json(summary_json, summary)
+    safe_print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
+    safe_print(console_json(summary))
+    return code
+
+
 def main() -> int:
     args = parse_args()
     out_dir = Path(args.out_dir)
     Path(windows_long_path(out_dir)).mkdir(parents=True, exist_ok=True)
 
-    fresh_dir = out_dir / "fresh_sender_valid_payload"
-    cycle_dir = out_dir / "sender_dry_run_registry_preview_cycle"
-    reconcile_dir = out_dir / "reconcile_exact"
-    policy_dir = out_dir / "policy_preview"
-    mock_positions_csv = out_dir / "mock_positions_from_registry.csv"
-    summary_json = out_dir / "fresh_sender_registry_policy_full_cycle_summary.json"
+    # Keep these deliberately short. The real sender still uses plain Path.mkdir.
+    fresh_dir = out_dir / "f"
+    cycle_dir = out_dir / "c"
+    reconcile_dir = out_dir / "r"
+    policy_dir = out_dir / "p"
+    mock_positions_csv = out_dir / "mp.csv"
+    summary_json = out_dir / "summary.json"
 
     payload_csv = fresh_dir / "order_payloads.csv"
     order_ledger_csv = fresh_dir / "dry_run_order_ledger.csv"
@@ -208,11 +230,7 @@ def main() -> int:
         "order_key": fresh_summary.get("order_key", ""),
     }
     if not fresh_step["ok"]:
-        summary["reason"] = "FRESH_PAYLOAD_BUILD_FAILED"
-        write_json(summary_json, summary)
-        print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
-        return 10
+        return stop(summary, summary_json, "FRESH_PAYLOAD_BUILD_FAILED", 10)
 
     cycle_cmd = [
         args.python_exe,
@@ -242,11 +260,7 @@ def main() -> int:
         "registry_preview_reason": cycle_summary.get("registry_preview_reason", ""),
     }
     if not cycle_step["ok"]:
-        summary["reason"] = "SENDER_REGISTRY_PREVIEW_CYCLE_FAILED"
-        write_json(summary_json, summary)
-        print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
-        return 20
+        return stop(summary, summary_json, "SENDER_REGISTRY_PREVIEW_CYCLE_FAILED", 20)
 
     mock_cmd = [
         args.python_exe,
@@ -263,11 +277,7 @@ def main() -> int:
         "rows_out": mock_summary.get("rows_out", read_csv_len(mock_positions_csv)),
     }
     if not mock_step["ok"]:
-        summary["reason"] = "MOCK_POSITIONS_BUILD_FAILED"
-        write_json(summary_json, summary)
-        print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
-        return 30
+        return stop(summary, summary_json, "MOCK_POSITIONS_BUILD_FAILED", 30)
 
     reconcile_cmd = [
         args.python_exe,
@@ -290,11 +300,7 @@ def main() -> int:
         "status_counts": reconcile_summary.get("status_counts", {}),
     }
     if not reconcile_step["ok"]:
-        summary["reason"] = "RECONCILE_FAILED"
-        write_json(summary_json, summary)
-        print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
-        return 40
+        return stop(summary, summary_json, "RECONCILE_FAILED", 40)
 
     policy_cmd = [
         args.python_exe,
@@ -325,11 +331,7 @@ def main() -> int:
         "reconcile_status_counts": policy_summary.get("reconcile_status_counts", {}),
     }
     if not policy_step["ok"]:
-        summary["reason"] = "POLICY_PREVIEW_FAILED"
-        write_json(summary_json, summary)
-        print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
-        return 50
+        return stop(summary, summary_json, "POLICY_PREVIEW_FAILED", 50)
 
     cycle_ok = bool(
         summary["fresh_payload"].get("build_ok")
@@ -348,12 +350,12 @@ def main() -> int:
     summary["reason"] = "FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_PASS" if cycle_ok else "FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_FAILED_EXPECTATIONS"
     write_json(summary_json, summary)
 
-    print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
-    print(json.dumps({k: v for k, v in summary.items() if k != "steps"}, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+    safe_print("run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle")
+    safe_print(console_json({k: v for k, v in summary.items() if k != "steps"}))
     step_df = pd.DataFrame([{"name": s["name"], "ok": s["ok"], "returncode": s["returncode"]} for s in summary["steps"]])
-    print(step_df.to_string(index=False))
-    print(f"summary_json: {summary_json}")
-    print("done")
+    safe_print(step_df.to_string(index=False))
+    safe_print(f"summary_json: {summary_json}")
+    safe_print("done")
     return 0 if cycle_ok else 1
 
 
