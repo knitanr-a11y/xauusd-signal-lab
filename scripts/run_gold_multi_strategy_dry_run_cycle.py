@@ -26,13 +26,11 @@ Modes:
 - Default: run each enabled strategy once, then aggregate outputs.
 - --aggregate-only: do not run strategy scripts; only aggregate existing outputs.
 
-Example:
-
-    python scripts\run_gold_multi_strategy_dry_run_cycle.py ^
-      --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-      --router-out-dir data\research_results\gold_multi_strategy_dry_run ^
-      --buy-out-dir data\research_results\gold_c_env_rr2_72h_live_scan ^
-      --sell-out-dir data\research_results\gold_h1h4_bear_ab_live_loop
+Runtime/lightweight option:
+- --skip-monitor-when-no-open-signals passes through to BUY/SELL isolated cycles.
+- It skips position monitor only when each strategy ledger has no
+  DRY_RUN_SIGNAL_CREATED rows.
+- This does not change signal detection logic.
 """
 
 from __future__ import annotations
@@ -99,6 +97,7 @@ ROUTER_CYCLE_LOG_COLUMNS = [
     "router_out_dir",
     "buy_enabled",
     "sell_enabled",
+    "skip_monitor_when_no_open_signals",
     "buy_returncode",
     "sell_returncode",
     "strategies_ok",
@@ -126,6 +125,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--latest-confirmed-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m5-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m1-policy", choices=["last", "second_last"], default="last")
+    p.add_argument("--skip-monitor-when-no-open-signals", action="store_true")
     p.add_argument("--continue-on-strategy-error", action="store_true")
     return p.parse_args()
 
@@ -136,7 +136,7 @@ def utc_now_text() -> str:
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
 
 
 def read_json_or_empty(path: Path) -> dict[str, Any]:
@@ -171,7 +171,7 @@ def run_cmd(cmd: list[str]) -> int:
 
 
 def build_buy_cmd(args: argparse.Namespace) -> list[str]:
-    return [
+    cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_c_env_rr2_72h_dry_run_cycle.py"),
         "--csv-dir", str(args.csv_dir),
@@ -181,10 +181,13 @@ def build_buy_cmd(args: argparse.Namespace) -> list[str]:
         "--latest-confirmed-policy", str(args.latest_confirmed_policy),
         "--latest-confirmed-m5-policy", str(args.latest_confirmed_m5_policy),
     ]
+    if args.skip_monitor_when_no_open_signals:
+        cmd.append("--skip-monitor-when-no-open-signals")
+    return cmd
 
 
 def build_sell_cmd(args: argparse.Namespace) -> list[str]:
-    return [
+    cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_h1h4_bear_ab_dry_run_loop.py"),
         "--csv-dir", str(args.csv_dir),
@@ -194,6 +197,9 @@ def build_sell_cmd(args: argparse.Namespace) -> list[str]:
         "--latest-confirmed-policy", str(args.latest_confirmed_policy),
         "--latest-confirmed-m1-policy", str(args.latest_confirmed_m1_policy),
     ]
+    if args.skip_monitor_when_no_open_signals:
+        cmd.append("--skip-monitor-when-no-open-signals")
+    return cmd
 
 
 def load_strategy_outputs(strategy_out_dir: Path) -> dict[str, Any]:
@@ -328,7 +334,7 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         for row in rows:
-            f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            f.write(json.dumps(row, ensure_ascii=False, sort_keys=True, default=str) + "\n")
 
 
 def count_order_intents(order_intents: list[dict[str, Any]], intent_type: str) -> int:
@@ -351,6 +357,7 @@ def main() -> int:
     print(f"[INFO] csv_dir={args.csv_dir}")
     print(f"[INFO] router_out_dir={args.router_out_dir}")
     print(f"[INFO] buy_enabled={not args.disable_buy} sell_enabled={not args.disable_sell}")
+    print(f"[INFO] skip_monitor_when_no_open_signals={args.skip_monitor_when_no_open_signals}")
 
     buy_rc: int | str = "DISABLED"
     sell_rc: int | str = "DISABLED"
@@ -406,7 +413,7 @@ def main() -> int:
     rc_ok = (buy_rc in [0, "DISABLED", "AGGREGATE_ONLY"]) and (sell_rc in [0, "DISABLED", "AGGREGATE_ONLY"])
     router_ok = strategies_ok and rc_ok
     summary = {
-        "schema_version": "gold_multi_strategy_dry_run_router_v2",
+        "schema_version": "gold_multi_strategy_dry_run_router_v3",
         "router_cycle_start_utc": router_start,
         "router_cycle_end_utc": router_end,
         "router_mode": router_mode,
@@ -415,6 +422,7 @@ def main() -> int:
         "router_out_dir": str(args.router_out_dir),
         "buy_enabled": not args.disable_buy,
         "sell_enabled": not args.disable_sell,
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
         "buy_returncode": buy_rc,
         "sell_returncode": sell_rc,
         "strategies_ok": bool(strategies_ok),
@@ -444,6 +452,7 @@ def main() -> int:
         "router_out_dir": str(args.router_out_dir),
         "buy_enabled": not args.disable_buy,
         "sell_enabled": not args.disable_sell,
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
         "buy_returncode": buy_rc,
         "sell_returncode": sell_rc,
         "strategies_ok": bool(strategies_ok),
@@ -459,7 +468,7 @@ def main() -> int:
     }, ROUTER_CYCLE_LOG_COLUMNS)
 
     print("[INFO] multi-strategy dry-run router completed")
-    print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+    print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
     return 0 if router_ok else 1
 
 
