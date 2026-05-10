@@ -30,6 +30,13 @@ Path policy:
   path can trigger Windows path issues and make the baseline fail for a reason
   unrelated to signal detection.
 
+Fast M15 timestamp policy:
+- This validator calls run_gold_multi_strategy_mochipoyo_loop_dry_run_fast_m15_patch.py.
+- The patch delegates all signal/sender behavior to the existing wrapper and only
+  replaces the lightweight latest-M15 pre-check parser.
+- This avoids noisy pandas dateutil fallback warnings and empty
+  latest_confirmed_m15_close_time_fast values in standard validation logs.
+
 Safety:
 - Never passes --send.
 - Uses only dedicated A/B output directories.
@@ -149,7 +156,7 @@ def norm(value: Any) -> str:
 def build_wrapper_cmd(args: argparse.Namespace, out_dir: Path, *, skip_monitor: bool) -> list[str]:
     cmd = [
         sys.executable,
-        str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_mochipoyo_loop_dry_run.py"),
+        str(REPO_ROOT / "scripts" / "run_gold_multi_strategy_mochipoyo_loop_dry_run_fast_m15_patch.py"),
         "--csv-dir", str(args.csv_dir),
         "--out-dir", str(out_dir),
         "--broker-symbol", str(args.broker_symbol),
@@ -225,6 +232,7 @@ def compare_summaries(baseline: dict[str, Any], optimized: dict[str, Any]) -> di
     failures: list[dict[str, Any]] = []
 
     compare_field(checks, failures, name="wrapper_cycle_ok", baseline=baseline.get("cycle_ok"), optimized=optimized.get("cycle_ok"))
+    compare_field(checks, failures, name="latest_confirmed_m15_close_time_fast", baseline=baseline.get("latest_confirmed_m15_close_time_fast"), optimized=optimized.get("latest_confirmed_m15_close_time_fast"))
     compare_field(checks, failures, name="signals_found_count", baseline=baseline.get("key_metrics", {}).get("signals_found_count"), optimized=optimized.get("key_metrics", {}).get("signals_found_count"))
     compare_field(checks, failures, name="open_order_intent_count", baseline=baseline.get("key_metrics", {}).get("open_order_intent_count"), optimized=optimized.get("key_metrics", {}).get("open_order_intent_count"))
     compare_field(checks, failures, name="close_intent_count", baseline=baseline.get("key_metrics", {}).get("close_intent_count"), optimized=optimized.get("key_metrics", {}).get("close_intent_count"))
@@ -326,7 +334,7 @@ def main() -> int:
     b_timing = baseline.get("summary", {}).get("timing", {}) if isinstance(baseline.get("summary", {}).get("timing"), dict) else {}
     o_timing = optimized.get("summary", {}).get("timing", {}) if isinstance(optimized.get("summary", {}).get("timing"), dict) else {}
     summary = {
-        "schema_version": "gold_multi_strategy_monitor_skip_ab_validation_v2",
+        "schema_version": "gold_multi_strategy_monitor_skip_ab_validation_v3",
         "started_at_utc": started,
         "ended_at_utc": utc_now_text(),
         "validation_ok": validation_ok,
