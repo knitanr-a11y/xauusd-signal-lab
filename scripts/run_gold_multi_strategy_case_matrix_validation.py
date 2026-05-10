@@ -21,6 +21,11 @@ Case C:
     -> sender dry-run -> registry preview -> mock position -> reconcile ->
     same_strategy BLOCK -> duplicate preview skip.
 
+Case D:
+    Minute-aligned one-cycle dry-run validation.
+    Validates that the independent dry-run runner is configured for the
+    Mochipoyo-style cadence: every 1 minute at second 02.
+
 Safety boundaries:
 - Does not pass --send itself.
 - Calls only safe dry-run / validation BATs.
@@ -252,6 +257,33 @@ def validate_mock_signal_path() -> tuple[bool, str, dict[str, Any], Path]:
     return len(failed) == 0, "MOCK_SIGNAL_PATH_PASS" if not failed else "MOCK_SIGNAL_PATH_FAILED", details, summary_path
 
 
+def validate_minute_aligned_dry_run() -> tuple[bool, str, dict[str, Any], Path]:
+    summary_path = REPO_ROOT / "data" / "research_results" / "gold_multi_strategy_mochipoyo_loop_dry_run_aligned" / "latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_result.json"
+    summary = read_json_or_empty(summary_path)
+    if not summary:
+        return False, "MINUTE_ALIGNED_SUMMARY_MISSING", summary, summary_path
+    if summary.get("_read_error"):
+        return False, "MINUTE_ALIGNED_SUMMARY_READ_ERROR", summary, summary_path
+    safety = summary.get("safety", {}) if isinstance(summary.get("safety"), dict) else {}
+    last_cycle = summary.get("last_cycle", {}) if isinstance(summary.get("last_cycle"), dict) else {}
+    checks = {
+        "loop_ok": as_bool(summary.get("loop_ok"), False),
+        "cycles_run_at_least_one": as_int(summary.get("cycles_run"), 0) >= 1,
+        "failed_cycles_zero": as_int(summary.get("failed_cycles"), 0) == 0,
+        "interval_minutes_one": as_int(summary.get("interval_minutes"), 0) == 1,
+        "offset_seconds_two": as_int(summary.get("offset_seconds"), -1) == 2,
+        "last_cycle_ok": as_bool(last_cycle.get("cycle_ok"), False),
+        "last_cycle_order_send_zero": as_int(last_cycle.get("sender_order_send_called_count"), 0) == 0,
+        "last_cycle_sent_rows_zero": as_int(last_cycle.get("sender_sent_rows"), 0) == 0,
+        "send_flag_false": not as_bool(safety.get("send_flag_passed_by_this_runner"), False),
+        "production_registry_false": not as_bool(safety.get("production_registry_mutated_by_this_runner"), False),
+        "existing_mochipoyo_bat_false": not as_bool(safety.get("existing_mochipoyo_bat_modified_by_this_runner"), False),
+    }
+    failed = [k for k, v in checks.items() if not v]
+    details = {"summary": summary, "checks": checks, "failed": failed}
+    return len(failed) == 0, "MINUTE_ALIGNED_DRY_RUN_PASS" if not failed else "MINUTE_ALIGNED_DRY_RUN_FAILED", details, summary_path
+
+
 def add_case(cases: list[dict[str, Any]], *, case_run: dict[str, Any], case_name: str, ok: bool, reason: str, summary_path: Path, details: dict[str, Any], out_dir: Path) -> None:
     details_json = out_dir / f"{case_run['case_id']}_details.json"
     case = {
@@ -274,6 +306,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--skip-loop", action="store_true")
     p.add_argument("--skip-sender-registry", action="store_true")
     p.add_argument("--skip-mock-signal", action="store_true")
+    p.add_argument("--skip-minute-aligned", action="store_true")
     return p.parse_args()
 
 
@@ -298,11 +331,16 @@ def main() -> int:
         ok, reason, details, summary_path = validate_mock_signal_path()
         add_case(cases, case_run=case_run, case_name="Mock signal-present adapter/payload/sender/registry path", ok=ok, reason=reason, summary_path=summary_path, details=details, out_dir=args.out_dir)
 
+    if not args.skip_minute_aligned:
+        case_run = run_bat("case_d_minute_aligned_dry_run", REPO_ROOT / "scripts" / "run_gold_multi_strategy_mochipoyo_loop_dry_run_aligned.bat", out_dir=args.out_dir)
+        ok, reason, details, summary_path = validate_minute_aligned_dry_run()
+        add_case(cases, case_run=case_run, case_name="Minute-aligned one-cycle dry-run timing", ok=ok, reason=reason, summary_path=summary_path, details=details, out_dir=args.out_dir)
+
     ended = utc_now_text()
     checks_total = len(cases)
     checks_failed = sum(1 for case in cases if not bool(case.get("case_ok")))
     summary = {
-        "schema_version": "gold_multi_strategy_case_matrix_validation_v2",
+        "schema_version": "gold_multi_strategy_case_matrix_validation_v3",
         "started_at_utc": started,
         "ended_at_utc": ended,
         "case_matrix_ok": checks_failed == 0,
