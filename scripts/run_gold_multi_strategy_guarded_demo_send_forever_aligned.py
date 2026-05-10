@@ -29,6 +29,15 @@ Timing:
 
 Stop:
 - Ctrl+C exits gracefully without traceback.
+
+Safe no-payload classification:
+- Some child wrapper versions can return code 1 even when the state is a safe
+  no-signal/no-payload cycle. This runner classifies such cycles as PASS only if
+  payload_rows_out=0, no sender --send was passed, order_send_called_count=0,
+  sent_rows=0, and the integration guards still show allow_any_until_max plus
+  adapter lot. This prevents a harmless no-payload cycle from making the forever
+  loop look failed while still preserving hard failures when order_send/sent rows
+  appear or guard settings drift.
 """
 
 from __future__ import annotations
@@ -55,6 +64,7 @@ LOOP_LOG_COLUMNS = [
     "cycle_end_utc",
     "returncode",
     "cycle_ok",
+    "cycle_ok_classification",
     "reason",
     "allow_demo_send",
     "send_requested",
@@ -199,6 +209,29 @@ def as_bool(value: Any, default: bool = False) -> bool:
     return str(value).strip().lower() in {"true", "1", "yes", "y"}
 
 
+def is_safe_no_payload_cycle(*, returncode: int, child: dict[str, Any], metrics: dict[str, Any], guards: dict[str, Any], safety: dict[str, Any]) -> bool:
+    """Classify harmless no-payload/no-send cycles as operationally OK."""
+    payload_rows = as_int(metrics.get("payload_rows_out"), 0)
+    order_send_called = as_int(metrics.get("guarded_sender_order_send_called_count"), 0)
+    sent_rows = as_int(metrics.get("guarded_sender_sent_rows"), 0)
+    sender_rows_out = as_int(metrics.get("guarded_sender_rows_out"), 0)
+    send_passed = as_bool(child.get("send_flag_passed_to_sender"), False) or as_bool(safety.get("guarded_sender_send_flag_passed"), False)
+    position_policy = str(guards.get("position_policy", ""))
+    use_adapter_lot = as_bool(guards.get("use_adapter_lot"), False)
+    suppressed = str(child.get("send_suppressed_reason", ""))
+    return bool(
+        payload_rows == 0
+        and sender_rows_out == 0
+        and order_send_called == 0
+        and sent_rows == 0
+        and not send_passed
+        and position_policy == "allow_any_until_max"
+        and use_adapter_lot
+        and suppressed in {"SEND_NOT_REQUESTED", "NO_PAYLOAD_ROWS", "ALLOW_DEMO_SEND_NOT_SET"}
+        and returncode in {0, 1}
+    )
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run GOLD multi-strategy guarded demo-send once wrapper on an aligned cadence.")
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
@@ -275,7 +308,7 @@ def run_once(cycle_index: int, args: argparse.Namespace, cycle_dir: Path) -> tup
 def build_loop_summary(args: argparse.Namespace, started_at: str, cycle_index: int, failed_cycles: int, last_cycle: dict[str, Any], stopped_by_user: bool) -> dict[str, Any]:
     loop_ok = failed_cycles == 0
     return {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_forever_aligned_v1",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_forever_aligned_v2_safe_no_payload_classification",
         "started_at_utc": started_at,
         "updated_at_utc": utc_text(),
         "loop_ok": loop_ok,
@@ -344,9 +377,10 @@ def main() -> int:
             metrics = child.get("key_metrics", {}) if isinstance(child.get("key_metrics"), dict) else {}
             guards = child.get("guards", {}) if isinstance(child.get("guards"), dict) else {}
             safety = child.get("safety", {}) if isinstance(child.get("safety"), dict) else {}
-            cycle_ok = bool(returncode == 0 and child.get("cycle_ok", False))
-            if as_int(metrics.get("guarded_sender_order_send_called_count"), 0) < 0:
-                cycle_ok = False
+            natural_ok = bool(returncode == 0 and child.get("cycle_ok", False))
+            safe_no_payload_ok = is_safe_no_payload_cycle(returncode=returncode, child=child, metrics=metrics, guards=guards, safety=safety)
+            cycle_ok = bool(natural_ok or safe_no_payload_ok)
+            cycle_ok_classification = "NATURAL_PASS" if natural_ok else ("SAFE_NO_PAYLOAD_PASS" if safe_no_payload_ok else "FAILED")
             if not cycle_ok:
                 failed_cycles += 1
 
@@ -360,6 +394,7 @@ def main() -> int:
                 "cycle_end_utc": cycle_end,
                 "returncode": returncode,
                 "cycle_ok": cycle_ok,
+                "cycle_ok_classification": cycle_ok_classification,
                 "reason": child.get("reason", "CHILD_SUMMARY_MISSING_OR_FAILED"),
                 "allow_demo_send": bool(args.allow_demo_send),
                 "send_requested": bool(args.send),
@@ -388,6 +423,7 @@ def main() -> int:
             compact = {
                 "cycle_index": cycle_index,
                 "cycle_ok": cycle_ok,
+                "cycle_ok_classification": cycle_ok_classification,
                 "reason": row["reason"],
                 "allow_demo_send": row["allow_demo_send"],
                 "send_requested": row["send_requested"],
