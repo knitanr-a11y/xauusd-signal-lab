@@ -21,8 +21,11 @@ Safety boundaries:
 - Does not write production position_registry.csv.
 - Writes only under --out-dir by default.
 
-This is intended to validate that the H4/H1 BUY/SELL signal work can flow toward
-Mochipoyo-compatible payloads and sender dry-run without merging into the old loop.
+Important no-signal rule:
+- A no-signal cycle is a NORMAL dry-run outcome.
+- If router returncode is non-zero only because one isolated strategy runner reports
+  no latest signal, this wrapper may continue adapter/payload/sender dry-run and
+  mark the overall cycle as PASS when no payload/send work is required.
 """
 
 from __future__ import annotations
@@ -42,6 +45,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 DEFAULT_OUT_DIR = Path("data/research_results/gold_multi_strategy_mochipoyo_loop_dry_run")
+NO_SIGNAL_REASONS = {
+    "NO_SIGNAL_ON_LATEST_CONFIRMED_M15",
+    "NO_M15_ROWS",
+    "NO_SIGNAL",
+    "NO_LATEST_SIGNAL",
+}
 
 CYCLE_LOG_COLUMNS = [
     "cycle_start_utc",
@@ -54,6 +63,7 @@ CYCLE_LOG_COLUMNS = [
     "payload_bridge_returncode",
     "sender_returncode",
     "router_ok",
+    "router_safe_no_signal",
     "adapter_ok",
     "bridge_ok",
     "sender_stage_status",
@@ -254,6 +264,38 @@ def build_sender_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[s
     return cmd
 
 
+def is_no_signal_strategy_status(status: dict[str, Any]) -> bool:
+    if safe_bool(status, "signal_found", False):
+        return False
+    reason = str(status.get("scan_reason", "")).strip()
+    # Empty monitor fields are acceptable for a strategy that found no signal.
+    return reason in NO_SIGNAL_REASONS or reason.startswith("NO_SIGNAL")
+
+
+def is_safe_no_signal_router_result(router_result: dict[str, Any], router_rc: int | str) -> bool:
+    """Return True when router failure is only a no-signal dry-run condition.
+
+    The BUY isolated cycle historically may return non-zero when no current BUY
+    signal exists because its monitor stage is skipped/not OK. For this wrapper,
+    no current signal must be treated as a valid dry-run outcome as long as no
+    order/close intents were produced and all strategy statuses are no-signal.
+    """
+    if router_rc in [0, "SKIPPED"]:
+        return False
+    if not router_result:
+        return False
+    if safe_int(router_result, "signals_found_count", 0) != 0:
+        return False
+    if safe_int(router_result, "open_order_intent_count", 0) != 0:
+        return False
+    if safe_int(router_result, "close_intent_count", 0) != 0:
+        return False
+    statuses = router_result.get("strategy_status", [])
+    if not isinstance(statuses, list) or not statuses:
+        return False
+    return all(isinstance(s, dict) and is_no_signal_strategy_status(s) for s in statuses)
+
+
 def main() -> int:
     args = parse_args()
     paths = build_paths(args.out_dir)
@@ -270,13 +312,20 @@ def main() -> int:
     router_rc: int | str = "SKIPPED"
     if not args.skip_router:
         router_rc = run_cmd("router", build_router_cmd(args, paths))
-        if router_rc != 0 and not args.continue_on_stage_error:
-            print("[ERROR] router failed; stopping", flush=True)
     else:
         print("[INFO] router skipped; using existing router outputs", flush=True)
 
+    router_result = read_json_or_empty(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json")
+    router_safe_no_signal = is_safe_no_signal_router_result(router_result, router_rc)
+    if router_rc != 0 and router_rc != "SKIPPED" and router_safe_no_signal:
+        print("[INFO] router returned non-zero, but this is a safe no-signal dry-run outcome; continuing", flush=True)
+    elif router_rc != 0 and router_rc != "SKIPPED" and not args.continue_on_stage_error:
+        print("[ERROR] router failed for a non no-signal reason; stopping", flush=True)
+
+    router_can_continue = router_rc == 0 or router_rc == "SKIPPED" or router_safe_no_signal or args.continue_on_stage_error
+
     adapter_rc: int | str = "SKIPPED"
-    if router_rc == 0 or router_rc == "SKIPPED" or args.continue_on_stage_error:
+    if router_can_continue:
         adapter_rc = run_cmd("adapter", build_adapter_cmd(args, paths))
         if adapter_rc != 0 and not args.continue_on_stage_error:
             print("[ERROR] adapter failed; stopping", flush=True)
@@ -294,6 +343,7 @@ def main() -> int:
     elif sender_cmd is None:
         print("[INFO] sender skipped because order_payloads.csv has no rows", flush=True)
 
+    # Re-read outputs after all stages.
     router_result = read_json_or_empty(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json")
     adapter_result = read_json_or_empty(paths["adapter_out_dir"] / "latest_adapter_result.json")
     payload_result = read_json_or_empty(paths["payload_out_dir"] / "order_payloads.json")
@@ -306,7 +356,9 @@ def main() -> int:
     sender_error_rows = safe_int(sender_report, "error_rows", 0)
     sender_order_send_called = safe_int(sender_report, "order_send_called_count", 0)
 
-    router_ok = safe_bool(router_result, "router_ok", router_rc in [0, "SKIPPED"])
+    router_ok_raw = safe_bool(router_result, "router_ok", router_rc in [0, "SKIPPED"])
+    router_safe_no_signal = is_safe_no_signal_router_result(router_result, router_rc)
+    router_ok = bool(router_ok_raw or router_safe_no_signal)
     adapter_ok = safe_bool(adapter_result, "adapter_ok", adapter_rc == 0)
     bridge_ok = safe_bool(payload_result, "bridge_ok", payload_rc == 0)
     sender_stage_ok = sender_rc in [0, "SKIPPED_NO_PAYLOAD_ROWS"] and sender_sent_rows == 0 and sender_order_send_called == 0
@@ -319,6 +371,7 @@ def main() -> int:
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
         "reason": "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_PASS" if cycle_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_FAILED",
+        "router_safe_no_signal": bool(router_safe_no_signal),
         "safety": {
             "send_flag_passed": False,
             "existing_mochipoyo_bat_modified": False,
@@ -337,6 +390,8 @@ def main() -> int:
         },
         "key_metrics": {
             "router_ok": router_ok,
+            "router_ok_raw": router_ok_raw,
+            "router_safe_no_signal": bool(router_safe_no_signal),
             "adapter_ok": adapter_ok,
             "bridge_ok": bridge_ok,
             "sender_stage_ok": sender_stage_ok,
@@ -382,6 +437,7 @@ def main() -> int:
     print(json.dumps({
         "cycle_ok": cycle_ok,
         "reason": summary["reason"],
+        "router_safe_no_signal": bool(router_safe_no_signal),
         "returncodes": summary["returncodes"],
         "key_metrics": metrics,
         "summary_json": str(paths["summary_json"]),
