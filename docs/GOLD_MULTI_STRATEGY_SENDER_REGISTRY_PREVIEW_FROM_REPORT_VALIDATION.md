@@ -16,6 +16,7 @@ scripts/build_gold_multi_strategy_sender_registry_preview_from_report.py
 scripts/build_gold_multi_strategy_mock_positions_from_registry.py
 scripts/run_gold_multi_strategy_position_registry_reconcile_dry_run.py
 scripts/run_gold_multi_strategy_registry_policy_preview_longpath.py
+scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
 ```
 
 ## Safety boundary
@@ -365,6 +366,88 @@ Decision:
 PASS.
 ```
 
+## One-command sender dry-run registry preview cycle
+
+Wrapper:
+
+```text
+scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
+```
+
+Implementation notes:
+
+```text
+- Calls scripts/send_mt5_order_from_payload.py without --send.
+- Then calls scripts/build_gold_multi_strategy_sender_registry_preview_from_report.py.
+- Does not modify send_mt5_order_from_payload.py.
+- Does not write production position_registry.csv.
+```
+
+Important behavior fixed during validation:
+
+```text
+send_mt5_order_from_payload.py returns non-zero when rows are blocked by local validation or position policy.
+However, it still writes a usable mt5_order_send_report.json and mt5_order_send_results.csv.
+The wrapper now continues to registry-preview evaluation if those sender outputs exist.
+```
+
+Validated command:
+
+```cmd
+python scripts\run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py --input-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run_time_exit\order_payloads.csv --order-ledger-csv data\research_results\gold_multi_strategy_mochipoyo_payload_bridge_dry_run_time_exit\dry_run_order_ledger.csv --out-dir data\research_results\gold_multi_strategy_sender_registry_preview\cycle_real_payload_allow_any --symbol GOLD# --max-orders 1 --select-symbol --expected-login 75539039 --require-demo-account --position-policy allow_any_until_max --max-symbol-positions 5 --max-symbol-lot 0.05
+```
+
+Observed:
+
+```text
+cycle_ok=true
+reason=SENDER_DRY_RUN_BLOCKED_BUT_REGISTRY_PREVIEW_EVALUATED
+send_requested=false
+sender_outputs_exist=true
+sender_metrics:
+  rows_in=1
+  rows_out=1
+  dry_run_check_ok_rows=0
+  sent_rows=0
+  blocked_position_policy_rows=0
+  error_rows=1
+  order_send_called_count=0
+registry_preview_ok=true
+registry_preview_reason=NO_ELIGIBLE_SENDER_ROWS
+registry_preview_rows=0
+```
+
+Step table:
+
+```text
+sender_dry_run: ok=false, returncode=1
+sender_registry_preview_from_report: ok=true, returncode=0
+```
+
+Interpretation:
+
+```text
+The stale real payload remained blocked by local validation.
+The wrapper still consumed the generated sender report/results.
+The registry preview builder produced NO_ELIGIBLE_SENDER_ROWS.
+The cycle was correctly considered evaluated and safe.
+```
+
+Safety:
+
+```text
+wrapper_passed_send_flag=false
+production_registry_mutated=false
+trigger_state_mutated=false
+existing_sender_modified=false
+```
+
+Decision:
+
+```text
+PASS for blocked real-payload wrapper behavior.
+```
+
 ## End-to-end validated chain
 
 The following chain is now validated without modifying the real sender or writing production registry:
@@ -376,6 +459,17 @@ controlled sender dry-run OK report
 → exact registry reconciliation
 → registry-aware policy preview
 → same_strategy BLOCK
+```
+
+Additionally validated:
+
+```text
+real stale payload
+→ sender dry-run returns BLOCKED_LOCAL_VALIDATION / returncode 1
+→ sender report/results still exist
+→ one-command wrapper continues to registry preview
+→ NO_ELIGIBLE_SENDER_ROWS
+→ cycle_ok true
 ```
 
 ## Safety matrix
@@ -390,23 +484,24 @@ Existing sender remains unchanged: PASS
 Generated registry row schema compatible with reconciliation: PASS
 Generated registry row schema compatible with policy preview: PASS
 same_strategy BLOCK from sender-generated registry row: PASS
+blocked sender report handled safely by one-command wrapper: PASS
 ```
 
 ## Current implication
 
-A sender-side dry-run-only registry preview hook concept is validated externally.
+A sender-side dry-run-only registry preview hook concept is validated externally, and a one-command wrapper is available.
 
 The next possible step is to decide whether to:
 
 ```text
-A. keep this sender-adjacent external builder as the safe validation path for one more round, or
+A. keep the wrapper as the safe validation path for another round, or
 B. fold the preview hook directly into send_mt5_order_from_payload.py behind explicit disabled-by-default CLI flags.
 ```
 
 Recommended next step:
 
 ```text
-Keep external builder for one more validation round and document this result in the next-chat handoff addendum.
+Keep the wrapper for one more validation round and use it with a fresh non-stale payload when available.
 ```
 
 Do not modify yet:
