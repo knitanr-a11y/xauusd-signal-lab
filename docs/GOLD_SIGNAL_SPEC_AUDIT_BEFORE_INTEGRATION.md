@@ -9,8 +9,9 @@ GOLD統合前に、既存もちぽよGOLDと新GOLD multi-strategyのシグナ�
 ```text
 BUY_C_ENV_RR2_72H:
   条件仕様は概ね一致。
-  ただし統合時に保持すべき重要条件が棚卸しdocだけでは薄い。
-  統合時のpayload lotは base_lot 0.01 等で明示する必要がある。
+  統合時に保持すべきM5 coverage / latest-confirmed / SL-priority等は明記して維持する。
+  BUY order intent の lot=None 問題は修正済み。
+  現在は base_lot=0.01 / lot=0.01 / lot_status=CALCULATED_BASE_LOT。
 
 SELL_H1H4_BEAR_AB:
   条件仕様・rank仕様は一致。
@@ -18,6 +19,10 @@ SELL_H1H4_BEAR_AB:
   現在は base_lot 0.01 に統一済み。
   B_ONLY_SAFE=0.01、CORE_AB_CONFIRM=0.02 の想定に戻っている。
   sender lot passthrough validation も PASS 済み。
+
+Sender重複防止:
+  allow_any_until_max でも duplicate order_key は BLOCKED_PRECHECK で止まることを確認済み。
+  銘柄単位 block_any に頼らず、order_key単位で重複防止できる。
 ```
 
 ---
@@ -34,12 +39,14 @@ docs/GOLD_FIRST_SCOPE_AND_SIGNAL_INVENTORY.md
 
 ```text
 scripts/run_gold_c_env_rr2_72h_live_scan_once.py
+scripts/run_gold_c_env_rr2_72h_dry_run_cycle.py
 scripts/research_gold_c_env_rr2_72h_notification_and_intent_preview.py
 scripts/run_gold_h1h4_bear_ab_live_scan_once.py
 scripts/run_gold_h1h4_bear_ab_dry_run_loop.py
 scripts/run_gold_multi_strategy_dry_run_cycle.py
 scripts/send_mt5_order_from_payload.py
 scripts/run_gold_sender_lot_passthrough_validation.py
+scripts/run_gold_sender_order_key_duplicate_validation.py
 ```
 
 ---
@@ -123,11 +130,48 @@ Separation policy:
   do not mutate existing Mochipoyo trigger-state / notification ledger / autotrade files until promoted
 ```
 
-### BUY側のlot注意
+### BUY側のlot修正結果
 
-BUY_C_ENVのorder intentは現在 `lot=None` / `lot_status=NOT_CALCULATED_RESEARCH_PREVIEW` であり、lotはまだ戦略仕様として固定されていない。
+修正前:
 
-統合時は、別途 base_lot 0.01 等を明示的に決めてpayloadへ入れる必要がある。
+```text
+order intent:
+  lot=None
+  volume=None
+  lot_status=NOT_CALCULATED_RESEARCH_PREVIEW
+```
+
+修正後:
+
+```text
+scripts/research_gold_c_env_rr2_72h_notification_and_intent_preview.py:
+  DEFAULT_BASE_LOT = 0.01
+  build_order_intent(..., base_lot=0.01)
+  base_lot=0.01
+  lot_multiplier=1.0
+  lot=0.01
+  volume=0.01
+  lot_status=CALCULATED_BASE_LOT
+
+scripts/run_gold_c_env_rr2_72h_live_scan_once.py:
+  --base-lot default=0.01
+  risk_mode default=base_lot_0_01_dry_run
+  order_intent_dry_run.json に lot=0.01 を記録
+
+scripts/run_gold_c_env_rr2_72h_dry_run_cycle.py:
+  --base-lot default=0.01
+  live scan 呼び出し時に --base-lot 0.01 を明示
+  latest_dry_run_cycle_result.json に base_lot を記録
+```
+
+現在のBUY想定lot:
+
+```text
+BUY_C_ENV_RR2_72H:
+  base_lot=0.01
+  lot_multiplier=1.0
+  lot=0.01
+```
 
 ---
 
@@ -272,6 +316,42 @@ NO --send のため order_send は呼ばれていない。
 
 ---
 
+## Sender重複防止 validation
+
+追加済み:
+
+```text
+scripts/run_gold_sender_order_key_duplicate_validation.py
+```
+
+実行結果:
+
+```text
+validation_ok=true
+reason=GOLD_SENDER_ORDER_KEY_DUPLICATE_VALIDATION_PASS
+position_policy=allow_any_until_max
+position_policy_block_any_used=false
+order_status_values=["BLOCKED_PRECHECK"]
+duplicate_detected=true
+sender_dry_run_check_ok_rows=0
+sender_error_rows=1
+sender_blocked_position_policy_rows=0
+sender_order_send_called_count=0
+sender_sent_rows=0
+validation_errors="duplicate order_key already exists in order ledger"
+```
+
+確認できたこと:
+
+```text
+銘柄単位 block_any を使わなくても、同じ order_key は sender precheck で止まる。
+allow_any_until_max でも duplicate order_key は DRY_RUN_ORDER_CHECK_OK にならない。
+order_send は呼ばれない。
+position-policy block ではなく order_key duplicate で止まっている。
+```
+
+---
+
 ## 複数ポジション/逆方向シグナル方針
 
 ユーザー方針:
@@ -309,13 +389,13 @@ BUY保有中という理由だけでSELLを止める。
    -> DONE
 
 2. BUY_C_ENV のlotを統合時に明示する。
-   -> TODO
+   -> DONE
 
 3. sender側でpayload lot/effective_lotを尊重する経路を確認する。
    -> DONE: lot passthrough validation PASS
 
 4. 新GOLD multi-strategyを銘柄単位block_anyではなく、signal/order key単位重複防止で接続する。
-   -> TODO
+   -> DONE: order_key duplicate validation PASS
 
 5. 既存もちぽよGOLD実運用BATは、上記修正後に統合する。
    -> TODO
@@ -328,6 +408,8 @@ BUY保有中という理由だけでSELLを止める。
 ```text
 シグナル条件そのものは、BUY/SELLとも決定時仕様と大筋一致。
 SELLのロットdefault相違は修正済み。
+BUYのlot=None相違も修正済み。
 A+B 0.02 lot は sender でも 0.02 のまま通ることを確認済み。
-残る統合前論点は BUY_C_ENV の lot 明示と、signal/order key 単位の重複防止接続。
+allow_any_until_max でも同じ order_key は重複ブロックされることを確認済み。
+残る統合前論点は、既存もちぽよGOLD実運用BATへどの入口で接続するか。
 ```
