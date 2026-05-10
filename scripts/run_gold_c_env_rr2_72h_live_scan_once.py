@@ -23,6 +23,9 @@ Outputs in --out-dir:
     live_scan_log.csv
     signal_ledger.csv
 
+Windows path policy:
+    This script writes its own JSON/CSV/TXT outputs through Windows long-path helpers.
+
 Example:
     python scripts\run_gold_c_env_rr2_72h_live_scan_once.py ^
       --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
@@ -33,8 +36,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -59,7 +63,6 @@ from scripts.research_gold_c_strict_h1_regular_bullish_m15_break import (  # noq
     build_data_coverage,
     build_h1_events,
     load_research_csvs,
-    write_csv,
 )
 from scripts.research_gold_h4_permission_modes_h1_regular_bullish_m15_break import prepare_h4_env_frame  # noqa: E402
 
@@ -95,6 +98,41 @@ LOG_COLUMNS = [
 ]
 
 
+def windows_long_path(path: str | Path) -> str:
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
+def mkdir_path(path: Path) -> None:
+    Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
+
+
+def ensure_parent_dir(path: Path) -> None:
+    mkdir_path(path.parent)
+
+
+def write_text(path: Path, text: str) -> None:
+    ensure_parent_dir(path)
+    with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def write_json(path: Path, obj: dict[str, Any]) -> None:
+    write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+
+
+def write_df_csv(df: pd.DataFrame, path: Path) -> None:
+    ensure_parent_dir(path)
+    df.to_csv(windows_long_path(path), index=False, encoding="utf-8-sig")
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Dry-run live scan once for GOLD C_ENV RR2 72h setup.")
     p.add_argument("--csv-dir", type=Path, required=True, help="Directory containing goldsharp_h4/h1/m15/m5 CSVs.")
@@ -118,13 +156,13 @@ def parse_args() -> argparse.Namespace:
 
 
 def utc_now_text() -> str:
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def read_ledger(path: Path) -> pd.DataFrame:
-    if not path.exists():
+    if not Path(windows_long_path(path)).exists():
         return pd.DataFrame(columns=LEDGER_COLUMNS)
-    df = pd.read_csv(path, encoding="utf-8-sig")
+    df = pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
     for col in LEDGER_COLUMNS:
         if col not in df.columns:
             df[col] = ""
@@ -132,10 +170,10 @@ def read_ledger(path: Path) -> pd.DataFrame:
 
 
 def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_parent_dir(path)
     df = pd.DataFrame([{col: row.get(col, "") for col in columns}])
-    header = not path.exists()
-    df.to_csv(path, mode="a", header=header, index=False, encoding="utf-8-sig")
+    header = not Path(windows_long_path(path)).exists()
+    df.to_csv(windows_long_path(path), mode="a", header=header, index=False, encoding="utf-8-sig")
 
 
 def latest_m15_close_time(m15: pd.DataFrame, *, policy: str) -> pd.Timestamp | None:
@@ -175,7 +213,7 @@ def normalize_live_row(row: pd.Series, *, max_hold_hours: int) -> pd.Series:
 
 def main() -> int:
     args = parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    mkdir_path(args.out_dir)
     scan_time = utc_now_text()
 
     result_path = args.out_dir / "latest_scan_result.json"
@@ -188,7 +226,7 @@ def main() -> int:
     print("[INFO] loading CSVs")
 
     frames = load_research_csvs(args.csv_dir)
-    write_csv(build_data_coverage(frames), args.out_dir / "data_coverage.csv")
+    write_df_csv(build_data_coverage(frames), args.out_dir / "data_coverage.csv")
 
     h4 = add_indicators(frames["H4"], "H4")
     h1 = add_indicators(frames["H1"], "H1")
@@ -203,7 +241,7 @@ def main() -> int:
             "duplicate": False,
             "reason": "NO_M15_ROWS",
         }
-        result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+        write_json(result_path, result)
         append_csv_row(log_path, {**result, "csv_dir": str(args.csv_dir), "latest_m15_close_time": "", "candidate_count": 0, "latest_candidate_entry_time": "", "signal_key": ""}, LOG_COLUMNS)
         print("[INFO] no M15 rows")
         return 0
@@ -225,7 +263,7 @@ def main() -> int:
         sl_mode="h1_pivot",
         args=args,
     )
-    write_csv(pending, args.out_dir / "latest_pending_candidates.csv")
+    write_df_csv(pending, args.out_dir / "latest_pending_candidates.csv")
 
     if pending.empty:
         latest_candidate_entry_time = ""
@@ -246,7 +284,7 @@ def main() -> int:
             "candidate_count": int(len(pending)),
             "latest_candidate_entry_time": latest_candidate_entry_time,
         }
-        result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+        write_json(result_path, result)
         append_csv_row(log_path, {**result, "csv_dir": str(args.csv_dir), "signal_key": ""}, LOG_COLUMNS)
         print("[INFO] no signal on latest confirmed M15")
         return 0
@@ -269,7 +307,7 @@ def main() -> int:
             "latest_candidate_entry_time": latest_candidate_entry_time,
             "signal_key": signal_key,
         }
-        result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+        write_json(result_path, result)
         append_csv_row(log_path, {**result, "csv_dir": str(args.csv_dir)}, LOG_COLUMNS)
         print(f"[INFO] duplicate signal: {signal_key}")
         return 0
@@ -278,13 +316,9 @@ def main() -> int:
     intent = build_order_intent(signal_row, risk_mode=args.risk_mode, dry_run=True)
     text = notification_text(payload)
 
-    (args.out_dir / "latest_signal_payload.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
-    )
-    (args.out_dir / "order_intent_dry_run.json").write_text(
-        json.dumps(intent, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8"
-    )
-    (args.out_dir / "notification_preview_latest.txt").write_text(text + "\n", encoding="utf-8")
+    write_json(args.out_dir / "latest_signal_payload.json", payload)
+    write_json(args.out_dir / "order_intent_dry_run.json", intent)
+    write_text(args.out_dir / "notification_preview_latest.txt", text + "\n")
 
     ledger_row = {
         "created_at_utc": scan_time,
@@ -322,7 +356,7 @@ def main() -> int:
             "signal_ledger": str(ledger_path),
         },
     }
-    result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    write_json(result_path, result)
     append_csv_row(log_path, {**result, "csv_dir": str(args.csv_dir)}, LOG_COLUMNS)
 
     print("[INFO] new dry-run signal created")
