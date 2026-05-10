@@ -2,7 +2,7 @@
 
 ## 目的
 
-GOLD市場停止中に、GOLD strategy sidecar とは分離した **BTC manual demo order_send smoke test** として、BTCUSD# の demo send-once が PASS した状態を次チャットへ引き継ぐ。
+GOLD市場停止中に、GOLD strategy sidecar とは分離した **BTC manual demo order_send smoke test** として、BTCUSD# の demo send-once が PASS し、その後の再実行ブロックも PASS した状態を次チャットへ引き継ぐ。
 
 これは GOLD multi-strategy signal ではない。
 
@@ -39,7 +39,7 @@ docs/GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_BAT_ENTRY_DESIGN.md
 目的: MT5 demo order_send 経路の実送信確認
 対象: BTCUSD#
 口座: XMTrading demo login 75539039
-実注文: 1件成功
+実注文: 成功済み
 send flag: --allow-demo-send --send の二重承認で sender に --send を渡した
 production registry write: なし
 GOLD strategy signal: 不使用
@@ -60,6 +60,14 @@ send-once guarded runner:
 
 ```text
 scripts/run_btc_manual_demo_order_send_smoke_test_send_once.py
+```
+
+send-once runner は以下を実装済み。
+
+```text
+--allow-demo-send と --send の二重承認
+success marker による repeat-send block
+repeat block 時は sender を呼ばない short-circuit
 ```
 
 ---
@@ -115,25 +123,9 @@ sender_order_send_called_count=0
 sender_sent_rows=0
 ```
 
-order_check row:
-
-```text
-order_status=DRY_RUN_ORDER_CHECK_OK
-broker_symbol=BTCUSD#
-direction=BUY
-lot=0.01
-existing_symbol_positions=0
-current_execution_price=80752.5
-sl_price=80640.0
-tp_price=80865.0
-order_check_ok=true
-order_send_called=false
-order_send_ok=false
-```
-
 ---
 
-## send-once 実注文 PASS
+## send-once 実注文 PASS 1
 
 実行:
 
@@ -187,12 +179,131 @@ deal_ticket=933029758
 validation_errors=
 ```
 
+---
+
+## send-once 実注文 PASS 2 / marker 作成
+
+success marker 実装後、marker がまだ無い状態で `--allow-demo-send --send` を実行したため、もう1件BTC demo注文が入った。
+
+実行:
+
+```bat
+python scripts\run_btc_manual_demo_order_send_smoke_test_send_once.py --allow-demo-send --send
+```
+
+結果:
+
+```text
+success_marker_exists_before_run=false
+send_flag_passed_to_sender=true
+order_send_called_count=1
+sent_rows=1
+success_marker_written=true
+```
+
+注文:
+
+```text
+order_status=SENT
+broker_symbol=BTCUSD#
+direction=BUY
+lot=0.01
+current_execution_price=80771.8
+sl_price=80659.3
+tp_price=80884.3
+order_check_ok=true
+order_send_called=true
+order_send_ok=true
+order_send_retcode=10009
+order_send_comment=Request executed
+order_ticket=946737003
+deal_ticket=933029780
+```
+
+marker:
+
+```text
+data\r\btc_manual_demo_order_send_smoke_test_send_once\btc_manual_send_once_success_marker.json
+```
+
+---
+
+## repeat-send block PASS 1
+
+marker 作成後、同じ `--allow-demo-send --send` を再実行した。
+
+結果:
+
+```text
+success_marker_exists_before_run=true
+send_flag_passed_to_sender=false
+send_suppressed_reason=SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED
+order_send_called_count=0
+sent_rows=0
+repeat_send_blocked=true
+```
+
+ただし、この時点の実装では、repeat block 後も sender no-send check を呼んでいた。
+
+そのため、既存BTCポジションにより以下が出た。
+
+```text
+order_status=BLOCKED_POSITION_POLICY
+existing_symbol_positions=1
+existing_symbol_lot=0.01
+validation_errors=position policy block_any blocked order: existing_positions=1; existing_lot=0.01
+cycle_ok=false
+sender_error_rows=1
+```
+
+安全上は問題なし。追加注文は出ていない。
+
+---
+
+## repeat-send block PASS 2 / sender short-circuit
+
+上記の運用表示を改善するため、repeat block 時は sender を呼ばずに正常ブロック扱いに修正済み。
+
+修正コミット:
+
+```text
+d13b60b9364bd5d42438a65c0654a7bc8b471ac9
+Short-circuit BTC send-once repeat block before sender
+```
+
+再確認:
+
+```bat
+python scripts\run_btc_manual_demo_order_send_smoke_test_send_once.py --allow-demo-send --send
+```
+
+結果:
+
+```text
+success_marker_exists_before_run=true
+sender_invoked=false
+send_flag_passed_to_sender=false
+send_suppressed_reason=SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED
+cycle_ok=true
+mode=REPEAT_SEND_BLOCKED_NO_SENDER
+reason=BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_REPEAT_BLOCKED_PASS
+sender_returncode=0
+sender_rows_out=1
+sender_dry_run_check_ok_rows=0
+sender_error_rows=0
+sender_order_send_called_count=0
+sender_sent_rows=0
+repeat_send_blocked=true
+success_marker_written=false
+```
+
 Safety:
 
 ```text
-send_flag_passed=true
-order_send_called_count=1
-sent_rows=1
+sender_invoked=false
+send_flag_passed=false
+order_send_called_count=0
+sent_rows=0
 production_registry_mutated=false
 gold_strategy_signal_used=false
 btc_strategy_integration_used=false
@@ -216,27 +327,7 @@ production registry write を伴う自動売買ではない
 
 これは手動 fixture による BTC demo order_send smoke test。
 
----
-
-## 次に必要な安全対応
-
-send-once が成功したため、同じ runner を誤って再実行して連続発注しないように、send-once 成功済み marker による再実行ブロックを追加する。
-
-推奨仕様:
-
-```text
-1. send-once 成功時に marker JSON を書く
-2. 次回 --allow-demo-send --send 実行時、marker が存在すればブロック
-3. 再実行したい場合は明示的に --allow-repeat-send を要求
-4. ただし通常は --allow-repeat-send を使わない
-5. no-send / order_check 実行は marker があっても許可
-```
-
-推奨 marker:
-
-```text
-data\r\btc_manual_demo_order_send_smoke_test_send_once\btc_manual_send_once_success_marker.json
-```
+また、BTCUSD# BUY 0.01 は少なくとも2件入っている可能性があるため、MT5画面でポジションを確認し、必要なら手動決済する。
 
 ---
 
@@ -277,11 +368,12 @@ production registry writeなし
 BTC no-send / order_check smoke test: PASS
 BTC send-once guarded runner: PASS
 BTC demo order_send: PASS
-BTCUSD# BUY 0.01 sent
+BTCUSD# BUY 0.01 sent at least once; likely two manual smoke-test BUY positions exist
 order_send_retcode=10009
 order_send_comment=Request executed
-order_ticket=946736969
-deal_ticket=933029758
+repeat-send marker: written
+repeat-send block: PASS
+repeat-send short-circuit before sender: PASS
 production registry writeなし
 ```
 
@@ -292,7 +384,6 @@ production registry writeなし
 以下はまだ作っていない/未対応。
 
 ```text
-BTC send-once success marker / repeat-send block  ※次に対応
 BTC manual close smoke test
 GOLD MT5 demo order_send
 GOLD armed BAT
@@ -307,8 +398,8 @@ BTC strategy integration
 ## 次にやること
 
 ```text
-1. BTC send-once success marker / repeat-send block を実装
-2. BTCポジションはMT5画面で確認し、必要なら手動決済
+1. BTCポジションはMT5画面で確認し、必要なら手動決済
+2. BTC manual close smoke test を作るか検討
 3. GOLD sidecar は引き続き dry-run / signal-present 待ち
 4. GOLD実送信はまだしない
 5. production registry write はまだ実装しない
@@ -336,32 +427,27 @@ send-once 実行:
 python scripts\run_btc_manual_demo_order_send_smoke_test_send_once.py --allow-demo-send --send
 
 結果:
-- cycle_ok=true
-- reason=BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_PASS
-- mode=GUARDED_SEND_ONCE
-- symbol=BTCUSD#
-- direction=BUY
-- lot=0.01
-- entry_price_reference=80753.6
-- sl_price=80641.1
-- tp_price=80866.1
-- sender_rows_out=1
-- sender_order_send_called_count=1
-- sender_sent_rows=1
+- BTC no-send/order_check PASS
+- BTC send-once PASS
 - order_status=SENT
 - order_send_ok=true
 - order_send_retcode=10009
 - order_send_comment=Request executed
-- order_ticket=946736969
-- deal_ticket=933029758
+- order_ticket=946736969 / deal_ticket=933029758
+- marker実装後にもう1件 send-once 成功: order_ticket=946737003 / deal_ticket=933029780
+- success_marker_written=true
+- repeat-send block PASS
+- repeat block時は sender_invoked=false
+- send_flag_passed_to_sender=false
+- order_send_called_count=0
+- sent_rows=0
 - production_registry_mutated=false
 - gold_strategy_signal_used=false
 - btc_strategy_integration_used=false
 
 重要:
+- BTCUSD# BUY 0.01 が少なくとも2件入っている可能性があるため、MT5画面で確認し、必要なら手動決済
 - 既存Mochipoyo本体BAT、既存ledgers、既存trigger-state、production position_registry.csv、close intent MT5 execution、BTC strategy integrationはまだ触っていない
-- 次は同じsend-onceを誤って再実行しないように、success marker / repeat-send block を実装する
-- BTCポジションはMT5画面で確認し、必要なら手動決済
 - GOLD sidecar の実送信はまだしない
 ```
 
@@ -371,5 +457,6 @@ python scripts\run_btc_manual_demo_order_send_smoke_test_send_once.py --allow-de
 
 ```text
 BTC manual demo order_send smoke test は成功。
-次は安全のため、send-once success marker による再実行ブロックを実装する。
+repeat-send block も sender short-circuit で正常PASS。
+次はBTCポジション確認/手動決済、またはBTC manual close smoke test の検討。
 ```
