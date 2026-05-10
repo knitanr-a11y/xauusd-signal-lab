@@ -4,12 +4,13 @@ Last updated: 2026-05-10
 
 ## Purpose
 
-This document records validation for the one-command full-cycle wrapper, its dry-run BAT, and its read-only verifier:
+This document records validation for the one-command full-cycle wrapper, its dry-run BAT, its read-only verifier, and the combined dry-run-with-verify BAT:
 
 ```text
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
 scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
+scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run_with_verify.bat
 ```
 
 Validated chain:
@@ -275,7 +276,7 @@ PASS.
 
 ## Dry-run BAT validation
 
-New BAT:
+BAT:
 
 ```text
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
@@ -406,7 +407,7 @@ PASS.
 
 ## Read-only summary verifier validation
 
-New verifier:
+Verifier:
 
 ```text
 scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
@@ -483,9 +484,114 @@ Decision:
 PASS.
 ```
 
+## Combined dry-run with verify BAT validation
+
+Combined BAT:
+
+```text
+scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run_with_verify.bat
+```
+
+Implementation commit:
+
+```text
+0730df19b0d0bec09689c4a4df9545a0113b466f
+```
+
+Command:
+
+```cmd
+scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run_with_verify.bat
+```
+
+Observed top-level result:
+
+```text
+full-cycle dry-run exit code=0
+verifier exit code=0
+```
+
+Observed full-cycle result:
+
+```text
+cycle_ok=true
+reason=FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_PASS
+summary_json=data/r/ff/summary.json
+```
+
+Observed fresh payload from combined BAT run:
+
+```text
+build_ok=true
+reason=FRESH_SENDER_VALID_PAYLOAD_BUILT
+rows_out=1
+bid=4715.02
+ask=4715.97
+entry=4715.02
+sl=4725.02
+tp=4695.02
+validation_errors=[]
+order_key=FRESH_SENDER_VALID|SELL_H1H4_BEAR_AB|GOLD|SELL|B_ONLY_SAFE|20260510T004920Z|MOCHIPOYO_PAYLOAD
+```
+
+Observed sender metrics:
+
+```text
+rows_in=1
+rows_out=1
+dry_run_check_ok_rows=1
+sent_rows=0
+blocked_position_policy_rows=0
+error_rows=0
+order_send_called_count=0
+```
+
+Observed registry/policy chain:
+
+```text
+registry_preview_rows=1
+mock_positions.rows_out=1
+reconcile.matched_active_registry_rows=1
+reconcile.matched_with_mismatch_rows=0
+reconcile.missing_position_rows=0
+reconcile.unregistered_position_rows=0
+policy_preview.same_strategy_blocked_rows=1
+policy_preview.registry_inconsistency_blocked_rows=0
+policy_preview.allow_rows=0
+policy_preview.blocked_rows=1
+```
+
+Observed verifier result:
+
+```text
+verify_ok=true
+reason=SUMMARY_VERIFY_PASS
+checks_total=26
+checks_failed=0
+failed_check_names=[]
+```
+
+Verifier safety:
+
+```text
+read_only=true
+mt5_imported=false
+order_check_called=false
+order_send_called=false
+ledger_mutated=false
+registry_mutated=false
+trigger_state_mutated=false
+```
+
+Decision:
+
+```text
+PASS.
+```
+
 ## Current implication
 
-The following can now be reproduced with one BAT command and verified with one read-only verifier command:
+The following can now be reproduced and verified with one BAT command:
 
 ```text
 fresh MT5 tick payload
@@ -499,16 +605,10 @@ fresh MT5 tick payload
 → read-only summary verification
 ```
 
-Canonical dry-run command:
+Canonical combined command:
 
 ```cmd
-scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
-```
-
-Canonical verifier command:
-
-```cmd
-python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py --summary-json data\r\ff\summary.json --out-json data\r\ff\summary_verify.json --out-csv data\r\ff\summary_verify_checks.csv
+scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run_with_verify.bat
 ```
 
 This full-cycle wrapper/BAT/verifier set is now the safest next integration layer before modifying the real sender or writing production registry.
@@ -520,7 +620,7 @@ Do not write production registry yet.
 Recommended next step:
 
 ```text
-Use the BAT + verifier pair above as the canonical dry-run validation commands for the sender/registry/policy path.
+Use scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run_with_verify.bat as the canonical validation command for the sender/registry/policy path.
 ```
 
 After another stable round, decide whether to:
