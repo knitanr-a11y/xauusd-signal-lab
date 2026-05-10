@@ -14,7 +14,7 @@ docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_VALIDATION.md
 
 ## Why this addendum exists
 
-After the sender-registry preview validation doc was updated, additional wrapper and BAT validations were completed.
+After the sender-registry preview validation doc was updated, additional wrapper, BAT, and verifier validations were completed.
 
 One-command sender preview wrapper:
 
@@ -40,6 +40,12 @@ Full-cycle dry-run BAT:
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
 ```
 
+Read-only full-cycle verifier:
+
+```text
+scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
+```
+
 Purpose:
 
 ```text
@@ -50,6 +56,7 @@ fresh MT5 tick payload
 → mock position from registry
 → exact reconcile
 → registry-aware policy preview
+→ read-only summary verification
 ```
 
 Important safety boundary:
@@ -61,6 +68,7 @@ Production position_registry.csv is not written.
 Existing Mochipoyo ledger files are not mutated by helper scripts.
 Trigger-state files are not mutated.
 Existing Mochipoyo BAT files are not modified.
+The verifier is read-only and does not import MT5.
 ```
 
 ## Implementation update 1: blocked sender report handling
@@ -656,17 +664,103 @@ Decision:
 PASS.
 ```
 
+## Validation 6: read-only summary verifier PASS
+
+Validation doc:
+
+```text
+docs/GOLD_MULTI_STRATEGY_FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_VALIDATION.md
+```
+
+Read-only verifier:
+
+```text
+scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
+```
+
+Implementation commit:
+
+```text
+2620a396927fbb15e76700dd2a329c6d8b8b4dd8
+```
+
+Validated command:
+
+```cmd
+python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py --summary-json data\r\ff\summary.json --out-json data\r\ff\summary_verify.json --out-csv data\r\ff\summary_verify_checks.csv
+```
+
+Observed result:
+
+```text
+verify_ok=true
+reason=SUMMARY_VERIFY_PASS
+checks_total=26
+checks_failed=0
+failed_check_names=[]
+```
+
+Verified key checks:
+
+```text
+cycle_ok=true
+reason=FRESH_SENDER_REGISTRY_POLICY_FULL_CYCLE_PASS
+send_requested=false
+safety.wrapper_passed_send_flag=false
+safety.production_registry_mutated=false
+safety.trigger_state_mutated=false
+safety.existing_sender_modified=false
+safety.existing_bat_modified=false
+sender_cycle.cycle_ok=true
+sender_cycle.sender_metrics.dry_run_check_ok_rows=1
+sender_cycle.sender_metrics.order_send_called_count=0
+sender_cycle.sender_metrics.sent_rows=0
+sender_cycle.sender_metrics.error_rows=0
+sender_cycle.registry_preview_rows=1
+mock_positions.build_ok=true
+mock_positions.rows_out=1
+reconcile.reconcile_ok=true
+reconcile.matched_active_registry_rows=1
+reconcile.matched_with_mismatch_rows=0
+reconcile.missing_position_rows=0
+reconcile.unregistered_position_rows=0
+policy_preview.preview_ok=true
+policy_preview.same_strategy_blocked_rows=1
+policy_preview.registry_inconsistency_blocked_rows=0
+policy_preview.allow_rows=0
+policy_preview.blocked_rows=1
+```
+
+Verifier safety:
+
+```text
+read_only=true
+mt5_imported=false
+order_check_called=false
+order_send_called=false
+ledger_mutated=false
+registry_mutated=false
+trigger_state_mutated=false
+```
+
+Decision:
+
+```text
+PASS.
+```
+
 ## Current implication
 
-The project now has two safe wrappers and one canonical dry-run BAT:
+The project now has two safe wrappers, one canonical dry-run BAT, and one canonical read-only verifier:
 
 ```text
 scripts/run_gold_multi_strategy_sender_dry_run_registry_preview_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle.py
 scripts/run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
+scripts/verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py
 ```
 
-The dry-run BAT can reproduce this entire path with one command:
+The BAT + verifier pair can reproduce and independently verify this entire path:
 
 ```text
 fresh MT5 tick payload
@@ -677,6 +771,7 @@ fresh MT5 tick payload
 → exact reconcile
 → registry-aware policy preview
 → same_strategy BLOCK
+→ read-only summary verification
 ```
 
 This wrapper path is validated in both important cases:
@@ -691,6 +786,7 @@ This wrapper path is validated in both important cases:
    → registry_preview_rows=1
    → exact reconcile
    → same_strategy BLOCK
+   → SUMMARY_VERIFY_PASS
 ```
 
 This is safer than modifying the real sender immediately.
@@ -701,10 +797,16 @@ Canonical dry-run command:
 scripts\run_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_dry_run.bat
 ```
 
+Canonical verifier command:
+
+```cmd
+python scripts\verify_gold_multi_strategy_fresh_sender_registry_policy_full_cycle_summary.py --summary-json data\r\ff\summary.json --out-json data\r\ff\summary_verify.json --out-csv data\r\ff\summary_verify_checks.csv
+```
+
 Recommended next step:
 
 ```text
-Use the BAT above as the canonical dry-run validation command for the sender/registry/policy path.
+Use the BAT + verifier pair above as the canonical dry-run validation commands for the sender/registry/policy path.
 After another stable round, decide whether to fold disabled-by-default registry preview flags into send_mt5_order_from_payload.py.
 ```
 
