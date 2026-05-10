@@ -11,23 +11,15 @@ flow. It simply runs the two dedicated dry-run components in sequence:
 It does not send Discord messages, place MT5 orders, update Mochipoyo trigger
 state, update Mochipoyo ledgers, or write existing autotrade order-intent files.
 
+Runtime/lightweight option:
+- --skip-monitor-when-no-open-signals skips the position monitor only when the
+  strategy dry-run signal ledger has no DRY_RUN_SIGNAL_CREATED rows.
+- This does not change signal detection logic.
+- If a dry-run signal exists in the ledger, the monitor still runs.
+
 Default behavior is a single cycle. For repeated dry-run operation, pass
 --cycles and --sleep-seconds. Use --cycles 0 for an intentionally infinite local
 loop.
-
-Example single cycle:
-
-    python scripts\run_gold_c_env_rr2_72h_dry_run_cycle.py ^
-      --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-      --out-dir data\research_results\gold_c_env_rr2_72h_live_scan
-
-Example repeated cycle every 15 minutes:
-
-    python scripts\run_gold_c_env_rr2_72h_dry_run_cycle.py ^
-      --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-      --out-dir data\research_results\gold_c_env_rr2_72h_live_scan ^
-      --cycles 0 ^
-      --sleep-seconds 900
 """
 
 from __future__ import annotations
@@ -57,6 +49,8 @@ CYCLE_LOG_COLUMNS = [
     "out_dir",
     "live_scan_returncode",
     "position_monitor_returncode",
+    "monitor_skipped",
+    "monitor_skip_reason",
     "cycle_ok",
     "live_signal_found",
     "live_duplicate",
@@ -72,6 +66,9 @@ CYCLE_LOG_COLUMNS = [
     "monitor_sl_touched",
     "monitor_time_exit_required",
     "monitor_no_m5_path",
+    "live_seconds",
+    "monitor_seconds",
+    "total_seconds",
     "live_stdout_log",
     "live_stderr_log",
     "monitor_stdout_log",
@@ -108,6 +105,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--risk-mode", type=str, default="dry_run_no_lot")
     parser.add_argument("--inbar-priority", choices=["SL", "TP"], default="SL")
     parser.add_argument(
+        "--skip-monitor-when-no-open-signals",
+        action="store_true",
+        help="Skip position monitor when signal_ledger.csv has no DRY_RUN_SIGNAL_CREATED rows.",
+    )
+    parser.add_argument(
         "--continue-monitor-on-live-error",
         action="store_true",
         help="Run position monitor even if live scan exits non-zero. Default is to skip monitor on live scan failure.",
@@ -135,6 +137,10 @@ def mkdir_path(path: Path) -> None:
     Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
 
 
+def path_exists(path: Path) -> bool:
+    return Path(windows_long_path(path)).exists()
+
+
 def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -150,29 +156,31 @@ def write_text(path: Path, text: str) -> None:
 
 
 def read_json_or_empty(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    if not path_exists(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with open(windows_long_path(path), "r", encoding="utf-8") as f:
+            return json.load(f)
     except Exception as exc:
         return {"_read_error": str(exc), "_path": str(path)}
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
-    write_text(path, json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    write_text(path, json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, default=str))
 
 
 def append_cycle_log(path: Path, row: dict[str, Any]) -> None:
     ensure_parent_dir(path)
     df = pd.DataFrame([{col: row.get(col, "") for col in CYCLE_LOG_COLUMNS}])
-    header = not Path(windows_long_path(path)).exists()
+    header = not path_exists(path)
     df.to_csv(windows_long_path(path), mode="a", header=header, index=False, encoding="utf-8-sig")
 
 
-def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int) -> tuple[int, Path, Path]:
+def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int) -> tuple[int, Path, Path, float]:
     print(f"[INFO] running {label}")
     print("[CMD] " + " ".join(command))
     mkdir_path(log_dir)
+    started = time.perf_counter()
     completed = subprocess.run(
         command,
         cwd=str(REPO_ROOT),
@@ -181,6 +189,7 @@ def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int)
         encoding="utf-8",
         errors="replace",
     )
+    elapsed = round(time.perf_counter() - started, 3)
 
     stamp = utc_stamp()
     stdout_path = log_dir / f"cycle_{cycle_index:05d}_{stamp}_{label}_stdout.txt"
@@ -192,38 +201,39 @@ def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int)
         print(completed.stdout.rstrip())
     if completed.stderr:
         print(completed.stderr.rstrip(), file=sys.stderr)
-    print(f"[INFO] {label} returncode={completed.returncode}")
-    return int(completed.returncode), stdout_path, stderr_path
+    print(f"[INFO] {label} returncode={completed.returncode} elapsed_seconds={elapsed}")
+    return int(completed.returncode), stdout_path, stderr_path, elapsed
+
+
+def has_monitorable_dry_run_signals(out_dir: Path) -> bool:
+    ledger_path = out_dir / "signal_ledger.csv"
+    if not path_exists(ledger_path):
+        return False
+    try:
+        df = pd.read_csv(windows_long_path(ledger_path), encoding="utf-8-sig")
+    except Exception:
+        return True
+    if df.empty or "status" not in df.columns:
+        return False
+    return bool(df["status"].astype(str).eq("DRY_RUN_SIGNAL_CREATED").any())
 
 
 def build_live_scan_command(args: argparse.Namespace) -> list[str]:
     return [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_c_env_rr2_72h_live_scan_once.py"),
-        "--csv-dir",
-        str(args.csv_dir),
-        "--out-dir",
-        str(args.out_dir),
-        "--pivot-left",
-        str(args.pivot_left),
-        "--pivot-right",
-        str(args.pivot_right),
-        "--entry-window-hours",
-        str(args.entry_window_hours),
-        "--breakout-lookback",
-        str(args.breakout_lookback),
-        "--sl-lookback-m15",
-        str(args.sl_lookback_m15),
-        "--sl-atr-buffer-mult",
-        str(args.sl_atr_buffer_mult),
-        "--rr",
-        str(args.rr),
-        "--max-hold-hours",
-        str(args.max_hold_hours),
-        "--risk-mode",
-        str(args.risk_mode),
-        "--latest-confirmed-policy",
-        str(args.latest_confirmed_policy),
+        "--csv-dir", str(args.csv_dir),
+        "--out-dir", str(args.out_dir),
+        "--pivot-left", str(args.pivot_left),
+        "--pivot-right", str(args.pivot_right),
+        "--entry-window-hours", str(args.entry_window_hours),
+        "--breakout-lookback", str(args.breakout_lookback),
+        "--sl-lookback-m15", str(args.sl_lookback_m15),
+        "--sl-atr-buffer-mult", str(args.sl_atr_buffer_mult),
+        "--rr", str(args.rr),
+        "--max-hold-hours", str(args.max_hold_hours),
+        "--risk-mode", str(args.risk_mode),
+        "--latest-confirmed-policy", str(args.latest_confirmed_policy),
     ]
 
 
@@ -231,20 +241,16 @@ def build_position_monitor_command(args: argparse.Namespace) -> list[str]:
     return [
         sys.executable,
         str(REPO_ROOT / "scripts" / "run_gold_c_env_rr2_72h_position_monitor_once.py"),
-        "--csv-dir",
-        str(args.csv_dir),
-        "--out-dir",
-        str(args.out_dir),
-        "--max-hold-hours",
-        str(args.max_hold_hours),
-        "--inbar-priority",
-        str(args.inbar_priority),
-        "--latest-confirmed-m5-policy",
-        str(args.latest_confirmed_m5_policy),
+        "--csv-dir", str(args.csv_dir),
+        "--out-dir", str(args.out_dir),
+        "--max-hold-hours", str(args.max_hold_hours),
+        "--inbar-priority", str(args.inbar_priority),
+        "--latest-confirmed-m5-policy", str(args.latest_confirmed_m5_policy),
     ]
 
 
 def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
+    total_started = time.perf_counter()
     cycle_start = utc_now_text()
     mkdir_path(args.out_dir)
     log_dir = args.out_dir / "dry_run_cycle_command_logs"
@@ -252,31 +258,57 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     cycle_log_path = args.out_dir / "dry_run_cycle_log.csv"
     latest_cycle_result_path = args.out_dir / "latest_dry_run_cycle_result.json"
 
-    live_returncode, live_stdout, live_stderr = run_command(
+    live_returncode, live_stdout, live_stderr, live_seconds = run_command(
         "live_scan",
         build_live_scan_command(args),
         log_dir,
         cycle_index,
     )
 
+    live_result = read_json_or_empty(args.out_dir / "latest_scan_result.json")
     monitor_returncode: int | str = "SKIPPED"
     monitor_stdout = Path("")
     monitor_stderr = Path("")
+    monitor_seconds = 0.0
+    monitor_skipped = False
+    monitor_skip_reason = ""
+    monitor_result: dict[str, Any] = {}
 
-    if live_returncode == 0 or args.continue_monitor_on_live_error:
-        monitor_returncode, monitor_stdout, monitor_stderr = run_command(
+    should_run_monitor = live_returncode == 0 or args.continue_monitor_on_live_error
+    if should_run_monitor and args.skip_monitor_when_no_open_signals and not has_monitorable_dry_run_signals(args.out_dir):
+        should_run_monitor = False
+        monitor_skipped = True
+        monitor_returncode = "SKIPPED_NO_OPEN_SIGNALS"
+        monitor_skip_reason = "MONITOR_SKIPPED_NO_DRY_RUN_SIGNAL_CREATED_ROWS"
+        monitor_result = {
+            "scan_time_utc": utc_now_text(),
+            "condition_id": CONDITION_ID,
+            "signals_monitored": 0,
+            "close_intent_created": 0,
+            "open_unresolved": 0,
+            "tp_touched": 0,
+            "sl_touched": 0,
+            "time_exit_required": 0,
+            "no_m5_path": 0,
+            "reason": monitor_skip_reason,
+        }
+        write_json(args.out_dir / "latest_position_monitor_result.json", monitor_result)
+        print(f"[INFO] {monitor_skip_reason}")
+
+    if should_run_monitor:
+        monitor_returncode, monitor_stdout, monitor_stderr, monitor_seconds = run_command(
             "position_monitor",
             build_position_monitor_command(args),
             log_dir,
             cycle_index,
         )
-    else:
+        monitor_result = read_json_or_empty(args.out_dir / "latest_position_monitor_result.json")
+    elif not monitor_skipped and live_returncode != 0:
         print("[WARN] live scan failed; skipped position monitor. Use --continue-monitor-on-live-error to force monitor.")
 
-    live_result = read_json_or_empty(args.out_dir / "latest_scan_result.json")
-    monitor_result = read_json_or_empty(args.out_dir / "latest_position_monitor_result.json")
     cycle_end = utc_now_text()
-    cycle_ok = live_returncode == 0 and monitor_returncode == 0
+    cycle_ok = live_returncode == 0 and monitor_returncode in [0, "SKIPPED_NO_OPEN_SIGNALS"]
+    total_seconds = round(time.perf_counter() - total_started, 3)
 
     row = {
         "cycle_start_utc": cycle_start,
@@ -287,6 +319,8 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
         "out_dir": str(args.out_dir),
         "live_scan_returncode": live_returncode,
         "position_monitor_returncode": monitor_returncode,
+        "monitor_skipped": bool(monitor_skipped),
+        "monitor_skip_reason": monitor_skip_reason,
         "cycle_ok": bool(cycle_ok),
         "live_signal_found": live_result.get("signal_found", ""),
         "live_duplicate": live_result.get("duplicate", ""),
@@ -302,6 +336,9 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
         "monitor_sl_touched": monitor_result.get("sl_touched", ""),
         "monitor_time_exit_required": monitor_result.get("time_exit_required", ""),
         "monitor_no_m5_path": monitor_result.get("no_m5_path", ""),
+        "live_seconds": live_seconds,
+        "monitor_seconds": monitor_seconds,
+        "total_seconds": total_seconds,
         "live_stdout_log": str(live_stdout),
         "live_stderr_log": str(live_stderr),
         "monitor_stdout_log": str(monitor_stdout) if monitor_stdout else "",
@@ -310,7 +347,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     append_cycle_log(cycle_log_path, row)
 
     latest_payload = {
-        "schema_version": "gold_c_env_rr2_72h_dry_run_cycle_v1",
+        "schema_version": "gold_c_env_rr2_72h_dry_run_cycle_v2",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "condition_id": CONDITION_ID,
@@ -318,6 +355,13 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
         "cycle_ok": bool(cycle_ok),
         "live_scan_returncode": live_returncode,
         "position_monitor_returncode": monitor_returncode,
+        "monitor_skipped": bool(monitor_skipped),
+        "monitor_skip_reason": monitor_skip_reason,
+        "timing": {
+            "live_seconds": live_seconds,
+            "monitor_seconds": monitor_seconds,
+            "total_seconds": total_seconds,
+        },
         "csv_dir": str(args.csv_dir),
         "out_dir": str(args.out_dir),
         "live_scan_result": live_result,
@@ -333,7 +377,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     write_json(latest_cycle_result_path, latest_payload)
 
     print("[INFO] dry-run cycle completed")
-    print(json.dumps(latest_payload, ensure_ascii=False, indent=2, sort_keys=True))
+    print(json.dumps(latest_payload, ensure_ascii=False, indent=2, sort_keys=True, default=str))
     return latest_payload
 
 
@@ -356,6 +400,7 @@ def main() -> int:
     print(f"[INFO] out_dir={args.out_dir}")
     print(f"[INFO] cycles={'infinite' if args.cycles == 0 else args.cycles}")
     print(f"[INFO] sleep_seconds={args.sleep_seconds}")
+    print(f"[INFO] skip_monitor_when_no_open_signals={args.skip_monitor_when_no_open_signals}")
 
     completed = 0
     last_ok = True
