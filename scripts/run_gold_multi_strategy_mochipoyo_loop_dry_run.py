@@ -26,14 +26,24 @@ Important no-signal rule:
 - If router returncode is non-zero only because one isolated strategy runner reports
   no latest signal, this wrapper may continue adapter/payload/sender dry-run and
   mark the overall cycle as PASS when no payload/send work is required.
+
+Runtime/lightweight policy:
+- This wrapper now records per-stage timing without changing signal logic.
+- Timing is the first step before applying heavier optimizations such as
+  same-M15 no-signal skip, monitor skip, recent-window scan, or in-process router.
+
+Windows path policy:
+- This wrapper writes its own JSON/CSV outputs through Windows long-path helpers.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -81,8 +91,43 @@ CYCLE_LOG_COLUMNS = [
     "sender_order_send_called_count",
     "registry_preview_enabled",
     "registry_preview_rows",
+    "router_seconds",
+    "adapter_seconds",
+    "payload_bridge_seconds",
+    "sender_seconds",
+    "total_seconds",
     "latest_summary_json",
 ]
+
+
+def windows_long_path(path: str | Path) -> str:
+    p = Path(path)
+    if os.name != "nt":
+        return str(p)
+    text = str(p.resolve())
+    if text.startswith("\\\\?\\"):
+        return text
+    if text.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + text.lstrip("\\")
+    return "\\\\?\\" + text
+
+
+def mkdir_path(path: Path) -> None:
+    Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
+
+
+def ensure_parent_dir(path: Path) -> None:
+    mkdir_path(path.parent)
+
+
+def write_text(path: Path, text: str) -> None:
+    ensure_parent_dir(path)
+    with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def path_exists(path: Path) -> bool:
+    return Path(windows_long_path(path)).exists()
 
 
 def parse_args() -> argparse.Namespace:
@@ -116,37 +161,39 @@ def utc_now_text() -> str:
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
+    write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str))
 
 
 def read_json_or_empty(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    if not path_exists(path):
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with open(windows_long_path(path), "r", encoding="utf-8") as f:
+            return json.load(f)
     except Exception as exc:
         return {"_read_error": str(exc), "_path": str(path)}
 
 
 def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_parent_dir(path)
     pd.DataFrame([{col: row.get(col, "") for col in columns}]).to_csv(
-        path,
+        windows_long_path(path),
         mode="a",
-        header=not path.exists(),
+        header=not path_exists(path),
         index=False,
         encoding="utf-8-sig",
     )
 
 
-def run_cmd(label: str, cmd: list[str]) -> int:
+def run_cmd(label: str, cmd: list[str]) -> tuple[int, float]:
     print("=" * 80, flush=True)
     print(f"[STEP] {label}", flush=True)
     print("[CMD] " + " ".join(cmd), flush=True)
+    started = time.perf_counter()
     completed = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace")
-    print(f"[STEP] {label} returncode={completed.returncode}", flush=True)
-    return int(completed.returncode)
+    elapsed = round(time.perf_counter() - started, 3)
+    print(f"[STEP] {label} returncode={completed.returncode} elapsed_seconds={elapsed}", flush=True)
+    return int(completed.returncode), elapsed
 
 
 def safe_int(obj: dict[str, Any], key: str, default: int = 0) -> int:
@@ -164,10 +211,10 @@ def safe_bool(obj: dict[str, Any], key: str, default: bool = False) -> bool:
 
 
 def payload_rows_count(path: Path) -> int:
-    if not path.exists():
+    if not path_exists(path):
         return 0
     try:
-        return int(len(pd.read_csv(path, encoding="utf-8-sig")))
+        return int(len(pd.read_csv(windows_long_path(path), encoding="utf-8-sig")))
     except Exception:
         return 0
 
@@ -268,18 +315,11 @@ def is_no_signal_strategy_status(status: dict[str, Any]) -> bool:
     if safe_bool(status, "signal_found", False):
         return False
     reason = str(status.get("scan_reason", "")).strip()
-    # Empty monitor fields are acceptable for a strategy that found no signal.
     return reason in NO_SIGNAL_REASONS or reason.startswith("NO_SIGNAL")
 
 
 def is_safe_no_signal_router_result(router_result: dict[str, Any], router_rc: int | str) -> bool:
-    """Return True when router failure is only a no-signal dry-run condition.
-
-    The BUY isolated cycle historically may return non-zero when no current BUY
-    signal exists because its monitor stage is skipped/not OK. For this wrapper,
-    no current signal must be treated as a valid dry-run outcome as long as no
-    order/close intents were produced and all strategy statuses are no-signal.
-    """
+    """Return True when router failure is only a no-signal dry-run condition."""
     if router_rc in [0, "SKIPPED"]:
         return False
     if not router_result:
@@ -298,8 +338,9 @@ def is_safe_no_signal_router_result(router_result: dict[str, Any], router_rc: in
 
 def main() -> int:
     args = parse_args()
+    loop_started_perf = time.perf_counter()
     paths = build_paths(args.out_dir)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
+    mkdir_path(args.out_dir)
     cycle_start = utc_now_text()
 
     print("=" * 80, flush=True)
@@ -309,9 +350,17 @@ def main() -> int:
     print(f"out_dir={args.out_dir}", flush=True)
     print("=" * 80, flush=True)
 
+    timing = {
+        "router_seconds": 0.0,
+        "adapter_seconds": 0.0,
+        "payload_bridge_seconds": 0.0,
+        "sender_seconds": 0.0,
+        "total_seconds": 0.0,
+    }
+
     router_rc: int | str = "SKIPPED"
     if not args.skip_router:
-        router_rc = run_cmd("router", build_router_cmd(args, paths))
+        router_rc, timing["router_seconds"] = run_cmd("router", build_router_cmd(args, paths))
     else:
         print("[INFO] router skipped; using existing router outputs", flush=True)
 
@@ -326,20 +375,20 @@ def main() -> int:
 
     adapter_rc: int | str = "SKIPPED"
     if router_can_continue:
-        adapter_rc = run_cmd("adapter", build_adapter_cmd(args, paths))
+        adapter_rc, timing["adapter_seconds"] = run_cmd("adapter", build_adapter_cmd(args, paths))
         if adapter_rc != 0 and not args.continue_on_stage_error:
             print("[ERROR] adapter failed; stopping", flush=True)
 
     payload_rc: int | str = "SKIPPED"
     if adapter_rc == 0 or args.continue_on_stage_error:
-        payload_rc = run_cmd("payload_bridge", build_payload_cmd(args, paths))
+        payload_rc, timing["payload_bridge_seconds"] = run_cmd("payload_bridge", build_payload_cmd(args, paths))
         if payload_rc != 0 and not args.continue_on_stage_error:
             print("[ERROR] payload bridge failed; stopping", flush=True)
 
     sender_rc: int | str = "SKIPPED_NO_PAYLOAD_ROWS"
     sender_cmd = build_sender_cmd(args, paths)
     if sender_cmd is not None and (payload_rc == 0 or args.continue_on_stage_error):
-        sender_rc = run_cmd("sender_dry_run", sender_cmd)
+        sender_rc, timing["sender_seconds"] = run_cmd("sender_dry_run", sender_cmd)
     elif sender_cmd is None:
         print("[INFO] sender skipped because order_payloads.csv has no rows", flush=True)
 
@@ -364,14 +413,16 @@ def main() -> int:
     sender_stage_ok = sender_rc in [0, "SKIPPED_NO_PAYLOAD_ROWS"] and sender_sent_rows == 0 and sender_order_send_called == 0
     cycle_ok = bool(router_ok and adapter_ok and bridge_ok and sender_stage_ok)
     cycle_end = utc_now_text()
+    timing["total_seconds"] = round(time.perf_counter() - loop_started_perf, 3)
 
     summary = {
-        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v1",
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v2",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
         "reason": "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_PASS" if cycle_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_FAILED",
         "router_safe_no_signal": bool(router_safe_no_signal),
+        "timing": timing,
         "safety": {
             "send_flag_passed": False,
             "existing_mochipoyo_bat_modified": False,
@@ -430,6 +481,7 @@ def main() -> int:
         "sender_stage_status": "OK" if sender_stage_ok else "FAILED",
         "latest_summary_json": str(paths["summary_json"]),
         **metrics,
+        **timing,
     }, CYCLE_LOG_COLUMNS)
 
     print("=" * 80, flush=True)
@@ -440,6 +492,7 @@ def main() -> int:
         "router_safe_no_signal": bool(router_safe_no_signal),
         "returncodes": summary["returncodes"],
         "key_metrics": metrics,
+        "timing": timing,
         "summary_json": str(paths["summary_json"]),
         "cycle_log_csv": str(paths["cycle_log_csv"]),
     }, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
