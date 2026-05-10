@@ -15,6 +15,12 @@ Safety:
 - sent_rows must remain 0.
 - production registry is never written.
 - This is not a strategy signal; it is a payload/sender contract validation.
+
+Important fixture detail:
+- The sender validates SL/TP against the *current* MT5 bid/ask, not the fixture
+  entry_price_reference. Therefore this validation uses a deliberately wide
+  SELL fixture by default: sl=9999.0 and tp=1.0. That keeps local price relation
+  validation valid even when GOLD is around normal broker quote ranges.
 """
 
 from __future__ import annotations
@@ -23,6 +29,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -136,6 +143,52 @@ def approx_equal(a: Any, b: Any, eps: float = 1e-9) -> bool:
     return abs(safe_float(a) - safe_float(b)) <= eps
 
 
+def read_csv_lot_values(path: Path) -> list[float]:
+    if not path.exists():
+        return []
+    try:
+        df = pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+    except Exception:
+        return []
+    if "lot" not in df.columns:
+        return []
+    return [safe_float(v) for v in df["lot"].dropna().tolist()]
+
+
+def discover_sender_lot_values(sender_out_dir: Path, order_ledger_csv: Path) -> tuple[list[float], list[str]]:
+    """Find sender result lot values across known sender output names.
+
+    The sender has evolved across iterations, so this validation should not depend
+    on one hard-coded result CSV filename. It reads every CSV under sender_out_dir
+    and the order ledger, then returns all lot values it finds.
+    """
+    paths: list[Path] = []
+    if sender_out_dir.exists():
+        paths.extend(sorted(sender_out_dir.glob("*.csv")))
+        paths.extend(sorted((sender_out_dir / "reports").glob("*.csv")) if (sender_out_dir / "reports").exists() else [])
+    paths.append(order_ledger_csv)
+    values: list[float] = []
+    sources: list[str] = []
+    for p in paths:
+        vals = read_csv_lot_values(p)
+        if vals:
+            values.extend(vals)
+            sources.append(str(p))
+    return values, sources
+
+
+def parse_stdout_lot_values(stdout: str, expected_symbol: str, expected_direction: str) -> list[float]:
+    """Fallback parser for the compact table printed by send_mt5_order_from_payload.py."""
+    values: list[float] = []
+    for line in stdout.splitlines():
+        if expected_symbol not in line or expected_direction.upper() not in line.upper():
+            continue
+        match = re.search(rf"\b{re.escape(expected_direction.upper())}\s+([0-9]+(?:\.[0-9]+)?)\b", line.upper())
+        if match:
+            values.append(safe_float(match.group(1)))
+    return values
+
+
 def build_fixture_payload(*, lot: float, symbol: str, direction: str, entry: float, sl: float, tp: float) -> dict[str, Any]:
     now = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     key_base = f"GOLD_LOT_PASSTHROUGH_{symbol}_{direction}_{lot}_{now}"
@@ -170,8 +223,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--direction", choices=["BUY", "SELL"], default="SELL")
     p.add_argument("--lot", type=float, default=0.02)
     p.add_argument("--entry-price", type=float, default=4700.0)
-    p.add_argument("--sl-price", type=float, default=4710.0)
-    p.add_argument("--tp-price", type=float, default=4680.0)
+    p.add_argument("--sl-price", type=float, default=9999.0)
+    p.add_argument("--tp-price", type=float, default=1.0)
     p.add_argument("--expected-login", type=int, default=75539039)
     p.add_argument("--require-demo-account", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--deviation", type=int, default=100)
@@ -190,6 +243,8 @@ def main() -> int:
     registry_preview_csv = args.out_dir / "registry_preview" / "registry_preview.csv"
     registry_preview_json = args.out_dir / "registry_preview" / "registry_preview.json"
     summary_json = args.out_dir / SUMMARY_FILENAME
+    stdout_log = args.out_dir / "command_logs" / "sender_stdout.txt"
+    stderr_log = args.out_dir / "command_logs" / "sender_stderr.txt"
 
     payload = build_fixture_payload(
         lot=float(args.lot),
@@ -225,10 +280,18 @@ def main() -> int:
     print("GOLD sender lot passthrough validation - NO SEND", flush=True)
     print("This is not a strategy signal. It validates payload lot -> sender lot preservation.", flush=True)
     print(f"payload_lot={args.lot} symbol={args.symbol} direction={args.direction}", flush=True)
+    print(f"fixture_prices entry={args.entry_price} sl={args.sl_price} tp={args.tp_price}", flush=True)
     print("[CMD] " + " ".join(cmd), flush=True)
     print("=" * 80, flush=True)
 
-    completed = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace")
+    completed = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
+    if completed.stdout:
+        print(completed.stdout, end="", flush=True)
+    if completed.stderr:
+        print(completed.stderr, end="", flush=True)
+    write_text(stdout_log, completed.stdout or "")
+    write_text(stderr_log, completed.stderr or "")
+
     sender_report = read_json_or_empty(sender_out_dir / "mt5_order_send_report.json")
     rows_out = safe_int(sender_report.get("rows_out"), 0)
     sent_rows = safe_int(sender_report.get("sent_rows"), 0)
@@ -236,24 +299,13 @@ def main() -> int:
     error_rows = safe_int(sender_report.get("error_rows"), 0)
     dry_run_check_ok_rows = safe_int(sender_report.get("dry_run_check_ok_rows"), 0)
 
-    sender_lot_values: list[float] = []
-    sender_rows_csv = sender_out_dir / "mt5_order_send_rows.csv"
-    if sender_rows_csv.exists():
-        try:
-            df = pd.read_csv(windows_long_path(sender_rows_csv), encoding="utf-8-sig")
-            if "lot" in df.columns:
-                sender_lot_values = [safe_float(v) for v in df["lot"].tolist()]
-        except Exception:
-            sender_lot_values = []
+    sender_lot_values, sender_lot_sources = discover_sender_lot_values(sender_out_dir, order_ledger_csv)
+    if not sender_lot_values:
+        sender_lot_values = parse_stdout_lot_values(completed.stdout or "", str(args.symbol), str(args.direction))
+        if sender_lot_values:
+            sender_lot_sources = [str(stdout_log)]
 
-    registry_lot_values: list[float] = []
-    if registry_preview_csv.exists():
-        try:
-            rdf = pd.read_csv(windows_long_path(registry_preview_csv), encoding="utf-8-sig")
-            if "lot" in rdf.columns:
-                registry_lot_values = [safe_float(v) for v in rdf["lot"].tolist()]
-        except Exception:
-            registry_lot_values = []
+    registry_lot_values = read_csv_lot_values(registry_preview_csv)
 
     sender_lot_ok = bool(sender_lot_values and all(approx_equal(v, args.lot) for v in sender_lot_values))
     registry_lot_ok = bool((not registry_lot_values) or all(approx_equal(v, args.lot) for v in registry_lot_values))
@@ -268,12 +320,13 @@ def main() -> int:
     )
 
     summary = {
-        "schema_version": "gold_sender_lot_passthrough_validation_v1",
+        "schema_version": "gold_sender_lot_passthrough_validation_v2_safe_sell_fixture",
         "validation_time_utc": utc_now_text(),
         "validation_ok": validation_ok,
         "reason": "GOLD_SENDER_LOT_PASSTHROUGH_VALIDATION_PASS" if validation_ok else "GOLD_SENDER_LOT_PASSTHROUGH_VALIDATION_FAILED",
         "payload_lot": float(args.lot),
         "sender_lot_values": sender_lot_values,
+        "sender_lot_sources": sender_lot_sources,
         "registry_lot_values": registry_lot_values,
         "sender_lot_ok": sender_lot_ok,
         "registry_lot_ok": registry_lot_ok,
@@ -283,6 +336,12 @@ def main() -> int:
         "sender_error_rows": error_rows,
         "sender_order_send_called_count": order_send_called_count,
         "sender_sent_rows": sent_rows,
+        "fixture_prices": {
+            "entry_price_reference": float(args.entry_price),
+            "sl_price": float(args.sl_price),
+            "tp_price": float(args.tp_price),
+            "note": "SELL defaults intentionally use very wide SL/TP so sender validates against current bid.",
+        },
         "safety": {
             "send_flag_passed": False,
             "order_send_called_count": order_send_called_count,
@@ -295,9 +354,10 @@ def main() -> int:
             "payload_csv": str(payload_csv),
             "order_ledger_csv": str(order_ledger_csv),
             "sender_out_dir": str(sender_out_dir),
-            "sender_rows_csv": str(sender_rows_csv),
             "registry_preview_csv": str(registry_preview_csv),
             "registry_preview_json": str(registry_preview_json),
+            "stdout_log": str(stdout_log),
+            "stderr_log": str(stderr_log),
             "summary_json": str(summary_json),
         },
     }
