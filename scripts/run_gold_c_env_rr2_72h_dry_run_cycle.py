@@ -17,6 +17,11 @@ Runtime/lightweight option:
 - This does not change signal detection logic.
 - If a dry-run signal exists in the ledger, the monitor still runs.
 
+Lot policy:
+- BUY_C_ENV_RR2_72H is pinned to base_lot=0.01 by default.
+- The cycle explicitly passes --base-lot to the live scan so order_intent_dry_run
+  never emits lot=None on the guarded sender integration path.
+
 Default behavior is a single cycle. For repeated dry-run operation, pass
 --cycles and --sleep-seconds. Use --cycles 0 for an intentionally infinite local
 loop.
@@ -39,6 +44,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = Path("data/research_results/gold_c_env_rr2_72h_live_scan")
 CONDITION_ID = "GOLD_C_ENV_H1_REGULAR_BULLISH_M15_BREAK_RR2_12H_BO8_SL_H1_PIVOT_HOLD_72H"
+DEFAULT_BASE_LOT = 0.01
 
 CYCLE_LOG_COLUMNS = [
     "cycle_start_utc",
@@ -102,7 +108,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sl-atr-buffer-mult", type=float, default=0.05)
     parser.add_argument("--rr", type=float, default=2.0)
     parser.add_argument("--max-hold-hours", type=int, default=72)
-    parser.add_argument("--risk-mode", type=str, default="dry_run_no_lot")
+    parser.add_argument("--risk-mode", type=str, default="base_lot_0_01_dry_run")
+    parser.add_argument("--base-lot", type=float, default=DEFAULT_BASE_LOT)
     parser.add_argument("--inbar-priority", choices=["SL", "TP"], default="SL")
     parser.add_argument(
         "--skip-monitor-when-no-open-signals",
@@ -233,6 +240,7 @@ def build_live_scan_command(args: argparse.Namespace) -> list[str]:
         "--rr", str(args.rr),
         "--max-hold-hours", str(args.max_hold_hours),
         "--risk-mode", str(args.risk_mode),
+        "--base-lot", str(args.base_lot),
         "--latest-confirmed-policy", str(args.latest_confirmed_policy),
     ]
 
@@ -347,7 +355,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     append_cycle_log(cycle_log_path, row)
 
     latest_payload = {
-        "schema_version": "gold_c_env_rr2_72h_dry_run_cycle_v2",
+        "schema_version": "gold_c_env_rr2_72h_dry_run_cycle_v3_base_lot",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "condition_id": CONDITION_ID,
@@ -364,6 +372,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
         },
         "csv_dir": str(args.csv_dir),
         "out_dir": str(args.out_dir),
+        "base_lot": float(args.base_lot),
         "live_scan_result": live_result,
         "position_monitor_result": monitor_result,
         "outputs": {
@@ -400,6 +409,7 @@ def main() -> int:
     print(f"[INFO] out_dir={args.out_dir}")
     print(f"[INFO] cycles={'infinite' if args.cycles == 0 else args.cycles}")
     print(f"[INFO] sleep_seconds={args.sleep_seconds}")
+    print(f"[INFO] base_lot={args.base_lot}")
     print(f"[INFO] skip_monitor_when_no_open_signals={args.skip_monitor_when_no_open_signals}")
 
     completed = 0
