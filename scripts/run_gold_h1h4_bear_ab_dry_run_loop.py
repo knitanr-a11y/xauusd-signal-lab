@@ -16,6 +16,11 @@ No Mochipoyo trigger-state update.
 No Mochipoyo ledger update.
 No existing autotrade order-intent mutation.
 
+Lot default:
+- base_lot=0.01.
+- CORE_AB_CONFIRM uses multiplier 2.0 => 0.02 lot.
+- B_ONLY_SAFE uses multiplier 1.0 => 0.01 lot.
+
 Runtime/lightweight option:
 - --skip-monitor-when-no-open-signals skips the position monitor only when the
   strategy dry-run signal ledger has no DRY_RUN_SIGNAL_CREATED rows.
@@ -92,7 +97,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--tp-usd", type=float, default=20.0)
     p.add_argument("--rr", type=float, default=2.0)
     p.add_argument("--horizon-hours", type=float, default=12.0)
-    p.add_argument("--base-lot", type=float, default=0.10)
+    p.add_argument("--base-lot", type=float, default=0.01)
     p.add_argument("--core-lot-multiplier", type=float, default=2.0)
     p.add_argument("--standard-lot-multiplier", type=float, default=1.0)
     p.add_argument("--max-lot-per-trade", type=float, default=99.0)
