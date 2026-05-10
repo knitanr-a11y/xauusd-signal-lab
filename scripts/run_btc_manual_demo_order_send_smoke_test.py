@@ -457,11 +457,12 @@ def main() -> int:
     reason = "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_NO_SEND_PASS" if cycle_ok else "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_NO_SEND_FAILED"
 
     summary = {
-        "schema_version": "btc_manual_demo_order_send_smoke_test_no_send_v1",
+        "schema_version": "btc_manual_demo_order_send_smoke_test_no_send_v2_summary_path_display",
         "cycle_start_utc": utc_now_text(),
         "cycle_ok": cycle_ok,
         "reason": reason,
         "mode": "NO_SEND_ORDER_CHECK_ONLY",
+        "summary_json": str(paths["summary_json"]),
         "symbol": resolved_symbol,
         "symbol_candidates_tried": tried_symbols,
         "direction": payload.get("direction", ""),
