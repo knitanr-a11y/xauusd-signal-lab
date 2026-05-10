@@ -15,6 +15,11 @@ No autotrade/order-intent file used by existing live flow.
 Strategy:
     GOLD_C_ENV_H1_REGULAR_BULLISH_M15_BREAK_RR2_12H_BO8_SL_H1_PIVOT_HOLD_72H
 
+Lot policy:
+    BUY_C_ENV_RR2_72H is a single BUY strategy in the current GOLD
+    multi-strategy plan. Its default base lot is 0.01 so order_intent_dry_run
+    never leaks lot=None into the guarded sender integration path.
+
 Outputs in --out-dir:
     latest_scan_result.json
     latest_signal_payload.json              only when a new signal is eligible
@@ -50,6 +55,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.research_gold_c_env_rr2_72h_notification_and_intent_preview import (  # noqa: E402
     CONDITION_ID,
+    DEFAULT_BASE_LOT,
     build_order_intent,
     build_signal_payload,
     notification_text,
@@ -145,7 +151,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--sl-atr-buffer-mult", type=float, default=0.05)
     p.add_argument("--rr", type=float, default=2.0)
     p.add_argument("--max-hold-hours", type=int, default=72)
-    p.add_argument("--risk-mode", type=str, default="dry_run_no_lot")
+    p.add_argument("--risk-mode", type=str, default="base_lot_0_01_dry_run")
+    p.add_argument("--base-lot", type=float, default=DEFAULT_BASE_LOT)
     p.add_argument(
         "--latest-confirmed-policy",
         choices=["last", "second_last"],
@@ -223,6 +230,7 @@ def main() -> int:
     print(f"[INFO] condition_id={CONDITION_ID}")
     print(f"[INFO] csv_dir={args.csv_dir}")
     print(f"[INFO] out_dir={args.out_dir}")
+    print(f"[INFO] base_lot={args.base_lot}")
     print("[INFO] loading CSVs")
 
     frames = load_research_csvs(args.csv_dir)
@@ -313,7 +321,7 @@ def main() -> int:
         return 0
 
     payload = build_signal_payload(signal_row)
-    intent = build_order_intent(signal_row, risk_mode=args.risk_mode, dry_run=True)
+    intent = build_order_intent(signal_row, risk_mode=args.risk_mode, dry_run=True, base_lot=float(args.base_lot))
     text = notification_text(payload)
 
     write_json(args.out_dir / "latest_signal_payload.json", payload)
@@ -349,6 +357,9 @@ def main() -> int:
         "candidate_count": int(len(pending)),
         "latest_candidate_entry_time": latest_candidate_entry_time,
         "signal_key": signal_key,
+        "base_lot": float(args.base_lot),
+        "lot": intent.get("lot"),
+        "lot_status": intent.get("lot_status"),
         "outputs": {
             "latest_signal_payload": str(args.out_dir / "latest_signal_payload.json"),
             "order_intent_dry_run": str(args.out_dir / "order_intent_dry_run.json"),
