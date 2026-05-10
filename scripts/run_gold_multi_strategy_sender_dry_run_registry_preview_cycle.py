@@ -17,6 +17,12 @@ Safety:
 Purpose:
 - Provide a disabled-by-default-like registry preview flow without directly modifying
   the real sender yet.
+
+Important behavior:
+- send_mt5_order_from_payload.py returns non-zero when rows are blocked by local
+  validation or policy, even though it still writes a valid report/results pair.
+- This wrapper should still run the registry-preview step in that case so the
+  expected safe result can be observed: NO_ELIGIBLE_SENDER_ROWS.
 """
 from __future__ import annotations
 
@@ -59,7 +65,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--registry-preview-order-ticket-start", type=int, default=880001)
     p.add_argument("--registry-preview-deal-ticket-start", type=int, default=770001)
     p.add_argument("--python-exe", default=sys.executable)
-    p.add_argument("--continue-on-sender-error", action="store_true")
+    p.add_argument(
+        "--strict-sender-returncode",
+        action="store_true",
+        help="If set, stop when sender dry-run exits non-zero. Default continues when sender report/results exist.",
+    )
     return p.parse_args()
 
 
@@ -73,6 +83,13 @@ def windows_long_path(path: str | Path) -> str:
     if text.startswith("\\\\"):
         return "\\\\?\\UNC\\" + text.lstrip("\\")
     return "\\\\?\\" + text
+
+
+def path_exists(path: Path) -> bool:
+    try:
+        return Path(windows_long_path(path)).exists()
+    except Exception:
+        return path.exists()
 
 
 def utc_now_text() -> str:
@@ -173,6 +190,10 @@ def build_registry_preview_cmd(args: argparse.Namespace, sender_out_dir: Path, r
     ]
 
 
+def sender_report_is_usable(sender_report_json: Path, sender_results_csv: Path) -> bool:
+    return path_exists(sender_report_json) and path_exists(sender_results_csv)
+
+
 def main() -> int:
     args = parse_args()
     out_dir = Path(args.out_dir)
@@ -192,6 +213,7 @@ def main() -> int:
         "sender_out_dir": str(sender_out_dir),
         "registry_preview_out_dir": str(registry_out_dir),
         "send_requested": False,
+        "strict_sender_returncode": bool(args.strict_sender_returncode),
         "safety": {
             "wrapper_passed_send_flag": False,
             "production_registry_mutated": False,
@@ -207,8 +229,10 @@ def main() -> int:
     sender_report_json = sender_out_dir / "mt5_order_send_report.json"
     sender_results_csv = sender_out_dir / "mt5_order_send_results.csv"
     sender_report = read_json(sender_report_json)
+    sender_outputs_exist = sender_report_is_usable(sender_report_json, sender_results_csv)
     summary["sender_report_json"] = str(sender_report_json)
     summary["sender_results_csv"] = str(sender_results_csv)
+    summary["sender_outputs_exist"] = bool(sender_outputs_exist)
     summary["sender_metrics"] = {
         "rows_in": sender_report.get("rows_in", ""),
         "rows_out": sender_report.get("rows_out", ""),
@@ -219,12 +243,19 @@ def main() -> int:
         "order_send_called_count": sender_report.get("order_send_called_count", ""),
     }
 
-    if not sender_step["ok"] and not args.continue_on_sender_error:
-        summary["reason"] = "SENDER_DRY_RUN_FAILED"
+    if (not sender_step["ok"]) and args.strict_sender_returncode:
+        summary["reason"] = "SENDER_DRY_RUN_FAILED_STRICT"
         write_json(summary_json, summary)
         print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
         print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
         return 10
+
+    if (not sender_step["ok"]) and (not sender_outputs_exist):
+        summary["reason"] = "SENDER_DRY_RUN_FAILED_NO_REPORT"
+        write_json(summary_json, summary)
+        print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
+        print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+        return 11
 
     preview_cmd = build_registry_preview_cmd(args, sender_out_dir, registry_out_dir)
     preview_step = run_step("sender_registry_preview_from_report", preview_cmd)
@@ -238,9 +269,16 @@ def main() -> int:
     summary["registry_preview_reason"] = preview_report.get("reason", "")
     summary["registry_preview_ok"] = bool(preview_report.get("preview_ok", False))
 
-    cycle_ok = bool(sender_step["ok"] and preview_step["ok"] and summary["registry_preview_ok"])
+    # A non-zero sender returncode is acceptable when the sender produced report/results
+    # and preview builder confirms a valid safe outcome such as NO_ELIGIBLE_SENDER_ROWS.
+    cycle_ok = bool(preview_step["ok"] and summary["registry_preview_ok"] and sender_outputs_exist)
     summary["cycle_ok"] = cycle_ok
-    summary["reason"] = "SENDER_DRY_RUN_REGISTRY_PREVIEW_EVALUATED" if cycle_ok else "SENDER_DRY_RUN_REGISTRY_PREVIEW_COMPLETED_WITH_ERRORS"
+    if cycle_ok and not sender_step["ok"]:
+        summary["reason"] = "SENDER_DRY_RUN_BLOCKED_BUT_REGISTRY_PREVIEW_EVALUATED"
+    elif cycle_ok:
+        summary["reason"] = "SENDER_DRY_RUN_REGISTRY_PREVIEW_EVALUATED"
+    else:
+        summary["reason"] = "SENDER_DRY_RUN_REGISTRY_PREVIEW_COMPLETED_WITH_ERRORS"
     write_json(summary_json, summary)
 
     print("run_gold_multi_strategy_sender_dry_run_registry_preview_cycle")
