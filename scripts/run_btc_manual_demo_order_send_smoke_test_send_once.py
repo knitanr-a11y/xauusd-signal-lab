@@ -23,16 +23,19 @@ Safety defaults:
 - max-symbol-lot=0.01.
 - fixed-lot=0.01.
 - production position_registry.csv is never written.
+- A success marker blocks repeated send-once attempts by default.
 
 Recommended flow:
 1. Run scripts/run_btc_manual_demo_order_send_smoke_test.py first.
 2. Confirm NO-SEND order_check PASS.
 3. Only then, with explicit user approval, run this send-once runner with
    --allow-demo-send --send.
+4. After one successful send, repeated --allow-demo-send --send is blocked by
+   btc_manual_send_once_success_marker.json unless --allow-repeat-send is given.
 
 Important:
 - This file is capable of passing --send to send_mt5_order_from_payload.py, but
-  only when the two explicit flags are both present.
+  only when the two explicit flags are both present and repeat-send guard allows it.
 - Do not use this as a strategy integration path.
 """
 
@@ -61,6 +64,7 @@ else:
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = Path("data/r/btc_manual_demo_order_send_smoke_test_send_once")
 SUMMARY_FILENAME = "latest_btc_manual_demo_order_send_smoke_test_send_once_result.json"
+SUCCESS_MARKER_FILENAME = "btc_manual_send_once_success_marker.json"
 
 PAYLOAD_COLUMNS = [
     "payload_key",
@@ -91,6 +95,8 @@ SUMMARY_PRINT_KEYS = [
     "mode",
     "send_requested",
     "allow_demo_send",
+    "allow_repeat_send",
+    "success_marker_exists_before_run",
     "send_flag_passed_to_sender",
     "send_suppressed_reason",
     "symbol",
@@ -119,6 +125,10 @@ def windows_long_path(path: str | Path) -> str:
     if text.startswith("\\\\"):
         return "\\\\?\\UNC\\" + text.lstrip("\\")
     return "\\\\?\\" + text
+
+
+def path_exists(path: Path) -> bool:
+    return Path(windows_long_path(path)).exists()
 
 
 def mkdir_path(path: Path) -> None:
@@ -330,11 +340,13 @@ def build_payload(args: argparse.Namespace, symbol: str, account_info: dict[str,
     }
 
 
-def decide_send_pass(args: argparse.Namespace, payload_rows: int) -> tuple[bool, str]:
+def decide_send_pass(args: argparse.Namespace, payload_rows: int, success_marker_exists: bool) -> tuple[bool, str]:
     if not bool(args.send):
         return False, "SEND_NOT_REQUESTED"
     if not bool(args.allow_demo_send):
         return False, "ALLOW_DEMO_SEND_NOT_SET"
+    if success_marker_exists and not bool(args.allow_repeat_send):
+        return False, "SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED"
     if payload_rows <= 0:
         return False, "NO_PAYLOAD_ROWS"
     if payload_rows > 1:
@@ -402,6 +414,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--portable", action="store_true")
     p.add_argument("--allow-demo-send", action="store_true")
     p.add_argument("--send", action="store_true")
+    p.add_argument("--allow-repeat-send", action="store_true", help="Dangerous: allow another manual BTC send even when success marker exists. Normally do not use.")
     return p.parse_args()
 
 
@@ -416,14 +429,17 @@ def main() -> int:
         "registry_preview_csv": args.out_dir / "registry_preview" / "registry_preview.csv",
         "registry_preview_json": args.out_dir / "registry_preview" / "registry_preview.json",
         "summary_json": args.out_dir / SUMMARY_FILENAME,
+        "success_marker_json": args.out_dir / SUCCESS_MARKER_FILENAME,
     }
+    success_marker_exists_before_run = path_exists(paths["success_marker_json"])
 
     print("=" * 80, flush=True)
     print("BTC manual demo order_send smoke test - GUARDED SEND-ONCE", flush=True)
     print("This is not a strategy signal. Sender receives --send only with BOTH --allow-demo-send and --send.", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"expected_login={args.expected_login} require_demo_account={args.require_demo_account}", flush=True)
-    print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
+    print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send} allow_repeat_send={args.allow_repeat_send}", flush=True)
+    print(f"success_marker_exists_before_run={success_marker_exists_before_run}", flush=True)
     print("=" * 80, flush=True)
 
     resolved_symbol = ""
@@ -465,7 +481,7 @@ def main() -> int:
             mt5.shutdown()
 
     payload_rows = 1
-    pass_send, suppressed_reason = decide_send_pass(args, payload_rows)
+    pass_send, suppressed_reason = decide_send_pass(args, payload_rows, success_marker_exists_before_run)
     sender_rc, sender_seconds = run_sender(build_sender_cmd(args, paths, resolved_symbol, pass_send=pass_send))
     sender_report = read_json_or_empty(paths["sender_out_dir"] / "mt5_order_send_report.json")
     rows_out = safe_int(sender_report, "rows_out", 0)
@@ -483,7 +499,7 @@ def main() -> int:
     )
 
     summary = {
-        "schema_version": "btc_manual_demo_order_send_smoke_test_send_once_v1",
+        "schema_version": "btc_manual_demo_order_send_smoke_test_send_once_v2_repeat_marker_guard",
         "cycle_start_utc": utc_now_text(),
         "cycle_ok": cycle_ok,
         "reason": reason,
@@ -491,6 +507,9 @@ def main() -> int:
         "summary_json": str(paths["summary_json"]),
         "send_requested": bool(args.send),
         "allow_demo_send": bool(args.allow_demo_send),
+        "allow_repeat_send": bool(args.allow_repeat_send),
+        "success_marker_exists_before_run": bool(success_marker_exists_before_run),
+        "success_marker_json": str(paths["success_marker_json"]),
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
         "symbol": resolved_symbol,
@@ -524,6 +543,8 @@ def main() -> int:
             "send_flag_passed": bool(pass_send),
             "order_send_called_count": order_send_called_count,
             "sent_rows": sent_rows,
+            "success_marker_exists_before_run": bool(success_marker_exists_before_run),
+            "repeat_send_blocked": bool(suppressed_reason == "SEND_ONCE_SUCCESS_MARKER_EXISTS_REPEAT_BLOCKED"),
             "production_registry_mutated": False,
             "gold_strategy_signal_used": False,
             "btc_strategy_integration_used": False,
@@ -538,11 +559,41 @@ def main() -> int:
             "total_seconds": round(time.perf_counter() - started_perf, 3),
         },
     }
+
+    if cycle_ok and pass_send and sent_rows == 1:
+        marker = {
+            "schema_version": "btc_manual_send_once_success_marker_v1",
+            "created_at_utc": utc_now_text(),
+            "reason": "BTC_MANUAL_DEMO_ORDER_SEND_SMOKE_TEST_SEND_ONCE_PASS",
+            "symbol": resolved_symbol,
+            "direction": payload.get("direction", ""),
+            "lot": payload.get("lot", 0),
+            "entry_price_reference": payload.get("entry_price_reference", 0),
+            "sl_price": payload.get("sl_price", 0),
+            "tp_price": payload.get("tp_price", 0),
+            "order_send_called_count": order_send_called_count,
+            "sent_rows": sent_rows,
+            "sender_report_summary": {
+                "rows_out": rows_out,
+                "sent_rows": sent_rows,
+                "error_rows": error_rows,
+                "order_send_called_count": order_send_called_count,
+            },
+            "summary_json": str(paths["summary_json"]),
+            "order_ledger_csv": str(paths["order_ledger_csv"]),
+        }
+        write_json(paths["success_marker_json"], marker)
+        summary["success_marker_written"] = True
+    else:
+        summary["success_marker_written"] = False
+
     write_json(paths["summary_json"], summary)
 
     print("=" * 80, flush=True)
     print("BTC manual demo order_send smoke test summary - GUARDED SEND-ONCE", flush=True)
     printable = {k: summary.get(k) for k in SUMMARY_PRINT_KEYS}
+    printable["success_marker_json"] = str(paths["success_marker_json"])
+    printable["success_marker_written"] = summary.get("success_marker_written")
     printable["safety"] = summary["safety"]
     printable["paths"] = summary["paths"]
     print(json.dumps(printable, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
