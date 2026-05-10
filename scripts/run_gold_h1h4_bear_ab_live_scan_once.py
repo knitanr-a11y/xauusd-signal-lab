@@ -18,6 +18,10 @@ Final rank:
     B_ONLY_SAFE     = B and not A, trade_enabled=True, lot_multiplier=1.0
     A_ONLY_OBSERVE  = A and not B, trade_enabled=False, lot_multiplier=0.0
 
+Lot default:
+    base_lot=0.01. Therefore CORE_AB_CONFIRM is 0.02 lot and B_ONLY_SAFE is
+    0.01 lot unless explicit command-line arguments override it.
+
 Important live detail:
     The latest confirmed M15 bar often has no next M15 open row yet.
     Therefore this script computes A/B conditions on the full historical M15
@@ -92,7 +96,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tp-usd", type=float, default=20.0)
     parser.add_argument("--rr", type=float, default=2.0)
     parser.add_argument("--horizon-hours", type=float, default=12.0)
-    parser.add_argument("--base-lot", type=float, default=0.10)
+    parser.add_argument("--base-lot", type=float, default=0.01)
     parser.add_argument("--core-lot-multiplier", type=float, default=2.0)
     parser.add_argument("--standard-lot-multiplier", type=float, default=1.0)
     parser.add_argument("--max-lot-per-trade", type=float, default=99.0)
