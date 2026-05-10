@@ -28,7 +28,11 @@ Console output policy:
 
 Stop policy:
 - Ctrl+C exits gracefully without a Python traceback.
-- The latest completed cycle summary remains available in latest_*_aligned_result.json.
+- If Ctrl+C happens before any cycle completed, the previous latest summary is
+  preserved and a separate stop marker is written instead of overwriting the
+  latest operational status with an empty cycles_run=0 summary.
+- If at least one cycle completed, latest_*_aligned_result.json is updated with
+  stopped_by_user=true while keeping the latest completed cycle details.
 
 Purpose:
 - Validate the new GOLD BUY/SELL multi-strategy path on a repeated minute-aligned cadence.
@@ -52,6 +56,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT_DIR = Path("data/research_results/gold_multi_strategy_mochipoyo_loop_dry_run_aligned")
 WRAPPER_SUMMARY_JSON = REPO_ROOT / "data" / "research_results" / "gold_multi_strategy_mochipoyo_loop_dry_run" / "latest_gold_multi_strategy_mochipoyo_loop_dry_run_result.json"
 SUMMARY_NAME = "latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_result.json"
+STOP_MARKER_NAME = "latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_stop_marker.json"
 
 LOOP_LOG_COLUMNS = [
     "cycle_index",
@@ -245,7 +250,7 @@ def build_loop_summary(
         "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_ALIGNED_PASS" if loop_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_ALIGNED_HAS_FAILURES"
     )
     return {
-        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_aligned_v3_compact_console_graceful_stop",
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_aligned_v4_compact_console_preserve_summary_on_precycle_stop",
         "started_at_utc": started_at,
         "updated_at_utc": utc_text(),
         "loop_ok": loop_ok,
@@ -271,6 +276,36 @@ def build_loop_summary(
         "outputs": {
             "summary_json": str(args.out_dir / SUMMARY_NAME),
             "aligned_loop_log_csv": str(args.out_dir / "aligned_loop_log.csv"),
+            "stop_marker_json": str(args.out_dir / STOP_MARKER_NAME),
+        },
+    }
+
+
+def build_precycle_stop_marker(*, args: argparse.Namespace, started_at: str, failed_cycles: int) -> dict[str, Any]:
+    previous_summary_path = args.out_dir / SUMMARY_NAME
+    previous_summary = read_json_or_empty(previous_summary_path)
+    previous_last = previous_summary.get("last_cycle", {}) if isinstance(previous_summary.get("last_cycle"), dict) else {}
+    return {
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_aligned_precycle_stop_marker_v1",
+        "started_at_utc": started_at,
+        "stopped_at_utc": utc_text(),
+        "stopped_by_user": True,
+        "reason": "STOPPED_BY_USER_BEFORE_FIRST_CYCLE_PREVIOUS_OPERATIONAL_SUMMARY_PRESERVED",
+        "cycles_run_this_session": 0,
+        "failed_cycles_this_session": failed_cycles,
+        "previous_summary_preserved": True,
+        "previous_summary_json": str(previous_summary_path),
+        "previous_summary_found": bool(previous_summary),
+        "previous_cycles_run": as_int(previous_summary.get("cycles_run"), 0),
+        "previous_loop_ok": as_bool(previous_summary.get("loop_ok"), False),
+        "previous_last_cycle_ok": as_bool(previous_last.get("cycle_ok"), False),
+        "previous_latest_m15": previous_last.get("latest_confirmed_m15_close_time_fast", ""),
+        "safety": {
+            "send_flag_passed_by_this_runner": False,
+            "sender_order_send_called_count": 0,
+            "sender_sent_rows": 0,
+            "existing_mochipoyo_bat_modified_by_this_runner": False,
+            "production_registry_mutated_by_this_runner": False,
         },
     }
 
@@ -395,21 +430,29 @@ def main() -> int:
                 break
 
     except KeyboardInterrupt:
-        loop_summary = build_loop_summary(
-            args=args,
-            started_at=started_at,
-            cycle_index=cycle_index,
-            failed_cycles=failed_cycles,
-            last_cycle_summary=last_cycle_summary,
-            stopped_by_user=True,
-        )
-        write_json(args.out_dir / SUMMARY_NAME, loop_summary)
         print("", flush=True)
         print("=" * 80, flush=True)
         print("[STOP] Ctrl+C received. GOLD aligned dry-run loop stopped gracefully.", flush=True)
-        print(f"cycles_run={cycle_index} failed_cycles={failed_cycles}", flush=True)
-        print(f"summary_json={args.out_dir / SUMMARY_NAME}", flush=True)
-        print(f"aligned_loop_log_csv={args.out_dir / 'aligned_loop_log.csv'}", flush=True)
+        if cycle_index == 0:
+            marker = build_precycle_stop_marker(args=args, started_at=started_at, failed_cycles=failed_cycles)
+            write_json(args.out_dir / STOP_MARKER_NAME, marker)
+            print("cycles_run=0 failed_cycles=0", flush=True)
+            print("No cycle completed in this session; previous latest operational summary was preserved.", flush=True)
+            print(f"stop_marker_json={args.out_dir / STOP_MARKER_NAME}", flush=True)
+            print(f"summary_json_preserved={args.out_dir / SUMMARY_NAME}", flush=True)
+        else:
+            loop_summary = build_loop_summary(
+                args=args,
+                started_at=started_at,
+                cycle_index=cycle_index,
+                failed_cycles=failed_cycles,
+                last_cycle_summary=last_cycle_summary,
+                stopped_by_user=True,
+            )
+            write_json(args.out_dir / SUMMARY_NAME, loop_summary)
+            print(f"cycles_run={cycle_index} failed_cycles={failed_cycles}", flush=True)
+            print(f"summary_json={args.out_dir / SUMMARY_NAME}", flush=True)
+            print(f"aligned_loop_log_csv={args.out_dir / 'aligned_loop_log.csv'}", flush=True)
         print("No --send was passed by this runner. No production registry write was performed by this runner.", flush=True)
         print("=" * 80, flush=True)
         return 0 if failed_cycles == 0 else 1
