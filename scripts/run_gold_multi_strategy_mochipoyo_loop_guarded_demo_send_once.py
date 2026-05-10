@@ -19,16 +19,21 @@ Safety defaults:
 - If --allow-demo-send is passed without --send, it is suppressed.
 - production position_registry.csv is never written by this wrapper.
 - registry outputs remain preview-only.
-- Uses conservative first-demo defaults: block_any, max-symbol-positions=1,
-  max-symbol-lot=0.01, max-orders=1, fixed-lot=0.01.
+- Uses GOLD integration defaults, not symbol-wide blocking:
+  position-policy=allow_any_until_max, max-symbol-positions=20,
+  max-symbol-lot=1.0, max-orders=1.
+- The dry-run bridge is called with --use-adapter-lot so strategy lot is kept:
+  BUY_C_ENV_RR2_72H => 0.01, SELL_H1H4_BEAR_AB B_ONLY => 0.01,
+  SELL_H1H4_BEAR_AB CORE_AB => 0.02.
 
 Important:
 - The first stage uses run_gold_multi_strategy_mochipoyo_loop_dry_run_fast_m15_patch.py.
 - That dry-run stage may run sender dry-run if payload rows exist, but it never
   passes --send.
 - This guarded wrapper may then run the sender again for the final guarded stage.
-  In current no-signal conditions payload rows are 0, so the guarded sender stage
-  is skipped and order_send_called_count remains 0.
+- Duplicate prevention is by order_key/order ledger. Do not force block_any here,
+  because separate GOLD signals may intentionally hold multiple or opposite
+  positions.
 """
 
 from __future__ import annotations
@@ -177,9 +182,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--magic", type=int, default=26050601)
     p.add_argument("--max-orders", type=int, default=1)
     p.add_argument("--deviation", type=int, default=50)
-    p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="block_any")
-    p.add_argument("--max-symbol-positions", type=int, default=1)
-    p.add_argument("--max-symbol-lot", type=float, default=0.01)
+    p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="allow_any_until_max")
+    p.add_argument("--max-symbol-positions", type=int, default=20)
+    p.add_argument("--max-symbol-lot", type=float, default=1.0)
     p.add_argument("--allow-demo-send", action="store_true")
     p.add_argument("--send", action="store_true")
     p.add_argument("--disable-same-m15-skip", action="store_true")
@@ -204,6 +209,7 @@ def build_dry_run_cmd(args: argparse.Namespace, dry_out_dir: Path) -> list[str]:
         "--position-policy", str(args.position_policy),
         "--max-symbol-positions", str(args.max_symbol_positions),
         "--max-symbol-lot", str(args.max_symbol_lot),
+        "--use-adapter-lot",
     ]
     if not args.disable_monitor_skip:
         cmd.append("--skip-monitor-when-no-open-signals")
@@ -271,6 +277,7 @@ def main() -> int:
     print("=" * 80, flush=True)
     print("GOLD multi-strategy guarded demo-send ONCE wrapper", flush=True)
     print("Default is no-send. Sender receives --send only with BOTH --allow-demo-send and --send.", flush=True)
+    print("Integration policy: use adapter lot, allow_any_until_max, duplicate order_key guard.", flush=True)
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
@@ -315,7 +322,7 @@ def main() -> int:
     cycle_ok = bool(dry_rc == 0 and dry_cycle_ok and guarded_sender_ok)
 
     summary = {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v1",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v2_integration_policy",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
@@ -328,7 +335,8 @@ def main() -> int:
             "expected_login": int(args.expected_login),
             "require_demo_account": bool(args.require_demo_account),
             "broker_symbol": str(args.broker_symbol),
-            "fixed_lot": float(args.fixed_lot),
+            "fixed_lot_fallback": float(args.fixed_lot),
+            "use_adapter_lot": True,
             "max_orders": int(args.max_orders),
             "position_policy": str(args.position_policy),
             "max_symbol_positions": int(args.max_symbol_positions),
@@ -354,6 +362,7 @@ def main() -> int:
             "existing_mochipoyo_bat_modified": False,
             "existing_mochipoyo_ledgers_mutated": False,
             "trigger_state_mutated": False,
+            "position_policy_block_any_used": str(args.position_policy) == "block_any",
         },
         "timing": {
             "dry_run_stage_seconds": dry_seconds,
@@ -399,6 +408,7 @@ def main() -> int:
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
         "key_metrics": summary["key_metrics"],
+        "guards": summary["guards"],
         "safety": summary["safety"],
         "timing": summary["timing"],
         "summary_json": str(paths["summary_json"]),
