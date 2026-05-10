@@ -81,7 +81,9 @@ def utc_now_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def as_bool(value: Any) -> bool:
+def as_bool(value: Any, default: bool = False) -> bool:
+    if value is None or value == "":
+        return bool(default)
     if isinstance(value, bool):
         return value
     return str(value).strip().lower() in {"true", "1", "yes", "y"}
@@ -172,7 +174,7 @@ def main() -> int:
     failed = [c for c in cases if not c["validation_ok"]]
     validation_ok = not failed
     summary = {
-        "schema_version": "gold_guarded_demo_send_once_armed_suppression_validation_v1",
+        "schema_version": "gold_guarded_demo_send_once_armed_suppression_validation_v2_bool_default_fix",
         "validation_time_utc": utc_now_text(),
         "validation_ok": validation_ok,
         "reason": "GOLD_GUARDED_DEMO_SEND_ONCE_ARMED_SUPPRESSION_VALIDATION_PASS" if validation_ok else "GOLD_GUARDED_DEMO_SEND_ONCE_ARMED_SUPPRESSION_VALIDATION_FAILED",
