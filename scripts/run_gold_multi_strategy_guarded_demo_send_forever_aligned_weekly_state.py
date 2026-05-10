@@ -25,6 +25,12 @@ Safety:
 - Adapter lot is used by child once-wrapper.
 - Existing Mochipoyo GOLD BAT/state/ledgers are not modified.
 - Ctrl+C exits gracefully.
+
+Important no-order behavior:
+- If there are no payload rows, sender is not invoked and no child order ledger
+  is produced. This is a normal waiting state, not a failure.
+- This runner creates an empty persistent ledger at startup so the state folder is
+  not empty and duplicate-key state has a stable file path before the first order.
 """
 
 from __future__ import annotations
@@ -46,6 +52,20 @@ DEFAULT_LOG_BASE = Path("data/runtime_logs/gold")
 DEFAULT_STATE_DIR = Path("data/runtime_state/gold/multi_strategy")
 SUMMARY_NAME = "latest_gold_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_result.json"
 STOP_MARKER_NAME = "latest_gold_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_stop_marker.json"
+ORDER_LEDGER_COLUMNS = [
+    "created_at_utc",
+    "order_key",
+    "payload_key",
+    "signal_key",
+    "broker_symbol",
+    "symbol",
+    "direction",
+    "lot",
+    "order_status",
+    "order_send_called",
+    "order_send_ok",
+    "source",
+]
 
 LOOP_LOG_COLUMNS = [
     "cycle_index",
@@ -132,6 +152,19 @@ def read_csv_header(path: Path) -> list[str]:
             return next(csv.reader(f), [])
     except Exception:
         return []
+
+
+def ensure_empty_csv(path: Path, columns: list[str]) -> bool:
+    """Create an empty CSV with headers when it does not exist.
+
+    Returns True when the file already existed or was created successfully.
+    """
+    if path_exists(path):
+        return True
+    ensure_parent_dir(path)
+    with open(windows_long_path(path), "w", encoding="utf-8-sig", newline="") as f:
+        csv.writer(f).writerow(columns)
+    return True
 
 
 def rotate_legacy_csv(path: Path) -> Path:
@@ -269,6 +302,7 @@ def build_once_cmd(args: argparse.Namespace, cycle_dir: Path) -> list[str]:
 
 
 def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persistent_ledger: Path) -> tuple[int, Path, Path, float, bool, bool, Path, Path]:
+    ensure_empty_csv(persistent_ledger, ORDER_LEDGER_COLUMNS)
     cycle_dir = out_dir / "cycles" / f"cycle_{cycle_index:05d}"
     child_ledger = cycle_dir / "guarded_demo_order_ledger.csv"
     synced_from_state = safe_copy(persistent_ledger, child_ledger)
@@ -298,6 +332,10 @@ def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persiste
         if completed.stderr:
             print(f"[WARN] wrapper stderr saved: {stderr_log}", flush=True)
     synced_to_state = safe_copy(child_ledger, persistent_ledger)
+    if not synced_to_state and path_exists(persistent_ledger):
+        # No-payload cycles do not create a child ledger. Keeping the existing
+        # persistent empty ledger is a successful no-op sync.
+        synced_to_state = True
     print(f"[CYCLE] {cycle_index} returncode={completed.returncode} elapsed_seconds={elapsed}", flush=True)
     return int(completed.returncode), stdout_log, stderr_log, elapsed, synced_from_state, synced_to_state, cycle_dir, child_ledger
 
@@ -305,7 +343,7 @@ def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persiste
 def build_loop_summary(args: argparse.Namespace, started_at: str, cycle_index: int, failed_cycles: int, last_cycle: dict[str, Any], out_dir: Path, persistent_ledger: Path, stopped_by_user: bool) -> dict[str, Any]:
     loop_ok = failed_cycles == 0
     return {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_v1",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_v2_initialized_ledger",
         "started_at_utc": started_at,
         "updated_at_utc": utc_text(),
         "loop_ok": loop_ok,
@@ -347,6 +385,7 @@ def main() -> int:
     persistent_ledger = state_dir / "guarded_demo_order_ledger.csv"
     mkdir_path(out_dir)
     mkdir_path(state_dir)
+    ensure_empty_csv(persistent_ledger, ORDER_LEDGER_COLUMNS)
 
     print("=" * 80, flush=True)
     print("GOLD multi-strategy guarded demo-send WEEKLY-LOG / PERSISTENT-STATE runner", flush=True)
@@ -385,7 +424,6 @@ def main() -> int:
             child = read_json_or_empty(child_summary_path)
             metrics = child.get("key_metrics", {}) if isinstance(child.get("key_metrics"), dict) else {}
             guards = child.get("guards", {}) if isinstance(child.get("guards"), dict) else {}
-            safety = child.get("safety", {}) if isinstance(child.get("safety"), dict) else {}
             cycle_ok = bool(returncode == 0 and child.get("cycle_ok", False) and synced_to)
             cycle_ok_classification = str(child.get("cycle_ok_classification", "NATURAL_PASS" if cycle_ok else "FAILED"))
             if not cycle_ok:
