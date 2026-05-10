@@ -31,6 +31,10 @@ Runtime/lightweight policy:
 - This wrapper records per-stage timing without changing signal logic.
 - It can pass --skip-monitor-when-no-open-signals to the strategy router.
 - Monitor skip only applies when a strategy ledger has no DRY_RUN_SIGNAL_CREATED rows.
+- It can optionally use --skip-same-m15-no-signal, but this is guarded and disabled
+  unless explicitly passed. The skip only fires when the latest confirmed M15 is
+  identical to the previous wrapper state, the previous wrapper result was a true
+  no-signal/no-intent cycle, and no strategy has DRY_RUN_SIGNAL_CREATED rows.
 
 Windows path policy:
 - This wrapper writes its own JSON/CSV outputs through Windows long-path helpers.
@@ -62,6 +66,38 @@ NO_SIGNAL_REASONS = {
     "NO_LATEST_SIGNAL",
 }
 
+STRATEGY_STATUS_COLUMNS = [
+    "router_cycle_start_utc",
+    "strategy_slot",
+    "strategy_id",
+    "direction",
+    "strategy_out_dir",
+    "runner_returncode",
+    "cycle_ok",
+    "signal_found",
+    "rank",
+    "trade_enabled",
+    "duplicate",
+    "signal_key",
+    "scan_reason",
+    "latest_m15_close_time",
+    "candidate_count",
+    "latest_candidate_entry_time",
+    "signals_monitored",
+    "resolved_skipped",
+    "position_results_created",
+    "tp_touched",
+    "sl_touched",
+    "time_exit_required",
+    "close_intent_created",
+    "open_unresolved",
+    "no_path",
+    "monitor_reason",
+    "order_intent_path",
+    "close_intent_path",
+    "latest_cycle_result_path",
+]
+
 CYCLE_LOG_COLUMNS = [
     "cycle_start_utc",
     "cycle_end_utc",
@@ -69,6 +105,10 @@ CYCLE_LOG_COLUMNS = [
     "csv_dir",
     "out_dir",
     "skip_monitor_when_no_open_signals",
+    "skip_same_m15_no_signal",
+    "same_m15_no_signal_skipped",
+    "same_m15_skip_reason",
+    "latest_confirmed_m15_close_time_fast",
     "router_returncode",
     "adapter_returncode",
     "payload_bridge_returncode",
@@ -154,6 +194,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--use-adapter-lot", action="store_true", help="Use adapter effective_lot in payload bridge. Default is fixed lot 0.01.")
     p.add_argument("--disable-registry-preview", action="store_true", help="Do not request sender-native registry preview outputs.")
     p.add_argument("--skip-monitor-when-no-open-signals", action="store_true")
+    p.add_argument("--skip-same-m15-no-signal", action="store_true")
+    p.add_argument("--runtime-state-json", type=Path, default=None)
+    p.add_argument("--m15-filename", default="goldsharp_m15.csv")
     p.add_argument("--continue-on-stage-error", action="store_true")
     return p.parse_args()
 
@@ -185,6 +228,22 @@ def append_csv_row(path: Path, row: dict[str, Any], columns: list[str]) -> None:
         index=False,
         encoding="utf-8-sig",
     )
+
+
+def write_csv_rows(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> None:
+    ensure_parent_dir(path)
+    pd.DataFrame([{col: row.get(col, "") for col in columns} for row in rows]).to_csv(
+        windows_long_path(path),
+        index=False,
+        encoding="utf-8-sig",
+    )
+
+
+def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
+    ensure_parent_dir(path)
+    with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False, sort_keys=True, default=str) + "\n")
 
 
 def run_cmd(label: str, cmd: list[str]) -> tuple[int, float]:
@@ -234,6 +293,7 @@ def build_paths(out_dir: Path) -> dict[str, Path]:
         "order_ledger_csv": out_dir / "dry_run_order_ledger.csv",
         "summary_json": out_dir / "latest_gold_multi_strategy_mochipoyo_loop_dry_run_result.json",
         "cycle_log_csv": out_dir / "gold_multi_strategy_mochipoyo_loop_dry_run_log.csv",
+        "runtime_state_json": out_dir / "runtime_state.json",
     }
 
 
@@ -312,7 +372,6 @@ def build_sender_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[s
             "--registry-preview-out-csv", str(paths["registry_preview_csv"]),
             "--registry-preview-out-json", str(paths["registry_preview_json"]),
         ])
-    # Intentionally never append --send in this wrapper.
     return cmd
 
 
@@ -340,12 +399,164 @@ def is_safe_no_signal_router_result(router_result: dict[str, Any], router_rc: in
     return all(isinstance(s, dict) and is_no_signal_strategy_status(s) for s in statuses)
 
 
+def read_latest_confirmed_m15_close_time_fast(csv_dir: Path, filename: str, policy: str) -> str:
+    path = csv_dir / filename
+    if not path_exists(path):
+        return ""
+    try:
+        df = pd.read_csv(windows_long_path(path), sep=";", encoding="utf-8")
+    except Exception:
+        try:
+            df = pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+        except Exception:
+            return ""
+    if df.empty:
+        return ""
+    time_col = "time" if "time" in df.columns else df.columns[0]
+    times = pd.to_datetime(df[time_col], errors="coerce").dropna().sort_values(kind="mergesort").reset_index(drop=True)
+    if times.empty:
+        return ""
+    idx = -2 if policy == "second_last" and len(times) >= 2 else -1
+    ts = pd.Timestamp(times.iloc[idx])
+    # Current strategy outputs use close_time = bar_time + 15 minutes.
+    if filename.lower().endswith("m15.csv"):
+        ts = ts + pd.Timedelta(minutes=15)
+    return ts.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def has_monitorable_dry_run_signals(strategy_out_dir: Path) -> bool:
+    ledger_path = strategy_out_dir / "signal_ledger.csv"
+    if not path_exists(ledger_path):
+        return False
+    try:
+        df = pd.read_csv(windows_long_path(ledger_path), encoding="utf-8-sig")
+    except Exception:
+        return True
+    if df.empty or "status" not in df.columns:
+        return False
+    return bool(df["status"].astype(str).eq("DRY_RUN_SIGNAL_CREATED").any())
+
+
+def previous_state_is_true_no_signal(state: dict[str, Any]) -> bool:
+    if not state:
+        return False
+    if not safe_bool(state, "previous_cycle_ok", False):
+        return False
+    if safe_int(state, "previous_signals_found_count", 0) != 0:
+        return False
+    if safe_int(state, "previous_open_order_intent_count", 0) != 0:
+        return False
+    if safe_int(state, "previous_close_intent_count", 0) != 0:
+        return False
+    statuses = state.get("previous_strategy_status", [])
+    if not isinstance(statuses, list) or not statuses:
+        return False
+    return all(isinstance(s, dict) and is_no_signal_strategy_status(s) for s in statuses)
+
+
+def same_m15_no_signal_skip_decision(args: argparse.Namespace, paths: dict[str, Path], latest_fast: str) -> tuple[bool, str, dict[str, Any]]:
+    if not args.skip_same_m15_no_signal:
+        return False, "DISABLED", {}
+    state_path = args.runtime_state_json or paths["runtime_state_json"]
+    state = read_json_or_empty(state_path)
+    if not latest_fast:
+        return False, "LATEST_M15_FAST_UNAVAILABLE", state
+    if not state:
+        return False, "NO_PREVIOUS_RUNTIME_STATE", state
+    previous_latest = str(state.get("previous_latest_m15_close_time", ""))
+    if previous_latest != latest_fast:
+        return False, f"LATEST_M15_CHANGED previous={previous_latest} current={latest_fast}", state
+    if not previous_state_is_true_no_signal(state):
+        return False, "PREVIOUS_STATE_NOT_TRUE_NO_SIGNAL", state
+    if has_monitorable_dry_run_signals(paths["buy_out_dir"]):
+        return False, "BUY_HAS_DRY_RUN_SIGNAL_CREATED_ROWS", state
+    if has_monitorable_dry_run_signals(paths["sell_out_dir"]):
+        return False, "SELL_HAS_DRY_RUN_SIGNAL_CREATED_ROWS", state
+    return True, "SKIPPED_SAME_CONFIRMED_M15_PREVIOUS_NO_SIGNAL_NO_OPEN_SIGNALS", state
+
+
+def write_router_skip_outputs(paths: dict[str, Path], state: dict[str, Any], cycle_start: str, cycle_end: str, latest_fast: str) -> dict[str, Any]:
+    statuses = state.get("previous_strategy_status", [])
+    if not isinstance(statuses, list):
+        statuses = []
+    copied_statuses: list[dict[str, Any]] = []
+    for status in statuses:
+        if not isinstance(status, dict):
+            continue
+        row = dict(status)
+        row["router_cycle_start_utc"] = cycle_start
+        row["runner_returncode"] = "SKIPPED_SAME_M15_NO_SIGNAL"
+        row["cycle_ok"] = True
+        row["signal_found"] = False
+        row["duplicate"] = False
+        row["signal_key"] = ""
+        row["order_intent_path"] = ""
+        row["close_intent_path"] = ""
+        row["close_intent_created"] = 0
+        row["open_unresolved"] = 0
+        row["signals_monitored"] = 0
+        row["monitor_reason"] = "MONITOR_SKIPPED_BY_SAME_M15_NO_SIGNAL"
+        row["latest_m15_close_time"] = latest_fast or row.get("latest_m15_close_time", "")
+        copied_statuses.append(row)
+    write_csv_rows(paths["router_out_dir"] / "strategy_status_latest.csv", copied_statuses, STRATEGY_STATUS_COLUMNS)
+    write_jsonl(paths["router_out_dir"] / "combined_order_intent_dry_run.jsonl", [])
+    write_jsonl(paths["router_out_dir"] / "combined_close_intent_dry_run.jsonl", [])
+    router_summary = {
+        "schema_version": "gold_multi_strategy_dry_run_router_same_m15_skip_v1",
+        "router_cycle_start_utc": cycle_start,
+        "router_cycle_end_utc": cycle_end,
+        "router_mode": "SKIPPED_SAME_M15_NO_SIGNAL",
+        "router_ok": True,
+        "same_m15_no_signal_skipped": True,
+        "latest_confirmed_m15_close_time_fast": latest_fast,
+        "signals_found_count": 0,
+        "open_order_intent_count": 0,
+        "observe_only_intent_count": 0,
+        "duplicate_skip_count": 0,
+        "close_intent_count": 0,
+        "strategy_status": copied_statuses,
+        "outputs": {
+            "strategy_status_latest": str(paths["router_out_dir"] / "strategy_status_latest.csv"),
+            "combined_order_intents_jsonl": str(paths["router_out_dir"] / "combined_order_intent_dry_run.jsonl"),
+            "combined_close_intents_jsonl": str(paths["router_out_dir"] / "combined_close_intent_dry_run.jsonl"),
+            "latest_multi_strategy_cycle_result": str(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json"),
+        },
+    }
+    write_json(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json", router_summary)
+    return router_summary
+
+
+def update_runtime_state(paths: dict[str, Path], args: argparse.Namespace, summary: dict[str, Any], latest_fast: str) -> None:
+    router_result = summary.get("router_result", {}) if isinstance(summary.get("router_result"), dict) else {}
+    statuses = router_result.get("strategy_status", []) if isinstance(router_result.get("strategy_status"), list) else []
+    latest_from_status = ""
+    for status in statuses:
+        if isinstance(status, dict) and status.get("latest_m15_close_time"):
+            latest_from_status = str(status.get("latest_m15_close_time"))
+            break
+    state = {
+        "schema_version": "gold_multi_strategy_runtime_state_v1",
+        "updated_at_utc": utc_now_text(),
+        "previous_cycle_ok": bool(summary.get("cycle_ok", False)),
+        "previous_reason": str(summary.get("reason", "")),
+        "previous_latest_m15_close_time": latest_from_status or latest_fast,
+        "previous_signals_found_count": safe_int(summary.get("key_metrics", {}), "signals_found_count", 0) if isinstance(summary.get("key_metrics"), dict) else 0,
+        "previous_open_order_intent_count": safe_int(summary.get("key_metrics", {}), "open_order_intent_count", 0) if isinstance(summary.get("key_metrics"), dict) else 0,
+        "previous_close_intent_count": safe_int(summary.get("key_metrics", {}), "close_intent_count", 0) if isinstance(summary.get("key_metrics"), dict) else 0,
+        "previous_strategy_status": statuses,
+        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
+        "skip_same_m15_no_signal": bool(args.skip_same_m15_no_signal),
+    }
+    write_json(args.runtime_state_json or paths["runtime_state_json"], state)
+
+
 def main() -> int:
     args = parse_args()
     loop_started_perf = time.perf_counter()
     paths = build_paths(args.out_dir)
     mkdir_path(args.out_dir)
     cycle_start = utc_now_text()
+    latest_fast = read_latest_confirmed_m15_close_time_fast(args.csv_dir, args.m15_filename, args.latest_confirmed_policy)
 
     print("=" * 80, flush=True)
     print("GOLD multi-strategy Mochipoyo-loop DRY-RUN wrapper", flush=True)
@@ -353,6 +564,8 @@ def main() -> int:
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"skip_monitor_when_no_open_signals={args.skip_monitor_when_no_open_signals}", flush=True)
+    print(f"skip_same_m15_no_signal={args.skip_same_m15_no_signal}", flush=True)
+    print(f"latest_confirmed_m15_close_time_fast={latest_fast}", flush=True)
     print("=" * 80, flush=True)
 
     timing = {
@@ -363,20 +576,25 @@ def main() -> int:
         "total_seconds": 0.0,
     }
 
+    same_m15_skipped, same_m15_skip_reason, previous_state = same_m15_no_signal_skip_decision(args, paths, latest_fast)
     router_rc: int | str = "SKIPPED"
-    if not args.skip_router:
+    if same_m15_skipped:
+        print(f"[INFO] same-M15 no-signal router skip enabled: {same_m15_skip_reason}", flush=True)
+        write_router_skip_outputs(paths, previous_state, cycle_start, utc_now_text(), latest_fast)
+        router_rc = "SKIPPED_SAME_M15_NO_SIGNAL"
+    elif not args.skip_router:
         router_rc, timing["router_seconds"] = run_cmd("router", build_router_cmd(args, paths))
     else:
         print("[INFO] router skipped; using existing router outputs", flush=True)
 
     router_result = read_json_or_empty(paths["router_out_dir"] / "latest_multi_strategy_cycle_result.json")
     router_safe_no_signal = is_safe_no_signal_router_result(router_result, router_rc)
-    if router_rc != 0 and router_rc != "SKIPPED" and router_safe_no_signal:
+    if router_rc != 0 and router_rc not in ["SKIPPED", "SKIPPED_SAME_M15_NO_SIGNAL"] and router_safe_no_signal:
         print("[INFO] router returned non-zero, but this is a safe no-signal dry-run outcome; continuing", flush=True)
-    elif router_rc != 0 and router_rc != "SKIPPED" and not args.continue_on_stage_error:
+    elif router_rc != 0 and router_rc not in ["SKIPPED", "SKIPPED_SAME_M15_NO_SIGNAL"] and not args.continue_on_stage_error:
         print("[ERROR] router failed for a non no-signal reason; stopping", flush=True)
 
-    router_can_continue = router_rc == 0 or router_rc == "SKIPPED" or router_safe_no_signal or args.continue_on_stage_error
+    router_can_continue = router_rc == 0 or router_rc in ["SKIPPED", "SKIPPED_SAME_M15_NO_SIGNAL"] or router_safe_no_signal or args.continue_on_stage_error
 
     adapter_rc: int | str = "SKIPPED"
     if router_can_continue:
@@ -409,7 +627,7 @@ def main() -> int:
     sender_error_rows = safe_int(sender_report, "error_rows", 0)
     sender_order_send_called = safe_int(sender_report, "order_send_called_count", 0)
 
-    router_ok_raw = safe_bool(router_result, "router_ok", router_rc in [0, "SKIPPED"])
+    router_ok_raw = safe_bool(router_result, "router_ok", router_rc in [0, "SKIPPED", "SKIPPED_SAME_M15_NO_SIGNAL"])
     router_safe_no_signal = is_safe_no_signal_router_result(router_result, router_rc)
     router_ok = bool(router_ok_raw or router_safe_no_signal)
     adapter_ok = safe_bool(adapter_result, "adapter_ok", adapter_rc == 0)
@@ -420,13 +638,17 @@ def main() -> int:
     timing["total_seconds"] = round(time.perf_counter() - loop_started_perf, 3)
 
     summary = {
-        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v3",
+        "schema_version": "gold_multi_strategy_mochipoyo_loop_dry_run_v4",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
         "reason": "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_PASS" if cycle_ok else "GOLD_MULTI_STRATEGY_MOCHIPOYO_LOOP_DRY_RUN_FAILED",
         "router_safe_no_signal": bool(router_safe_no_signal),
         "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
+        "skip_same_m15_no_signal": bool(args.skip_same_m15_no_signal),
+        "same_m15_no_signal_skipped": bool(same_m15_skipped),
+        "same_m15_skip_reason": same_m15_skip_reason,
+        "latest_confirmed_m15_close_time_fast": latest_fast,
         "timing": timing,
         "safety": {
             "send_flag_passed": False,
@@ -472,6 +694,7 @@ def main() -> int:
         "sender_report": sender_report,
     }
     write_json(paths["summary_json"], summary)
+    update_runtime_state(paths, args, summary, latest_fast)
     metrics = summary["key_metrics"]
     append_csv_row(paths["cycle_log_csv"], {
         "cycle_start_utc": cycle_start,
@@ -480,6 +703,10 @@ def main() -> int:
         "csv_dir": str(args.csv_dir),
         "out_dir": str(args.out_dir),
         "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
+        "skip_same_m15_no_signal": bool(args.skip_same_m15_no_signal),
+        "same_m15_no_signal_skipped": bool(same_m15_skipped),
+        "same_m15_skip_reason": same_m15_skip_reason,
+        "latest_confirmed_m15_close_time_fast": latest_fast,
         "router_returncode": router_rc,
         "adapter_returncode": adapter_rc,
         "payload_bridge_returncode": payload_rc,
@@ -497,6 +724,10 @@ def main() -> int:
         "reason": summary["reason"],
         "router_safe_no_signal": bool(router_safe_no_signal),
         "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
+        "skip_same_m15_no_signal": bool(args.skip_same_m15_no_signal),
+        "same_m15_no_signal_skipped": bool(same_m15_skipped),
+        "same_m15_skip_reason": same_m15_skip_reason,
+        "latest_confirmed_m15_close_time_fast": latest_fast,
         "returncodes": summary["returncodes"],
         "key_metrics": metrics,
         "timing": timing,
