@@ -23,6 +23,11 @@ SELL_H1H4_BEAR_AB:
 Sender重複防止:
   allow_any_until_max でも duplicate order_key は BLOCKED_PRECHECK で止まることを確認済み。
   銘柄単位 block_any に頼らず、order_key単位で重複防止できる。
+
+Guarded demo-send aligned loop:
+  新GOLD multi-strategy専用BAT/runnerは no-payload 待機を正常扱いできる。
+  --allow-demo-send --send 付きBATでも payload_rows_out=0 の間は senderへ --send を渡さない。
+  returncode=0 / cycle_ok=true / failed_cycles=0 を確認済み。
 ```
 
 ---
@@ -47,6 +52,9 @@ scripts/run_gold_multi_strategy_dry_run_cycle.py
 scripts/send_mt5_order_from_payload.py
 scripts/run_gold_sender_lot_passthrough_validation.py
 scripts/run_gold_sender_order_key_duplicate_validation.py
+scripts/run_gold_multi_strategy_mochipoyo_loop_guarded_demo_send_once.py
+scripts/run_gold_multi_strategy_guarded_demo_send_forever_aligned.py
+scripts/run_gold_multi_strategy_guarded_demo_send_forever_aligned.bat
 ```
 
 ---
@@ -352,6 +360,68 @@ position-policy block ではなく order_key duplicate で止まっている。
 
 ---
 
+## Guarded demo-send aligned loop validation
+
+追加済み:
+
+```text
+scripts/run_gold_multi_strategy_mochipoyo_loop_guarded_demo_send_once.py
+scripts/run_gold_multi_strategy_guarded_demo_send_forever_aligned.py
+scripts/run_gold_multi_strategy_guarded_demo_send_forever_aligned.bat
+```
+
+no-send 1 cycle:
+
+```text
+command:
+  python scripts\run_gold_multi_strategy_guarded_demo_send_forever_aligned.py --max-cycles 1
+
+result:
+  returncode=0
+  cycle_ok=true
+  cycle_ok_classification=NATURAL_PASS
+  reason=GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_SAFE_NO_PAYLOAD_PASS
+  payload_rows_out=0
+  send_requested=false
+  send_flag_passed_to_sender=false
+  send_suppressed_reason=SEND_NOT_REQUESTED
+  order_send_called_count=0
+  sent_rows=0
+  position_policy=allow_any_until_max
+  use_adapter_lot=true
+```
+
+send-armed BAT short run:
+
+```text
+command:
+  scripts\run_gold_multi_strategy_guarded_demo_send_forever_aligned.bat
+
+result:
+  allow_demo_send=true
+  send_requested=true
+  cycle_ok=true
+  cycle_ok_classification=NATURAL_PASS
+  reason=GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_SAFE_NO_PAYLOAD_PASS
+  payload_rows_out=0
+  send_flag_passed_to_sender=false
+  send_suppressed_reason=NO_PAYLOAD_ROWS
+  order_send_called_count=0
+  sent_rows=0
+  failed_cycles=0
+```
+
+確認できたこと:
+
+```text
+--allow-demo-send --send 付きBATでも、payload_rows_out=0 の間は sender へ --send を渡さない。
+no-signal/no-payload は正常待機扱い。
+returncode=0 / cycle_ok=true / failed_cycles=0。
+既存もちぽよGOLD BATは変更していない。
+```
+
+---
+
 ## 複数ポジション/逆方向シグナル方針
 
 ユーザー方針:
@@ -397,8 +467,11 @@ BUY保有中という理由だけでSELLを止める。
 4. 新GOLD multi-strategyを銘柄単位block_anyではなく、signal/order key単位重複防止で接続する。
    -> DONE: order_key duplicate validation PASS
 
-5. 既存もちぽよGOLD実運用BATは、上記修正後に統合する。
-   -> TODO
+5. 新GOLD multi-strategy専用 guarded demo-send aligned loop を作る。
+   -> DONE: no-send 1 cycle PASS / send-armed BAT short run PASS with no-payload safe wait
+
+6. 既存もちぽよGOLD実運用BATと同時運用する。
+   -> READY: 既存BATは未変更。別窓で新multi-strategy BATを起動する構成。
 ```
 
 ---
@@ -411,5 +484,7 @@ SELLのロットdefault相違は修正済み。
 BUYのlot=None相違も修正済み。
 A+B 0.02 lot は sender でも 0.02 のまま通ることを確認済み。
 allow_any_until_max でも同じ order_key は重複ブロックされることを確認済み。
-残る統合前論点は、既存もちぽよGOLD実運用BATへどの入口で接続するか。
+新GOLD multi-strategy専用 guarded demo-send aligned loop は no-payload safe wait までPASS。
+GOLDは既存もちぽよGOLD BAT + 新GOLD multi-strategy BAT の別窓同時運用構成で進める。
+BTCはGOLD完了後に別枠BATとして作る。
 ```
