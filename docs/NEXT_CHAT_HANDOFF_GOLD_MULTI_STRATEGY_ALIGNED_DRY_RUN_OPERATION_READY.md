@@ -6,14 +6,18 @@ GOLD BUY/SELL multi-strategy sidecar dry-run / guarded demo send flow が、実�
 
 現在も、既存 Mochipoyo 本体へ直接混ぜず、独立 sidecar dry-run / guarded demo send flow として構築中。
 
-今回の到達点は以下。
+今回の最終到達点は以下。
 
 ```text
 1. aligned dry-run loop compact console output: PASS
 2. .bat launcher graceful Python stop: PASS
 3. .ps1 PowerShell launcher: PASS
 4. status viewer: PASS
-5. 実送信なし / order_sendなし / production registry writeなし
+5. pre-cycle Ctrl+C summary preservation: PASS
+6. aligned_loop_log.csv fallback recovery: PASS
+7. aligned_loop_log.csv header schema rotation: implemented
+8. final status viewer recovery from summary_json: PASS
+9. 実送信なし / order_sendなし / production registry writeなし
 ```
 
 まだ `--allow-demo-send --send` を含む armed / 実送信BAT は作っていない。
@@ -187,6 +191,7 @@ python scripts\show_gold_multi_strategy_aligned_dry_run_status.py
 
 ```text
 status_ok=true
+status_source=summary_json
 loop_ok=true
 last_cycle_ok=true
 failed_cycles=0
@@ -194,6 +199,8 @@ payload_rows_out=0 または signal時は 1以上
 order_send_called_count=0
 sent_rows=0
 ```
+
+`status_source=aligned_loop_log_csv_fallback` が出た場合は、summary_json に有効な last_cycle がないため、aligned_loop_log.csv の最新有効行から復元している状態。
 
 ---
 
@@ -264,37 +271,7 @@ No --send was passed by this runner. No production registry write was performed 
 
 ---
 
-## 実行確認済み 3: status viewer
-
-コマンド:
-
-```bat
-scripts\show_gold_multi_strategy_aligned_dry_run_status.bat
-```
-
-結果:
-
-```text
-status_ok=true
-loop_ok=true
-cycles_run=1
-failed_cycles=0
-last_cycle_ok=true
-latest_m15=2026-05-08 23:45:00
-same_m15_no_signal_skipped=true
-same_m15_skip_reason=SKIPPED_SAME_CONFIRMED_M15_PREVIOUS_NO_SIGNAL_NO_OPEN_SIGNALS
-signals_found_count=0
-open_order_intent_count=0
-close_intent_count=0
-payload_rows_out=0
-valid_order_payloads=0
-order_send_called_count=0
-sent_rows=0
-```
-
----
-
-## 実行確認済み 4: PowerShell launcher
+## 実行確認済み 3: PowerShell launcher
 
 最初に直接 `.ps1` を実行した場合、PowerShell execution policy でブロックされた。
 
@@ -326,7 +303,81 @@ No --send was passed by this runner. No production registry write was performed 
 
 ---
 
-## 最新CSV状態
+## 実行確認済み 4: pre-cycle Ctrl+C summary preservation
+
+PowerShell launcher を1サイクル前に停止した際、以前は `latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_result.json` が `cycles_run=0` summary で上書きされ、status viewer が false になった。
+
+修正後は、1サイクル前に Ctrl+C された場合は latest summary を上書きしない。
+
+代わりに以下へ stop marker を書く。
+
+```text
+data\research_results\gold_multi_strategy_mochipoyo_loop_dry_run_aligned\latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_stop_marker.json
+```
+
+表示:
+
+```text
+No cycle completed in this session; previous latest operational summary was preserved.
+summary_json_preserved=data\research_results\gold_multi_strategy_mochipoyo_loop_dry_run_aligned\latest_gold_multi_strategy_mochipoyo_loop_dry_run_aligned_result.json
+```
+
+---
+
+## 実行確認済み 5: status viewer fallback recovery
+
+過去に残った `cycles_run=0` summary に対し、status viewer が `aligned_loop_log.csv` の最新有効行から復元できることを確認。
+
+結果:
+
+```text
+status_ok=true
+status_source=aligned_loop_log_csv_fallback
+last_cycle_ok=true
+payload_rows_out=0
+order_send_called_count=0
+sent_rows=0
+```
+
+その後、1-cycle を再実行して summary_json を正常化した。
+
+---
+
+## 実行確認済み 6: final status viewer from summary_json
+
+コマンド:
+
+```bat
+scripts\show_gold_multi_strategy_aligned_dry_run_status.bat
+```
+
+最終結果:
+
+```text
+status_ok=true
+status_source=summary_json
+loop_ok=true
+cycles_run=1
+failed_cycles=0
+last_cycle_index=1
+last_cycle_ok=true
+last_cycle_end_utc=2026-05-10 04:49:04
+latest_m15=2026-05-08 23:45:00
+same_m15_no_signal_skipped=true
+same_m15_skip_reason=SKIPPED_SAME_CONFIRMED_M15_PREVIOUS_NO_SIGNAL_NO_OPEN_SIGNALS
+signals_found_count=0
+open_order_intent_count=0
+close_intent_count=0
+payload_rows_out=0
+valid_order_payloads=0
+order_send_called_count=0
+sent_rows=0
+stdout_log=data\research_results\gold_multi_strategy_mochipoyo_loop_dry_run_aligned\command_logs\cycle_00001_20260510_044902_stdout.txt
+```
+
+---
+
+## latest CSV / signal 状態
 
 今回の確認時点では no-signal。
 
@@ -350,6 +401,29 @@ total_seconds around 1.1 to 1.2 seconds
 
 ---
 
+## 実装修正コミット
+
+aligned dry-run / status viewer の安定化で以下を追加済み。
+
+```text
+b17d6b5bc257bb1d506e1706f692d0cda8f75d56
+Handle aligned dry-run Ctrl-C gracefully
+
+5da948f5e22cf37602c18f72344d7b348dc60532
+Add PowerShell aligned dry-run launcher
+
+71b99f9bd9cfdab4cae82877e6213aa23bd16182
+Preserve aligned dry-run summary when stopped before first cycle
+
+c2c32aee62c7f335f81293b69939b18eb5b99ed5
+Fallback aligned status viewer to latest loop CSV row
+
+c41f62eb10ebf15ffe136109ed7384c03dfbbd7e
+Rotate aligned loop CSV when header schema changes
+```
+
+---
+
 ## 現在の到達点
 
 ```text
@@ -369,6 +443,9 @@ aligned forever .bat launcher: PASS
 aligned status viewer: PASS
 aligned PowerShell launcher: PASS
 Ctrl+C graceful stop: PASS
+pre-cycle Ctrl+C summary preservation: PASS
+status viewer fallback recovery: PASS
+final status viewer summary_json recovery: PASS
 --send 単独の抑止: PASS
 --allow-demo-send 単独の抑止: PASS
 payload rows 0 fixtureでの --allow-demo-send --send 抑止: PASS
@@ -491,6 +568,9 @@ docs/NEXT_CHAT_HANDOFF_GOLD_MULTI_STRATEGY_LIGHTWEIGHT_SAME_M15_SKIP.md
 - aligned status viewer PASS
 - aligned PowerShell launcher PASS
 - Ctrl+C graceful stop PASS
+- pre-cycle Ctrl+C summary preservation PASS
+- status viewer fallback recovery PASS
+- final status viewer summary_json recovery PASS
 - 実運用ループは compact console output 化済み
 - 子プロセスの長い stdout/stderr は command_logs に保存される
 - --send 単独では sender に --send が渡らない
@@ -506,6 +586,15 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_gold_multi
 
 状態確認:
 scripts\show_gold_multi_strategy_aligned_dry_run_status.bat
+
+最終 status viewer 結果:
+- status_ok=true
+- status_source=summary_json
+- latest_m15=2026-05-08 23:45:00
+- same_m15_no_signal_skipped=true
+- payload_rows_out=0
+- order_send_called_count=0
+- sent_rows=0
 
 重要:
 - まだ armed / 実送信BAT は作っていない
@@ -529,6 +618,7 @@ scripts\show_gold_multi_strategy_aligned_dry_run_status.bat
 
 ```text
 GOLD multi-strategy sidecar は、実運用 dry-run loop として起動・停止・状態確認まで準備完了。
+status viewer も summary_json から正常復帰済み。
 次は PowerShell launcher で compact dry-run を継続し、signal-present 状態を待つ段階。
 実送信はまだしない。
 ```
