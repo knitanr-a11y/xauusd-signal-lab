@@ -151,6 +151,7 @@ def append_cycle_log(path: Path, row: dict[str, Any]) -> None:
 def run_command(label: str, command: list[str], log_dir: Path, cycle_index: int) -> tuple[int, Path, Path]:
     print(f"[INFO] running {label}")
     print("[CMD] " + " ".join(command))
+    log_dir.mkdir(parents=True, exist_ok=True)
     completed = subprocess.run(
         command,
         cwd=str(REPO_ROOT),
@@ -226,6 +227,7 @@ def run_one_cycle(args: argparse.Namespace, cycle_index: int) -> dict[str, Any]:
     cycle_start = utc_now_text()
     args.out_dir.mkdir(parents=True, exist_ok=True)
     log_dir = args.out_dir / "dry_run_cycle_command_logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
     cycle_log_path = args.out_dir / "dry_run_cycle_log.csv"
     latest_cycle_result_path = args.out_dir / "latest_dry_run_cycle_result.json"
 
