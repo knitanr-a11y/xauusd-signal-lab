@@ -7,7 +7,7 @@ This validator runs the GOLD multi-strategy Mochipoyo-loop dry-run wrapper twice
 A. baseline without --skip-monitor-when-no-open-signals
 B. optimized with --skip-monitor-when-no-open-signals
 
-It then compares signal-detection outputs that must be invariant:
+It compares signal-detection outputs that must be invariant:
 
 - router signal/order/close intent counts
 - strategy-level signal_found / duplicate / signal_key / scan_reason
@@ -23,8 +23,14 @@ Expected allowed difference:
   signals to monitor.
 - runtime timing should improve or at least remain within normal variance.
 
-Safety:
+Path policy:
+- The default A/B output directory is intentionally short: data/r/msab.
+- Baseline mode runs position monitors, and some monitor scripts still contain
+  older direct Path.write_text / pandas.to_csv calls. A deep validation output
+  path can trigger Windows path issues and make the baseline fail for a reason
+  unrelated to signal detection.
 
+Safety:
 - Never passes --send.
 - Uses only dedicated A/B output directories.
 - Does not write production registry.
@@ -45,7 +51,7 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_DIR = Path("data/research_results/gold_multi_strategy_monitor_skip_ab_validation")
+DEFAULT_OUT_DIR = Path("data/r/msab")
 DEFAULT_CSV_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 
 CASE_LOG_COLUMNS = [
@@ -303,9 +309,9 @@ def main() -> int:
     args = parse_args()
     mkdir_path(args.out_dir)
     started = utc_now_text()
-    baseline_dir = args.out_dir / "baseline_no_monitor_skip"
-    optimized_dir = args.out_dir / "optimized_monitor_skip"
-    log_dir = args.out_dir / "command_logs"
+    baseline_dir = args.out_dir / "base"
+    optimized_dir = args.out_dir / "opt"
+    log_dir = args.out_dir / "logs"
 
     baseline = run_case("baseline_no_monitor_skip", build_wrapper_cmd(args, baseline_dir, skip_monitor=False), baseline_dir, log_dir)
     optimized = run_case("optimized_monitor_skip", build_wrapper_cmd(args, optimized_dir, skip_monitor=True), optimized_dir, log_dir)
@@ -320,7 +326,7 @@ def main() -> int:
     b_timing = baseline.get("summary", {}).get("timing", {}) if isinstance(baseline.get("summary", {}).get("timing"), dict) else {}
     o_timing = optimized.get("summary", {}).get("timing", {}) if isinstance(optimized.get("summary", {}).get("timing"), dict) else {}
     summary = {
-        "schema_version": "gold_multi_strategy_monitor_skip_ab_validation_v1",
+        "schema_version": "gold_multi_strategy_monitor_skip_ab_validation_v2",
         "started_at_utc": started,
         "ended_at_utc": utc_now_text(),
         "validation_ok": validation_ok,
