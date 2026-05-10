@@ -31,6 +31,10 @@ Runtime/lightweight option:
 - It skips position monitor only when each strategy ledger has no
   DRY_RUN_SIGNAL_CREATED rows.
 - This does not change signal detection logic.
+
+Lot policy:
+- SELL_H1H4_BEAR_AB is pinned to base_lot=0.01 at the router level.
+- Therefore B_ONLY_SAFE remains 0.01 lot and CORE_AB_CONFIRM remains 0.02 lot.
 """
 
 from __future__ import annotations
@@ -121,7 +125,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--sell-out-dir", type=Path, default=DEFAULT_SELL_OUT_DIR)
     p.add_argument("--disable-buy", action="store_true")
     p.add_argument("--disable-sell", action="store_true")
-    p.add_argument("--aggregate-only", action="store_true", help="Do not run strategy scripts; only aggregate existing strategy outputs.")
+    p.add_argument("--aggregate-only", action="store_true", help="Do not run strategy scripts; only aggregate existing outputs.")
     p.add_argument("--latest-confirmed-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m5-policy", choices=["last", "second_last"], default="last")
     p.add_argument("--latest-confirmed-m1-policy", choices=["last", "second_last"], default="last")
@@ -194,6 +198,7 @@ def build_sell_cmd(args: argparse.Namespace) -> list[str]:
         "--out-dir", str(args.sell_out_dir),
         "--iterations", "1",
         "--interval-seconds", "0",
+        "--base-lot", "0.01",
         "--latest-confirmed-policy", str(args.latest_confirmed_policy),
         "--latest-confirmed-m1-policy", str(args.latest_confirmed_m1_policy),
     ]
