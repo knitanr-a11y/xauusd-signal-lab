@@ -229,8 +229,10 @@ def validate_sender_native_registry_policy() -> tuple[bool, str, dict[str, Any],
         return False, "POLICY_PREVIEW_NOT_OK", details, policy_preview_path
     if as_int(policy_preview.get("same_strategy_blocked_rows"), 0) < 1:
         return False, "POLICY_SAME_STRATEGY_BLOCK_NOT_CONFIRMED", details, policy_preview_path
-    if str(policy_preview.get("final_policy_decision", "")).upper() != "BLOCK":
-        return False, "POLICY_FINAL_DECISION_NOT_BLOCK", details, policy_preview_path
+    if as_int(policy_preview.get("blocked_rows"), 0) < 1:
+        return False, "POLICY_BLOCKED_ROWS_ZERO", details, policy_preview_path
+    if as_int(policy_preview.get("allow_rows"), 0) != 0:
+        return False, "POLICY_ALLOW_ROWS_NOT_ZERO", details, policy_preview_path
     if as_int(policy_preview.get("registry_inconsistency_blocked_rows"), 0) != 0:
         return False, "POLICY_REGISTRY_INCONSISTENCY_PRESENT", details, policy_preview_path
     return True, "SENDER_NATIVE_REGISTRY_POLICY_PASS", details, policy_preview_path
