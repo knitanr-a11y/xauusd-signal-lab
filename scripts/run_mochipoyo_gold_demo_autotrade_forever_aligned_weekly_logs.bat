@@ -27,9 +27,14 @@ echo Persistent state files used by existing Mochipoyo GOLD:
 echo   trigger-state: data\results\mochipoyo\minimal_trigger_test\gold_pair_trigger_state.csv
 echo   notification-ledger: data\results\mochipoyo\minimal_live_once_test\gold_notification_ledger.csv
 echo   auto-trade-order-ledger: data\mt5_demo_order_test\goldsharp_auto_trade_demo_prod_order_ledger.csv
+echo.
+echo Auto-trade freshness guard:
+echo   Discord notification can catch up delayed unnotified signals.
+echo   MT5 auto-trade payloads are allowed only when signal age <= 20 minutes.
 echo ============================================================
 
-python scripts\run_mochipoyo_gold_minimal_live_loop_aligned.py ^
+python scripts\run_mochipoyo_gold_minimal_live_loop_aligned_fresh_autotrade.py ^
+  --auto-trade-max-signal-age-minutes 20 ^
   --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
   --out-dir "%OUT_DIR%" ^
   --symbol GOLD ^
