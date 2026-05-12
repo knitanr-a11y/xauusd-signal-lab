@@ -45,6 +45,13 @@ Strict send-success rule:
 - Therefore a case such as order_send_called_count=1 / sent_rows=0 /
   error_rows=1 is FAILED, even if the child sender process itself returned 0.
 
+Market-closed deferral:
+- MT5 retcode=10018 / comment=Market closed is not treated as a corrupted loop.
+- It is normalized to DEFERRED_MARKET_CLOSED and cycle_ok=True so the forever
+  wrapper can continue, matching the Mochipoyo guarded auto-trade behavior.
+- No order is considered sent in this path; sent_rows remains 0 and the sender
+  report is preserved for audit.
+
 Safe no-payload behavior:
 - No signal / no payload is a normal operational state.
 - If payload_rows_out=0, sender --send was not passed, order_send_called_count=0,
@@ -69,6 +76,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CSV_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_OUT_DIR = Path("data/research_results/gold_multi_strategy_guarded_demo_send_once")
+MT5_RETCODE_MARKET_CLOSED = 10018
 
 SUMMARY_FILENAME = "latest_gold_multi_strategy_guarded_demo_send_once_result.json"
 LOG_COLUMNS = [
@@ -84,6 +92,9 @@ LOG_COLUMNS = [
     "strict_send_success_required",
     "guarded_sender_success_ok",
     "guarded_sender_success_reason",
+    "guarded_sender_deferred",
+    "guarded_sender_deferred_reason",
+    "guarded_sender_market_closed_rows",
     "payload_rows_out",
     "guarded_sender_returncode",
     "guarded_sender_rows_out",
@@ -290,14 +301,59 @@ def is_safe_no_payload_cycle(*, args: argparse.Namespace, dry_rc: int, dry_cycle
     )
 
 
+def result_is_market_closed(row: dict[str, Any]) -> bool:
+    retcode = safe_int(row, "order_send_retcode", -1)
+    comment = str(row.get("order_send_comment", "")).strip().lower()
+    errors = str(row.get("validation_errors", "")).strip().lower()
+    return retcode == MT5_RETCODE_MARKET_CLOSED or "market closed" in comment or "market closed" in errors
+
+
+def report_is_market_closed_deferred(guarded_report: dict[str, Any]) -> bool:
+    rows_out = safe_int(guarded_report, "rows_out", 0)
+    sent_rows = safe_int(guarded_report, "sent_rows", 0)
+    error_rows = safe_int(guarded_report, "error_rows", 0)
+    called = safe_int(guarded_report, "order_send_called_count", 0)
+    results = guarded_report.get("results", [])
+    if rows_out <= 0 or called <= 0 or sent_rows != 0 or error_rows <= 0:
+        return False
+    if not isinstance(results, list) or not results:
+        return False
+    error_like_rows: list[dict[str, Any]] = []
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("order_status", "")).upper()
+        send_ok = str(item.get("order_send_ok", "")).strip().lower() in {"true", "1", "yes", "y"}
+        if not send_ok and ("ERROR" in status or safe_int(item, "order_send_retcode", 0) != 0):
+            error_like_rows.append(item)
+    if not error_like_rows:
+        return False
+    return all(result_is_market_closed(row) for row in error_like_rows)
+
+
+def write_deferred_market_closed_marker(path: Path, guarded_report: dict[str, Any]) -> None:
+    marker = {
+        "schema_version": "gold_multi_strategy_guarded_demo_send_deferred_market_closed_v1",
+        "deferred_status": "DEFERRED_MARKET_CLOSED",
+        "reason": "MT5 order_send returned retcode=10018 / Market closed. Loop may continue; no order was sent.",
+        "rows_out": safe_int(guarded_report, "rows_out", 0),
+        "order_send_called_count": safe_int(guarded_report, "order_send_called_count", 0),
+        "sent_rows": safe_int(guarded_report, "sent_rows", 0),
+        "error_rows": safe_int(guarded_report, "error_rows", 0),
+        "input_csv": guarded_report.get("input_csv", ""),
+        "order_ledger_csv": guarded_report.get("order_ledger_csv", ""),
+    }
+    write_json(path, marker)
+
+
 def evaluate_guarded_sender_success(
     *,
     pass_send: bool,
     payload_rows: int,
     guarded_sender_rc: int | str,
     guarded_report: dict[str, Any],
-) -> tuple[bool, str, bool]:
-    """Return (ok, reason, strict_send_success_required)."""
+) -> tuple[bool, str, bool, bool, str, int]:
+    """Return (ok, reason, strict_required, deferred, deferred_reason, market_closed_rows)."""
     rows_out = safe_int(guarded_report, "rows_out", 0)
     sent_rows = safe_int(guarded_report, "sent_rows", 0)
     error_rows = safe_int(guarded_report, "error_rows", 0)
@@ -305,28 +361,30 @@ def evaluate_guarded_sender_success(
 
     if payload_rows <= 0:
         if guarded_sender_rc == "SKIPPED_NO_PAYLOAD_ROWS" and rows_out == 0 and sent_rows == 0 and called == 0:
-            return True, "NO_PAYLOAD_ROWS_SAFE_SKIP", False
-        return False, "NO_PAYLOAD_ROWS_BUT_SENDER_STATE_UNEXPECTED", False
+            return True, "NO_PAYLOAD_ROWS_SAFE_SKIP", False, False, "", 0
+        return False, "NO_PAYLOAD_ROWS_BUT_SENDER_STATE_UNEXPECTED", False, False, "", 0
 
     if pass_send:
+        if report_is_market_closed_deferred(guarded_report):
+            return True, "DEFERRED_MARKET_CLOSED", True, True, "MT5 order_send retcode=10018 / Market closed", error_rows
         if guarded_sender_rc != 0:
-            return False, f"SEND_REQUESTED_BUT_SENDER_RETURNCODE_NOT_ZERO: {guarded_sender_rc}", True
+            return False, f"SEND_REQUESTED_BUT_SENDER_RETURNCODE_NOT_ZERO: {guarded_sender_rc}", True, False, "", 0
         if called <= 0:
-            return False, "SEND_REQUESTED_BUT_ORDER_SEND_NOT_CALLED", True
+            return False, "SEND_REQUESTED_BUT_ORDER_SEND_NOT_CALLED", True, False, "", 0
         if sent_rows != int(payload_rows):
-            return False, f"SEND_REQUESTED_BUT_SENT_ROWS_MISMATCH: sent_rows={sent_rows}; payload_rows={payload_rows}", True
+            return False, f"SEND_REQUESTED_BUT_SENT_ROWS_MISMATCH: sent_rows={sent_rows}; payload_rows={payload_rows}", True, False, "", 0
         if error_rows != 0:
-            return False, f"SEND_REQUESTED_BUT_ERROR_ROWS_NONZERO: error_rows={error_rows}", True
+            return False, f"SEND_REQUESTED_BUT_ERROR_ROWS_NONZERO: error_rows={error_rows}", True, False, "", 0
         if rows_out < int(payload_rows):
-            return False, f"SEND_REQUESTED_BUT_ROWS_OUT_LT_PAYLOAD_ROWS: rows_out={rows_out}; payload_rows={payload_rows}", True
-        return True, "SEND_REQUESTED_AND_ALL_PAYLOAD_ROWS_SENT", True
+            return False, f"SEND_REQUESTED_BUT_ROWS_OUT_LT_PAYLOAD_ROWS: rows_out={rows_out}; payload_rows={payload_rows}", True, False, "", 0
+        return True, "SEND_REQUESTED_AND_ALL_PAYLOAD_ROWS_SENT", True, False, "", 0
 
     # No-send/dry-run path: sender may validate, but must never call order_send.
     if guarded_sender_rc not in [0, "SKIPPED_NO_PAYLOAD_ROWS"]:
-        return False, f"NO_SEND_BUT_SENDER_RETURNCODE_NOT_OK: {guarded_sender_rc}", False
+        return False, f"NO_SEND_BUT_SENDER_RETURNCODE_NOT_OK: {guarded_sender_rc}", False, False, "", 0
     if called != 0 or sent_rows != 0:
-        return False, f"NO_SEND_BUT_ORDER_SEND_OCCURRED: called={called}; sent_rows={sent_rows}", False
-    return True, "NO_SEND_PATH_OK", False
+        return False, f"NO_SEND_BUT_ORDER_SEND_OCCURRED: called={called}; sent_rows={sent_rows}", False, False, "", 0
+    return True, "NO_SEND_PATH_OK", False, False, "", 0
 
 
 def main() -> int:
@@ -344,6 +402,7 @@ def main() -> int:
         "registry_preview_json": args.out_dir / "registry_preview" / "registry_preview.json",
         "summary_json": args.out_dir / SUMMARY_FILENAME,
         "cycle_log_csv": args.out_dir / "gold_multi_strategy_guarded_demo_send_once_log.csv",
+        "deferred_market_closed_json": args.out_dir / "guarded_sender" / "deferred_market_closed.json",
     }
 
     print("=" * 80, flush=True)
@@ -351,6 +410,7 @@ def main() -> int:
     print("Default is no-send. Sender receives --send only with BOTH --allow-demo-send and --send.", flush=True)
     print("Integration policy: use adapter lot, allow_any_until_max, duplicate order_key guard.", flush=True)
     print("Strict send success: when --send is passed, sent_rows must equal payload_rows_out and error_rows must be 0.", flush=True)
+    print("Market closed deferral: retcode=10018 is normalized to DEFERRED_MARKET_CLOSED and does not fail the cycle.", flush=True)
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
@@ -391,12 +451,22 @@ def main() -> int:
     sender_error_rows = safe_int(guarded_report, "error_rows", 0)
     sender_rows_out = safe_int(guarded_report, "rows_out", 0)
     dry_cycle_ok = safe_bool(dry_summary, "cycle_ok", dry_rc == 0)
-    guarded_sender_ok, guarded_sender_success_reason, strict_send_success_required = evaluate_guarded_sender_success(
+    (
+        guarded_sender_ok,
+        guarded_sender_success_reason,
+        strict_send_success_required,
+        guarded_sender_deferred,
+        guarded_sender_deferred_reason,
+        guarded_sender_market_closed_rows,
+    ) = evaluate_guarded_sender_success(
         pass_send=bool(pass_send),
         payload_rows=int(payload_rows),
         guarded_sender_rc=guarded_sender_rc,
         guarded_report=guarded_report,
     )
+    if guarded_sender_deferred:
+        write_deferred_market_closed_marker(paths["deferred_market_closed_json"], guarded_report)
+
     natural_ok = bool(dry_rc == 0 and dry_cycle_ok and guarded_sender_ok)
     safe_no_payload_ok = is_safe_no_payload_cycle(
         args=args,
@@ -407,16 +477,20 @@ def main() -> int:
         guarded_report=guarded_report,
     )
     cycle_ok = bool(natural_ok or safe_no_payload_ok)
-    cycle_ok_classification = "NATURAL_PASS" if natural_ok else ("SAFE_NO_PAYLOAD_PASS" if safe_no_payload_ok else "FAILED")
+    cycle_ok_classification = "DEFERRED_MARKET_CLOSED" if guarded_sender_deferred and cycle_ok else (
+        "NATURAL_PASS" if natural_ok else ("SAFE_NO_PAYLOAD_PASS" if safe_no_payload_ok else "FAILED")
+    )
 
     reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_PASS"
-    if safe_no_payload_ok:
+    if guarded_sender_deferred and cycle_ok:
+        reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_DEFERRED_MARKET_CLOSED"
+    elif safe_no_payload_ok:
         reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_SAFE_NO_PAYLOAD_PASS"
     elif not cycle_ok:
         reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_FAILED"
 
     summary = {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v4_strict_send_success",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v5_market_closed_deferred",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
@@ -429,6 +503,9 @@ def main() -> int:
         "strict_send_success_required": bool(strict_send_success_required),
         "guarded_sender_success_ok": bool(guarded_sender_ok),
         "guarded_sender_success_reason": guarded_sender_success_reason,
+        "guarded_sender_deferred": bool(guarded_sender_deferred),
+        "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
+        "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
         "guards": {
             "expected_login": int(args.expected_login),
             "require_demo_account": bool(args.require_demo_account),
@@ -439,7 +516,8 @@ def main() -> int:
             "position_policy": str(args.position_policy),
             "max_symbol_positions": int(args.max_symbol_positions),
             "max_symbol_lot": float(args.max_symbol_lot),
-            "strict_send_success_rule": "if --send is passed and payload_rows_out>0, require sent_rows==payload_rows_out and error_rows==0",
+            "strict_send_success_rule": "if --send is passed and payload_rows_out>0, require sent_rows==payload_rows_out and error_rows==0 unless retcode=10018 Market closed deferral",
+            "market_closed_deferral_rule": "retcode=10018/comment Market closed => DEFERRED_MARKET_CLOSED; no order considered sent",
         },
         "returncodes": {
             "dry_run_stage": dry_rc,
@@ -458,6 +536,7 @@ def main() -> int:
             "normal_dry_run_wrapper_send_flag_passed": False,
             "guarded_sender_send_flag_passed": bool(pass_send),
             "strict_send_success_required": bool(strict_send_success_required),
+            "market_closed_deferred": bool(guarded_sender_deferred),
             "production_registry_mutated": False,
             "existing_mochipoyo_bat_modified": False,
             "existing_mochipoyo_ledgers_mutated": False,
@@ -487,6 +566,9 @@ def main() -> int:
         "strict_send_success_required": bool(strict_send_success_required),
         "guarded_sender_success_ok": bool(guarded_sender_ok),
         "guarded_sender_success_reason": guarded_sender_success_reason,
+        "guarded_sender_deferred": bool(guarded_sender_deferred),
+        "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
+        "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
         "payload_rows_out": int(payload_rows),
         "guarded_sender_returncode": guarded_sender_rc,
         "guarded_sender_rows_out": sender_rows_out,
@@ -515,6 +597,9 @@ def main() -> int:
         "strict_send_success_required": bool(strict_send_success_required),
         "guarded_sender_success_ok": bool(guarded_sender_ok),
         "guarded_sender_success_reason": guarded_sender_success_reason,
+        "guarded_sender_deferred": bool(guarded_sender_deferred),
+        "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
+        "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
         "key_metrics": summary["key_metrics"],
         "guards": summary["guards"],
         "safety": summary["safety"],
