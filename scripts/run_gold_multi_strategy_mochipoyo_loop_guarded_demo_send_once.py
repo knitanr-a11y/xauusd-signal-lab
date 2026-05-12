@@ -35,6 +35,16 @@ Important:
   because separate GOLD signals may intentionally hold multiple or opposite
   positions.
 
+Strict send-success rule:
+- If final guarded sender receives --send and payload_rows_out > 0, the cycle is
+  successful only when:
+    * guarded sender returncode is 0
+    * order_send_called_count >= 1
+    * sent_rows == payload_rows_out
+    * error_rows == 0
+- Therefore a case such as order_send_called_count=1 / sent_rows=0 /
+  error_rows=1 is FAILED, even if the child sender process itself returned 0.
+
 Safe no-payload behavior:
 - No signal / no payload is a normal operational state.
 - If payload_rows_out=0, sender --send was not passed, order_send_called_count=0,
@@ -71,6 +81,9 @@ LOG_COLUMNS = [
     "send_requested",
     "send_flag_passed_to_sender",
     "send_suppressed_reason",
+    "strict_send_success_required",
+    "guarded_sender_success_ok",
+    "guarded_sender_success_reason",
     "payload_rows_out",
     "guarded_sender_returncode",
     "guarded_sender_rows_out",
@@ -277,6 +290,45 @@ def is_safe_no_payload_cycle(*, args: argparse.Namespace, dry_rc: int, dry_cycle
     )
 
 
+def evaluate_guarded_sender_success(
+    *,
+    pass_send: bool,
+    payload_rows: int,
+    guarded_sender_rc: int | str,
+    guarded_report: dict[str, Any],
+) -> tuple[bool, str, bool]:
+    """Return (ok, reason, strict_send_success_required)."""
+    rows_out = safe_int(guarded_report, "rows_out", 0)
+    sent_rows = safe_int(guarded_report, "sent_rows", 0)
+    error_rows = safe_int(guarded_report, "error_rows", 0)
+    called = safe_int(guarded_report, "order_send_called_count", 0)
+
+    if payload_rows <= 0:
+        if guarded_sender_rc == "SKIPPED_NO_PAYLOAD_ROWS" and rows_out == 0 and sent_rows == 0 and called == 0:
+            return True, "NO_PAYLOAD_ROWS_SAFE_SKIP", False
+        return False, "NO_PAYLOAD_ROWS_BUT_SENDER_STATE_UNEXPECTED", False
+
+    if pass_send:
+        if guarded_sender_rc != 0:
+            return False, f"SEND_REQUESTED_BUT_SENDER_RETURNCODE_NOT_ZERO: {guarded_sender_rc}", True
+        if called <= 0:
+            return False, "SEND_REQUESTED_BUT_ORDER_SEND_NOT_CALLED", True
+        if sent_rows != int(payload_rows):
+            return False, f"SEND_REQUESTED_BUT_SENT_ROWS_MISMATCH: sent_rows={sent_rows}; payload_rows={payload_rows}", True
+        if error_rows != 0:
+            return False, f"SEND_REQUESTED_BUT_ERROR_ROWS_NONZERO: error_rows={error_rows}", True
+        if rows_out < int(payload_rows):
+            return False, f"SEND_REQUESTED_BUT_ROWS_OUT_LT_PAYLOAD_ROWS: rows_out={rows_out}; payload_rows={payload_rows}", True
+        return True, "SEND_REQUESTED_AND_ALL_PAYLOAD_ROWS_SENT", True
+
+    # No-send/dry-run path: sender may validate, but must never call order_send.
+    if guarded_sender_rc not in [0, "SKIPPED_NO_PAYLOAD_ROWS"]:
+        return False, f"NO_SEND_BUT_SENDER_RETURNCODE_NOT_OK: {guarded_sender_rc}", False
+    if called != 0 or sent_rows != 0:
+        return False, f"NO_SEND_BUT_ORDER_SEND_OCCURRED: called={called}; sent_rows={sent_rows}", False
+    return True, "NO_SEND_PATH_OK", False
+
+
 def main() -> int:
     args = parse_args()
     started_perf = time.perf_counter()
@@ -298,6 +350,7 @@ def main() -> int:
     print("GOLD multi-strategy guarded demo-send ONCE wrapper", flush=True)
     print("Default is no-send. Sender receives --send only with BOTH --allow-demo-send and --send.", flush=True)
     print("Integration policy: use adapter lot, allow_any_until_max, duplicate order_key guard.", flush=True)
+    print("Strict send success: when --send is passed, sent_rows must equal payload_rows_out and error_rows must be 0.", flush=True)
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
@@ -335,10 +388,15 @@ def main() -> int:
     cycle_end = utc_now_text()
     sender_order_send_called_count = safe_int(guarded_report, "order_send_called_count", 0)
     sender_sent_rows = safe_int(guarded_report, "sent_rows", 0)
+    sender_error_rows = safe_int(guarded_report, "error_rows", 0)
+    sender_rows_out = safe_int(guarded_report, "rows_out", 0)
     dry_cycle_ok = safe_bool(dry_summary, "cycle_ok", dry_rc == 0)
-    guarded_sender_ok = guarded_sender_rc in [0, "SKIPPED_NO_PAYLOAD_ROWS"]
-    if not pass_send and sender_order_send_called_count != 0:
-        guarded_sender_ok = False
+    guarded_sender_ok, guarded_sender_success_reason, strict_send_success_required = evaluate_guarded_sender_success(
+        pass_send=bool(pass_send),
+        payload_rows=int(payload_rows),
+        guarded_sender_rc=guarded_sender_rc,
+        guarded_report=guarded_report,
+    )
     natural_ok = bool(dry_rc == 0 and dry_cycle_ok and guarded_sender_ok)
     safe_no_payload_ok = is_safe_no_payload_cycle(
         args=args,
@@ -358,7 +416,7 @@ def main() -> int:
         reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_FAILED"
 
     summary = {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v3_safe_no_payload_pass",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v4_strict_send_success",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
@@ -368,6 +426,9 @@ def main() -> int:
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
+        "strict_send_success_required": bool(strict_send_success_required),
+        "guarded_sender_success_ok": bool(guarded_sender_ok),
+        "guarded_sender_success_reason": guarded_sender_success_reason,
         "guards": {
             "expected_login": int(args.expected_login),
             "require_demo_account": bool(args.require_demo_account),
@@ -378,6 +439,7 @@ def main() -> int:
             "position_policy": str(args.position_policy),
             "max_symbol_positions": int(args.max_symbol_positions),
             "max_symbol_lot": float(args.max_symbol_lot),
+            "strict_send_success_rule": "if --send is passed and payload_rows_out>0, require sent_rows==payload_rows_out and error_rows==0",
         },
         "returncodes": {
             "dry_run_stage": dry_rc,
@@ -386,15 +448,16 @@ def main() -> int:
         "key_metrics": {
             "dry_run_wrapper_cycle_ok": dry_cycle_ok,
             "payload_rows_out": int(payload_rows),
-            "guarded_sender_rows_out": safe_int(guarded_report, "rows_out", 0),
+            "guarded_sender_rows_out": sender_rows_out,
             "guarded_sender_dry_run_check_ok_rows": safe_int(guarded_report, "dry_run_check_ok_rows", 0),
             "guarded_sender_sent_rows": sender_sent_rows,
-            "guarded_sender_error_rows": safe_int(guarded_report, "error_rows", 0),
+            "guarded_sender_error_rows": sender_error_rows,
             "guarded_sender_order_send_called_count": sender_order_send_called_count,
         },
         "safety": {
             "normal_dry_run_wrapper_send_flag_passed": False,
             "guarded_sender_send_flag_passed": bool(pass_send),
+            "strict_send_success_required": bool(strict_send_success_required),
             "production_registry_mutated": False,
             "existing_mochipoyo_bat_modified": False,
             "existing_mochipoyo_ledgers_mutated": False,
@@ -421,12 +484,15 @@ def main() -> int:
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
+        "strict_send_success_required": bool(strict_send_success_required),
+        "guarded_sender_success_ok": bool(guarded_sender_ok),
+        "guarded_sender_success_reason": guarded_sender_success_reason,
         "payload_rows_out": int(payload_rows),
         "guarded_sender_returncode": guarded_sender_rc,
-        "guarded_sender_rows_out": safe_int(guarded_report, "rows_out", 0),
+        "guarded_sender_rows_out": sender_rows_out,
         "guarded_sender_dry_run_check_ok_rows": safe_int(guarded_report, "dry_run_check_ok_rows", 0),
         "guarded_sender_sent_rows": sender_sent_rows,
-        "guarded_sender_error_rows": safe_int(guarded_report, "error_rows", 0),
+        "guarded_sender_error_rows": sender_error_rows,
         "guarded_sender_order_send_called_count": sender_order_send_called_count,
         "dry_run_wrapper_returncode": dry_rc,
         "dry_run_wrapper_cycle_ok": dry_cycle_ok,
@@ -446,6 +512,9 @@ def main() -> int:
         "send_requested": bool(args.send),
         "send_flag_passed_to_sender": bool(pass_send),
         "send_suppressed_reason": suppressed_reason,
+        "strict_send_success_required": bool(strict_send_success_required),
+        "guarded_sender_success_ok": bool(guarded_sender_ok),
+        "guarded_sender_success_reason": guarded_sender_success_reason,
         "key_metrics": summary["key_metrics"],
         "guards": summary["guards"],
         "safety": summary["safety"],
