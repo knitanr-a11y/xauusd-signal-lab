@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Aligned Mochipoyo GOLD live loop with an auto-trade freshness guard.
+"""Aligned Mochipoyo GOLD live loop with auto-trade execution guards.
 
 This wrapper intentionally keeps the existing validated Mochipoyo live flow
-unchanged up to Discord/notification-ledger processing, then filters only the
-order-payload source CSV before the auto-trade stages run.
+unchanged up to Discord/notification-ledger processing, then applies two guards
+only around MT5 auto-trade execution.
 
-Why this exists:
+Guard 1: stale signal auto-trade filter
 - The notification flow may legitimately catch up delayed, unnotified signals
   after a loop restart.
 - That is acceptable for Discord notification, but unsafe for market orders.
-- A signal that is one or more M15 bars old can be executed at a materially
-  different current bid/ask while keeping the older payload SL/TP.
-
-Guard rule:
 - For auto-trade payload generation, keep only rows where
     latest_trigger_close_time - signal_close_time <= max_age_minutes.
 - Times are compared in the MT5/server timestamp domain by using the loop's own
@@ -21,12 +17,22 @@ Guard rule:
 - Stale rows are written to order/auto_trade_stale_signal_rows.csv for audit.
 - Notification ledger and Discord send behavior are not changed by this guard.
 
+Guard 2: market-closed deferral
+- MT5 can return retcode=10018 / comment=Market closed from order_send.
+- That is an execution-window condition, not a corrupted scanner/loop state.
+- This wrapper normalizes that specific outcome to DEFERRED_MARKET_CLOSED with
+  auto_trade_returncode=0 so --stop-on-error does not stop the forever loop.
+- The sender report and order ledger still contain the original ERROR_ORDER_SEND
+  row for audit until the sender duplicate-ledger policy is fixed separately.
+
 Default max age is 20 minutes, suitable for an M15-close loop. Use
---auto-trade-max-signal-age-minutes to tune it. A value <= 0 disables the guard.
+--auto-trade-max-signal-age-minutes to tune it. A value <= 0 disables the stale
+signal guard.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from pathlib import Path
@@ -39,6 +45,8 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import run_mochipoyo_gold_minimal_live_loop_aligned as aligned  # noqa: E402
+
+MT5_RETCODE_MARKET_CLOSED = 10018
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -61,6 +69,25 @@ def write_csv(df: pd.DataFrame, path: str | Path) -> None:
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(windows_long_path(p), index=False, encoding="utf-8-sig")
+
+
+def read_json(path: str | Path) -> dict[str, Any]:
+    p = Path(path)
+    if not p.exists():
+        return {}
+    try:
+        with open(windows_long_path(p), "r", encoding="utf-8-sig") as f:
+            obj = json.load(f)
+        return obj if isinstance(obj, dict) else {}
+    except Exception:
+        return {}
+
+
+def write_json(path: str | Path, obj: dict[str, Any]) -> None:
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with open(windows_long_path(p), "w", encoding="utf-8", newline="") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2, sort_keys=True, default=str)
 
 
 def extract_wrapper_args(argv: list[str]) -> tuple[float, list[str]]:
@@ -209,8 +236,69 @@ def apply_auto_trade_freshness_filter(iteration_dir: Path, *, max_age_minutes: f
     )
 
 
+def _clean_int(value: Any, default: int = 0) -> int:
+    try:
+        if value is None or value == "":
+            return int(default)
+        if pd.isna(value):
+            return int(default)
+    except Exception:
+        pass
+    try:
+        return int(float(value))
+    except Exception:
+        return int(default)
+
+
+def _result_is_market_closed(row: dict[str, Any]) -> bool:
+    retcode = _clean_int(row.get("order_send_retcode"), default=-1)
+    comment = str(row.get("order_send_comment", "")).strip().lower()
+    errors = str(row.get("validation_errors", "")).strip().lower()
+    return retcode == MT5_RETCODE_MARKET_CLOSED or "market closed" in comment or "market closed" in errors
+
+
+def _market_closed_report(report: dict[str, Any]) -> bool:
+    if not report:
+        return False
+    rows_out = _clean_int(report.get("rows_out"), 0)
+    sent_rows = _clean_int(report.get("sent_rows"), 0)
+    error_rows = _clean_int(report.get("error_rows"), 0)
+    called = _clean_int(report.get("order_send_called_count"), 0)
+    results = report.get("results", [])
+    if rows_out <= 0 or called <= 0 or sent_rows != 0 or error_rows <= 0:
+        return False
+    if not isinstance(results, list) or not results:
+        return False
+    error_like_rows: list[dict[str, Any]] = []
+    for item in results:
+        if isinstance(item, dict):
+            status = str(item.get("order_status", "")).upper()
+            send_ok = str(item.get("order_send_ok", "")).strip().lower() in {"true", "1", "yes", "y"}
+            if not send_ok and ("ERROR" in status or _clean_int(item.get("order_send_retcode"), 0) != 0):
+                error_like_rows.append(item)
+    if not error_like_rows:
+        return False
+    return all(_result_is_market_closed(row) for row in error_like_rows)
+
+
+def _write_deferred_marker(iteration_dir: Path, report: dict[str, Any]) -> None:
+    marker = {
+        "schema_version": "mochipoyo_auto_trade_deferred_market_closed_v1",
+        "deferred_status": "DEFERRED_MARKET_CLOSED",
+        "reason": "MT5 order_send returned retcode=10018 / Market closed. Loop continues; no order was sent.",
+        "rows_out": _clean_int(report.get("rows_out"), 0),
+        "order_send_called_count": _clean_int(report.get("order_send_called_count"), 0),
+        "sent_rows": _clean_int(report.get("sent_rows"), 0),
+        "error_rows": _clean_int(report.get("error_rows"), 0),
+        "input_csv": report.get("input_csv", ""),
+        "order_ledger_csv": report.get("order_ledger_csv", ""),
+    }
+    write_json(iteration_dir / "auto_trade" / "deferred_market_closed.json", marker)
+
+
 def install_patch(max_age_minutes: float) -> None:
-    original = aligned.base.run_order_payload_stage
+    original_order_payload_stage = aligned.base.run_order_payload_stage
+    original_auto_trade_stage = aligned.base.run_auto_trade_stage
 
     def patched_run_order_payload_stage(args: argparse.Namespace, iteration_dir: Path, once_event: dict[str, Any] | None = None) -> dict[str, Any]:
         auto_trade_enabled = bool(getattr(args, "enable_auto_trade_send", False) or getattr(args, "enable_auto_trade_dry_run", False))
@@ -222,10 +310,30 @@ def install_patch(max_age_minutes: float) -> None:
                 max_age_minutes=max_age_minutes,
                 reason="auto-trade stage is disabled",
             )
-        order_event = original(args, iteration_dir, once_event)
+        order_event = original_order_payload_stage(args, iteration_dir, once_event)
         return {**order_event, **freshness_event}
 
+    def patched_run_auto_trade_stage(args: argparse.Namespace, iteration_dir: Path, order_event: dict[str, Any]) -> dict[str, Any]:
+        auto_event = original_auto_trade_stage(args, iteration_dir, order_event)
+        send_enabled = bool(getattr(args, "enable_auto_trade_send", False))
+        if not send_enabled:
+            return auto_event
+        if str(auto_event.get("auto_trade_status", "")).upper() != "ERROR":
+            return auto_event
+        report = read_json(Path(iteration_dir) / "auto_trade" / "mt5_order_send_report.json")
+        if not _market_closed_report(report):
+            return auto_event
+        _write_deferred_marker(Path(iteration_dir), report)
+        normalized = dict(auto_event)
+        normalized["auto_trade_status"] = "DEFERRED_MARKET_CLOSED"
+        normalized["auto_trade_returncode"] = 0
+        normalized["auto_trade_deferred"] = True
+        normalized["auto_trade_deferred_reason"] = "MT5 order_send retcode=10018 / Market closed"
+        normalized["auto_trade_market_closed_rows"] = _clean_int(report.get("error_rows"), 0)
+        return normalized
+
     aligned.base.run_order_payload_stage = patched_run_order_payload_stage
+    aligned.base.run_auto_trade_stage = patched_run_auto_trade_stage
 
 
 def main() -> int:
@@ -234,6 +342,7 @@ def main() -> int:
     install_patch(max_age_minutes)
     print("run_mochipoyo_gold_minimal_live_loop_aligned_fresh_autotrade")
     print(f"auto_trade_max_signal_age_minutes: {max_age_minutes}")
+    print("market_closed_deferral: enabled")
     return int(aligned.main())
 
 
