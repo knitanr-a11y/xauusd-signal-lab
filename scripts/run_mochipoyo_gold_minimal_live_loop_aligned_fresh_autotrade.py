@@ -3,8 +3,8 @@
 """Aligned Mochipoyo GOLD live loop with auto-trade execution guards.
 
 This wrapper intentionally keeps the existing validated Mochipoyo live flow
-unchanged up to Discord/notification-ledger processing, then applies two guards
-only around MT5 auto-trade execution.
+unchanged up to Discord/notification-ledger processing, then applies guards only
+around MT5 auto-trade execution.
 
 Guard 1: stale signal auto-trade filter
 - The notification flow may legitimately catch up delayed, unnotified signals
@@ -22,8 +22,15 @@ Guard 2: market-closed deferral
 - That is an execution-window condition, not a corrupted scanner/loop state.
 - This wrapper normalizes that specific outcome to DEFERRED_MARKET_CLOSED with
   auto_trade_returncode=0 so --stop-on-error does not stop the forever loop.
-- The sender report and order ledger still contain the original ERROR_ORDER_SEND
-  row for audit until the sender duplicate-ledger policy is fixed separately.
+
+Guard 3: duplicate guard uses only successful orders
+- The sender's native duplicate loader treats every order_key in the order ledger
+  as already used.
+- Failed rows such as ERROR_ORDER_SEND / Market closed must remain auditable but
+  must not block a future valid send.
+- This wrapper passes the sender a per-iteration sanitized ledger containing only
+  successful SENT rows, then merges only newly successful SENT rows back into the
+  persistent order ledger.
 
 Default max age is 20 minutes, suitable for an M15-close loop. Use
 --auto-trade-max-signal-age-minutes to tune it. A value <= 0 disables the stale
@@ -141,12 +148,7 @@ def _fallback_latest_close(latest_by_pair: dict[str, pd.Timestamp]) -> pd.Timest
 
 
 def apply_auto_trade_freshness_filter(iteration_dir: Path, *, max_age_minutes: float) -> dict[str, Any]:
-    """Filter notification_ledger_to_send.csv before order payload generation.
-
-    The file is intentionally modified in-place only under the per-iteration
-    output directory, after notification/Discord handling has already completed.
-    Persistent notification ledger files are not touched here.
-    """
+    """Filter notification_ledger_to_send.csv before order payload generation."""
     ledger_dir = iteration_dir / "ledger"
     order_dir = iteration_dir / "order"
     order_dir.mkdir(parents=True, exist_ok=True)
@@ -165,7 +167,6 @@ def apply_auto_trade_freshness_filter(iteration_dir: Path, *, max_age_minutes: f
     if df.empty:
         return _status_payload("OK_EMPTY", max_age_minutes=max_age_minutes, before_rows=0, kept_rows=0, stale_rows=0)
     if "signal_close_time" not in df.columns:
-        # Fail closed for auto-trade freshness: no timestamp means no market order.
         backup = order_dir / "notification_ledger_to_send_before_auto_trade_freshness.csv"
         write_csv(df, backup)
         stale = df.copy()
@@ -250,6 +251,135 @@ def _clean_int(value: Any, default: int = 0) -> int:
         return int(default)
 
 
+def _clean_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    return text in {"true", "1", "yes", "y"}
+
+
+def _successful_order_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Return rows that should participate in duplicate prevention.
+
+    Failed attempts are intentionally excluded. A row is considered successful
+    only when it is explicitly SENT or order_send_ok is true, and it has a real
+    MT5 order/deal/position ticket when those columns are present.
+    """
+    if df.empty:
+        return df.copy()
+    work = df.copy()
+    status = work["order_status"].astype(str).str.upper() if "order_status" in work.columns else pd.Series([""] * len(work), index=work.index)
+    send_ok = work["order_send_ok"].map(_clean_bool) if "order_send_ok" in work.columns else pd.Series([False] * len(work), index=work.index)
+    success = status.eq("SENT") | send_ok
+
+    ticket_cols = [col for col in ["order_ticket", "deal_ticket", "position_ticket", "order", "deal", "position"] if col in work.columns]
+    if ticket_cols:
+        has_ticket = pd.Series([False] * len(work), index=work.index)
+        for col in ticket_cols:
+            has_ticket = has_ticket | work[col].map(lambda v: _clean_int(v, 0) != 0)
+        success = success & has_ticket
+    return work.loc[success].copy()
+
+
+def _ledger_signature(row: pd.Series) -> str:
+    parts = []
+    for col in ["order_key", "payload_key", "order_status", "order_send_ok", "order_ticket", "deal_ticket", "position_ticket", "order", "deal", "position"]:
+        parts.append(str(row.get(col, "")))
+    return "\u241f".join(parts)
+
+
+def _sanitize_order_ledger_for_duplicate_check(args: argparse.Namespace, iteration_dir: Path) -> dict[str, Any]:
+    original = Path(str(args.auto_trade_order_ledger_csv)) if getattr(args, "auto_trade_order_ledger_csv", None) else None
+    if original is None:
+        return {"enabled": False, "reason": "missing auto_trade_order_ledger_csv"}
+
+    auto_dir = iteration_dir / "auto_trade"
+    auto_dir.mkdir(parents=True, exist_ok=True)
+    sanitized = auto_dir / "order_ledger_success_only_for_duplicate_check.csv"
+    before_success = pd.DataFrame()
+    before_rows = 0
+    success_rows = 0
+    if original.exists():
+        try:
+            before = read_csv(original)
+            before_rows = int(len(before))
+            before_success = _successful_order_rows(before)
+            success_rows = int(len(before_success))
+            write_csv(before_success, sanitized)
+        except Exception as exc:
+            # Fail closed for duplicate safety: if the ledger cannot be read,
+            # keep the original path so native sender behavior is preserved.
+            return {
+                "enabled": False,
+                "reason": f"read original ledger failed: {exc!r}",
+                "original_order_ledger_csv": str(original),
+            }
+    else:
+        write_csv(pd.DataFrame(columns=["order_key"]), sanitized)
+
+    return {
+        "enabled": True,
+        "original_order_ledger_csv": str(original),
+        "sanitized_order_ledger_csv": str(sanitized),
+        "original_rows_before": before_rows,
+        "success_rows_before": success_rows,
+        "success_signatures_before": set(_ledger_signature(row) for _, row in before_success.iterrows()),
+    }
+
+
+def _merge_new_success_rows_to_original(info: dict[str, Any]) -> dict[str, Any]:
+    if not info.get("enabled"):
+        return {
+            "order_ledger_duplicate_filter_mode": "NATIVE_ORIGINAL_LEDGER",
+            "order_ledger_success_rows_merged": 0,
+            "order_ledger_sanitizer_reason": info.get("reason", "disabled"),
+        }
+
+    original = Path(str(info["original_order_ledger_csv"]))
+    sanitized = Path(str(info["sanitized_order_ledger_csv"]))
+    before_sigs = info.get("success_signatures_before", set())
+    if not isinstance(before_sigs, set):
+        before_sigs = set()
+
+    if not sanitized.exists():
+        return {
+            "order_ledger_duplicate_filter_mode": "SUCCESS_ONLY_SANITIZED",
+            "order_ledger_success_rows_merged": 0,
+            "order_ledger_sanitizer_reason": "sanitized ledger missing after sender",
+        }
+    try:
+        after = read_csv(sanitized)
+    except Exception as exc:
+        return {
+            "order_ledger_duplicate_filter_mode": "SUCCESS_ONLY_SANITIZED",
+            "order_ledger_success_rows_merged": 0,
+            "order_ledger_sanitizer_reason": f"read sanitized after sender failed: {exc!r}",
+        }
+
+    success_after = _successful_order_rows(after)
+    new_success = success_after[[sig not in before_sigs for sig in (_ledger_signature(row) for _, row in success_after.iterrows())]].copy()
+    merged = int(len(new_success))
+    if merged > 0:
+        if original.exists():
+            old = read_csv(original)
+            cols = list(dict.fromkeys(list(old.columns) + list(new_success.columns)))
+            out = pd.concat([old.reindex(columns=cols), new_success.reindex(columns=cols)], ignore_index=True)
+        else:
+            out = new_success
+        write_csv(out, original)
+
+    return {
+        "order_ledger_duplicate_filter_mode": "SUCCESS_ONLY_SANITIZED",
+        "order_ledger_original_csv": str(original),
+        "order_ledger_sanitized_csv": str(sanitized),
+        "order_ledger_original_rows_before": int(info.get("original_rows_before", 0)),
+        "order_ledger_success_rows_before": int(info.get("success_rows_before", 0)),
+        "order_ledger_success_rows_after_sanitized": int(len(success_after)),
+        "order_ledger_success_rows_merged": merged,
+        "order_ledger_failed_rows_ignored_for_duplicate": int(info.get("original_rows_before", 0)) - int(info.get("success_rows_before", 0)),
+    }
+
+
 def _result_is_market_closed(row: dict[str, Any]) -> bool:
     retcode = _clean_int(row.get("order_send_retcode"), default=-1)
     comment = str(row.get("order_send_comment", "")).strip().lower()
@@ -273,7 +403,7 @@ def _market_closed_report(report: dict[str, Any]) -> bool:
     for item in results:
         if isinstance(item, dict):
             status = str(item.get("order_status", "")).upper()
-            send_ok = str(item.get("order_send_ok", "")).strip().lower() in {"true", "1", "yes", "y"}
+            send_ok = _clean_bool(item.get("order_send_ok"))
             if not send_ok and ("ERROR" in status or _clean_int(item.get("order_send_retcode"), 0) != 0):
                 error_like_rows.append(item)
     if not error_like_rows:
@@ -314,8 +444,22 @@ def install_patch(max_age_minutes: float) -> None:
         return {**order_event, **freshness_event}
 
     def patched_run_auto_trade_stage(args: argparse.Namespace, iteration_dir: Path, order_event: dict[str, Any]) -> dict[str, Any]:
-        auto_event = original_auto_trade_stage(args, iteration_dir, order_event)
         send_enabled = bool(getattr(args, "enable_auto_trade_send", False))
+        ledger_info: dict[str, Any] = {"enabled": False, "reason": "send disabled"}
+        original_ledger_value = getattr(args, "auto_trade_order_ledger_csv", None)
+        if send_enabled and int(order_event.get("order_payload_rows", 0) or 0) > 0 and original_ledger_value:
+            ledger_info = _sanitize_order_ledger_for_duplicate_check(args, Path(iteration_dir))
+            if ledger_info.get("enabled"):
+                args.auto_trade_order_ledger_csv = ledger_info["sanitized_order_ledger_csv"]
+        try:
+            auto_event = original_auto_trade_stage(args, iteration_dir, order_event)
+        finally:
+            if original_ledger_value is not None:
+                args.auto_trade_order_ledger_csv = original_ledger_value
+
+        ledger_event = _merge_new_success_rows_to_original(ledger_info)
+        auto_event = {**auto_event, **ledger_event}
+
         if not send_enabled:
             return auto_event
         if str(auto_event.get("auto_trade_status", "")).upper() != "ERROR":
@@ -343,6 +487,7 @@ def main() -> int:
     print("run_mochipoyo_gold_minimal_live_loop_aligned_fresh_autotrade")
     print(f"auto_trade_max_signal_age_minutes: {max_age_minutes}")
     print("market_closed_deferral: enabled")
+    print("order_ledger_duplicate_filter_mode: success_only_sanitized")
     return int(aligned.main())
 
 
