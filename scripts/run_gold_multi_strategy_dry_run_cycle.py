@@ -115,28 +115,21 @@ def run_cmd(cmd: list[str]) -> int:
 
 
 def build_buy_cmd(args: argparse.Namespace) -> list[str]:
-    cmd = [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_c_env_rr2_72h_dry_run_cycle.py"),
-           "--csv-dir", str(args.csv_dir), "--out-dir", str(args.buy_out_dir), "--cycles", "1", "--sleep-seconds", "0",
-           "--latest-confirmed-policy", str(args.latest_confirmed_policy), "--latest-confirmed-m5-policy", str(args.latest_confirmed_m5_policy)]
+    cmd = [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_c_env_rr2_72h_dry_run_cycle.py"), "--csv-dir", str(args.csv_dir), "--out-dir", str(args.buy_out_dir), "--cycles", "1", "--sleep-seconds", "0", "--latest-confirmed-policy", str(args.latest_confirmed_policy), "--latest-confirmed-m5-policy", str(args.latest_confirmed_m5_policy)]
     if args.skip_monitor_when_no_open_signals:
         cmd.append("--skip-monitor-when-no-open-signals")
     return cmd
 
 
 def build_sell_cmd(args: argparse.Namespace) -> list[str]:
-    cmd = [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_h1h4_bear_ab_dry_run_loop.py"),
-           "--csv-dir", str(args.csv_dir), "--out-dir", str(args.sell_out_dir), "--iterations", "1", "--interval-seconds", "0",
-           "--base-lot", "0.01", "--latest-confirmed-policy", str(args.latest_confirmed_policy),
-           "--latest-confirmed-m1-policy", str(args.latest_confirmed_m1_policy)]
+    cmd = [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_h1h4_bear_ab_dry_run_loop.py"), "--csv-dir", str(args.csv_dir), "--out-dir", str(args.sell_out_dir), "--iterations", "1", "--interval-seconds", "0", "--base-lot", "0.01", "--latest-confirmed-policy", str(args.latest_confirmed_policy), "--latest-confirmed-m1-policy", str(args.latest_confirmed_m1_policy)]
     if args.skip_monitor_when_no_open_signals:
         cmd.append("--skip-monitor-when-no-open-signals")
     return cmd
 
 
 def build_alt_cmd(args: argparse.Namespace) -> list[str]:
-    return [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_alt_pf_signal_pack_dry_run_cycle.py"),
-            "--csv-dir", str(args.csv_dir), "--out-dir", str(args.alt_out_dir),
-            "--latest-confirmed-policy", str(args.latest_confirmed_policy), "--base-lot", "0.01", "--max-lot-per-trade", "0.01"]
+    return [sys.executable, str(REPO_ROOT / "scripts" / "run_gold_alt_pf_signal_pack_dry_run_cycle.py"), "--csv-dir", str(args.csv_dir), "--out-dir", str(args.alt_out_dir), "--latest-confirmed-policy", str(args.latest_confirmed_policy), "--base-lot", "0.01", "--max-lot-per-trade", "0.01"]
 
 
 def load_strategy_outputs(strategy_out_dir: Path) -> dict[str, Any]:
@@ -167,25 +160,11 @@ def normalize_status(router_cycle_start: str, out_dir: Path, returncode: int | s
         cycle_ok = outputs["latest_dry_run_loop_cycle_result"].get("cycle", {}).get("cycle_ok", aggregate_only_cycle_ok(out_dir) if returncode == "AGGREGATE_ONLY" else returncode == 0)
         cycle_path = out_dir / "latest_dry_run_loop_cycle_result.json"
     else:
-        cycle_ok = outputs["latest_dry_run_cycle_result"].get("cycle_ok", aggregate_only_cycle_ok(out_dir) if returncode == "AGGREGATE_ONLY" else returncode == 0)
+        cycle_ok = outputs["latest_dry_run_cycle_result"].get("cycle_ok", scan.get("cycle_ok", aggregate_only_cycle_ok(out_dir) if returncode == "AGGREGATE_ONLY" else returncode == 0))
         cycle_path = out_dir / "latest_dry_run_cycle_result.json"
     order_intent_path = outputs["order_intent_path"]
     close_intent_path = outputs["close_intent_path"]
-    return {
-        "router_cycle_start_utc": router_cycle_start, "strategy_slot": slot, "strategy_id": strategy_id, "direction": direction,
-        "strategy_out_dir": str(out_dir), "runner_returncode": returncode, "cycle_ok": cycle_ok,
-        "signal_found": scan.get("signal_found", ""), "rank": scan.get("rank", ""), "trade_enabled": scan.get("trade_enabled", ""),
-        "duplicate": scan.get("duplicate", ""), "signal_key": scan.get("signal_key", ""), "scan_reason": scan.get("reason", ""),
-        "latest_m15_close_time": scan.get("latest_m15_close_time", ""), "candidate_count": scan.get("candidate_count", ""),
-        "latest_candidate_entry_time": scan.get("latest_candidate_entry_time", ""), "signals_monitored": monitor.get("signals_monitored", ""),
-        "resolved_skipped": monitor.get("resolved_skipped", ""), "position_results_created": monitor.get("position_results_created", ""),
-        "tp_touched": monitor.get("tp_touched", ""), "sl_touched": monitor.get("sl_touched", ""),
-        "time_exit_required": monitor.get("time_exit_required", ""), "close_intent_created": monitor.get("close_intent_created", ""),
-        "open_unresolved": monitor.get("open_unresolved", ""), "no_path": monitor.get("no_m1_path", monitor.get("no_m5_path", "")),
-        "monitor_reason": monitor.get("reason", ""), "order_intent_path": str(order_intent_path) if order_intent_path.exists() else "",
-        "close_intent_path": str(close_intent_path) if close_intent_path.exists() else "",
-        "latest_cycle_result_path": str(cycle_path) if cycle_path.exists() else "",
-    }
+    return {"router_cycle_start_utc": router_cycle_start, "strategy_slot": slot, "strategy_id": strategy_id, "direction": direction, "strategy_out_dir": str(out_dir), "runner_returncode": returncode, "cycle_ok": cycle_ok, "signal_found": scan.get("signal_found", ""), "rank": scan.get("rank", ""), "trade_enabled": scan.get("trade_enabled", ""), "duplicate": scan.get("duplicate", ""), "signal_key": scan.get("signal_key", ""), "scan_reason": scan.get("reason", ""), "latest_m15_close_time": scan.get("latest_m15_close_time", ""), "candidate_count": scan.get("candidate_count", ""), "latest_candidate_entry_time": scan.get("latest_candidate_entry_time", ""), "signals_monitored": monitor.get("signals_monitored", ""), "resolved_skipped": monitor.get("resolved_skipped", ""), "position_results_created": monitor.get("position_results_created", ""), "tp_touched": monitor.get("tp_touched", ""), "sl_touched": monitor.get("sl_touched", ""), "time_exit_required": monitor.get("time_exit_required", ""), "close_intent_created": monitor.get("close_intent_created", ""), "open_unresolved": monitor.get("open_unresolved", ""), "no_path": monitor.get("no_m1_path", monitor.get("no_m5_path", "")), "monitor_reason": monitor.get("reason", ""), "order_intent_path": str(order_intent_path) if order_intent_path.exists() else "", "close_intent_path": str(close_intent_path) if close_intent_path.exists() else "", "latest_cycle_result_path": str(cycle_path) if cycle_path.exists() else ""}
 
 
 def read_order_intent(path: str) -> dict[str, Any] | None:
@@ -238,7 +217,6 @@ def main() -> int:
     buy_rc: int | str = "DISABLED"
     sell_rc: int | str = "DISABLED"
     alt_rc: int | str = "DISABLED"
-
     if args.aggregate_only:
         if not args.disable_buy: buy_rc = "AGGREGATE_ONLY"
         if not args.disable_sell: sell_rc = "AGGREGATE_ONLY"
@@ -255,7 +233,7 @@ def main() -> int:
         if (buy_rc == 0 or args.disable_buy or args.continue_on_strategy_error) and (sell_rc == 0 or args.disable_sell or args.continue_on_strategy_error) and not args.disable_alt:
             alt_rc = run_cmd(build_alt_cmd(args))
             if alt_rc != 0 and not args.continue_on_strategy_error:
-                print("[ERROR] ALT PF strategy runner failed", flush=True)
+                print("[WARN] ALT PF strategy runner returned non-zero; latest_scan_result/cycle_ok will decide router status", flush=True)
 
     statuses: list[dict[str, Any]] = []
     if not args.disable_buy:
@@ -267,7 +245,6 @@ def main() -> int:
 
     strategy_status_path = args.router_out_dir / "strategy_status_latest.csv"
     write_csv(strategy_status_path, statuses, STRATEGY_STATUS_COLUMNS)
-
     order_intents: list[dict[str, Any]] = []
     close_intents: list[dict[str, Any]] = []
     for status in statuses:
@@ -289,41 +266,16 @@ def main() -> int:
     close_intents_path = args.router_out_dir / "combined_close_intent_dry_run.jsonl"
     write_jsonl(order_intents_path, order_intents)
     write_jsonl(close_intents_path, close_intents)
-
     strategies_ok = all(boolish(status.get("cycle_ok", False)) for status in statuses) if statuses else True
-    router_end = utc_now_text()
-    rc_ok = all(rc in [0, "DISABLED", "AGGREGATE_ONLY"] for rc in [buy_rc, sell_rc, alt_rc])
+    alt_status = next((s for s in statuses if str(s.get("strategy_slot")) == "GOLD_ALT_PF_SIGNAL_PACK"), {})
+    alt_rc_ok = alt_rc in [0, "DISABLED", "AGGREGATE_ONLY"] or boolish(alt_status.get("cycle_ok", False))
+    rc_ok = (buy_rc in [0, "DISABLED", "AGGREGATE_ONLY"]) and (sell_rc in [0, "DISABLED", "AGGREGATE_ONLY"]) and alt_rc_ok
     router_ok = strategies_ok and rc_ok
-    summary = {
-        "schema_version": "gold_multi_strategy_dry_run_router_v4_alt_pf_pack",
-        "router_cycle_start_utc": router_start, "router_cycle_end_utc": router_end, "router_mode": router_mode,
-        "router_ok": bool(router_ok), "csv_dir": str(args.csv_dir), "router_out_dir": str(args.router_out_dir),
-        "buy_enabled": not args.disable_buy, "sell_enabled": not args.disable_sell, "alt_enabled": not args.disable_alt,
-        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
-        "buy_returncode": buy_rc, "sell_returncode": sell_rc, "alt_returncode": alt_rc, "strategies_ok": bool(strategies_ok),
-        "signals_found_count": int(sum(1 for s in statuses if boolish(s.get("signal_found", False)))),
-        "open_order_intent_count": int(count_order_intents(order_intents, "OPEN_POSITION")),
-        "observe_only_intent_count": int(count_order_intents(order_intents, "OBSERVE_ONLY")),
-        "duplicate_skip_count": int(count_order_intents(order_intents, "DUPLICATE_SKIP")),
-        "close_intent_count": int(len(close_intents)), "strategy_status": statuses,
-        "outputs": {"strategy_status_latest": str(strategy_status_path), "combined_order_intents_jsonl": str(order_intents_path),
-                    "combined_close_intents_jsonl": str(close_intents_path), "router_cycle_log": str(args.router_out_dir / "multi_strategy_cycle_log.csv"),
-                    "latest_multi_strategy_cycle_result": str(args.router_out_dir / "latest_multi_strategy_cycle_result.json")},
-    }
+    router_end = utc_now_text()
+    summary = {"schema_version": "gold_multi_strategy_dry_run_router_v4_alt_pf_pack", "router_cycle_start_utc": router_start, "router_cycle_end_utc": router_end, "router_mode": router_mode, "router_ok": bool(router_ok), "csv_dir": str(args.csv_dir), "router_out_dir": str(args.router_out_dir), "buy_enabled": not args.disable_buy, "sell_enabled": not args.disable_sell, "alt_enabled": not args.disable_alt, "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals), "buy_returncode": buy_rc, "sell_returncode": sell_rc, "alt_returncode": alt_rc, "strategies_ok": bool(strategies_ok), "signals_found_count": int(sum(1 for s in statuses if boolish(s.get("signal_found", False)))), "open_order_intent_count": int(count_order_intents(order_intents, "OPEN_POSITION")), "observe_only_intent_count": int(count_order_intents(order_intents, "OBSERVE_ONLY")), "duplicate_skip_count": int(count_order_intents(order_intents, "DUPLICATE_SKIP")), "close_intent_count": int(len(close_intents)), "strategy_status": statuses, "outputs": {"strategy_status_latest": str(strategy_status_path), "combined_order_intents_jsonl": str(order_intents_path), "combined_close_intents_jsonl": str(close_intents_path), "router_cycle_log": str(args.router_out_dir / "multi_strategy_cycle_log.csv"), "latest_multi_strategy_cycle_result": str(args.router_out_dir / "latest_multi_strategy_cycle_result.json")}}
     latest_path = args.router_out_dir / "latest_multi_strategy_cycle_result.json"
     write_json(latest_path, summary)
-    append_csv_row(args.router_out_dir / "multi_strategy_cycle_log.csv", {
-        "router_cycle_start_utc": router_start, "router_cycle_end_utc": router_end, "router_ok": bool(router_ok),
-        "router_mode": router_mode, "csv_dir": str(args.csv_dir), "router_out_dir": str(args.router_out_dir),
-        "buy_enabled": not args.disable_buy, "sell_enabled": not args.disable_sell, "alt_enabled": not args.disable_alt,
-        "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals),
-        "buy_returncode": buy_rc, "sell_returncode": sell_rc, "alt_returncode": alt_rc, "strategies_ok": bool(strategies_ok),
-        "signals_found_count": summary["signals_found_count"], "open_order_intent_count": summary["open_order_intent_count"],
-        "observe_only_intent_count": summary["observe_only_intent_count"], "duplicate_skip_count": summary["duplicate_skip_count"],
-        "close_intent_count": summary["close_intent_count"], "strategy_status_latest": str(strategy_status_path),
-        "combined_order_intents_jsonl": str(order_intents_path), "combined_close_intents_jsonl": str(close_intents_path),
-        "latest_multi_strategy_cycle_result": str(latest_path),
-    }, ROUTER_CYCLE_LOG_COLUMNS)
+    append_csv_row(args.router_out_dir / "multi_strategy_cycle_log.csv", {"router_cycle_start_utc": router_start, "router_cycle_end_utc": router_end, "router_ok": bool(router_ok), "router_mode": router_mode, "csv_dir": str(args.csv_dir), "router_out_dir": str(args.router_out_dir), "buy_enabled": not args.disable_buy, "sell_enabled": not args.disable_sell, "alt_enabled": not args.disable_alt, "skip_monitor_when_no_open_signals": bool(args.skip_monitor_when_no_open_signals), "buy_returncode": buy_rc, "sell_returncode": sell_rc, "alt_returncode": alt_rc, "strategies_ok": bool(strategies_ok), "signals_found_count": summary["signals_found_count"], "open_order_intent_count": summary["open_order_intent_count"], "observe_only_intent_count": summary["observe_only_intent_count"], "duplicate_skip_count": summary["duplicate_skip_count"], "close_intent_count": summary["close_intent_count"], "strategy_status_latest": str(strategy_status_path), "combined_order_intents_jsonl": str(order_intents_path), "combined_close_intents_jsonl": str(close_intents_path), "latest_multi_strategy_cycle_result": str(latest_path)}, ROUTER_CYCLE_LOG_COLUMNS)
     print("[INFO] multi-strategy dry-run router completed")
     print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str))
     return 0 if router_ok else 1
