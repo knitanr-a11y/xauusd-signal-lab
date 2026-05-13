@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-r"""Run GOLD multi-strategy dry-run wrapper with a robust fast M15 parser patch.
+r"""Run GOLD multi-strategy dry-run wrapper with robust fast parser patches.
 
 Compatibility wrapper around scripts/run_gold_multi_strategy_mochipoyo_loop_dry_run.py.
 It patches only lightweight runtime behavior:
 - robust latest confirmed M15 timestamp parsing
 - router path/cmd wiring for GOLD_ALT_PF_SIGNAL_PACK
+- router path/cmd wiring for GOLD_M5_SCALP_SIGNAL_PACK
 
 Signal detection itself remains inside each strategy runner.
 """
@@ -148,22 +149,25 @@ _base_build_paths = base.build_paths
 _base_build_router_cmd = base.build_router_cmd
 
 
-def build_paths_with_alt(out_dir: Path) -> dict[str, Path]:
+def build_paths_with_strategy_packs(out_dir: Path) -> dict[str, Path]:
     paths = _base_build_paths(out_dir)
     paths["alt_out_dir"] = out_dir / "alt_pf_signal_pack"
+    paths["m5_scalp_out_dir"] = out_dir / "m5_scalp_signal_pack"
     return paths
 
 
-def build_router_cmd_with_alt(args, paths: dict[str, Path]) -> list[str]:
+def build_router_cmd_with_strategy_packs(args, paths: dict[str, Path]) -> list[str]:
     cmd = _base_build_router_cmd(args, paths)
     if "--alt-out-dir" not in cmd:
         cmd.extend(["--alt-out-dir", str(paths["alt_out_dir"])])
+    if "--m5-scalp-out-dir" not in cmd:
+        cmd.extend(["--m5-scalp-out-dir", str(paths["m5_scalp_out_dir"])])
     return cmd
 
 
 base.read_latest_confirmed_m15_close_time_fast = robust_read_latest_confirmed_m15_close_time_fast
-base.build_paths = build_paths_with_alt
-base.build_router_cmd = build_router_cmd_with_alt
+base.build_paths = build_paths_with_strategy_packs
+base.build_router_cmd = build_router_cmd_with_strategy_packs
 
 
 if __name__ == "__main__":
