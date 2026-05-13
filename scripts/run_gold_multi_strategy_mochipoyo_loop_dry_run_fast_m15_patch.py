@@ -2,25 +2,12 @@
 # -*- coding: utf-8 -*-
 r"""Run GOLD multi-strategy dry-run wrapper with a robust fast M15 parser patch.
 
-This is a small compatibility wrapper around:
+Compatibility wrapper around scripts/run_gold_multi_strategy_mochipoyo_loop_dry_run.py.
+It patches only lightweight runtime behavior:
+- robust latest confirmed M15 timestamp parsing
+- router path/cmd wiring for GOLD_ALT_PF_SIGNAL_PACK
 
-    scripts/run_gold_multi_strategy_mochipoyo_loop_dry_run.py
-
-It intentionally does not reimplement signal detection. It imports the existing
-wrapper and replaces only read_latest_confirmed_m15_close_time_fast() with a
-more defensive parser so that --skip-same-m15-no-signal can be validated safely.
-
-Why this exists:
-- The initial fast parser used pandas.read_csv(..., sep=';') first.
-- If the MT5 CSV is comma/tab/space separated, pandas can still return a single
-  column instead of raising, and timestamp parsing then returns empty.
-- The strategy live_scan itself already obtains latest_m15_close_time correctly.
-- This patch only fixes the lightweight pre-check timestamp path.
-
-Safety:
-- Never passes --send by itself.
-- Delegates all order/sender behavior to the existing dry-run wrapper.
-- Does not alter BUY/SELL signal detection logic.
+Signal detection itself remains inside each strategy runner.
 """
 
 from __future__ import annotations
@@ -53,13 +40,12 @@ def _windows_long_path(path: str | Path) -> str:
 
 
 def _candidate_files(csv_dir: Path, filename: str) -> list[Path]:
-    base_name = filename
     names = [
-        base_name,
-        base_name.lower(),
-        base_name.upper(),
-        base_name.replace("m15", "M15"),
-        base_name.replace("M15", "m15"),
+        filename,
+        filename.lower(),
+        filename.upper(),
+        filename.replace("m15", "M15"),
+        filename.replace("M15", "m15"),
         "goldsharp_m15.csv",
         "goldsharp_M15.csv",
         "gold_m15.csv",
@@ -84,18 +70,17 @@ def _read_tail_lines(path: Path, max_lines: int = 80) -> list[str]:
     if not Path(_windows_long_path(path)).exists():
         return []
     raw = Path(_windows_long_path(path)).read_bytes()
+    text = ""
     for enc in ("utf-8-sig", "utf-8", "cp932", "shift_jis"):
         try:
             text = raw.decode(enc, errors="strict")
             break
         except Exception:
             text = raw.decode("utf-8", errors="replace")
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    return lines[-max_lines:]
+    return [line.strip() for line in text.splitlines() if line.strip()][-max_lines:]
 
 
 def _split_row(line: str) -> list[str]:
-    # Try CSV dialects first, then a whitespace fallback.
     for delim in (";", ",", "\t"):
         try:
             row = next(csv.reader([line], delimiter=delim))
@@ -115,7 +100,6 @@ def _parse_dt_from_cells(cells: Iterable[str]) -> datetime | None:
         candidates.append(f"{values[0]} {values[1]}")
     if len(values) >= 3:
         candidates.append(f"{values[0]} {values[1]}:{values[2]}")
-
     formats = [
         "%Y-%m-%d %H:%M:%S",
         "%Y-%m-%d %H:%M",
@@ -160,9 +144,26 @@ def robust_read_latest_confirmed_m15_close_time_fast(csv_dir: Path, filename: st
     return ""
 
 
-# Monkey-patch only the lightweight timestamp pre-check. Everything else remains
-# the existing wrapper implementation.
+_base_build_paths = base.build_paths
+_base_build_router_cmd = base.build_router_cmd
+
+
+def build_paths_with_alt(out_dir: Path) -> dict[str, Path]:
+    paths = _base_build_paths(out_dir)
+    paths["alt_out_dir"] = out_dir / "alt_pf_signal_pack"
+    return paths
+
+
+def build_router_cmd_with_alt(args, paths: dict[str, Path]) -> list[str]:
+    cmd = _base_build_router_cmd(args, paths)
+    if "--alt-out-dir" not in cmd:
+        cmd.extend(["--alt-out-dir", str(paths["alt_out_dir"])])
+    return cmd
+
+
 base.read_latest_confirmed_m15_close_time_fast = robust_read_latest_confirmed_m15_close_time_fast
+base.build_paths = build_paths_with_alt
+base.build_router_cmd = build_router_cmd_with_alt
 
 
 if __name__ == "__main__":
