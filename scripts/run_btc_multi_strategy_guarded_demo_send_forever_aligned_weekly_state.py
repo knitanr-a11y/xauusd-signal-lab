@@ -14,6 +14,13 @@ Persistent order ledger:
 The child once-wrapper expects its order ledger inside its own out-dir, so this
 runner syncs the persistent ledger into each child cycle directory before the
 cycle and syncs it back afterwards.
+
+Startup backlog safety:
+- At loop startup, there may already be an unnotified live payload from an older
+  confirmed candle. That must not be notified late and then immediately traded.
+- Therefore this runner suppresses child --send during a startup warmup window.
+- During warmup, the child can still build payloads and Discord previews, but it
+  cannot send Discord messages or MT5 orders because --send is not passed.
 """
 
 from __future__ import annotations
@@ -40,6 +47,7 @@ STOP_MARKER_NAME = "latest_btc_multi_strategy_guarded_demo_send_forever_aligned_
 LOOP_LOG_COLUMNS = [
     "cycle_index", "cycle_start_utc", "cycle_end_utc", "returncode", "cycle_ok",
     "cycle_ok_classification", "reason", "allow_demo_send", "send_requested",
+    "send_allowed_after_startup_warmup", "startup_warmup_active", "startup_warmup_end_utc",
     "send_flag_passed_to_sender", "send_suppressed_reason", "payload_rows_out",
     "guarded_sender_rows_out", "guarded_sender_dry_run_check_ok_rows",
     "guarded_sender_error_rows", "guarded_sender_order_send_called_count",
@@ -208,6 +216,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--echo-wrapper-output", action="store_true")
     p.add_argument("--allow-demo-send", action="store_true")
     p.add_argument("--send", action="store_true")
+    p.add_argument("--startup-warmup-minutes", type=int, default=16, help="Suppress child --send after loop startup to avoid late trading startup backlog signals. Use 0 only after validation.")
     p.add_argument("--broker-symbol", default="BTCUSD#")
     p.add_argument("--expected-login", type=int, default=75539039)
     p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="allow_any_until_max")
@@ -224,7 +233,7 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def build_once_cmd(args: argparse.Namespace, cycle_dir: Path) -> list[str]:
+def build_once_cmd(args: argparse.Namespace, cycle_dir: Path, *, send_allowed_after_startup_warmup: bool) -> list[str]:
     cmd = [
         sys.executable, str(REPO_ROOT / "scripts" / "run_btc_multi_strategy_guarded_demo_send_once.py"),
         "--csv-dir", str(args.csv_dir), "--out-dir", str(cycle_dir), "--csv-sep", str(args.csv_sep),
@@ -238,12 +247,12 @@ def build_once_cmd(args: argparse.Namespace, cycle_dir: Path) -> list[str]:
     cmd.append("--enable-sell-early-low-break-trade" if args.enable_sell_early_low_break_trade else "--no-enable-sell-early-low-break-trade")
     if args.allow_demo_send:
         cmd.append("--allow-demo-send")
-    if args.send:
+    if args.send and send_allowed_after_startup_warmup:
         cmd.append("--send")
     return cmd
 
 
-def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persistent_ledger: Path) -> tuple[int, Path, Path, float, bool, bool, Path, Path]:
+def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persistent_ledger: Path, *, send_allowed_after_startup_warmup: bool) -> tuple[int, Path, Path, float, bool, bool, Path, Path]:
     cycle_dir = out_dir / "cycles" / f"cycle_{cycle_index:05d}"
     child_ledger = cycle_dir / "guarded_demo_order_ledger.csv"
     synced_from_state = safe_copy(persistent_ledger, child_ledger)
@@ -252,11 +261,12 @@ def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persiste
     mkdir_path(log_dir)
     stdout_log = log_dir / f"cycle_{cycle_index:05d}_{utc_stamp()}_stdout.txt"
     stderr_log = log_dir / f"cycle_{cycle_index:05d}_{utc_stamp()}_stderr.txt"
-    cmd = build_once_cmd(args, cycle_dir)
+    cmd = build_once_cmd(args, cycle_dir, send_allowed_after_startup_warmup=send_allowed_after_startup_warmup)
     print("=" * 80, flush=True)
     print(f"[CYCLE] {cycle_index} start_utc={utc_text()}", flush=True)
     print(f"[INFO] persistent_ledger={persistent_ledger}", flush=True)
     print(f"[INFO] child_ledger={child_ledger}", flush=True)
+    print(f"[INFO] send_requested={args.send} send_allowed_after_startup_warmup={send_allowed_after_startup_warmup}", flush=True)
     print("[CMD] " + " ".join(cmd), flush=True)
     started = time.perf_counter()
     completed = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -277,10 +287,10 @@ def run_once(cycle_index: int, args: argparse.Namespace, out_dir: Path, persiste
     return int(completed.returncode), stdout_log, stderr_log, elapsed, synced_from_state, synced_to_state, cycle_dir, child_ledger
 
 
-def build_loop_summary(args: argparse.Namespace, started_at: str, cycle_index: int, failed_cycles: int, last_cycle: dict[str, Any], out_dir: Path, persistent_ledger: Path, stopped_by_user: bool) -> dict[str, Any]:
+def build_loop_summary(args: argparse.Namespace, started_at: str, cycle_index: int, failed_cycles: int, last_cycle: dict[str, Any], out_dir: Path, persistent_ledger: Path, stopped_by_user: bool, startup_warmup_end_utc: str) -> dict[str, Any]:
     loop_ok = failed_cycles == 0
     return {
-        "schema_version": "btc_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_v1",
+        "schema_version": "btc_multi_strategy_guarded_demo_send_forever_aligned_weekly_state_v2_startup_warmup_gate",
         "started_at_utc": started_at,
         "updated_at_utc": utc_text(),
         "loop_ok": loop_ok,
@@ -290,10 +300,13 @@ def build_loop_summary(args: argparse.Namespace, started_at: str, cycle_index: i
         "failed_cycles": failed_cycles,
         "allow_demo_send": bool(args.allow_demo_send),
         "send_requested": bool(args.send),
+        "startup_warmup_minutes": int(args.startup_warmup_minutes),
+        "startup_warmup_end_utc": startup_warmup_end_utc,
         "persistent_order_ledger_csv": str(persistent_ledger),
         "weekly_out_dir": str(out_dir),
         "safety": {
             "send_requires_allow_demo_send_and_send": True,
+            "startup_warmup_suppresses_child_send": True,
             "position_policy_block_any_used": str(args.position_policy) == "block_any",
             "gold_bat_modified_by_this_runner": False,
             "gold_ledgers_mutated_by_this_runner": False,
@@ -312,6 +325,8 @@ def main() -> int:
         raise ValueError("--max-cycles must be >= 0. Use 0 for infinite.")
     if args.interval_minutes <= 0:
         raise ValueError("--interval-minutes must be > 0")
+    if args.startup_warmup_minutes < 0:
+        raise ValueError("--startup-warmup-minutes must be >= 0")
 
     out_dir = weekly_out_dir(args.log_base)
     state_dir = args.state_dir
@@ -319,17 +334,22 @@ def main() -> int:
     mkdir_path(out_dir)
     mkdir_path(state_dir)
 
+    started_dt = utc_now()
+    startup_warmup_end_dt = started_dt + timedelta(minutes=int(args.startup_warmup_minutes))
+    startup_warmup_end_utc = utc_text(startup_warmup_end_dt)
+
     print("=" * 80, flush=True)
     print("BTC multi-strategy guarded demo-send WEEKLY-LOG / PERSISTENT-STATE runner", flush=True)
     print(f"weekly_out_dir={out_dir}", flush=True)
     print(f"persistent_order_ledger_csv={persistent_ledger}", flush=True)
     print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
+    print(f"startup_warmup_minutes={args.startup_warmup_minutes} startup_warmup_end_utc={startup_warmup_end_utc}", flush=True)
     print(f"position_policy={args.position_policy} max_symbol_positions={args.max_symbol_positions} max_symbol_lot={args.max_symbol_lot}", flush=True)
     print(f"max_cycles={'infinite' if args.max_cycles == 0 else args.max_cycles} interval_minutes={args.interval_minutes} offset_seconds={args.offset_seconds}", flush=True)
     print("Stop with Ctrl+C", flush=True)
     print("=" * 80, flush=True)
 
-    started_at = utc_text()
+    started_at = utc_text(started_dt)
     cycle_index = 0
     failed_cycles = 0
     last_cycle: dict[str, Any] = {}
@@ -349,8 +369,17 @@ def main() -> int:
                 time.sleep(wait_seconds)
 
             cycle_index += 1
-            cycle_start = utc_text()
-            returncode, stdout_log, stderr_log, elapsed, synced_from, synced_to, cycle_dir, child_ledger = run_once(cycle_index, args, out_dir, persistent_ledger)
+            cycle_start_dt = utc_now()
+            cycle_start = utc_text(cycle_start_dt)
+            startup_warmup_active = bool(args.send and cycle_start_dt < startup_warmup_end_dt)
+            send_allowed_after_startup_warmup = bool(not startup_warmup_active)
+            returncode, stdout_log, stderr_log, elapsed, synced_from, synced_to, cycle_dir, child_ledger = run_once(
+                cycle_index,
+                args,
+                out_dir,
+                persistent_ledger,
+                send_allowed_after_startup_warmup=send_allowed_after_startup_warmup,
+            )
             cycle_end = utc_text()
             child_summary_path = cycle_dir / "latest_btc_multi_strategy_guarded_demo_send_once_result.json"
             child = read_json_or_empty(child_summary_path)
@@ -358,6 +387,9 @@ def main() -> int:
             guards = child.get("guards", {}) if isinstance(child.get("guards"), dict) else {}
             cycle_ok = bool(returncode == 0 and child.get("cycle_ok", False) and (synced_to or as_int(metrics.get("guarded_sender_sent_rows"), 0) == 0))
             cycle_ok_classification = str(child.get("cycle_ok_classification", "NATURAL_PASS" if cycle_ok else "FAILED"))
+            if startup_warmup_active and as_int(metrics.get("payload_rows_out"), 0) > 0 and as_int(metrics.get("guarded_sender_order_send_called_count"), 0) == 0:
+                cycle_ok = True
+                cycle_ok_classification = "STARTUP_WARMUP_BLOCKED_BACKLOG_SEND"
             if not cycle_ok:
                 failed_cycles += 1
 
@@ -370,6 +402,9 @@ def main() -> int:
                 "returncode": returncode, "cycle_ok": cycle_ok, "cycle_ok_classification": cycle_ok_classification,
                 "reason": child.get("reason", "CHILD_SUMMARY_MISSING_OR_FAILED"),
                 "allow_demo_send": bool(args.allow_demo_send), "send_requested": bool(args.send),
+                "send_allowed_after_startup_warmup": send_allowed_after_startup_warmup,
+                "startup_warmup_active": startup_warmup_active,
+                "startup_warmup_end_utc": startup_warmup_end_utc,
                 "send_flag_passed_to_sender": as_bool(child.get("send_flag_passed_to_sender"), False),
                 "send_suppressed_reason": child.get("send_suppressed_reason", ""),
                 "payload_rows_out": as_int(metrics.get("payload_rows_out"), 0),
@@ -389,11 +424,13 @@ def main() -> int:
             }
             append_csv_row(out_dir / "aligned_loop_log.csv", row, LOOP_LOG_COLUMNS)
             last_cycle = row
-            write_json(out_dir / SUMMARY_NAME, build_loop_summary(args, started_at, cycle_index, failed_cycles, last_cycle, out_dir, persistent_ledger, stopped_by_user=False))
+            write_json(out_dir / SUMMARY_NAME, build_loop_summary(args, started_at, cycle_index, failed_cycles, last_cycle, out_dir, persistent_ledger, stopped_by_user=False, startup_warmup_end_utc=startup_warmup_end_utc))
 
             compact = {
                 "cycle_index": cycle_index, "cycle_ok": cycle_ok, "cycle_ok_classification": cycle_ok_classification,
                 "reason": row["reason"], "payload_rows_out": row["payload_rows_out"],
+                "startup_warmup_active": startup_warmup_active,
+                "send_allowed_after_startup_warmup": send_allowed_after_startup_warmup,
                 "order_send_called_count": row["guarded_sender_order_send_called_count"], "sent_rows": row["guarded_sender_sent_rows"],
                 "ledger_synced_from_state": row["ledger_synced_from_state"], "ledger_synced_to_state": row["ledger_synced_to_state"],
                 "persistent_order_ledger_csv": str(persistent_ledger), "weekly_out_dir": str(out_dir), "next_run_utc": next_run,
@@ -414,7 +451,7 @@ def main() -> int:
             marker = {"schema_version": "btc_multi_strategy_weekly_state_precycle_stop_marker_v1", "started_at_utc": started_at, "stopped_at_utc": utc_text(), "stopped_by_user": True, "reason": "STOPPED_BY_USER_BEFORE_FIRST_CYCLE", "cycles_run_this_session": 0}
             write_json(out_dir / STOP_MARKER_NAME, marker)
         else:
-            write_json(out_dir / SUMMARY_NAME, build_loop_summary(args, started_at, cycle_index, failed_cycles, last_cycle, out_dir, persistent_ledger, stopped_by_user=True))
+            write_json(out_dir / SUMMARY_NAME, build_loop_summary(args, started_at, cycle_index, failed_cycles, last_cycle, out_dir, persistent_ledger, stopped_by_user=True, startup_warmup_end_utc=startup_warmup_end_utc))
         print(f"cycles_run={cycle_index} failed_cycles={failed_cycles}", flush=True)
         print(f"summary_json={out_dir / SUMMARY_NAME}", flush=True)
         print("=" * 80, flush=True)
