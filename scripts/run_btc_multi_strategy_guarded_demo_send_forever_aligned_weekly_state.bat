@@ -24,9 +24,10 @@ echo GOLD BAT/state/ledgers are not modified
 echo LOG_ROOT=%LOG_ROOT%
 echo STATE_DIR=%STATE_DIR%
 echo Persistent order ledger: %STATE_DIR%\guarded_demo_order_ledger.csv
+echo Startup backlog ledger: %STATE_DIR%\startup_backlog_payload_ledger.csv
 echo Broker symbol: BTCUSD# / expected demo login: 75539039
-echo SAFETY TEMPORARY: --send is disabled until startup-backlog gate is verified
 echo Sender --send requires BOTH --allow-demo-send and --send
+echo Startup backlog guard: first-cycle payload_key is blocked, not time-window based
 echo Position policy: allow_any_until_max / duplicate guard: order_key ledger
 echo Lot: 0.01 fixed / max orders per cycle: 1 / deviation: 100
 echo SELL_EARLY_LOW_BREAK is observe-only by default
@@ -47,7 +48,8 @@ python scripts\run_btc_multi_strategy_guarded_demo_send_forever_aligned_weekly_s
   --deviation 100 ^
   --base-lot 0.01 ^
   --spread-cost-usd 22.5 ^
-  --allow-demo-send
+  --allow-demo-send ^
+  --send
 
 set EXITCODE=%ERRORLEVEL%
 
