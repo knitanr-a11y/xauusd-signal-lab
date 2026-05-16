@@ -11,7 +11,8 @@ Safety:
 - no AI review API call
 - no order placement
 - transient Discord/webhook failures are retried before returning ERROR
-- optional AI history warning only appends trader-facing caution text
+- AI history warning is enabled by default when tag summary exists; it only
+  appends trader-facing caution text and can be disabled explicitly
 
 Console output is deliberately summary-only. Full Discord messages are written to
 UTF-8 preview files instead of being printed to Windows cmd.exe, which avoids
@@ -349,9 +350,11 @@ def main() -> int:
     p.add_argument("--sleep-seconds", type=float, default=1.0)
     p.add_argument("--discord-retry-count", type=int, default=3, help="Retry transient Discord failures this many times after the first attempt.")
     p.add_argument("--discord-retry-sleep-seconds", type=float, default=2.0, help="Base sleep seconds for transient Discord retries.")
-    p.add_argument("--enable-ai-history-warning", action="store_true", help="Append AI history warning text to Discord previews/messages. Does not block orders.")
+    p.add_argument("--enable-ai-history-warning", dest="enable_ai_history_warning", action="store_true", help="Append AI history warning text. Enabled by default when tag summary exists.")
+    p.add_argument("--disable-ai-history-warning", dest="enable_ai_history_warning", action="store_false", help="Disable AI history warning text.")
     p.add_argument("--ai-history-tag-summary-csv", default="data/runtime_logs/trade_ai_review/trade_ai_tag_summary.csv")
     p.add_argument("--ai-history-max-tags", type=int, default=4)
+    p.set_defaults(enable_ai_history_warning=True)
     args = p.parse_args()
 
     load_local_dotenv()
