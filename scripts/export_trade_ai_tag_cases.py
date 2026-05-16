@@ -19,6 +19,10 @@ from typing import Any
 import pandas as pd
 
 from trade_ai_review_utils import (
+    BTC_TAGS,
+    COMMON_TAGS,
+    EXECUTION_SYSTEM_TAGS,
+    GOLD_TAGS,
     clean_float,
     clean_str,
     read_csv,
@@ -49,11 +53,14 @@ TAG_GROUP_FIELDS = {
     "execution": "execution_issue_tags",
     "system": "system_issue_tags",
 }
+RISK_TAGS = {t.lower() for t in COMMON_TAGS + GOLD_TAGS + BTC_TAGS}
+EXECUTION_TAGS = {t.lower() for t in EXECUTION_SYSTEM_TAGS}
 
 OUTPUT_COLUMNS = [
     "created_at_utc",
     "tag_name",
     "tag_group",
+    "ai_original_tag_group",
     "symbol",
     "strategy_key",
     "strategy_id",
@@ -117,6 +124,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output-json", default="")
     p.add_argument("--include-open-trades", action="store_true")
     p.add_argument("--keep-non-informative-tags", action="store_true")
+    p.add_argument("--keep-ai-tag-group", action="store_true", help="Do not normalize known risk/execution tags that the model returned in the wrong group.")
     return p.parse_args()
 
 
@@ -139,6 +147,17 @@ def tag_is_informative(tag: str, *, keep: bool) -> bool:
     if keep:
         return bool(tag)
     return canonical_tag_name(tag) not in NON_INFORMATIVE_TAGS
+
+
+def normalize_tag_group(tag_name: str, ai_group: str, *, keep_ai_tag_group: bool = False) -> str:
+    if keep_ai_tag_group:
+        return ai_group
+    tag = canonical_tag_name(tag_name)
+    if tag in EXECUTION_TAGS:
+        return "execution"
+    if tag in RISK_TAGS:
+        return "risk"
+    return ai_group
 
 
 def is_closed_row(row: dict[str, Any] | pd.Series, *, include_open: bool) -> bool:
@@ -192,13 +211,17 @@ def main() -> int:
     rows: list[dict[str, Any]] = []
 
     for review in review_rows:
-        matched_groups: list[str] = []
-        for group, field in TAG_GROUP_FIELDS.items():
-            if args.tag_group and group != args.tag_group:
-                continue
+        matched_groups: list[tuple[str, str]] = []
+        for ai_group, field in TAG_GROUP_FIELDS.items():
             tags = [t for t in normalize_tags(review.get(field)) if tag_is_informative(t, keep=args.keep_non_informative_tags)]
-            if target_tag in tags:
-                matched_groups.append(group)
+            for tag in tags:
+                normalized_group = normalize_tag_group(tag, ai_group, keep_ai_tag_group=bool(args.keep_ai_tag_group))
+                if args.tag_group and normalized_group != args.tag_group:
+                    continue
+                if target_tag == tag:
+                    pair = (normalized_group, ai_group)
+                    if pair not in matched_groups:
+                        matched_groups.append(pair)
         if not matched_groups:
             continue
         outcome_row = lookup_row(
@@ -221,11 +244,12 @@ def main() -> int:
             ("order_key", clean_str(outcome_row.get("order_key"))),
             ("payload_key", clean_str(outcome_row.get("payload_key"))),
         ) if snapshot_indexes else None
-        for group in matched_groups:
+        for group, ai_original_group in matched_groups:
             out: dict[str, Any] = {
                 "created_at_utc": now,
                 "tag_name": target_tag,
                 "tag_group": group,
+                "ai_original_tag_group": ai_original_group,
                 "symbol": clean_str(outcome_row.get("symbol")),
                 "strategy_key": clean_str(outcome_row.get("strategy_key")),
                 "strategy_id": clean_str(outcome_row.get("strategy_id")),
@@ -284,12 +308,14 @@ def main() -> int:
         "output_csv": args.output_csv,
         "rows_out": int(len(out_df)),
         "outcome_counts": out_df["outcome"].value_counts(dropna=False).to_dict() if not out_df.empty else {},
+        "normalized_tag_groups": not bool(args.keep_ai_tag_group),
     }
     if args.output_json:
         write_json(args.output_json, summary)
     print("export_trade_ai_tag_cases")
     print(f"tag_name: {target_tag}")
     print(f"rows_out: {summary['rows_out']}")
+    print(f"normalized_tag_groups: {summary['normalized_tag_groups']}")
     print(f"output_csv: {args.output_csv}")
     if args.output_json:
         print(f"output_json: {args.output_json}")
