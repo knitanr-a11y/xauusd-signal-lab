@@ -61,6 +61,21 @@ SUMMARY_COLUMNS = [
     "last_seen_trade_time",
 ]
 
+NON_INFORMATIVE_TAGS = {
+    "",
+    "-",
+    "none",
+    "null",
+    "n/a",
+    "na",
+    "unknown",
+    "unclear",
+    "no_clear_positive_tag",
+    "no_positive_tag",
+    "no_risk_tag",
+    "no_clear_risk_tag",
+}
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Summarize trade AI review hypothesis tags.")
@@ -73,7 +88,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--suspect-avg-r-diff", type=float, default=-0.20, help="Tagged avg_r - overall avg_r threshold")
     p.add_argument("--group-by-symbol", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--group-by-strategy", action=argparse.BooleanOptionalAction, default=True)
+    p.add_argument("--keep-non-informative-tags", action="store_true", help="Do not drop placeholder tags such as unclear/none/unknown.")
     return p.parse_args()
+
+
+def canonical_tag_name(tag: Any) -> str:
+    return clean_str(tag).strip().lower().replace(" ", "_").replace("-", "_")
+
+
+def is_informative_tag(tag: Any, *, keep_non_informative: bool = False) -> bool:
+    if keep_non_informative:
+        return bool(clean_str(tag))
+    return canonical_tag_name(tag) not in NON_INFORMATIVE_TAGS
 
 
 def is_win(outcome: Any, profit_r: Any) -> bool:
@@ -135,7 +161,7 @@ def last_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "")
     return default
 
 
-def normalize_review_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
+def normalize_review_rows(rows: list[dict[str, Any]], *, keep_non_informative: bool = False) -> pd.DataFrame:
     out_rows: list[dict[str, Any]] = []
     for row in rows:
         for group_name, key in [
@@ -150,8 +176,8 @@ def normalize_review_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
             if not isinstance(tags, list):
                 tags = []
             for tag in tags:
-                tag_name = clean_str(tag)
-                if not tag_name:
+                tag_name = canonical_tag_name(tag)
+                if not is_informative_tag(tag_name, keep_non_informative=keep_non_informative):
                     continue
                 out_rows.append({
                     "trade_id": clean_str(row.get("trade_id")),
@@ -284,7 +310,7 @@ def main() -> int:
     args = parse_args()
     outcome_df = read_csv(args.trade_outcome_csv)
     review_rows = read_jsonl(args.ai_review_jsonl)
-    tag_df = normalize_review_rows(review_rows)
+    tag_df = normalize_review_rows(review_rows, keep_non_informative=bool(args.keep_non_informative_tags))
     joined = join_reviews_outcomes(tag_df, outcome_df)
     now = utc_now_text()
 
@@ -366,6 +392,7 @@ def main() -> int:
         "summary_rows": int(len(out)),
         "should_investigate_rows": int(out["should_investigate"].fillna(False).sum()) if "should_investigate" in out.columns and not out.empty else 0,
         "min_sample": int(args.min_sample),
+        "keep_non_informative_tags": bool(args.keep_non_informative_tags),
     }
     if args.output_json:
         write_json(args.output_json, summary)
@@ -374,6 +401,7 @@ def main() -> int:
     print(f"tag_rows: {summary['tag_rows']}")
     print(f"summary_rows: {summary['summary_rows']}")
     print(f"should_investigate_rows: {summary['should_investigate_rows']}")
+    print(f"keep_non_informative_tags: {summary['keep_non_informative_tags']}")
     print(f"output_csv: {args.output_csv}")
     return 0
 
