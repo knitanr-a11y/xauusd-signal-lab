@@ -9,6 +9,7 @@ should_change_strategy_from_this_single_trade is always False.
 Environment:
 - OPENAI_API_KEY must be set unless --dry-run is used.
 - OPENAI_MODEL can be used as a default model.
+- A .env file containing OPENAI_API_KEY=... is loaded automatically by default.
 
 Operational note:
 - Use --overwrite when switching from dry-run to real API output so placeholder
@@ -19,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from pathlib import Path
 from typing import Any
 
 from trade_ai_review_utils import (
@@ -32,6 +34,7 @@ from trade_ai_review_utils import (
     clean_str,
     read_jsonl,
     utc_now_text,
+    windows_long_path,
     write_json,
     write_jsonl,
 )
@@ -39,17 +42,109 @@ from trade_ai_review_utils import (
 DEFAULT_MODEL = "gpt-5-mini"
 
 
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def dotenv_candidate_paths(explicit_path: str = "") -> list[Path]:
+    candidates: list[Path] = []
+    if explicit_path:
+        candidates.append(Path(explicit_path))
+    cwd = Path.cwd()
+    root = repo_root()
+    script_dir = Path(__file__).resolve().parent
+    for p in [cwd / ".env", root / ".env", script_dir / ".env", root.parent / ".env"]:
+        if p not in candidates:
+            candidates.append(p)
+    return candidates
+
+
+def parse_dotenv_line(line: str) -> tuple[str, str] | None:
+    text = line.strip()
+    if not text or text.startswith("#"):
+        return None
+    if text.lower().startswith("export "):
+        text = text[7:].strip()
+    if "=" not in text:
+        return None
+    key, value = text.split("=", 1)
+    key = key.strip()
+    value = value.strip()
+    if not key:
+        return None
+    if len(value) >= 2 and ((value[0] == value[-1] == '"') or (value[0] == value[-1] == "'")):
+        value = value[1:-1]
+    return key, value
+
+
+def load_dotenv_if_present(explicit_path: str = "", *, override: bool = False) -> dict[str, Any]:
+    """Load OPENAI_* values from .env without adding python-dotenv dependency.
+
+    Only keys that are not already present in os.environ are loaded unless
+    override=True. The returned report never includes secret values.
+    """
+    loaded_keys: list[str] = []
+    checked: list[str] = []
+    loaded_path = ""
+    for path in dotenv_candidate_paths(explicit_path):
+        checked.append(str(path))
+        if not path.exists():
+            continue
+        loaded_path = str(path)
+        with open(windows_long_path(path), "r", encoding="utf-8-sig") as f:
+            for raw_line in f:
+                parsed = parse_dotenv_line(raw_line)
+                if parsed is None:
+                    continue
+                key, value = parsed
+                if not key.startswith("OPENAI_"):
+                    continue
+                if override or key not in os.environ:
+                    os.environ[key] = value
+                    loaded_keys.append(key)
+        break
+    return {
+        "dotenv_loaded": bool(loaded_path),
+        "dotenv_path": loaded_path,
+        "dotenv_checked_paths": checked,
+        "dotenv_loaded_keys": sorted(set(loaded_keys)),
+        "openai_api_key_present": bool(os.environ.get("OPENAI_API_KEY")),
+        "openai_model_from_env_present": bool(os.environ.get("OPENAI_MODEL")),
+    }
+
+
+def default_model_after_dotenv() -> str:
+    return os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run OpenAI trade AI reviews from payload JSONL.")
     p.add_argument("--payload-jsonl", required=True)
     p.add_argument("--output-jsonl", required=True)
     p.add_argument("--output-json", default="")
-    p.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
+    p.add_argument("--env-file", default="", help="Optional .env path. Default searches current directory and repo root.")
+    p.add_argument("--no-dotenv", action="store_true", help="Do not load OPENAI_* values from .env.")
+    p.add_argument("--dotenv-override", action="store_true", help="Allow .env to override existing OPENAI_* environment variables.")
+    p.add_argument("--model", default="", help="Default: OPENAI_MODEL from env/.env, else gpt-5-mini.")
     p.add_argument("--max-items", type=int, default=0, help="0 = all")
     p.add_argument("--dry-run", action="store_true", help="Write deterministic placeholder reviews without calling OpenAI.")
     p.add_argument("--overwrite", action="store_true", help="Overwrite output JSONL instead of appending. Recommended when re-running or switching dry-run/API modes.")
     p.add_argument("--temperature", type=float, default=0.0)
-    return p.parse_args()
+    args = p.parse_args()
+    if not args.no_dotenv:
+        args.dotenv_report = load_dotenv_if_present(args.env_file, override=bool(args.dotenv_override))
+    else:
+        args.dotenv_report = {
+            "dotenv_loaded": False,
+            "dotenv_path": "",
+            "dotenv_checked_paths": [],
+            "dotenv_loaded_keys": [],
+            "openai_api_key_present": bool(os.environ.get("OPENAI_API_KEY")),
+            "openai_model_from_env_present": bool(os.environ.get("OPENAI_MODEL")),
+        }
+    if not args.model:
+        args.model = default_model_after_dotenv()
+    return args
 
 
 def extract_json(text: str) -> dict[str, Any]:
@@ -168,7 +263,9 @@ def call_openai(payload: dict[str, Any], *, model: str, temperature: float) -> t
         from openai import OpenAI  # type: ignore
     except Exception as exc:  # pragma: no cover
         raise RuntimeError(f"openai package import failed: {exc!r}") from exc
-    client = OpenAI()
+    if not os.environ.get("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is not set. Put OPENAI_API_KEY=... in .env or set it as an environment variable.")
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     system_prompt = clean_str(payload.get("system_prompt"))
     user_prompt = clean_str(payload.get("user_prompt"))
     # Use Chat Completions for broad compatibility with the current Python SDK.
@@ -214,6 +311,8 @@ def main() -> int:
         written = write_jsonl(args.output_jsonl, rows)
     else:
         written = append_jsonl(args.output_jsonl, rows)
+    dotenv_report = dict(getattr(args, "dotenv_report", {}))
+    # Never include secret values. This only reports whether a key was present.
     summary = {
         "script": "run_trade_ai_review_from_payloads.py",
         "created_at_utc": utc_now_text(),
@@ -223,6 +322,7 @@ def main() -> int:
         "model": args.model,
         "dry_run": bool(args.dry_run),
         "run_mode": "DRY_RUN" if args.dry_run else "OPENAI_API",
+        "dotenv": dotenv_report,
         "rows_in": int(len(payloads)),
         "rows_written": int(written),
         "error_rows": int(len(errors)),
@@ -241,6 +341,11 @@ def main() -> int:
     print(f"run_mode: {summary['run_mode']}")
     print(f"output_mode: {summary['output_mode']}")
     print(f"model: {summary['model']}")
+    if dotenv_report:
+        print(f"dotenv_loaded: {dotenv_report.get('dotenv_loaded')}")
+        if dotenv_report.get("dotenv_path"):
+            print(f"dotenv_path: {dotenv_report.get('dotenv_path')}")
+        print(f"openai_api_key_present: {dotenv_report.get('openai_api_key_present')}")
     print(f"output_jsonl: {args.output_jsonl}")
     return 0 if not errors else 1
 
