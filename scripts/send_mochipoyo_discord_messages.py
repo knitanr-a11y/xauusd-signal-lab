@@ -13,6 +13,7 @@ Safety:
 - transient Discord/webhook failures are retried before returning ERROR
 - AI history warning is enabled by default when tag summary exists; it only
   appends trader-facing caution text and can be disabled explicitly
+- empty input CSVs are treated as SKIPPED_NO_ROWS, not as fatal parser errors
 
 Console output is deliberately summary-only. Full Discord messages are written to
 UTF-8 preview files instead of being printed to Windows cmd.exe, which avoids
@@ -31,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 from format_mochipoyo_discord_messages import format_row, val  # type: ignore
 
@@ -68,8 +70,13 @@ def write_csv(df: pd.DataFrame, path: str | Path) -> None:
     df.to_csv(windows_long_path(p), index=False, encoding="utf-8-sig")
 
 
-def read_csv(path: str | Path) -> pd.DataFrame:
-    return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+def read_csv(path: str | Path, *, empty_ok: bool = True) -> pd.DataFrame:
+    try:
+        return pd.read_csv(windows_long_path(path), encoding="utf-8-sig")
+    except EmptyDataError:
+        if empty_ok:
+            return pd.DataFrame()
+        raise
 
 
 def safe_text(text: object) -> str:
@@ -277,6 +284,8 @@ def append_send_ledger(rows: list[dict[str, Any]], send_ledger_csv: Path) -> Non
 
 def load_input_rows(input_csv: Path, symbol: str | None, max_rows: int) -> pd.DataFrame:
     df = read_csv(input_csv)
+    if df.empty:
+        return df
     if symbol and "symbol" in df.columns:
         df = df[df["symbol"].astype(str).str.upper() == symbol.upper()].copy()
     if "entry_time" in df.columns:
@@ -295,6 +304,9 @@ def maybe_apply_ai_history_warnings(df: pd.DataFrame, args: argparse.Namespace, 
         "ai_history_warning_tag_summary_csv": str(args.ai_history_tag_summary_csv),
     }
     if not args.enable_ai_history_warning:
+        return df, report
+    if df.empty:
+        report["ai_history_warning_status"] = "SKIPPED_NO_ROWS"
         return df, report
     if apply_ai_history_warnings is None:
         report["ai_history_warning_status"] = "ERROR_IMPORT_HELPER"
