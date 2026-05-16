@@ -21,7 +21,6 @@ from __future__ import annotations
 import argparse
 import math
 import os
-import re
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +37,7 @@ SEVERITY_ORDER = {
     "WATCH": 2,
     "SUSPECT": 3,
 }
+MIN_DISCORD_SEVERITY = "WATCH"
 
 RISK_TAG_JP = {
     "ema_distance_too_large": "EMA乖離が大きい",
@@ -221,17 +221,6 @@ def matching_summary_rows(summary: pd.DataFrame, ctx: dict[str, str]) -> pd.Data
     return summary[mask].copy()
 
 
-def row_has_feature_columns(row: pd.Series) -> bool:
-    names = [
-        "entry_position_in_m15_range_100_pct",
-        "m15_signal_candle_range_atr_ratio",
-        "m15_ema20_distance_atr",
-        "m15_ema50_distance_atr",
-        "m15_ema200_distance_atr",
-    ]
-    return any(name in row.index and clean_str(row.get(name)) for name in names)
-
-
 def feature_pattern_warning(row: pd.Series, ctx: dict[str, str]) -> list[str]:
     """Detect the current candidate's own high-risk shape when feature columns exist."""
     direction = clean_str(ctx.get("direction")).upper()
@@ -266,8 +255,6 @@ def severity_from_rows(rows: pd.DataFrame) -> str:
             max_sev = "SUSPECT"
         elif status == "WATCH" and SEVERITY_ORDER.get(max_sev, 0) < SEVERITY_ORDER["WATCH"]:
             max_sev = "WATCH"
-        elif status == "NEW" and SEVERITY_ORDER.get(max_sev, 0) < SEVERITY_ORDER["INFO"]:
-            max_sev = "INFO"
     return max_sev
 
 
@@ -292,14 +279,18 @@ def select_relevant_summary_rows(matched: pd.DataFrame, ctx: dict[str, str], *, 
     if matched.empty:
         return matched.copy()
     df = matched.copy()
-    # Trader-facing warning: focus on risk/execution tags. Positive tags are not
-    # shown here because this text is a caution block, not an approval block.
     if "tag_group" in df.columns:
         df = df[df["tag_group"].astype(str).isin(["risk", "execution", "system"])].copy()
     if df.empty:
         return df
-    # Show SUSPECT first, then near-sample-lossy WATCH/NEW tags that are useful
-    # for manual inspection.
+
+    # Do not show INFO-only NEW rows as Discord warnings. They remain available
+    # in CSV summaries, but live notifications should stay quiet until a tag is
+    # SUSPECT/WATCH or the current signal itself matches a high-risk feature shape.
+    df = df[(df["should_investigate_bool"]) | (df["tag_status_norm"].isin(["SUSPECT", "WATCH"]))].copy()
+    if df.empty:
+        return df
+
     df["_sev_score"] = df.apply(
         lambda r: 3 if bool(r.get("should_investigate_bool", False)) or clean_str(r.get("tag_status_norm")).upper() == "SUSPECT"
         else 2 if clean_str(r.get("tag_status_norm")).upper() == "WATCH"
@@ -322,6 +313,7 @@ def build_warning_for_row(row: pd.Series, summary: pd.DataFrame, *, max_tags: in
     severity = severity_from_rows(relevant)
     if pattern_lines and SEVERITY_ORDER.get(severity, 0) < SEVERITY_ORDER["WATCH"]:
         severity = "WATCH"
+
     if not pattern_lines and not tag_lines:
         if summary.empty:
             return {
@@ -336,7 +328,16 @@ def build_warning_for_row(row: pd.Series, summary: pd.DataFrame, *, max_tags: in
             "ai_history_warning_severity": "NONE",
             "ai_history_warning_text": "",
             "ai_history_warning_tags": "",
-            "ai_history_warning_reason": "no matching strategy tag warnings",
+            "ai_history_warning_reason": "no WATCH/SUSPECT tag warnings and no current high-risk feature pattern",
+        }
+
+    if SEVERITY_ORDER.get(severity, 0) < SEVERITY_ORDER[MIN_DISCORD_SEVERITY]:
+        return {
+            "ai_history_warning_status": WARNING_STATUS_NONE,
+            "ai_history_warning_severity": severity,
+            "ai_history_warning_text": "",
+            "ai_history_warning_tags": ";".join(canonical_tag(r.get("tag_name")) for _, r in relevant.iterrows()),
+            "ai_history_warning_reason": "suppressed info-only tag history",
         }
 
     direction = clean_str(ctx.get("direction")).upper()
@@ -358,7 +359,7 @@ def build_warning_for_row(row: pd.Series, summary: pd.DataFrame, *, max_tags: in
         "ai_history_warning_severity": severity,
         "ai_history_warning_text": " || ".join(lines),
         "ai_history_warning_tags": ";".join(canonical_tag(r.get("tag_name")) for _, r in relevant.iterrows()),
-        "ai_history_warning_reason": "matched historical tag summary and/or current feature pattern",
+        "ai_history_warning_reason": "matched WATCH/SUSPECT history and/or current feature pattern",
     }
 
 
