@@ -15,6 +15,12 @@ Matching priority:
 3. deal_ticket / entry_deal_ticket / close_deal_ticket
 4. symbol + direction + closest entry time fallback
 
+Important distinction:
+- MATCHED rows are real MT5 positions/trades.
+- NOT_EXECUTED rows are ledger/order candidates that did not become MT5 positions.
+  Example: signal generated near market open, but broker rejected/disabled trading.
+- NO_MT5_POSITION_MATCH rows are ambiguous unmatched rows.
+
 The output is the factual ledger used by the AI review pipeline. AI comments and
 hypothesis tags are intentionally stored elsewhere.
 """
@@ -55,6 +61,8 @@ OUTCOME_COLUMNS = [
     "trade_id",
     "match_status",
     "match_method",
+    "execution_status",
+    "send_status_text",
     "account_login",
     "account_server",
     "broker_symbol",
@@ -113,6 +121,25 @@ OUTCOME_COLUMNS = [
     "notes",
 ]
 
+NEGATIVE_EXECUTION_KEYWORDS = [
+    "ERROR",
+    "FAILED",
+    "FAIL",
+    "REJECT",
+    "REJECTED",
+    "INVALID",
+    "DISABLED",
+    "MARKET_CLOSED",
+    "TRADE_DISABLED",
+    "NOT_TRADEABLE",
+    "OFF_QUOTES",
+    "NO_MONEY",
+    "NO_TRADE",
+    "SKIP",
+    "SENT_ROWS=0",
+    "AUTO_TRADE_STATUS=ERROR",
+]
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Build deterministic trade outcome ledger from sender order ledgers and MT5 history.")
@@ -169,14 +196,7 @@ def normalize_positions(df: pd.DataFrame, source_path: str) -> pd.DataFrame:
 
 
 def infer_from_pipe_key(*values: Any) -> dict[str, str]:
-    """Infer legacy Mochipoyo strategy metadata from pipe-separated keys.
-
-    Common key shape:
-        GOLD|GOLD_H4_M15_DAYTRADE|B|BUY|2026-05-07 16:00:00|...|4750.00
-
-    This keeps old order ledgers useful even when they did not persist
-    strategy_key / pair_name as separate columns.
-    """
+    """Infer legacy Mochipoyo strategy metadata from pipe-separated keys."""
     for value in values:
         text = clean_str(value)
         if not text or "|" not in text:
@@ -199,6 +219,63 @@ def infer_from_pipe_key(*values: Any) -> dict[str, str]:
     return {}
 
 
+def row_status_text(row: pd.Series) -> str:
+    names = [
+        "order_status",
+        "auto_trade_status",
+        "status",
+        "result_status",
+        "send_status",
+        "request_status",
+        "payload_status",
+        "order_payload_status",
+        "discord_status",
+        "retcode",
+        "retcode_external",
+        "result_retcode",
+        "result_comment",
+        "comment",
+        "error",
+        "last_error",
+        "exception",
+        "success",
+        "sent_rows",
+        "auto_trade_sent_rows",
+        "order_send_called_count",
+        "auto_trade_order_send_called_count",
+    ]
+    parts: list[str] = []
+    for name in names:
+        value = row_get(row, [name], "")
+        text = clean_str(value)
+        if text:
+            parts.append(f"{name}={text}")
+    return " | ".join(parts)
+
+
+def infer_unmatched_execution_status(order: dict[str, Any]) -> tuple[str, str, str]:
+    """Classify rows that did not match MT5 history.
+
+    This avoids mislabeling non-executed signals as live OPEN positions.
+    """
+    status_text = clean_str(order.get("send_status_text"))
+    status_upper = status_text.upper()
+    order_ticket = clean_int(order.get("order_ticket"), 0)
+    deal_ticket = clean_int(order.get("deal_ticket"), 0)
+    position_ticket = clean_int(order.get("position_ticket"), 0)
+    if order_ticket or deal_ticket or position_ticket:
+        return "SENT_NO_MT5_POSITION_MATCH", "NO_MT5_POSITION_MATCH", "NO_MT5_POSITION_MATCH"
+    for keyword in NEGATIVE_EXECUTION_KEYWORDS:
+        if keyword in status_upper:
+            return "NOT_EXECUTED", "NOT_EXECUTED", "NOT_EXECUTED"
+    # Generic sent_rows=0 detection even if the status text format varies.
+    for key in ["sent_rows", "auto_trade_sent_rows"]:
+        value = clean_int(order.get(key), -999999)
+        if value == 0:
+            return "NOT_EXECUTED", "NOT_EXECUTED", "NOT_EXECUTED"
+    return "NO_MT5_POSITION_MATCH", "NO_MT5_POSITION_MATCH", "NO_MT5_POSITION_MATCH"
+
+
 def normalize_order_row(row: pd.Series) -> dict[str, Any]:
     order_key = clean_str(row_get(row, ["order_key"], ""))
     payload_key = clean_str(row_get(row, ["payload_key"], ""))
@@ -218,6 +295,7 @@ def normalize_order_row(row: pd.Series) -> dict[str, Any]:
     strategy_id = clean_str(row_get(row, ["strategy_id", "router_strategy_id"], inferred.get("strategy_id", strategy_key)))
     pair_name = clean_str(row_get(row, ["pair_name"], inferred.get("pair_name", strategy_key)))
     candidate_rank = clean_str(row_get(row, ["candidate_rank"], inferred.get("candidate_rank", "")))
+    status_text = row_status_text(row)
     return {
         "account_login": clean_int(row_get(row, ["account_login", "login"], 0), 0),
         "account_server": clean_str(row_get(row, ["account_server", "server"], "")),
@@ -247,6 +325,9 @@ def normalize_order_row(row: pd.Series) -> dict[str, Any]:
         "tp_price": tp_price,
         "spread_at_entry": clean_float(row_get(row, ["spread_at_entry", "spread"], None)),
         "slippage_entry": clean_float(row_get(row, ["slippage_entry"], None)),
+        "send_status_text": status_text,
+        "sent_rows": clean_int(row_get(row, ["sent_rows", "auto_trade_sent_rows"], -999999), -999999),
+        "auto_trade_sent_rows": clean_int(row_get(row, ["auto_trade_sent_rows", "sent_rows"], -999999), -999999),
         "source_order_ledger_csv": clean_str(row_get(row, ["source_order_ledger_csv"], "")),
         "source_order_ledger_row_index": clean_int(row_get(row, ["source_order_ledger_row_index"], 0), 0),
     }
@@ -255,15 +336,12 @@ def normalize_order_row(row: pd.Series) -> dict[str, Any]:
 def find_position_match(order: dict[str, Any], positions: pd.DataFrame, tolerance_minutes: float) -> tuple[pd.Series | None, str]:
     if positions.empty:
         return None, "NO_MT5_POSITIONS"
-
     candidates = positions.copy()
-
     pos_ticket = clean_int(order.get("position_ticket"), 0)
     if pos_ticket and "position_id_int" in candidates.columns:
         hit = candidates[candidates["position_id_int"] == pos_ticket]
         if not hit.empty:
             return hit.iloc[0], "position_ticket"
-
     order_ticket = clean_int(order.get("order_ticket"), 0)
     if order_ticket:
         mask = pd.Series(False, index=candidates.index)
@@ -273,7 +351,6 @@ def find_position_match(order: dict[str, Any], positions: pd.DataFrame, toleranc
         hit = candidates[mask]
         if not hit.empty:
             return hit.iloc[0], "order_ticket"
-
     deal_ticket = clean_int(order.get("deal_ticket"), 0)
     if deal_ticket:
         mask = pd.Series(False, index=candidates.index)
@@ -283,7 +360,6 @@ def find_position_match(order: dict[str, Any], positions: pd.DataFrame, toleranc
         hit = candidates[mask]
         if not hit.empty:
             return hit.iloc[0], "deal_ticket"
-
     symbol = clean_str(order.get("symbol"), normalize_symbol_from_broker(order.get("broker_symbol")))
     broker_symbol = clean_str(order.get("broker_symbol"))
     direction = normalize_direction(order.get("direction"))
@@ -297,7 +373,6 @@ def find_position_match(order: dict[str, Any], positions: pd.DataFrame, toleranc
         candidates = candidates[candidates["entry_time_diff_minutes"] <= float(tolerance_minutes)].copy()
         if not candidates.empty:
             return candidates.sort_values("entry_time_diff_minutes").iloc[0], "symbol_direction_time"
-
     return None, "NO_MATCH"
 
 
@@ -321,6 +396,7 @@ def build_outcome_row(order_row: pd.Series, positions: pd.DataFrame, args: argpa
     order = normalize_order_row(order_row)
     pos, match_method = find_position_match(order, positions, args.time_match_tolerance_minutes)
     matched = pos is not None
+    unmatched_execution_status, unmatched_outcome, unmatched_close_reason = infer_unmatched_execution_status(order)
 
     entry_price = clean_float(position_value(pos, ["entry_price"], order.get("entry_price")), order.get("entry_price"))
     close_price = clean_float(position_value(pos, ["close_price"], None))
@@ -352,8 +428,10 @@ def build_outcome_row(order_row: pd.Series, positions: pd.DataFrame, args: argpa
         "schema_version": OUTCOME_LEDGER_SCHEMA_VERSION,
         "created_at_utc": now,
         "updated_at_utc": now,
-        "match_status": "MATCHED" if matched else "UNMATCHED_OPEN_OR_MISSING_HISTORY",
+        "match_status": "MATCHED" if matched else unmatched_execution_status,
         "match_method": match_method,
+        "execution_status": "EXECUTED" if matched else unmatched_execution_status,
+        "send_status_text": order.get("send_status_text"),
         **{k: order.get(k, "") for k in [
             "account_login", "account_server", "broker_symbol", "symbol", "strategy_key", "strategy_alias",
             "strategy_id", "condition_id", "router_strategy_slot", "router_strategy_id", "pair_name",
@@ -379,8 +457,8 @@ def build_outcome_row(order_row: pd.Series, positions: pd.DataFrame, args: argpa
         "commission": commission,
         "swap": swap,
         "net_profit": net_profit,
-        "outcome": outcome if matched else "OPEN",
-        "close_reason": close_reason if matched else "OPEN",
+        "outcome": outcome if matched else unmatched_outcome,
+        "close_reason": close_reason if matched else unmatched_close_reason,
         "holding_minutes": holding_minutes,
         "mfe_points": None,
         "mae_points": None,
@@ -397,7 +475,7 @@ def build_outcome_row(order_row: pd.Series, positions: pd.DataFrame, args: argpa
         "source_mt5_positions_csv": position_value(pos, ["source_mt5_positions_csv"], args.mt5_positions_csv if matched else ""),
         "source_mt5_position_row_index": clean_int(position_value(pos, ["source_mt5_position_row_index"], 0), 0),
         "source_mt5_deals_csv": args.mt5_deals_csv,
-        "notes": "deterministic outcome ledger; AI review not applied",
+        "notes": "deterministic outcome ledger; AI review not applied" if matched else "unmatched order ledger row; not counted as an open MT5 position",
     }
     row["trade_id"] = canonical_trade_id(row)
     return {col: row.get(col, "") for col in OUTCOME_COLUMNS}
@@ -427,9 +505,11 @@ def main() -> int:
         "rows_in_mt5_positions": int(len(positions)),
         "rows_out": int(len(out)),
         "matched_rows": int((out["match_status"] == "MATCHED").sum()) if not out.empty else 0,
-        "open_or_unmatched_rows": int((out["match_status"] != "MATCHED").sum()) if not out.empty else 0,
+        "unmatched_rows": int((out["match_status"] != "MATCHED").sum()) if not out.empty else 0,
         "outcome_counts": out["outcome"].value_counts(dropna=False).to_dict() if "outcome" in out.columns and not out.empty else {},
+        "match_status_counts": out["match_status"].value_counts(dropna=False).to_dict() if "match_status" in out.columns and not out.empty else {},
         "match_method_counts": out["match_method"].value_counts(dropna=False).to_dict() if "match_method" in out.columns and not out.empty else {},
+        "execution_status_counts": out["execution_status"].value_counts(dropna=False).to_dict() if "execution_status" in out.columns and not out.empty else {},
         "strategy_key_counts": out["strategy_key"].value_counts(dropna=False).to_dict() if "strategy_key" in out.columns and not out.empty else {},
     }
     if args.output_json:
@@ -440,7 +520,7 @@ def main() -> int:
     print(f"rows_in_mt5_positions: {summary['rows_in_mt5_positions']}")
     print(f"rows_out: {summary['rows_out']}")
     print(f"matched_rows: {summary['matched_rows']}")
-    print(f"open_or_unmatched_rows: {summary['open_or_unmatched_rows']}")
+    print(f"unmatched_rows: {summary['unmatched_rows']}")
     print(f"output_csv: {args.output_csv}")
     if args.output_json:
         print(f"output_json: {args.output_json}")
