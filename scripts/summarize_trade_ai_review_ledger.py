@@ -11,7 +11,6 @@ It never edits strategy rules. It produces investigation candidates only.
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
 from typing import Any
 
 import pandas as pd
@@ -105,10 +104,40 @@ def is_breakeven(outcome: Any, profit_r: Any) -> bool:
     return bool(r is not None and abs(r) <= 1e-12)
 
 
+def first_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "") -> str:
+    """Return the first non-empty value from any of the requested columns.
+
+    This intentionally avoids `.dropna().iloc[0]` because a column can exist but
+    contain only NaN/empty strings for a given tag group. That was the cause of
+    the first live failure in this script.
+    """
+    if df.empty:
+        return default
+    for col in columns:
+        if col not in df.columns:
+            continue
+        for value in df[col].tolist():
+            text = clean_str(value)
+            if text:
+                return text
+    return default
+
+
+def last_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "") -> str:
+    if df.empty:
+        return default
+    for col in columns:
+        if col not in df.columns:
+            continue
+        values = [clean_str(v) for v in df[col].tolist() if clean_str(v)]
+        if values:
+            return values[-1]
+    return default
+
+
 def normalize_review_rows(rows: list[dict[str, Any]]) -> pd.DataFrame:
     out_rows: list[dict[str, Any]] = []
     for row in rows:
-        base = dict(row)
         for group_name, key in [
             ("possible_risk_tags", "risk"),
             ("possible_positive_tags", "positive"),
@@ -268,12 +297,6 @@ def main() -> int:
     if "strategy_key" not in joined.columns:
         joined["strategy_key"] = ""
 
-    overall_scope_cols = []
-    if args.group_by_symbol:
-        overall_scope_cols.append("symbol")
-    if args.group_by_strategy:
-        overall_scope_cols.append("strategy_id")
-
     rows: list[dict[str, Any]] = []
     if joined.empty:
         out = pd.DataFrame(columns=SUMMARY_COLUMNS)
@@ -300,7 +323,7 @@ def main() -> int:
                 "created_at_utc": now,
                 "updated_at_utc": now,
                 "symbol": clean_str(group_values.get("symbol")),
-                "strategy_key": clean_str(g.get("strategy_key", pd.Series([""])).dropna().astype(str).iloc[0]) if "strategy_key" in g.columns and not g.empty else "",
+                "strategy_key": first_nonempty_value(g, ["strategy_key", "strategy_key_outcome"]),
                 "strategy_id": clean_str(group_values.get("strategy_id")),
                 "tag_name": clean_str(group_values.get("tag_name")),
                 "tag_group": clean_str(group_values.get("tag_group")),
@@ -323,7 +346,7 @@ def main() -> int:
                 "investigation_reason": reason,
                 "example_win_trade_ids": examples(g, want_win=True),
                 "example_loss_trade_ids": examples(g, want_win=False),
-                "last_seen_trade_time": clean_str(g.get("close_time", pd.Series(dtype=object)).dropna().astype(str).max()) if "close_time" in g.columns and not g.empty else "",
+                "last_seen_trade_time": last_nonempty_value(g, ["close_time", "close_time_outcome", "review_created_at_utc"]),
             }
             rows.append(row)
         out = pd.DataFrame(rows, columns=SUMMARY_COLUMNS).sort_values(
