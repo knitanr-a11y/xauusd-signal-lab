@@ -14,6 +14,9 @@ Environment:
 Operational note:
 - Use --overwrite when switching from dry-run to real API output so placeholder
   records do not remain mixed with model-generated reviews.
+- Some current models, including gpt-5-mini in this environment, only accept the
+  default temperature. Therefore temperature is omitted unless --temperature is
+  explicitly provided.
 """
 from __future__ import annotations
 
@@ -129,7 +132,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-items", type=int, default=0, help="0 = all")
     p.add_argument("--dry-run", action="store_true", help="Write deterministic placeholder reviews without calling OpenAI.")
     p.add_argument("--overwrite", action="store_true", help="Overwrite output JSONL instead of appending. Recommended when re-running or switching dry-run/API modes.")
-    p.add_argument("--temperature", type=float, default=0.0)
+    p.add_argument("--temperature", type=float, default=None, help="Optional. Omitted by default because some models only support the default temperature.")
     args = p.parse_args()
     if not args.no_dotenv:
         args.dotenv_report = load_dotenv_if_present(args.env_file, override=bool(args.dotenv_override))
@@ -258,7 +261,7 @@ def dry_run_review(payload: dict[str, Any], *, model: str) -> dict[str, Any]:
     return normalize_review(review, payload, model=model, run_mode="DRY_RUN", raw_response="DRY_RUN_PLACEHOLDER")
 
 
-def call_openai(payload: dict[str, Any], *, model: str, temperature: float) -> tuple[dict[str, Any], str]:
+def call_openai(payload: dict[str, Any], *, model: str, temperature: float | None) -> tuple[dict[str, Any], str]:
     try:
         from openai import OpenAI  # type: ignore
     except Exception as exc:  # pragma: no cover
@@ -269,15 +272,17 @@ def call_openai(payload: dict[str, Any], *, model: str, temperature: float) -> t
     system_prompt = clean_str(payload.get("system_prompt"))
     user_prompt = clean_str(payload.get("user_prompt"))
     # Use Chat Completions for broad compatibility with the current Python SDK.
-    resp = client.chat.completions.create(
-        model=model,
-        messages=[
+    request: dict[str, Any] = {
+        "model": model,
+        "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=temperature,
-        response_format={"type": "json_object"},
-    )
+        "response_format": {"type": "json_object"},
+    }
+    if temperature is not None:
+        request["temperature"] = float(temperature)
+    resp = client.chat.completions.create(**request)
     text = resp.choices[0].message.content or "{}"
     return extract_json(text), text
 
@@ -320,6 +325,8 @@ def main() -> int:
         "output_jsonl": args.output_jsonl,
         "output_mode": "overwrite" if args.overwrite else "append",
         "model": args.model,
+        "temperature_sent": args.temperature is not None,
+        "temperature": args.temperature,
         "dry_run": bool(args.dry_run),
         "run_mode": "DRY_RUN" if args.dry_run else "OPENAI_API",
         "dotenv": dotenv_report,
@@ -341,6 +348,7 @@ def main() -> int:
     print(f"run_mode: {summary['run_mode']}")
     print(f"output_mode: {summary['output_mode']}")
     print(f"model: {summary['model']}")
+    print(f"temperature_sent: {summary['temperature_sent']}")
     if dotenv_report:
         print(f"dotenv_loaded: {dotenv_report.get('dotenv_loaded')}")
         if dotenv_report.get("dotenv_path"):
