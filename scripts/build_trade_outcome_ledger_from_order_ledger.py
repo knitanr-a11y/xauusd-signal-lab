@@ -21,7 +21,6 @@ hypothesis tags are intentionally stored elsewhere.
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -169,35 +168,74 @@ def normalize_positions(df: pd.DataFrame, source_path: str) -> pd.DataFrame:
     return out
 
 
+def infer_from_pipe_key(*values: Any) -> dict[str, str]:
+    """Infer legacy Mochipoyo strategy metadata from pipe-separated keys.
+
+    Common key shape:
+        GOLD|GOLD_H4_M15_DAYTRADE|B|BUY|2026-05-07 16:00:00|...|4750.00
+
+    This keeps old order ledgers useful even when they did not persist
+    strategy_key / pair_name as separate columns.
+    """
+    for value in values:
+        text = clean_str(value)
+        if not text or "|" not in text:
+            continue
+        parts = [p.strip() for p in text.split("|")]
+        if len(parts) < 4:
+            continue
+        symbol = parts[0]
+        strategy = parts[1]
+        candidate_rank = parts[2]
+        direction = normalize_direction(parts[3])
+        return {
+            "symbol": symbol,
+            "strategy_key": strategy,
+            "strategy_id": strategy,
+            "pair_name": strategy,
+            "candidate_rank": candidate_rank,
+            "direction": direction,
+        }
+    return {}
+
+
 def normalize_order_row(row: pd.Series) -> dict[str, Any]:
+    order_key = clean_str(row_get(row, ["order_key"], ""))
+    payload_key = clean_str(row_get(row, ["payload_key"], ""))
+    signal_key = clean_str(row_get(row, ["signal_key"], ""))
+    inferred = infer_from_pipe_key(order_key, payload_key, signal_key)
     broker_symbol = clean_str(row_get(row, ["broker_symbol", "symbol"], ""))
-    symbol = clean_str(row_get(row, ["symbol"], normalize_symbol_from_broker(broker_symbol)))
+    symbol = clean_str(row_get(row, ["symbol"], inferred.get("symbol", normalize_symbol_from_broker(broker_symbol))))
     if not symbol or symbol == broker_symbol:
-        symbol = normalize_symbol_from_broker(broker_symbol)
-    direction = normalize_direction(row_get(row, ["direction", "order_type"], ""))
+        symbol = inferred.get("symbol", normalize_symbol_from_broker(broker_symbol))
+    direction = normalize_direction(row_get(row, ["direction", "order_type"], inferred.get("direction", "")))
     entry_price_reference = clean_float(row_get(row, ["entry_price_reference", "entry_price", "price", "current_execution_price"], None))
     entry_price = clean_float(row_get(row, ["price", "current_execution_price", "entry_price", "entry_price_reference"], entry_price_reference))
     sl_price = clean_float(row_get(row, ["sl_price", "sl"], None))
     tp_price = clean_float(row_get(row, ["tp_price", "tp"], None))
     entry_time = row_get(row, ["entry_time", "sent_at", "created_at_utc", "signal_close_time"], "")
+    strategy_key = clean_str(row_get(row, ["strategy_key", "pair_name", "router_strategy_slot"], inferred.get("strategy_key", "")))
+    strategy_id = clean_str(row_get(row, ["strategy_id", "router_strategy_id"], inferred.get("strategy_id", strategy_key)))
+    pair_name = clean_str(row_get(row, ["pair_name"], inferred.get("pair_name", strategy_key)))
+    candidate_rank = clean_str(row_get(row, ["candidate_rank"], inferred.get("candidate_rank", "")))
     return {
         "account_login": clean_int(row_get(row, ["account_login", "login"], 0), 0),
         "account_server": clean_str(row_get(row, ["account_server", "server"], "")),
         "broker_symbol": broker_symbol,
         "symbol": symbol,
-        "strategy_key": clean_str(row_get(row, ["strategy_key", "pair_name", "router_strategy_slot"], "")),
+        "strategy_key": strategy_key,
         "strategy_alias": clean_str(row_get(row, ["strategy_alias"], "")),
-        "strategy_id": clean_str(row_get(row, ["strategy_id", "router_strategy_id"], "")),
-        "condition_id": clean_str(row_get(row, ["condition_id"], "")),
-        "router_strategy_slot": clean_str(row_get(row, ["router_strategy_slot"], "")),
-        "router_strategy_id": clean_str(row_get(row, ["router_strategy_id"], "")),
-        "pair_name": clean_str(row_get(row, ["pair_name"], "")),
-        "candidate_rank": clean_str(row_get(row, ["candidate_rank"], "")),
+        "strategy_id": strategy_id,
+        "condition_id": clean_str(row_get(row, ["condition_id"], strategy_id)),
+        "router_strategy_slot": clean_str(row_get(row, ["router_strategy_slot"], strategy_key)),
+        "router_strategy_id": clean_str(row_get(row, ["router_strategy_id"], strategy_id)),
+        "pair_name": pair_name,
+        "candidate_rank": candidate_rank,
         "direction": direction,
         "lot": clean_float(row_get(row, ["lot", "volume"], None)),
-        "order_key": clean_str(row_get(row, ["order_key"], "")),
-        "payload_key": clean_str(row_get(row, ["payload_key"], "")),
-        "signal_key": clean_str(row_get(row, ["signal_key"], "")),
+        "order_key": order_key,
+        "payload_key": payload_key,
+        "signal_key": signal_key,
         "position_ticket": clean_int(row_get(row, ["position_ticket", "position"], 0), 0),
         "order_ticket": clean_int(row_get(row, ["order_ticket", "order", "order_id"], 0), 0),
         "deal_ticket": clean_int(row_get(row, ["deal_ticket", "deal", "deal_id"], 0), 0),
@@ -392,6 +430,7 @@ def main() -> int:
         "open_or_unmatched_rows": int((out["match_status"] != "MATCHED").sum()) if not out.empty else 0,
         "outcome_counts": out["outcome"].value_counts(dropna=False).to_dict() if "outcome" in out.columns and not out.empty else {},
         "match_method_counts": out["match_method"].value_counts(dropna=False).to_dict() if "match_method" in out.columns and not out.empty else {},
+        "strategy_key_counts": out["strategy_key"].value_counts(dropna=False).to_dict() if "strategy_key" in out.columns and not out.empty else {},
     }
     if args.output_json:
         write_json(args.output_json, summary)
