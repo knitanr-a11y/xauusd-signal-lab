@@ -9,6 +9,10 @@ should_change_strategy_from_this_single_trade is always False.
 Environment:
 - OPENAI_API_KEY must be set unless --dry-run is used.
 - OPENAI_MODEL can be used as a default model.
+
+Operational note:
+- Use --overwrite when switching from dry-run to real API output so placeholder
+  records do not remain mixed with model-generated reviews.
 """
 from __future__ import annotations
 
@@ -29,6 +33,7 @@ from trade_ai_review_utils import (
     read_jsonl,
     utc_now_text,
     write_json,
+    write_jsonl,
 )
 
 DEFAULT_MODEL = "gpt-5-mini"
@@ -42,6 +47,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model", default=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL))
     p.add_argument("--max-items", type=int, default=0, help="0 = all")
     p.add_argument("--dry-run", action="store_true", help="Write deterministic placeholder reviews without calling OpenAI.")
+    p.add_argument("--overwrite", action="store_true", help="Overwrite output JSONL instead of appending. Recommended when re-running or switching dry-run/API modes.")
     p.add_argument("--temperature", type=float, default=0.0)
     return p.parse_args()
 
@@ -73,7 +79,7 @@ def normalize_list(value: Any) -> list[str]:
     return [clean_str(value)] if clean_str(value) else []
 
 
-def normalize_review(review: dict[str, Any], payload: dict[str, Any], *, model: str, raw_response: str = "") -> dict[str, Any]:
+def normalize_review(review: dict[str, Any], payload: dict[str, Any], *, model: str, run_mode: str, raw_response: str = "") -> dict[str, Any]:
     trade = payload.get("trade", {}) if isinstance(payload.get("trade"), dict) else {}
     compact = payload.get("compact_features", {}) if isinstance(payload.get("compact_features"), dict) else {}
     risk_category = clean_str(review.get("risk_category"), "unclear")
@@ -88,6 +94,7 @@ def normalize_review(review: dict[str, Any], payload: dict[str, Any], *, model: 
         "tag_taxonomy_version": TAG_TAXONOMY_VERSION,
         "created_at_utc": utc_now_text(),
         "model": model,
+        "run_mode": run_mode,
         "trade_id": clean_str(review.get("trade_id"), clean_str(payload.get("trade_id"), clean_str(trade.get("trade_id"), clean_str(compact.get("trade_id"))))),
         "order_key": clean_str(review.get("order_key"), clean_str(payload.get("order_key"), clean_str(trade.get("order_key"), clean_str(compact.get("order_key"))))),
         "payload_key": clean_str(review.get("payload_key"), clean_str(payload.get("payload_key"), clean_str(trade.get("payload_key"), clean_str(compact.get("payload_key"))))),
@@ -153,7 +160,7 @@ def dry_run_review(payload: dict[str, Any], *, model: str) -> dict[str, Any]:
         "post_entry_outcome_explanation": [],
         "notes": "dry-run placeholder",
     }
-    return normalize_review(review, payload, model=model, raw_response="DRY_RUN_PLACEHOLDER")
+    return normalize_review(review, payload, model=model, run_mode="DRY_RUN", raw_response="DRY_RUN_PLACEHOLDER")
 
 
 def call_openai(payload: dict[str, Any], *, model: str, temperature: float) -> tuple[dict[str, Any], str]:
@@ -191,7 +198,7 @@ def main() -> int:
                 review = dry_run_review(payload, model=args.model)
             else:
                 raw_review, raw_response = call_openai(payload, model=args.model, temperature=args.temperature)
-                review = normalize_review(raw_review, payload, model=args.model, raw_response=raw_response)
+                review = normalize_review(raw_review, payload, model=args.model, run_mode="OPENAI_API", raw_response=raw_response)
             rows.append(review)
         except Exception as exc:
             err = {
@@ -199,17 +206,23 @@ def main() -> int:
                 "row_index": i,
                 "trade_id": clean_str(payload.get("trade_id")),
                 "order_key": clean_str(payload.get("order_key")),
+                "run_mode": "DRY_RUN" if args.dry_run else "OPENAI_API",
                 "error": repr(exc),
             }
             errors.append(err)
-    written = append_jsonl(args.output_jsonl, rows)
+    if args.overwrite:
+        written = write_jsonl(args.output_jsonl, rows)
+    else:
+        written = append_jsonl(args.output_jsonl, rows)
     summary = {
         "script": "run_trade_ai_review_from_payloads.py",
         "created_at_utc": utc_now_text(),
         "payload_jsonl": args.payload_jsonl,
         "output_jsonl": args.output_jsonl,
+        "output_mode": "overwrite" if args.overwrite else "append",
         "model": args.model,
         "dry_run": bool(args.dry_run),
+        "run_mode": "DRY_RUN" if args.dry_run else "OPENAI_API",
         "rows_in": int(len(payloads)),
         "rows_written": int(written),
         "error_rows": int(len(errors)),
@@ -225,6 +238,8 @@ def main() -> int:
     print(f"rows_written: {summary['rows_written']}")
     print(f"error_rows: {summary['error_rows']}")
     print(f"dry_run: {summary['dry_run']}")
+    print(f"run_mode: {summary['run_mode']}")
+    print(f"output_mode: {summary['output_mode']}")
     print(f"model: {summary['model']}")
     print(f"output_jsonl: {args.output_jsonl}")
     return 0 if not errors else 1
