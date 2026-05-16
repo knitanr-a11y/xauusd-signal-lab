@@ -82,7 +82,14 @@ NON_INFORMATIVE_TAGS = {
 
 RISK_TAGS = {t.lower() for t in COMMON_TAGS + GOLD_TAGS + BTC_TAGS}
 EXECUTION_TAGS = {t.lower() for t in EXECUTION_SYSTEM_TAGS}
-OPEN_OUTCOMES = {"OPEN", "UNKNOWN", "UNMATCHED_OPEN_OR_MISSING_HISTORY"}
+OPEN_OUTCOMES = {
+    "OPEN",
+    "UNKNOWN",
+    "UNMATCHED_OPEN_OR_MISSING_HISTORY",
+    "NOT_EXECUTED",
+    "NO_MT5_POSITION_MATCH",
+    "SENT_NO_MT5_POSITION_MATCH",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -97,7 +104,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--group-by-symbol", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--group-by-strategy", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--keep-non-informative-tags", action="store_true", help="Do not drop placeholder tags such as unclear/none/unknown.")
-    p.add_argument("--include-open-trades", action="store_true", help="Include OPEN/UNKNOWN/unmatched trades in tag summaries. Default excludes them.")
+    p.add_argument("--include-open-trades", action="store_true", help="Include OPEN/UNKNOWN/unmatched/non-executed trades in tag summaries. Default excludes them.")
     p.add_argument("--keep-ai-tag-group", action="store_true", help="Do not normalize known risk/execution tags that the model returned in the wrong group.")
     return p.parse_args()
 
@@ -154,7 +161,10 @@ def is_breakeven(outcome: Any, profit_r: Any) -> bool:
 def is_closed_outcome_row(row: pd.Series) -> bool:
     outcome = clean_str(row.get("outcome")).upper()
     match_status = clean_str(row.get("match_status")).upper()
+    execution_status = clean_str(row.get("execution_status")).upper()
     if outcome in OPEN_OUTCOMES:
+        return False
+    if execution_status and execution_status != "EXECUTED":
         return False
     if match_status and match_status != "MATCHED":
         return False
@@ -164,7 +174,7 @@ def is_closed_outcome_row(row: pd.Series) -> bool:
 def filter_closed(df: pd.DataFrame, *, include_open: bool = False) -> pd.DataFrame:
     if include_open or df.empty:
         return df.copy()
-    if "outcome" not in df.columns and "match_status" not in df.columns:
+    if "outcome" not in df.columns and "match_status" not in df.columns and "execution_status" not in df.columns:
         return df.copy()
     mask = df.apply(is_closed_outcome_row, axis=1)
     return df[mask].copy()
@@ -203,6 +213,7 @@ def normalize_review_rows(
 ) -> pd.DataFrame:
     out_rows: list[dict[str, Any]] = []
     for row in rows:
+        seen_in_review: set[tuple[str, str]] = set()
         for group_name, key in [
             ("possible_risk_tags", "risk"),
             ("possible_positive_tags", "positive"),
@@ -219,6 +230,10 @@ def normalize_review_rows(
                 if not is_informative_tag(tag_name, keep_non_informative=keep_non_informative):
                     continue
                 tag_group = normalize_tag_group(tag_name, key, keep_ai_tag_group=keep_ai_tag_group)
+                dedupe_key = (tag_name, tag_group)
+                if dedupe_key in seen_in_review:
+                    continue
+                seen_in_review.add(dedupe_key)
                 out_rows.append({
                     "trade_id": clean_str(row.get("trade_id")),
                     "order_key": clean_str(row.get("order_key")),
@@ -233,7 +248,9 @@ def normalize_review_rows(
                     "issue_category": clean_str(row.get("issue_category")),
                     "confidence": clean_float(row.get("confidence")),
                 })
-    return pd.DataFrame(out_rows)
+    if not out_rows:
+        return pd.DataFrame()
+    return pd.DataFrame(out_rows).drop_duplicates(subset=["trade_id", "order_key", "payload_key", "tag_name", "tag_group"], keep="first")
 
 
 def join_reviews_outcomes(tag_df: pd.DataFrame, outcome_df: pd.DataFrame) -> pd.DataFrame:
@@ -342,7 +359,7 @@ def examples(df: pd.DataFrame, *, want_win: bool, limit: int = 5) -> str:
                 ids.append(tid)
         if len(ids) >= limit:
             break
-    return "|".join(ids)
+    return " || ".join(ids)
 
 
 def main() -> int:
@@ -441,6 +458,7 @@ def main() -> int:
         "keep_non_informative_tags": bool(args.keep_non_informative_tags),
         "include_open_trades": bool(args.include_open_trades),
         "keep_ai_tag_group": bool(args.keep_ai_tag_group),
+        "dedupe_normalized_tags": True,
     }
     if args.output_json:
         write_json(args.output_json, summary)
@@ -454,6 +472,7 @@ def main() -> int:
     print(f"keep_non_informative_tags: {summary['keep_non_informative_tags']}")
     print(f"include_open_trades: {summary['include_open_trades']}")
     print(f"keep_ai_tag_group: {summary['keep_ai_tag_group']}")
+    print(f"dedupe_normalized_tags: {summary['dedupe_normalized_tags']}")
     print(f"output_csv: {args.output_csv}")
     return 0
 
