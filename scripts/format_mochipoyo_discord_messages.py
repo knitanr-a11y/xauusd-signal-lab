@@ -226,6 +226,29 @@ def warning_items(row: pd.Series) -> list[str]:
     return out
 
 
+def ai_history_warning_lines(row: pd.Series) -> list[str]:
+    text = val(row, "ai_history_warning_text", "")
+    if not text or text == "-":
+        return []
+    # trade_ai_history_warning stores compact line breaks as " || " so CSV remains easy to read.
+    parts = [p.strip() for p in text.split("||") if p.strip()]
+    return parts
+
+
+def append_ai_history_warning(lines: list[str], row: pd.Series) -> None:
+    warn_lines = ai_history_warning_lines(row)
+    if not warn_lines:
+        return
+    lines += ["", "AI履歴警告:"]
+    first = True
+    for item in warn_lines:
+        if first and item.startswith("AI履歴警告:"):
+            lines.append(f"・{item.replace('AI履歴警告:', '').strip()}")
+        else:
+            lines.append(f"・{item}")
+        first = False
+
+
 def compact_message(row: pd.Series) -> str:
     symbol = val(row, "symbol").upper()
     direction = val(row, "direction").upper()
@@ -261,6 +284,7 @@ def compact_message(row: pd.Series) -> str:
     ]
     for item in warning_items(row):
         lines.append(f"・{item}")
+    append_ai_history_warning(lines, row)
     lines += [
         "",
         f"照合ID: `{compact_signal_id(row)}`",
@@ -293,6 +317,7 @@ def detailed_message(row: pd.Series) -> str:
             f"Spread: points=`{fnum(row, 'mode_spread_points', 0)}` price=`{fnum(row, 'mode_spread_price', 2)}`",
             f"Spread/SL: `{fnum(row, 'spread_to_sl_ratio', 4)}` Effective RR: `{fnum(row, 'effective_rr_after_spread', 3)}`",
         ]
+    append_ai_history_warning(lines, row)
     return "\n".join(lines)
 
 
