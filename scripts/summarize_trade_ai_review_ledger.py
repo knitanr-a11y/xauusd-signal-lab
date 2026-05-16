@@ -16,6 +16,10 @@ from typing import Any
 import pandas as pd
 
 from trade_ai_review_utils import (
+    BTC_TAGS,
+    COMMON_TAGS,
+    EXECUTION_SYSTEM_TAGS,
+    GOLD_TAGS,
     TAG_SUMMARY_SCHEMA_VERSION,
     TAG_TAXONOMY_VERSION,
     clean_float,
@@ -76,6 +80,10 @@ NON_INFORMATIVE_TAGS = {
     "no_clear_risk_tag",
 }
 
+RISK_TAGS = {t.lower() for t in COMMON_TAGS + GOLD_TAGS + BTC_TAGS}
+EXECUTION_TAGS = {t.lower() for t in EXECUTION_SYSTEM_TAGS}
+OPEN_OUTCOMES = {"OPEN", "UNKNOWN", "UNMATCHED_OPEN_OR_MISSING_HISTORY"}
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Summarize trade AI review hypothesis tags.")
@@ -89,6 +97,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--group-by-symbol", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--group-by-strategy", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--keep-non-informative-tags", action="store_true", help="Do not drop placeholder tags such as unclear/none/unknown.")
+    p.add_argument("--include-open-trades", action="store_true", help="Include OPEN/UNKNOWN/unmatched trades in tag summaries. Default excludes them.")
+    p.add_argument("--keep-ai-tag-group", action="store_true", help="Do not normalize known risk/execution tags that the model returned in the wrong group.")
     return p.parse_args()
 
 
@@ -100,6 +110,17 @@ def is_informative_tag(tag: Any, *, keep_non_informative: bool = False) -> bool:
     if keep_non_informative:
         return bool(clean_str(tag))
     return canonical_tag_name(tag) not in NON_INFORMATIVE_TAGS
+
+
+def normalize_tag_group(tag_name: str, ai_group: str, *, keep_ai_tag_group: bool = False) -> str:
+    if keep_ai_tag_group:
+        return ai_group
+    tag = canonical_tag_name(tag_name)
+    if tag in EXECUTION_TAGS:
+        return "execution"
+    if tag in RISK_TAGS:
+        return "risk"
+    return ai_group
 
 
 def is_win(outcome: Any, profit_r: Any) -> bool:
@@ -130,13 +151,26 @@ def is_breakeven(outcome: Any, profit_r: Any) -> bool:
     return bool(r is not None and abs(r) <= 1e-12)
 
 
-def first_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "") -> str:
-    """Return the first non-empty value from any of the requested columns.
+def is_closed_outcome_row(row: pd.Series) -> bool:
+    outcome = clean_str(row.get("outcome")).upper()
+    match_status = clean_str(row.get("match_status")).upper()
+    if outcome in OPEN_OUTCOMES:
+        return False
+    if match_status and match_status != "MATCHED":
+        return False
+    return True
 
-    This intentionally avoids `.dropna().iloc[0]` because a column can exist but
-    contain only NaN/empty strings for a given tag group. That was the cause of
-    the first live failure in this script.
-    """
+
+def filter_closed(df: pd.DataFrame, *, include_open: bool = False) -> pd.DataFrame:
+    if include_open or df.empty:
+        return df.copy()
+    if "outcome" not in df.columns and "match_status" not in df.columns:
+        return df.copy()
+    mask = df.apply(is_closed_outcome_row, axis=1)
+    return df[mask].copy()
+
+
+def first_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "") -> str:
     if df.empty:
         return default
     for col in columns:
@@ -161,7 +195,12 @@ def last_nonempty_value(df: pd.DataFrame, columns: list[str], default: str = "")
     return default
 
 
-def normalize_review_rows(rows: list[dict[str, Any]], *, keep_non_informative: bool = False) -> pd.DataFrame:
+def normalize_review_rows(
+    rows: list[dict[str, Any]],
+    *,
+    keep_non_informative: bool = False,
+    keep_ai_tag_group: bool = False,
+) -> pd.DataFrame:
     out_rows: list[dict[str, Any]] = []
     for row in rows:
         for group_name, key in [
@@ -179,6 +218,7 @@ def normalize_review_rows(rows: list[dict[str, Any]], *, keep_non_informative: b
                 tag_name = canonical_tag_name(tag)
                 if not is_informative_tag(tag_name, keep_non_informative=keep_non_informative):
                     continue
+                tag_group = normalize_tag_group(tag_name, key, keep_ai_tag_group=keep_ai_tag_group)
                 out_rows.append({
                     "trade_id": clean_str(row.get("trade_id")),
                     "order_key": clean_str(row.get("order_key")),
@@ -186,7 +226,8 @@ def normalize_review_rows(rows: list[dict[str, Any]], *, keep_non_informative: b
                     "symbol": clean_str(row.get("symbol")),
                     "strategy_id": clean_str(row.get("strategy_id")),
                     "tag_name": tag_name,
-                    "tag_group": key,
+                    "tag_group": tag_group,
+                    "ai_original_tag_group": key,
                     "review_created_at_utc": clean_str(row.get("created_at_utc")),
                     "risk_category": clean_str(row.get("risk_category")),
                     "issue_category": clean_str(row.get("issue_category")),
@@ -205,7 +246,6 @@ def join_reviews_outcomes(tag_df: pd.DataFrame, outcome_df: pd.DataFrame) -> pd.
             outcome[col] = ""
         if col not in out.columns:
             out[col] = ""
-    # Prefer trade_id, then order_key, then payload_key. Avoid duplicate expansion by taking first match per key.
     joined_parts: list[pd.DataFrame] = []
     remaining = out.copy()
     for key in ["trade_id", "order_key", "payload_key"]:
@@ -217,7 +257,6 @@ def join_reviews_outcomes(tag_df: pd.DataFrame, outcome_df: pd.DataFrame) -> pd.
         merged = left.merge(right, on=key, how="left", suffixes=("", "_outcome"))
         hit = merged[merged.get("outcome", pd.Series(index=merged.index, dtype=object)).notna()].copy()
         miss = merged[merged.get("outcome", pd.Series(index=merged.index, dtype=object)).isna()].copy()
-        # Convert misses back to original tag columns for next key.
         keep_cols = list(out.columns)
         if not hit.empty:
             joined_parts.append(hit)
@@ -308,13 +347,18 @@ def examples(df: pd.DataFrame, *, want_win: bool, limit: int = 5) -> str:
 
 def main() -> int:
     args = parse_args()
-    outcome_df = read_csv(args.trade_outcome_csv)
+    outcome_df_raw = read_csv(args.trade_outcome_csv)
+    outcome_df = filter_closed(outcome_df_raw, include_open=bool(args.include_open_trades))
     review_rows = read_jsonl(args.ai_review_jsonl)
-    tag_df = normalize_review_rows(review_rows, keep_non_informative=bool(args.keep_non_informative_tags))
+    tag_df = normalize_review_rows(
+        review_rows,
+        keep_non_informative=bool(args.keep_non_informative_tags),
+        keep_ai_tag_group=bool(args.keep_ai_tag_group),
+    )
     joined = join_reviews_outcomes(tag_df, outcome_df)
+    joined = filter_closed(joined, include_open=bool(args.include_open_trades))
     now = utc_now_text()
 
-    # Grouping scope. Empty strategy/symbol means all, but default keeps both to avoid mixing GOLD/BTC.
     group_cols = ["tag_name", "tag_group"]
     if args.group_by_symbol:
         group_cols.insert(0, "symbol")
@@ -387,21 +431,29 @@ def main() -> int:
         "trade_outcome_csv": args.trade_outcome_csv,
         "ai_review_jsonl": args.ai_review_jsonl,
         "output_csv": args.output_csv,
+        "outcome_rows_raw": int(len(outcome_df_raw)),
+        "outcome_rows_used": int(len(outcome_df)),
         "reviews_in": int(len(review_rows)),
         "tag_rows": int(len(tag_df)),
         "summary_rows": int(len(out)),
         "should_investigate_rows": int(out["should_investigate"].fillna(False).sum()) if "should_investigate" in out.columns and not out.empty else 0,
         "min_sample": int(args.min_sample),
         "keep_non_informative_tags": bool(args.keep_non_informative_tags),
+        "include_open_trades": bool(args.include_open_trades),
+        "keep_ai_tag_group": bool(args.keep_ai_tag_group),
     }
     if args.output_json:
         write_json(args.output_json, summary)
     print("summarize_trade_ai_review_ledger")
+    print(f"outcome_rows_raw: {summary['outcome_rows_raw']}")
+    print(f"outcome_rows_used: {summary['outcome_rows_used']}")
     print(f"reviews_in: {summary['reviews_in']}")
     print(f"tag_rows: {summary['tag_rows']}")
     print(f"summary_rows: {summary['summary_rows']}")
     print(f"should_investigate_rows: {summary['should_investigate_rows']}")
     print(f"keep_non_informative_tags: {summary['keep_non_informative_tags']}")
+    print(f"include_open_trades: {summary['include_open_trades']}")
+    print(f"keep_ai_tag_group: {summary['keep_ai_tag_group']}")
     print(f"output_csv: {args.output_csv}")
     return 0
 
