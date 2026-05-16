@@ -8,9 +8,10 @@ Safety:
 - payload_key based duplicate-send prevention
 - send ledger CSV
 - webhook URL from --webhook-url, environment variable, or local .env
-- no AI review
+- no AI review API call
 - no order placement
 - transient Discord/webhook failures are retried before returning ERROR
+- optional AI history warning only appends trader-facing caution text
 
 Console output is deliberately summary-only. Full Discord messages are written to
 UTF-8 preview files instead of being printed to Windows cmd.exe, which avoids
@@ -31,6 +32,11 @@ from typing import Any
 import pandas as pd
 
 from format_mochipoyo_discord_messages import format_row, val  # type: ignore
+
+try:
+    from trade_ai_history_warning import apply_ai_history_warnings  # type: ignore
+except Exception:  # pragma: no cover
+    apply_ai_history_warnings = None  # type: ignore
 
 DISCORD_LIMIT = 2000
 TRANSIENT_STATUS_CODES = {429, 500, 502, 503, 504}
@@ -213,8 +219,6 @@ def retry_sleep_seconds(base_sleep: float, attempt_index: int, result: dict[str,
             return max(0.0, float(retry_after))
         except Exception:
             pass
-    # attempt_index is 1-based. Keep this small enough for live use, but avoid
-    # hammering Discord during 503/504/429 windows.
     return max(0.0, float(base_sleep)) * float(attempt_index)
 
 
@@ -282,6 +286,52 @@ def load_input_rows(input_csv: Path, symbol: str | None, max_rows: int) -> pd.Da
     return df.reset_index(drop=True)
 
 
+def maybe_apply_ai_history_warnings(df: pd.DataFrame, args: argparse.Namespace, preview_dir: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+    report: dict[str, Any] = {
+        "ai_history_warning_enabled": bool(args.enable_ai_history_warning),
+        "ai_history_warning_status": "DISABLED",
+        "ai_history_warning_rows_warn": 0,
+        "ai_history_warning_tag_summary_csv": str(args.ai_history_tag_summary_csv),
+    }
+    if not args.enable_ai_history_warning:
+        return df, report
+    if apply_ai_history_warnings is None:
+        report["ai_history_warning_status"] = "ERROR_IMPORT_HELPER"
+        return df, report
+    tag_summary_path = Path(args.ai_history_tag_summary_csv)
+    if not tag_summary_path.exists():
+        out = df.copy()
+        out["ai_history_warning_status"] = "NO_DATA"
+        out["ai_history_warning_severity"] = "NONE"
+        out["ai_history_warning_text"] = ""
+        out["ai_history_warning_tags"] = ""
+        out["ai_history_warning_reason"] = f"tag summary not found: {tag_summary_path}"
+        report["ai_history_warning_status"] = "NO_TAG_SUMMARY_CSV"
+        return out, report
+    try:
+        summary = read_csv(tag_summary_path)
+        out = apply_ai_history_warnings(df, summary, max_tags=int(args.ai_history_max_tags))
+        preview_path = preview_dir / "discord_input_with_ai_history_warning.csv"
+        write_csv(out, preview_path)
+        warn_count = int((out.get("ai_history_warning_status", pd.Series(dtype=object)).astype(str) == "WARN").sum()) if not out.empty else 0
+        report.update({
+            "ai_history_warning_status": "OK",
+            "ai_history_warning_rows_warn": warn_count,
+            "ai_history_warning_preview_csv": str(preview_path),
+        })
+        return out, report
+    except Exception as exc:
+        out = df.copy()
+        out["ai_history_warning_status"] = "ERROR"
+        out["ai_history_warning_severity"] = "NONE"
+        out["ai_history_warning_text"] = ""
+        out["ai_history_warning_tags"] = ""
+        out["ai_history_warning_reason"] = repr(exc)
+        report["ai_history_warning_status"] = "ERROR"
+        report["ai_history_warning_error"] = repr(exc)
+        return out, report
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="Safely send Mochipoyo Discord notifications.")
     p.add_argument("--input-csv", required=True, help="Payload/enriched payload/ledger CSV")
@@ -299,6 +349,9 @@ def main() -> int:
     p.add_argument("--sleep-seconds", type=float, default=1.0)
     p.add_argument("--discord-retry-count", type=int, default=3, help="Retry transient Discord failures this many times after the first attempt.")
     p.add_argument("--discord-retry-sleep-seconds", type=float, default=2.0, help="Base sleep seconds for transient Discord retries.")
+    p.add_argument("--enable-ai-history-warning", action="store_true", help="Append AI history warning text to Discord previews/messages. Does not block orders.")
+    p.add_argument("--ai-history-tag-summary-csv", default="data/runtime_logs/trade_ai_review/trade_ai_tag_summary.csv")
+    p.add_argument("--ai-history-max-tags", type=int, default=4)
     args = p.parse_args()
 
     load_local_dotenv()
@@ -307,8 +360,11 @@ def main() -> int:
     send_ledger_csv = Path(args.send_ledger_csv)
     preview_txt = Path(args.preview_txt)
     preview_json = Path(args.preview_json)
+    preview_dir = preview_txt.parent
+    preview_dir.mkdir(parents=True, exist_ok=True)
 
     df = load_input_rows(input_csv, args.symbol, args.max_rows)
+    df, ai_warning_report = maybe_apply_ai_history_warnings(df, args, preview_dir)
     sent_keys = load_sent_keys(send_ledger_csv)
 
     records: list[dict[str, Any]] = []
@@ -327,6 +383,9 @@ def main() -> int:
             "symbol": val(row, "symbol"),
             "direction": val(row, "direction"),
             "entry_time": val(row, "entry_time"),
+            "ai_history_warning_status": val(row, "ai_history_warning_status", ""),
+            "ai_history_warning_severity": val(row, "ai_history_warning_severity", ""),
+            "ai_history_warning_tags": val(row, "ai_history_warning_tags", ""),
             "duplicate_existing": bool(duplicate),
             "send_requested": bool(args.send),
             "sent": False,
@@ -351,7 +410,7 @@ def main() -> int:
             for rec in records:
                 if rec["send_status"] == "PENDING":
                     rec["send_status"] = "ERROR_NO_WEBHOOK_URL"
-            write_text(preview_json, json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2))
+            write_text(preview_json, json.dumps({"source": str(input_csv), "ai_history_warning": ai_warning_report, "records": records}, ensure_ascii=False, indent=2))
             safe_print("send_mochipoyo_discord_messages")
             safe_print("ERROR: --send was specified but webhook URL was not provided.")
             safe_print(f"Use --webhook-url, set environment variable {args.webhook_env}, or add it to .env.")
@@ -399,12 +458,13 @@ def main() -> int:
                     "symbol": rec.get("symbol"),
                     "direction": rec.get("direction"),
                     "entry_time": rec.get("entry_time"),
+                    "ai_history_warning_status": rec.get("ai_history_warning_status"),
+                    "ai_history_warning_severity": rec.get("ai_history_warning_severity"),
+                    "ai_history_warning_tags": rec.get("ai_history_warning_tags"),
                     "message": rec.get("message"),
                     "discord_attempt_count": len(all_attempts),
                 })
             if final_error_result is not None:
-                # Preserve per-attempt details in preview_json; do not append to
-                # send ledger because Discord delivery was not confirmed.
                 pass
             time.sleep(args.sleep_seconds)
 
@@ -417,7 +477,7 @@ def main() -> int:
             else:
                 rec["send_status"] = "DRY_RUN_WOULD_SEND"
 
-    write_text(preview_json, json.dumps({"source": str(input_csv), "records": records}, ensure_ascii=False, indent=2))
+    write_text(preview_json, json.dumps({"source": str(input_csv), "ai_history_warning": ai_warning_report, "records": records}, ensure_ascii=False, indent=2))
 
     total = len(records)
     duplicates = sum(1 for r in records if r["duplicate_existing"])
@@ -434,6 +494,9 @@ def main() -> int:
     safe_print(f"dry_run_would_send: {would_send}")
     safe_print(f"sent: {sent}")
     safe_print(f"errors: {errors}")
+    safe_print(f"ai_history_warning_enabled: {ai_warning_report.get('ai_history_warning_enabled')}")
+    safe_print(f"ai_history_warning_status: {ai_warning_report.get('ai_history_warning_status')}")
+    safe_print(f"ai_history_warning_rows_warn: {ai_warning_report.get('ai_history_warning_rows_warn')}")
     safe_print(f"max_discord_attempts: {max_attempts}")
     safe_print(f"discord_retry_count: {int(args.discord_retry_count)}")
     safe_print(f"discord_retry_sleep_seconds: {float(args.discord_retry_sleep_seconds)}")
