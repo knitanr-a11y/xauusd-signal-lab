@@ -7,8 +7,9 @@ This wrapper is intentionally separate from the normal dry-run BAT/wrapper.
 Purpose:
 1. Run the existing independent GOLD multi-strategy sidecar dry-run flow.
 2. Inspect the generated Mochipoyo-compatible order_payloads.csv.
-3. Run the MT5 sender only through a second, explicit guarded stage.
-4. Pass --send to the sender only when BOTH flags are present:
+3. Create an optional AI-history warning preview from the payload rows.
+4. Run the MT5 sender only through a second, explicit guarded stage.
+5. Pass --send to the sender only when BOTH flags are present:
 
        --allow-demo-send
        --send
@@ -17,6 +18,8 @@ Safety defaults:
 - Default is NO SEND.
 - If --send is passed without --allow-demo-send, it is suppressed.
 - If --allow-demo-send is passed without --send, it is suppressed.
+- AI-history warning preview does not send Discord and does not edit the payload
+  CSV used by the MT5 sender.
 - production position_registry.csv is never written by this wrapper.
 - registry outputs remain preview-only.
 - Uses GOLD integration defaults, not symbol-wide blocking:
@@ -76,6 +79,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CSV_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_OUT_DIR = Path("data/research_results/gold_multi_strategy_guarded_demo_send_once")
+DEFAULT_AI_HISTORY_TAG_SUMMARY_CSV = Path("data/runtime_logs/trade_ai_review/trade_ai_tag_summary.csv")
 MT5_RETCODE_MARKET_CLOSED = 10018
 
 SUMMARY_FILENAME = "latest_gold_multi_strategy_guarded_demo_send_once_result.json"
@@ -96,6 +100,13 @@ LOG_COLUMNS = [
     "guarded_sender_deferred_reason",
     "guarded_sender_market_closed_rows",
     "payload_rows_out",
+    "ai_history_warning_preview_enabled",
+    "ai_history_warning_preview_returncode",
+    "ai_history_warning_preview_status",
+    "ai_history_warning_rows_warn",
+    "ai_history_warning_preview_txt",
+    "ai_history_warning_preview_json",
+    "ai_history_warning_enriched_csv",
     "guarded_sender_returncode",
     "guarded_sender_rows_out",
     "guarded_sender_dry_run_check_ok_rows",
@@ -220,6 +231,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--send", action="store_true")
     p.add_argument("--disable-same-m15-skip", action="store_true")
     p.add_argument("--disable-monitor-skip", action="store_true")
+    p.add_argument("--enable-ai-history-warning-preview", dest="enable_ai_history_warning_preview", action="store_true", help="Create AI-history warning preview from payload rows. Enabled by default.")
+    p.add_argument("--disable-ai-history-warning-preview", dest="enable_ai_history_warning_preview", action="store_false", help="Disable AI-history warning preview generation.")
+    p.add_argument("--ai-history-tag-summary-csv", type=Path, default=DEFAULT_AI_HISTORY_TAG_SUMMARY_CSV)
+    p.add_argument("--ai-history-max-tags", type=int, default=4)
+    p.add_argument("--ai-history-preview-style", choices=["compact", "detailed"], default="compact")
+    p.set_defaults(enable_ai_history_warning_preview=True)
     return p.parse_args()
 
 
@@ -247,6 +264,61 @@ def build_dry_run_cmd(args: argparse.Namespace, dry_out_dir: Path) -> list[str]:
     if not args.disable_same_m15_skip:
         cmd.append("--skip-same-m15-no-signal")
     return cmd
+
+
+def build_ai_history_warning_preview_cmd(args: argparse.Namespace, paths: dict[str, Path]) -> list[str]:
+    cmd = [
+        sys.executable,
+        str(REPO_ROOT / "scripts" / "send_mochipoyo_discord_messages.py"),
+        "--input-csv", str(paths["payload_csv"]),
+        "--send-ledger-csv", str(paths["ai_history_warning_send_ledger_csv"]),
+        "--preview-txt", str(paths["ai_history_warning_preview_txt"]),
+        "--preview-json", str(paths["ai_history_warning_preview_json"]),
+        "--symbol", "GOLD",
+        "--max-rows", str(args.max_orders),
+        "--style", str(args.ai_history_preview_style),
+        "--ai-history-tag-summary-csv", str(args.ai_history_tag_summary_csv),
+        "--ai-history-max-tags", str(args.ai_history_max_tags),
+        "--allow-duplicates",
+    ]
+    if args.enable_ai_history_warning_preview:
+        cmd.append("--enable-ai-history-warning")
+    else:
+        cmd.append("--disable-ai-history-warning")
+    return cmd
+
+
+def read_ai_history_preview_result(paths: dict[str, Path], returncode: int | str) -> dict[str, Any]:
+    preview_json = paths["ai_history_warning_preview_json"]
+    obj = read_json_or_empty(preview_json)
+    warning = obj.get("ai_history_warning", {}) if isinstance(obj.get("ai_history_warning"), dict) else {}
+    records = obj.get("records", []) if isinstance(obj.get("records"), list) else []
+    enriched_csv = paths["ai_history_warning_out_dir"] / "discord_input_with_ai_history_warning.csv"
+    return {
+        "enabled": True,
+        "returncode": returncode,
+        "status": warning.get("ai_history_warning_status", "PREVIEW_JSON_MISSING" if not obj else "UNKNOWN"),
+        "rows_warn": safe_int(warning, "ai_history_warning_rows_warn", 0),
+        "records": len(records),
+        "preview_txt": str(paths["ai_history_warning_preview_txt"]),
+        "preview_json": str(paths["ai_history_warning_preview_json"]),
+        "enriched_csv": str(enriched_csv),
+        "tag_summary_csv": str(paths["ai_history_tag_summary_csv"]),
+    }
+
+
+def skipped_ai_history_preview_result(paths: dict[str, Path], reason: str) -> dict[str, Any]:
+    return {
+        "enabled": False,
+        "returncode": "SKIPPED",
+        "status": reason,
+        "rows_warn": 0,
+        "records": 0,
+        "preview_txt": str(paths["ai_history_warning_preview_txt"]),
+        "preview_json": str(paths["ai_history_warning_preview_json"]),
+        "enriched_csv": str(paths["ai_history_warning_out_dir"] / "discord_input_with_ai_history_warning.csv"),
+        "tag_summary_csv": str(paths["ai_history_tag_summary_csv"]),
+    }
 
 
 def build_guarded_sender_cmd(args: argparse.Namespace, paths: dict[str, Path], *, pass_send: bool) -> list[str]:
@@ -403,6 +475,11 @@ def main() -> int:
         "summary_json": args.out_dir / SUMMARY_FILENAME,
         "cycle_log_csv": args.out_dir / "gold_multi_strategy_guarded_demo_send_once_log.csv",
         "deferred_market_closed_json": args.out_dir / "guarded_sender" / "deferred_market_closed.json",
+        "ai_history_warning_out_dir": args.out_dir / "ai_history_warning_preview",
+        "ai_history_warning_send_ledger_csv": args.out_dir / "ai_history_warning_preview" / "dry_run_discord_send_ledger.csv",
+        "ai_history_warning_preview_txt": args.out_dir / "ai_history_warning_preview" / "ai_history_warning_discord_preview.txt",
+        "ai_history_warning_preview_json": args.out_dir / "ai_history_warning_preview" / "ai_history_warning_discord_preview.json",
+        "ai_history_tag_summary_csv": args.ai_history_tag_summary_csv,
     }
 
     print("=" * 80, flush=True)
@@ -411,14 +488,33 @@ def main() -> int:
     print("Integration policy: use adapter lot, allow_any_until_max, duplicate order_key guard.", flush=True)
     print("Strict send success: when --send is passed, sent_rows must equal payload_rows_out and error_rows must be 0.", flush=True)
     print("Market closed deferral: retcode=10018 is normalized to DEFERRED_MARKET_CLOSED and does not fail the cycle.", flush=True)
+    print("AI-history warning preview: payload rows are rendered to preview only; sender input CSV is not modified.", flush=True)
     print(f"csv_dir={args.csv_dir}", flush=True)
     print(f"out_dir={args.out_dir}", flush=True)
     print(f"allow_demo_send={args.allow_demo_send} send_requested={args.send}", flush=True)
+    print(f"ai_history_warning_preview_enabled={args.enable_ai_history_warning_preview}", flush=True)
+    print(f"ai_history_tag_summary_csv={args.ai_history_tag_summary_csv}", flush=True)
     print("=" * 80, flush=True)
 
     dry_rc, dry_seconds = run_cmd("dry_run_stage", build_dry_run_cmd(args, paths["dry_out_dir"]))
     dry_summary = read_json_or_empty(paths["dry_out_dir"] / "latest_gold_multi_strategy_mochipoyo_loop_dry_run_result.json")
     payload_rows = payload_rows_count(paths["payload_csv"])
+
+    if args.enable_ai_history_warning_preview and payload_rows > 0:
+        ai_preview_rc, ai_preview_seconds = run_cmd(
+            "ai_history_warning_preview",
+            build_ai_history_warning_preview_cmd(args, paths),
+        )
+        ai_history_warning_preview = read_ai_history_preview_result(paths, ai_preview_rc)
+        ai_history_warning_preview["seconds"] = ai_preview_seconds
+    elif not args.enable_ai_history_warning_preview:
+        ai_history_warning_preview = skipped_ai_history_preview_result(paths, "DISABLED")
+        ai_history_warning_preview["seconds"] = 0.0
+        print("[INFO] AI-history warning preview disabled", flush=True)
+    else:
+        ai_history_warning_preview = skipped_ai_history_preview_result(paths, "SKIPPED_NO_PAYLOAD_ROWS")
+        ai_history_warning_preview["seconds"] = 0.0
+        print("[INFO] AI-history warning preview skipped because payload rows are 0", flush=True)
 
     pass_send, suppressed_reason = decide_send_suppression(args, payload_rows)
     guarded_sender_rc: int | str = "SKIPPED"
@@ -490,7 +586,7 @@ def main() -> int:
         reason = "GOLD_MULTI_STRATEGY_GUARDED_DEMO_SEND_ONCE_FAILED"
 
     summary = {
-        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v5_market_closed_deferred",
+        "schema_version": "gold_multi_strategy_guarded_demo_send_once_v6_ai_history_warning_preview",
         "cycle_start_utc": cycle_start,
         "cycle_end_utc": cycle_end,
         "cycle_ok": cycle_ok,
@@ -506,6 +602,7 @@ def main() -> int:
         "guarded_sender_deferred": bool(guarded_sender_deferred),
         "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
         "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
+        "ai_history_warning_preview": ai_history_warning_preview,
         "guards": {
             "expected_login": int(args.expected_login),
             "require_demo_account": bool(args.require_demo_account),
@@ -518,14 +615,17 @@ def main() -> int:
             "max_symbol_lot": float(args.max_symbol_lot),
             "strict_send_success_rule": "if --send is passed and payload_rows_out>0, require sent_rows==payload_rows_out and error_rows==0 unless retcode=10018 Market closed deferral",
             "market_closed_deferral_rule": "retcode=10018/comment Market closed => DEFERRED_MARKET_CLOSED; no order considered sent",
+            "ai_history_warning_preview_rule": "payload rows may be rendered to AI-history warning preview; MT5 sender input remains original payload_csv",
         },
         "returncodes": {
             "dry_run_stage": dry_rc,
+            "ai_history_warning_preview": ai_history_warning_preview.get("returncode"),
             "guarded_sender": guarded_sender_rc,
         },
         "key_metrics": {
             "dry_run_wrapper_cycle_ok": dry_cycle_ok,
             "payload_rows_out": int(payload_rows),
+            "ai_history_warning_rows_warn": int(ai_history_warning_preview.get("rows_warn", 0) or 0),
             "guarded_sender_rows_out": sender_rows_out,
             "guarded_sender_dry_run_check_ok_rows": safe_int(guarded_report, "dry_run_check_ok_rows", 0),
             "guarded_sender_sent_rows": sender_sent_rows,
@@ -537,6 +637,8 @@ def main() -> int:
             "guarded_sender_send_flag_passed": bool(pass_send),
             "strict_send_success_required": bool(strict_send_success_required),
             "market_closed_deferred": bool(guarded_sender_deferred),
+            "ai_history_warning_preview_sends_discord": False,
+            "ai_history_warning_preview_modifies_sender_input_csv": False,
             "production_registry_mutated": False,
             "existing_mochipoyo_bat_modified": False,
             "existing_mochipoyo_ledgers_mutated": False,
@@ -545,6 +647,7 @@ def main() -> int:
         },
         "timing": {
             "dry_run_stage_seconds": dry_seconds,
+            "ai_history_warning_preview_seconds": float(ai_history_warning_preview.get("seconds", 0.0) or 0.0),
             "guarded_sender_seconds": guarded_seconds,
             "total_seconds": round(time.perf_counter() - started_perf, 3),
         },
@@ -570,6 +673,13 @@ def main() -> int:
         "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
         "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
         "payload_rows_out": int(payload_rows),
+        "ai_history_warning_preview_enabled": bool(args.enable_ai_history_warning_preview),
+        "ai_history_warning_preview_returncode": ai_history_warning_preview.get("returncode"),
+        "ai_history_warning_preview_status": ai_history_warning_preview.get("status"),
+        "ai_history_warning_rows_warn": int(ai_history_warning_preview.get("rows_warn", 0) or 0),
+        "ai_history_warning_preview_txt": ai_history_warning_preview.get("preview_txt"),
+        "ai_history_warning_preview_json": ai_history_warning_preview.get("preview_json"),
+        "ai_history_warning_enriched_csv": ai_history_warning_preview.get("enriched_csv"),
         "guarded_sender_returncode": guarded_sender_rc,
         "guarded_sender_rows_out": sender_rows_out,
         "guarded_sender_dry_run_check_ok_rows": safe_int(guarded_report, "dry_run_check_ok_rows", 0),
@@ -600,6 +710,7 @@ def main() -> int:
         "guarded_sender_deferred": bool(guarded_sender_deferred),
         "guarded_sender_deferred_reason": guarded_sender_deferred_reason,
         "guarded_sender_market_closed_rows": int(guarded_sender_market_closed_rows),
+        "ai_history_warning_preview": ai_history_warning_preview,
         "key_metrics": summary["key_metrics"],
         "guards": summary["guards"],
         "safety": summary["safety"],
