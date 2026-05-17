@@ -17,9 +17,11 @@ Safety:
 - AI output is hypothesis tagging only.
 - should_change_strategy_from_this_single_trade is forced False by the review runner.
 
-Default order ledgers are manual BTC smoke-test ledgers because the repository
-currently exposes those BTC paths. When a real BTC strategy/forever ledger exists,
-pass it with --order-ledger-csv and this same pipeline will use it.
+Default order ledger:
+- data/runtime_state/btc/multi_strategy/guarded_demo_order_ledger.csv
+
+Optional manual BTC smoke-test ledgers can be added with --include-manual-ledgers
+or explicit --order-ledger-csv arguments.
 """
 from __future__ import annotations
 
@@ -38,7 +40,8 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_OUT_DIR = Path("data/runtime_logs/trade_ai_review_btc")
-DEFAULT_BTC_LEDGERS = [
+DEFAULT_BTC_MULTI_LEDGER = Path("data/runtime_state/btc/multi_strategy/guarded_demo_order_ledger.csv")
+MANUAL_BTC_LEDGERS = [
     Path("data/r/btc_manual_demo_order_send_smoke_test/btc_manual_demo_order_ledger.csv"),
     Path("data/r/btc_manual_demo_order_send_smoke_test_send_once/btc_manual_demo_send_once_order_ledger.csv"),
 ]
@@ -120,10 +123,16 @@ def run_cmd(label: str, cmd: list[str], *, cwd: Path = REPO_ROOT, allow_failure:
     }
 
 
-def parse_order_ledgers(values: list[str]) -> list[Path]:
+def parse_order_ledgers(values: list[str], *, include_manual_ledgers: bool) -> list[Path]:
     if values:
-        return [Path(v) for v in values]
-    return DEFAULT_BTC_LEDGERS.copy()
+        paths = [Path(v) for v in values]
+    else:
+        paths = [DEFAULT_BTC_MULTI_LEDGER]
+    if include_manual_ledgers:
+        for ledger in MANUAL_BTC_LEDGERS:
+            if ledger not in paths:
+                paths.append(ledger)
+    return paths
 
 
 def existing_order_ledgers(paths: list[Path], *, allow_missing: bool) -> tuple[list[Path], list[str]]:
@@ -163,7 +172,6 @@ def normalize_btc_outcome_symbols(path: Path) -> None:
     if "symbol" in df.columns:
         df["symbol"] = df["symbol"].map(normalize_btc_symbol_text)
     if "broker_symbol" in df.columns:
-        # broker_symbol remains factual, but blank symbol rows can be inferred.
         if "symbol" not in df.columns:
             df["symbol"] = df["broker_symbol"].map(normalize_btc_symbol_text)
         else:
@@ -177,6 +185,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     p.add_argument("--mql5-files-dir", type=Path, default=DEFAULT_MQL5_FILES_DIR)
     p.add_argument("--order-ledger-csv", action="append", default=[], help="BTC order ledger CSV. Repeat to override defaults.")
+    p.add_argument("--include-manual-ledgers", action="store_true", help="Also include older BTC manual smoke-test ledgers.")
     p.add_argument("--allow-missing-order-ledger", action="store_true")
     p.add_argument("--expected-login", type=int, default=75539039)
     p.add_argument("--broker-symbols", default="BTCUSD#", help="BTC broker symbols for MT5 history export, comma-separated.")
@@ -186,11 +195,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--h1-csv", default="")
     p.add_argument("--h4-csv", default="")
     p.add_argument("--d1-csv", default="")
-    p.add_argument("--m15-file", default="btc_m15.csv")
-    p.add_argument("--m5-file", default="btc_m5.csv")
-    p.add_argument("--h1-file", default="btc_h1.csv")
-    p.add_argument("--h4-file", default="btc_h4.csv")
-    p.add_argument("--d1-file", default="btc_d1.csv")
+    p.add_argument("--m15-file", default="btcusdsharp_m15.csv")
+    p.add_argument("--m5-file", default="btcusdsharp_m5.csv")
+    p.add_argument("--h1-file", default="btcusdsharp_h1.csv")
+    p.add_argument("--h4-file", default="btcusdsharp_h4.csv")
+    p.add_argument("--d1-file", default="btcusdsharp_d1.csv")
     p.add_argument("--min-sample", type=int, default=5)
     p.add_argument("--model", default="gpt-5-mini")
     p.add_argument("--max-review-items", type=int, default=0, help="0 = all payloads")
@@ -227,10 +236,10 @@ def main() -> int:
     for pth in paths.values():
         pth.parent.mkdir(parents=True, exist_ok=True)
 
-    requested_ledgers = parse_order_ledgers(args.order_ledger_csv)
+    requested_ledgers = parse_order_ledgers(args.order_ledger_csv, include_manual_ledgers=bool(args.include_manual_ledgers))
     order_ledgers, missing_ledgers = existing_order_ledgers(requested_ledgers, allow_missing=bool(args.allow_missing_order_ledger))
     if not order_ledgers:
-        raise SystemExit("No existing BTC order ledger CSVs found. Pass --order-ledger-csv for the BTC strategy ledger, or run the BTC send-once flow first.")
+        raise SystemExit("No existing BTC order ledger CSVs found. Expected default: data/runtime_state/btc/multi_strategy/guarded_demo_order_ledger.csv")
 
     m15_csv = csv_path(args.mql5_files_dir, args.m15_csv, args.m15_file)
     m5_csv = csv_path(args.mql5_files_dir, args.m5_csv, args.m5_file)
@@ -359,7 +368,7 @@ def main() -> int:
     review_summary = read_json(paths["review_json"])
     tag_summary = read_json(paths["tag_summary_json"])
     pipeline_summary = {
-        "schema_version": "btc_ai_review_pipeline_v1",
+        "schema_version": "btc_ai_review_pipeline_v2_multi_strategy_default",
         "created_at_utc": utc_now_text(),
         "cycle_ok": True,
         "out_dir": str(args.out_dir),
