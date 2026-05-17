@@ -18,6 +18,8 @@ from ensure_ai_history_warning_preview_marker import build_marker  # type: ignor
 _ORIGINAL_RUN_ONCE = base.run_once
 SUMMARY_NAME = "latest_gold_multi_strategy_guarded_demo_send_once_result.json"
 PAYLOAD_CSV_REL = Path("dry_run_stage") / "payload" / "order_payloads.csv"
+DEFAULT_MULTI_TAG_SUMMARY_CSV = Path("data/runtime_logs/trade_ai_review/gold_multi/gold_multi_trade_ai_tag_summary.csv")
+FALLBACK_SHARED_TAG_SUMMARY_CSV = Path("data/runtime_logs/trade_ai_review/trade_ai_tag_summary.csv")
 
 
 def _safe_int(value: Any, default: int = 0) -> int:
@@ -63,6 +65,12 @@ def _run_cmd(label: str, cmd: list[str], cwd: Path) -> tuple[int, float]:
     return int(completed.returncode), elapsed
 
 
+def _select_tag_summary_csv() -> Path:
+    if base.path_exists(DEFAULT_MULTI_TAG_SUMMARY_CSV):
+        return DEFAULT_MULTI_TAG_SUMMARY_CSV
+    return FALLBACK_SHARED_TAG_SUMMARY_CSV
+
+
 def _ensure_marker_when_no_payload(cycle_dir: Path) -> None:
     summary_path = cycle_dir / SUMMARY_NAME
     summary = base.read_json_or_empty(summary_path)
@@ -102,6 +110,7 @@ def _discord_send_paths(cycle_dir: Path, persistent_ledger: Path) -> dict[str, P
         "preview_json": preview_dir / "ai_history_warning_discord_preview.json",
         "result_json": preview_dir / "multi_ai_history_discord_send_result.json",
         "payload_csv": cycle_dir / PAYLOAD_CSV_REL,
+        "tag_summary_csv": _select_tag_summary_csv(),
     }
 
 
@@ -147,11 +156,12 @@ def _send_multi_ai_discord(cycle_dir: Path, persistent_ledger: Path) -> None:
         "--max-rows", str(max(1, payload_rows)),
         "--style", "compact",
         "--send",
+        "--ai-history-tag-summary-csv", str(paths["tag_summary_csv"]),
     ]
     rc, elapsed = _run_cmd("multi_ai_history_discord_send", cmd, base.REPO_ROOT)
     parsed = _read_send_result(paths["preview_json"])
     result = {
-        "schema_version": "gold_multi_ai_history_discord_send_result_v1",
+        "schema_version": "gold_multi_ai_history_discord_send_result_v2_multi_tag_summary",
         "created_at_utc": base.utc_text(),
         "cycle_dir": str(cycle_dir),
         "payload_csv": str(paths["payload_csv"]),
@@ -159,6 +169,7 @@ def _send_multi_ai_discord(cycle_dir: Path, persistent_ledger: Path) -> None:
         "returncode": int(rc),
         "elapsed_seconds": float(elapsed),
         "send_ledger_csv": str(paths["send_ledger_csv"]),
+        "tag_summary_csv": str(paths["tag_summary_csv"]),
         "preview_txt": str(paths["preview_txt"]),
         "preview_json": str(paths["preview_json"]),
         "records": parsed.get("records", 0),
@@ -171,6 +182,7 @@ def _send_multi_ai_discord(cycle_dir: Path, persistent_ledger: Path) -> None:
             "ai_api_called": False,
             "discord_send_requested": True,
             "duplicate_prevention_ledger": str(paths["send_ledger_csv"]),
+            "multi_specific_tag_summary_preferred": True,
         },
     }
     _write_json(paths["result_json"], result)
@@ -178,7 +190,7 @@ def _send_multi_ai_discord(cycle_dir: Path, persistent_ledger: Path) -> None:
         "[INFO] multi AI Discord send result: "
         f"returncode={rc} payload_rows={payload_rows} sent={result['sent']} "
         f"errors={result['errors']} warning_rows={result['warning_rows']} "
-        f"preview_txt={paths['preview_txt']}",
+        f"tag_summary_csv={paths['tag_summary_csv']} preview_txt={paths['preview_txt']}",
         flush=True,
     )
 
