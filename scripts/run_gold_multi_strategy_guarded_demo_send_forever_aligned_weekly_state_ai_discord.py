@@ -67,8 +67,22 @@ def _ensure_marker_when_no_payload(cycle_dir: Path) -> None:
     summary_path = cycle_dir / SUMMARY_NAME
     summary = base.read_json_or_empty(summary_path)
     payload_rows = _payload_rows_from_summary(summary)
-    preview_json = cycle_dir / "ai_history_warning_preview" / "ai_history_warning_discord_preview.json"
-    if payload_rows > 0 or base.path_exists(preview_json):
+    preview_dir = cycle_dir / "ai_history_warning_preview"
+    preview_json = preview_dir / "ai_history_warning_discord_preview.json"
+    preview_txt = preview_dir / "ai_history_warning_discord_preview.txt"
+    if payload_rows > 0:
+        print(
+            "[INFO] AI-history no-payload marker skipped because payload rows exist: "
+            f"payload_rows_out={payload_rows}",
+            flush=True,
+        )
+        return
+    if base.path_exists(preview_json):
+        print(
+            "[INFO] AI-history no-payload marker already exists: "
+            f"payload_rows_out={payload_rows} preview_txt={preview_txt}",
+            flush=True,
+        )
         return
     marker = build_marker(cycle_dir, "SKIPPED_NO_PAYLOAD_ROWS", force=True)
     print(
@@ -115,6 +129,10 @@ def _send_multi_ai_discord(cycle_dir: Path, persistent_ledger: Path) -> None:
     paths = _discord_send_paths(cycle_dir, persistent_ledger)
     payload_rows = _read_csv_rows(paths["payload_csv"])
     if payload_rows <= 0:
+        print(
+            "[INFO] multi AI Discord send skipped because payload rows are 0; ensuring no-payload marker",
+            flush=True,
+        )
         _ensure_marker_when_no_payload(cycle_dir)
         return
 
