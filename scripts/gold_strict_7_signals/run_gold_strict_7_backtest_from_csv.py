@@ -2,25 +2,22 @@
 # -*- coding: utf-8 -*-
 r"""Run strict no-future backtest for the GOLD seven-candidate signal set.
 
-This script is intentionally research-only.
+Research-only script.
 
-It does not:
-- send Discord notifications
-- call MT5
-- place orders
-- mutate live runtime ledgers
-- call OpenAI
+No Discord send.
+No MT5 call.
+No order_send.
+No live/runtime ledger mutation.
+No OpenAI call.
 
-It does:
-- read GOLD OHLC CSVs
-- build M5 indicators
-- attach only closed H1/H4/D1 context where close_time <= M5 close_time
-- detect the seven current GOLD strict candidates
-- evaluate outcome with M1 first-touch
-- export full trade detail, summary, monthly stats, overlap, and JSON summary
-
-Default output:
-    data/research_results/gold_strict_7_signal_candidates/
+Important v2 fixes:
+- M1 coverage is explicit. By default, post-cooldown signals before the first
+  available M1 candle are dropped from trade evaluation instead of being counted
+  as breakeven-like zero-R rows.
+- Summary/monthly/portfolio stats use evaluated rows only.
+- NO_M1_PATH rows can still be kept for diagnostics with
+  --m1-coverage-policy keep_no_path, but they are never counted as wins/losses
+  or breakevens in performance stats.
 """
 from __future__ import annotations
 
@@ -44,7 +41,6 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from gold_strict_7_signal_specs import (  # noqa: E402
     DEFAULT_BROKER_SYMBOL,
-    DEFAULT_MAGIC_BASE,
     DEFAULT_SYMBOL,
     GOLD_PIP_SIZE,
     GoldStrictSignalSpec,
@@ -52,9 +48,11 @@ from gold_strict_7_signal_specs import (  # noqa: E402
     validate_signal_specs,
 )
 
-SCHEMA_VERSION = "gold_strict_7_backtest_v1"
+SCHEMA_VERSION = "gold_strict_7_backtest_v2"
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_OUT_DIR = Path("data/research_results/gold_strict_7_signal_candidates")
+EVALUATED_OUTCOMES = {"WIN", "LOSS", "BREAKEVEN"}
+NON_EVALUATED_OUTCOMES = {"NO_M1_PATH", "NO_PATH", "INVALID_RISK"}
 
 TIMEFRAME_MINUTES = {
     "M1": 1,
@@ -77,6 +75,7 @@ TRADE_COLUMNS = [
     "symbol",
     "trigger_timeframe",
     "outcome_timeframe",
+    "m1_coverage_status",
     "signal_time",
     "entry_time",
     "entry_price",
@@ -129,7 +128,10 @@ SUMMARY_COLUMNS = [
     "candidate_family",
     "direction",
     "session",
+    "signal_count",
+    "evaluated_trade_count",
     "trade_count",
+    "no_m1_path_count",
     "win_count",
     "loss_count",
     "breakeven_count",
@@ -153,7 +155,10 @@ MONTHLY_COLUMNS = [
     "direction",
     "session",
     "entry_month",
+    "signal_count",
+    "evaluated_trade_count",
     "trade_count",
+    "no_m1_path_count",
     "win_count",
     "loss_count",
     "breakeven_count",
@@ -193,10 +198,6 @@ def windows_long_path(path: str | Path) -> str:
 
 def ensure_parent_dir(path: str | Path) -> None:
     Path(windows_long_path(Path(path).parent)).mkdir(parents=True, exist_ok=True)
-
-
-def path_exists(path: str | Path) -> bool:
-    return Path(windows_long_path(path)).exists()
 
 
 def write_csv(df: pd.DataFrame, path: str | Path) -> None:
@@ -246,9 +247,7 @@ def clean_float(value: Any, default: float | None = None) -> float | None:
         x = float(value)
     except Exception:
         return default
-    if not math.isfinite(x):
-        return default
-    return x
+    return x if math.isfinite(x) else default
 
 
 def time_text(value: Any) -> str:
@@ -269,19 +268,9 @@ def read_ohlc_csv(path: str | Path, *, tail_bars: int = 0) -> pd.DataFrame:
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"CSV not found: {p}")
-    sep = sniff_sep(p)
-    df = pd.read_csv(windows_long_path(p), sep=sep, encoding="utf-8-sig")
+    df = pd.read_csv(windows_long_path(p), sep=sniff_sep(p), encoding="utf-8-sig")
     df.columns = [str(c).strip().lower() for c in df.columns]
-    df = df.rename(
-        columns={
-            "datetime": "time",
-            "date": "time",
-            "timestamp": "time",
-            "tickvolume": "tick_volume",
-            "tick volume": "tick_volume",
-            "volume": "tick_volume",
-        }
-    )
+    df = df.rename(columns={"datetime": "time", "date": "time", "timestamp": "time", "tickvolume": "tick_volume", "tick volume": "tick_volume", "volume": "tick_volume"})
     required = ["time", "open", "high", "low", "close"]
     missing = [c for c in required if c not in df.columns]
     if missing:
@@ -290,8 +279,7 @@ def read_ohlc_csv(path: str | Path, *, tail_bars: int = 0) -> pd.DataFrame:
     for col in ["open", "high", "low", "close", "tick_volume", "spread", "real_volume"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
-    df = df.dropna(subset=required)
-    df = df.sort_values("time", kind="mergesort").drop_duplicates("time", keep="last").reset_index(drop=True)
+    df = df.dropna(subset=required).sort_values("time", kind="mergesort").drop_duplicates("time", keep="last").reset_index(drop=True)
     if int(tail_bars) > 0 and len(df) > int(tail_bars):
         df = df.tail(int(tail_bars)).reset_index(drop=True)
     return df
@@ -303,14 +291,7 @@ def ema(series: pd.Series, span: int) -> pd.Series:
 
 def atr(df: pd.DataFrame, period: int) -> pd.Series:
     prev_close = df["close"].shift(1)
-    tr = pd.concat(
-        [
-            (df["high"] - df["low"]).abs(),
-            (df["high"] - prev_close).abs(),
-            (df["low"] - prev_close).abs(),
-        ],
-        axis=1,
-    ).max(axis=1)
+    tr = pd.concat([(df["high"] - df["low"]).abs(), (df["high"] - prev_close).abs(), (df["low"] - prev_close).abs()], axis=1).max(axis=1)
     return tr.rolling(int(period), min_periods=int(period)).mean()
 
 
@@ -369,19 +350,16 @@ def add_indicators(df: pd.DataFrame, tf: str) -> pd.DataFrame:
     out["bb_mid20"] = bb_mid
     out["bb_upper20"] = bb_mid + 2.0 * bb_std
     out["bb_lower20"] = bb_mid - 2.0 * bb_std
-    out["bb_width20"] = (out["bb_upper20"] - out["bb_lower20"]) / out["bb_mid20"].replace(0.0, np.nan)
     out["bb_pos20"] = (out["close"] - out["bb_lower20"]) / (out["bb_upper20"] - out["bb_lower20"]).replace(0.0, np.nan)
 
     kc_mid = out["ema20"]
     kc_atr = out["atr14"]
-    out["kc_mid20"] = kc_mid
     out["kc_upper20_1p5"] = kc_mid + 1.5 * kc_atr
     out["kc_lower20_1p5"] = kc_mid - 1.5 * kc_atr
     out["kc_pos20_1p5"] = (out["close"] - out["kc_lower20_1p5"]) / (out["kc_upper20_1p5"] - out["kc_lower20_1p5"]).replace(0.0, np.nan)
 
-    vwap_num = (out["close"] * out.get("tick_volume", pd.Series(1.0, index=out.index))).rolling(96, min_periods=20).sum()
-    vwap_den = out.get("tick_volume", pd.Series(1.0, index=out.index)).rolling(96, min_periods=20).sum()
-    out["vwap96"] = vwap_num / vwap_den.replace(0.0, np.nan)
+    vol = out["tick_volume"] if "tick_volume" in out.columns else pd.Series(1.0, index=out.index)
+    out["vwap96"] = (out["close"] * vol).rolling(96, min_periods=20).sum() / vol.rolling(96, min_periods=20).sum().replace(0.0, np.nan)
 
     for window in [6, 12, 24, 48, 96]:
         out[f"prev_low_{window}"] = out["low"].shift(1).rolling(window, min_periods=window).min()
@@ -390,13 +368,7 @@ def add_indicators(df: pd.DataFrame, tf: str) -> pd.DataFrame:
 
 
 def prefix_context(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
-    cols = [
-        "close_time", "open", "high", "low", "close", "ema20", "ema50", "ema200", "atr14", "atr50",
-        "macd", "macd_signal", "macd_hist", "macd_hist_delta", "rsi14", "stoch_k20", "stoch_d3",
-        "cci20", "range", "close_pos", "range_atr", "ema20_slope3", "ema50_slope3",
-        "prev_low_6", "prev_low_12", "prev_low_24", "prev_low_48", "prev_low_96",
-        "prev_high_6", "prev_high_12", "prev_high_24", "prev_high_48", "prev_high_96",
-    ]
+    cols = ["close_time", "open", "high", "low", "close", "ema20", "ema50", "ema200", "atr14", "atr50", "macd", "macd_signal", "macd_hist", "macd_hist_delta", "rsi14", "stoch_k20", "stoch_d3", "cci20", "range", "close_pos", "range_atr", "ema20_slope3", "ema50_slope3", "prev_low_6", "prev_low_12", "prev_low_24", "prev_low_48", "prev_low_96", "prev_high_6", "prev_high_12", "prev_high_24", "prev_high_48", "prev_high_96"]
     use = [c for c in cols if c in df.columns]
     out = df[use].copy().sort_values("close_time", kind="mergesort")
     rename = {"close_time": f"{prefix}_close_time"}
@@ -409,33 +381,21 @@ def attach_strict_context(m5: pd.DataFrame, h1: pd.DataFrame, h4: pd.DataFrame, 
     out = pd.merge_asof(base, prefix_context(h1, "h1"), left_on="close_time", right_on="h1_close_time", direction="backward")
     out = pd.merge_asof(out, prefix_context(h4, "h4"), left_on="close_time", right_on="h4_close_time", direction="backward")
     out = pd.merge_asof(out, prefix_context(d1, "d1"), left_on="close_time", right_on="d1_close_time", direction="backward")
-    out["strict_no_future_ok"] = (
-        (pd.to_datetime(out["h1_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce"))
-        & (pd.to_datetime(out["h4_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce"))
-        & (pd.to_datetime(out["d1_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce"))
-    ).fillna(False)
+    out["strict_no_future_ok"] = ((pd.to_datetime(out["h1_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce")) & (pd.to_datetime(out["h4_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce")) & (pd.to_datetime(out["d1_close_time"], errors="coerce") <= pd.to_datetime(out["close_time"], errors="coerce"))).fillna(False)
     return out
 
 
-def mt5_hour(ts: pd.Series) -> pd.Series:
-    return pd.to_datetime(ts, errors="coerce").dt.hour
-
-
 def session_mask(df: pd.DataFrame, session: str) -> pd.Series:
-    h = mt5_hour(df["close_time"])
+    hour = pd.to_datetime(df["close_time"], errors="coerce").dt.hour
     if session == "ALL":
         return pd.Series(True, index=df.index)
     if session == "LONDON":
-        return h.between(8, 16, inclusive="both")
+        return hour.between(8, 16, inclusive="both")
     if session == "NY":
-        return h.between(13, 22, inclusive="both")
+        return hour.between(13, 22, inclusive="both")
     if session == "LONDON_NY":
-        return h.between(8, 22, inclusive="both")
+        return hour.between(8, 22, inclusive="both")
     raise ValueError(f"unsupported session: {session}")
-
-
-def h1_up_context(df: pd.DataFrame) -> pd.Series:
-    return (df["h1_close"] > df["h1_ema20"]) & (df["h1_ema20"] > df["h1_ema50"])
 
 
 def h1_down_context(df: pd.DataFrame) -> pd.Series:
@@ -456,64 +416,22 @@ def detect_spec_candidates(ctx: pd.DataFrame, spec: GoldStrictSignalSpec) -> pd.
     strict = base["strict_no_future_ok"].astype(bool)
 
     if spec.family == "KC_CCI150":
-        mask = (
-            strict
-            & sm
-            & (base["cci20"] >= float(spec.cci_threshold))
-            & (base["high"] >= base["kc_upper20_1p5"])
-            & (base["close"] < base["open"])
-            & (base["upper_wick_ratio"] >= float(spec.rejection_threshold))
-            & (base["close_pos"] <= 0.45)
-        )
+        mask = strict & sm & (base["cci20"] >= float(spec.cci_threshold)) & (base["high"] >= base["kc_upper20_1p5"]) & (base["close"] < base["open"]) & (base["upper_wick_ratio"] >= float(spec.rejection_threshold)) & (base["close_pos"] <= 0.45)
         reason = "SELL KC upper rejection with CCI >= 150, bearish M5 close, London session."
     elif spec.family == "SWEEP_RECLAIM_RSI":
-        mask = (
-            strict
-            & sm
-            & (base["low"] < base["prev_low_24"])
-            & (base["close"] > base["prev_low_24"])
-            & (base["rsi14"] <= float(spec.rsi_threshold))
-            & (base["lower_wick_ratio"] >= float(spec.rejection_threshold))
-            & (base["close_pos"] >= 0.50)
-        )
+        mask = strict & sm & (base["low"] < base["prev_low_24"]) & (base["close"] > base["prev_low_24"]) & (base["rsi14"] <= float(spec.rsi_threshold)) & (base["lower_wick_ratio"] >= float(spec.rejection_threshold)) & (base["close_pos"] >= 0.50)
         reason = "BUY sweep below previous low then reclaim, RSI low, lower-wick rejection."
     elif spec.family == "STOCH_BB_KTURN":
-        mask = (
-            strict
-            & sm
-            & (base["low"] <= base["bb_lower20"])
-            & (base["stoch_k20"] <= 35.0)
-            & (base["stoch_k20"] > base["stoch_d3"])
-            & (base["lower_wick_ratio"] >= float(spec.rejection_threshold))
-            & (base["close_pos"] >= 0.45)
-        )
+        mask = strict & sm & (base["low"] <= base["bb_lower20"]) & (base["stoch_k20"] <= 35.0) & (base["stoch_k20"] > base["stoch_d3"]) & (base["lower_wick_ratio"] >= float(spec.rejection_threshold)) & (base["close_pos"] >= 0.45)
         reason = "BUY BB lower-band rejection with Stoch K > D turn-up filter."
     elif spec.family == "DONCHIAN_MACD_RANGE":
         lb = int(spec.donchian_lookback)
         if lb <= 0:
             raise ValueError(f"{spec.strategy_id}: donchian_lookback must be positive")
-        mask = (
-            strict
-            & sm
-            & h1_down_context(base)
-            & h4_down_context(base)
-            & d1_down_context(base)
-            & (base["low"] < base[f"prev_low_{lb}"])
-            & (base["macd_hist"] < 0)
-            & (base["macd_hist_delta"] < 0)
-            & (base["range_atr"] >= float(spec.min_range_atr))
-            & (base["close_pos"] <= 0.50)
-        )
+        mask = strict & sm & h1_down_context(base) & h4_down_context(base) & d1_down_context(base) & (base["low"] < base[f"prev_low_{lb}"]) & (base["macd_hist"] < 0) & (base["macd_hist_delta"] < 0) & (base["range_atr"] >= float(spec.min_range_atr)) & (base["close_pos"] <= 0.50)
         reason = f"SELL H1/H4/D1 bearish context, Donchian{lb} low break, MACD negative, range >= {spec.min_range_atr} ATR."
     elif spec.family == "BB_RSI_REJECTION":
-        mask = (
-            strict
-            & sm
-            & (base["low"] <= base["bb_lower20"])
-            & (base["rsi14"] <= float(spec.rsi_threshold))
-            & (base["lower_wick_ratio"] >= float(spec.rejection_threshold))
-            & (base["close_pos"] >= 0.50)
-        )
+        mask = strict & sm & (base["low"] <= base["bb_lower20"]) & (base["rsi14"] <= float(spec.rsi_threshold)) & (base["lower_wick_ratio"] >= float(spec.rejection_threshold)) & (base["close_pos"] >= 0.50)
         reason = "BUY BB lower-band touch, RSI30 zone, lower-wick rejection."
     else:
         raise ValueError(f"unsupported family: {spec.family}")
@@ -535,9 +453,7 @@ def detect_spec_candidates(ctx: pd.DataFrame, spec: GoldStrictSignalSpec) -> pd.
 
 
 def apply_cooldown(candidates: pd.DataFrame, spec: GoldStrictSignalSpec) -> pd.DataFrame:
-    if candidates.empty:
-        return candidates.copy()
-    if spec.cooldown_bars_m5 <= 0:
+    if candidates.empty or spec.cooldown_bars_m5 <= 0:
         return candidates.copy()
     cooldown = pd.to_timedelta(int(spec.cooldown_minutes), unit="m")
     accepted: list[dict[str, Any]] = []
@@ -550,96 +466,111 @@ def apply_cooldown(candidates: pd.DataFrame, spec: GoldStrictSignalSpec) -> pd.D
     return pd.DataFrame(accepted).reset_index(drop=True) if accepted else pd.DataFrame(columns=candidates.columns)
 
 
+def no_m1_path_row(row: pd.Series, spec: GoldStrictSignalSpec, *, broker_symbol: str, coverage_status: str) -> dict[str, Any]:
+    entry_time = pd.Timestamp(row["close_time"])
+    entry_price = float(row["close"])
+    sl = entry_price - spec.sl_price_distance if spec.direction == "BUY" else entry_price + spec.sl_price_distance
+    tp = entry_price + spec.tp_price_distance if spec.direction == "BUY" else entry_price - spec.tp_price_distance
+    signal_id = f"{spec.strategy_id}|{spec.direction}|{id_time_text(entry_time)}"
+    return {col: "" for col in TRADE_COLUMNS} | {
+        "created_at_utc": utc_now_text(),
+        "schema_version": SCHEMA_VERSION,
+        "signal_id": signal_id,
+        "trade_id": f"GOLD_STRICT7_{spec.strategy_id}_{id_time_text(entry_time)}",
+        "strategy_id": spec.strategy_id,
+        "candidate_family": spec.family,
+        "direction": spec.direction,
+        "session": spec.session,
+        "broker_symbol": broker_symbol,
+        "symbol": DEFAULT_SYMBOL,
+        "trigger_timeframe": spec.trigger_timeframe,
+        "outcome_timeframe": spec.outcome_timeframe,
+        "m1_coverage_status": coverage_status,
+        "signal_time": time_text(entry_time),
+        "entry_time": time_text(entry_time),
+        "entry_price": round(entry_price, 5),
+        "entry_price_reference": round(entry_price, 5),
+        "sl_price": round(sl, 5),
+        "tp_price": round(tp, 5),
+        "tp_pips": float(spec.tp_pips),
+        "sl_pips": float(spec.sl_pips),
+        "rr": float(spec.rr),
+        "outcome": "NO_M1_PATH",
+        "close_reason": "NO_M1_PATH",
+        "strict_no_future_ok": bool(row.get("strict_no_future_ok", False)),
+        "context_h1_close_time": time_text(row.get("h1_close_time")),
+        "context_h4_close_time": time_text(row.get("h4_close_time")),
+        "context_d1_close_time": time_text(row.get("d1_close_time")),
+        "reason": clean_str(row.get("reason")),
+    }
+
+
 def evaluate_one_candidate(row: pd.Series, m1: pd.DataFrame, spec: GoldStrictSignalSpec, *, broker_symbol: str, inbar_priority: str) -> dict[str, Any]:
     direction = spec.direction
     entry_time = pd.Timestamp(row["close_time"])
     entry_price = float(row["close"])
-    sl_dist_price = spec.sl_price_distance
-    tp_dist_price = spec.tp_price_distance
-    sl_price = entry_price - sl_dist_price if direction == "BUY" else entry_price + sl_dist_price
-    tp_price = entry_price + tp_dist_price if direction == "BUY" else entry_price - tp_dist_price
-
-    path = m1[m1["time"] > entry_time].copy()
-    path = path[path["time"] <= entry_time + pd.Timedelta(hours=24)]
-
-    outcome = "NO_M1_PATH"
-    close_reason = "NO_M1_PATH"
-    close_time = ""
-    close_price: float | None = None
-    same_bar_conflict = False
-    bars_checked = int(len(path))
-    gross_price = None
-    net_price = None
-    gross_r = None
-    net_r = None
-    mfe_pips = None
-    mae_pips = None
-    holding_minutes = None
+    sl_dist = spec.sl_price_distance
+    tp_dist = spec.tp_price_distance
+    sl_price = entry_price - sl_dist if direction == "BUY" else entry_price + sl_dist
+    tp_price = entry_price + tp_dist if direction == "BUY" else entry_price - tp_dist
+    path = m1[(m1["time"] > entry_time) & (m1["time"] <= entry_time + pd.Timedelta(hours=24))].copy()
+    if path.empty:
+        return no_m1_path_row(row, spec, broker_symbol=broker_symbol, coverage_status="NO_M1_AFTER_ENTRY_WITHIN_24H")
 
     spread_raw = clean_float(row.get("spread"), 0.0) or 0.0
-    # Current MT5 GOLD CSV convention usually stores spread as points. Treat 10 points as 1 pip.
     spread_pips = float(spread_raw) / 10.0
     spread_price = spread_pips * GOLD_PIP_SIZE
 
-    if not path.empty:
-        if direction == "BUY":
-            favorable_price = path["high"] - entry_price
-            adverse_price = path["low"] - entry_price
-            tp_hit = path["high"] >= tp_price
-            sl_hit = path["low"] <= sl_price
+    if direction == "BUY":
+        favorable = path["high"] - entry_price
+        adverse = path["low"] - entry_price
+        tp_hit = path["high"] >= tp_price
+        sl_hit = path["low"] <= sl_price
+    else:
+        favorable = entry_price - path["low"]
+        adverse = entry_price - path["high"]
+        tp_hit = path["low"] <= tp_price
+        sl_hit = path["high"] >= sl_price
+
+    mfe_pips = float(favorable.max() / GOLD_PIP_SIZE)
+    mae_pips = float(adverse.min() / GOLD_PIP_SIZE)
+    hit = (tp_hit | sl_hit).to_numpy(dtype=bool)
+    same_bar_conflict = False
+    if hit.any():
+        k = int(np.argmax(hit))
+        hit_row = path.iloc[k]
+        both = bool(tp_hit.iloc[k] and sl_hit.iloc[k])
+        same_bar_conflict = both
+        if both:
+            close_reason = "SL" if inbar_priority.upper() == "SL" else "TP"
+        elif bool(sl_hit.iloc[k]):
+            close_reason = "SL"
         else:
-            favorable_price = entry_price - path["low"]
-            adverse_price = entry_price - path["high"]
-            tp_hit = path["low"] <= tp_price
-            sl_hit = path["high"] >= sl_price
-        mfe_pips = float(favorable_price.max() / GOLD_PIP_SIZE)
-        mae_pips = float(adverse_price.min() / GOLD_PIP_SIZE)
+            close_reason = "TP"
+        close_time = time_text(hit_row["time"])
+        close_price = sl_price if close_reason == "SL" else tp_price
+        outcome = "LOSS" if close_reason == "SL" else "WIN"
+    else:
+        last = path.iloc[-1]
+        close_reason = "TIMEOUT_24H_CLOSE"
+        close_time = time_text(last["time"])
+        close_price = float(last["close"])
+        gross_price_tmp = close_price - entry_price if direction == "BUY" else entry_price - close_price
+        net_price_tmp = gross_price_tmp - spread_price
+        outcome = "WIN" if net_price_tmp > 0 else ("LOSS" if net_price_tmp < 0 else "BREAKEVEN")
 
-        hit = (tp_hit | sl_hit).to_numpy(dtype=bool)
-        if hit.any():
-            k = int(np.argmax(hit))
-            hit_row = path.iloc[k]
-            both = bool(tp_hit.iloc[k] and sl_hit.iloc[k])
-            same_bar_conflict = both
-            if both:
-                close_reason = "SL" if inbar_priority.upper() == "SL" else "TP"
-            elif bool(sl_hit.iloc[k]):
-                close_reason = "SL"
-            else:
-                close_reason = "TP"
-            close_time = time_text(hit_row["time"])
-            close_price = sl_price if close_reason == "SL" else tp_price
-            outcome = "LOSS" if close_reason == "SL" else "WIN"
-        else:
-            last = path.iloc[-1]
-            close_reason = "TIMEOUT_24H_CLOSE"
-            close_time = time_text(last["time"])
-            close_price = float(last["close"])
-            if direction == "BUY":
-                gross_price = close_price - entry_price
-            else:
-                gross_price = entry_price - close_price
-            net_price = gross_price - spread_price
-            outcome = "WIN" if net_price > 0 else ("LOSS" if net_price < 0 else "BREAKEVEN")
-
-        if gross_price is None and close_price is not None:
-            gross_price = close_price - entry_price if direction == "BUY" else entry_price - close_price
-        if net_price is None and gross_price is not None:
-            net_price = gross_price - spread_price
-        if gross_price is not None:
-            gross_r = gross_price / sl_dist_price if sl_dist_price > 0 else None
-        if net_price is not None:
-            net_r = net_price / sl_dist_price if sl_dist_price > 0 else None
-        if close_time:
-            holding_minutes = (pd.Timestamp(close_time) - entry_time).total_seconds() / 60.0
-
+    gross_price = close_price - entry_price if direction == "BUY" else entry_price - close_price
+    net_price = gross_price - spread_price
+    gross_r = gross_price / sl_dist if sl_dist > 0 else None
+    net_r = net_price / sl_dist if sl_dist > 0 else None
+    holding_minutes = (pd.Timestamp(close_time) - entry_time).total_seconds() / 60.0
     signal_id = f"{spec.strategy_id}|{direction}|{id_time_text(entry_time)}"
-    trade_id = f"GOLD_STRICT7_{spec.strategy_id}_{id_time_text(entry_time)}"
+
     return {
         "created_at_utc": utc_now_text(),
         "schema_version": SCHEMA_VERSION,
         "signal_id": signal_id,
-        "trade_id": trade_id,
+        "trade_id": f"GOLD_STRICT7_{spec.strategy_id}_{id_time_text(entry_time)}",
         "strategy_id": spec.strategy_id,
         "candidate_family": spec.family,
         "direction": direction,
@@ -648,7 +579,8 @@ def evaluate_one_candidate(row: pd.Series, m1: pd.DataFrame, spec: GoldStrictSig
         "symbol": DEFAULT_SYMBOL,
         "trigger_timeframe": spec.trigger_timeframe,
         "outcome_timeframe": spec.outcome_timeframe,
-        "signal_time": time_text(row["close_time"]),
+        "m1_coverage_status": "EVALUATED",
+        "signal_time": time_text(entry_time),
         "entry_time": time_text(entry_time),
         "entry_price": round(entry_price, 5),
         "entry_price_reference": round(entry_price, 5),
@@ -663,9 +595,9 @@ def evaluate_one_candidate(row: pd.Series, m1: pd.DataFrame, spec: GoldStrictSig
         "outcome": outcome,
         "close_reason": close_reason,
         "close_time": close_time,
-        "close_price": round(close_price, 5) if close_price is not None else None,
-        "profit_pips_gross": None if gross_price is None else gross_price / GOLD_PIP_SIZE,
-        "profit_pips_net": None if net_price is None else net_price / GOLD_PIP_SIZE,
+        "close_price": round(close_price, 5),
+        "profit_pips_gross": gross_price / GOLD_PIP_SIZE,
+        "profit_pips_net": net_price / GOLD_PIP_SIZE,
         "profit_price_gross": gross_price,
         "profit_price_net": net_price,
         "profit_r": net_r,
@@ -673,10 +605,10 @@ def evaluate_one_candidate(row: pd.Series, m1: pd.DataFrame, spec: GoldStrictSig
         "gross_profit_r": gross_r,
         "mfe_pips": mfe_pips,
         "mae_pips": mae_pips,
-        "mfe_r": None if mfe_pips is None else mfe_pips / float(spec.sl_pips),
-        "mae_r": None if mae_pips is None else mae_pips / float(spec.sl_pips),
+        "mfe_r": mfe_pips / float(spec.sl_pips),
+        "mae_r": mae_pips / float(spec.sl_pips),
         "holding_minutes": holding_minutes,
-        "bars_checked_m1": bars_checked,
+        "bars_checked_m1": int(len(path)),
         "same_bar_conflict": same_bar_conflict,
         "cooldown_minutes": int(spec.cooldown_minutes),
         "cooldown_bars_m5": int(spec.cooldown_bars_m5),
@@ -696,17 +628,39 @@ def evaluate_one_candidate(row: pd.Series, m1: pd.DataFrame, spec: GoldStrictSig
     }
 
 
-def evaluate_candidates(candidates_by_spec: dict[str, pd.DataFrame], specs: list[GoldStrictSignalSpec], m1: pd.DataFrame, *, broker_symbol: str, inbar_priority: str) -> pd.DataFrame:
+def evaluate_candidates(candidates_by_spec: dict[str, pd.DataFrame], specs: list[GoldStrictSignalSpec], m1: pd.DataFrame, *, broker_symbol: str, inbar_priority: str, m1_coverage_policy: str) -> tuple[pd.DataFrame, dict[str, int], dict[str, int]]:
     rows: list[dict[str, Any]] = []
+    dropped_before_m1: dict[str, int] = {}
+    post_cooldown_counts: dict[str, int] = {}
     spec_by_id = {s.strategy_id: s for s in specs}
+    m1_first = pd.Timestamp(m1["time"].min()) if not m1.empty else None
     for strategy_id, candidates in candidates_by_spec.items():
         spec = spec_by_id[strategy_id]
         cooled = apply_cooldown(candidates, spec)
+        post_cooldown_counts[strategy_id] = int(len(cooled))
+        if m1_first is not None:
+            before_mask = pd.to_datetime(cooled["close_time"], errors="coerce") < m1_first if not cooled.empty else pd.Series([], dtype=bool)
+            dropped_before_m1[strategy_id] = int(before_mask.sum())
+            if m1_coverage_policy == "drop" and not cooled.empty:
+                cooled = cooled[~before_mask].copy()
+        else:
+            dropped_before_m1[strategy_id] = int(len(cooled))
+            if m1_coverage_policy == "drop":
+                cooled = cooled.iloc[0:0].copy()
         for _, row in cooled.iterrows():
-            rows.append(evaluate_one_candidate(row, m1, spec, broker_symbol=broker_symbol, inbar_priority=inbar_priority))
+            if m1_first is not None and pd.Timestamp(row["close_time"]) < m1_first and m1_coverage_policy == "keep_no_path":
+                rows.append(no_m1_path_row(row, spec, broker_symbol=broker_symbol, coverage_status="BEFORE_FIRST_M1"))
+            else:
+                rows.append(evaluate_one_candidate(row, m1, spec, broker_symbol=broker_symbol, inbar_priority=inbar_priority))
     if not rows:
-        return pd.DataFrame(columns=TRADE_COLUMNS)
-    return pd.DataFrame(rows, columns=TRADE_COLUMNS).sort_values(["entry_time", "strategy_id"], kind="mergesort").reset_index(drop=True)
+        return pd.DataFrame(columns=TRADE_COLUMNS), dropped_before_m1, post_cooldown_counts
+    return pd.DataFrame(rows, columns=TRADE_COLUMNS).sort_values(["entry_time", "strategy_id"], kind="mergesort").reset_index(drop=True), dropped_before_m1, post_cooldown_counts
+
+
+def evaluated_only(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty or "outcome" not in df.columns:
+        return df.iloc[0:0].copy()
+    return df[df["outcome"].astype(str).str.upper().isin(EVALUATED_OUTCOMES)].copy()
 
 
 def profit_factor(r: pd.Series) -> float | None:
@@ -726,15 +680,14 @@ def max_drawdown_r(r: pd.Series) -> float:
         return 0.0
     equity = np.cumsum(vals)
     peak = np.maximum.accumulate(equity)
-    dd = equity - peak
-    return float(dd.min())
+    return float((equity - peak).min())
 
 
 def max_losing_streak(outcomes: pd.Series) -> int:
     max_streak = 0
     cur = 0
     for item in outcomes.astype(str).str.upper().tolist():
-        if item in {"LOSS", "SMALL_LOSS"}:
+        if item == "LOSS":
             cur += 1
             max_streak = max(max_streak, cur)
         else:
@@ -742,21 +695,26 @@ def max_losing_streak(outcomes: pd.Series) -> int:
     return int(max_streak)
 
 
-def summarize_group(group: pd.DataFrame) -> dict[str, Any]:
+def summarize_group(group_all: pd.DataFrame) -> dict[str, Any]:
+    group = evaluated_only(group_all)
     r = pd.to_numeric(group["profit_r"], errors="coerce").fillna(0.0)
-    outcomes = group["outcome"].astype(str).str.upper()
-    entry_times = pd.to_datetime(group["entry_time"], errors="coerce")
-    holding = pd.to_numeric(group["holding_minutes"], errors="coerce")
+    outcomes = group["outcome"].astype(str).str.upper() if not group.empty else pd.Series([], dtype=str)
+    entry_times = pd.to_datetime(group["entry_time"], errors="coerce") if not group.empty else pd.Series([], dtype="datetime64[ns]")
+    holding = pd.to_numeric(group["holding_minutes"], errors="coerce") if not group.empty else pd.Series([], dtype=float)
     win_count = int((r > 0).sum())
     loss_count = int((r < 0).sum())
     breakeven_count = int((r == 0).sum())
+    no_m1_path_count = int(group_all["outcome"].astype(str).str.upper().eq("NO_M1_PATH").sum()) if not group_all.empty and "outcome" in group_all.columns else 0
     return {
+        "signal_count": int(len(group_all)),
+        "evaluated_trade_count": int(len(group)),
         "trade_count": int(len(group)),
+        "no_m1_path_count": no_m1_path_count,
         "win_count": win_count,
         "loss_count": loss_count,
         "breakeven_count": breakeven_count,
         "win_rate": None if len(group) == 0 else win_count / len(group),
-        "total_r": float(r.sum()),
+        "total_r": float(r.sum()) if len(group) else 0.0,
         "avg_r": None if len(group) == 0 else float(r.mean()),
         "profit_factor": profit_factor(r),
         "max_drawdown_r": max_drawdown_r(r),
@@ -774,15 +732,8 @@ def build_summary(trades: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(columns=SUMMARY_COLUMNS)
     rows: list[dict[str, Any]] = []
     for (strategy_id, family, direction, session), group in trades.groupby(["strategy_id", "candidate_family", "direction", "session"], dropna=False):
-        rows.append({
-            "strategy_id": strategy_id,
-            "candidate_family": family,
-            "direction": direction,
-            "session": session,
-            **summarize_group(group),
-            "strict_no_future_all_ok": bool(group["strict_no_future_ok"].astype(bool).all()),
-        })
-    return pd.DataFrame(rows, columns=SUMMARY_COLUMNS).sort_values(["strategy_id"], kind="mergesort").reset_index(drop=True)
+        rows.append({"strategy_id": strategy_id, "candidate_family": family, "direction": direction, "session": session, **summarize_group(group), "strict_no_future_all_ok": bool(group["strict_no_future_ok"].astype(bool).all())})
+    return pd.DataFrame(rows, columns=SUMMARY_COLUMNS).sort_values("strategy_id", kind="mergesort").reset_index(drop=True)
 
 
 def build_monthly(trades: pd.DataFrame) -> pd.DataFrame:
@@ -793,54 +744,25 @@ def build_monthly(trades: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for (strategy_id, family, direction, session, month), group in work.groupby(["strategy_id", "candidate_family", "direction", "session", "entry_month"], dropna=False):
         stats = summarize_group(group)
-        rows.append({
-            "strategy_id": strategy_id,
-            "candidate_family": family,
-            "direction": direction,
-            "session": session,
-            "entry_month": month,
-            "trade_count": stats["trade_count"],
-            "win_count": stats["win_count"],
-            "loss_count": stats["loss_count"],
-            "breakeven_count": stats["breakeven_count"],
-            "win_rate": stats["win_rate"],
-            "total_r": stats["total_r"],
-            "avg_r": stats["avg_r"],
-            "profit_factor": stats["profit_factor"],
-            "max_drawdown_r": stats["max_drawdown_r"],
-        })
+        rows.append({"strategy_id": strategy_id, "candidate_family": family, "direction": direction, "session": session, "entry_month": month, **{k: stats[k] for k in ["signal_count", "evaluated_trade_count", "trade_count", "no_m1_path_count", "win_count", "loss_count", "breakeven_count", "win_rate", "total_r", "avg_r", "profit_factor", "max_drawdown_r"]}})
     return pd.DataFrame(rows, columns=MONTHLY_COLUMNS).sort_values(["strategy_id", "entry_month"], kind="mergesort").reset_index(drop=True)
 
 
 def build_overlap(trades: pd.DataFrame) -> pd.DataFrame:
-    if trades.empty:
+    eval_trades = evaluated_only(trades)
+    if eval_trades.empty:
         return pd.DataFrame(columns=OVERLAP_COLUMNS)
     rows: list[dict[str, Any]] = []
-    for entry_time, group in trades.groupby("entry_time", dropna=False):
+    for entry_time, group in eval_trades.groupby("entry_time", dropna=False):
         if len(group) <= 1:
             continue
-        directions = sorted(set(group["direction"].astype(str)))
-        rows.append({
-            "entry_time": entry_time,
-            "signals_at_same_time": int(len(group)),
-            "buy_count": int(group["direction"].astype(str).eq("BUY").sum()),
-            "sell_count": int(group["direction"].astype(str).eq("SELL").sum()),
-            "strategy_ids": ";".join(group["strategy_id"].astype(str).tolist()),
-            "directions": ";".join(directions),
-            "total_r_same_time": float(pd.to_numeric(group["profit_r"], errors="coerce").fillna(0.0).sum()),
-        })
+        rows.append({"entry_time": entry_time, "signals_at_same_time": int(len(group)), "buy_count": int(group["direction"].astype(str).eq("BUY").sum()), "sell_count": int(group["direction"].astype(str).eq("SELL").sum()), "strategy_ids": ";".join(group["strategy_id"].astype(str).tolist()), "directions": ";".join(sorted(set(group["direction"].astype(str)))), "total_r_same_time": float(pd.to_numeric(group["profit_r"], errors="coerce").fillna(0.0).sum())})
     return pd.DataFrame(rows, columns=OVERLAP_COLUMNS).sort_values("entry_time", kind="mergesort").reset_index(drop=True) if rows else pd.DataFrame(columns=OVERLAP_COLUMNS)
 
 
 def resolve_csv_paths(args: argparse.Namespace) -> dict[str, Path]:
     csv_dir = Path(args.csv_dir)
-    return {
-        "M1": Path(args.gold_m1_csv) if args.gold_m1_csv else csv_dir / "goldsharp_m1.csv",
-        "M5": Path(args.gold_m5_csv) if args.gold_m5_csv else csv_dir / "goldsharp_m5.csv",
-        "H1": Path(args.gold_h1_csv) if args.gold_h1_csv else csv_dir / "goldsharp_h1.csv",
-        "H4": Path(args.gold_h4_csv) if args.gold_h4_csv else csv_dir / "goldsharp_h4.csv",
-        "D1": Path(args.gold_d1_csv) if args.gold_d1_csv else csv_dir / "goldsharp_d1.csv",
-    }
+    return {"M1": Path(args.gold_m1_csv) if args.gold_m1_csv else csv_dir / "goldsharp_m1.csv", "M5": Path(args.gold_m5_csv) if args.gold_m5_csv else csv_dir / "goldsharp_m5.csv", "H1": Path(args.gold_h1_csv) if args.gold_h1_csv else csv_dir / "goldsharp_h1.csv", "H4": Path(args.gold_h4_csv) if args.gold_h4_csv else csv_dir / "goldsharp_h4.csv", "D1": Path(args.gold_d1_csv) if args.gold_d1_csv else csv_dir / "goldsharp_d1.csv"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -854,6 +776,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gold-d1-csv", default="")
     parser.add_argument("--broker-symbol", default=DEFAULT_BROKER_SYMBOL)
     parser.add_argument("--inbar-priority", choices=["SL", "TP"], default="SL")
+    parser.add_argument("--m1-coverage-policy", choices=["drop", "keep_no_path"], default="drop", help="drop excludes post-cooldown signals before first M1 from trade stats; keep_no_path writes them as NO_M1_PATH diagnostics.")
     parser.add_argument("--tail-m1", type=int, default=0)
     parser.add_argument("--tail-m5", type=int, default=0)
     parser.add_argument("--tail-h1", type=int, default=0)
@@ -872,18 +795,14 @@ def main() -> int:
 
     print("=" * 80, flush=True)
     print("GOLD strict 7 signal backtest", flush=True)
+    print(f"schema_version: {SCHEMA_VERSION}", flush=True)
+    print(f"m1_coverage_policy: {args.m1_coverage_policy}", flush=True)
     print(f"out_dir: {out_dir}", flush=True)
     for tf, path in paths.items():
         print(f"{tf}: {path}", flush=True)
     print("=" * 80, flush=True)
 
-    raw = {
-        "M1": read_ohlc_csv(paths["M1"], tail_bars=args.tail_m1),
-        "M5": read_ohlc_csv(paths["M5"], tail_bars=args.tail_m5),
-        "H1": read_ohlc_csv(paths["H1"], tail_bars=args.tail_h1),
-        "H4": read_ohlc_csv(paths["H4"], tail_bars=args.tail_h4),
-        "D1": read_ohlc_csv(paths["D1"], tail_bars=args.tail_d1),
-    }
+    raw = {"M1": read_ohlc_csv(paths["M1"], tail_bars=args.tail_m1), "M5": read_ohlc_csv(paths["M5"], tail_bars=args.tail_m5), "H1": read_ohlc_csv(paths["H1"], tail_bars=args.tail_h1), "H4": read_ohlc_csv(paths["H4"], tail_bars=args.tail_h4), "D1": read_ohlc_csv(paths["D1"], tail_bars=args.tail_d1)}
     frames = {tf: add_indicators(df, tf) for tf, df in raw.items()}
     ctx = attach_strict_context(frames["M5"], frames["H1"], frames["H4"], frames["D1"])
 
@@ -897,10 +816,11 @@ def main() -> int:
         print(f"candidate {spec.strategy_id}: raw_rows={len(cand)}", flush=True)
 
     all_candidates = pd.concat(candidate_rows, ignore_index=True, sort=False) if candidate_rows else pd.DataFrame()
-    trades = evaluate_candidates(candidates_by_spec, specs, frames["M1"], broker_symbol=str(args.broker_symbol), inbar_priority=str(args.inbar_priority))
+    trades, dropped_before_m1, post_cooldown_counts = evaluate_candidates(candidates_by_spec, specs, frames["M1"], broker_symbol=str(args.broker_symbol), inbar_priority=str(args.inbar_priority), m1_coverage_policy=str(args.m1_coverage_policy))
     summary = build_summary(trades)
     monthly = build_monthly(trades)
     overlap = build_overlap(trades)
+    eval_trades = evaluated_only(trades)
 
     trades_path = out_dir / "gold_strict_7_candidates_trades.csv"
     candidates_path = out_dir / "gold_strict_7_candidates_raw.csv"
@@ -921,61 +841,23 @@ def main() -> int:
         "created_at_utc": utc_now_text(),
         "cycle_ok": True,
         "script": "scripts/gold_strict_7_signals/run_gold_strict_7_backtest_from_csv.py",
+        "m1_coverage_policy": str(args.m1_coverage_policy),
         "inputs": {tf: str(path) for tf, path in paths.items()},
-        "outputs": {
-            "raw_candidates_csv": str(candidates_path),
-            "trades_csv": str(trades_path),
-            "summary_csv": str(summary_path),
-            "monthly_csv": str(monthly_path),
-            "overlap_csv": str(overlap_path),
-            "portfolio_summary_json": str(json_path),
-        },
-        "rows": {
-            "m1": int(len(raw["M1"])),
-            "m5": int(len(raw["M5"])),
-            "h1": int(len(raw["H1"])),
-            "h4": int(len(raw["H4"])),
-            "d1": int(len(raw["D1"])),
-            "strict_joined_m5": int(len(ctx)),
-            "raw_candidates": int(len(all_candidates)),
-            "trades_after_cooldown": int(len(trades)),
-            "summary_rows": int(len(summary)),
-            "monthly_rows": int(len(monthly)),
-            "overlap_rows": int(len(overlap)),
-        },
+        "outputs": {"raw_candidates_csv": str(candidates_path), "trades_csv": str(trades_path), "summary_csv": str(summary_path), "monthly_csv": str(monthly_path), "overlap_csv": str(overlap_path), "portfolio_summary_json": str(json_path)},
+        "rows": {"m1": int(len(raw["M1"])), "m5": int(len(raw["M5"])), "h1": int(len(raw["H1"])), "h4": int(len(raw["H4"])), "d1": int(len(raw["D1"])), "strict_joined_m5": int(len(ctx)), "raw_candidates": int(len(all_candidates)), "post_cooldown_signals_before_m1_filter": int(sum(post_cooldown_counts.values())), "dropped_before_first_m1": int(sum(dropped_before_m1.values())), "trade_rows_written": int(len(trades)), "evaluated_trades": int(len(eval_trades)), "summary_rows": int(len(summary)), "monthly_rows": int(len(monthly)), "overlap_rows": int(len(overlap))},
         "candidate_raw_counts": {spec.strategy_id: int(len(candidates_by_spec.get(spec.strategy_id, []))) for spec in specs},
-        "candidate_trade_counts": summary.set_index("strategy_id")["trade_count"].to_dict() if not summary.empty else {},
-        "portfolio_stats_all_signals_no_overlap_filter": portfolio_stats,
-        "no_future_contract": {
-            "trigger_timeframe": "M5",
-            "outcome_timeframe": "M1",
-            "higher_timeframe_rule": "H1/H4/D1 context_close_time <= M5 close_time",
-            "forming_higher_timeframe_allowed": False,
-            "all_trades_strict_no_future_ok": bool(trades["strict_no_future_ok"].astype(bool).all()) if not trades.empty else True,
-            "inbar_priority": str(args.inbar_priority),
-        },
-        "safety": {
-            "discord_send": False,
-            "mt5_calls": False,
-            "order_send": False,
-            "openai_calls": False,
-            "runtime_state_mutation": False,
-        },
+        "candidate_post_cooldown_counts": post_cooldown_counts,
+        "candidate_dropped_before_first_m1_counts": dropped_before_m1,
+        "candidate_trade_counts_evaluated": summary.set_index("strategy_id")["evaluated_trade_count"].to_dict() if not summary.empty else {},
+        "portfolio_stats_all_evaluated_signals_no_overlap_filter": portfolio_stats,
+        "no_future_contract": {"trigger_timeframe": "M5", "outcome_timeframe": "M1", "higher_timeframe_rule": "H1/H4/D1 context_close_time <= M5 close_time", "forming_higher_timeframe_allowed": False, "all_trades_strict_no_future_ok": bool(trades["strict_no_future_ok"].astype(bool).all()) if not trades.empty else True, "inbar_priority": str(args.inbar_priority)},
+        "safety": {"discord_send": False, "mt5_calls": False, "order_send": False, "openai_calls": False, "runtime_state_mutation": False},
         "timing": {"total_seconds": round(time.perf_counter() - started, 3)},
     }
     write_json(json_path, summary_json)
 
     print("=" * 80, flush=True)
-    print(json.dumps({
-        "cycle_ok": True,
-        "trades": int(len(trades)),
-        "summary_csv": str(summary_path),
-        "monthly_csv": str(monthly_path),
-        "overlap_csv": str(overlap_path),
-        "summary_json": str(json_path),
-        "portfolio_total_r": portfolio_stats.get("total_r"),
-        "portfolio_pf": portfolio_stats.get("profit_factor"),
-    }, ensure_ascii=False, indent=2, sort_keys=True), flush=True)
+    print(json.dumps({"cycle_ok": True, "schema_version": SCHEMA_VERSION, "m1_coverage_policy": str(args.m1_coverage_policy), "trade_rows_written": int(len(trades)), "evaluated_trades": int(len(eval_trades)), "dropped_before_first_m1": int(sum(dropped_before_m1.values())), "summary_csv": str(summary_path), "monthly_csv": str(monthly_path), "overlap_csv": str(overlap_path), "summary_json": str(json_path), "portfolio_total_r": portfolio_stats.get("total_r"), "portfolio_pf": portfolio_stats.get("profit_factor")}, ensure_ascii=False, indent=2, sort_keys=True), flush=True)
     print("=" * 80, flush=True)
     return 0
 
