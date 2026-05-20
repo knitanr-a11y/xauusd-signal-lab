@@ -61,7 +61,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v2"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v3"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -286,24 +286,23 @@ def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, notification_ke
     lines = [
         f"{side_icon} **GOLD strict 7 {spec.direction} シグナル**",
         "",
-        "状態: 確定足ベースのシグナル候補",
-        f"時刻: {time_text(row.get('close_time'))}",
-        f"ルール: {strategy_display_name(spec.strategy_id)}",
-        f"内部名: {spec.strategy_id}",
-        f"方向: {spec.direction} / Session: {spec.session}",
-        "",
         f"価格目安: Entry {fmt_price(entry)} / TP {fmt_price(tp)} / SL {fmt_price(sl)}",
         f"値幅: TP {fmt_num(spec.tp_pips, 1)} pips / SL {fmt_num(spec.sl_pips, 1)} pips / RR {fmt_num(spec.rr, 2)}",
         "価格注記: M5確定足終値ベース。実約定・スプレッドでズレあり。",
         "",
+        "AIタグ監視対象: " + (", ".join(watch_tags) if watch_tags else "なし"),
+        "AI注記: この通知時点ではAI発注判定なし。タグは後続評価で蓄積。",
+        "",
+        "その他:",
+        "状態: 確定足ベースのシグナル候補",
+        f"時刻: {time_text(row.get('close_time'))}",
+        f"ルール: {strategy_display_name(spec.strategy_id)}",
+        f"方向: {spec.direction} / Session: {spec.session}",
+        f"内部名: {spec.strategy_id}",
         "strict no-future: H1/H4/D1は確定足のみ",
         f"H1 close: {time_text(row.get('h1_close_time'))}",
         f"H4 close: {time_text(row.get('h4_close_time'))}",
         f"D1 close: {time_text(row.get('d1_close_time'))}",
-        "",
-        "AIタグ監視対象: " + (", ".join(watch_tags) if watch_tags else "なし"),
-        "AI注記: この通知時点ではAI発注判定なし。タグは後続評価で蓄積。",
-        "",
         f"reason: {clean_str(row.get('reason'))}",
         f"key: {notification_key_value}",
     ]
