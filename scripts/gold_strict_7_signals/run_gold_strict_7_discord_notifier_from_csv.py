@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -46,7 +47,7 @@ for path in [SCRIPT_DIR, SCRIPTS_DIR, REPO_ROOT]:
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from gold_strict_7_signal_specs import DEFAULT_BROKER_SYMBOL, DEFAULT_SYMBOL, GoldStrictSignalSpec, get_signal_specs, validate_signal_specs  # noqa: E402
+from gold_strict_7_signal_specs import DEFAULT_SYMBOL, GoldStrictSignalSpec, get_signal_specs, validate_signal_specs  # noqa: E402
 from run_gold_strict_7_backtest_from_csv import (  # noqa: E402
     add_indicators,
     apply_cooldown,
@@ -60,7 +61,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v1"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v2"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -130,6 +131,10 @@ def windows_long_path(path: str | Path) -> str:
     if text.startswith("\\\\"):
         return "\\\\?\\UNC\\" + text.lstrip("\\")
     return "\\\\?\\" + text
+
+
+def mkdirp(path: str | Path) -> None:
+    Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
 
 
 def resolve_path(path: str | Path) -> Path:
@@ -253,9 +258,9 @@ def load_notified_keys(path: Path) -> set[str]:
 def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
-    path.parent.mkdir(parents=True, exist_ok=True)
+    mkdirp(path.parent)
     exists = path.exists()
-    with path.open("a", encoding="utf-8-sig", newline="") as f:
+    with open(windows_long_path(path), "a", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=LEDGER_COLUMNS)
         if not exists:
             writer.writeheader()
@@ -341,11 +346,15 @@ def row_to_preview(row: pd.Series, spec: GoldStrictSignalSpec, *, key: str, mess
     }
 
 
+def message_filename(key: str, row: pd.Series, spec: GoldStrictSignalSpec) -> str:
+    key_hash = hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+    return f"gold_strict7_{spec.direction}_{id_time_text(row.get('close_time'))}_{key_hash}.json"
+
+
 def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: GoldStrictSignalSpec) -> Path:
     message_dir = out_dir / "messages"
-    message_dir.mkdir(parents=True, exist_ok=True)
-    safe_key = key.replace("|", "_").replace(":", "").replace(" ", "_")
-    path = message_dir / f"gold_strict7_message_{safe_key}.json"
+    mkdirp(message_dir)
+    path = message_dir / message_filename(key, row, spec)
     payload = {
         "created_at": now_str(),
         "schema_version": SCHEMA_VERSION,
@@ -356,14 +365,14 @@ def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: G
         "message": message,
         "row": {str(k): json_safe(v) for k, v in row.to_dict().items()},
     }
-    with path.open("w", encoding="utf-8") as f:
+    with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2, default=str)
     return path
 
 
 def write_preview_csv(path: Path, rows: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8-sig", newline="") as f:
+    mkdirp(path.parent)
+    with open(windows_long_path(path), "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=PREVIEW_COLUMNS)
         writer.writeheader()
         for row in rows:
@@ -446,7 +455,7 @@ def main() -> int:
     out_dir = resolve_path(args.out_dir)
     ledger_csv = resolve_path(args.ledger_csv)
     env_file = resolve_path(args.env_file)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    mkdirp(out_dir)
     load_env_file(env_file)
 
     paths = resolve_csv_paths(args)
@@ -535,7 +544,7 @@ def main() -> int:
             "live_runtime_state_mutation": bool(len(ledger_rows) > 0),
         },
     }
-    with summary_json.open("w", encoding="utf-8") as f:
+    with open(windows_long_path(summary_json), "w", encoding="utf-8", newline="") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2, default=str)
 
     print("\n" + "=" * 100, flush=True)
