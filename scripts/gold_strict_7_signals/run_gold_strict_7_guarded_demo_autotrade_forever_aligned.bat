@@ -5,7 +5,8 @@ cd /d "%~dp0\..\.."
 echo ============================================================
 echo GOLD strict 7 guarded demo autotrade forever aligned
 echo - mt5.order_send ENABLED through existing guarded sender
-echo - aligned to every 5 minutes + delay
+echo - aligned to every 5 minutes + 02 seconds
+echo - lightweight candle tails
 echo - expected-login and demo-account guard enabled
 echo - duplicate prevention by guarded_demo_order_ledger.csv
 echo - max-orders=1
@@ -20,12 +21,16 @@ python scripts\gold_strict_7_signals\run_gold_strict_7_guarded_demo_autotrade_fo
   --send ^
   --allow-demo-send ^
   --interval-minutes 5 ^
-  --run-delay-seconds 25 ^
+  --run-delay-seconds 2 ^
   --broker-symbol GOLD# ^
   --expected-login 75539039 ^
   --lot 0.01 ^
   --scan-recent-bars 3 ^
   --max-signal-age-minutes 15 ^
+  --tail-m5 2000 ^
+  --tail-h1 1000 ^
+  --tail-h4 500 ^
+  --tail-d1 300 ^
   --max-orders 1 ^
   --position-policy block_any ^
   --max-symbol-positions 1 ^
