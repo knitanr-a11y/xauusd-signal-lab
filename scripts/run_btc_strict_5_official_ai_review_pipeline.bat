@@ -12,23 +12,16 @@ echo Order ledger: %ORDER_LEDGER%
 echo Output dir  : %OUT_DIR%
 echo D1 csv      : NOT_USED
 echo Safety      : No order_send / MT5 history read-only / AI hypothesis only
+echo Note        : If no order ledger exists yet, this exits OK with NO_ORDER_LEDGER_YET.
 echo ============================================================
 
-if not exist "%ORDER_LEDGER%" (
-  echo [ERROR] Missing BTC strict 5 official order ledger:
-  echo   %ORDER_LEDGER%
-  echo Start guarded demo send first, or wait until at least one order payload is recorded.
-  exit /b 2
-)
-
-python scripts\run_btc_ai_review_pipeline_same_spec.py ^
+python scripts\run_btc_strict_5_official_ai_review_pipeline.py ^
+  --order-ledger-csv "%ORDER_LEDGER%" ^
   --out-dir "%OUT_DIR%" ^
   --model gpt-5-mini ^
   --min-sample 5 ^
-  -- ^
-  --order-ledger-csv "%ORDER_LEDGER%" ^
-  --broker-symbols BTCUSD# ^
   --expected-login 75539039 ^
+  --broker-symbols BTCUSD# ^
   --lookback-days 60 ^
   --m15-file btcusdsharp_m15.csv ^
   --m5-file btcusdsharp_m5.csv ^
@@ -37,7 +30,8 @@ python scripts\run_btc_ai_review_pipeline_same_spec.py ^
   --d1-csv "%NOT_USED_D1%"
 
 set EXITCODE=%ERRORLEVEL%
-echo BTC strict 5 official AI review pipeline exit code: %EXITCODE%
-echo Summary JSON: %OUT_DIR%\btc_ai_review_pipeline_same_spec_summary.json
-echo Tag summary : %OUT_DIR%\trade_ai_tag_summary.csv
+echo BTC strict 5 official AI review wrapper exit code: %EXITCODE%
+echo Wrapper summary JSON: %OUT_DIR%\btc_strict_5_official_ai_review_pipeline_summary.json
+echo Pipeline summary JSON: %OUT_DIR%\btc_ai_review_pipeline_same_spec_summary.json
+echo Tag summary        : %OUT_DIR%\trade_ai_tag_summary.csv
 exit /b %EXITCODE%
