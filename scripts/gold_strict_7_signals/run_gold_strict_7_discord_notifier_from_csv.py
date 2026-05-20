@@ -2,11 +2,6 @@
 # -*- coding: utf-8 -*-
 r"""Discord preview/notifier for GOLD strict 7 signals from live CSVs.
 
-This script connects the isolated GOLD strict seven-candidate signal detector to
-Discord notification preview/send flow.
-
-It is intentionally separate from old Mochipoyo/GOLD multi-strategy runtime loops.
-
 Default behavior is safe:
 - no Discord send unless --send-discord is passed
 - no ledger mutation unless --send-discord or --mark-dry-run-notified is passed
@@ -14,17 +9,8 @@ Default behavior is safe:
 - no AI call
 - H1/H4/D1 context is joined only with closed context candles
 
-Typical dry-run preview:
-
-python scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py ^
-  --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-  --dry-run
-
-Discord send, after preview approval:
-
-python scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py ^
-  --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
-  --send-discord
+Notification text intentionally keeps strategy rule/internal name near the
+bottom as reference information, and the title does not include "strict 7".
 """
 from __future__ import annotations
 
@@ -61,7 +47,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v3"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v4_text_tidy"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -284,7 +270,10 @@ def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, notification_ke
     side_icon = "🟢" if spec.direction == "BUY" else "🔴"
     watch_tags = risk_watch_tags(spec.strategy_id)
     lines = [
-        f"{side_icon} **GOLD strict 7 {spec.direction} シグナル**",
+        f"{side_icon} **GOLD {spec.direction} シグナル**",
+        "",
+        f"方向: {spec.direction}",
+        f"Session: {spec.session}",
         "",
         f"価格目安: Entry {fmt_price(entry)} / TP {fmt_price(tp)} / SL {fmt_price(sl)}",
         f"値幅: TP {fmt_num(spec.tp_pips, 1)} pips / SL {fmt_num(spec.sl_pips, 1)} pips / RR {fmt_num(spec.rr, 2)}",
@@ -293,16 +282,18 @@ def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, notification_ke
         "AIタグ監視対象: " + (", ".join(watch_tags) if watch_tags else "なし"),
         "AI注記: この通知時点ではAI発注判定なし。タグは後続評価で蓄積。",
         "",
-        "その他:",
-        "状態: 確定足ベースのシグナル候補",
-        f"時刻: {time_text(row.get('close_time'))}",
-        f"ルール: {strategy_display_name(spec.strategy_id)}",
-        f"方向: {spec.direction} / Session: {spec.session}",
-        f"内部名: {spec.strategy_id}",
-        "strict no-future: H1/H4/D1は確定足のみ",
+        "時刻:",
+        f"entry_time目安: {time_text(row.get('close_time'))}",
+        "",
+        "No-future監査:",
+        "H1/H4/D1は確定足のみ",
         f"H1 close: {time_text(row.get('h1_close_time'))}",
         f"H4 close: {time_text(row.get('h4_close_time'))}",
         f"D1 close: {time_text(row.get('d1_close_time'))}",
+        "",
+        "確認用:",
+        f"ルール: {strategy_display_name(spec.strategy_id)}",
+        f"内部名: {spec.strategy_id}",
         f"reason: {clean_str(row.get('reason'))}",
         f"key: {notification_key_value}",
     ]
@@ -423,7 +414,7 @@ def collect_signals(ctx: pd.DataFrame, specs: list[GoldStrictSignalSpec], args: 
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="GOLD strict 7 Discord preview/notifier from live CSVs.")
+    p = argparse.ArgumentParser(description="GOLD Discord preview/notifier from live CSVs.")
     p.add_argument("--csv-dir", type=Path, default=DEFAULT_MQL5_FILES_DIR)
     p.add_argument("--gold-m5-csv", default="")
     p.add_argument("--gold-h1-csv", default="")
@@ -471,7 +462,7 @@ def main() -> int:
     skipped_duplicates = 0
 
     print("=" * 100, flush=True)
-    print("GOLD strict 7 Discord notifier", flush=True)
+    print("GOLD Discord notifier", flush=True)
     print(f"schema_version: {SCHEMA_VERSION}", flush=True)
     print(f"out_dir: {out_dir}", flush=True)
     print(f"ledger_csv: {ledger_csv}", flush=True)
