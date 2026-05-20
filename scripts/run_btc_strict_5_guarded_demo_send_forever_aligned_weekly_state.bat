@@ -26,6 +26,8 @@ echo Persistent order ledger: %STATE_DIR%\guarded_demo_order_ledger.csv
 echo Sender --send requires BOTH --allow-demo-send and --send
 echo Position policy: block_any / duplicate guard: order_key ledger
 echo Lot: 0.01 / max-orders per cycle: 1
+echo Schedule: every 1 minute at +02 seconds, same as GOLD aligned runners
+echo Lightweight tails: M15=3000 / H1=2000 / H4=1000
 echo D1 is not used by BTC strict 5
 echo Stop with Ctrl+C
 echo ============================================================
@@ -33,10 +35,13 @@ echo ============================================================
 python scripts\run_btc_strict_5_guarded_demo_send_forever_aligned_weekly_state.py ^
   --log-base data\runtime_logs\btc ^
   --state-dir "%STATE_DIR%" ^
-  --interval-minutes 15 ^
-  --offset-seconds 5 ^
+  --interval-minutes 1 ^
+  --offset-seconds 2 ^
   --scan-recent-bars 5 ^
   --max-signal-age-minutes 30 ^
+  --tail-m15 3000 ^
+  --tail-h1 2000 ^
+  --tail-h4 1000 ^
   --position-policy block_any ^
   --max-symbol-positions 1 ^
   --max-symbol-lot 0.01 ^
