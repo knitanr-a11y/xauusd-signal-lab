@@ -25,10 +25,10 @@ from btc_strict_5_filter_variants import BTC_STRICT_5_DEFAULT_FILTER_VARIANT, av
 from btc_strict_5_official_runtime import build_context_from_csvs, build_filtered_preview
 from btc_strict_5_signal_specs import DEFAULT_BROKER_SYMBOL, DEFAULT_SYMBOL, validate_signal_specs
 from run_btc_strict_5_backtest_from_csv import DEFAULT_MQL5_FILES_DIR, choose_path, windows_long_path, write_csv
-from run_btc_strict_5_discord_notifier_from_csv import build_message, clean_str, json_safe
+from run_btc_strict_5_discord_notifier_from_csv import clean_str, json_safe
 from run_live_gold_notifier_from_csv import load_env_file, send_discord_message
 
-SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v1"
+SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v2_simple_message"
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_official_discord_numeric_ai_tags")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv")
@@ -41,6 +41,14 @@ LEDGER_COLUMNS = [
     "symbol", "signal_time", "base_close_time", "entry_time", "discord_sent",
     "preview_only_marked", "message_path",
 ]
+
+STRATEGY_SHORT_NAME = {
+    "BTC_SELL_DONCH96_BBWIDTH_LOW_EMA200_TP1900_SL400_H20H_CD0": "Donchian96 SELL",
+    "BTC_SELL_DONCH32_H1SLOPE_ATR30_80_00_06_TP2500_SL750_H4H_CD0": "Donchian32 SELL",
+    "BTC_BUY_RSI40_RECLAIM_EMA200_BBLOW_12_23_TP2300_SL650_H20H_CD0": "RSI40 BUY",
+    "BTC_SELL_DONCH64_H1MACD_RANGE_M15_00_06_TP2400_SL600_H6H_CD0": "Donchian64 SELL",
+    "BTC_BUY_CCI_RECLAIM_H4BULL_BBLOW_19_23_TP2500_SL650_H20H_CD0": "CCI BUY",
+}
 
 
 def utc_now_text() -> str:
@@ -61,6 +69,23 @@ def write_json(path: str | Path, obj: dict[str, Any]) -> None:
     mkdirp(p.parent)
     with open(windows_long_path(p), "w", encoding="utf-8", newline="") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2, sort_keys=True, default=str)
+
+
+def safe_float(value: Any) -> float | None:
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def fmt_num(value: Any, digits: int = 2) -> str:
+    x = safe_float(value)
+    return "N/A" if x is None else f"{x:.{digits}f}"
 
 
 def load_notified_keys(path: Path) -> set[str]:
@@ -112,12 +137,35 @@ def message_filename(row: pd.Series, key: str) -> str:
     return f"btc_numaitag_{clean_str(row.get('direction'))}_{id_time_text(row.get('signal_time'))}_{h}.json"
 
 
-def enrich_message(message: str, score: dict[str, Any]) -> str:
-    lines = ["AIタグ推定:"] + format_score_for_discord(score) + [
-        "個別AI判定: 未実施（通知時にOpenAIは呼ばない）",
-        "注記: 過去AI評価タグを数値条件化したルールで、現在シグナルにHITしたものだけ表示。",
+def build_simple_message(row: pd.Series, ai_score: dict[str, Any]) -> str:
+    direction = clean_str(row.get("direction"))
+    side_icon = "🟢" if direction == "BUY" else "🔴"
+    strategy_id = clean_str(row.get("strategy_id"))
+    strategy_name = STRATEGY_SHORT_NAME.get(strategy_id, "BTC signal")
+    next_open = clean_str(row.get("next_m15_open_price"), "N/A") if bool(row.get("next_m15_open_available", False)) else "未取得"
+    lines = [
+        f"{side_icon} **BTC {direction} シグナル**",
+        "",
+        f"タイプ: {strategy_name}",
+        f"シグナル時刻: {clean_str(row.get('signal_time'))}",
+        f"エントリー目安: {clean_str(row.get('entry_time'))}",
+        "",
+        "価格・値幅:",
+        f"signal close: {fmt_num(row.get('signal_close_price'), 2)}",
+        f"next M15 open: {next_open}",
+        f"TP距離: {fmt_num(row.get('tp_price_distance'), 1)} price / {fmt_num(row.get('tp_pips'), 1)} pips",
+        f"SL距離: {fmt_num(row.get('sl_price_distance'), 1)} price / {fmt_num(row.get('sl_pips'), 1)} pips",
+        f"RR: {fmt_num(row.get('rr'), 2)}",
+        "価格注記: preview。実発注時のSL/TPは実約定基準で計算。",
+        "",
+        "AIタグ推定:",
     ]
-    return message + "\n\n" + "\n".join(lines)
+    lines.extend(format_score_for_discord(ai_score))
+    lines.extend([
+        "個別AI判定: 未実施（OpenAIは呼ばない）",
+        "注記: 過去AI評価タグを数値条件化し、現在シグナルにHITしたものだけ表示。",
+    ])
+    return "\n".join(lines)
 
 
 def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_variant: str, ai_score: dict[str, Any]) -> Path:
@@ -134,6 +182,15 @@ def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_
         "signal_time": clean_str(row.get("signal_time")),
         "ai_tag_score": ai_score,
         "message": message,
+        "audit": {
+            "strict_no_future_ok": bool(row.get("strict_no_future_ok")),
+            "h1_close_time": clean_str(row.get("h1_close_time")),
+            "h1_confirmed_ok": bool(row.get("h1_confirmed_ok")),
+            "h4_close_time": clean_str(row.get("h4_close_time")),
+            "h4_confirmed_ok": bool(row.get("h4_confirmed_ok")),
+            "d1_used": bool(row.get("d1_used")),
+            "reason": clean_str(row.get("reason")),
+        },
         "row": {str(k): json_safe(v) for k, v in row.to_dict().items()},
     })
     return path
@@ -255,7 +312,7 @@ def main() -> int:
         ai_score = score_signal_row(row, rules_obj)
         if ai_score.get("hit_count", 0) > 0:
             ai_tag_hit_rows += 1
-        message = enrich_message(build_message(row, key=key), ai_score)
+        message = build_simple_message(row, ai_score)
         message_path = write_message(out_dir, row, key, message, args.filter_variant, ai_score)
         message_rows += 1
         print("\n" + "-" * 100, flush=True)
