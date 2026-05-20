@@ -6,11 +6,13 @@ Default behavior is safe:
 - no Discord send unless --send-discord is passed
 - no ledger mutation unless --send-discord or --mark-dry-run-notified is passed
 - no MT5 order send
-- no AI call
+- no OpenAI call at notification time
 - H1/H4/D1 context is joined only with closed context candles
 
-Notification text intentionally keeps strategy rule/internal name near the
-bottom as reference information, and the title does not include "strict 7".
+AI tag scoring:
+- uses deterministic numeric rules generated from historical post-trade AI review
+- only tags that HIT the current signal are displayed
+- if --send-discord is used and rules JSON is missing/invalid, sending is refused
 """
 from __future__ import annotations
 
@@ -33,6 +35,7 @@ for path in [SCRIPT_DIR, SCRIPTS_DIR, REPO_ROOT]:
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
+from ai_tag_numeric_rule_utils import format_score_for_discord, load_rules_json, score_signal_row  # noqa: E402
 from gold_strict_7_signal_specs import DEFAULT_SYMBOL, GoldStrictSignalSpec, get_signal_specs, validate_signal_specs  # noqa: E402
 from run_gold_strict_7_backtest_from_csv import (  # noqa: E402
     add_indicators,
@@ -47,7 +50,8 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v5_ai_warning"
+DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v6_numeric_ai_tag_score"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -64,6 +68,9 @@ PREVIEW_COLUMNS = [
     "tp_pips",
     "sl_pips",
     "rr",
+    "ai_tag_rule_hit_count",
+    "ai_tag_rule_hits",
+    "ai_tag_rules_json",
     "strict_no_future_ok",
     "context_h1_close_time",
     "context_h4_close_time",
@@ -97,22 +104,13 @@ LEDGER_COLUMNS = [
     "tp_pips",
     "sl_pips",
     "rr",
+    "ai_tag_rule_hit_count",
+    "ai_tag_rule_hits",
+    "ai_tag_rules_json",
     "discord_sent",
     "dry_run",
     "message_path",
 ]
-
-TAG_JA = {
-    "poor_pullback_structure": "押し戻り構造が弱い",
-    "macd_late_signal": "MACD反応が遅い",
-    "entry_after_extended_move": "伸びた後のエントリー",
-    "high_volatility_chase": "高ボラ追いかけ",
-    "m15_signal_candle_large": "M15シグナル足が大きすぎる",
-    "range_edge_entry": "レンジ端エントリーリスク",
-    "near_recent_low": "直近安値付近でのSELLリスク",
-    "ema_distance_too_large": "EMAから離れすぎ",
-    "against_h1_context": "H1環境に逆らう形",
-}
 
 
 def now_str() -> str:
@@ -221,28 +219,6 @@ def strategy_display_name(strategy_id: str) -> str:
     return mapping.get(strategy_id, strategy_id)
 
 
-def risk_watch_tags(strategy_id: str) -> list[str]:
-    if strategy_id == "BUY_STOCH_BB_KTURN_NY_TP150_SL10":
-        return ["poor_pullback_structure", "macd_late_signal", "entry_after_extended_move"]
-    if strategy_id == "BUY_SWEEP_RECLAIM_RSI_TP150_SL10":
-        return ["poor_pullback_structure", "high_volatility_chase", "m15_signal_candle_large"]
-    if strategy_id == "BUY_BB_RSI30_REJECTION65_NY_TP30_SL7P5":
-        return ["high_volatility_chase", "m15_signal_candle_large", "range_edge_entry"]
-    if "DONCHIAN96" in strategy_id:
-        return ["m15_signal_candle_large", "macd_late_signal", "poor_pullback_structure", "near_recent_low"]
-    if strategy_id == "SELL_DONCHIAN48_MACD_RANGE_NY_TP30_SL7P5":
-        return ["m15_signal_candle_large", "ema_distance_too_large"]
-    if strategy_id == "SELL_KC_CCI150_LONDON_TP100_SL10":
-        return ["ema_distance_too_large", "against_h1_context"]
-    return []
-
-
-def format_watch_tags(tags: list[str]) -> str:
-    if not tags:
-        return "なし"
-    return ", ".join(f"{tag}({TAG_JA.get(tag, '要確認')})" for tag in tags)
-
-
 def notification_key(row: pd.Series, spec: GoldStrictSignalSpec) -> str:
     return "|".join([DEFAULT_SYMBOL, "STRICT7", spec.strategy_id, spec.direction, time_text(row.get("close_time"))])
 
@@ -283,45 +259,57 @@ def calc_prices(row: pd.Series, spec: GoldStrictSignalSpec) -> tuple[float, floa
     return entry, tp, sl
 
 
-def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, notification_key_value: str) -> str:
+def row_for_ai_score(row: pd.Series, spec: GoldStrictSignalSpec) -> dict[str, Any]:
+    out = {str(k): json_safe(v) for k, v in row.to_dict().items()}
+    out["strategy_id"] = spec.strategy_id
+    out["direction"] = spec.direction
+    # Notification-row aliases for feature-snapshot feature names.
+    out["m15_signal_candle_close_pos"] = safe_float(row.get("close_pos"))
+    out["m15_signal_candle_range_atr_ratio"] = safe_float(row.get("range_atr"))
+    out["m15_signal_candle_body_ratio"] = safe_float(row.get("body_ratio"))
+    out["m15_macd_hist_at_entry"] = safe_float(row.get("macd_hist"))
+    out["m15_macd_hist_delta_at_entry"] = safe_float(row.get("macd_hist_delta"))
+    for col in [
+        "h1_close_vs_ema20_atr", "h1_close_vs_ema50_atr", "h1_close_vs_ema200_atr",
+        "h4_close_vs_ema20_atr", "h4_close_vs_ema50_atr", "d1_close_vs_ema20_atr",
+    ]:
+        if col in row.index:
+            out[col] = safe_float(row.get(col))
+    return out
+
+
+def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, ai_score: dict[str, Any]) -> str:
     entry, tp, sl = calc_prices(row, spec)
     side_icon = "🟢" if spec.direction == "BUY" else "🔴"
-    watch_tags = risk_watch_tags(spec.strategy_id)
     lines = [
         f"{side_icon} **GOLD {spec.direction} シグナル**",
         "",
-        f"方向: {spec.direction}",
+        f"タイプ: {strategy_display_name(spec.strategy_id)}",
         f"Session: {spec.session}",
+        f"エントリー目安: {time_text(row.get('close_time'))}",
         "",
         f"価格目安: Entry {fmt_price(entry)} / TP {fmt_price(tp)} / SL {fmt_price(sl)}",
         f"値幅: TP {fmt_num(spec.tp_pips, 1)} pips / SL {fmt_num(spec.sl_pips, 1)} pips / RR {fmt_num(spec.rr, 2)}",
         "価格注記: M5確定足終値ベース。実約定・スプレッドでズレあり。",
         "",
-        "AI評価:",
-        f"過去AI評価タグ警告: {'⚠️ WATCH' if watch_tags else 'なし'}",
-        "警戒タグ: " + format_watch_tags(watch_tags),
-        "AI注記: 通知時点ではAIによる新規判定は行わない。これは過去AI評価で蓄積した注意タグの表示。",
-        "",
-        "時刻:",
-        f"entry_time目安: {time_text(row.get('close_time'))}",
-        "",
-        "No-future監査:",
-        "H1/H4/D1は確定足のみ",
-        f"H1 close: {time_text(row.get('h1_close_time'))}",
-        f"H4 close: {time_text(row.get('h4_close_time'))}",
-        f"D1 close: {time_text(row.get('d1_close_time'))}",
-        "",
-        "確認用:",
-        f"ルール: {strategy_display_name(spec.strategy_id)}",
-        f"内部名: {spec.strategy_id}",
-        f"reason: {clean_str(row.get('reason'))}",
-        f"key: {notification_key_value}",
+        "AIタグ推定:",
     ]
+    lines.extend(format_score_for_discord(ai_score))
+    lines.extend([
+        "個別AI判定: 未実施（OpenAIは呼ばない）",
+        "注記: 過去AI評価タグを数値条件化し、現在シグナルにHITしたものだけ表示。",
+    ])
     return "\n".join(lines)
 
 
-def row_to_preview(row: pd.Series, spec: GoldStrictSignalSpec, *, key: str, message_path: Path, discord_sent: bool, dry_run: bool) -> dict[str, Any]:
+def ai_score_hit_text(ai_score: dict[str, Any]) -> str:
+    hits = ai_score.get("hits", []) if isinstance(ai_score, dict) else []
+    return "|".join(clean_str(h.get("tag_name")) for h in hits if isinstance(h, dict))
+
+
+def row_to_preview(row: pd.Series, spec: GoldStrictSignalSpec, *, key: str, message_path: Path, discord_sent: bool, dry_run: bool, ai_score: dict[str, Any]) -> dict[str, Any]:
     entry, tp, sl = calc_prices(row, spec)
+    hits = ai_score.get("hits", []) if isinstance(ai_score, dict) else []
     return {
         "created_at": now_str(),
         "schema_version": SCHEMA_VERSION,
@@ -337,6 +325,9 @@ def row_to_preview(row: pd.Series, spec: GoldStrictSignalSpec, *, key: str, mess
         "tp_pips": spec.tp_pips,
         "sl_pips": spec.sl_pips,
         "rr": spec.rr,
+        "ai_tag_rule_hit_count": int(len(hits)),
+        "ai_tag_rule_hits": ai_score_hit_text(ai_score),
+        "ai_tag_rules_json": ai_score.get("rules_path", "") if isinstance(ai_score, dict) else "",
         "strict_no_future_ok": bool(row.get("strict_no_future_ok", False)),
         "context_h1_close_time": time_text(row.get("h1_close_time")),
         "context_h4_close_time": time_text(row.get("h4_close_time")),
@@ -361,7 +352,7 @@ def message_filename(key: str, row: pd.Series, spec: GoldStrictSignalSpec) -> st
     return f"gold_strict7_{spec.direction}_{id_time_text(row.get('close_time'))}_{key_hash}.json"
 
 
-def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: GoldStrictSignalSpec) -> Path:
+def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: GoldStrictSignalSpec, ai_score: dict[str, Any]) -> Path:
     message_dir = out_dir / "messages"
     mkdirp(message_dir)
     path = message_dir / message_filename(key, row, spec)
@@ -372,12 +363,16 @@ def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: G
         "strategy_id": spec.strategy_id,
         "direction": spec.direction,
         "entry_time": time_text(row.get("close_time")),
-        "ai_warning": {
-            "has_warning": bool(risk_watch_tags(spec.strategy_id)),
-            "risk_watch_tags": risk_watch_tags(spec.strategy_id),
-            "note": "historical AI-review warning tags only; no live AI decision at notification time",
-        },
+        "ai_tag_score": ai_score,
         "message": message,
+        "audit": {
+            "strict_no_future_ok": bool(row.get("strict_no_future_ok", False)),
+            "h1_close_time": time_text(row.get("h1_close_time")),
+            "h4_close_time": time_text(row.get("h4_close_time")),
+            "d1_close_time": time_text(row.get("d1_close_time")),
+            "reason": clean_str(row.get("reason")),
+            "internal_name": spec.strategy_id,
+        },
         "row": {str(k): json_safe(v) for k, v in row.to_dict().items()},
     }
     with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
@@ -448,6 +443,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     p.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
     p.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
+    p.add_argument("--ai-tag-rules-json", type=Path, default=DEFAULT_AI_TAG_RULES_JSON)
     p.add_argument("--scan-recent-bars", type=int, default=300)
     p.add_argument("--bar-offset", type=int, default=1, help="1 means ignore the latest M5 row as potentially forming.")
     p.add_argument("--tail-m5", type=int, default=20000)
@@ -470,8 +466,15 @@ def main() -> int:
     out_dir = resolve_path(args.out_dir)
     ledger_csv = resolve_path(args.ledger_csv)
     env_file = resolve_path(args.env_file)
+    rules_path = resolve_path(args.ai_tag_rules_json)
     mkdirp(out_dir)
     load_env_file(env_file)
+    rules_obj = load_rules_json(rules_path)
+    if args.send_discord and not bool(rules_obj.get("cycle_ok", False)):
+        raise SystemExit(
+            "GOLD AI tag numeric rules JSON is missing or invalid; refusing to send Discord. "
+            f"Run scripts\\build_gold_strict_7_ai_tag_numeric_rules.bat first. path={rules_path}"
+        )
 
     paths = resolve_csv_paths(args)
     ctx = load_context(paths, args)
@@ -485,12 +488,14 @@ def main() -> int:
     preview_rows: list[dict[str, Any]] = []
     ledger_rows: list[dict[str, Any]] = []
     skipped_duplicates = 0
+    ai_tag_hit_rows = 0
 
     print("=" * 100, flush=True)
     print("GOLD Discord notifier", flush=True)
     print(f"schema_version: {SCHEMA_VERSION}", flush=True)
     print(f"out_dir: {out_dir}", flush=True)
     print(f"ledger_csv: {ledger_csv}", flush=True)
+    print(f"ai_tag_rules_json: {rules_path} ok={bool(rules_obj.get('cycle_ok', False))} rules={rules_obj.get('rules_count', len(rules_obj.get('rules', [])) if isinstance(rules_obj.get('rules', []), list) else 0)}", flush=True)
     print(f"env_file: {env_file} exists={env_file.exists()}", flush=True)
     for tf, p in paths.items():
         print(f"{tf}: {p}", flush=True)
@@ -511,8 +516,11 @@ def main() -> int:
         if not args.allow_duplicate and key in notified_keys:
             skipped_duplicates += 1
             continue
-        message = build_message(row, spec, notification_key_value=key)
-        message_path = write_message(out_dir, key, message, row, spec)
+        ai_score = score_signal_row(row_for_ai_score(row, spec), rules_obj, strategy_id=spec.strategy_id)
+        if int(ai_score.get("hit_count", 0)) > 0:
+            ai_tag_hit_rows += 1
+        message = build_message(row, spec, ai_score=ai_score)
+        message_path = write_message(out_dir, key, message, row, spec, ai_score)
         discord_sent = False
         print("\n" + "-" * 100, flush=True)
         print(message, flush=True)
@@ -521,7 +529,7 @@ def main() -> int:
             send_discord_message(webhook_url, message)
             discord_sent = True
             print("Discord sent: true", flush=True)
-        preview = row_to_preview(row, spec, key=key, message_path=message_path, discord_sent=discord_sent, dry_run=bool(args.dry_run))
+        preview = row_to_preview(row, spec, key=key, message_path=message_path, discord_sent=discord_sent, dry_run=bool(args.dry_run), ai_score=ai_score)
         preview_rows.append(preview)
         if args.send_discord or args.mark_dry_run_notified:
             ledger_rows.append({
@@ -542,11 +550,15 @@ def main() -> int:
         "out_dir": str(out_dir),
         "preview_csv": str(preview_csv),
         "ledger_csv": str(ledger_csv),
+        "ai_tag_rules_json": str(rules_path),
+        "ai_tag_rules_cycle_ok": bool(rules_obj.get("cycle_ok", False)),
+        "ai_tag_rules_count": int(rules_obj.get("rules_count", len(rules_obj.get("rules", [])))) if isinstance(rules_obj.get("rules", []), list) else 0,
         "ctx_rows": int(len(ctx)),
         "scan_recent_bars": int(args.scan_recent_bars),
         "bar_offset": int(args.bar_offset),
         "raw_recent_signals_after_cooldown": int(len(signals)),
         "preview_rows": int(len(preview_rows)),
+        "ai_tag_hit_rows": int(ai_tag_hit_rows),
         "skipped_duplicates": int(skipped_duplicates),
         "ledger_rows_appended": int(len(ledger_rows)),
         "send_discord": bool(args.send_discord),
@@ -556,6 +568,7 @@ def main() -> int:
             "mt5_calls": False,
             "order_send": False,
             "ai_calls": False,
+            "requires_valid_ai_tag_rules_on_send": True,
             "live_runtime_state_mutation": bool(len(ledger_rows) > 0),
         },
     }
