@@ -64,7 +64,7 @@ DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_guarded_demo_autotrade")
 DEFAULT_ORDER_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/guarded_demo_order_ledger.csv")
 DEFAULT_BROKER_SYMBOL = "GOLD#"
 DEFAULT_EXPECTED_LOGIN = 75539039
-SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_v1"
+SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_v2"
 
 PAYLOAD_COLUMNS = [
     "created_at_utc",
@@ -188,28 +188,11 @@ def clean_str(value: Any, default: str = "") -> str:
     return text if text else default
 
 
-def clean_float(value: Any, default: float = 0.0) -> float:
-    try:
-        x = float(value)
-        if pd.notna(x):
-            return x
-    except Exception:
-        pass
-    return float(default)
-
-
 def time_text(value: Any) -> str:
     ts = pd.to_datetime(value, errors="coerce")
     if pd.isna(ts):
         return clean_str(value)
     return pd.Timestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-
-
-def id_time_text(value: Any) -> str:
-    ts = pd.to_datetime(value, errors="coerce")
-    if pd.isna(ts):
-        return "UNKNOWN_TIME"
-    return pd.Timestamp(ts).strftime("%Y%m%d_%H%M")
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> None:
@@ -260,7 +243,6 @@ def strategy_alias(strategy_id: str) -> str:
 
 
 def magic_number(strategy_id: str) -> int:
-    # Deterministic but compact magic range for strict 7.
     return 26052070 + strategy_priority(strategy_id)
 
 
@@ -317,7 +299,6 @@ def collect_recent_signals(ctx: pd.DataFrame, specs: list[GoldStrictSignalSpec],
         recent = cooled[mask.fillna(False)].copy()
         for _, row in recent.iterrows():
             items.append((pd.Timestamp(row["close_time"]), spec, row))
-    # Sender reads head(max_orders), so latest and highest-priority signals must be first.
     items.sort(key=lambda x: (x[0], -strategy_priority(x[1].strategy_id)), reverse=True)
     return items
 
@@ -395,10 +376,6 @@ def build_sender_cmd(args: argparse.Namespace, payload_csv: Path, order_ledger_c
     return cmd
 
 
-def run_sender(cmd: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
-
-
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="GOLD strict 7 guarded demo autotrade connector from CSV.")
     p.add_argument("--csv-dir", type=Path, default=DEFAULT_MQL5_FILES_DIR)
@@ -463,9 +440,16 @@ def main() -> int:
     if not payloads:
         reason = "NO_RECENT_STRICT7_SIGNAL"
         cycle_ok = bool(args.allow_no_signal_success)
+        sender_report = {
+            "rows_out": 0,
+            "dry_run_check_ok_rows": 0,
+            "sent_rows": 0,
+            "error_rows": 0,
+            "order_send_called_count": 0,
+        }
     else:
         cmd = build_sender_cmd(args, payload_csv, order_ledger_csv, sender_out_dir, send_to_sender)
-        proc = run_sender(cmd)
+        proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
         sender_returncode = int(proc.returncode)
         sender_stdout = proc.stdout or ""
         sender_stderr = proc.stderr or ""
@@ -503,6 +487,7 @@ def main() -> int:
         "run_dir": str(run_dir),
         "payload_csv": str(payload_csv),
         "order_ledger_csv": str(order_ledger_csv),
+        "summary_json": str(summary_json),
         "sender_out_dir": str(sender_out_dir),
         "ctx_rows": int(len(ctx)),
         "scan_recent_bars": int(args.scan_recent_bars),
@@ -513,18 +498,17 @@ def main() -> int:
         "payload_order_keys": [p.get("order_key") for p in payloads],
         "payload_strategy_ids": [p.get("strategy_id") for p in payloads],
         "sender_returncode": sender_returncode,
-        "sender_rows_out": sender_report.get("rows_out"),
-        "sender_dry_run_check_ok_rows": sender_report.get("dry_run_check_ok_rows"),
-        "sender_sent_rows": sender_report.get("sent_rows"),
-        "sender_error_rows": sender_report.get("error_rows"),
-        "sender_order_send_called_count": sender_report.get("order_send_called_count"),
-        "sender_report_json": str(sender_out_dir / "mt5_order_send_report.json"),
+        "sender_rows_out": sender_report.get("rows_out", 0),
+        "sender_dry_run_check_ok_rows": sender_report.get("dry_run_check_ok_rows", 0),
+        "sender_sent_rows": sender_report.get("sent_rows", 0),
+        "sender_error_rows": sender_report.get("error_rows", 0),
+        "sender_order_send_called_count": sender_report.get("order_send_called_count", 0),
+        "sender_report_json": str(sender_out_dir / "mt5_order_send_report.json") if payloads else "",
         "sender_stdout_log": str(run_dir / "sender_stdout.log") if payloads else "",
         "sender_stderr_log": str(run_dir / "sender_stderr.log") if payloads else "",
         "elapsed_seconds": round(time.perf_counter() - started, 3),
     }
     write_json(summary_json, summary)
-    # latest pointer for easy checking
     write_json(out_dir / "latest_gold_strict_7_guarded_demo_autotrade_summary.json", summary)
 
     print("=" * 100, flush=True)
