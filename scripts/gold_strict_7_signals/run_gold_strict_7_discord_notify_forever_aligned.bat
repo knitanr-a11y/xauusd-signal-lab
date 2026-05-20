@@ -5,7 +5,9 @@ cd /d "%~dp0\..\.."
 echo ============================================================
 echo GOLD strict 7 Discord notify forever aligned
 echo - Discord send ENABLED
-echo - aligned to every 5 minutes + 02 seconds
+echo - aligned to every 1 minute + 02 seconds
+echo - designed for delayed EA CSV writes
+echo - reads latest confirmed CSV row: bar_offset=0
 echo - lightweight candle tails
 echo - duplicate prevention by ledger
 echo - no MT5 order send
@@ -15,9 +17,10 @@ echo ============================================================
 python scripts\gold_strict_7_signals\run_gold_strict_7_discord_notify_forever_aligned.py ^
   --csv-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
   --send-discord ^
-  --interval-minutes 5 ^
+  --interval-minutes 1 ^
   --run-delay-seconds 2 ^
   --scan-recent-bars 36 ^
+  --bar-offset 0 ^
   --tail-m5 2000 ^
   --tail-h1 1000 ^
   --tail-h4 500 ^
