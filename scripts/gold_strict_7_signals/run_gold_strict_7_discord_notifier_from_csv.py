@@ -47,7 +47,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v4_text_tidy"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v5_ai_warning"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -101,6 +101,18 @@ LEDGER_COLUMNS = [
     "dry_run",
     "message_path",
 ]
+
+TAG_JA = {
+    "poor_pullback_structure": "押し戻り構造が弱い",
+    "macd_late_signal": "MACD反応が遅い",
+    "entry_after_extended_move": "伸びた後のエントリー",
+    "high_volatility_chase": "高ボラ追いかけ",
+    "m15_signal_candle_large": "M15シグナル足が大きすぎる",
+    "range_edge_entry": "レンジ端エントリーリスク",
+    "near_recent_low": "直近安値付近でのSELLリスク",
+    "ema_distance_too_large": "EMAから離れすぎ",
+    "against_h1_context": "H1環境に逆らう形",
+}
 
 
 def now_str() -> str:
@@ -225,6 +237,12 @@ def risk_watch_tags(strategy_id: str) -> list[str]:
     return []
 
 
+def format_watch_tags(tags: list[str]) -> str:
+    if not tags:
+        return "なし"
+    return ", ".join(f"{tag}({TAG_JA.get(tag, '要確認')})" for tag in tags)
+
+
 def notification_key(row: pd.Series, spec: GoldStrictSignalSpec) -> str:
     return "|".join([DEFAULT_SYMBOL, "STRICT7", spec.strategy_id, spec.direction, time_text(row.get("close_time"))])
 
@@ -279,8 +297,10 @@ def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, notification_ke
         f"値幅: TP {fmt_num(spec.tp_pips, 1)} pips / SL {fmt_num(spec.sl_pips, 1)} pips / RR {fmt_num(spec.rr, 2)}",
         "価格注記: M5確定足終値ベース。実約定・スプレッドでズレあり。",
         "",
-        "AIタグ監視対象: " + (", ".join(watch_tags) if watch_tags else "なし"),
-        "AI注記: この通知時点ではAI発注判定なし。タグは後続評価で蓄積。",
+        "AI評価:",
+        f"過去AI評価タグ警告: {'⚠️ WATCH' if watch_tags else 'なし'}",
+        "警戒タグ: " + format_watch_tags(watch_tags),
+        "AI注記: 通知時点ではAIによる新規判定は行わない。これは過去AI評価で蓄積した注意タグの表示。",
         "",
         "時刻:",
         f"entry_time目安: {time_text(row.get('close_time'))}",
@@ -352,6 +372,11 @@ def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: G
         "strategy_id": spec.strategy_id,
         "direction": spec.direction,
         "entry_time": time_text(row.get("close_time")),
+        "ai_warning": {
+            "has_warning": bool(risk_watch_tags(spec.strategy_id)),
+            "risk_watch_tags": risk_watch_tags(spec.strategy_id),
+            "note": "historical AI-review warning tags only; no live AI decision at notification time",
+        },
         "message": message,
         "row": {str(k): json_safe(v) for k, v in row.to_dict().items()},
     }
