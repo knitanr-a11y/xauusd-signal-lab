@@ -12,20 +12,19 @@ set RULE_CSV=data\runtime_state\btc\strict_5\ai_tag_numeric_rules_summary.csv
 
 echo ============================================================
 echo Build BTC strict 5 AI-tag numeric rules JSON
+echo Mode: rebuild numeric diagnostics for ALL should_investigate tags
 echo No AI call / No MT5 call / No Discord / No order_send
 echo ============================================================
 
-if not exist "%SELECTED_CSV%" if not exist "%SUMMARY_CSV%" (
-  echo [INFO] Missing selected and summary condition CSV.
-  echo [INFO] Building numeric condition diagnostics first...
-  python scripts\btc_strict_5_signals\run_btc_strict_5_ai_tag_numeric_condition_diagnostics.py ^
-    --ai-review-dir "%AI_REVIEW_DIR%" ^
-    --exclusion-dir "%EXCLUSION_DIR%" ^
-    --out-dir "%NUMERIC_DIR%"
-  if errorlevel 1 (
-    echo [ERROR] Failed to build numeric condition diagnostics.
-    exit /b 1
-  )
+echo [INFO] Rebuilding numeric condition diagnostics with --focus-grade "" so WATCH tags can also become notification-time numeric rules...
+python scripts\btc_strict_5_signals\run_btc_strict_5_ai_tag_numeric_condition_diagnostics.py ^
+  --ai-review-dir "%AI_REVIEW_DIR%" ^
+  --exclusion-dir "%EXCLUSION_DIR%" ^
+  --out-dir "%NUMERIC_DIR%" ^
+  --focus-grade ""
+if errorlevel 1 (
+  echo [ERROR] Failed to build numeric condition diagnostics.
+  exit /b 1
 )
 
 if exist "%SELECTED_CSV%" (
