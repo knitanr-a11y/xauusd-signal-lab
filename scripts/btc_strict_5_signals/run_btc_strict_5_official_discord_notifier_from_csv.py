@@ -37,6 +37,7 @@ for p in [SCRIPT_DIR, REPO_ROOT / "scripts"]:
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
+from btc_strict_5_ai_warning_tags import build_ai_warning_section, warning_summary
 from btc_strict_5_filter_variants import BTC_STRICT_5_DEFAULT_FILTER_VARIANT, available_filter_variants
 from btc_strict_5_official_runtime import build_context_from_csvs, build_filtered_preview
 from btc_strict_5_signal_specs import DEFAULT_BROKER_SYMBOL, DEFAULT_SYMBOL, validate_signal_specs
@@ -44,13 +45,14 @@ from run_btc_strict_5_backtest_from_csv import DEFAULT_MQL5_FILES_DIR, choose_pa
 from run_btc_strict_5_discord_notifier_from_csv import build_message, clean_str, json_safe
 from run_live_gold_notifier_from_csv import load_env_file, send_discord_message
 
-SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_v1"
+SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_v2_ai_warning"
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_official_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/official_discord_notification_ledger.csv")
 
 LEDGER_COLUMNS = [
     "notified_at_utc", "schema_version", "notification_key", "filter_variant",
+    "ai_warning_has_warning", "ai_warning_tags", "official_filtered_tags",
     "preview_id", "signal_id", "strategy_id", "candidate_base", "candidate_family",
     "direction", "broker_symbol", "symbol", "signal_time", "base_close_time", "entry_time",
     "tp_price_distance", "sl_price_distance", "tp_pips", "sl_pips", "rr",
@@ -128,10 +130,17 @@ def message_filename(row: pd.Series, key: str) -> str:
     return f"btc_official_{clean_str(row.get('direction'))}_{id_time_text(row.get('signal_time'))}_{h}.json"
 
 
+def enrich_message_with_ai_warning(message: str, row: pd.Series, filter_variant: str) -> str:
+    strategy_id = clean_str(row.get("strategy_id"))
+    section = build_ai_warning_section(strategy_id, filter_variant=filter_variant)
+    return message + "\n\n" + "\n".join(section)
+
+
 def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_variant: str) -> Path:
     message_dir = out_dir / "messages"
     mkdirp(message_dir)
     path = message_dir / message_filename(row, key)
+    ai_warning = warning_summary(clean_str(row.get("strategy_id")), filter_variant=filter_variant)
     payload = {
         "created_at_utc": utc_now_text(),
         "schema_version": SCHEMA_VERSION,
@@ -141,6 +150,7 @@ def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_
         "candidate_base": clean_str(row.get("candidate_base")),
         "direction": clean_str(row.get("direction")),
         "signal_time": clean_str(row.get("signal_time")),
+        "ai_warning": ai_warning,
         "message": message,
         "row": {str(k): json_safe(v) for k, v in row.to_dict().items()},
     }
@@ -149,11 +159,15 @@ def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_
 
 
 def ledger_row(row: pd.Series, *, key: str, filter_variant: str, discord_sent: bool, preview_only_marked: bool, message_path: Path) -> dict[str, Any]:
+    ai_warning = warning_summary(clean_str(row.get("strategy_id")), filter_variant=filter_variant)
     return {
         "notified_at_utc": utc_now_text(),
         "schema_version": SCHEMA_VERSION,
         "notification_key": key,
         "filter_variant": filter_variant,
+        "ai_warning_has_warning": bool(ai_warning.get("has_warning")),
+        "ai_warning_tags": "|".join(ai_warning.get("risk_watch_tags", [])),
+        "official_filtered_tags": "|".join(ai_warning.get("official_filtered_tags", [])),
         "preview_id": row.get("preview_id", ""),
         "signal_id": row.get("signal_id", ""),
         "strategy_id": row.get("strategy_id", ""),
@@ -261,12 +275,17 @@ def main() -> int:
     sent_rows = 0
     skipped_duplicates = 0
     message_rows = 0
+    warning_rows = 0
     for _, row in preview.iterrows():
         key = notification_key(row, args.filter_variant)
         if not args.allow_duplicate and key in notified_keys:
             skipped_duplicates += 1
             continue
-        message = build_message(row, key=key) + f"\nfilter_variant: {args.filter_variant}"
+        base_message = build_message(row, key=key)
+        message = enrich_message_with_ai_warning(base_message, row, args.filter_variant)
+        ai_warning = warning_summary(clean_str(row.get("strategy_id")), filter_variant=args.filter_variant)
+        if ai_warning.get("has_warning"):
+            warning_rows += 1
         message_path = write_message(out_dir, row, key, message, args.filter_variant)
         message_rows += 1
         print("\n" + "-" * 100, flush=True)
@@ -305,6 +324,7 @@ def main() -> int:
             "signals_excluded_by_filter": int(len(excluded)),
             "preview_rows": int(len(preview)),
             "message_rows": int(message_rows),
+            "ai_warning_rows": int(warning_rows),
             "skipped_duplicates": int(skipped_duplicates),
         },
         "filter_meta": meta,
