@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 r"""Build BTC strict-5 order payloads and call the existing guarded MT5 sender.
 
-This is the guarded demo connector layer for BTC strict 5.
-
-It intentionally reuses:
-
-    scripts/send_mt5_order_from_payload.py
+Guarded demo connector for BTC strict 5.  This wrapper is intentionally thin:
+it detects recent BTC strict-5 signals with the same detector used by the
+backtest/preview path, writes sender-compatible order_payloads.csv, and then
+calls scripts/send_mt5_order_from_payload.py.
 
 Safety defaults:
 - dry-run/order_check only unless BOTH --send and --allow-demo-send are passed
@@ -14,26 +13,16 @@ Safety defaults:
 - lot=0.01
 - position-policy=block_any
 - require-demo-account is passed to the sender by default
-- expected-login defaults to the known demo account 75539039
+- expected-login defaults to 75539039
+- no direct mt5.order_send in this wrapper
 - no Discord send
 - no AI call
-- no direct mt5.order_send in this wrapper
-- duplicate order_key prevention is handled by sender order ledger
 - no D1 read or D1 condition
 
-The wrapper only:
-1. Reads BTC live CSVs.
-2. Detects recent BTC strict-5 signals using the same detector as backtest/preview.
-3. Builds order_payloads.csv in the existing sender-compatible schema.
-4. Calls send_mt5_order_from_payload.py.
-5. Writes a summary JSON.
-
-Important execution note:
-The backtest enters at the next M15 open. In live operation, actual execution is
-current MT5 bid/ask when the sender runs. Therefore this wrapper uses the latest
-available preview entry reference to build a candidate SL/TP, but the sender still
-performs broker-side order_check before any send. Keep max_signal_age_minutes
-small for live/demo operation.
+Live-loop lightweight mode:
+The loop passes --tail-m15/--tail-h1/--tail-h4 so each cycle reads only the most
+recent rows needed for indicator warmup and recent signal detection.  Backtest
+scripts remain full-history and are not affected.
 """
 from __future__ import annotations
 
@@ -80,65 +69,21 @@ SENDER_SCRIPT = REPO_ROOT / "scripts" / "send_mt5_order_from_payload.py"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_guarded_demo_autotrade")
 DEFAULT_ORDER_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/guarded_demo_order_ledger.csv")
 DEFAULT_EXPECTED_LOGIN = 75539039
-SCHEMA_VERSION = "btc_strict_5_guarded_demo_autotrade_v1"
+SCHEMA_VERSION = "btc_strict_5_guarded_demo_autotrade_v2_light_tail"
 
 PAYLOAD_COLUMNS = [
-    "created_at_utc",
-    "schema_version",
-    "payload_key",
-    "order_key",
-    "signal_key",
-    "notification_key",
-    "broker_symbol",
-    "symbol",
-    "direction",
-    "lot",
-    "entry_price_reference",
-    "sl_price",
-    "tp_price",
-    "tp_price_distance",
-    "sl_price_distance",
-    "tp_pips",
-    "sl_pips",
-    "rr",
-    "magic_number",
-    "comment",
-    "strategy_key",
-    "strategy_alias",
-    "strategy_id",
-    "condition_id",
-    "router_strategy_slot",
-    "router_strategy_id",
-    "candidate_rank",
-    "signal_time",
-    "base_close_time",
-    "entry_time",
-    "source",
-    "strict_no_future_ok",
-    "h1_close_time",
-    "h1_confirmed_ok",
-    "h4_close_time",
-    "h4_confirmed_ok",
-    "d1_used",
-    "reason",
+    "created_at_utc", "schema_version", "payload_key", "order_key", "signal_key", "notification_key",
+    "broker_symbol", "symbol", "direction", "lot", "entry_price_reference", "sl_price", "tp_price",
+    "tp_price_distance", "sl_price_distance", "tp_pips", "sl_pips", "rr", "magic_number", "comment",
+    "strategy_key", "strategy_alias", "strategy_id", "condition_id", "router_strategy_slot", "router_strategy_id",
+    "candidate_rank", "signal_time", "base_close_time", "entry_time", "source", "strict_no_future_ok",
+    "h1_close_time", "h1_confirmed_ok", "h4_close_time", "h4_confirmed_ok", "d1_used", "reason",
 ]
 
 SUMMARY_PRINT_KEYS = [
-    "cycle_ok",
-    "reason",
-    "send_requested_by_user",
-    "allow_demo_send",
-    "send_flag_passed_to_sender",
-    "payload_rows",
-    "sender_returncode",
-    "sender_rows_out",
-    "sender_dry_run_check_ok_rows",
-    "sender_sent_rows",
-    "sender_error_rows",
-    "sender_order_send_called_count",
-    "payload_csv",
-    "order_ledger_csv",
-    "summary_json",
+    "cycle_ok", "reason", "send_requested_by_user", "allow_demo_send", "send_flag_passed_to_sender",
+    "payload_rows", "sender_returncode", "sender_rows_out", "sender_dry_run_check_ok_rows", "sender_sent_rows",
+    "sender_error_rows", "sender_order_send_called_count", "payload_csv", "order_ledger_csv", "summary_json",
 ]
 
 STRATEGY_PRIORITY = {
@@ -205,6 +150,13 @@ def safe_float(value: Any, default: float = 0.0) -> float:
         return float(default)
 
 
+def read_ohlc_csv_tail(path: str | Path, tail_bars: int) -> pd.DataFrame:
+    df = read_ohlc_csv(path)
+    if tail_bars and int(tail_bars) > 0:
+        return df.tail(int(tail_bars)).reset_index(drop=True)
+    return df
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> None:
     mkdirp(path.parent)
     with open(windows_long_path(path), "w", encoding="utf-8-sig", newline="") as f:
@@ -245,49 +197,19 @@ def magic_number(strategy_id: str) -> int:
     return int(DEFAULT_MAGIC_BASE + strategy_priority(strategy_id))
 
 
-def id_time_text(value: Any) -> str:
-    ts = pd.to_datetime(value, errors="coerce")
-    if pd.isna(ts):
-        return "UNKNOWN_TIME"
-    return pd.Timestamp(ts).strftime("%Y%m%d_%H%M")
-
-
 def notification_key(row: pd.Series) -> str:
-    return "|".join([
-        DEFAULT_SYMBOL,
-        "STRICT5",
-        clean_str(row.get("strategy_id")),
-        clean_str(row.get("direction")),
-        clean_str(row.get("signal_time")),
-    ])
+    return "|".join([DEFAULT_SYMBOL, "STRICT5", clean_str(row.get("strategy_id")), clean_str(row.get("direction")), clean_str(row.get("signal_time"))])
 
 
 def order_key(row: pd.Series) -> str:
-    return "|".join([
-        "ORDER",
-        DEFAULT_SYMBOL,
-        "STRICT5",
-        clean_str(row.get("strategy_id")),
-        clean_str(row.get("direction")),
-        clean_str(row.get("signal_time")),
-    ])
+    return "|".join(["ORDER", DEFAULT_SYMBOL, "STRICT5", clean_str(row.get("strategy_id")), clean_str(row.get("direction")), clean_str(row.get("signal_time"))])
 
 
 def signal_key(row: pd.Series) -> str:
-    return "|".join([
-        "SIGNAL",
-        DEFAULT_SYMBOL,
-        "STRICT5",
-        clean_str(row.get("strategy_id")),
-        clean_str(row.get("direction")),
-        clean_str(row.get("signal_time")),
-    ])
+    return "|".join(["SIGNAL", DEFAULT_SYMBOL, "STRICT5", clean_str(row.get("strategy_id")), clean_str(row.get("direction")), clean_str(row.get("signal_time"))])
 
 
 def calc_payload_prices(row: pd.Series) -> tuple[float, float, float]:
-    # Prefer next M15 open when it exists because it matches the backtest entry policy.
-    # If the next open is not yet in CSV, fall back to signal close as a preview-only
-    # reference. The sender still validates against current MT5 bid/ask with order_check.
     next_open_available = bool(row.get("next_m15_open_available", False))
     entry = safe_float(row.get("next_m15_open_price"), default=0.0) if next_open_available else safe_float(row.get("signal_close_price"), default=0.0)
     direction = clean_str(row.get("direction")).upper()
@@ -308,9 +230,12 @@ def load_preview(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[str, Any]
         "h1": choose_path(args.mql5_files_dir, args.h1_csv, args.h1_file),
         "h4": choose_path(args.mql5_files_dir, args.h4_csv, args.h4_file),
     }
-    m15 = add_indicators(read_ohlc_csv(input_paths["m15"]), include_donchian=True)
-    h1 = add_indicators(read_ohlc_csv(input_paths["h1"]))
-    h4 = add_indicators(read_ohlc_csv(input_paths["h4"]))
+    m15_raw = read_ohlc_csv_tail(input_paths["m15"], args.tail_m15)
+    h1_raw = read_ohlc_csv_tail(input_paths["h1"], args.tail_h1)
+    h4_raw = read_ohlc_csv_tail(input_paths["h4"], args.tail_h4)
+    m15 = add_indicators(m15_raw, include_donchian=True)
+    h1 = add_indicators(h1_raw)
+    h4 = add_indicators(h4_raw)
     ctx = join_confirmed_context(m15, h1, h4)
     signals = detect_signals(ctx, get_signal_specs())
     if args.scan_recent_bars and int(args.scan_recent_bars) > 0 and not ctx.empty:
@@ -335,11 +260,11 @@ def load_preview(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[str, Any]
     if not preview.empty:
         preview = preview.sort_values(["signal_time", "strategy_id"]).reset_index(drop=True)
         preview["_priority"] = preview["strategy_id"].map(strategy_priority).fillna(999).astype(int)
-        # Most recent first; for identical times, lower priority number first.
         preview = preview.sort_values(["signal_time", "_priority"], ascending=[False, True]).drop(columns=["_priority"]).reset_index(drop=True)
     meta = {
         "input_paths": {k: str(v) for k, v in input_paths.items()},
         "rows": {"m15": int(len(m15)), "h1": int(len(h1)), "h4": int(len(h4)), "preview_rows": int(len(preview))},
+        "tails": {"m15": int(args.tail_m15), "h1": int(args.tail_h1), "h4": int(args.tail_h4)},
         "ctx_last_base_close_time": time_text(ctx.iloc[-1]["base_close_time"]) if not ctx.empty else "",
     }
     return preview, meta
@@ -354,63 +279,31 @@ def payload_row(row: pd.Series, args: argparse.Namespace, rank: int) -> dict[str
     sk = signal_key(row)
     comment = f"B5 {alias} {clean_str(row.get('direction'))}"
     return {
-        "created_at_utc": utc_now_text(),
-        "schema_version": SCHEMA_VERSION,
-        "payload_key": pk,
-        "order_key": ok,
-        "signal_key": sk,
-        "notification_key": notification_key(row),
-        "broker_symbol": args.broker_symbol,
-        "symbol": args.symbol,
-        "direction": clean_str(row.get("direction")),
-        "lot": float(args.lot),
-        "entry_price_reference": round(entry, 5),
-        "sl_price": round(sl, 5),
-        "tp_price": round(tp, 5),
-        "tp_price_distance": safe_float(row.get("tp_price_distance")),
-        "sl_price_distance": safe_float(row.get("sl_price_distance")),
-        "tp_pips": safe_float(row.get("tp_pips")),
-        "sl_pips": safe_float(row.get("sl_pips")),
-        "rr": safe_float(row.get("rr")),
-        "magic_number": magic_number(strategy_id),
-        "comment": comment[:31],
-        "strategy_key": strategy_id,
-        "strategy_alias": alias,
-        "strategy_id": strategy_id,
-        "condition_id": strategy_id,
-        "router_strategy_slot": alias,
-        "router_strategy_id": strategy_id,
-        "candidate_rank": int(rank),
-        "signal_time": clean_str(row.get("signal_time")),
-        "base_close_time": clean_str(row.get("base_close_time")),
-        "entry_time": clean_str(row.get("entry_time")),
-        "source": "btc_strict_5_guarded_demo_autotrade_from_csv",
+        "created_at_utc": utc_now_text(), "schema_version": SCHEMA_VERSION, "payload_key": pk, "order_key": ok,
+        "signal_key": sk, "notification_key": notification_key(row), "broker_symbol": args.broker_symbol,
+        "symbol": args.symbol, "direction": clean_str(row.get("direction")), "lot": float(args.lot),
+        "entry_price_reference": round(entry, 5), "sl_price": round(sl, 5), "tp_price": round(tp, 5),
+        "tp_price_distance": safe_float(row.get("tp_price_distance")), "sl_price_distance": safe_float(row.get("sl_price_distance")),
+        "tp_pips": safe_float(row.get("tp_pips")), "sl_pips": safe_float(row.get("sl_pips")), "rr": safe_float(row.get("rr")),
+        "magic_number": magic_number(strategy_id), "comment": comment[:31], "strategy_key": strategy_id,
+        "strategy_alias": alias, "strategy_id": strategy_id, "condition_id": strategy_id,
+        "router_strategy_slot": alias, "router_strategy_id": strategy_id, "candidate_rank": int(rank),
+        "signal_time": clean_str(row.get("signal_time")), "base_close_time": clean_str(row.get("base_close_time")),
+        "entry_time": clean_str(row.get("entry_time")), "source": "btc_strict_5_guarded_demo_autotrade_from_csv",
         "strict_no_future_ok": bool(row.get("strict_no_future_ok", False)),
-        "h1_close_time": clean_str(row.get("h1_close_time")),
-        "h1_confirmed_ok": bool(row.get("h1_confirmed_ok", False)),
-        "h4_close_time": clean_str(row.get("h4_close_time")),
-        "h4_confirmed_ok": bool(row.get("h4_confirmed_ok", False)),
-        "d1_used": False,
-        "reason": clean_str(row.get("reason")),
+        "h1_close_time": clean_str(row.get("h1_close_time")), "h1_confirmed_ok": bool(row.get("h1_confirmed_ok", False)),
+        "h4_close_time": clean_str(row.get("h4_close_time")), "h4_confirmed_ok": bool(row.get("h4_confirmed_ok", False)),
+        "d1_used": False, "reason": clean_str(row.get("reason")),
     }
 
 
 def build_sender_cmd(args: argparse.Namespace, payload_csv: Path, order_ledger_csv: Path, sender_out_dir: Path, send_to_sender: bool) -> list[str]:
     cmd = [
-        sys.executable,
-        str(SENDER_SCRIPT),
-        "--input-csv", str(payload_csv),
-        "--order-ledger-csv", str(order_ledger_csv),
-        "--out-dir", str(sender_out_dir),
-        "--symbol", str(args.broker_symbol),
-        "--max-orders", str(args.max_orders),
-        "--expected-login", str(args.expected_login),
-        "--require-demo-account",
-        "--select-symbol",
-        "--position-policy", str(args.position_policy),
-        "--max-symbol-positions", str(args.max_symbol_positions),
-        "--max-symbol-lot", str(args.max_symbol_lot),
-        "--deviation", str(args.deviation),
+        sys.executable, str(SENDER_SCRIPT), "--input-csv", str(payload_csv), "--order-ledger-csv", str(order_ledger_csv),
+        "--out-dir", str(sender_out_dir), "--symbol", str(args.broker_symbol), "--max-orders", str(args.max_orders),
+        "--expected-login", str(args.expected_login), "--require-demo-account", "--select-symbol",
+        "--position-policy", str(args.position_policy), "--max-symbol-positions", str(args.max_symbol_positions),
+        "--max-symbol-lot", str(args.max_symbol_lot), "--deviation", str(args.deviation),
         "--registry-preview-out-csv", str(sender_out_dir / "position_registry_preview.csv"),
         "--registry-preview-out-json", str(sender_out_dir / "position_registry_preview_summary.json"),
     ]
@@ -433,6 +326,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--m15-file", default="btcusdsharp_m15.csv")
     p.add_argument("--h1-file", default="btcusdsharp_h1.csv")
     p.add_argument("--h4-file", default="btcusdsharp_h4.csv")
+    p.add_argument("--tail-m15", type=int, default=3000)
+    p.add_argument("--tail-h1", type=int, default=2000)
+    p.add_argument("--tail-h4", type=int, default=1000)
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     p.add_argument("--order-ledger-csv", type=Path, default=DEFAULT_ORDER_LEDGER_CSV)
     p.add_argument("--broker-symbol", default=DEFAULT_BROKER_SYMBOL)
@@ -469,7 +365,6 @@ def main() -> int:
     if not preview.empty and args.max_orders and int(args.max_orders) > 0:
         preview = preview.head(int(args.max_orders)).copy()
     payloads = [payload_row(row, args, rank=i + 1) for i, (_, row) in enumerate(preview.iterrows())]
-
     payload_csv = run_dir / "btc_strict_5_order_payloads.csv"
     summary_json = run_dir / "btc_strict_5_guarded_demo_autotrade_summary.json"
     write_csv(payload_csv, payloads, PAYLOAD_COLUMNS)
@@ -525,8 +420,13 @@ def main() -> int:
             "discord_send": False,
             "ai_calls": False,
             "d1_read": False,
+            "tail_m15": int(args.tail_m15),
+            "tail_h1": int(args.tail_h1),
+            "tail_h4": int(args.tail_h4),
         },
         "inputs": meta.get("input_paths", {}),
+        "input_rows_after_tail": meta.get("rows", {}),
+        "tails": meta.get("tails", {}),
         "run_dir": str(run_dir),
         "payload_csv": str(payload_csv),
         "order_ledger_csv": str(order_ledger_csv),
@@ -557,6 +457,7 @@ def main() -> int:
     print("BTC strict 5 guarded demo autotrade connector", flush=True)
     for key in SUMMARY_PRINT_KEYS:
         print(f"{key}: {summary.get(key)}", flush=True)
+    print(f"tail_m15: {args.tail_m15} tail_h1: {args.tail_h1} tail_h4: {args.tail_h4}", flush=True)
     print("=" * 100, flush=True)
     if sender_stdout:
         print("--- sender stdout tail ---", flush=True)
