@@ -233,10 +233,8 @@ def build_message(row: pd.Series, *, key: str) -> str:
     next_open_available = bool(row.get("next_m15_open_available", False))
     next_open = clean_str(row.get("next_m15_open_price"), "N/A")
     lines = [
-        f"{side_icon} **BTC strict 5 {direction} シグナル**",
+        f"{side_icon} **BTC {direction} シグナル**",
         "",
-        f"ルール: {strategy_display_name(strategy_id)}",
-        f"内部名: {strategy_id}",
         f"方向: {direction}",
         "",
         "価格・値幅:",
@@ -258,6 +256,9 @@ def build_message(row: pd.Series, *, key: str) -> str:
         f"H4 close: {clean_str(row.get('h4_close_time'))} / ok={bool(row.get('h4_confirmed_ok'))}",
         f"D1 used: {bool(row.get('d1_used'))}",
         "",
+        "確認用:",
+        f"ルール: {strategy_display_name(strategy_id)}",
+        f"内部名: {strategy_id}",
         f"reason: {clean_str(row.get('reason'))}",
         f"key: {key}",
     ]
