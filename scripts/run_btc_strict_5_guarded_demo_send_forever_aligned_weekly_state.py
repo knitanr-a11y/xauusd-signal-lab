@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 r"""BTC strict-5 guarded demo-send aligned forever runner.
 
-This runner calls the BTC strict-5 once-wrapper on an aligned schedule and keeps
-persistent duplicate-order state under data/runtime_state/btc/strict_5.
+Runs the BTC strict-5 once-wrapper on the same cadence style as the GOLD
+aligned runners: every minute at +02 seconds by BAT default.
 
 Safety:
 - The child wrapper still only passes --send to the guarded sender when both
@@ -13,10 +13,7 @@ Safety:
 - This runner does not call AI.
 - D1 is not read by the BTC strict-5 child wrapper.
 - Duplicate order_key protection is handled by the persistent sender ledger.
-
-Typical live-demo use is via:
-
-  scripts/run_btc_strict_5_guarded_demo_send_forever_aligned_weekly_state.bat
+- Lightweight mode passes --tail-m15/--tail-h1/--tail-h4 to the child wrapper.
 """
 from __future__ import annotations
 
@@ -39,48 +36,17 @@ SUMMARY_NAME = "latest_btc_strict_5_guarded_demo_send_forever_aligned_weekly_sta
 STOP_MARKER_NAME = "latest_btc_strict_5_guarded_demo_send_forever_aligned_weekly_state_stop_marker.json"
 
 ORDER_LEDGER_COLUMNS = [
-    "created_at_utc",
-    "order_key",
-    "payload_key",
-    "signal_key",
-    "broker_symbol",
-    "symbol",
-    "direction",
-    "lot",
-    "order_status",
-    "order_send_called",
-    "order_send_ok",
-    "source",
+    "created_at_utc", "order_key", "payload_key", "signal_key", "broker_symbol", "symbol", "direction",
+    "lot", "order_status", "order_send_called", "order_send_ok", "source",
 ]
 
 LOOP_LOG_COLUMNS = [
-    "cycle_index",
-    "cycle_start_utc",
-    "cycle_end_utc",
-    "returncode",
-    "cycle_ok",
-    "reason",
-    "send_requested",
-    "allow_demo_send",
-    "send_flag_passed_to_sender",
-    "payload_rows",
-    "sender_rows_out",
-    "sender_dry_run_check_ok_rows",
-    "sender_error_rows",
-    "sender_sent_rows",
-    "sender_order_send_called_count",
-    "raw_recent_preview_rows",
-    "ctx_last_base_close_time",
-    "d1_used",
-    "position_policy",
-    "max_symbol_positions",
-    "max_symbol_lot",
-    "persistent_order_ledger_csv",
-    "total_seconds",
-    "next_run_utc",
-    "stdout_log",
-    "stderr_log",
-    "summary_json",
+    "cycle_index", "cycle_start_utc", "cycle_end_utc", "returncode", "cycle_ok", "reason",
+    "send_requested", "allow_demo_send", "send_flag_passed_to_sender", "payload_rows", "sender_rows_out",
+    "sender_dry_run_check_ok_rows", "sender_error_rows", "sender_sent_rows", "sender_order_send_called_count",
+    "raw_recent_preview_rows", "ctx_last_base_close_time", "d1_used", "tail_m15", "tail_h1", "tail_h4",
+    "position_policy", "max_symbol_positions", "max_symbol_lot", "persistent_order_ledger_csv", "total_seconds",
+    "next_run_utc", "stdout_log", "stderr_log", "summary_json",
 ]
 
 
@@ -219,6 +185,9 @@ def build_child_cmd(args: argparse.Namespace, child_out_dir: Path, persistent_or
         "--order-ledger-csv", str(persistent_order_ledger),
         "--scan-recent-bars", str(args.scan_recent_bars),
         "--max-signal-age-minutes", str(args.max_signal_age_minutes),
+        "--tail-m15", str(args.tail_m15),
+        "--tail-h1", str(args.tail_h1),
+        "--tail-h4", str(args.tail_h4),
         "--max-orders", str(args.max_orders),
         "--position-policy", str(args.position_policy),
         "--max-symbol-positions", str(args.max_symbol_positions),
@@ -286,6 +255,9 @@ def run_cycle(args: argparse.Namespace, cycle_index: int, loop_dir: Path, persis
         "raw_recent_preview_rows": as_int(child_summary.get("raw_recent_preview_rows"), 0),
         "ctx_last_base_close_time": child_summary.get("ctx_last_base_close_time", ""),
         "d1_used": as_bool(child_summary.get("d1_used"), False),
+        "tail_m15": int(args.tail_m15),
+        "tail_h1": int(args.tail_h1),
+        "tail_h4": int(args.tail_h4),
         "position_policy": str(args.position_policy),
         "max_symbol_positions": int(args.max_symbol_positions),
         "max_symbol_lot": float(args.max_symbol_lot),
@@ -297,9 +269,8 @@ def run_cycle(args: argparse.Namespace, cycle_index: int, loop_dir: Path, persis
         "summary_json": str(child_summary.get("summary_json", child_out_dir / "latest_btc_strict_5_guarded_demo_autotrade_summary.json")),
     }
     print(
-        f"[CYCLE {cycle_index}] ok={row['cycle_ok']} reason={row['reason']} "
-        f"payload_rows={row['payload_rows']} sent={row['sender_sent_rows']} "
-        f"order_send_called={row['sender_order_send_called_count']} seconds={elapsed}",
+        f"[CYCLE {cycle_index}] ok={row['cycle_ok']} reason={row['reason']} payload_rows={row['payload_rows']} "
+        f"sent={row['sender_sent_rows']} order_send_called={row['sender_order_send_called_count']} seconds={elapsed}",
         flush=True,
     )
     if proc.returncode != 0:
@@ -318,10 +289,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--m15-csv", default="")
     p.add_argument("--h1-csv", default="")
     p.add_argument("--h4-csv", default="")
-    p.add_argument("--interval-minutes", type=int, default=15)
-    p.add_argument("--offset-seconds", type=int, default=5)
+    p.add_argument("--interval-minutes", type=int, default=1)
+    p.add_argument("--offset-seconds", type=int, default=2)
     p.add_argument("--scan-recent-bars", type=int, default=5)
     p.add_argument("--max-signal-age-minutes", type=int, default=30)
+    p.add_argument("--tail-m15", type=int, default=3000)
+    p.add_argument("--tail-h1", type=int, default=2000)
+    p.add_argument("--tail-h4", type=int, default=1000)
     p.add_argument("--latest-only", action="store_true")
     p.add_argument("--max-orders", type=int, default=1)
     p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="block_any")
@@ -358,6 +332,7 @@ def main() -> int:
     print(f"state_dir={state_dir}", flush=True)
     print(f"persistent_order_ledger={persistent_order_ledger}", flush=True)
     print(f"interval_minutes={args.interval_minutes} offset_seconds={args.offset_seconds}", flush=True)
+    print(f"tails: m15={args.tail_m15} h1={args.tail_h1} h4={args.tail_h4}", flush=True)
     print(f"send={args.send} allow_demo_send={args.allow_demo_send}", flush=True)
     print("Stop with Ctrl+C", flush=True)
     print("=" * 100, flush=True)
@@ -373,7 +348,7 @@ def main() -> int:
             loop_csv = loop_dir / "aligned_loop_log.csv"
             append_csv_row(loop_csv, row, LOOP_LOG_COLUMNS)
             latest_summary = {
-                "schema_version": "btc_strict_5_guarded_demo_send_forever_aligned_weekly_state_v1",
+                "schema_version": "btc_strict_5_guarded_demo_send_forever_aligned_weekly_state_v2_light_tail",
                 "updated_at_utc": utc_text(),
                 "cycle_index": cycle_index,
                 "cycle_ok": bool(row.get("cycle_ok")),
@@ -385,6 +360,9 @@ def main() -> int:
                 "sender_sent_rows": row.get("sender_sent_rows"),
                 "sender_order_send_called_count": row.get("sender_order_send_called_count"),
                 "d1_used": row.get("d1_used"),
+                "tail_m15": int(args.tail_m15),
+                "tail_h1": int(args.tail_h1),
+                "tail_h4": int(args.tail_h4),
                 "log_dir": str(loop_dir),
                 "loop_csv": str(loop_csv),
                 "persistent_order_ledger_csv": str(persistent_order_ledger),
