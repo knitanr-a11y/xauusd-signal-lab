@@ -118,7 +118,13 @@ def review_identity(row: dict[str, Any]) -> tuple[str, str, str]:
     return trade_id, order_key, payload_key
 
 
-def payload_is_reviewed(payload: dict[str, Any], reviewed: set[tuple[str, str, str]], reviewed_trade_ids: set[str], reviewed_order_keys: set[str], reviewed_payload_keys: set[str]) -> bool:
+def payload_is_reviewed(
+    payload: dict[str, Any],
+    reviewed: set[tuple[str, str, str]],
+    reviewed_trade_ids: set[str],
+    reviewed_order_keys: set[str],
+    reviewed_payload_keys: set[str],
+) -> bool:
     trade = payload.get("trade", {}) if isinstance(payload.get("trade"), dict) else {}
     compact = payload.get("compact_features", {}) if isinstance(payload.get("compact_features"), dict) else {}
     trade_id = clean_str(payload.get("trade_id"), clean_str(trade.get("trade_id"), clean_str(compact.get("trade_id"))))
@@ -234,8 +240,14 @@ def main() -> int:
     final_reviews = read_jsonl(paths["review_jsonl"])
     payloads = read_jsonl(paths["payload_jsonl"])
     tag_summary = read_json(paths["tag_summary_json"])
+
+    tag_group_summary_rows = int(tag_summary.get("summary_rows") or 0)
+    raw_tag_rows = int(tag_summary.get("tag_rows") or 0)
+    should_investigate_rows = int(tag_summary.get("should_investigate_rows") or 0)
+    remaining_payload_rows = max(0, int(len(payloads)) - int(len(final_reviews)))
+
     resume_summary = {
-        "schema_version": "gold_strict_7_ai_review_resume_v1",
+        "schema_version": "gold_strict_7_ai_review_resume_v2",
         "created_at_utc": utc_now_text(),
         "cycle_ok": bool(all(s.get("ok") for s in steps)),
         "summarize_only": bool(args.summarize_only),
@@ -247,9 +259,13 @@ def main() -> int:
         "final_counts": {
             "payload_rows": int(len(payloads)),
             "review_rows": int(len(final_reviews)),
-            "remaining_payload_rows_after_resume": max(0, int(len(payloads)) - int(len(final_reviews))),
-            "tag_summary_rows": int(len(read_jsonl(paths["review_jsonl"]))),
-            "should_investigate_rows": tag_summary.get("should_investigate_rows"),
+            "remaining_payload_rows_after_resume": remaining_payload_rows,
+            "tag_group_summary_rows": tag_group_summary_rows,
+            "raw_tag_rows": raw_tag_rows,
+            "should_investigate_rows": should_investigate_rows,
+            # Backward-compatible alias. This is now the tag summary table row count,
+            # not the number of review ledger JSONL rows.
+            "tag_summary_rows": tag_group_summary_rows,
         },
         "tag_summary": tag_summary,
         "steps": steps,
@@ -263,6 +279,8 @@ def main() -> int:
         "payload_rows": resume_summary["final_counts"]["payload_rows"],
         "review_rows": resume_summary["final_counts"]["review_rows"],
         "remaining_payload_rows_after_resume": resume_summary["final_counts"]["remaining_payload_rows_after_resume"],
+        "tag_group_summary_rows": resume_summary["final_counts"]["tag_group_summary_rows"],
+        "raw_tag_rows": resume_summary["final_counts"]["raw_tag_rows"],
         "should_investigate_rows": resume_summary["final_counts"].get("should_investigate_rows"),
         "tag_summary_csv": str(paths["tag_summary_csv"]),
         "resume_summary_json": str(paths["resume_summary_json"]),
