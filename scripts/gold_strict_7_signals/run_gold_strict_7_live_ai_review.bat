@@ -6,9 +6,10 @@ echo ============================================================
 echo GOLD strict 7 live AI review
 echo - post-trade AI review
 echo - pending-only review
+echo - safe when order ledger does not exist yet
 echo ============================================================
 
-python scripts\gold_strict_7_signals\run_gold_strict_7_live_ai_review_pipeline.py ^
+python scripts\gold_strict_7_signals\run_gold_strict_7_live_ai_review_safe.py ^
   --mql5-files-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
   --order-ledger-csv data\runtime_state\gold\strict_7\guarded_demo_order_ledger.csv ^
   --expected-login 75539039 ^
