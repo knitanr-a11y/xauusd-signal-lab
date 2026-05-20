@@ -2,21 +2,7 @@
 # -*- coding: utf-8 -*-
 r"""Forever aligned Discord notification loop for GOLD strict 7.
 
-This loop is intentionally thin. It does not implement signal logic itself.
-It repeatedly calls:
-
-    scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
-
-Safety:
-- Discord notification only
-- No MT5 order send
-- No AI call
-- No autotrade payload
-- Uses notifier ledger for duplicate prevention
-
-Default cadence:
-- every 5 minutes
-- wait a few seconds after the 5-minute boundary so CSV export can finish
+Thin loop. Signal logic lives in run_gold_strict_7_discord_notifier_from_csv.py.
 """
 from __future__ import annotations
 
@@ -36,28 +22,14 @@ NOTIFIER_SCRIPT = REPO_ROOT / "scripts" / "gold_strict_7_signals" / "run_gold_st
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_LOOP_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_live_loop")
 DEFAULT_NOTIFIER_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
-SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v1"
+SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v2"
 
 SUMMARY_COLUMNS = [
-    "loop_started_at",
-    "loop_iteration",
-    "scheduled_for",
-    "started_at",
-    "finished_at",
-    "elapsed_seconds",
-    "returncode",
-    "success",
-    "send_discord",
-    "scan_recent_bars",
-    "max_notifications",
-    "preview_rows",
-    "skipped_duplicates",
-    "ledger_rows_appended",
-    "raw_recent_signals_after_cooldown",
-    "ctx_rows",
-    "summary_read_status",
-    "stdout_log",
-    "stderr_log",
+    "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
+    "returncode", "success", "send_discord", "scan_recent_bars", "max_notifications",
+    "tail_m5", "tail_h1", "tail_h4", "tail_d1",
+    "preview_rows", "skipped_duplicates", "ledger_rows_appended", "raw_recent_signals_after_cooldown",
+    "ctx_rows", "summary_read_status", "stdout_log", "stderr_log",
 ]
 
 
@@ -91,9 +63,7 @@ def mkdirp(path: str | Path) -> None:
 
 def resolve_repo_path(path: str | Path) -> Path:
     p = Path(path)
-    if p.is_absolute():
-        return p
-    return REPO_ROOT / p
+    return p if p.is_absolute() else REPO_ROOT / p
 
 
 def weekly_dir(base_dir: Path, dt: datetime) -> Path:
@@ -131,12 +101,10 @@ def read_notifier_summary(path: Path) -> tuple[str, dict[str, Any]]:
 def next_aligned_time(interval_minutes: int, delay_seconds: int) -> datetime:
     n = now()
     base = n.replace(second=0, microsecond=0)
-    minute = base.minute
-    next_minute = ((minute // interval_minutes) + 1) * interval_minutes
+    next_minute = ((base.minute // interval_minutes) + 1) * interval_minutes
     hour_add = next_minute // 60
-    next_minute = next_minute % 60
-    aligned = base.replace(minute=next_minute) + timedelta(hours=hour_add)
-    return aligned + timedelta(seconds=delay_seconds)
+    next_minute %= 60
+    return base.replace(minute=next_minute) + timedelta(hours=hour_add, seconds=delay_seconds)
 
 
 def sleep_until(target: datetime) -> None:
@@ -149,18 +117,18 @@ def sleep_until(target: datetime) -> None:
 
 def build_notifier_cmd(args: argparse.Namespace) -> list[str]:
     cmd = [
-        sys.executable,
-        str(NOTIFIER_SCRIPT),
+        sys.executable, str(NOTIFIER_SCRIPT),
         "--csv-dir", str(args.csv_dir),
         "--out-dir", str(args.notifier_out_dir),
         "--scan-recent-bars", str(args.scan_recent_bars),
         "--max-notifications", str(args.max_notifications),
         "--bar-offset", str(args.bar_offset),
+        "--tail-m5", str(args.tail_m5),
+        "--tail-h1", str(args.tail_h1),
+        "--tail-h4", str(args.tail_h4),
+        "--tail-d1", str(args.tail_d1),
     ]
-    if args.send_discord:
-        cmd.append("--send-discord")
-    else:
-        cmd.append("--dry-run")
+    cmd.append("--send-discord" if args.send_discord else "--dry-run")
     if args.allow_duplicate:
         cmd.append("--allow-duplicate")
     if args.discord_webhook_url:
@@ -197,6 +165,10 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
         "send_discord": bool(args.send_discord),
         "scan_recent_bars": int(args.scan_recent_bars),
         "max_notifications": int(args.max_notifications),
+        "tail_m5": int(args.tail_m5),
+        "tail_h1": int(args.tail_h1),
+        "tail_h4": int(args.tail_h4),
+        "tail_d1": int(args.tail_d1),
         "preview_rows": notifier_summary.get("preview_rows", ""),
         "skipped_duplicates": notifier_summary.get("skipped_duplicates", ""),
         "ledger_rows_appended": notifier_summary.get("ledger_rows_appended", ""),
@@ -226,13 +198,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--env-file", type=Path, default=Path(".env"))
     p.add_argument("--discord-webhook-url", default="")
     p.add_argument("--interval-minutes", type=int, default=5)
-    p.add_argument("--run-delay-seconds", type=int, default=20)
-    p.add_argument("--scan-recent-bars", type=int, default=36, help="36 M5 bars = 3 hours; duplicate ledger prevents repeats.")
+    p.add_argument("--run-delay-seconds", type=int, default=2)
+    p.add_argument("--scan-recent-bars", type=int, default=36)
+    p.add_argument("--tail-m5", type=int, default=2000)
+    p.add_argument("--tail-h1", type=int, default=1000)
+    p.add_argument("--tail-h4", type=int, default=500)
+    p.add_argument("--tail-d1", type=int, default=300)
     p.add_argument("--max-notifications", type=int, default=20)
     p.add_argument("--bar-offset", type=int, default=1)
     p.add_argument("--send-discord", action="store_true")
     p.add_argument("--allow-duplicate", action="store_true")
-    p.add_argument("--max-iterations", type=int, default=0, help="0 means forever.")
+    p.add_argument("--max-iterations", type=int, default=0)
     p.add_argument("--run-immediately", action="store_true")
     p.add_argument("--stop-on-error", action="store_true")
     return p.parse_args()
@@ -252,6 +228,8 @@ def main() -> int:
     print(f"schema_version: {SCHEMA_VERSION}", flush=True)
     print(f"loop_started_at: {loop_started_at}", flush=True)
     print(f"send_discord: {bool(args.send_discord)}", flush=True)
+    print(f"run_delay_seconds: {args.run_delay_seconds}", flush=True)
+    print(f"tails: M5={args.tail_m5} H1={args.tail_h1} H4={args.tail_h4} D1={args.tail_d1}", flush=True)
     print(f"csv_dir: {args.csv_dir}", flush=True)
     print(f"summary_csv: {summary_csv}", flush=True)
     print(f"log_dir: {log_dir}", flush=True)
