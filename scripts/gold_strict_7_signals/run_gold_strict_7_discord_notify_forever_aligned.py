@@ -22,13 +22,15 @@ NOTIFIER_SCRIPT = REPO_ROOT / "scripts" / "gold_strict_7_signals" / "run_gold_st
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_LOOP_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_live_loop")
 DEFAULT_NOTIFIER_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
-SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v2"
+DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
+SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v3_numeric_ai_tags"
 
 SUMMARY_COLUMNS = [
     "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
     "returncode", "success", "send_discord", "scan_recent_bars", "max_notifications",
     "tail_m5", "tail_h1", "tail_h4", "tail_d1",
-    "preview_rows", "skipped_duplicates", "ledger_rows_appended", "raw_recent_signals_after_cooldown",
+    "preview_rows", "ai_tag_hit_rows", "ai_tag_rules_count", "ai_tag_rules_cycle_ok",
+    "skipped_duplicates", "ledger_rows_appended", "raw_recent_signals_after_cooldown",
     "ctx_rows", "summary_read_status", "stdout_log", "stderr_log",
 ]
 
@@ -120,6 +122,7 @@ def build_notifier_cmd(args: argparse.Namespace) -> list[str]:
         sys.executable, str(NOTIFIER_SCRIPT),
         "--csv-dir", str(args.csv_dir),
         "--out-dir", str(args.notifier_out_dir),
+        "--ai-tag-rules-json", str(args.ai_tag_rules_json),
         "--scan-recent-bars", str(args.scan_recent_bars),
         "--max-notifications", str(args.max_notifications),
         "--bar-offset", str(args.bar_offset),
@@ -170,6 +173,9 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
         "tail_h4": int(args.tail_h4),
         "tail_d1": int(args.tail_d1),
         "preview_rows": notifier_summary.get("preview_rows", ""),
+        "ai_tag_hit_rows": notifier_summary.get("ai_tag_hit_rows", ""),
+        "ai_tag_rules_count": notifier_summary.get("ai_tag_rules_count", ""),
+        "ai_tag_rules_cycle_ok": notifier_summary.get("ai_tag_rules_cycle_ok", ""),
         "skipped_duplicates": notifier_summary.get("skipped_duplicates", ""),
         "ledger_rows_appended": notifier_summary.get("ledger_rows_appended", ""),
         "raw_recent_signals_after_cooldown": notifier_summary.get("raw_recent_signals_after_cooldown", ""),
@@ -195,6 +201,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--csv-dir", type=Path, default=DEFAULT_MQL5_FILES_DIR)
     p.add_argument("--loop-out-dir", type=Path, default=DEFAULT_LOOP_OUT_DIR)
     p.add_argument("--notifier-out-dir", type=Path, default=DEFAULT_NOTIFIER_OUT_DIR)
+    p.add_argument("--ai-tag-rules-json", type=Path, default=DEFAULT_AI_TAG_RULES_JSON)
     p.add_argument("--env-file", type=Path, default=Path(".env"))
     p.add_argument("--discord-webhook-url", default="")
     p.add_argument("--interval-minutes", type=int, default=5)
@@ -229,11 +236,12 @@ def main() -> int:
     print(f"loop_started_at: {loop_started_at}", flush=True)
     print(f"send_discord: {bool(args.send_discord)}", flush=True)
     print(f"run_delay_seconds: {args.run_delay_seconds}", flush=True)
+    print(f"ai_tag_rules_json: {args.ai_tag_rules_json}", flush=True)
     print(f"tails: M5={args.tail_m5} H1={args.tail_h1} H4={args.tail_h4} D1={args.tail_d1}", flush=True)
     print(f"csv_dir: {args.csv_dir}", flush=True)
     print(f"summary_csv: {summary_csv}", flush=True)
     print(f"log_dir: {log_dir}", flush=True)
-    print("Safety: Discord only. No MT5 order send. No AI call.", flush=True)
+    print("Safety: Discord only. No MT5 order send. No OpenAI call.", flush=True)
     print("=" * 100, flush=True)
 
     iteration = 0
