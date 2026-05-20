@@ -2,24 +2,7 @@
 # -*- coding: utf-8 -*-
 r"""Forever aligned guarded demo autotrade loop for GOLD strict 7.
 
-This loop is intentionally thin. It does not implement signal logic or MT5
-order sending itself. It repeatedly calls:
-
-    scripts/gold_strict_7_signals/run_gold_strict_7_guarded_demo_autotrade_from_csv.py
-
-Safety:
-- Uses existing send_mt5_order_from_payload.py through the wrapper.
-- No direct mt5.order_send in this loop.
-- Expected login + demo guard are passed by wrapper defaults/BAT.
-- max-orders=1.
-- position-policy=block_any.
-- order ledger duplicate prevention is handled by the existing sender.
-- No Discord send.
-- No AI call.
-
-Default cadence:
-- every 5 minutes
-- wait a few seconds after the 5-minute boundary so CSV export can finish
+Thin loop. Order payload logic lives in run_gold_strict_7_guarded_demo_autotrade_from_csv.py.
 """
 from __future__ import annotations
 
@@ -38,35 +21,15 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 WRAPPER_SCRIPT = REPO_ROOT / "scripts" / "gold_strict_7_signals" / "run_gold_strict_7_guarded_demo_autotrade_from_csv.py"
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_LOOP_OUT_DIR = Path("data/runtime_logs/gold_strict_7_guarded_demo_autotrade_loop")
-SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_loop_v1"
+SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_loop_v2"
 
 SUMMARY_COLUMNS = [
-    "loop_started_at",
-    "loop_iteration",
-    "scheduled_for",
-    "started_at",
-    "finished_at",
-    "elapsed_seconds",
-    "returncode",
-    "success",
-    "send_requested_by_user",
-    "allow_demo_send",
-    "send_flag_passed_to_sender",
-    "reason",
-    "payload_rows",
-    "sender_returncode",
-    "sender_rows_out",
-    "sender_dry_run_check_ok_rows",
-    "sender_sent_rows",
-    "sender_error_rows",
-    "sender_order_send_called_count",
-    "raw_recent_signals_after_cooldown",
-    "scan_recent_bars",
-    "max_signal_age_minutes",
-    "summary_read_status",
-    "wrapper_summary_json",
-    "stdout_log",
-    "stderr_log",
+    "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
+    "returncode", "success", "send_requested_by_user", "allow_demo_send", "send_flag_passed_to_sender",
+    "reason", "payload_rows", "sender_returncode", "sender_rows_out", "sender_dry_run_check_ok_rows",
+    "sender_sent_rows", "sender_error_rows", "sender_order_send_called_count", "raw_recent_signals_after_cooldown",
+    "scan_recent_bars", "max_signal_age_minutes", "tail_m5", "tail_h1", "tail_h4", "tail_d1",
+    "summary_read_status", "wrapper_summary_json", "stdout_log", "stderr_log",
 ]
 
 
@@ -100,9 +63,7 @@ def mkdirp(path: str | Path) -> None:
 
 def resolve_repo_path(path: str | Path) -> Path:
     p = Path(path)
-    if p.is_absolute():
-        return p
-    return REPO_ROOT / p
+    return p if p.is_absolute() else REPO_ROOT / p
 
 
 def weekly_dir(base_dir: Path, dt: datetime) -> Path:
@@ -142,9 +103,8 @@ def next_aligned_time(interval_minutes: int, delay_seconds: int) -> datetime:
     base = n.replace(second=0, microsecond=0)
     next_minute = ((base.minute // interval_minutes) + 1) * interval_minutes
     hour_add = next_minute // 60
-    next_minute = next_minute % 60
-    aligned = base.replace(minute=next_minute) + timedelta(hours=hour_add)
-    return aligned + timedelta(seconds=delay_seconds)
+    next_minute %= 60
+    return base.replace(minute=next_minute) + timedelta(hours=hour_add, seconds=delay_seconds)
 
 
 def sleep_until(target: datetime) -> None:
@@ -157,8 +117,7 @@ def sleep_until(target: datetime) -> None:
 
 def build_wrapper_cmd(args: argparse.Namespace) -> list[str]:
     cmd = [
-        sys.executable,
-        str(WRAPPER_SCRIPT),
+        sys.executable, str(WRAPPER_SCRIPT),
         "--csv-dir", str(args.csv_dir),
         "--out-dir", str(args.wrapper_out_dir),
         "--order-ledger-csv", str(args.order_ledger_csv),
@@ -173,6 +132,10 @@ def build_wrapper_cmd(args: argparse.Namespace) -> list[str]:
         "--max-symbol-lot", str(args.max_symbol_lot),
         "--bar-offset", str(args.bar_offset),
         "--deviation", str(args.deviation),
+        "--tail-m5", str(args.tail_m5),
+        "--tail-h1", str(args.tail_h1),
+        "--tail-h4", str(args.tail_h4),
+        "--tail-d1", str(args.tail_d1),
     ]
     if args.send:
         cmd.append("--send")
@@ -224,6 +187,10 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
         "raw_recent_signals_after_cooldown": wrapper_summary.get("raw_recent_signals_after_cooldown", ""),
         "scan_recent_bars": int(args.scan_recent_bars),
         "max_signal_age_minutes": int(args.max_signal_age_minutes),
+        "tail_m5": int(args.tail_m5),
+        "tail_h1": int(args.tail_h1),
+        "tail_h4": int(args.tail_h4),
+        "tail_d1": int(args.tail_d1),
         "summary_read_status": summary_status,
         "wrapper_summary_json": str(latest_summary),
         "stdout_log": str(stdout_log),
@@ -251,9 +218,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--expected-login", type=int, default=75539039)
     p.add_argument("--lot", type=float, default=0.01)
     p.add_argument("--interval-minutes", type=int, default=5)
-    p.add_argument("--run-delay-seconds", type=int, default=25)
+    p.add_argument("--run-delay-seconds", type=int, default=2)
     p.add_argument("--scan-recent-bars", type=int, default=3)
     p.add_argument("--max-signal-age-minutes", type=int, default=15)
+    p.add_argument("--tail-m5", type=int, default=2000)
+    p.add_argument("--tail-h1", type=int, default=1000)
+    p.add_argument("--tail-h4", type=int, default=500)
+    p.add_argument("--tail-d1", type=int, default=300)
     p.add_argument("--bar-offset", type=int, default=1)
     p.add_argument("--max-orders", type=int, default=1)
     p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="block_any")
@@ -264,7 +235,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--portable", action="store_true")
     p.add_argument("--send", action="store_true")
     p.add_argument("--allow-demo-send", action="store_true")
-    p.add_argument("--max-iterations", type=int, default=0, help="0 means forever.")
+    p.add_argument("--max-iterations", type=int, default=0)
     p.add_argument("--run-immediately", action="store_true")
     p.add_argument("--stop-on-error", action="store_true")
     return p.parse_args()
@@ -287,6 +258,8 @@ def main() -> int:
     print(f"loop_started_at: {loop_started_at}", flush=True)
     print(f"send: {bool(args.send)}", flush=True)
     print(f"allow_demo_send: {bool(args.allow_demo_send)}", flush=True)
+    print(f"run_delay_seconds: {args.run_delay_seconds}", flush=True)
+    print(f"tails: M5={args.tail_m5} H1={args.tail_h1} H4={args.tail_h4} D1={args.tail_d1}", flush=True)
     print(f"csv_dir: {args.csv_dir}", flush=True)
     print(f"summary_csv: {summary_csv}", flush=True)
     print(f"log_dir: {log_dir}", flush=True)
