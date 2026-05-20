@@ -28,7 +28,7 @@ from run_btc_strict_5_backtest_from_csv import DEFAULT_MQL5_FILES_DIR, choose_pa
 from run_btc_strict_5_discord_notifier_from_csv import clean_str, json_safe
 from run_live_gold_notifier_from_csv import load_env_file, send_discord_message
 
-SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v2_simple_message"
+SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v3_require_rules_on_send"
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_official_discord_numeric_ai_tags")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv")
@@ -263,6 +263,11 @@ def main() -> int:
     mkdirp(out_dir)
     load_env_file(env_file)
     rules_obj = load_rules_json(ai_tag_rules_json)
+    if args.send_discord and not bool(rules_obj.get("cycle_ok", False)):
+        raise SystemExit(
+            "AI tag numeric rules JSON is missing or invalid; refusing to send Discord. "
+            f"Run scripts\\build_btc_strict_5_ai_tag_numeric_rules.bat first. path={ai_tag_rules_json}"
+        )
     webhook_url = args.discord_webhook_url or os.environ.get("BTC_STRICT_5_DISCORD_WEBHOOK_URL", "") or os.environ.get("DISCORD_WEBHOOK_URL", "")
     if args.send_discord and not webhook_url:
         raise SystemExit("--send-discord requires webhook URL or DISCORD_WEBHOOK_URL in .env")
@@ -346,7 +351,7 @@ def main() -> int:
         "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv)},
         "rows": {"preview_rows": int(len(preview)), "message_rows": int(message_rows), "ai_tag_hit_rows": int(ai_tag_hit_rows), "skipped_duplicates": int(skipped_duplicates), "signals_excluded_by_filter": int(len(excluded)), "raw_signals_before_filter": int(len(raw))},
         "filter_meta": meta,
-        "safety": {"mt5_calls": False, "order_send": False, "ai_calls": False, "d1_read": False, "discord_send_requested": bool(args.send_discord)},
+        "safety": {"mt5_calls": False, "order_send": False, "ai_calls": False, "d1_read": False, "discord_send_requested": bool(args.send_discord), "requires_valid_ai_tag_rules_on_send": True},
     }
     write_json(summary_json, summary)
     print("\n" + json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
