@@ -19,7 +19,7 @@ from typing import Any
 
 import pandas as pd
 
-SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v2_evaluable_counts_readable_text"
+SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v3_derived_features"
 
 HIGH_PRIORITY_TAGS = {
     "poor_pullback_structure",
@@ -125,6 +125,98 @@ def load_rules_json(path: str | Path) -> dict[str, Any]:
     return obj
 
 
+def get_raw(row: dict[str, Any] | pd.Series, name: str) -> Any:
+    if isinstance(row, pd.Series):
+        return row.get(name) if name in row.index else None
+    return row.get(name)
+
+
+def get_num(row: dict[str, Any] | pd.Series, *names: str) -> float | None:
+    for name in names:
+        val = safe_float(get_raw(row, name))
+        if val is not None:
+            return val
+    return None
+
+
+def div0(num: float | None, den: float | None) -> float | None:
+    if num is None or den is None or abs(den) <= 1e-12:
+        return None
+    return num / den
+
+
+def derived_feature_value(row: dict[str, Any] | pd.Series, feature: str) -> float | None:
+    """Derive common AI-review features from live notification rows.
+
+    This keeps notification-time scoring useful even when the live row has raw
+    OHLC/indicator columns but not the exact feature-snapshot column name.
+    """
+    f = clean_str(feature)
+    close = get_num(row, "close", "signal_close_price", "entry_price")
+    open_ = get_num(row, "open")
+    high = get_num(row, "high")
+    low = get_num(row, "low")
+    rng = get_num(row, "range")
+    if rng is None and high is not None and low is not None:
+        rng = high - low
+    atr = get_num(row, "atr14", "trigger_atr14")
+
+    if f == "entry_position_in_m15_range_100_pct":
+        val = get_num(row, "entry_position_in_m15_range_100_pct", "entry_position_pct", "trigger_entry_position_pct")
+        if val is not None:
+            return val
+        cp = get_num(row, "m15_signal_candle_close_pos", "close_pos", "trigger_close_pos")
+        if cp is not None:
+            return cp * 100.0 if -2.0 <= cp <= 2.0 else cp
+        if close is not None and low is not None and rng is not None and abs(rng) > 1e-12:
+            return 100.0 * (close - low) / rng
+
+    if f == "m15_signal_candle_body_ratio":
+        val = get_num(row, "m15_signal_candle_body_ratio", "body_ratio", "trigger_body_ratio")
+        if val is not None:
+            return val
+        if close is not None and open_ is not None and rng is not None and abs(rng) > 1e-12:
+            return abs(close - open_) / rng
+
+    if f == "m15_signal_candle_close_pos":
+        val = get_num(row, "m15_signal_candle_close_pos", "close_pos", "trigger_close_pos")
+        if val is not None:
+            return val
+        if close is not None and low is not None and rng is not None and abs(rng) > 1e-12:
+            return (close - low) / rng
+
+    if f == "m15_signal_candle_range_atr_ratio":
+        val = get_num(row, "m15_signal_candle_range_atr_ratio", "range_atr", "trigger_range_atr", "trigger_range_atr14")
+        if val is not None:
+            return val
+        return div0(rng, atr)
+
+    if f == "m15_ema20_distance_atr":
+        return get_num(row, "m15_ema20_distance_atr", "ema20_distance_atr", "trigger_ema20_distance_atr") or div0((close - get_num(row, "ema20")) if close is not None and get_num(row, "ema20") is not None else None, atr)
+    if f == "m15_ema50_distance_atr":
+        return get_num(row, "m15_ema50_distance_atr", "ema50_distance_atr", "trigger_ema50_distance_atr") or div0((close - get_num(row, "ema50")) if close is not None and get_num(row, "ema50") is not None else None, atr)
+    if f == "m15_ema200_distance_atr":
+        return get_num(row, "m15_ema200_distance_atr", "ema200_distance_atr", "trigger_ema200_distance_atr") or div0((close - get_num(row, "ema200")) if close is not None and get_num(row, "ema200") is not None else None, atr)
+
+    for tf in ["h1", "h4", "d1"]:
+        for ema in ["ema20", "ema50", "ema200"]:
+            target = f"{tf}_close_vs_{ema}_atr"
+            if f == target:
+                direct = get_num(row, target)
+                if direct is not None:
+                    return direct
+                c = get_num(row, f"{tf}_close")
+                e = get_num(row, f"{tf}_{ema}")
+                a = get_num(row, f"{tf}_atr14")
+                return div0((c - e) if c is not None and e is not None else None, a)
+
+    # These need rolling history. If a caller has precomputed them, row_value will
+    # find them before this function is called; otherwise we intentionally return None.
+    if f in {"m15_recent_large_candle_count_20", "m15_recent_breakout_high_count_20", "m15_recent_breakout_low_count_20"}:
+        return None
+    return None
+
+
 def row_value(row: dict[str, Any] | pd.Series, feature: str, aliases: list[str] | None = None) -> float | None:
     names = [feature]
     if aliases:
@@ -140,7 +232,7 @@ def row_value(row: dict[str, Any] | pd.Series, feature: str, aliases: list[str] 
                 val = safe_float(row.get(name))
                 if val is not None:
                     return val
-    return None
+    return derived_feature_value(row, feature)
 
 
 def op_match(value: float | None, op: str, threshold: float) -> bool:
