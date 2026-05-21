@@ -29,16 +29,7 @@ if not exist "%AI_REVIEW_DIR%\trade_ai_review_ledger.jsonl" (
   exit /b 3
 )
 
-echo [INFO] Ensuring GOLD single-tag builder includes positive/win-loss balance audit support...
-python scripts\gold_strict_7_signals\apply_ai_tag_positive_balance_patch.py
-set EXITCODE=%ERRORLEVEL%
-echo Apply GOLD positive-balance builder patch exit code: %EXITCODE%
-if not "%EXITCODE%"=="0" (
-  echo [ERROR] Failed to ensure positive-balance builder patch.
-  exit /b %EXITCODE%
-)
-
-python scripts\gold_strict_7_signals\build_gold_strict_7_ai_tag_numeric_rules.py ^
+python scripts\gold_strict_7_signals\build_gold_strict_7_ai_tag_numeric_rules_v3_no_patch.py ^
   --ai-review-dir "%AI_REVIEW_DIR%" ^
   --output-json "%RULE_JSON%" ^
   --output-csv "%RULE_CSV%"
