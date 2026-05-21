@@ -5,9 +5,9 @@ r"""Build GOLD strict-7 AI-tag numeric rules JSON for notification-time scoring.
 This builder converts completed post-trade AI review tags into deterministic
 single-feature numeric rules that can be applied at notification time.
 
-Inputs by default come from the existing GOLD AI-review pipeline:
-  data/runtime_logs/trade_ai_review/trade_feature_snapshot.csv
-  data/runtime_logs/trade_ai_review/trade_ai_review_ledger.jsonl
+Inputs by default come from the GOLD strict-7 backtest AI-review pipeline:
+  data/runtime_logs/trade_ai_review_backtest_gold_strict_7/trade_feature_snapshot.csv
+  data/runtime_logs/trade_ai_review_backtest_gold_strict_7/trade_ai_review_ledger.jsonl
 
 No AI call is made here. No MT5 call. No order_send. No Discord send.
 """
@@ -22,11 +22,13 @@ from typing import Any
 
 import pandas as pd
 
+from gold_strict_7_signal_specs import get_signal_specs, validate_signal_specs
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_AI_REVIEW_DIR = Path("data/runtime_logs/trade_ai_review")
+DEFAULT_AI_REVIEW_DIR = Path("data/runtime_logs/trade_ai_review_backtest_gold_strict_7")
 DEFAULT_OUTPUT_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
 DEFAULT_OUTPUT_CSV = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules_summary.csv")
-SCHEMA_VERSION = "gold_strict_7_ai_tag_numeric_rules_v1"
+SCHEMA_VERSION = "gold_strict_7_ai_tag_numeric_rules_v2_strict7_source_guard"
 
 FEATURES = [
     "entry_position_in_m15_range_100_pct",
@@ -161,6 +163,63 @@ def safe_float(value: Any, default: float | None = None) -> float | None:
         return default
 
 
+def unique_clean_values(df: pd.DataFrame, column: str) -> list[str]:
+    if column not in df.columns:
+        return []
+    values: list[str] = []
+    for value in df[column].dropna().tolist():
+        text = clean_str(value)
+        if text:
+            values.append(text)
+    return sorted(set(values))
+
+
+def strict7_strategy_ids() -> list[str]:
+    validate_signal_specs()
+    return [spec.strategy_id for spec in get_signal_specs()]
+
+
+def filter_feature_rows_to_strict7(
+    feature_df: pd.DataFrame,
+    allowed_strategy_ids: list[str],
+    *,
+    allow_non_strict7_strategy_rules: bool,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    before_rows = int(len(feature_df))
+    if "strategy_id" not in feature_df.columns:
+        raise SystemExit(
+            "trade_feature_snapshot.csv has no strategy_id column. "
+            "Refusing to build notification-time AI-tag rules because strict7 alignment cannot be verified."
+        )
+    allowed = set(allowed_strategy_ids)
+    before_strategy_ids = unique_clean_values(feature_df, "strategy_id")
+    matched_strategy_ids = sorted(set(before_strategy_ids) & allowed)
+    unexpected_strategy_ids = sorted(set(before_strategy_ids) - allowed)
+    if not matched_strategy_ids:
+        raise SystemExit(
+            "No GOLD strict-7 strategy_id rows were found in trade_feature_snapshot.csv. "
+            "This usually means the builder is pointing at an old GOLD AI review folder. "
+            f"found_strategy_ids={before_strategy_ids}; expected_any={allowed_strategy_ids}"
+        )
+    if unexpected_strategy_ids and not allow_non_strict7_strategy_rules:
+        # Do not fail; filter them out. The hard failure is only when there are no strict7 rows at all.
+        # This lets mixed diagnostic folders be used safely without producing old-strategy rules.
+        pass
+    mask = feature_df["strategy_id"].astype(str).isin(allowed)
+    filtered = feature_df[mask.fillna(False)].copy()
+    summary = {
+        "allowed_strategy_ids": allowed_strategy_ids,
+        "feature_strategy_ids_before_filter": before_strategy_ids,
+        "feature_strategy_ids_matched_strict7": matched_strategy_ids,
+        "feature_strategy_ids_filtered_out": unexpected_strategy_ids,
+        "feature_rows_before_filter": before_rows,
+        "feature_rows_after_filter": int(len(filtered)),
+        "filtered_out_feature_rows": int(before_rows - len(filtered)),
+        "allow_non_strict7_strategy_rules": bool(allow_non_strict7_strategy_rules),
+    }
+    return filtered, summary
+
+
 def is_informative_tag(tag: str) -> bool:
     return canonical_tag(tag) not in NON_INFORMATIVE_TAGS
 
@@ -232,8 +291,6 @@ def evaluate_condition(df: pd.DataFrame, tag_name: str, tag_group: str, feature:
     removed = df[pred].copy()
     kept = df[~pred].copy()
     tp = int((pred & actual).sum())
-    fp = int((pred & ~actual).sum())
-    fn = int((~pred & actual).sum())
     tag_total = int(actual.sum())
     removed_trades = int(pred.sum())
     if removed_trades <= 0 or tag_total <= 0:
@@ -351,7 +408,7 @@ def build_rules(candidates: pd.DataFrame, args: argparse.Namespace) -> tuple[lis
             "removed_trades": safe_float(row.get("removed_trades")),
             "kept_trades": safe_float(row.get("kept_trades")),
             "source": "gold_strict_7_ai_review_feature_snapshot_tags",
-            "note": "Deterministic numeric approximation of historical AI-review tag; no AI call at notification time.",
+            "note": "Deterministic numeric approximation of historical strict-7 AI-review tag; no AI call at notification time.",
         }
         rules.append(rule)
         flat = {k: v for k, v in rule.items() if k != "conditions"}
@@ -367,6 +424,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--ai-review-jsonl", type=Path, default=None)
     p.add_argument("--output-json", type=Path, default=DEFAULT_OUTPUT_JSON)
     p.add_argument("--output-csv", type=Path, default=DEFAULT_OUTPUT_CSV)
+    p.add_argument("--allow-non-strict7-strategy-rules", action="store_true", help="Emergency override. Default behavior filters feature rows to the seven GOLD strict-7 strategy IDs and refuses sources with no strict7 rows.")
     p.add_argument("--min-tag-trades", type=int, default=3)
     p.add_argument("--min-precision", type=float, default=0.55)
     p.add_argument("--min-recall", type=float, default=0.30)
@@ -379,27 +437,49 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    allowed_strategy_ids = strict7_strategy_ids()
     ai_dir = resolve(args.ai_review_dir)
     feature_csv = resolve(args.feature_snapshot_csv) if args.feature_snapshot_csv else ai_dir / "trade_feature_snapshot.csv"
     review_jsonl = resolve(args.ai_review_jsonl) if args.ai_review_jsonl else ai_dir / "trade_ai_review_ledger.jsonl"
     output_json = resolve(args.output_json)
     output_csv = resolve(args.output_csv)
     if not feature_csv.exists():
-        raise SystemExit(f"feature snapshot CSV not found: {feature_csv}. Run GOLD post-trade AI review pipeline first.")
+        raise SystemExit(f"feature snapshot CSV not found: {feature_csv}. Run GOLD strict-7 post-trade/backtest AI review pipeline first.")
     if not review_jsonl.exists():
-        raise SystemExit(f"AI review JSONL not found: {review_jsonl}. Run GOLD post-trade AI review pipeline first.")
-    feature_df = read_csv(feature_csv)
+        raise SystemExit(f"AI review JSONL not found: {review_jsonl}. Run GOLD strict-7 post-trade/backtest AI review pipeline first.")
+    feature_df_raw = read_csv(feature_csv)
+    feature_df, strategy_alignment = filter_feature_rows_to_strict7(
+        feature_df_raw,
+        allowed_strategy_ids,
+        allow_non_strict7_strategy_rules=bool(args.allow_non_strict7_strategy_rules),
+    )
     review_rows = read_jsonl(review_jsonl)
     tag_df = explode_review_tags(review_rows)
+    tag_strategy_ids_raw = unique_clean_values(tag_df, "strategy_id") if not tag_df.empty else []
     candidates = build_candidate_rows(feature_df, tag_df, args)
     rules, summary_df = build_rules(candidates, args)
+    rule_strategy_ids = sorted({clean_str(rule.get("strategy_id")) for rule in rules if clean_str(rule.get("strategy_id"))})
+    unexpected_rule_strategy_ids = sorted(set(rule_strategy_ids) - set(allowed_strategy_ids))
+    if unexpected_rule_strategy_ids and not args.allow_non_strict7_strategy_rules:
+        raise SystemExit(
+            "Generated non-strict7 AI-tag numeric rules. Refusing to write JSON. "
+            f"unexpected_rule_strategy_ids={unexpected_rule_strategy_ids}; allowed_strategy_ids={allowed_strategy_ids}"
+        )
+    strategy_alignment.update({
+        "tag_strategy_ids_raw": tag_strategy_ids_raw,
+        "candidate_strategy_ids": unique_clean_values(candidates, "strategy_id") if not candidates.empty else [],
+        "rule_strategy_ids": rule_strategy_ids,
+        "unexpected_rule_strategy_ids": unexpected_rule_strategy_ids,
+    })
     obj = {
         "schema_version": SCHEMA_VERSION,
         "created_at_utc": utc_now_text(),
         "cycle_ok": True,
         "symbol": "GOLD",
+        "input_ai_review_dir": str(ai_dir),
         "input_feature_snapshot_csv": str(feature_csv),
         "input_ai_review_jsonl": str(review_jsonl),
+        "strategy_alignment": strategy_alignment,
         "settings": {
             "min_tag_trades": int(args.min_tag_trades),
             "min_precision": float(args.min_precision),
@@ -408,9 +488,11 @@ def main() -> int:
             "min_kept_trades": int(args.min_kept_trades),
             "max_thresholds_per_feature": int(args.max_thresholds_per_feature),
             "max_rules_per_strategy_tag": int(args.max_rules_per_strategy_tag),
+            "allow_non_strict7_strategy_rules": bool(args.allow_non_strict7_strategy_rules),
         },
         "rows": {
-            "feature_snapshot_rows": int(len(feature_df)),
+            "feature_snapshot_rows_raw": int(len(feature_df_raw)),
+            "feature_snapshot_rows_strict7": int(len(feature_df)),
             "ai_review_rows": int(len(review_rows)),
             "tag_rows": int(len(tag_df)),
             "candidate_rows": int(len(candidates)),
@@ -422,7 +504,16 @@ def main() -> int:
     }
     write_json(output_json, obj)
     write_csv(summary_df, output_csv)
-    print(json.dumps({"cycle_ok": True, "rules_count": len(rules), "output_json": str(output_json), "output_csv": str(output_csv), "candidate_rows": int(len(candidates))}, ensure_ascii=False, indent=2), flush=True)
+    print(json.dumps({
+        "cycle_ok": True,
+        "rules_count": len(rules),
+        "rule_strategy_ids": rule_strategy_ids,
+        "filtered_out_feature_rows": strategy_alignment.get("filtered_out_feature_rows", 0),
+        "input_ai_review_dir": str(ai_dir),
+        "output_json": str(output_json),
+        "output_csv": str(output_csv),
+        "candidate_rows": int(len(candidates)),
+    }, ensure_ascii=False, indent=2), flush=True)
     return 0
 
 
