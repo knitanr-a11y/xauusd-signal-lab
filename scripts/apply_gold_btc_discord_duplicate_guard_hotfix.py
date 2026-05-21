@@ -9,8 +9,9 @@ Then restart these BATs:
   scripts\gold_strict_7_signals\run_gold_strict_7_discord_notify_forever_aligned.bat
   scripts\run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.bat
 
-This version is robust to partial previous patches.  It replaces function ranges
-instead of requiring one huge exact old-text match.
+This version is robust to partial previous patches. It replaces function ranges
+and then repairs missing runtime variables / summary fields if older local edits
+make exact old-pattern replacements impossible.
 """
 from __future__ import annotations
 
@@ -68,6 +69,19 @@ def ensure_after(text: str, anchor: str, insert: str, label: str) -> str:
     return text[:pos] + insert + text[pos:]
 
 
+def ensure_after_any(text: str, anchors: list[str], insert: str, label: str) -> str:
+    if insert.strip() in text:
+        print(f"[SKIP] {label}: already present")
+        return text
+    for anchor in anchors:
+        idx = text.find(anchor)
+        if idx >= 0:
+            pos = idx + len(anchor)
+            print(f"[PATCH] {label}")
+            return text[:pos] + insert + text[pos:]
+    raise SystemExit(f"[ERROR] no anchor found for {label}")
+
+
 def replace_or_insert_seen_arg(text: str, label_prefix: str, arg_line: str) -> str:
     if "--seen-state-json" in text:
         print(f"[SKIP] {label_prefix} seen-state arg: already present")
@@ -75,11 +89,90 @@ def replace_or_insert_seen_arg(text: str, label_prefix: str, arg_line: str) -> s
     return replace_literal(text, arg_line, arg_line + '    p.add_argument("--seen-state-json", type=Path, default=DEFAULT_SEEN_STATE_JSON)\n', f"{label_prefix} seen-state arg")
 
 
+def ensure_gold_runtime_repairs(text: str) -> str:
+    if "ledger_errors: list[dict[str, Any]] = []" not in text:
+        text = ensure_after_any(
+            text,
+            ['    send_errors: list[dict[str, Any]] = []\n'],
+            '    ledger_errors: list[dict[str, Any]] = []\n',
+            "GOLD repair ledger_errors variable",
+        )
+    if "seen_state_errors: list[dict[str, Any]] = []" not in text:
+        text = ensure_after_any(
+            text,
+            ['    ledger_errors: list[dict[str, Any]] = []\n', '    send_errors: list[dict[str, Any]] = []\n'],
+            '    seen_state_errors: list[dict[str, Any]] = []\n',
+            "GOLD repair seen_state_errors variable",
+        )
+    if '"duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_5min_candle_bucket_key"' not in text:
+        text = ensure_after_any(
+            text,
+            ['        "discord_send_errors": send_errors,\n'],
+            '        "ledger_append_error_rows": int(len(ledger_errors)),\n'
+            '        "ledger_append_errors": ledger_errors,\n'
+            '        "seen_state_error_rows": int(len(seen_state_errors)),\n'
+            '        "seen_state_errors": seen_state_errors,\n'
+            '        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_5min_candle_bucket_key",\n',
+            "GOLD repair duplicate summary fields",
+        )
+    if '"cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0)' not in text:
+        text = replace_literal(
+            text,
+            '        "cycle_ok": bool(len(send_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",\n',
+            '        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else "SEND_OR_DUPLICATE_STATE_ERROR_SUMMARY_WRITTEN",\n',
+            "GOLD repair cycle_ok",
+            required=False,
+        )
+    if 'return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1' not in text:
+        text = replace_literal(
+            text,
+            '    return 0 if len(send_errors) == 0 else 1\n',
+            '    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1\n',
+            "GOLD repair return code",
+            required=False,
+        )
+    return text
+
+
+def ensure_btc_runtime_repairs(text: str) -> str:
+    if "ledger_errors: list[dict[str, Any]] = []" not in text:
+        text = ensure_after_any(text, ['    send_errors: list[dict[str, Any]] = []\n'], '    ledger_errors: list[dict[str, Any]] = []\n', "BTC repair ledger_errors variable")
+    if "seen_state_errors: list[dict[str, Any]] = []" not in text:
+        text = ensure_after_any(text, ['    ledger_errors: list[dict[str, Any]] = []\n', '    send_errors: list[dict[str, Any]] = []\n'], '    seen_state_errors: list[dict[str, Any]] = []\n', "BTC repair seen_state_errors variable")
+    if '"duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_15min_candle_bucket_key"' not in text:
+        text = ensure_after_any(
+            text,
+            ['        "discord_send_errors": send_errors,\n'],
+            '        "ledger_append_error_rows": int(len(ledger_errors)),\n'
+            '        "ledger_append_errors": ledger_errors,\n'
+            '        "seen_state_error_rows": int(len(seen_state_errors)),\n'
+            '        "seen_state_errors": seen_state_errors,\n'
+            '        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_15min_candle_bucket_key",\n',
+            "BTC repair duplicate summary fields",
+        )
+    if '"cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0)' not in text:
+        text = replace_literal(
+            text,
+            '        "cycle_ok": bool(len(send_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",\n',
+            '        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else "SEND_OR_DUPLICATE_STATE_ERROR_SUMMARY_WRITTEN",\n',
+            "BTC repair cycle_ok",
+            required=False,
+        )
+    if 'return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1' not in text:
+        text = replace_literal(
+            text,
+            '    return 0 if len(send_errors) == 0 else 1\n',
+            '    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1\n',
+            "BTC repair return code",
+            required=False,
+        )
+    return text
+
+
 def patch_gold() -> None:
     path = GOLD
     text = read(path)
 
-    # Schema/default can already be partially patched from a failed prior run.
     if 'SCHEMA_VERSION = "gold_strict_7_discord_notifier_v8_wall_clock_guard_send_error_summary"' in text:
         text = replace_literal(
             text,
@@ -212,7 +305,6 @@ def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
 
 '''
     text = replace_between(text, "def notification_key(row: pd.Series, spec: GoldStrictSignalSpec) -> str:", "def calc_prices(row: pd.Series, spec: GoldStrictSignalSpec)", gold_dup_block, "GOLD duplicate helper function range")
-
     text = replace_or_insert_seen_arg(text, "GOLD", '    p.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)\n')
     text = replace_literal(text, '    ledger_csv = resolve_path(args.ledger_csv)\n    env_file = resolve_path(args.env_file)\n', '    ledger_csv = resolve_path(args.ledger_csv)\n    seen_state_json = resolve_path(args.seen_state_json)\n    env_file = resolve_path(args.env_file)\n', "GOLD resolve seen-state", required=False)
     if "seen_state_json = resolve_path(args.seen_state_json)" not in text:
@@ -250,18 +342,19 @@ def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
 '''
     text = replace_between(text, old_mark_start, old_mark_end, new_mark, "GOLD immediate duplicate-state mark")
     text = text.replace('    append_ledger(ledger_csv, ledger_rows)\n', '')
-
     text = replace_literal(text, '        "cycle_ok": bool(len(send_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",\n', '        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else "SEND_OR_DUPLICATE_STATE_ERROR_SUMMARY_WRITTEN",\n', "GOLD summary cycle_ok", required=False)
     text = replace_literal(text, '        "ledger_csv": str(ledger_csv),\n        "ai_tag_rules_json": str(rules_path),\n', '        "ledger_csv": str(ledger_csv),\n        "seen_state_json": str(seen_state_json),\n        "ai_tag_rules_json": str(rules_path),\n', "GOLD summary seen-state", required=False)
     text = replace_literal(text, '        "discord_send_error_rows": int(len(send_errors)),\n        "discord_send_errors": send_errors,\n        "dry_run": bool(args.dry_run),\n', '        "discord_send_error_rows": int(len(send_errors)),\n        "discord_send_errors": send_errors,\n        "ledger_append_error_rows": int(len(ledger_errors)),\n        "ledger_append_errors": ledger_errors,\n        "seen_state_error_rows": int(len(seen_state_errors)),\n        "seen_state_errors": seen_state_errors,\n        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_5min_candle_bucket_key",\n        "dry_run": bool(args.dry_run),\n', "GOLD summary duplicate fields", required=False)
     text = replace_literal(text, '            "ledger_append_requires_send_success_or_mark_dry_run": True,\n', '            "ledger_append_requires_send_success_or_mark_dry_run": True,\n            "seen_state_duplicate_guard_enabled": True,\n            "notification_key_uses_5min_candle_bucket": True,\n', "GOLD safety flags", required=False)
     text = replace_literal(text, '    return 0 if len(send_errors) == 0 else 1\n', '    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1\n', "GOLD return code", required=False)
+    text = ensure_gold_runtime_repairs(text)
 
     write(path, text)
     verify(path, [
         'v9_candle_bucket_duplicate_guard', 'DEFAULT_SEEN_STATE_JSON', '--seen-state-json',
         'load_seen_state_keys(seen_state_json)', 'notification_key_uses_5min_candle_bucket',
         'duplicate_guard_mode', 'append_ledger_row_durable', 'mark_seen_state_key(seen_state_json',
+        'seen_state_errors: list[dict[str, Any]] = []',
     ], "GOLD")
 
 
@@ -443,18 +536,19 @@ def notification_key(row: pd.Series, filter_variant: str) -> str:
     text = text.replace('    append_ledger(ledger_csv, ledger_rows)\n', '')
     if '    summary = {\n' not in text:
         text = text.replace(new_mark, new_mark + '    summary = {\n')
-
     text = replace_literal(text, '        "cycle_ok": bool(len(send_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",\n', '        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0),\n        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else "SEND_OR_DUPLICATE_STATE_ERROR_SUMMARY_WRITTEN",\n', "BTC summary cycle_ok", required=False)
     text = replace_literal(text, '        "discord_send_error_rows": int(len(send_errors)),\n        "discord_send_errors": send_errors,\n        "openai_called": False,\n', '        "discord_send_error_rows": int(len(send_errors)),\n        "discord_send_errors": send_errors,\n        "ledger_append_error_rows": int(len(ledger_errors)),\n        "ledger_append_errors": ledger_errors,\n        "seen_state_error_rows": int(len(seen_state_errors)),\n        "seen_state_errors": seen_state_errors,\n        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_15min_candle_bucket_key",\n        "openai_called": False,\n', "BTC summary duplicate fields", required=False)
     text = replace_literal(text, '        "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv)},\n', '        "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv), "seen_state_json": str(seen_state_json)},\n', "BTC summary output seen-state", required=False)
     text = replace_literal(text, '            "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),\n', '            "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),\n            "seen_state_duplicate_guard_enabled": True,\n            "notification_key_uses_15min_candle_bucket": True,\n', "BTC safety flags", required=False)
     text = replace_literal(text, '    return 0 if len(send_errors) == 0 else 1\n', '    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0 else 1\n', "BTC return code", required=False)
+    text = ensure_btc_runtime_repairs(text)
 
     write(path, text)
     verify(path, [
         'v5_m15_bucket_duplicate_guard', 'DEFAULT_SEEN_STATE_JSON', '--seen-state-json',
         'load_seen_state_keys(seen_state_json)', 'notification_key_uses_15min_candle_bucket',
         'duplicate_guard_mode', 'append_ledger_row_durable', 'mark_seen_state_key(seen_state_json',
+        'seen_state_errors: list[dict[str, Any]] = []',
     ], "BTC")
 
 
