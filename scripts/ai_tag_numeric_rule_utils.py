@@ -8,7 +8,8 @@ that were generated from historical AI-review tags and pre-entry features.
 Important wording:
 - A rule HIT means "the current signal numerically resembles a past AI-review tag".
 - It is not a direct loss-probability prediction.
-- Notification text therefore separates stronger caution tags from reference-only tags.
+- Notification text therefore separates good-sign tags, stronger caution tags,
+  and reference-only tags.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ from typing import Any
 
 import pandas as pd
 
-SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v3_derived_features"
+SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v4_win_loss_balance_display"
 
 HIGH_PRIORITY_TAGS = {
     "poor_pullback_structure",
@@ -55,6 +56,10 @@ TAG_JA = {
     "against_h4_context": "H4方向と逆らい気味",
     "entry_after_extended_move": "伸びた後のエントリー",
     "tp_sl_distance_invalid": "TP/SL距離に注意",
+    "gold_fast_mean_reversion": "GOLD短期反発の形",
+    "strong_reversal_candle": "反転足が強い",
+    "trend_context_aligned": "上位足と合いやすい",
+    "clean_pullback_structure": "押し戻りの形が良い",
 }
 
 
@@ -146,11 +151,6 @@ def div0(num: float | None, den: float | None) -> float | None:
 
 
 def derived_feature_value(row: dict[str, Any] | pd.Series, feature: str) -> float | None:
-    """Derive common AI-review features from live notification rows.
-
-    This keeps notification-time scoring useful even when the live row has raw
-    OHLC/indicator columns but not the exact feature-snapshot column name.
-    """
     f = clean_str(feature)
     close = get_num(row, "close", "signal_close_price", "entry_price")
     open_ = get_num(row, "open")
@@ -192,11 +192,14 @@ def derived_feature_value(row: dict[str, Any] | pd.Series, feature: str) -> floa
         return div0(rng, atr)
 
     if f == "m15_ema20_distance_atr":
-        return get_num(row, "m15_ema20_distance_atr", "ema20_distance_atr", "trigger_ema20_distance_atr") or div0((close - get_num(row, "ema20")) if close is not None and get_num(row, "ema20") is not None else None, atr)
+        e = get_num(row, "ema20")
+        return get_num(row, "m15_ema20_distance_atr", "ema20_distance_atr", "trigger_ema20_distance_atr") or div0((close - e) if close is not None and e is not None else None, atr)
     if f == "m15_ema50_distance_atr":
-        return get_num(row, "m15_ema50_distance_atr", "ema50_distance_atr", "trigger_ema50_distance_atr") or div0((close - get_num(row, "ema50")) if close is not None and get_num(row, "ema50") is not None else None, atr)
+        e = get_num(row, "ema50")
+        return get_num(row, "m15_ema50_distance_atr", "ema50_distance_atr", "trigger_ema50_distance_atr") or div0((close - e) if close is not None and e is not None else None, atr)
     if f == "m15_ema200_distance_atr":
-        return get_num(row, "m15_ema200_distance_atr", "ema200_distance_atr", "trigger_ema200_distance_atr") or div0((close - get_num(row, "ema200")) if close is not None and get_num(row, "ema200") is not None else None, atr)
+        e = get_num(row, "ema200")
+        return get_num(row, "m15_ema200_distance_atr", "ema200_distance_atr", "trigger_ema200_distance_atr") or div0((close - e) if close is not None and e is not None else None, atr)
 
     for tf in ["h1", "h4", "d1"]:
         for ema in ["ema20", "ema50", "ema200"]:
@@ -210,8 +213,6 @@ def derived_feature_value(row: dict[str, Any] | pd.Series, feature: str) -> floa
                 a = get_num(row, f"{tf}_atr14")
                 return div0((c - e) if c is not None and e is not None else None, a)
 
-    # These need rolling history. If a caller has precomputed them, row_value will
-    # find them before this function is called; otherwise we intentionally return None.
     if f in {"m15_recent_large_candle_count_20", "m15_recent_breakout_high_count_20", "m15_recent_breakout_low_count_20"}:
         return None
     return None
@@ -293,11 +294,48 @@ def rule_evaluable(row: dict[str, Any] | pd.Series, rule: dict[str, Any]) -> tup
     return True, details
 
 
+def normalize_display_level(value: Any) -> str:
+    text = clean_str(value)
+    mapping = {
+        "強め注意": "STRONG_CAUTION",
+        "注意": "CAUTION",
+        "参考注意": "REFERENCE_CAUTION",
+        "参考": "REFERENCE_ONLY",
+        "好材料": "POSITIVE_SUPPORT",
+        "好材料候補": "POSITIVE_WATCH",
+        "STRONG_CAUTION": "STRONG_CAUTION",
+        "CAUTION": "CAUTION",
+        "REFERENCE_CAUTION": "REFERENCE_CAUTION",
+        "REFERENCE_ONLY": "REFERENCE_ONLY",
+        "POSITIVE_SUPPORT": "POSITIVE_SUPPORT",
+        "POSITIVE_WATCH": "POSITIVE_WATCH",
+    }
+    return mapping.get(text, "")
+
+
 def derive_warning_level(rule: dict[str, Any]) -> str:
-    explicit = clean_str(rule.get("warning_level") or rule.get("display_warning_level"))
+    explicit = normalize_display_level(rule.get("warning_level") or rule.get("display_warning_level") or rule.get("display_level_suggestion"))
     if explicit:
         return explicit
+    tag_role = clean_str(rule.get("tag_role"))
+    tag_group = clean_str(rule.get("tag_group"))
     tag = canonical_tag(rule.get("tag_name"))
+    tag_avg_r = safe_float(rule.get("tag_avg_r"))
+    tag_win_rate = safe_float(rule.get("tag_win_rate"))
+    if tag_role == "positive" or tag_group == "positive":
+        if tag_avg_r is not None and tag_avg_r > 0 and (tag_win_rate is None or tag_win_rate >= 0.45):
+            return "POSITIVE_SUPPORT"
+        return "POSITIVE_WATCH"
+    verdict = clean_str(rule.get("verdict"))
+    if verdict == "not_loss_specific_also_on_wins":
+        return "REFERENCE_CAUTION"
+    if verdict == "loss_heavy_warning":
+        return "STRONG_CAUTION"
+    if verdict == "moderate_loss_warning":
+        return "CAUTION"
+    if verdict in {"mixed_reference_only", "sample_too_small"}:
+        return "REFERENCE_ONLY" if verdict == "sample_too_small" else "REFERENCE_CAUTION"
+
     removed_avg_r = safe_float(rule.get("removed_avg_r"))
     baseline_pf = safe_float(rule.get("baseline_pf"))
     kept_pf = safe_float(rule.get("kept_pf"))
@@ -360,6 +398,7 @@ def score_signal_row(
             hit["matched_conditions"] = details
             hit["warning_level"] = derive_warning_level(hit)
             hits.append(hit)
+    positive_hits = [h for h in hits if clean_str(h.get("warning_level")) in {"POSITIVE_SUPPORT", "POSITIVE_WATCH"}]
     strong_hits = [h for h in hits if clean_str(h.get("warning_level")) == "STRONG_CAUTION"]
     caution_hits = [h for h in hits if clean_str(h.get("warning_level")) in {"CAUTION", "REFERENCE_CAUTION"}]
     ref_hits = [h for h in hits if clean_str(h.get("warning_level")) == "REFERENCE_ONLY"]
@@ -375,6 +414,7 @@ def score_signal_row(
         "rules_skipped_invalid_condition": int(skipped_invalid_condition),
         "missing_features": sorted(x for x in missing_features if x),
         "hit_count": int(len(hits)),
+        "positive_count": int(len(positive_hits)),
         "strong_caution_count": int(len(strong_hits)),
         "caution_count": int(len(caution_hits)),
         "reference_count": int(len(ref_hits)),
@@ -384,7 +424,14 @@ def score_signal_row(
 
 def hit_sort_key(hit: dict[str, Any]) -> tuple[int, float, float]:
     level = clean_str(hit.get("warning_level"))
-    order = {"STRONG_CAUTION": 0, "CAUTION": 1, "REFERENCE_CAUTION": 2, "REFERENCE_ONLY": 3}.get(level, 2)
+    order = {
+        "POSITIVE_SUPPORT": 0,
+        "POSITIVE_WATCH": 1,
+        "STRONG_CAUTION": 2,
+        "CAUTION": 3,
+        "REFERENCE_CAUTION": 4,
+        "REFERENCE_ONLY": 5,
+    }.get(level, 4)
     precision = safe_float(hit.get("tag_precision")) or 0.0
     recall = safe_float(hit.get("tag_recall")) or 0.0
     return (order, -precision, -recall)
@@ -393,7 +440,11 @@ def hit_sort_key(hit: dict[str, Any]) -> tuple[int, float, float]:
 def format_hit_line(hit: dict[str, Any]) -> str:
     tag = canonical_tag(hit.get("tag_name"))
     level = clean_str(hit.get("warning_level"))
-    if level == "STRONG_CAUTION":
+    if level == "POSITIVE_SUPPORT":
+        prefix = "✅ 好材料"
+    elif level == "POSITIVE_WATCH":
+        prefix = "好材料候補"
+    elif level == "STRONG_CAUTION":
         prefix = "⚠️ 強め注意"
     elif level == "CAUTION":
         prefix = "注意"
@@ -401,17 +452,29 @@ def format_hit_line(hit: dict[str, Any]) -> str:
         prefix = "参考"
     else:
         prefix = "参考注意"
+    tag_avg_r = safe_float(hit.get("tag_avg_r"))
+    tag_win_rate = safe_float(hit.get("tag_win_rate"))
+    tag_pf = safe_float(hit.get("tag_pf"))
     removed_avg_r = safe_float(hit.get("removed_avg_r"))
     kept_pf = safe_float(hit.get("kept_pf"))
     baseline_pf = safe_float(hit.get("baseline_pf"))
     precision = safe_float(hit.get("tag_precision"))
+    verdict = clean_str(hit.get("verdict"))
     pieces = [f"{prefix}: {tag_japanese_name(tag)}"]
-    if removed_avg_r is not None:
+    if tag_avg_r is not None:
+        pieces.append(f"タグ実績avgR={tag_avg_r:.2f}")
+    elif removed_avg_r is not None:
         pieces.append(f"過去類似avgR={removed_avg_r:.2f}")
-    if baseline_pf is not None and kept_pf is not None:
+    if tag_win_rate is not None:
+        pieces.append(f"勝率={tag_win_rate:.0%}")
+    if tag_pf is not None:
+        pieces.append(f"PF={tag_pf:.2f}")
+    elif baseline_pf is not None and kept_pf is not None:
         pieces.append(f"除外後PF {baseline_pf:.2f}→{kept_pf:.2f}")
     if precision is not None:
         pieces.append(f"タグ一致率={precision:.0%}")
+    if verdict == "not_loss_specific_also_on_wins":
+        pieces.append("勝ちにも出るため参考扱い")
     return " / ".join(pieces)
 
 
@@ -426,22 +489,29 @@ def format_score_for_discord(score: dict[str, Any]) -> list[str]:
     hit_count = int(score.get("hit_count", 0) or 0)
     if hit_count <= 0:
         return [
-            "AIタグ: 目立つ注意タグなし",
+            "AIタグ: 目立つ注意/好材料タグなし",
             f"判定: 評価可 {evaluable}/{checked}・特徴不足 {missing}・HIT 0",
         ]
     hits = sorted([h for h in score.get("hits", []) if isinstance(h, dict)], key=hit_sort_key)
+    positive = int(score.get("positive_count", 0) or 0)
     strong = int(score.get("strong_caution_count", 0) or 0)
     caution = int(score.get("caution_count", 0) or 0)
     ref = int(score.get("reference_count", 0) or 0)
-    if strong > 0:
-        header = f"AIタグ: ⚠️ 強め注意 {strong}件（参考注意 {max(caution - strong, 0)}件 / 参考 {ref}件）"
-    else:
-        header = f"AIタグ: 参考注意 {caution}件 / 参考 {ref}件"
+    header_parts = []
+    if positive:
+        header_parts.append(f"✅ 好材料 {positive}件")
+    if strong:
+        header_parts.append(f"⚠️ 強め注意 {strong}件")
+    if caution:
+        header_parts.append(f"参考注意 {caution}件")
+    if ref:
+        header_parts.append(f"参考 {ref}件")
+    header = "AIタグ: " + " / ".join(header_parts)
     lines = [
         header,
         f"判定: 評価可 {evaluable}/{checked}・特徴不足 {missing}・HIT {hit_count}",
     ]
-    for hit in hits[:5]:
+    for hit in hits[:6]:
         lines.append("- " + format_hit_line(hit))
         conds = []
         for c in hit.get("matched_conditions", [])[:2]:
@@ -450,7 +520,7 @@ def format_score_for_discord(score: dict[str, Any]) -> list[str]:
             conds.append(f"{c.get('feature')}={val_text} {c.get('op')} {fmt_float(c.get('threshold'), 4)}")
         if conds:
             lines.append("  根拠: " + " / ".join(conds))
-    if len(hits) > 5:
-        lines.append(f"- ほか {len(hits) - 5}件")
-    lines.append("注: AIタグは過去レビュー類似の注意ラベルで、負け確定ではありません。")
+    if len(hits) > 6:
+        lines.append(f"- ほか {len(hits) - 6}件")
+    lines.append("注: AIタグは過去レビュー類似の注意/好材料ラベルで、勝敗確定ではありません。")
     return lines
