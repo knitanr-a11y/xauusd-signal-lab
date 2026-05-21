@@ -4,6 +4,12 @@ Last updated: 2026-05-21
 
 この文書は、GOLD strict 7 の現状を次チャットへ引き継ぐためのメモです。
 
+> 重要: 2026-05-21後半に、GOLD/BTC Discord通知の毎分重複通知、AIタグの勝ち/負けバランス、EA/BATタイミング、GOLD shallow SL探索について追加整理した最新版ハンドオフを作成済みです。通知重複・AIタグ・SL探索の話を続ける場合は、まず以下を読むこと。
+>
+> ```text
+> docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
+> ```
+
 ---
 
 ## 1. 現在のステータス
@@ -47,6 +53,7 @@ GOLD strict 7 は、デモ検証を開始できる構成になっています。
 まず読む文書:
 
 ```text
+docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
 docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 docs/GOLD_STRICT_7_SIGNAL_CANDIDATES_CURRENT_SCOPE.md
 docs/REPOSITORY_CLEANUP_AND_DEPRECATION_POLICY.md
@@ -123,30 +130,11 @@ scripts/send_mt5_order_from_payload.py
 
 ## 5. 現在の監視間隔とCSV方針
 
-EA側のCSV書き出しが約1分遅れる可能性があるため、GOLD strict 7 の常時監視BATは毎分監視へ変更済みです。
+注: この節の旧記述には `run_delay_seconds: 2` が残っていましたが、2026-05-21後半の見直し後はEA `InpExportSecond=2`、BAT側 `+5秒` が推奨です。詳細は最新版ハンドオフを参照してください。
 
 ```text
-interval_minutes: 1
-run_delay_seconds: 2
-bar_offset: 0
-```
-
-理由:
-
-```text
-- EAが確定足だけを書き出している前提。
-- 最新CSV行を判定対象にする。
-- 書き出しが1分程度遅れても次の1分チェックで拾える。
-- 同じ足を複数回見てもledgerで重複を防ぐ。
-```
-
-軽量tail設定:
-
-```text
-M5: 2000
-H1: 1000
-H4: 500
-D1: 300
+最新参照:
+docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
 ```
 
 ---
@@ -157,6 +145,12 @@ Discord通知ledger:
 
 ```text
 data/runtime_state/gold/strict_7/discord_notification_ledger.csv
+```
+
+Discord通知 seen-state JSON:
+
+```text
+data/runtime_state/gold/strict_7/discord_notification_seen_keys.json
 ```
 
 strict 7 connector ledger:
@@ -188,73 +182,10 @@ data/runtime_logs/trade_ai_review_backtest_gold_strict_7/
 
 ## 7. 通知時 AIタグ推定
 
-GOLD通知は、過去AI評価でstrategyに溜まったタグをそのまま表示する方式ではなく、BTCと同じく numeric rule による個別シグナル判定へ変更済み。
+注: 2026-05-21後半に、AIタグは「負けタグ警告」だけでなく、勝ち側に寄った `✅ 好材料`、勝ちにも出るため強警告にしない `参考注意` を含む表示へ更新済みです。詳細は最新版ハンドオフを参照してください。
 
 ```text
-過去AI評価
-  -> gold strict 7 numeric rule JSON
-  -> 通知時に現在シグナルへ適用
-  -> HITしたタグだけDiscordへ表示
-```
-
-通知時にOpenAIは呼ばない。
-
-GOLD用ルール生成BAT:
-
-```text
-scripts/build_gold_strict_7_ai_tag_numeric_rules.bat
-```
-
-通常のGOLD通知BAT:
-
-```text
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
-```
-
-このBATは起動時に以下を確認する。
-
-```text
-data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json
-```
-
-無ければ、`scripts/build_gold_strict_7_ai_tag_numeric_rules.bat` を自動実行する。
-
-通知loop本体も、`--ai-tag-rules-json` を notifier へ渡すよう更新済み。
-
-通知例:
-
-```text
-AIタグ推定:
-個別AIタグ推定: なし
-AIタグ数値ルール: checked=... hit=0
-個別AI判定: 未実施（OpenAIは呼ばない）
-```
-
-HIT時:
-
-```text
-AIタグ推定:
-個別AIタグ推定: ⚠️ HIT 1件
-- ema_distance_too_large / WATCH / WARN
-  根拠: ...
-```
-
-GOLD用ルールJSONの最終確認時点:
-
-```text
-cycle_ok: true
-rules_count: 4
-対象strategy: GOLD_H4_M15_DAYTRADE
-対象タグ:
-- ema_distance_too_large
-- entry_after_extended_move
-```
-
-注記:
-
-```text
-現状のGOLD numeric AI tag rulesは4本のみ。
-今後live/backtest AI reviewが増えたら再生成して精度と対象タグを増やす。
+docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
 ```
 
 ---
@@ -322,9 +253,9 @@ docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 
 ```text
 1. Discord通知が毎分監視で遅れず届くか
-2. 通知本文にAIタグ推定欄が出るか
-3. summaryで ai_tag_rules_cycle_ok: true になるか
-4. summaryで ai_tag_rules_count: 4 以上になるか
+2. 同じM5足でGOLD通知が再通知されず skipped_duplicates になるか
+3. 通知本文にAIタグ推定欄が出るか
+4. summaryで ai_tag_rules_cycle_ok: true になるか
 5. strict 7 connector ledger が想定通り残るか
 6. 既存sender側のチェック結果がsummaryに残るか
 7. 完了後、live AI reviewが新規分だけ拾うか
@@ -348,6 +279,11 @@ reason
 pending_rows
 skipped_already_reviewed_rows
 review_rows_written_this_run
+duplicate_guard_mode
+seen_state_json
+skipped_duplicates
+ledger_rows_appended
+seen_state_error_rows
 ```
 
 ---
@@ -357,33 +293,8 @@ review_rows_written_this_run
 次チャットでは、まずこの文書と以下を読むこと。
 
 ```text
+docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
 docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
-docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md
+docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 ```
-
-その後、実シグナルが出ていれば、以下を確認する。
-
-```text
-- Discord通知の有無
-- 通知本文のAIタグ推定欄
-- strict 7 connector ledger
-- loop summary CSV
-- live AI review summary
-```
-
-実シグナルがまだ出ていなければ、GOLD側は監視継続でよい。
-
----
-
-## 12. このチャットで追加・更新した主なGOLD関連ファイル
-
-```text
-scripts/gold_strict_7_signals/build_gold_strict_7_ai_tag_numeric_rules.py
-scripts/build_gold_strict_7_ai_tag_numeric_rules.bat
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.py
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
-```
-
-GOLD側は、次に通知BATの1サイクル確認を行う。
