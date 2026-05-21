@@ -28,11 +28,12 @@ from run_btc_strict_5_backtest_from_csv import DEFAULT_MQL5_FILES_DIR, choose_pa
 from run_btc_strict_5_discord_notifier_from_csv import clean_str, json_safe
 from run_live_gold_notifier_from_csv import load_env_file, send_discord_message
 
-SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v3_require_rules_on_send"
+SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v4_wall_clock_guard_send_error_summary"
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_official_discord_numeric_ai_tags")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/btc/strict_5/ai_tag_numeric_rules.json")
+DISCORD_SAFE_MAX_CHARS = 1900
 
 LEDGER_COLUMNS = [
     "notified_at_utc", "schema_version", "notification_key", "filter_variant",
@@ -132,6 +133,63 @@ def id_time_text(value: Any) -> str:
     return pd.Timestamp(ts).strftime("%Y%m%d_%H%M")
 
 
+def mt5_time_to_local_est(value: Any, mt5_to_local_hours: float) -> pd.Timestamp | None:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return None
+    return pd.Timestamp(ts) + pd.Timedelta(hours=float(mt5_to_local_hours))
+
+
+def apply_wall_clock_freshness_guard(preview: pd.DataFrame, ctx: pd.DataFrame, args: argparse.Namespace) -> tuple[pd.DataFrame, dict[str, Any]]:
+    now_local = pd.Timestamp(datetime.now())
+    mt5_to_local_hours = float(args.mt5_to_local_hours)
+    max_csv_staleness = int(args.max_csv_staleness_minutes)
+    max_signal_age = int(args.max_wall_clock_signal_age_minutes)
+    last_close_col = "base_close_time" if "base_close_time" in ctx.columns else "time"
+    last_close = ctx.iloc[-1][last_close_col] if not ctx.empty and last_close_col in ctx.columns else ""
+    last_close_local = mt5_time_to_local_est(last_close, mt5_to_local_hours)
+    csv_staleness = None if last_close_local is None else float((now_local - last_close_local).total_seconds() / 60.0)
+    guard = {
+        "enabled": True,
+        "now_local": now_local.strftime("%Y-%m-%d %H:%M:%S"),
+        "mt5_to_local_hours": mt5_to_local_hours,
+        "max_csv_staleness_minutes": max_csv_staleness,
+        "max_wall_clock_signal_age_minutes": max_signal_age,
+        "ctx_last_base_close_time_mt5": clean_str(last_close),
+        "ctx_last_base_close_time_local_est": "" if last_close_local is None else last_close_local.strftime("%Y-%m-%d %H:%M:%S"),
+        "csv_staleness_minutes": csv_staleness,
+        "csv_stale_guard_triggered": False,
+        "signals_before_wall_clock_guard": int(len(preview)),
+        "signals_after_wall_clock_guard": int(len(preview)),
+        "signals_filtered_by_wall_clock_age": 0,
+    }
+    if max_csv_staleness > 0 and csv_staleness is not None and csv_staleness > max_csv_staleness:
+        guard["csv_stale_guard_triggered"] = True
+        guard["signals_after_wall_clock_guard"] = 0
+        guard["signals_filtered_by_wall_clock_age"] = int(len(preview))
+        return preview.iloc[0:0].copy(), guard
+    if preview.empty or max_signal_age <= 0:
+        return preview, guard
+    base_close = pd.to_datetime(preview["base_close_time"], errors="coerce") if "base_close_time" in preview.columns else pd.to_datetime(preview["signal_time"], errors="coerce")
+    local_est = base_close + pd.Timedelta(hours=mt5_to_local_hours)
+    age = (now_local - local_est).dt.total_seconds() / 60.0
+    out = preview.copy()
+    out["wall_clock_signal_time_local_est"] = local_est.dt.strftime("%Y-%m-%d %H:%M:%S")
+    out["wall_clock_signal_age_minutes"] = age
+    keep = age.notna() & (age >= -2.0) & (age <= max_signal_age)
+    filtered = out[keep.fillna(False)].copy()
+    guard["signals_after_wall_clock_guard"] = int(len(filtered))
+    guard["signals_filtered_by_wall_clock_age"] = int(len(out) - len(filtered))
+    return filtered.reset_index(drop=True), guard
+
+
+def truncate_for_discord(message: str) -> str:
+    if len(message) <= DISCORD_SAFE_MAX_CHARS:
+        return message
+    suffix = "\n\n[TRUNCATED] Discord文字数制限回避のため本文を短縮。詳細はmessage_path JSONを確認。"
+    return message[: max(0, DISCORD_SAFE_MAX_CHARS - len(suffix))] + suffix
+
+
 def message_filename(row: pd.Series, key: str) -> str:
     h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
     return f"btc_numaitag_{clean_str(row.get('direction'))}_{id_time_text(row.get('signal_time'))}_{h}.json"
@@ -143,12 +201,18 @@ def build_simple_message(row: pd.Series, ai_score: dict[str, Any]) -> str:
     strategy_id = clean_str(row.get("strategy_id"))
     strategy_name = STRATEGY_SHORT_NAME.get(strategy_id, "BTC signal")
     next_open = clean_str(row.get("next_m15_open_price"), "N/A") if bool(row.get("next_m15_open_available", False)) else "未取得"
+    age = safe_float(row.get("wall_clock_signal_age_minutes"))
+    age_line = "" if age is None else f"シグナル経過: {age:.1f}分（MT5+6h換算）"
     lines = [
         f"{side_icon} **BTC {direction} シグナル**",
         "",
         f"タイプ: {strategy_name}",
         f"シグナル時刻: {clean_str(row.get('signal_time'))}",
         f"エントリー目安: {clean_str(row.get('entry_time'))}",
+    ]
+    if age_line:
+        lines.append(age_line)
+    lines.extend([
         "",
         "価格・値幅:",
         f"signal close: {fmt_num(row.get('signal_close_price'), 2)}",
@@ -159,13 +223,13 @@ def build_simple_message(row: pd.Series, ai_score: dict[str, Any]) -> str:
         "価格注記: preview。実発注時のSL/TPは実約定基準で計算。",
         "",
         "AIタグ推定:",
-    ]
+    ])
     lines.extend(format_score_for_discord(ai_score))
     lines.extend([
         "個別AI判定: 未実施（OpenAIは呼ばない）",
         "注記: 過去AI評価タグを数値条件化し、現在シグナルにHITしたものだけ表示。",
     ])
-    return "\n".join(lines)
+    return truncate_for_discord("\n".join(lines))
 
 
 def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_variant: str, ai_score: dict[str, Any]) -> Path:
@@ -180,6 +244,9 @@ def write_message(out_dir: Path, row: pd.Series, key: str, message: str, filter_
         "strategy_id": clean_str(row.get("strategy_id")),
         "direction": clean_str(row.get("direction")),
         "signal_time": clean_str(row.get("signal_time")),
+        "base_close_time": clean_str(row.get("base_close_time")),
+        "wall_clock_signal_time_local_est": clean_str(row.get("wall_clock_signal_time_local_est")),
+        "wall_clock_signal_age_minutes": safe_float(row.get("wall_clock_signal_age_minutes")),
         "ai_tag_score": ai_score,
         "message": message,
         "audit": {
@@ -242,6 +309,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     p.add_argument("--scan-recent-bars", type=int, default=500)
     p.add_argument("--max-signal-age-minutes", type=int, default=0)
+    p.add_argument("--max-wall-clock-signal-age-minutes", type=int, default=30, help="Suppress notifications when base_close_time + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--max-csv-staleness-minutes", type=int, default=45, help="Suppress all notifications when latest M15 base close + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--mt5-to-local-hours", type=float, default=6.0, help="Local time offset from MT5 server timestamps. JST=MT5+6 for the current broker setup.")
     p.add_argument("--latest-only", action="store_true")
     p.add_argument("--max-notifications", type=int, default=10)
     p.add_argument("--send-discord", action="store_true")
@@ -296,6 +366,8 @@ def main() -> int:
         broker_symbol=args.broker_symbol,
         symbol=args.symbol,
     )
+    preview_rows_before_wall_clock_guard = int(len(preview))
+    preview, wall_clock_guard = apply_wall_clock_freshness_guard(preview, ctx, args)
     if not preview.empty:
         preview = preview.sort_values(["signal_time", "strategy_id"]).reset_index(drop=True)
         preview.insert(1, "official_schema_version", SCHEMA_VERSION)
@@ -309,6 +381,7 @@ def main() -> int:
     skipped_duplicates = 0
     message_rows = 0
     ai_tag_hit_rows = 0
+    send_errors: list[dict[str, Any]] = []
     for _, row in preview.iterrows():
         key = notification_key(row, args.filter_variant)
         if not args.allow_duplicate and key in notified_keys:
@@ -325,16 +398,22 @@ def main() -> int:
         print(f"message_path: {message_path}", flush=True)
         discord_sent = False
         if args.send_discord:
-            send_discord_message(webhook_url, message)
-            discord_sent = True
-            sent_rows += 1
-        if args.send_discord or args.mark_preview_notified:
+            try:
+                send_discord_message(webhook_url, message)
+                discord_sent = True
+                sent_rows += 1
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                send_errors.append(err)
+                print(f"Discord send error: {err}", flush=True)
+        if (args.send_discord and discord_sent) or args.mark_preview_notified:
             ledger_rows.append(ledger_row(row, key=key, filter_variant=args.filter_variant, discord_sent=discord_sent, preview_only_marked=bool(args.mark_preview_notified and not args.send_discord), message_path=message_path, ai_score=ai_score))
     append_ledger(ledger_csv, ledger_rows)
     summary = {
         "schema_version": SCHEMA_VERSION,
         "created_at_utc": utc_now_text(),
-        "cycle_ok": True,
+        "cycle_ok": bool(len(send_errors) == 0),
+        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",
         "filter_variant": args.filter_variant,
         "official_default_filter_variant": BTC_STRICT_5_DEFAULT_FILTER_VARIANT,
         "ai_tag_rules_json": str(ai_tag_rules_json),
@@ -343,19 +422,39 @@ def main() -> int:
         "orders_sent": False,
         "discord_sent": bool(args.send_discord and sent_rows > 0),
         "discord_sent_rows": int(sent_rows),
+        "discord_send_error_rows": int(len(send_errors)),
+        "discord_send_errors": send_errors,
         "openai_called": False,
         "runtime_ledger_mutated": bool(len(ledger_rows) > 0),
         "ledger_rows_appended": int(len(ledger_rows)),
         "d1_used": False,
         "inputs": {k: str(v) for k, v in paths.items()},
         "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv)},
-        "rows": {"preview_rows": int(len(preview)), "message_rows": int(message_rows), "ai_tag_hit_rows": int(ai_tag_hit_rows), "skipped_duplicates": int(skipped_duplicates), "signals_excluded_by_filter": int(len(excluded)), "raw_signals_before_filter": int(len(raw))},
+        "rows": {
+            "preview_rows": int(len(preview)),
+            "preview_rows_before_wall_clock_guard": int(preview_rows_before_wall_clock_guard),
+            "message_rows": int(message_rows),
+            "ai_tag_hit_rows": int(ai_tag_hit_rows),
+            "skipped_duplicates": int(skipped_duplicates),
+            "signals_excluded_by_filter": int(len(excluded)),
+            "raw_signals_before_filter": int(len(raw)),
+        },
         "filter_meta": meta,
-        "safety": {"mt5_calls": False, "order_send": False, "ai_calls": False, "d1_read": False, "discord_send_requested": bool(args.send_discord), "requires_valid_ai_tag_rules_on_send": True},
+        "wall_clock_freshness_guard": wall_clock_guard,
+        "safety": {
+            "mt5_calls": False,
+            "order_send": False,
+            "ai_calls": False,
+            "d1_read": False,
+            "discord_send_requested": bool(args.send_discord),
+            "requires_valid_ai_tag_rules_on_send": True,
+            "wall_clock_freshness_guard_enabled": True,
+            "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),
+        },
     }
     write_json(summary_json, summary)
     print("\n" + json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
-    return 0
+    return 0 if len(send_errors) == 0 else 1
 
 
 if __name__ == "__main__":
