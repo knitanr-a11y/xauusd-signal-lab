@@ -1,12 +1,15 @@
 @echo off
-setlocal
+setlocal EnableExtensions
 cd /d "%~dp0\..\.."
+
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
 
 echo ============================================================
 echo GOLD strict 7 guarded demo autotrade forever aligned
 echo - mt5.order_send ENABLED through existing guarded sender
-echo - aligned to every 1 minute + 02 seconds
-echo - designed for delayed EA CSV writes
+echo - aligned to every 1 minute + 05 seconds
+echo - designed for delayed EA CSV writes; recommended EA InpExportSecond=2
 echo - reads latest confirmed CSV row: bar_offset=0
 echo - lightweight candle tails
 echo - expected-login and demo-account guard enabled
@@ -14,6 +17,7 @@ echo - duplicate prevention by guarded_demo_order_ledger.csv
 echo - max-orders=1
 echo - position-policy=block_any
 echo - lot=0.01
+echo - Python UTF-8 mode ENABLED to avoid cp932 print failures
 echo - no Discord send
 echo - no AI call
 echo ============================================================
@@ -23,7 +27,7 @@ python scripts\gold_strict_7_signals\run_gold_strict_7_guarded_demo_autotrade_fo
   --send ^
   --allow-demo-send ^
   --interval-minutes 1 ^
-  --run-delay-seconds 2 ^
+  --run-delay-seconds 5 ^
   --broker-symbol GOLD# ^
   --expected-login 75539039 ^
   --lot 0.01 ^
