@@ -2,6 +2,8 @@
 setlocal EnableExtensions
 cd /d "%~dp0\.."
 
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
 set STATE_DIR=data\runtime_state\btc\strict_5
 if not exist "%STATE_DIR%" mkdir "%STATE_DIR%"
 
@@ -11,6 +13,7 @@ echo Official filter variant: buy_h4_context_conservative_v1
 echo Schedule: every 1 minute at +02 seconds
 echo Rule JSON: %STATE_DIR%\ai_tag_numeric_rules.json
 echo Notification ledger: %STATE_DIR%\official_discord_numeric_ai_tag_ledger.csv
+echo Python UTF-8 mode ENABLED to avoid cp932 emoji print failures
 echo No MT5 call / No order_send / No OpenAI call
 echo Stop with Ctrl+C
 echo ============================================================
