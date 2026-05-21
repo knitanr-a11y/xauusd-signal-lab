@@ -2,6 +2,8 @@
 setlocal EnableExtensions
 cd /d "%~dp0\..\.."
 
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
 set RULE_JSON=data\runtime_state\gold\strict_7\ai_tag_numeric_rules.json
 
 echo ============================================================
@@ -14,6 +16,7 @@ echo - lightweight candle tails
 echo - duplicate prevention by ledger
 echo - numeric AI tag scoring ENABLED
 echo - AI tag rules: %RULE_JSON%
+echo - Python UTF-8 mode ENABLED to avoid cp932 emoji print failures
 echo - no MT5 order send
 echo - no OpenAI call at notification time
 echo ============================================================
