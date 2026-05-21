@@ -350,7 +350,7 @@ def build_candidate_rows(feature_df: pd.DataFrame, tag_df: pd.DataFrame, args: a
             work = work.merge(tagged_keys.assign(_tag_hit=True), on=keys, how="left")
             work["tag_name"] = tag_name
             work["tag_group"] = tag_group
-            hit = work["_tag_hit"].fillna(False).astype(bool)
+            hit = work["_tag_hit"].eq(True)
             if int(hit.sum()) < args.min_tag_trades:
                 continue
             work.loc[~hit, "tag_name"] = "__NO_TAG__"
