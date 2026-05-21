@@ -9,7 +9,7 @@ Important wording:
 - A rule HIT means "the current signal numerically resembles a past AI-review tag".
 - It is not a direct loss-probability prediction.
 - Notification text therefore separates good-sign tags, stronger caution tags,
-  and reference-only tags.
+  reference-only tags, and historical tag-combination tendency.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from typing import Any
 
 import pandas as pd
 
-SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v4_win_loss_balance_display"
+SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v5_tag_combo_display"
 
 HIGH_PRIORITY_TAGS = {
     "poor_pullback_structure",
@@ -119,6 +119,7 @@ def load_rules_json(path: str | Path) -> dict[str, Any]:
             "reason": "RULES_JSON_NOT_FOUND",
             "rules_path": str(p),
             "rules": [],
+            "combo_rules": [],
         }
     with open(windows_long_path(p), "r", encoding="utf-8") as f:
         obj = json.load(f)
@@ -126,7 +127,10 @@ def load_rules_json(path: str | Path) -> dict[str, Any]:
         raise ValueError(f"rules JSON must be an object: {p}")
     if "rules" not in obj or not isinstance(obj.get("rules"), list):
         raise ValueError(f"rules JSON missing list field 'rules': {p}")
+    if "combo_rules" in obj and not isinstance(obj.get("combo_rules"), list):
+        raise ValueError(f"rules JSON field 'combo_rules' must be a list when present: {p}")
     obj["rules_path"] = str(p)
+    obj.setdefault("combo_rules", [])
     return obj
 
 
@@ -303,12 +307,22 @@ def normalize_display_level(value: Any) -> str:
         "参考": "REFERENCE_ONLY",
         "好材料": "POSITIVE_SUPPORT",
         "好材料候補": "POSITIVE_WATCH",
+        "複合警告": "COMBO_STRONG_CAUTION",
+        "複合注意": "COMBO_CAUTION",
+        "複合好機": "COMBO_POSITIVE_SUPPORT",
+        "複合好機候補": "COMBO_POSITIVE_WATCH",
+        "複合参考": "COMBO_REFERENCE",
         "STRONG_CAUTION": "STRONG_CAUTION",
         "CAUTION": "CAUTION",
         "REFERENCE_CAUTION": "REFERENCE_CAUTION",
         "REFERENCE_ONLY": "REFERENCE_ONLY",
         "POSITIVE_SUPPORT": "POSITIVE_SUPPORT",
         "POSITIVE_WATCH": "POSITIVE_WATCH",
+        "COMBO_STRONG_CAUTION": "COMBO_STRONG_CAUTION",
+        "COMBO_CAUTION": "COMBO_CAUTION",
+        "COMBO_POSITIVE_SUPPORT": "COMBO_POSITIVE_SUPPORT",
+        "COMBO_POSITIVE_WATCH": "COMBO_POSITIVE_WATCH",
+        "COMBO_REFERENCE": "COMBO_REFERENCE",
     }
     return mapping.get(text, "")
 
@@ -360,6 +374,107 @@ def tag_japanese_name(tag: str) -> str:
     return f"{jp}（{c}）" if jp else c
 
 
+def combo_tags_from_rule(rule: dict[str, Any]) -> list[str]:
+    raw = rule.get("combo_tags", rule.get("tags", []))
+    if isinstance(raw, str):
+        parts = [x.strip() for x in raw.replace("+", ",").replace("|", ",").split(",")]
+    elif isinstance(raw, list):
+        parts = [str(x).strip() for x in raw]
+    else:
+        parts = []
+    tags = sorted({canonical_tag(x) for x in parts if canonical_tag(x)})
+    return tags
+
+
+def combo_rule_matches(hit_tags: set[str], rule: dict[str, Any]) -> tuple[bool, list[str]]:
+    tags = combo_tags_from_rule(rule)
+    if len(tags) < 2:
+        return False, tags
+    return set(tags).issubset(hit_tags), tags
+
+
+def combo_sort_key(combo: dict[str, Any]) -> tuple[int, int, float]:
+    level = normalize_display_level(combo.get("display_level") or combo.get("warning_level"))
+    order = {
+        "COMBO_POSITIVE_SUPPORT": 0,
+        "COMBO_POSITIVE_WATCH": 1,
+        "COMBO_STRONG_CAUTION": 2,
+        "COMBO_CAUTION": 3,
+        "COMBO_REFERENCE": 4,
+    }.get(level, 4)
+    n = int(safe_float(combo.get("sample_count")) or 0)
+    avg_delta = abs(safe_float(combo.get("avg_r_delta")) or 0.0)
+    return (order, -n, -avg_delta)
+
+
+def combo_level_prefix(level: str) -> str:
+    if level == "COMBO_POSITIVE_SUPPORT":
+        return "✅ 複合好機"
+    if level == "COMBO_POSITIVE_WATCH":
+        return "複合好機候補"
+    if level == "COMBO_STRONG_CAUTION":
+        return "⚠️ 複合警告"
+    if level == "COMBO_CAUTION":
+        return "複合注意"
+    return "複合参考"
+
+
+def format_pct(value: Any) -> str:
+    x = safe_float(value)
+    return "N/A" if x is None else f"{x:.0%}"
+
+
+def pf_text(value: Any) -> str:
+    x = safe_float(value)
+    if x is None:
+        return "N/A"
+    if x >= 900:
+        return "∞"
+    return f"{x:.2f}"
+
+
+def format_combo_line(combo: dict[str, Any]) -> str:
+    level = normalize_display_level(combo.get("display_level") or combo.get("warning_level")) or "COMBO_REFERENCE"
+    tags = combo.get("matched_tags") if isinstance(combo.get("matched_tags"), list) else combo_tags_from_rule(combo)
+    tag_text = " + ".join(tag_japanese_name(str(t)) for t in tags)
+    sample_count = int(safe_float(combo.get("sample_count")) or 0)
+    win_rate = combo.get("win_rate")
+    pf = combo.get("pf")
+    avg_r = combo.get("avg_r")
+    base_wr = combo.get("baseline_win_rate")
+    base_pf = combo.get("baseline_pf")
+    base_avg = combo.get("baseline_avg_r")
+    avg_delta = safe_float(combo.get("avg_r_delta"))
+    wr_delta = safe_float(combo.get("win_rate_delta"))
+    pieces = [f"{combo_level_prefix(level)}: {tag_text}"]
+    pieces.append(f"過去類似={sample_count}件")
+    pieces.append(f"勝率={format_pct(win_rate)}")
+    pieces.append(f"PF={pf_text(pf)}")
+    if safe_float(avg_r) is not None:
+        pieces.append(f"avgR={float(avg_r):+.2f}")
+    if safe_float(base_avg) is not None or safe_float(base_wr) is not None or safe_float(base_pf) is not None:
+        base_parts = []
+        if safe_float(base_wr) is not None:
+            base_parts.append(f"勝率{format_pct(base_wr)}")
+        if safe_float(base_pf) is not None:
+            base_parts.append(f"PF{pf_text(base_pf)}")
+        if safe_float(base_avg) is not None:
+            base_parts.append(f"avgR{float(base_avg):+.2f}")
+        if base_parts:
+            pieces.append("戦略平均=" + "/".join(base_parts))
+    delta_parts = []
+    if wr_delta is not None:
+        delta_parts.append(f"勝率差{wr_delta:+.0%}")
+    if avg_delta is not None:
+        delta_parts.append(f"avgR差{avg_delta:+.2f}")
+    if delta_parts:
+        pieces.append("差分=" + "/".join(delta_parts))
+    reason = clean_str(combo.get("reason"))
+    if reason:
+        pieces.append(reason)
+    return " / ".join(pieces)
+
+
 def score_signal_row(
     row: dict[str, Any] | pd.Series,
     rules_obj: dict[str, Any],
@@ -398,10 +513,33 @@ def score_signal_row(
             hit["matched_conditions"] = details
             hit["warning_level"] = derive_warning_level(hit)
             hits.append(hit)
+
+    hit_tags = sorted({canonical_tag(h.get("tag_name")) for h in hits if canonical_tag(h.get("tag_name"))})
+    hit_tag_set = set(hit_tags)
+    combo_hits: list[dict[str, Any]] = []
+    combo_checked = 0
+    for combo in rules_obj.get("combo_rules", []):
+        if not isinstance(combo, dict):
+            continue
+        if clean_str(combo.get("strategy_id")) != sid:
+            continue
+        combo_checked += 1
+        ok, tags = combo_rule_matches(hit_tag_set, combo)
+        if ok:
+            ch = dict(combo)
+            ch["matched_tags"] = tags
+            ch["display_level"] = normalize_display_level(ch.get("display_level") or ch.get("warning_level")) or "COMBO_REFERENCE"
+            combo_hits.append(ch)
+
     positive_hits = [h for h in hits if clean_str(h.get("warning_level")) in {"POSITIVE_SUPPORT", "POSITIVE_WATCH"}]
     strong_hits = [h for h in hits if clean_str(h.get("warning_level")) == "STRONG_CAUTION"]
-    caution_hits = [h for h in hits if clean_str(h.get("warning_level")) in {"CAUTION", "REFERENCE_CAUTION"}]
+    caution_hits = [h for h in hits if clean_str(h.get("warning_level")) == "CAUTION"]
+    ref_caution_hits = [h for h in hits if clean_str(h.get("warning_level")) == "REFERENCE_CAUTION"]
     ref_hits = [h for h in hits if clean_str(h.get("warning_level")) == "REFERENCE_ONLY"]
+    combo_positive = [h for h in combo_hits if clean_str(h.get("display_level")) in {"COMBO_POSITIVE_SUPPORT", "COMBO_POSITIVE_WATCH"}]
+    combo_strong = [h for h in combo_hits if clean_str(h.get("display_level")) == "COMBO_STRONG_CAUTION"]
+    combo_caution = [h for h in combo_hits if clean_str(h.get("display_level")) == "COMBO_CAUTION"]
+    combo_ref = [h for h in combo_hits if clean_str(h.get("display_level")) == "COMBO_REFERENCE"]
     return {
         "schema_version": SCHEMA_VERSION,
         "strategy_id": sid,
@@ -417,8 +555,17 @@ def score_signal_row(
         "positive_count": int(len(positive_hits)),
         "strong_caution_count": int(len(strong_hits)),
         "caution_count": int(len(caution_hits)),
+        "reference_caution_count": int(len(ref_caution_hits)),
         "reference_count": int(len(ref_hits)),
+        "hit_tags": hit_tags,
         "hits": hits,
+        "combo_rules_checked": int(combo_checked),
+        "combo_hit_count": int(len(combo_hits)),
+        "combo_positive_count": int(len(combo_positive)),
+        "combo_strong_caution_count": int(len(combo_strong)),
+        "combo_caution_count": int(len(combo_caution)),
+        "combo_reference_count": int(len(combo_ref)),
+        "combo_hits": combo_hits,
     }
 
 
@@ -496,6 +643,7 @@ def format_score_for_discord(score: dict[str, Any]) -> list[str]:
     positive = int(score.get("positive_count", 0) or 0)
     strong = int(score.get("strong_caution_count", 0) or 0)
     caution = int(score.get("caution_count", 0) or 0)
+    ref_caution = int(score.get("reference_caution_count", 0) or 0)
     ref = int(score.get("reference_count", 0) or 0)
     header_parts = []
     if positive:
@@ -503,7 +651,9 @@ def format_score_for_discord(score: dict[str, Any]) -> list[str]:
     if strong:
         header_parts.append(f"⚠️ 強め注意 {strong}件")
     if caution:
-        header_parts.append(f"参考注意 {caution}件")
+        header_parts.append(f"注意 {caution}件")
+    if ref_caution:
+        header_parts.append(f"参考注意 {ref_caution}件")
     if ref:
         header_parts.append(f"参考 {ref}件")
     header = "AIタグ: " + " / ".join(header_parts)
@@ -522,5 +672,29 @@ def format_score_for_discord(score: dict[str, Any]) -> list[str]:
             lines.append("  根拠: " + " / ".join(conds))
     if len(hits) > 6:
         lines.append(f"- ほか {len(hits) - 6}件")
+
+    combo_hits = sorted([c for c in score.get("combo_hits", []) if isinstance(c, dict)], key=combo_sort_key)
+    if combo_hits:
+        combo_positive = int(score.get("combo_positive_count", 0) or 0)
+        combo_strong = int(score.get("combo_strong_caution_count", 0) or 0)
+        combo_caution = int(score.get("combo_caution_count", 0) or 0)
+        combo_ref = int(score.get("combo_reference_count", 0) or 0)
+        combo_parts = []
+        if combo_positive:
+            combo_parts.append(f"✅ 複合好機 {combo_positive}件")
+        if combo_strong:
+            combo_parts.append(f"⚠️ 複合警告 {combo_strong}件")
+        if combo_caution:
+            combo_parts.append(f"複合注意 {combo_caution}件")
+        if combo_ref:
+            combo_parts.append(f"複合参考 {combo_ref}件")
+        lines.append("タグ組み合わせ: " + " / ".join(combo_parts))
+        for combo in combo_hits[:3]:
+            lines.append("- " + format_combo_line(combo))
+        if len(combo_hits) > 3:
+            lines.append(f"- 組み合わせほか {len(combo_hits) - 3}件")
+    elif int(score.get("combo_rules_checked", 0) or 0) > 0:
+        lines.append("タグ組み合わせ: 目立つ複合傾向なし")
+
     lines.append("注: AIタグは過去レビュー類似の注意/好材料ラベルで、勝敗確定ではありません。")
     return lines
