@@ -9,8 +9,8 @@ set RULE_JSON=data\runtime_state\gold\strict_7\ai_tag_numeric_rules.json
 echo ============================================================
 echo GOLD strict 7 Discord notify forever aligned
 echo - Discord send ENABLED
-echo - aligned to every 1 minute + 02 seconds
-echo - designed for delayed EA CSV writes
+echo - aligned to every 1 minute + 05 seconds
+echo - designed for delayed EA CSV writes; recommended EA InpExportSecond=2
 echo - reads latest confirmed CSV row: bar_offset=0
 echo - lightweight candle tails
 echo - duplicate prevention by ledger
@@ -43,7 +43,7 @@ python scripts\gold_strict_7_signals\run_gold_strict_7_discord_notify_forever_al
   --ai-tag-rules-json "%RULE_JSON%" ^
   --send-discord ^
   --interval-minutes 1 ^
-  --run-delay-seconds 2 ^
+  --run-delay-seconds 5 ^
   --scan-recent-bars 36 ^
   --bar-offset 0 ^
   --tail-m5 2000 ^
