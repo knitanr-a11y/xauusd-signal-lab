@@ -1,8 +1,8 @@
 # NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
-この文書は、新チャットでBTCシグナル作成を再開するための引き継ぎです。
+この文書は、BTC strict 5 再構築後の現状を次チャットへ引き継ぐためのメモです。
 
 ---
 
@@ -16,281 +16,357 @@ docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
 docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 ```
 
-GOLD側の現状確認が不要なら、BTC作成に直接進んでよい。
-
 ---
 
-## 2. GOLD側の現在地
+## 2. 現在の結論
 
-GOLDは strict 7 候補で、以下まで接続済み。
+BTC側は、既存BTCシグナルを捨て、未来情報なし・確定足のみ・スプレッド込みで strict 5 として再構築済み。
+
+現時点では、以下まで実装・接続済み。
 
 ```text
-- strict 7 シグナル検出
+- BTC strict 5 候補探索
+- M15/H1/H4 確定足のみの context join
+- D1不使用
+- スプレッド込みバックテスト
+- official filter variant 固定
 - Discord通知
-- guarded demo connector
-- post-trade live AI review
-- backtest AI review と live AI review の分離
-- EAのCSV書き出し遅延対策として毎分監視へ変更済み
+- guarded demo send
+- 毎分02秒 aligned loop
+- 通知時 numeric AI tag 推定
+- トレード後AI評価wrapper
 ```
 
-GOLD側は、デモ運用を開始できる構成。
-
-ただし、最終完成判定は、実シグナル1件について以下を確認してから。
-
-```text
-通知
-  -> strict 7 connector ledger
-  -> 決済
-  -> live AI評価
-  -> 2回目AI評価で同じIDがスキップされること
-```
-
-GOLD側の現行引き継ぎ:
-
-```text
-docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
-```
+BTC側は、仕組みとしては一旦完了。残る確認は、実際に自動売買BATで注文ledgerが作られた後、トレード後AI評価BATが通るかどうか。
 
 ---
 
-## 3. 次にやること
+## 3. official variant
 
-次はBTCのシグナルを作り直す。
+BTC strict 5 の公式variantは以下で固定。
+
+```text
+buy_h4_context_conservative_v1
+```
+
+baseline は比較用として残っているが、通常運用では使わない。
+
+このvariantでは、BUY CCI / BUY RSI40 の H4逆行系に対して conservative filter を適用済み。
 
 重要:
 
 ```text
-既存BTCシグナルをそのまま本命にしない。
-未来情報混入の疑いを踏まえ、BTCは厳密条件で再探索する。
-```
-
-今回の目的は、BTC用の新しいシグナル候補を、GOLD strict 7 と同じように、後で以下へ接続できる形にすること。
-
-```text
-BTC strict signal candidates
-  -> 厳密バックテスト
-  -> Discord通知
-  -> guarded demo connector
-  -> post-trade live AI review
-```
-
-ただし、最初から通知・発注へ進まない。
-
-まずはBTCのシグナル候補探索と厳密バックテストを優先する。
-
----
-
-## 4. BTCで特に重要な方針
-
-BTCはスプレッドが大きいので、短すぎる値幅は避ける。
-
-ユーザー希望:
-
-```text
-BTCは50 pips以上の値幅を取れるところを探索する。
-```
-
-ただし、ここでいう pips / price distance の扱いは、ブローカー銘柄仕様に依存するため、実装前にCSV価格桁と既存BTC sender仕様を確認すること。
-
-探索では、以下を重視する。
-
-```text
-- スプレッド込みで成立する値幅
-- PF 2以上を目指す
-- 月別の偏り確認
-- 最大DD確認
-- 取引回数が少なすぎないこと
-- 2026年4月など、悪化月があれば理由を考察
+- H1/H4は確定足のみ
+- D1は使わない
+- 最新CSV行は確定足前提
+- 形成中足、未来足は使わない
 ```
 
 ---
 
-## 5. 未来情報禁止ルール
+## 4. BTC strict 5 主要スクリプト
 
-BTCでは特に厳格に守る。
+### official preview / runtime
 
 ```text
-- 上位足は確定済み情報だけ使う
-- MTF joinは context_close_time <= base_close_time を厳守
-- 形成中のH1/H4/D1を使わない
-- 形成中のM15/M5も使わない
-- confirmed-time join を使う
-- current forming candle 情報を前提にしない
+scripts/btc_strict_5_signals/run_btc_strict_5_official_preview_from_csv.py
+scripts/btc_strict_5_signals/btc_strict_5_official_runtime.py
+scripts/btc_strict_5_signals/btc_strict_5_filter_variants.py
 ```
 
-今回のBTC再探索では、既存の成績が良かったとしても、未来情報の疑いがあるものは本命扱いしない。
+### official Discord通知
 
----
-
-## 6. BTCのCSV想定
-
-ユーザーが使っているMT5 Files配下のBTC CSVは、おそらく以下。
+通常運用で使う通知BAT:
 
 ```text
-btcusdsharp_m5.csv
-btcusdsharp_m15.csv
-btcusdsharp_h1.csv
-btcusdsharp_h4.csv
-btcusdsharp_d1.csv
+scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.bat
 ```
 
-新チャットでユーザーに必要なら、これらを貼ってもらう。
-
-ただし、GitHub上の既存スクリプト・既存データ出力があれば、まずそれを確認する。
-
----
-
-## 7. 既存BTC関連で確認すべきファイル
-
-BTCの既存接続・AI評価・送信まわりを確認するなら以下。
+通知loop本体:
 
 ```text
-scripts/run_btc_ai_review_pipeline_same_spec.py
-scripts/run_btc_ai_review_pipeline.bat
-scripts/run_btc_manual_demo_order_send_smoke_test.py
-scripts/run_btc_manual_demo_order_send_smoke_test_send_once.py
-scripts/send_mt5_order_from_payload.py
+scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.py
 ```
 
-既存BTC multiのruntime ledger:
+単発通知テスト用:
 
 ```text
-data/runtime_state/btc/multi_strategy/guarded_demo_order_ledger.csv
+scripts/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.bat
+scripts/btc_strict_5_signals/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.py
 ```
 
-ただし、次のBTCシグナル作成では、既存BTC候補を前提にしすぎない。
+古い通知BATやbaseline系は通常運用では使わない。
 
----
+### guarded demo send
 
-## 8. 既存BTC AI評価の状況
-
-以前のBTC same_spec summaryでは以下まで確認済み。
+通常運用で使う自動売買BAT:
 
 ```text
-strategy_filled_rows: 4
-strategies: [D1_LOW_BREAK_SELL, PULLBACK_REJECT_SELL]
-review_error_rows: 0
-should_investigate_rows: 0
+scripts/run_btc_strict_5_official_guarded_demo_send_forever_aligned_weekly_state.bat
 ```
 
-ただし、これは既存BTC live AI評価の話であり、新しいBTC候補の性能保証ではない。
+これを起動しない限り、BTC strict 5 official の order ledger は作られない。
 
----
-
-## 9. BTC探索の進め方
-
-推奨順序:
+### トレード後AI評価
 
 ```text
-1. BTC CSVの列・時刻・価格桁・期間を確認
-2. confirmed-time join基盤を確認または新規作成
-3. 既存BTC候補を棚卸しするが、本命扱いしない
-4. 多角的に候補を探索する
-5. 候補ごとに月別成績・PF・最大DD・連敗・件数を見る
-6. スプレッド込みnet成績を必須にする
-7. 良い候補があってもすぐ通知/発注へ進めない
-8. 候補を数本に絞ってから、GOLD strict 7 と同様の候補管理へ進む
+scripts/run_btc_strict_5_official_ai_review_pipeline.bat
+scripts/run_btc_strict_5_official_ai_review_pipeline.py
 ```
 
-使ってよい指標例:
+order ledger がまだ無い場合は、エラーではなく以下で安全終了する。
 
 ```text
-- Donchian breakout / breakdown
-- EMA trend
-- MACD momentum
-- RSI / Stoch
-- Bollinger / Keltner
-- ATR / volatility filter
-- CCI
-- pullback / reclaim / rejection
-```
-
-ただし、1候補に詰め込みすぎない。
-
-```text
-インジケーターは2〜3個程度を基本にする。
+status: NO_ORDER_LEDGER_YET
+cycle_ok: true
+ai_called: false
+mt5_history_export_called: false
 ```
 
 ---
 
-## 10. バックテスト判定方針
+## 5. 普段起動するBTC BAT
 
-BTCはスプレッドが大きいため、必ずnet評価にする。
+BTCの通常運用では、通知と自動売買を別々のコマンドプロンプトで起動する。
+
+### 通知
 
 ```text
-- spread込み
-- 手数料や実運用差があれば考慮
-- first-touch判定を明確にする
-- TP/SL到達順の曖昧さを保守的に扱う
-- 月別成績を見る
-- 最大DDと連敗を見る
+scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.bat
 ```
 
-候補が良く見えても、以下は必ず確認する。
+内容:
 
 ```text
-- トレード数が極端に少なくないか
-- 1ヶ月だけで稼いでいないか
-- 悪化月の理由
-- 大きなボラ局面だけに依存していないか
-- レンジで連敗しないか
+毎分02秒
+Discord通知
+official conservative_v1
+numeric AI tag 推定あり
+重複通知はledgerで防止
+OpenAI呼び出しなし
+MT5発注なし
+D1不使用
 ```
 
----
-
-## 11. BTC候補を作るときの注意
-
-ユーザーは、勝手にシグナルを本実装へ進めることを望んでいない。
-
-必ず段階を守る。
+### 自動売買
 
 ```text
-探索
-  -> 数値比較
-  -> 月別確認
-  -> 候補名と条件を言語化
-  -> ユーザー確認
-  -> その後にコード整理
+scripts/run_btc_strict_5_official_guarded_demo_send_forever_aligned_weekly_state.bat
 ```
 
-勝手にDiscord通知や自動売買へ接続しない。
-
----
-
-## 12. 次チャットでの開始文例
-
-新チャットでは、ユーザーは以下を貼る想定。
+内容:
 
 ```text
-GitHubリポジトリ knitanr-a11y/xauusd-signal-lab の以下を最初に読んで、続きからお願いします。
+毎分02秒
+official conservative_v1
+guarded demo send
+発注あり
+position guardあり
+order ledger作成あり
+```
 
-必須:
-docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md
-docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
-docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
+### トレード後AI評価
 
-次にやること:
-GOLD strict 7 は運用開始可能な状態まで進みました。
-次はBTCのシグナルを、未来情報なし・確定足のみ・スプレッド込みで作り直したいです。
-既存BTCシグナルは参考程度にし、D1_LOW_BREAK_SELL なども本命扱いせず、BTC用の候補を多角的に再探索してください。
-BTCはスプレッドが大きいので、50pips以上の値幅を取れるところを優先してください。
-まずはコード実装ではなく、既存ファイル確認・CSV仕様確認・探索方針の整理からお願いします。
+実際に発注・決済が発生した後に実行する。
+
+```text
+scripts/run_btc_strict_5_official_ai_review_pipeline.bat
 ```
 
 ---
 
-## 13. 現時点の結論
+## 6. BTC runtime ledger / 出力先
 
-GOLD側は、運用開始可能な状態として記録済み。
-
-BTC側は、次チャットで以下から再開する。
+通知ledger:
 
 ```text
-BTC strict signal rebuild
-未来情報なし
-確定足のみ
-スプレッド込み
-50pips以上の値幅優先
-PF 2以上を目指す
-すぐ通知/発注へ接続しない
+data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv
+```
+
+autotrade order ledger:
+
+```text
+data/runtime_state/btc/strict_5/official_guarded_demo_order_ledger.csv
+```
+
+AI tag numeric rules:
+
+```text
+data/runtime_state/btc/strict_5/ai_tag_numeric_rules.json
+data/runtime_state/btc/strict_5/ai_tag_numeric_rules_summary.csv
+```
+
+post-trade AI review 出力:
+
+```text
+data/runtime_logs/trade_ai_review_btc_strict_5_official/
+```
+
+主なsummary:
+
+```text
+data/runtime_logs/trade_ai_review_btc_strict_5_official/btc_strict_5_official_ai_review_pipeline_summary.json
+data/runtime_logs/trade_ai_review_btc_strict_5_official/btc_ai_review_pipeline_same_spec_summary.json
+data/runtime_logs/trade_ai_review_btc_strict_5_official/trade_ai_tag_summary.csv
+```
+
+---
+
+## 7. 通知時 numeric AI tag 推定
+
+通知時にはOpenAIを呼ばない。
+
+過去のpost-trade AI評価から作った数値ルールを読み、現在シグナルにHITしたタグだけを表示する。
+
+```text
+過去AI評価
+  -> numeric rule JSON
+  -> 通知時に現在シグナルへ適用
+  -> HITしたタグだけDiscordへ表示
+```
+
+ルール生成BAT:
+
+```text
+scripts/build_btc_strict_5_ai_tag_numeric_rules.bat
+```
+
+このBATは、numeric condition diagnostics を再構築し、`ai_tag_numeric_rules.json` を作る。
+
+通知BATは、ルールJSONが無ければ自動生成を試みる。
+
+通知例:
+
+```text
+AIタグ推定:
+個別AIタグ推定: なし
+AIタグ数値ルール: checked=9 hit=0
+個別AI判定: 未実施（OpenAIは呼ばない）
+```
+
+HIT時:
+
+```text
+AIタグ推定:
+個別AIタグ推定: ⚠️ HIT 1件
+- high_volatility_chase / WATCH / WARN
+  根拠: ...
+```
+
+重要:
+
+```text
+checked=N hit=0 は、N個のルールを確認し、今回は警告なしという意味。
+hit>0 の場合のみ、その個別シグナルに警告タグ推定が付く。
+```
+
+---
+
+## 8. BTC AI tag numeric rules の現在地
+
+最終確認時点では以下まで確認済み。
+
+```text
+rules_count: 31
+ai_tag_rules_cycle_ok: true
+Donch96: checked=9 hit=0
+Donch32: checked=6 hit=0
+```
+
+つまり、ルールJSONの読み込みNG問題は解消済み。
+
+今回確認した2件では、AIタグ数値ルールは確認されたがHITなし。
+
+---
+
+## 9. トレード後AI評価BAT
+
+追加済み:
+
+```text
+scripts/run_btc_strict_5_official_ai_review_pipeline.bat
+scripts/run_btc_strict_5_official_ai_review_pipeline.py
+```
+
+対象order ledger:
+
+```text
+data/runtime_state/btc/strict_5/official_guarded_demo_order_ledger.csv
+```
+
+このledgerは、通知BATではなく自動売買BATが作る。
+
+まだ注文ledgerが無い状態で実行すると、以下で正常スキップする。
+
+```text
+status: NO_ORDER_LEDGER_YET
+cycle_ok: true
+ai_called: false
+orders_sent: false
+```
+
+実際にBTC strict 5 officialの注文が発生し、決済済みトレードが出てから再実行する。
+
+---
+
+## 10. BTCの次に確認すること
+
+次にBTCで確認すべきこと:
+
+```text
+1. 通知BATを起動し続ける
+2. 自動売買BATを別窓で起動し続ける
+3. official_guarded_demo_order_ledger.csv が作られるか確認
+4. 決済後、run_btc_strict_5_official_ai_review_pipeline.bat を実行
+5. trade_ai_review_btc_strict_5_official 出力を確認
+6. 2回目実行で評価済みがスキップされるか確認
+```
+
+BTCは、実装追加ではなく実運用確認フェーズ。
+
+---
+
+## 11. 注意事項
+
+```text
+- 既存BTC multi_strategy のledgerとは混ぜない。
+- BTC strict 5 official のruntime_stateだけを見る。
+- 通知BATだけではorder ledgerは作られない。
+- 自動売買BATを起動して初めて official_guarded_demo_order_ledger.csv ができる。
+- トレード後AI評価は、通知時AIタグ推定とは別物。
+```
+
+---
+
+## 12. このチャットで追加・更新した主なファイル
+
+```text
+scripts/ai_tag_numeric_rule_utils.py
+scripts/btc_strict_5_signals/build_btc_strict_5_ai_tag_numeric_rules.py
+scripts/build_btc_strict_5_ai_tag_numeric_rules.bat
+scripts/btc_strict_5_signals/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.py
+scripts/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.bat
+scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.py
+scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.bat
+scripts/run_btc_strict_5_official_ai_review_pipeline.py
+scripts/run_btc_strict_5_official_ai_review_pipeline.bat
+```
+
+---
+
+## 13. 次チャット開始時の推奨確認
+
+次チャットでは、ユーザーが以下を貼ったらこの文書から再開する。
+
+```text
+BTC strict 5 と GOLD strict 7 の続きです。
+まず docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md と docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md を読んでください。
+```
+
+BTC側で最初に見るべきもの:
+
+```text
+data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv
+data/runtime_state/btc/strict_5/official_guarded_demo_order_ledger.csv
+data/runtime_logs/trade_ai_review_btc_strict_5_official/btc_strict_5_official_ai_review_pipeline_summary.json
 ```
