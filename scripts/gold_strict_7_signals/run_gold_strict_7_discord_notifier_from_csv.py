@@ -4,11 +4,12 @@ r"""Discord preview/notifier for GOLD strict 7 signals from live CSVs.
 
 Default behavior is safe:
 - no Discord send unless --send-discord is passed
-- no ledger mutation unless --send-discord or --mark-dry-run-notified is passed
+- no ledger mutation unless Discord send succeeds or --mark-dry-run-notified is passed
 - no MT5 order send
 - no OpenAI call at notification time
 - H1/H4/D1 context is joined only with closed context candles
 - wall-clock freshness guard suppresses stale CSV/signals before notification
+- Discord send errors are written to summary JSON before returning non-zero
 
 AI tag scoring:
 - uses deterministic numeric rules generated from historical post-trade AI review
@@ -52,7 +53,8 @@ DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v7_wall_clock_freshness_guard"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v8_wall_clock_guard_send_error_summary"
+DISCORD_SAFE_MAX_CHARS = 1900
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -223,6 +225,13 @@ def minutes_since_local_est(value: Any, *, mt5_to_local_hours: float, now_local:
     return float((now_local - local_est).total_seconds() / 60.0)
 
 
+def truncate_for_discord(message: str) -> str:
+    if len(message) <= DISCORD_SAFE_MAX_CHARS:
+        return message
+    suffix = "\n\n[TRUNCATED] Discord文字数制限回避のため本文を短縮。詳細はmessage_path JSONを確認。"
+    return message[: max(0, DISCORD_SAFE_MAX_CHARS - len(suffix))] + suffix
+
+
 def strategy_display_name(strategy_id: str) -> str:
     mapping = {
         "SELL_KC_CCI150_LONDON_TP100_SL10": "SELL KC+CCI150 London",
@@ -280,7 +289,6 @@ def row_for_ai_score(row: pd.Series, spec: GoldStrictSignalSpec) -> dict[str, An
     out = {str(k): json_safe(v) for k, v in row.to_dict().items()}
     out["strategy_id"] = spec.strategy_id
     out["direction"] = spec.direction
-    # Notification-row aliases for feature-snapshot feature names.
     out["m15_signal_candle_close_pos"] = safe_float(row.get("close_pos"))
     out["m15_signal_candle_range_atr_ratio"] = safe_float(row.get("range_atr"))
     out["m15_signal_candle_body_ratio"] = safe_float(row.get("body_ratio"))
@@ -322,7 +330,7 @@ def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, ai_score: dict[
         "個別AI判定: 未実施（OpenAIは呼ばない）",
         "注記: 過去AI評価タグを数値条件化し、現在シグナルにHITしたものだけ表示。",
     ])
-    return "\n".join(lines)
+    return truncate_for_discord("\n".join(lines))
 
 
 def ai_score_hit_text(ai_score: dict[str, Any]) -> str:
@@ -559,8 +567,10 @@ def main() -> int:
 
     preview_rows: list[dict[str, Any]] = []
     ledger_rows: list[dict[str, Any]] = []
+    send_errors: list[dict[str, Any]] = []
     skipped_duplicates = 0
     ai_tag_hit_rows = 0
+    discord_sent_rows = 0
 
     print("=" * 100, flush=True)
     print("GOLD Discord notifier", flush=True)
@@ -599,12 +609,18 @@ def main() -> int:
         print(message, flush=True)
         print(f"message_path: {message_path}", flush=True)
         if args.send_discord:
-            send_discord_message(webhook_url, message)
-            discord_sent = True
-            print("Discord sent: true", flush=True)
+            try:
+                send_discord_message(webhook_url, message)
+                discord_sent = True
+                discord_sent_rows += 1
+                print("Discord sent: true", flush=True)
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                send_errors.append(err)
+                print(f"Discord send error: {err}", flush=True)
         preview = row_to_preview(row, spec, key=key, message_path=message_path, discord_sent=discord_sent, dry_run=bool(args.dry_run), ai_score=ai_score)
         preview_rows.append(preview)
-        if args.send_discord or args.mark_dry_run_notified:
+        if (args.send_discord and discord_sent) or args.mark_dry_run_notified:
             ledger_rows.append({
                 "notified_at": now_str(),
                 "schema_version": SCHEMA_VERSION,
@@ -618,7 +634,8 @@ def main() -> int:
     summary = {
         "schema_version": SCHEMA_VERSION,
         "created_at": now_str(),
-        "cycle_ok": True,
+        "cycle_ok": bool(len(send_errors) == 0),
+        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",
         "csv_paths": {tf: str(p) for tf, p in paths.items()},
         "out_dir": str(out_dir),
         "preview_csv": str(preview_csv),
@@ -636,6 +653,9 @@ def main() -> int:
         "skipped_duplicates": int(skipped_duplicates),
         "ledger_rows_appended": int(len(ledger_rows)),
         "send_discord": bool(args.send_discord),
+        "discord_sent_rows": int(discord_sent_rows),
+        "discord_send_error_rows": int(len(send_errors)),
+        "discord_send_errors": send_errors,
         "dry_run": bool(args.dry_run),
         "wall_clock_freshness_guard": freshness_guard,
         "safety": {
@@ -646,6 +666,8 @@ def main() -> int:
             "requires_valid_ai_tag_rules_on_send": True,
             "live_runtime_state_mutation": bool(len(ledger_rows) > 0),
             "wall_clock_freshness_guard_enabled": True,
+            "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),
+            "ledger_append_requires_send_success_or_mark_dry_run": True,
         },
     }
     with open(windows_long_path(summary_json), "w", encoding="utf-8", newline="") as f:
@@ -654,7 +676,7 @@ def main() -> int:
     print("\n" + "=" * 100, flush=True)
     print(json.dumps(summary, ensure_ascii=False, indent=2, default=str), flush=True)
     print("=" * 100, flush=True)
-    return 0
+    return 0 if len(send_errors) == 0 else 1
 
 
 if __name__ == "__main__":
