@@ -1,6 +1,6 @@
 # NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
 この文書は、GOLD strict 7 の現状を次チャットへ引き継ぐためのメモです。
 
@@ -16,6 +16,7 @@ GOLD側は、strict 7 の候補を中心に以下の構成まで整理済みで�
 - guarded demo connector
 - post-trade AI review
 - backtest AI review と live AI review の分離
+- 通知時 numeric AI tag 推定
 ```
 
 GOLD strict 7 は、デモ検証を開始できる構成になっています。
@@ -57,6 +58,12 @@ docs/REPOSITORY_CLEANUP_AND_DEPRECATION_POLICY.md
 docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
 ```
 
+BTC側の現状:
+
+```text
+docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md
+```
+
 ---
 
 ## 4. 主要スクリプト
@@ -79,6 +86,14 @@ Discord通知系:
 scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
 scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.py
 scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
+```
+
+通知時AIタグ推定:
+
+```text
+scripts/ai_tag_numeric_rule_utils.py
+scripts/gold_strict_7_signals/build_gold_strict_7_ai_tag_numeric_rules.py
+scripts/build_gold_strict_7_ai_tag_numeric_rules.bat
 ```
 
 guarded demo connector系:
@@ -150,6 +165,13 @@ strict 7 connector ledger:
 data/runtime_state/gold/strict_7/guarded_demo_order_ledger.csv
 ```
 
+AI tag numeric rules:
+
+```text
+data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json
+data/runtime_state/gold/strict_7/ai_tag_numeric_rules_summary.csv
+```
+
 live AI review 出力:
 
 ```text
@@ -164,7 +186,80 @@ data/runtime_logs/trade_ai_review_backtest_gold_strict_7/
 
 ---
 
-## 7. AI評価の扱い
+## 7. 通知時 AIタグ推定
+
+GOLD通知は、過去AI評価でstrategyに溜まったタグをそのまま表示する方式ではなく、BTCと同じく numeric rule による個別シグナル判定へ変更済み。
+
+```text
+過去AI評価
+  -> gold strict 7 numeric rule JSON
+  -> 通知時に現在シグナルへ適用
+  -> HITしたタグだけDiscordへ表示
+```
+
+通知時にOpenAIは呼ばない。
+
+GOLD用ルール生成BAT:
+
+```text
+scripts/build_gold_strict_7_ai_tag_numeric_rules.bat
+```
+
+通常のGOLD通知BAT:
+
+```text
+scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
+```
+
+このBATは起動時に以下を確認する。
+
+```text
+data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json
+```
+
+無ければ、`scripts/build_gold_strict_7_ai_tag_numeric_rules.bat` を自動実行する。
+
+通知loop本体も、`--ai-tag-rules-json` を notifier へ渡すよう更新済み。
+
+通知例:
+
+```text
+AIタグ推定:
+個別AIタグ推定: なし
+AIタグ数値ルール: checked=... hit=0
+個別AI判定: 未実施（OpenAIは呼ばない）
+```
+
+HIT時:
+
+```text
+AIタグ推定:
+個別AIタグ推定: ⚠️ HIT 1件
+- ema_distance_too_large / WATCH / WARN
+  根拠: ...
+```
+
+GOLD用ルールJSONの最終確認時点:
+
+```text
+cycle_ok: true
+rules_count: 4
+対象strategy: GOLD_H4_M15_DAYTRADE
+対象タグ:
+- ema_distance_too_large
+- entry_after_extended_move
+```
+
+注記:
+
+```text
+現状のGOLD numeric AI tag rulesは4本のみ。
+今後live/backtest AI reviewが増えたら再生成して精度と対象タグを増やす。
+```
+
+---
+
+## 8. AI評価の扱い
 
 AI評価は、発生前の可否判定ではなく、完了後の仮説タグ付けとして扱います。
 
@@ -197,11 +292,12 @@ cycle_ok: True
 - 1件だけで条件変更しない。
 - 自動停止、ブロック、ロット変更はまだ行わない。
 - live結果とbacktest結果は混ぜない。
+- 通知時AIタグ推定はOpenAIを呼ばない。
 ```
 
 ---
 
-## 8. backtest AI review 初回結果
+## 9. backtest AI review 初回結果
 
 GOLD strict 7 backtest AI review は 314/314件完了済みです。
 
@@ -220,18 +316,21 @@ docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 
 ---
 
-## 9. まだ実地確認が必要なこと
+## 10. まだ実地確認が必要なこと
 
 次に確認すべきこと:
 
 ```text
 1. Discord通知が毎分監視で遅れず届くか
-2. strict 7 connector ledger が想定通り残るか
-3. 既存sender側のチェック結果がsummaryに残るか
-4. 完了後、live AI reviewが新規分だけ拾うか
-5. 2回目live AI reviewで同じIDがスキップされるか
-6. loop summaryのelapsed_secondsが十分短いか
-7. EAのCSV書き出し時刻とPython検出時刻のズレが許容範囲か
+2. 通知本文にAIタグ推定欄が出るか
+3. summaryで ai_tag_rules_cycle_ok: true になるか
+4. summaryで ai_tag_rules_count: 4 以上になるか
+5. strict 7 connector ledger が想定通り残るか
+6. 既存sender側のチェック結果がsummaryに残るか
+7. 完了後、live AI reviewが新規分だけ拾うか
+8. 2回目live AI reviewで同じIDがスキップされるか
+9. loop summaryのelapsed_secondsが十分短いか
+10. EAのCSV書き出し時刻とPython検出時刻のズレが許容範囲か
 ```
 
 見るsummary列:
@@ -241,6 +340,9 @@ elapsed_seconds
 ctx_rows
 raw_recent_signals_after_cooldown
 preview_rows
+ai_tag_hit_rows
+ai_tag_rules_count
+ai_tag_rules_cycle_ok
 payload_rows
 reason
 pending_rows
@@ -250,19 +352,21 @@ review_rows_written_this_run
 
 ---
 
-## 10. 次チャットで続ける場合
+## 11. 次チャットで続ける場合
 
 次チャットでは、まずこの文書と以下を読むこと。
 
 ```text
 docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
 docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
+docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md
 ```
 
 その後、実シグナルが出ていれば、以下を確認する。
 
 ```text
 - Discord通知の有無
+- 通知本文のAIタグ推定欄
 - strict 7 connector ledger
 - loop summary CSV
 - live AI review summary
@@ -270,4 +374,16 @@ docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
 
 実シグナルがまだ出ていなければ、GOLD側は監視継続でよい。
 
-BTC側は、GOLD strict 7 の実地確認後に再開する。
+---
+
+## 12. このチャットで追加・更新した主なGOLD関連ファイル
+
+```text
+scripts/gold_strict_7_signals/build_gold_strict_7_ai_tag_numeric_rules.py
+scripts/build_gold_strict_7_ai_tag_numeric_rules.bat
+scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
+scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.py
+scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
+```
+
+GOLD側は、次に通知BATの1サイクル確認を行う。
