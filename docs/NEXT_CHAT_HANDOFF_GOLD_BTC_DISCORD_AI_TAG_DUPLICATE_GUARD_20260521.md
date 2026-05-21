@@ -2,6 +2,40 @@
 
 Last updated: 2026-05-21
 
+## 0. 2026-05-22追記: まず読むべき最新短縮版
+
+GOLD strict7 のAI推定タグ、特に「タグ組み合わせ」「複合警告」「複合好機」の続きなら、この長い文書を読む前に以下だけ読んでください。
+
+```text
+docs/NEXT_CHAT_HANDOFF_GOLD_AI_TAG_COMBO_RULES_20260522.md
+```
+
+この文書を読む必要があるのは、主に以下の場合だけです。
+
+```text
+- Discord通知の重複通知ガードを再確認する時
+- GOLD/BTC通知タイミングの +5秒 設定を確認する時
+- GOLD strict7 の浅いSL探索結果を確認する時
+- 2026-05-21時点の背景を詳しく追う時
+```
+
+読まなくてよいケース:
+
+```text
+- AIタグ組み合わせの現在実装だけ確認したい時
+- 最新のGOLD AIタグ生成BATの流れだけ確認したい時
+- combo_rules の表示・運用方針だけ確認したい時
+```
+
+理由:
+
+```text
+2026-05-22に、GOLD AIタグ組み合わせ専用の短縮ハンドオフを追加済み。
+古い記述にはローカルパッチ方式や旧AIタグ表示の説明が含まれるため、最新作業では短縮版を優先する。
+```
+
+---
+
 この文書は、2026-05-21時点で実施した以下の内容を、次チャットへ正確に引き継ぐための最新版メモです。
 
 ```text
@@ -218,231 +252,3 @@ BTC official Discord通知にも同じ構造のリスクがあった。
 
 ### hotfix方針
 
-GOLD:
-
-```text
-notification_key の時刻を 5分足bucket に固定
-CSV ledger + JSON seen_state の二重重複ガード
-Discord送信成功直後に即時ledger追記
-Discord送信成功直後にseen_state JSONへ即時保存
-```
-
-BTC:
-
-```text
-notification_key の時刻を 15分足bucket に固定
-CSV ledger + JSON seen_state の二重重複ガード
-Discord送信成功直後に即時ledger追記
-Discord送信成功直後にseen_state JSONへ即時保存
-```
-
-### hotfix適用スクリプト
-
-```text
-scripts/apply_gold_btc_discord_duplicate_guard_hotfix.py
-```
-
-実行ログでは、GOLD/BTCともに以下まで成功済み。
-
-```text
-[OK] GOLD patched and verified
-[OK] BTC patched and verified
-[DONE] GOLD/BTC Discord duplicate guard hotfix applied. Restart Discord notification BATs.
-```
-
-### GitHub反映状況
-
-ユーザーが本体ファイルを1つずつpush済み。
-
-GitHub上で以下を確認済み。
-
-GOLD:
-
-```text
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
-SCHEMA_VERSION = gold_strict_7_discord_notifier_v9_candle_bucket_duplicate_guard
-DEFAULT_SEEN_STATE_JSON = data/runtime_state/gold/strict_7/discord_notification_seen_keys.json
-notification_key uses 5min bucket
-load_notified_keys + load_seen_state_keys
-append_ledger_row_durable
-mark_seen_state_key
-```
-
-BTC:
-
-```text
-scripts/btc_strict_5_signals/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.py
-SCHEMA_VERSION = btc_strict_5_official_discord_notifier_numeric_ai_tags_v5_m15_bucket_duplicate_guard
-DEFAULT_SEEN_STATE_JSON = data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_seen_keys.json
-notification_key uses 15min bucket
-load_notified_keys + load_seen_state_keys
-append_ledger_row_durable
-mark_seen_state_key
-```
-
-### 注意: 現在の本体には軽微な重複行あり
-
-複数回のローカルパッチ適用の影響で、以下の軽微な重複が残っている。
-
-GOLD:
-
-```text
-notification_bucket_time_text が2回定義されている
-print(seen_state_json) が2回出る
-summary内で ledger_append_error_rows / ledger_append_errors が重複
-safety内で seen_state_duplicate_guard_enabled / notification_key_uses_5min_candle_bucket が重複
-```
-
-BTC:
-
-```text
-summary内で ledger_append_error_rows / ledger_append_errors が重複
-```
-
-実害:
-
-```text
-同名関数は後の定義で上書きされる。
-summaryの同じキーは同値のため大きな実害はない。
-重複通知防止の中核処理には影響しない見込み。
-```
-
-ただし、後で本体2ファイルを整理して重複行を除去した方がよい。
-
----
-
-## 4. 現在の運用確認手順
-
-### 1. 古い通知BATを止める
-
-修正前のプロセスは古い本体を読み続けるため、必ず停止する。
-
-### 2. 通知BATを再起動
-
-GOLD:
-
-```text
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notify_forever_aligned.bat
-```
-
-BTC:
-
-```text
-scripts/run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned_weekly_state.bat
-```
-
-### 3. summaryで確認する項目
-
-GOLD:
-
-```text
-schema_version: gold_strict_7_discord_notifier_v9_candle_bucket_duplicate_guard
-duplicate_guard_mode: ledger_csv_plus_seen_state_json_plus_5min_candle_bucket_key
-seen_state_json: data/runtime_state/gold/strict_7/discord_notification_seen_keys.json
-seen_state_duplicate_guard_enabled: true
-notification_key_uses_5min_candle_bucket: true
-skipped_duplicates
-ledger_rows_appended
-seen_state_error_rows
-```
-
-BTC:
-
-```text
-schema_version: btc_strict_5_official_discord_notifier_numeric_ai_tags_v5_m15_bucket_duplicate_guard
-duplicate_guard_mode: ledger_csv_plus_seen_state_json_plus_15min_candle_bucket_key
-seen_state_json: data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_seen_keys.json
-seen_state_duplicate_guard_enabled: true
-notification_key_uses_15min_candle_bucket: true
-skipped_duplicates
-ledger_rows_appended
-seen_state_error_rows
-```
-
-### 4. 期待挙動
-
-GOLD:
-
-```text
-同じM5足の同じstrategy/directionは1回だけ通知。
-次ループ以降は skipped_duplicates が増える。
-```
-
-BTC:
-
-```text
-同じM15足の同じstrategy/direction/filter_variantは1回だけ通知。
-次ループ以降は skipped_duplicates が増える。
-```
-
----
-
-## 5. 残課題
-
-### A. Discord通知本体のクリーンアップ
-
-GOLD/BTC通知本体は、hotfixの止血は入ったが、重複行が残っている。
-
-落ち着いたら以下を整理する。
-
-```text
-scripts/gold_strict_7_signals/run_gold_strict_7_discord_notifier_from_csv.py
-scripts/btc_strict_5_signals/run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv.py
-```
-
-整理内容:
-
-```text
-- notification_bucket_time_text の重複定義削除
-- seen_state_json print重複削除
-- summary重複キー削除
-- cycle_ok / return code に seen_state_errors も含める
-- apply_gold_btc_discord_duplicate_guard_hotfix.py は将来的に不要なら削除またはarchive
-```
-
-### B. AIタグ表示の実通知確認
-
-次回GOLD通知で確認すること。
-
-```text
-AIタグ: ✅ 好材料 / ⚠️ 強め注意 / 参考注意 / 参考
-判定: 評価可 x/y・特徴不足 z・HIT n
-```
-
-が出るか確認。
-
-### C. GOLD/BTCとも、実シグナル時に1回通知で止まるか確認
-
-```text
-GOLDはM5単位
-BTCはM15単位
-```
-
-で重複が止まることを確認する。
-
-### D. 価格ズレ/浅いSL監視
-
-SLは変更しない方針だが、GOLDの浅いSL戦略では、通知時点の価格ズレやSL残距離を将来的に通知へ出すとよい。
-
-対象優先:
-
-```text
-BUY_BB_RSI30_REJECTION65_NY_TP30_SL7P5
-SELL_DONCHIAN48_MACD_RANGE_NY_TP30_SL7P5
-SELL_KC_CCI150_LONDON_TP100_SL10
-BUY_SWEEP_RECLAIM_RSI_TP150_SL10
-BUY_STOCH_BB_KTURN_NY_TP150_SL10
-```
-
----
-
-## 6. 次チャットで最初に見るファイル
-
-```text
-docs/NEXT_CHAT_HANDOFF_GOLD_BTC_DISCORD_AI_TAG_DUPLICATE_GUARD_20260521.md
-docs/NEXT_CHAT_HANDOFF_GOLD_STRICT_7_LIVE_READY.md
-docs/NEXT_CHAT_HANDOFF_BTC_SIGNAL_REBUILD_AFTER_GOLD_STRICT_7_READY.md
-docs/GOLD_STRICT_7_BACKTEST_AI_REVIEW_INITIAL_RESULT.md
-```
-
-特に、通知重複やAIタグの話を続ける場合は、この文書を最優先で読む。
