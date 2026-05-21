@@ -14,6 +14,7 @@ Safety:
 - D1 is not read by the BTC strict-5 child wrapper.
 - Duplicate order_key protection is handled by the persistent sender ledger.
 - Lightweight mode passes --tail-m15/--tail-h1/--tail-h4 to the child wrapper.
+- Wall-clock freshness guard args are passed through to suppress stale CSV/signals.
 """
 from __future__ import annotations
 
@@ -185,6 +186,9 @@ def build_child_cmd(args: argparse.Namespace, child_out_dir: Path, persistent_or
         "--order-ledger-csv", str(persistent_order_ledger),
         "--scan-recent-bars", str(args.scan_recent_bars),
         "--max-signal-age-minutes", str(args.max_signal_age_minutes),
+        "--max-wall-clock-signal-age-minutes", str(args.max_wall_clock_signal_age_minutes),
+        "--max-csv-staleness-minutes", str(args.max_csv_staleness_minutes),
+        "--mt5-to-local-hours", str(args.mt5_to_local_hours),
         "--tail-m15", str(args.tail_m15),
         "--tail-h1", str(args.tail_h1),
         "--tail-h4", str(args.tail_h4),
@@ -230,7 +234,10 @@ def run_cycle(args: argparse.Namespace, cycle_index: int, loop_dir: Path, persis
     print(f"[CYCLE {cycle_index}] {utc_text(cycle_start)} running child", flush=True)
     print("[CMD] " + " ".join(cmd), flush=True)
     started = time.perf_counter()
-    proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True, env=env)
     elapsed = round(time.perf_counter() - started, 3)
     cycle_end = utc_now()
     write_text(stdout_log, proc.stdout or "")
@@ -293,6 +300,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--offset-seconds", type=int, default=2)
     p.add_argument("--scan-recent-bars", type=int, default=5)
     p.add_argument("--max-signal-age-minutes", type=int, default=30)
+    p.add_argument("--max-wall-clock-signal-age-minutes", type=int, default=30)
+    p.add_argument("--max-csv-staleness-minutes", type=int, default=45)
+    p.add_argument("--mt5-to-local-hours", type=float, default=6.0)
     p.add_argument("--tail-m15", type=int, default=3000)
     p.add_argument("--tail-h1", type=int, default=2000)
     p.add_argument("--tail-h4", type=int, default=1000)
@@ -333,6 +343,7 @@ def main() -> int:
     print(f"persistent_order_ledger={persistent_order_ledger}", flush=True)
     print(f"interval_minutes={args.interval_minutes} offset_seconds={args.offset_seconds}", flush=True)
     print(f"tails: m15={args.tail_m15} h1={args.tail_h1} h4={args.tail_h4}", flush=True)
+    print(f"wall_clock_guard: max_signal_age={args.max_wall_clock_signal_age_minutes}m max_csv_staleness={args.max_csv_staleness_minutes}m mt5_to_local_hours={args.mt5_to_local_hours}", flush=True)
     print(f"send={args.send} allow_demo_send={args.allow_demo_send}", flush=True)
     print("Stop with Ctrl+C", flush=True)
     print("=" * 100, flush=True)
@@ -348,7 +359,7 @@ def main() -> int:
             loop_csv = loop_dir / "aligned_loop_log.csv"
             append_csv_row(loop_csv, row, LOOP_LOG_COLUMNS)
             latest_summary = {
-                "schema_version": "btc_strict_5_guarded_demo_send_forever_aligned_weekly_state_v2_light_tail",
+                "schema_version": "btc_strict_5_guarded_demo_send_forever_aligned_weekly_state_v3_wall_clock_freshness_guard",
                 "updated_at_utc": utc_text(),
                 "cycle_index": cycle_index,
                 "cycle_ok": bool(row.get("cycle_ok")),
@@ -363,6 +374,11 @@ def main() -> int:
                 "tail_m15": int(args.tail_m15),
                 "tail_h1": int(args.tail_h1),
                 "tail_h4": int(args.tail_h4),
+                "wall_clock_guard": {
+                    "max_wall_clock_signal_age_minutes": int(args.max_wall_clock_signal_age_minutes),
+                    "max_csv_staleness_minutes": int(args.max_csv_staleness_minutes),
+                    "mt5_to_local_hours": float(args.mt5_to_local_hours),
+                },
                 "log_dir": str(loop_dir),
                 "loop_csv": str(loop_csv),
                 "persistent_order_ledger_csv": str(persistent_order_ledger),
