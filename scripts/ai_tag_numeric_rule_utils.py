@@ -4,6 +4,11 @@
 
 These utilities do not call AI. They only evaluate deterministic numeric rules
 that were generated from historical AI-review tags and pre-entry features.
+
+Important wording:
+- A rule HIT means "the current signal numerically resembles a past AI-review tag".
+- It is not a direct loss-probability prediction.
+- Notification text therefore separates stronger caution tags from reference-only tags.
 """
 from __future__ import annotations
 
@@ -14,7 +19,43 @@ from typing import Any
 
 import pandas as pd
 
-SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v1"
+SCHEMA_VERSION = "ai_tag_numeric_rule_utils_v2_evaluable_counts_readable_text"
+
+HIGH_PRIORITY_TAGS = {
+    "poor_pullback_structure",
+    "m15_signal_candle_large",
+    "macd_late_signal",
+    "high_volatility_chase",
+    "ema_distance_too_large",
+}
+
+MEDIUM_PRIORITY_TAGS = {
+    "near_recent_low",
+    "near_recent_high",
+    "range_edge_entry",
+    "against_h1_context",
+    "against_h4_context",
+    "entry_after_extended_move",
+}
+
+LOW_PRIORITY_TAGS = {
+    "tp_sl_distance_invalid",
+}
+
+TAG_JA = {
+    "poor_pullback_structure": "押し戻りの形が弱い",
+    "m15_signal_candle_large": "シグナル足が大きすぎる",
+    "macd_late_signal": "MACDが遅れ気味",
+    "high_volatility_chase": "高ボラ追いかけ気味",
+    "ema_distance_too_large": "EMAから離れすぎ",
+    "near_recent_low": "直近安値に近い",
+    "near_recent_high": "直近高値に近い",
+    "range_edge_entry": "レンジ端でのエントリー",
+    "against_h1_context": "H1方向と逆らい気味",
+    "against_h4_context": "H4方向と逆らい気味",
+    "entry_after_extended_move": "伸びた後のエントリー",
+    "tp_sl_distance_invalid": "TP/SL距離に注意",
+}
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -41,6 +82,10 @@ def clean_str(value: Any, default: str = "") -> str:
     return text if text else default
 
 
+def canonical_tag(value: Any) -> str:
+    return clean_str(value).lower().replace(" ", "_").replace("-", "_")
+
+
 def safe_float(value: Any) -> float | None:
     if value is None or value == "":
         return None
@@ -53,6 +98,11 @@ def safe_float(value: Any) -> float | None:
         return float(value)
     except Exception:
         return None
+
+
+def fmt_float(value: Any, digits: int = 2, default: str = "N/A") -> str:
+    x = safe_float(value)
+    return default if x is None else f"{x:.{digits}f}"
 
 
 def load_rules_json(path: str | Path) -> dict[str, Any]:
@@ -115,8 +165,10 @@ def condition_matches(row: dict[str, Any] | pd.Series, cond: dict[str, Any]) -> 
     if not feature or not op or threshold is None:
         return False, {"feature": feature, "op": op, "threshold": threshold, "value": None, "ok": False, "reason": "INVALID_CONDITION"}
     value = row_value(row, feature, aliases)
+    if value is None:
+        return False, {"feature": feature, "op": op, "threshold": threshold, "value": None, "ok": False, "reason": "MISSING_FEATURE_VALUE", "aliases": aliases}
     ok = op_match(value, op, threshold)
-    return ok, {"feature": feature, "op": op, "threshold": threshold, "value": value, "ok": ok, "aliases": aliases}
+    return ok, {"feature": feature, "op": op, "threshold": threshold, "value": value, "ok": ok, "reason": "OK" if ok else "NO_MATCH", "aliases": aliases}
 
 
 def rule_matches(row: dict[str, Any] | pd.Series, rule: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
@@ -134,6 +186,50 @@ def rule_matches(row: dict[str, Any] | pd.Series, rule: dict[str, Any]) -> tuple
     return True, results
 
 
+def rule_evaluable(row: dict[str, Any] | pd.Series, rule: dict[str, Any]) -> tuple[bool, list[dict[str, Any]]]:
+    conditions = rule.get("conditions", [])
+    if not isinstance(conditions, list) or not conditions:
+        return False, []
+    details: list[dict[str, Any]] = []
+    for cond in conditions:
+        if not isinstance(cond, dict):
+            return False, details
+        _ok, detail = condition_matches(row, cond)
+        details.append(detail)
+        if detail.get("reason") in {"INVALID_CONDITION", "MISSING_FEATURE_VALUE"}:
+            return False, details
+    return True, details
+
+
+def derive_warning_level(rule: dict[str, Any]) -> str:
+    explicit = clean_str(rule.get("warning_level") or rule.get("display_warning_level"))
+    if explicit:
+        return explicit
+    tag = canonical_tag(rule.get("tag_name"))
+    removed_avg_r = safe_float(rule.get("removed_avg_r"))
+    baseline_pf = safe_float(rule.get("baseline_pf"))
+    kept_pf = safe_float(rule.get("kept_pf"))
+    precision = safe_float(rule.get("tag_precision"))
+    pf_improved = baseline_pf is not None and kept_pf is not None and kept_pf > baseline_pf
+    removed_negative = removed_avg_r is not None and removed_avg_r < 0
+    precision_high = precision is not None and precision >= 0.65
+    if tag in HIGH_PRIORITY_TAGS and (removed_negative or pf_improved or precision_high):
+        return "STRONG_CAUTION"
+    if tag in HIGH_PRIORITY_TAGS:
+        return "CAUTION"
+    if tag in MEDIUM_PRIORITY_TAGS:
+        return "REFERENCE_CAUTION"
+    if tag in LOW_PRIORITY_TAGS:
+        return "REFERENCE_ONLY"
+    return "REFERENCE_CAUTION"
+
+
+def tag_japanese_name(tag: str) -> str:
+    c = canonical_tag(tag)
+    jp = TAG_JA.get(c)
+    return f"{jp}（{c}）" if jp else c
+
+
 def score_signal_row(
     row: dict[str, Any] | pd.Series,
     rules_obj: dict[str, Any],
@@ -143,17 +239,38 @@ def score_signal_row(
     sid = clean_str(strategy_id or (row.get("strategy_id") if isinstance(row, pd.Series) else row.get("strategy_id")))
     hits: list[dict[str, Any]] = []
     checked = 0
+    evaluable = 0
+    skipped_missing_feature = 0
+    skipped_invalid_condition = 0
+    missing_features: set[str] = set()
     for rule in rules_obj.get("rules", []):
         if not isinstance(rule, dict):
             continue
         if clean_str(rule.get("strategy_id")) != sid:
             continue
         checked += 1
+        can_eval, eval_details = rule_evaluable(row, rule)
+        if can_eval:
+            evaluable += 1
+        else:
+            reasons = {clean_str(d.get("reason")) for d in eval_details}
+            if "MISSING_FEATURE_VALUE" in reasons:
+                skipped_missing_feature += 1
+                for d in eval_details:
+                    if clean_str(d.get("reason")) == "MISSING_FEATURE_VALUE":
+                        missing_features.add(clean_str(d.get("feature")))
+            else:
+                skipped_invalid_condition += 1
+            continue
         ok, details = rule_matches(row, rule)
         if ok:
             hit = dict(rule)
             hit["matched_conditions"] = details
+            hit["warning_level"] = derive_warning_level(hit)
             hits.append(hit)
+    strong_hits = [h for h in hits if clean_str(h.get("warning_level")) == "STRONG_CAUTION"]
+    caution_hits = [h for h in hits if clean_str(h.get("warning_level")) in {"CAUTION", "REFERENCE_CAUTION"}]
+    ref_hits = [h for h in hits if clean_str(h.get("warning_level")) == "REFERENCE_ONLY"]
     return {
         "schema_version": SCHEMA_VERSION,
         "strategy_id": sid,
@@ -161,40 +278,87 @@ def score_signal_row(
         "rules_schema_version": rules_obj.get("schema_version", ""),
         "rules_cycle_ok": bool(rules_obj.get("cycle_ok", True)),
         "rules_checked": int(checked),
+        "rules_evaluable": int(evaluable),
+        "rules_skipped_missing_feature": int(skipped_missing_feature),
+        "rules_skipped_invalid_condition": int(skipped_invalid_condition),
+        "missing_features": sorted(x for x in missing_features if x),
         "hit_count": int(len(hits)),
+        "strong_caution_count": int(len(strong_hits)),
+        "caution_count": int(len(caution_hits)),
+        "reference_count": int(len(ref_hits)),
         "hits": hits,
     }
 
 
+def hit_sort_key(hit: dict[str, Any]) -> tuple[int, float, float]:
+    level = clean_str(hit.get("warning_level"))
+    order = {"STRONG_CAUTION": 0, "CAUTION": 1, "REFERENCE_CAUTION": 2, "REFERENCE_ONLY": 3}.get(level, 2)
+    precision = safe_float(hit.get("tag_precision")) or 0.0
+    recall = safe_float(hit.get("tag_recall")) or 0.0
+    return (order, -precision, -recall)
+
+
+def format_hit_line(hit: dict[str, Any]) -> str:
+    tag = canonical_tag(hit.get("tag_name"))
+    level = clean_str(hit.get("warning_level"))
+    if level == "STRONG_CAUTION":
+        prefix = "⚠️ 強め注意"
+    elif level == "CAUTION":
+        prefix = "注意"
+    elif level == "REFERENCE_ONLY":
+        prefix = "参考"
+    else:
+        prefix = "参考注意"
+    removed_avg_r = safe_float(hit.get("removed_avg_r"))
+    kept_pf = safe_float(hit.get("kept_pf"))
+    baseline_pf = safe_float(hit.get("baseline_pf"))
+    precision = safe_float(hit.get("tag_precision"))
+    pieces = [f"{prefix}: {tag_japanese_name(tag)}"]
+    if removed_avg_r is not None:
+        pieces.append(f"過去類似avgR={removed_avg_r:.2f}")
+    if baseline_pf is not None and kept_pf is not None:
+        pieces.append(f"除外後PF {baseline_pf:.2f}→{kept_pf:.2f}")
+    if precision is not None:
+        pieces.append(f"タグ一致率={precision:.0%}")
+    return " / ".join(pieces)
+
+
 def format_score_for_discord(score: dict[str, Any]) -> list[str]:
     if not score.get("rules_path"):
-        return ["個別AIタグ推定: 未使用", "AIタグ数値ルール: 未指定"]
+        return ["AIタグ: 未使用（ルールJSON未指定）"]
     if not score.get("rules_cycle_ok", True):
-        return ["個別AIタグ推定: 未使用", f"AIタグ数値ルール: 読み込みNG ({score.get('rules_path')})"]
-    hits = score.get("hits", [])
-    if not hits:
+        return ["AIタグ: 未使用（ルールJSON読み込みNG）", f"path: {score.get('rules_path')}"]
+    checked = int(score.get("rules_checked", 0) or 0)
+    evaluable = int(score.get("rules_evaluable", 0) or 0)
+    missing = int(score.get("rules_skipped_missing_feature", 0) or 0)
+    hit_count = int(score.get("hit_count", 0) or 0)
+    if hit_count <= 0:
         return [
-            "個別AIタグ推定: なし",
-            f"AIタグ数値ルール: checked={score.get('rules_checked', 0)} hit=0",
+            "AIタグ: 目立つ注意タグなし",
+            f"判定: 評価可 {evaluable}/{checked}・特徴不足 {missing}・HIT 0",
         ]
+    hits = sorted([h for h in score.get("hits", []) if isinstance(h, dict)], key=hit_sort_key)
+    strong = int(score.get("strong_caution_count", 0) or 0)
+    caution = int(score.get("caution_count", 0) or 0)
+    ref = int(score.get("reference_count", 0) or 0)
+    if strong > 0:
+        header = f"AIタグ: ⚠️ 強め注意 {strong}件（参考注意 {max(caution - strong, 0)}件 / 参考 {ref}件）"
+    else:
+        header = f"AIタグ: 参考注意 {caution}件 / 参考 {ref}件"
     lines = [
-        f"個別AIタグ推定: ⚠️ HIT {len(hits)}件",
-        f"AIタグ数値ルール: checked={score.get('rules_checked', 0)} hit={len(hits)}",
+        header,
+        f"判定: 評価可 {evaluable}/{checked}・特徴不足 {missing}・HIT {hit_count}",
     ]
     for hit in hits[:5]:
-        tag = clean_str(hit.get("tag_name"), "unknown_tag")
-        severity = clean_str(hit.get("severity"), "WATCH")
-        action = clean_str(hit.get("action"), "WARN")
-        precision = hit.get("tag_precision", "")
-        recall = hit.get("tag_recall", "")
+        lines.append("- " + format_hit_line(hit))
         conds = []
-        for c in hit.get("matched_conditions", []):
+        for c in hit.get("matched_conditions", [])[:2]:
             val = c.get("value")
             val_text = "N/A" if val is None else f"{float(val):.4f}"
-            conds.append(f"{c.get('feature')}={val_text} {c.get('op')} {c.get('threshold')}")
-        lines.append(f"- {tag} / {severity} / {action} / precision={precision} recall={recall}")
+            conds.append(f"{c.get('feature')}={val_text} {c.get('op')} {fmt_float(c.get('threshold'), 4)}")
         if conds:
-            lines.append("  根拠: " + " AND ".join(conds))
+            lines.append("  根拠: " + " / ".join(conds))
     if len(hits) > 5:
         lines.append(f"- ほか {len(hits) - 5}件")
+    lines.append("注: AIタグは過去レビュー類似の注意ラベルで、負け確定ではありません。")
     return lines
