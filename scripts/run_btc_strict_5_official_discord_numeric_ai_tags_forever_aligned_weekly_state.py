@@ -101,12 +101,27 @@ def next_aligned(now: datetime, interval: int, offset: int) -> datetime:
     return b + timedelta(seconds=offset)
 
 
+def utf8_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
 def ensure_rules(rule_json: Path, loop_dir: Path) -> bool:
     if rule_json.exists():
         return True
     stdout = loop_dir / "rule_build_stdout.log"
     stderr = loop_dir / "rule_build_stderr.log"
-    proc = subprocess.run(["cmd", "/c", str(BUILD_RULES_BAT)], cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
+    proc = subprocess.run(
+        ["cmd", "/c", str(BUILD_RULES_BAT)],
+        cwd=str(REPO_ROOT),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        env=utf8_env(),
+    )
     write_text(stdout, proc.stdout or "")
     write_text(stderr, proc.stderr or "")
     return proc.returncode == 0 and rule_json.exists()
@@ -152,7 +167,15 @@ def run_cycle(args: argparse.Namespace, i: int, loop_dir: Path, ledger_csv: Path
         write_text(stderr, "")
         return row
     cmd = build_cmd(args, child_out, ledger_csv, rule_json)
-    proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
+    proc = subprocess.run(
+        cmd,
+        cwd=str(REPO_ROOT),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        env=utf8_env(),
+    )
     write_text(stdout, proc.stdout or "")
     write_text(stderr, proc.stderr or "")
     summary_path = child_out / "btc_strict_5_official_numeric_ai_tag_preview_summary.json"
@@ -219,6 +242,7 @@ def main() -> int:
     rule_json = state / "ai_tag_numeric_rules.json"
     mkdirp(state)
     print(f"BTC strict 5 official Discord numeric AI tags loop variant={args.filter_variant} interval={args.interval_minutes}m +{args.offset_seconds}s ledger={ledger_csv}", flush=True)
+    print("Python UTF-8 mode is forced for child processes to avoid cp932 emoji print failures.", flush=True)
     i = 0
     try:
         while True:
@@ -230,7 +254,7 @@ def main() -> int:
             row["next_run_utc"] = utc_text(nxt)
             loop_csv = loop_dir / "official_discord_numeric_ai_tags_loop_log.csv"
             append_csv(loop_csv, row)
-            write_json(loop_dir / SUMMARY_NAME, {"schema_version": "btc_strict_5_official_discord_numeric_ai_tags_loop_v1", "updated_at_utc": utc_text(), "filter_variant": args.filter_variant, "last_cycle": row, "loop_csv": str(loop_csv), "ledger_csv": str(ledger_csv), "rule_json": str(rule_json)})
+            write_json(loop_dir / SUMMARY_NAME, {"schema_version": "btc_strict_5_official_discord_numeric_ai_tags_loop_v2_utf8_child_env", "updated_at_utc": utc_text(), "filter_variant": args.filter_variant, "last_cycle": row, "loop_csv": str(loop_csv), "ledger_csv": str(ledger_csv), "rule_json": str(rule_json), "python_utf8_child_env": True})
             if args.max_cycles > 0 and i >= args.max_cycles:
                 return 0 if bool(row.get("cycle_ok")) else 1
             time.sleep(max(1.0, (nxt - utc_now()).total_seconds()))
