@@ -53,7 +53,8 @@ DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v8_wall_clock_guard_send_error_summary"
+DEFAULT_SEEN_STATE_JSON = Path("data/runtime_state/gold/strict_7/discord_notification_seen_keys.json")
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v9_candle_bucket_duplicate_guard"
 DISCORD_SAFE_MAX_CHARS = 1900
 
 PREVIEW_COLUMNS = [
@@ -245,8 +246,31 @@ def strategy_display_name(strategy_id: str) -> str:
     return mapping.get(strategy_id, strategy_id)
 
 
+def notification_bucket_time_text(value: Any) -> str:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return time_text(value)
+    return pd.Timestamp(ts).floor("5min").strftime("%Y-%m-%d %H:%M:%S")
+
+
+def notification_bucket_time_text(value: Any) -> str:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return time_text(value)
+    return pd.Timestamp(ts).floor("5min").strftime("%Y-%m-%d %H:%M:%S")
+
+
 def notification_key(row: pd.Series, spec: GoldStrictSignalSpec) -> str:
-    return "|".join([DEFAULT_SYMBOL, "STRICT7", spec.strategy_id, spec.direction, time_text(row.get("close_time"))])
+    return "|".join([DEFAULT_SYMBOL, "STRICT7", spec.strategy_id, spec.direction, notification_bucket_time_text(row.get("close_time"))])
+
+
+def normalize_notification_key(key: Any) -> str:
+    text = clean_str(key)
+    parts = text.split("|")
+    if len(parts) >= 5 and parts[0] == DEFAULT_SYMBOL and parts[1] == "STRICT7":
+        parts[4] = notification_bucket_time_text(parts[4])
+        return "|".join(parts[:5])
+    return text
 
 
 def load_notified_keys(path: Path) -> set[str]:
@@ -258,20 +282,87 @@ def load_notified_keys(path: Path) -> set[str]:
         return set()
     if "notification_key" not in df.columns:
         return set()
-    return set(df["notification_key"].dropna().astype(str).tolist())
+    keys: set[str] = set()
+    for value in df["notification_key"].dropna().astype(str).tolist():
+        raw = clean_str(value)
+        if raw:
+            keys.add(raw)
+            keys.add(normalize_notification_key(raw))
+    return keys
 
 
-def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
-    if not rows:
-        return
+def load_seen_state_keys(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    try:
+        with open(windows_long_path(path), "r", encoding="utf-8") as f:
+            obj = json.load(f)
+    except Exception:
+        return set()
+    rows = obj.get("seen", []) if isinstance(obj, dict) else []
+    keys: set[str] = set()
+    if isinstance(rows, list):
+        for row in rows:
+            key = row.get("notification_key") if isinstance(row, dict) else row
+            raw = clean_str(key)
+            if raw:
+                keys.add(raw)
+                keys.add(normalize_notification_key(raw))
+    return keys
+
+
+def mark_seen_state_key(path: Path, key: str, row: pd.Series, spec: GoldStrictSignalSpec) -> None:
+    mkdirp(path.parent)
+    existing: list[dict[str, Any]] = []
+    if path.exists():
+        try:
+            with open(windows_long_path(path), "r", encoding="utf-8") as f:
+                obj = json.load(f)
+            if isinstance(obj, dict) and isinstance(obj.get("seen"), list):
+                existing = [x for x in obj.get("seen", []) if isinstance(x, dict)]
+        except Exception:
+            existing = []
+    normalized = normalize_notification_key(key)
+    by_key = {normalize_notification_key(x.get("notification_key")): x for x in existing if clean_str(x.get("notification_key"))}
+    by_key[normalized] = {
+        "notified_at": now_str(),
+        "notification_key": normalized,
+        "strategy_id": spec.strategy_id,
+        "direction": spec.direction,
+        "entry_time": time_text(row.get("close_time")),
+        "bucket_time": notification_bucket_time_text(row.get("close_time")),
+        "schema_version": SCHEMA_VERSION,
+    }
+    rows = sorted(by_key.values(), key=lambda x: clean_str(x.get("notified_at")))[-1000:]
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(windows_long_path(tmp), "w", encoding="utf-8", newline="") as f:
+        json.dump({"schema_version": SCHEMA_VERSION, "updated_at": now_str(), "seen": rows}, f, ensure_ascii=False, indent=2, default=str)
+        f.flush()
+        try:
+            os.fsync(f.fileno())
+        except Exception:
+            pass
+    os.replace(windows_long_path(tmp), windows_long_path(path))
+
+
+def append_ledger_row_durable(path: Path, row: dict[str, Any]) -> None:
     mkdirp(path.parent)
     exists = path.exists()
     with open(windows_long_path(path), "a", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=LEDGER_COLUMNS)
         if not exists:
             writer.writeheader()
-        for row in rows:
-            writer.writerow({col: row.get(col, "") for col in LEDGER_COLUMNS})
+        writer.writerow({col: row.get(col, "") for col in LEDGER_COLUMNS})
+        f.flush()
+        try:
+            os.fsync(f.fileno())
+        except Exception:
+            pass
+
+
+def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
+    for row in rows:
+        append_ledger_row_durable(path, row)
 
 
 def calc_prices(row: pd.Series, spec: GoldStrictSignalSpec) -> tuple[float, float, float]:
@@ -519,6 +610,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--gold-d1-csv", default="")
     p.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     p.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
+    p.add_argument("--seen-state-json", type=Path, default=DEFAULT_SEEN_STATE_JSON)
     p.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     p.add_argument("--ai-tag-rules-json", type=Path, default=DEFAULT_AI_TAG_RULES_JSON)
     p.add_argument("--scan-recent-bars", type=int, default=300)
@@ -545,6 +637,7 @@ def main() -> int:
     specs = get_signal_specs()
     out_dir = resolve_path(args.out_dir)
     ledger_csv = resolve_path(args.ledger_csv)
+    seen_state_json = resolve_path(args.seen_state_json)
     env_file = resolve_path(args.env_file)
     rules_path = resolve_path(args.ai_tag_rules_json)
     mkdirp(out_dir)
@@ -558,7 +651,7 @@ def main() -> int:
 
     paths = resolve_csv_paths(args)
     ctx = load_context(paths, args)
-    notified_keys = load_notified_keys(ledger_csv)
+    notified_keys = load_notified_keys(ledger_csv) | load_seen_state_keys(seen_state_json)
     signals, freshness_guard = collect_signals(ctx, specs, args)
 
     webhook_url = args.discord_webhook_url or os.environ.get("GOLD_STRICT_7_DISCORD_WEBHOOK_URL", "") or os.environ.get("DISCORD_WEBHOOK_URL", "")
@@ -568,6 +661,8 @@ def main() -> int:
     preview_rows: list[dict[str, Any]] = []
     ledger_rows: list[dict[str, Any]] = []
     send_errors: list[dict[str, Any]] = []
+    ledger_errors: list[dict[str, Any]] = []
+    seen_state_errors: list[dict[str, Any]] = []
     skipped_duplicates = 0
     ai_tag_hit_rows = 0
     discord_sent_rows = 0
@@ -577,6 +672,8 @@ def main() -> int:
     print(f"schema_version: {SCHEMA_VERSION}", flush=True)
     print(f"out_dir: {out_dir}", flush=True)
     print(f"ledger_csv: {ledger_csv}", flush=True)
+    print(f"seen_state_json: {seen_state_json}", flush=True)
+    print(f"seen_state_json: {seen_state_json}", flush=True)
     print(f"ai_tag_rules_json: {rules_path} ok={bool(rules_obj.get('cycle_ok', False))} rules={rules_obj.get('rules_count', len(rules_obj.get('rules', [])) if isinstance(rules_obj.get('rules', []), list) else 0)}", flush=True)
     print(f"env_file: {env_file} exists={env_file.exists()}", flush=True)
     for tf, p in paths.items():
@@ -621,25 +718,42 @@ def main() -> int:
         preview = row_to_preview(row, spec, key=key, message_path=message_path, discord_sent=discord_sent, dry_run=bool(args.dry_run), ai_score=ai_score)
         preview_rows.append(preview)
         if (args.send_discord and discord_sent) or args.mark_dry_run_notified:
-            ledger_rows.append({
+            ledger_row = {
                 "notified_at": now_str(),
                 "schema_version": SCHEMA_VERSION,
                 **{col: preview.get(col, "") for col in LEDGER_COLUMNS if col not in {"notified_at", "schema_version"}},
-            })
+            }
+            try:
+                append_ledger_row_durable(ledger_csv, ledger_row)
+                ledger_rows.append(ledger_row)
+                notified_keys.add(key)
+                notified_keys.add(normalize_notification_key(key))
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                ledger_errors.append(err)
+                print(f"Ledger append error after send/mark: {err}", flush=True)
+            try:
+                mark_seen_state_key(seen_state_json, key, row, spec)
+                notified_keys.add(key)
+                notified_keys.add(normalize_notification_key(key))
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                seen_state_errors.append(err)
+                print(f"Seen-state append error after send/mark: {err}", flush=True)
 
     preview_csv = out_dir / "gold_strict_7_discord_preview_signals.csv"
     summary_json = out_dir / "gold_strict_7_discord_preview_summary.json"
     write_preview_csv(preview_csv, preview_rows)
-    append_ledger(ledger_csv, ledger_rows)
     summary = {
         "schema_version": SCHEMA_VERSION,
         "created_at": now_str(),
-        "cycle_ok": bool(len(send_errors) == 0),
-        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",
+        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0),
+        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 else "SEND_OR_LEDGER_ERROR_SUMMARY_WRITTEN",
         "csv_paths": {tf: str(p) for tf, p in paths.items()},
         "out_dir": str(out_dir),
         "preview_csv": str(preview_csv),
         "ledger_csv": str(ledger_csv),
+        "seen_state_json": str(seen_state_json),
         "ai_tag_rules_json": str(rules_path),
         "ai_tag_rules_cycle_ok": bool(rules_obj.get("cycle_ok", False)),
         "ai_tag_rules_count": int(rules_obj.get("rules_count", len(rules_obj.get("rules", [])))) if isinstance(rules_obj.get("rules", []), list) else 0,
@@ -656,6 +770,14 @@ def main() -> int:
         "discord_sent_rows": int(discord_sent_rows),
         "discord_send_error_rows": int(len(send_errors)),
         "discord_send_errors": send_errors,
+        "ledger_append_error_rows": int(len(ledger_errors)),
+        "ledger_append_errors": ledger_errors,
+        "seen_state_error_rows": int(len(seen_state_errors)),
+        "seen_state_errors": seen_state_errors,
+        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_5min_candle_bucket_key",
+        "ledger_append_error_rows": int(len(ledger_errors)),
+        "ledger_append_errors": ledger_errors,
+        "ledger_append_mode": "immediate_after_each_successful_send_or_mark",
         "dry_run": bool(args.dry_run),
         "wall_clock_freshness_guard": freshness_guard,
         "safety": {
@@ -668,6 +790,11 @@ def main() -> int:
             "wall_clock_freshness_guard_enabled": True,
             "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),
             "ledger_append_requires_send_success_or_mark_dry_run": True,
+            "seen_state_duplicate_guard_enabled": True,
+            "notification_key_uses_5min_candle_bucket": True,
+            "seen_state_duplicate_guard_enabled": True,
+            "notification_key_uses_5min_candle_bucket": True,
+            "ledger_append_immediate_after_successful_send": True,
         },
     }
     with open(windows_long_path(summary_json), "w", encoding="utf-8", newline="") as f:
@@ -676,7 +803,7 @@ def main() -> int:
     print("\n" + "=" * 100, flush=True)
     print(json.dumps(summary, ensure_ascii=False, indent=2, default=str), flush=True)
     print("=" * 100, flush=True)
-    return 0 if len(send_errors) == 0 else 1
+    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 else 1
 
 
 if __name__ == "__main__":
