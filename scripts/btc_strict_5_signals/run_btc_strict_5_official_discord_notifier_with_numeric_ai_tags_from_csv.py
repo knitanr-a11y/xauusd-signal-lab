@@ -28,10 +28,11 @@ from run_btc_strict_5_backtest_from_csv import DEFAULT_MQL5_FILES_DIR, choose_pa
 from run_btc_strict_5_discord_notifier_from_csv import clean_str, json_safe
 from run_live_gold_notifier_from_csv import load_env_file, send_discord_message
 
-SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v4_wall_clock_guard_send_error_summary"
+SCHEMA_VERSION = "btc_strict_5_official_discord_notifier_numeric_ai_tags_v5_m15_bucket_duplicate_guard"
 DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_official_discord_numeric_ai_tags")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_ledger.csv")
+DEFAULT_SEEN_STATE_JSON = Path("data/runtime_state/btc/strict_5/official_discord_numeric_ai_tag_seen_keys.json")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/btc/strict_5/ai_tag_numeric_rules.json")
 DISCORD_SAFE_MAX_CHARS = 1900
 
@@ -89,6 +90,22 @@ def fmt_num(value: Any, digits: int = 2) -> str:
     return "N/A" if x is None else f"{x:.{digits}f}"
 
 
+def notification_bucket_time_text(value: Any) -> str:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return clean_str(value)
+    return pd.Timestamp(ts).floor("15min").strftime("%Y-%m-%d %H:%M:%S")
+
+
+def normalize_notification_key(key: Any) -> str:
+    text = clean_str(key)
+    parts = text.split("|")
+    if len(parts) >= 7 and parts[0] == DEFAULT_SYMBOL and parts[1] == "STRICT5":
+        parts[6] = notification_bucket_time_text(parts[6])
+        return "|".join(parts[:7])
+    return text
+
+
 def load_notified_keys(path: Path) -> set[str]:
     if not path.exists():
         return set()
@@ -98,20 +115,88 @@ def load_notified_keys(path: Path) -> set[str]:
         return set()
     if "notification_key" not in df.columns:
         return set()
-    return set(df["notification_key"].dropna().astype(str).tolist())
+    keys: set[str] = set()
+    for value in df["notification_key"].dropna().astype(str).tolist():
+        raw = clean_str(value)
+        if raw:
+            keys.add(raw)
+            keys.add(normalize_notification_key(raw))
+    return keys
 
 
-def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
-    if not rows:
-        return
+def load_seen_state_keys(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    try:
+        with open(windows_long_path(path), "r", encoding="utf-8") as f:
+            obj = json.load(f)
+    except Exception:
+        return set()
+    rows = obj.get("seen", []) if isinstance(obj, dict) else []
+    keys: set[str] = set()
+    if isinstance(rows, list):
+        for row in rows:
+            key = row.get("notification_key") if isinstance(row, dict) else row
+            raw = clean_str(key)
+            if raw:
+                keys.add(raw)
+                keys.add(normalize_notification_key(raw))
+    return keys
+
+
+def mark_seen_state_key(path: Path, key: str, row: pd.Series, filter_variant: str) -> None:
+    mkdirp(path.parent)
+    existing: list[dict[str, Any]] = []
+    if path.exists():
+        try:
+            with open(windows_long_path(path), "r", encoding="utf-8") as f:
+                obj = json.load(f)
+            if isinstance(obj, dict) and isinstance(obj.get("seen"), list):
+                existing = [x for x in obj.get("seen", []) if isinstance(x, dict)]
+        except Exception:
+            existing = []
+    normalized = normalize_notification_key(key)
+    by_key = {normalize_notification_key(x.get("notification_key")): x for x in existing if clean_str(x.get("notification_key"))}
+    by_key[normalized] = {
+        "notified_at_utc": utc_now_text(),
+        "notification_key": normalized,
+        "filter_variant": filter_variant,
+        "strategy_id": clean_str(row.get("strategy_id")),
+        "direction": clean_str(row.get("direction")),
+        "signal_time": clean_str(row.get("signal_time")),
+        "bucket_time": notification_bucket_time_text(row.get("signal_time")),
+        "schema_version": SCHEMA_VERSION,
+    }
+    rows = sorted(by_key.values(), key=lambda x: clean_str(x.get("notified_at_utc")))[-1000:]
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(windows_long_path(tmp), "w", encoding="utf-8", newline="") as f:
+        json.dump({"schema_version": SCHEMA_VERSION, "updated_at_utc": utc_now_text(), "seen": rows}, f, ensure_ascii=False, indent=2, default=str)
+        f.flush()
+        try:
+            os.fsync(f.fileno())
+        except Exception:
+            pass
+    os.replace(windows_long_path(tmp), windows_long_path(path))
+
+
+def append_ledger_row_durable(path: Path, row: dict[str, Any]) -> None:
     mkdirp(path.parent)
     exists = path.exists()
     with open(windows_long_path(path), "a", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=LEDGER_COLUMNS)
         if not exists:
             writer.writeheader()
-        for row in rows:
-            writer.writerow({col: row.get(col, "") for col in LEDGER_COLUMNS})
+        writer.writerow({col: row.get(col, "") for col in LEDGER_COLUMNS})
+        f.flush()
+        try:
+            os.fsync(f.fileno())
+        except Exception:
+            pass
+
+
+def append_ledger(path: Path, rows: list[dict[str, Any]]) -> None:
+    for row in rows:
+        append_ledger_row_durable(path, row)
 
 
 def notification_key(row: pd.Series, filter_variant: str) -> str:
@@ -122,7 +207,7 @@ def notification_key(row: pd.Series, filter_variant: str) -> str:
         filter_variant,
         clean_str(row.get("strategy_id")),
         clean_str(row.get("direction")),
-        clean_str(row.get("signal_time")),
+        notification_bucket_time_text(row.get("signal_time")),
     ])
 
 
@@ -306,6 +391,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--preview-csv", default="")
     p.add_argument("--summary-json", default="")
     p.add_argument("--ledger-csv", type=Path, default=DEFAULT_LEDGER_CSV)
+    p.add_argument("--seen-state-json", type=Path, default=DEFAULT_SEEN_STATE_JSON)
     p.add_argument("--env-file", type=Path, default=DEFAULT_ENV_FILE)
     p.add_argument("--scan-recent-bars", type=int, default=500)
     p.add_argument("--max-signal-age-minutes", type=int, default=0)
@@ -328,6 +414,7 @@ def main() -> int:
     validate_signal_specs()
     out_dir = resolve_repo_path(args.out_dir)
     ledger_csv = resolve_repo_path(args.ledger_csv)
+    seen_state_json = resolve_repo_path(args.seen_state_json)
     env_file = resolve_repo_path(args.env_file)
     ai_tag_rules_json = resolve_repo_path(args.ai_tag_rules_json)
     mkdirp(out_dir)
@@ -375,13 +462,15 @@ def main() -> int:
         if args.max_notifications and int(args.max_notifications) > 0:
             preview = preview.tail(int(args.max_notifications)).copy()
     write_csv(preview, preview_csv)
-    notified_keys = load_notified_keys(ledger_csv)
+    notified_keys = load_notified_keys(ledger_csv) | load_seen_state_keys(seen_state_json)
     ledger_rows: list[dict[str, Any]] = []
     sent_rows = 0
     skipped_duplicates = 0
     message_rows = 0
     ai_tag_hit_rows = 0
     send_errors: list[dict[str, Any]] = []
+    ledger_errors: list[dict[str, Any]] = []
+    seen_state_errors: list[dict[str, Any]] = []
     for _, row in preview.iterrows():
         key = notification_key(row, args.filter_variant)
         if not args.allow_duplicate and key in notified_keys:
@@ -407,13 +496,29 @@ def main() -> int:
                 send_errors.append(err)
                 print(f"Discord send error: {err}", flush=True)
         if (args.send_discord and discord_sent) or args.mark_preview_notified:
-            ledger_rows.append(ledger_row(row, key=key, filter_variant=args.filter_variant, discord_sent=discord_sent, preview_only_marked=bool(args.mark_preview_notified and not args.send_discord), message_path=message_path, ai_score=ai_score))
-    append_ledger(ledger_csv, ledger_rows)
+            lr = ledger_row(row, key=key, filter_variant=args.filter_variant, discord_sent=discord_sent, preview_only_marked=bool(args.mark_preview_notified and not args.send_discord), message_path=message_path, ai_score=ai_score)
+            try:
+                append_ledger_row_durable(ledger_csv, lr)
+                ledger_rows.append(lr)
+                notified_keys.add(key)
+                notified_keys.add(normalize_notification_key(key))
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                ledger_errors.append(err)
+                print(f"Ledger append error after send/mark: {err}", flush=True)
+            try:
+                mark_seen_state_key(seen_state_json, key, row, args.filter_variant)
+                notified_keys.add(key)
+                notified_keys.add(normalize_notification_key(key))
+            except Exception as exc:
+                err = {"notification_key": key, "type": type(exc).__name__, "message": str(exc), "message_path": str(message_path)}
+                seen_state_errors.append(err)
+                print(f"Seen-state append error after send/mark: {err}", flush=True)
     summary = {
         "schema_version": SCHEMA_VERSION,
         "created_at_utc": utc_now_text(),
-        "cycle_ok": bool(len(send_errors) == 0),
-        "reason": "OK" if len(send_errors) == 0 else "DISCORD_SEND_ERROR_SUMMARY_WRITTEN",
+        "cycle_ok": bool(len(send_errors) == 0 and len(ledger_errors) == 0),
+        "reason": "OK" if len(send_errors) == 0 and len(ledger_errors) == 0 else "SEND_OR_LEDGER_ERROR_SUMMARY_WRITTEN",
         "filter_variant": args.filter_variant,
         "official_default_filter_variant": BTC_STRICT_5_DEFAULT_FILTER_VARIANT,
         "ai_tag_rules_json": str(ai_tag_rules_json),
@@ -424,12 +529,20 @@ def main() -> int:
         "discord_sent_rows": int(sent_rows),
         "discord_send_error_rows": int(len(send_errors)),
         "discord_send_errors": send_errors,
+        "ledger_append_error_rows": int(len(ledger_errors)),
+        "ledger_append_errors": ledger_errors,
+        "seen_state_error_rows": int(len(seen_state_errors)),
+        "seen_state_errors": seen_state_errors,
+        "duplicate_guard_mode": "ledger_csv_plus_seen_state_json_plus_15min_candle_bucket_key",
+        "ledger_append_error_rows": int(len(ledger_errors)),
+        "ledger_append_errors": ledger_errors,
         "openai_called": False,
         "runtime_ledger_mutated": bool(len(ledger_rows) > 0),
         "ledger_rows_appended": int(len(ledger_rows)),
+        "ledger_append_mode": "immediate_after_each_successful_send_or_mark",
         "d1_used": False,
         "inputs": {k: str(v) for k, v in paths.items()},
-        "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv)},
+        "outputs": {"preview_csv": str(preview_csv), "summary_json": str(summary_json), "ledger_csv": str(ledger_csv), "seen_state_json": str(seen_state_json)},
         "rows": {
             "preview_rows": int(len(preview)),
             "preview_rows_before_wall_clock_guard": int(preview_rows_before_wall_clock_guard),
@@ -450,11 +563,14 @@ def main() -> int:
             "requires_valid_ai_tag_rules_on_send": True,
             "wall_clock_freshness_guard_enabled": True,
             "discord_message_safe_max_chars": int(DISCORD_SAFE_MAX_CHARS),
+            "seen_state_duplicate_guard_enabled": True,
+            "notification_key_uses_15min_candle_bucket": True,
+            "ledger_append_immediate_after_successful_send": True,
         },
     }
     write_json(summary_json, summary)
     print("\n" + json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str), flush=True)
-    return 0 if len(send_errors) == 0 else 1
+    return 0 if len(send_errors) == 0 and len(ledger_errors) == 0 else 1
 
 
 if __name__ == "__main__":
