@@ -10,7 +10,8 @@ if not exist "%STATE_DIR%" mkdir "%STATE_DIR%"
 echo ============================================================
 echo BTC strict 5 OFFICIAL Discord numeric AI tags aligned runner
 echo Official filter variant: buy_h4_context_conservative_v1
-echo Schedule: every 1 minute at +02 seconds
+echo Schedule: every 1 minute at +05 seconds
+echo Recommended EA InpExportSecond=2
 echo Rule JSON: %STATE_DIR%\ai_tag_numeric_rules.json
 echo Notification ledger: %STATE_DIR%\official_discord_numeric_ai_tag_ledger.csv
 echo Python UTF-8 mode ENABLED to avoid cp932 emoji print failures
@@ -23,7 +24,7 @@ python scripts\run_btc_strict_5_official_discord_numeric_ai_tags_forever_aligned
   --state-dir "%STATE_DIR%" ^
   --filter-variant buy_h4_context_conservative_v1 ^
   --interval-minutes 1 ^
-  --offset-seconds 2 ^
+  --offset-seconds 5 ^
   --scan-recent-bars 5 ^
   --max-signal-age-minutes 30 ^
   --max-notifications 5 ^
