@@ -18,6 +18,7 @@ Safety defaults:
 - no Discord send
 - no AI call
 - no D1 read or D1 condition
+- wall-clock freshness guard suppresses stale CSV/signals before payload creation
 
 Live-loop lightweight mode:
 The loop passes --tail-m15/--tail-h1/--tail-h4 so each cycle reads only the most
@@ -69,7 +70,7 @@ SENDER_SCRIPT = REPO_ROOT / "scripts" / "send_mt5_order_from_payload.py"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/btc_strict_5_guarded_demo_autotrade")
 DEFAULT_ORDER_LEDGER_CSV = Path("data/runtime_state/btc/strict_5/guarded_demo_order_ledger.csv")
 DEFAULT_EXPECTED_LOGIN = 75539039
-SCHEMA_VERSION = "btc_strict_5_guarded_demo_autotrade_v2_light_tail"
+SCHEMA_VERSION = "btc_strict_5_guarded_demo_autotrade_v3_wall_clock_freshness_guard"
 
 PAYLOAD_COLUMNS = [
     "created_at_utc", "schema_version", "payload_key", "order_key", "signal_key", "notification_key",
@@ -209,6 +210,65 @@ def signal_key(row: pd.Series) -> str:
     return "|".join(["SIGNAL", DEFAULT_SYMBOL, "STRICT5", clean_str(row.get("strategy_id")), clean_str(row.get("direction")), clean_str(row.get("signal_time"))])
 
 
+def mt5_time_to_local_est(value: Any, mt5_to_local_hours: float) -> pd.Timestamp | None:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return None
+    return pd.Timestamp(ts) + pd.Timedelta(hours=float(mt5_to_local_hours))
+
+
+def minutes_since_local_est(value: Any, *, mt5_to_local_hours: float, now_local: pd.Timestamp) -> float | None:
+    local_est = mt5_time_to_local_est(value, mt5_to_local_hours)
+    if local_est is None:
+        return None
+    return float((now_local - local_est).total_seconds() / 60.0)
+
+
+def apply_wall_clock_freshness_guard(preview: pd.DataFrame, meta: dict[str, Any], args: argparse.Namespace) -> pd.DataFrame:
+    now_local = pd.Timestamp(datetime.now())
+    mt5_to_local_hours = float(args.mt5_to_local_hours)
+    max_csv_staleness = int(args.max_csv_staleness_minutes)
+    max_signal_age = int(args.max_wall_clock_signal_age_minutes)
+    last_close = meta.get("ctx_last_base_close_time", "")
+    last_close_local = mt5_time_to_local_est(last_close, mt5_to_local_hours)
+    csv_staleness = None if last_close_local is None else float((now_local - last_close_local).total_seconds() / 60.0)
+    guard = {
+        "enabled": True,
+        "now_local": now_local.strftime("%Y-%m-%d %H:%M:%S"),
+        "mt5_to_local_hours": mt5_to_local_hours,
+        "max_csv_staleness_minutes": max_csv_staleness,
+        "max_wall_clock_signal_age_minutes": max_signal_age,
+        "ctx_last_base_close_time_mt5": clean_str(last_close),
+        "ctx_last_base_close_time_local_est": "" if last_close_local is None else last_close_local.strftime("%Y-%m-%d %H:%M:%S"),
+        "csv_staleness_minutes": csv_staleness,
+        "csv_stale_guard_triggered": False,
+        "signals_before_wall_clock_guard": int(len(preview)),
+        "signals_after_wall_clock_guard": int(len(preview)),
+        "signals_filtered_by_wall_clock_age": 0,
+    }
+    if max_csv_staleness > 0 and csv_staleness is not None and csv_staleness > max_csv_staleness:
+        guard["csv_stale_guard_triggered"] = True
+        guard["signals_after_wall_clock_guard"] = 0
+        guard["signals_filtered_by_wall_clock_age"] = int(len(preview))
+        meta["wall_clock_freshness_guard"] = guard
+        return preview.iloc[0:0].copy()
+    if preview.empty or max_signal_age <= 0:
+        meta["wall_clock_freshness_guard"] = guard
+        return preview
+    base_close = pd.to_datetime(preview["base_close_time"], errors="coerce")
+    local_est = base_close + pd.Timedelta(hours=mt5_to_local_hours)
+    age = (now_local - local_est).dt.total_seconds() / 60.0
+    out = preview.copy()
+    out["wall_clock_signal_time_local_est"] = local_est.dt.strftime("%Y-%m-%d %H:%M:%S")
+    out["wall_clock_signal_age_minutes"] = age
+    keep = age.notna() & (age >= -2.0) & (age <= max_signal_age)
+    filtered = out[keep.fillna(False)].copy()
+    guard["signals_after_wall_clock_guard"] = int(len(filtered))
+    guard["signals_filtered_by_wall_clock_age"] = int(len(out) - len(filtered))
+    meta["wall_clock_freshness_guard"] = guard
+    return filtered.reset_index(drop=True)
+
+
 def calc_payload_prices(row: pd.Series) -> tuple[float, float, float]:
     next_open_available = bool(row.get("next_m15_open_available", False))
     entry = safe_float(row.get("next_m15_open_price"), default=0.0) if next_open_available else safe_float(row.get("signal_close_price"), default=0.0)
@@ -263,10 +323,12 @@ def load_preview(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[str, Any]
         preview = preview.sort_values(["signal_time", "_priority"], ascending=[False, True]).drop(columns=["_priority"]).reset_index(drop=True)
     meta = {
         "input_paths": {k: str(v) for k, v in input_paths.items()},
-        "rows": {"m15": int(len(m15)), "h1": int(len(h1)), "h4": int(len(h4)), "preview_rows": int(len(preview))},
+        "rows": {"m15": int(len(m15)), "h1": int(len(h1)), "h4": int(len(h4)), "preview_rows_before_wall_clock_guard": int(len(preview))},
         "tails": {"m15": int(args.tail_m15), "h1": int(args.tail_h1), "h4": int(args.tail_h4)},
         "ctx_last_base_close_time": time_text(ctx.iloc[-1]["base_close_time"]) if not ctx.empty else "",
     }
+    preview = apply_wall_clock_freshness_guard(preview, meta, args)
+    meta["rows"]["preview_rows"] = int(len(preview))
     return preview, meta
 
 
@@ -337,6 +399,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--expected-login", type=int, default=DEFAULT_EXPECTED_LOGIN)
     p.add_argument("--scan-recent-bars", type=int, default=5)
     p.add_argument("--max-signal-age-minutes", type=int, default=30)
+    p.add_argument("--max-wall-clock-signal-age-minutes", type=int, default=30, help="Suppress payloads when signal base_close_time + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--max-csv-staleness-minutes", type=int, default=45, help="Suppress all payloads when latest M15 base close + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--mt5-to-local-hours", type=float, default=6.0, help="Local time offset from MT5 server timestamps. JST=MT5+6 for the current broker setup.")
     p.add_argument("--latest-only", action="store_true")
     p.add_argument("--max-orders", type=int, default=1)
     p.add_argument("--position-policy", choices=["block_any", "allow_same_direction", "allow_any_until_max"], default="block_any")
@@ -378,8 +443,14 @@ def main() -> int:
     sender_returncode: int | None = None
     sender_stdout = ""
     sender_stderr = ""
+    stale_guard = meta.get("wall_clock_freshness_guard", {}) if isinstance(meta, dict) else {}
     if not payloads:
-        reason = "NO_RECENT_STRICT5_SIGNAL"
+        if bool(stale_guard.get("csv_stale_guard_triggered", False)):
+            reason = "CSV_STALE_WALL_CLOCK_GUARD_SUPPRESSED_PAYLOADS"
+        elif int(stale_guard.get("signals_filtered_by_wall_clock_age", 0) or 0) > 0:
+            reason = "SIGNAL_STALE_WALL_CLOCK_GUARD_SUPPRESSED_PAYLOADS"
+        else:
+            reason = "NO_RECENT_STRICT5_SIGNAL"
         cycle_ok = bool(args.allow_no_signal_success)
         sender_report = {"rows_out": 0, "dry_run_check_ok_rows": 0, "sent_rows": 0, "error_rows": 0, "order_send_called_count": 0}
     else:
@@ -423,6 +494,7 @@ def main() -> int:
             "tail_m15": int(args.tail_m15),
             "tail_h1": int(args.tail_h1),
             "tail_h4": int(args.tail_h4),
+            "wall_clock_freshness_guard": stale_guard,
         },
         "inputs": meta.get("input_paths", {}),
         "input_rows_after_tail": meta.get("rows", {}),
@@ -435,7 +507,11 @@ def main() -> int:
         "ctx_last_base_close_time": meta.get("ctx_last_base_close_time", ""),
         "scan_recent_bars": int(args.scan_recent_bars),
         "max_signal_age_minutes": int(args.max_signal_age_minutes),
+        "max_wall_clock_signal_age_minutes": int(args.max_wall_clock_signal_age_minutes),
+        "max_csv_staleness_minutes": int(args.max_csv_staleness_minutes),
+        "mt5_to_local_hours": float(args.mt5_to_local_hours),
         "raw_recent_preview_rows": int(meta.get("rows", {}).get("preview_rows", 0)),
+        "raw_recent_preview_rows_before_wall_clock_guard": int(meta.get("rows", {}).get("preview_rows_before_wall_clock_guard", 0)),
         "payload_rows": int(len(payloads)),
         "payload_order_keys": [p.get("order_key") for p in payloads],
         "payload_strategy_ids": [p.get("strategy_id") for p in payloads],
@@ -458,6 +534,7 @@ def main() -> int:
     for key in SUMMARY_PRINT_KEYS:
         print(f"{key}: {summary.get(key)}", flush=True)
     print(f"tail_m15: {args.tail_m15} tail_h1: {args.tail_h1} tail_h4: {args.tail_h4}", flush=True)
+    print(f"wall_clock_freshness_guard: {json.dumps(stale_guard, ensure_ascii=False, default=str)}", flush=True)
     print("=" * 100, flush=True)
     if sender_stdout:
         print("--- sender stdout tail ---", flush=True)
