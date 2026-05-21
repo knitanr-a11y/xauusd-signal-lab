@@ -23,7 +23,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_LOOP_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_live_loop")
 DEFAULT_NOTIFIER_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
-SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v3_numeric_ai_tags"
+SCHEMA_VERSION = "gold_strict_7_discord_live_loop_v4_utf8_child_env_stale_summary_guard"
 
 SUMMARY_COLUMNS = [
     "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
@@ -89,9 +89,22 @@ def write_text(path: Path, text: str) -> None:
         f.write(text)
 
 
-def read_notifier_summary(path: Path) -> tuple[str, dict[str, Any]]:
+def utf8_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
+def read_notifier_summary(path: Path, *, started_at: datetime) -> tuple[str, dict[str, Any]]:
     if not path.exists():
         return "MISSING", {}
+    try:
+        modified_at = datetime.fromtimestamp(Path(windows_long_path(path)).stat().st_mtime)
+    except Exception as exc:
+        return f"STAT_ERROR:{type(exc).__name__}:{exc}", {}
+    if modified_at < started_at:
+        return f"STALE:modified_at={ts_text(modified_at)}<started_at={ts_text(started_at)}", {}
     try:
         with open(windows_long_path(path), "r", encoding="utf-8") as f:
             obj = json.load(f)
@@ -150,11 +163,22 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
     print("=" * 100, flush=True)
     print(f"[{ts_text()}] iteration={iteration} scheduled_for={ts_text(scheduled_for)}", flush=True)
     print("CMD: " + " ".join(cmd), flush=True)
-    proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
+    proc = subprocess.run(
+        cmd,
+        cwd=str(REPO_ROOT),
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        capture_output=True,
+        env=utf8_env(),
+    )
     finished = now()
     write_text(stdout_log, proc.stdout or "")
     write_text(stderr_log, proc.stderr or "")
-    summary_status, notifier_summary = read_notifier_summary(resolve_repo_path(args.notifier_out_dir) / "gold_strict_7_discord_preview_summary.json")
+    summary_status, notifier_summary = read_notifier_summary(
+        resolve_repo_path(args.notifier_out_dir) / "gold_strict_7_discord_preview_summary.json",
+        started_at=started,
+    )
     success = proc.returncode == 0 and bool(notifier_summary.get("cycle_ok", False))
     row = {
         "loop_started_at": loop_started_at,
@@ -237,6 +261,8 @@ def main() -> int:
     print(f"send_discord: {bool(args.send_discord)}", flush=True)
     print(f"run_delay_seconds: {args.run_delay_seconds}", flush=True)
     print(f"ai_tag_rules_json: {args.ai_tag_rules_json}", flush=True)
+    print("Python UTF-8 mode is forced for child notifier to avoid cp932 emoji print failures.", flush=True)
+    print("Notifier summary freshness is checked; stale summaries are ignored after child failures.", flush=True)
     print(f"tails: M5={args.tail_m5} H1={args.tail_h1} H4={args.tail_h4} D1={args.tail_d1}", flush=True)
     print(f"csv_dir: {args.csv_dir}", flush=True)
     print(f"summary_csv: {summary_csv}", flush=True)
