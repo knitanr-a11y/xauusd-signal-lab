@@ -8,6 +8,7 @@ Default behavior is safe:
 - no MT5 order send
 - no OpenAI call at notification time
 - H1/H4/D1 context is joined only with closed context candles
+- wall-clock freshness guard suppresses stale CSV/signals before notification
 
 AI tag scoring:
 - uses deterministic numeric rules generated from historical post-trade AI review
@@ -51,7 +52,7 @@ DEFAULT_ENV_FILE = REPO_ROOT / ".env"
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_strict_7_discord_preview")
 DEFAULT_LEDGER_CSV = Path("data/runtime_state/gold/strict_7/discord_notification_ledger.csv")
 DEFAULT_AI_TAG_RULES_JSON = Path("data/runtime_state/gold/strict_7/ai_tag_numeric_rules.json")
-SCHEMA_VERSION = "gold_strict_7_discord_notifier_v6_numeric_ai_tag_score"
+SCHEMA_VERSION = "gold_strict_7_discord_notifier_v7_wall_clock_freshness_guard"
 
 PREVIEW_COLUMNS = [
     "created_at",
@@ -83,6 +84,8 @@ PREVIEW_COLUMNS = [
     "trigger_cci20",
     "trigger_bb_pos",
     "trigger_kc_pos",
+    "wall_clock_signal_time_local_est",
+    "wall_clock_signal_age_minutes",
     "reason",
     "discord_sent",
     "dry_run",
@@ -206,6 +209,20 @@ def json_safe(value: Any) -> Any:
     return value
 
 
+def mt5_time_to_local_est(value: Any, mt5_to_local_hours: float) -> pd.Timestamp | None:
+    ts = pd.to_datetime(value, errors="coerce")
+    if pd.isna(ts):
+        return None
+    return pd.Timestamp(ts) + pd.Timedelta(hours=float(mt5_to_local_hours))
+
+
+def minutes_since_local_est(value: Any, *, mt5_to_local_hours: float, now_local: pd.Timestamp) -> float | None:
+    local_est = mt5_time_to_local_est(value, mt5_to_local_hours)
+    if local_est is None:
+        return None
+    return float((now_local - local_est).total_seconds() / 60.0)
+
+
 def strategy_display_name(strategy_id: str) -> str:
     mapping = {
         "SELL_KC_CCI150_LONDON_TP100_SL10": "SELL KC+CCI150 London",
@@ -281,19 +298,25 @@ def row_for_ai_score(row: pd.Series, spec: GoldStrictSignalSpec) -> dict[str, An
 def build_message(row: pd.Series, spec: GoldStrictSignalSpec, *, ai_score: dict[str, Any]) -> str:
     entry, tp, sl = calc_prices(row, spec)
     side_icon = "🟢" if spec.direction == "BUY" else "🔴"
+    age = safe_float(row.get("wall_clock_signal_age_minutes"))
+    age_line = "" if age is None else f"シグナル経過: {age:.1f}分（MT5+6h換算）"
     lines = [
         f"{side_icon} **GOLD {spec.direction} シグナル**",
         "",
         f"タイプ: {strategy_display_name(spec.strategy_id)}",
         f"Session: {spec.session}",
         f"エントリー目安: {time_text(row.get('close_time'))}",
+    ]
+    if age_line:
+        lines.append(age_line)
+    lines.extend([
         "",
         f"価格目安: Entry {fmt_price(entry)} / TP {fmt_price(tp)} / SL {fmt_price(sl)}",
         f"値幅: TP {fmt_num(spec.tp_pips, 1)} pips / SL {fmt_num(spec.sl_pips, 1)} pips / RR {fmt_num(spec.rr, 2)}",
         "価格注記: M5確定足終値ベース。実約定・スプレッドでズレあり。",
         "",
         "AIタグ推定:",
-    ]
+    ])
     lines.extend(format_score_for_discord(ai_score))
     lines.extend([
         "個別AI判定: 未実施（OpenAIは呼ばない）",
@@ -340,6 +363,8 @@ def row_to_preview(row: pd.Series, spec: GoldStrictSignalSpec, *, key: str, mess
         "trigger_cci20": safe_float(row.get("cci20")),
         "trigger_bb_pos": safe_float(row.get("bb_pos20")),
         "trigger_kc_pos": safe_float(row.get("kc_pos20_1p5")),
+        "wall_clock_signal_time_local_est": clean_str(row.get("wall_clock_signal_time_local_est")),
+        "wall_clock_signal_age_minutes": safe_float(row.get("wall_clock_signal_age_minutes")),
         "reason": clean_str(row.get("reason")),
         "discord_sent": bool(discord_sent),
         "dry_run": bool(dry_run),
@@ -370,6 +395,8 @@ def write_message(out_dir: Path, key: str, message: str, row: pd.Series, spec: G
             "h1_close_time": time_text(row.get("h1_close_time")),
             "h4_close_time": time_text(row.get("h4_close_time")),
             "d1_close_time": time_text(row.get("d1_close_time")),
+            "wall_clock_signal_time_local_est": clean_str(row.get("wall_clock_signal_time_local_est")),
+            "wall_clock_signal_age_minutes": safe_float(row.get("wall_clock_signal_age_minutes")),
             "reason": clean_str(row.get("reason")),
             "internal_name": spec.strategy_id,
         },
@@ -407,12 +434,39 @@ def load_context(paths: dict[str, Path], args: argparse.Namespace) -> pd.DataFra
     return attach_strict_context(m5, h1, h4, d1)
 
 
-def collect_signals(ctx: pd.DataFrame, specs: list[GoldStrictSignalSpec], args: argparse.Namespace) -> list[tuple[pd.Timestamp, GoldStrictSignalSpec, pd.Series]]:
+def collect_signals(ctx: pd.DataFrame, specs: list[GoldStrictSignalSpec], args: argparse.Namespace) -> tuple[list[tuple[pd.Timestamp, GoldStrictSignalSpec, pd.Series]], dict[str, Any]]:
+    now_local = pd.Timestamp(datetime.now())
+    mt5_to_local_hours = float(args.mt5_to_local_hours)
+    max_csv_staleness = int(args.max_csv_staleness_minutes)
+    max_signal_age = int(args.max_wall_clock_signal_age_minutes)
+    guard = {
+        "enabled": True,
+        "now_local": now_local.strftime("%Y-%m-%d %H:%M:%S"),
+        "mt5_to_local_hours": mt5_to_local_hours,
+        "max_csv_staleness_minutes": max_csv_staleness,
+        "max_wall_clock_signal_age_minutes": max_signal_age,
+        "ctx_last_close_time_mt5": "",
+        "ctx_last_close_time_local_est": "",
+        "csv_staleness_minutes": None,
+        "csv_stale_guard_triggered": False,
+        "signals_before_wall_clock_guard": 0,
+        "signals_after_wall_clock_guard": 0,
+        "signals_filtered_by_wall_clock_age": 0,
+    }
     if ctx.empty:
-        return []
+        return [], guard
+    last_close = ctx.iloc[-1]["close_time"]
+    last_close_local = mt5_time_to_local_est(last_close, mt5_to_local_hours)
+    guard["ctx_last_close_time_mt5"] = time_text(last_close)
+    guard["ctx_last_close_time_local_est"] = "" if last_close_local is None else last_close_local.strftime("%Y-%m-%d %H:%M:%S")
+    if last_close_local is not None:
+        guard["csv_staleness_minutes"] = float((now_local - last_close_local).total_seconds() / 60.0)
+    if max_csv_staleness > 0 and guard["csv_staleness_minutes"] is not None and float(guard["csv_staleness_minutes"]) > max_csv_staleness:
+        guard["csv_stale_guard_triggered"] = True
+        return [], guard
     end_idx = len(ctx) - 1 - int(args.bar_offset)
     if end_idx < 0:
-        return []
+        return [], guard
     end_close_time = pd.Timestamp(ctx.iloc[end_idx]["close_time"])
     start_close_time = end_close_time - pd.Timedelta(minutes=5 * max(1, int(args.scan_recent_bars) - 1))
     items: list[tuple[pd.Timestamp, GoldStrictSignalSpec, pd.Series]] = []
@@ -427,10 +481,25 @@ def collect_signals(ctx: pd.DataFrame, specs: list[GoldStrictSignalSpec], args: 
         recent = cooled[mask.fillna(False)].copy()
         for _, row in recent.iterrows():
             items.append((pd.Timestamp(row["close_time"]), spec, row))
-    items.sort(key=lambda x: (x[0], x[1].strategy_id))
+    guard["signals_before_wall_clock_guard"] = int(len(items))
+    filtered_items: list[tuple[pd.Timestamp, GoldStrictSignalSpec, pd.Series]] = []
+    for t, spec, row in items:
+        age = minutes_since_local_est(row.get("close_time"), mt5_to_local_hours=mt5_to_local_hours, now_local=now_local)
+        if age is None:
+            continue
+        if max_signal_age > 0 and (age < -2.0 or age > max_signal_age):
+            continue
+        enriched = row.copy()
+        local_est = mt5_time_to_local_est(row.get("close_time"), mt5_to_local_hours)
+        enriched["wall_clock_signal_time_local_est"] = "" if local_est is None else local_est.strftime("%Y-%m-%d %H:%M:%S")
+        enriched["wall_clock_signal_age_minutes"] = float(age)
+        filtered_items.append((t, spec, enriched))
+    guard["signals_after_wall_clock_guard"] = int(len(filtered_items))
+    guard["signals_filtered_by_wall_clock_age"] = int(len(items) - len(filtered_items))
+    filtered_items.sort(key=lambda x: (x[0], x[1].strategy_id))
     if args.max_notifications > 0:
-        items = items[-int(args.max_notifications):]
-    return items
+        filtered_items = filtered_items[-int(args.max_notifications):]
+    return filtered_items, guard
 
 
 def parse_args() -> argparse.Namespace:
@@ -451,6 +520,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--tail-h4", type=int, default=2000)
     p.add_argument("--tail-d1", type=int, default=1000)
     p.add_argument("--max-notifications", type=int, default=10)
+    p.add_argument("--max-wall-clock-signal-age-minutes", type=int, default=30, help="Suppress notifications when signal close_time + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--max-csv-staleness-minutes", type=int, default=15, help="Suppress all notifications when latest M5 close_time + MT5 offset is older than this many local minutes. 0 disables.")
+    p.add_argument("--mt5-to-local-hours", type=float, default=6.0, help="Local time offset from MT5 server timestamps. JST=MT5+6 for the current broker setup.")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--send-discord", action="store_true")
     p.add_argument("--mark-dry-run-notified", action="store_true")
@@ -479,7 +551,7 @@ def main() -> int:
     paths = resolve_csv_paths(args)
     ctx = load_context(paths, args)
     notified_keys = load_notified_keys(ledger_csv)
-    signals = collect_signals(ctx, specs, args)
+    signals, freshness_guard = collect_signals(ctx, specs, args)
 
     webhook_url = args.discord_webhook_url or os.environ.get("GOLD_STRICT_7_DISCORD_WEBHOOK_URL", "") or os.environ.get("DISCORD_WEBHOOK_URL", "")
     if args.send_discord and not webhook_url:
@@ -505,7 +577,8 @@ def main() -> int:
         print(f"ctx_last_close_time: {time_text(ctx['close_time'].iloc[-1])}", flush=True)
     print(f"scan_recent_bars: {args.scan_recent_bars}", flush=True)
     print(f"bar_offset: {args.bar_offset}", flush=True)
-    print(f"raw_recent_signals_after_cooldown: {len(signals)}", flush=True)
+    print(f"wall_clock_freshness_guard: {json.dumps(freshness_guard, ensure_ascii=False, default=str)}", flush=True)
+    print(f"raw_recent_signals_after_cooldown: {freshness_guard.get('signals_after_wall_clock_guard', len(signals))}", flush=True)
     print(f"already_notified_keys: {len(notified_keys)}", flush=True)
     print(f"send_discord: {bool(args.send_discord)}", flush=True)
     print(f"dry_run: {bool(args.dry_run)}", flush=True)
@@ -556,13 +629,15 @@ def main() -> int:
         "ctx_rows": int(len(ctx)),
         "scan_recent_bars": int(args.scan_recent_bars),
         "bar_offset": int(args.bar_offset),
-        "raw_recent_signals_after_cooldown": int(len(signals)),
+        "raw_recent_signals_after_cooldown": int(freshness_guard.get("signals_after_wall_clock_guard", len(signals))),
+        "raw_recent_signals_before_wall_clock_guard": int(freshness_guard.get("signals_before_wall_clock_guard", 0)),
         "preview_rows": int(len(preview_rows)),
         "ai_tag_hit_rows": int(ai_tag_hit_rows),
         "skipped_duplicates": int(skipped_duplicates),
         "ledger_rows_appended": int(len(ledger_rows)),
         "send_discord": bool(args.send_discord),
         "dry_run": bool(args.dry_run),
+        "wall_clock_freshness_guard": freshness_guard,
         "safety": {
             "discord_send": bool(args.send_discord),
             "mt5_calls": False,
@@ -570,6 +645,7 @@ def main() -> int:
             "ai_calls": False,
             "requires_valid_ai_tag_rules_on_send": True,
             "live_runtime_state_mutation": bool(len(ledger_rows) > 0),
+            "wall_clock_freshness_guard_enabled": True,
         },
     }
     with open(windows_long_path(summary_json), "w", encoding="utf-8", newline="") as f:
