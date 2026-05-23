@@ -3,6 +3,16 @@
 r"""Forever aligned guarded demo autotrade loop for GOLD strict 7.
 
 Thin loop. Order payload logic lives in run_gold_strict_7_guarded_demo_autotrade_from_csv.py.
+
+Runtime log policy:
+- The loop summary remains grouped by ISO week under gold_strict_7_guarded_demo_autotrade_loop.
+- Per-cycle autotrade payload/sender logs are stored under:
+
+    data/runtime_logs/gold_strict_7_guarded_demo_autotrade/YYYY/MM/YYYYMMDD_HHMMSS/
+
+- A compatibility latest summary is still written to the root wrapper output dir:
+
+    data/runtime_logs/gold_strict_7_guarded_demo_autotrade/latest_gold_strict_7_guarded_demo_autotrade_summary.json
 """
 from __future__ import annotations
 
@@ -21,7 +31,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 WRAPPER_SCRIPT = REPO_ROOT / "scripts" / "gold_strict_7_signals" / "run_gold_strict_7_guarded_demo_autotrade_from_csv.py"
 DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_LOOP_OUT_DIR = Path("data/runtime_logs/gold_strict_7_guarded_demo_autotrade_loop")
-SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_loop_v2"
+DEFAULT_WRAPPER_OUT_DIR = Path("data/runtime_logs/gold_strict_7_guarded_demo_autotrade")
+LATEST_SUMMARY_FILENAME = "latest_gold_strict_7_guarded_demo_autotrade_summary.json"
+SCHEMA_VERSION = "gold_strict_7_guarded_demo_autotrade_loop_v3_year_month_wrapper_logs"
 
 SUMMARY_COLUMNS = [
     "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
@@ -29,7 +41,8 @@ SUMMARY_COLUMNS = [
     "reason", "payload_rows", "sender_returncode", "sender_rows_out", "sender_dry_run_check_ok_rows",
     "sender_sent_rows", "sender_error_rows", "sender_order_send_called_count", "raw_recent_signals_after_cooldown",
     "scan_recent_bars", "max_signal_age_minutes", "tail_m5", "tail_h1", "tail_h4", "tail_d1",
-    "summary_read_status", "wrapper_summary_json", "stdout_log", "stderr_log",
+    "summary_read_status", "wrapper_out_dir", "wrapper_period_out_dir", "wrapper_summary_json", "root_latest_summary_json",
+    "stdout_log", "stderr_log",
 ]
 
 
@@ -71,6 +84,18 @@ def weekly_dir(base_dir: Path, dt: datetime) -> Path:
     return base_dir / f"{dt.year:04d}" / f"{dt.month:02d}" / f"week_{iso.week:02d}"
 
 
+def year_month_dir(base_dir: Path, dt: datetime) -> Path:
+    return base_dir / f"{dt.year:04d}" / f"{dt.month:02d}"
+
+
+def wrapper_period_out_dir(args: argparse.Namespace, dt: datetime) -> Path:
+    return year_month_dir(resolve_repo_path(args.wrapper_out_dir), dt)
+
+
+def root_latest_summary_path(args: argparse.Namespace) -> Path:
+    return resolve_repo_path(args.wrapper_out_dir) / LATEST_SUMMARY_FILENAME
+
+
 def append_summary(path: Path, row: dict[str, Any]) -> None:
     mkdirp(path.parent)
     exists = path.exists()
@@ -85,6 +110,10 @@ def write_text(path: Path, text: str) -> None:
     mkdirp(path.parent)
     with open(windows_long_path(path), "w", encoding="utf-8", newline="") as f:
         f.write(text)
+
+
+def write_json(path: Path, obj: dict[str, Any]) -> None:
+    write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True, default=str))
 
 
 def read_json(path: Path) -> tuple[str, dict[str, Any]]:
@@ -115,11 +144,12 @@ def sleep_until(target: datetime) -> None:
         time.sleep(min(remaining, 1.0))
 
 
-def build_wrapper_cmd(args: argparse.Namespace) -> list[str]:
+def build_wrapper_cmd(args: argparse.Namespace, *, run_dt: datetime) -> tuple[list[str], Path]:
+    period_out_dir = wrapper_period_out_dir(args, run_dt)
     cmd = [
         sys.executable, str(WRAPPER_SCRIPT),
         "--csv-dir", str(args.csv_dir),
-        "--out-dir", str(args.wrapper_out_dir),
+        "--out-dir", str(period_out_dir),
         "--order-ledger-csv", str(args.order_ledger_csv),
         "--broker-symbol", str(args.broker_symbol),
         "--expected-login", str(args.expected_login),
@@ -145,7 +175,21 @@ def build_wrapper_cmd(args: argparse.Namespace) -> list[str]:
         cmd.extend(["--terminal-path", str(args.terminal_path)])
     if args.portable:
         cmd.append("--portable")
-    return cmd
+    return cmd, period_out_dir
+
+
+def sync_root_latest_summary(args: argparse.Namespace, *, period_summary_path: Path, wrapper_summary: dict[str, Any]) -> Path:
+    root_path = root_latest_summary_path(args)
+    copied = dict(wrapper_summary)
+    copied["root_latest_summary_json"] = str(root_path)
+    copied["period_latest_summary_json"] = str(period_summary_path)
+    copied["log_layout"] = {
+        "schema_version": SCHEMA_VERSION,
+        "wrapper_run_dir_layout": "YYYY/MM/YYYYMMDD_HHMMSS",
+        "root_latest_summary_preserved": True,
+    }
+    write_json(root_path, copied)
+    return root_path
 
 
 def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iteration: int, scheduled_for: datetime, summary_csv: Path, log_dir: Path) -> dict[str, Any]:
@@ -153,16 +197,21 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
     stamp = safe_file_ts(started)
     stdout_log = log_dir / f"gold_strict7_autotrade_loop_iter_{iteration:06d}_{stamp}.stdout.log"
     stderr_log = log_dir / f"gold_strict7_autotrade_loop_iter_{iteration:06d}_{stamp}.stderr.log"
-    cmd = build_wrapper_cmd(args)
+    cmd, period_out_dir = build_wrapper_cmd(args, run_dt=started)
     print("=" * 100, flush=True)
     print(f"[{ts_text()}] iteration={iteration} scheduled_for={ts_text(scheduled_for)}", flush=True)
+    print(f"wrapper_period_out_dir: {period_out_dir}", flush=True)
     print("CMD: " + " ".join(cmd), flush=True)
     proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
     finished = now()
     write_text(stdout_log, proc.stdout or "")
     write_text(stderr_log, proc.stderr or "")
-    latest_summary = resolve_repo_path(args.wrapper_out_dir) / "latest_gold_strict_7_guarded_demo_autotrade_summary.json"
-    summary_status, wrapper_summary = read_json(latest_summary)
+
+    period_latest_summary = period_out_dir / LATEST_SUMMARY_FILENAME
+    summary_status, wrapper_summary = read_json(period_latest_summary)
+    root_latest = root_latest_summary_path(args)
+    if summary_status == "OK":
+        root_latest = sync_root_latest_summary(args, period_summary_path=period_latest_summary, wrapper_summary=wrapper_summary)
     success = proc.returncode == 0 and bool(wrapper_summary.get("cycle_ok", False))
     row = {
         "loop_started_at": loop_started_at,
@@ -192,7 +241,10 @@ def run_one_iteration(args: argparse.Namespace, *, loop_started_at: str, iterati
         "tail_h4": int(args.tail_h4),
         "tail_d1": int(args.tail_d1),
         "summary_read_status": summary_status,
-        "wrapper_summary_json": str(latest_summary),
+        "wrapper_out_dir": str(resolve_repo_path(args.wrapper_out_dir)),
+        "wrapper_period_out_dir": str(period_out_dir),
+        "wrapper_summary_json": str(period_latest_summary),
+        "root_latest_summary_json": str(root_latest),
         "stdout_log": str(stdout_log),
         "stderr_log": str(stderr_log),
     }
@@ -212,7 +264,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Forever aligned guarded demo autotrade loop for GOLD strict 7.")
     p.add_argument("--csv-dir", type=Path, default=DEFAULT_MQL5_FILES_DIR)
     p.add_argument("--loop-out-dir", type=Path, default=DEFAULT_LOOP_OUT_DIR)
-    p.add_argument("--wrapper-out-dir", type=Path, default=Path("data/runtime_logs/gold_strict_7_guarded_demo_autotrade"))
+    p.add_argument("--wrapper-out-dir", type=Path, default=DEFAULT_WRAPPER_OUT_DIR)
     p.add_argument("--order-ledger-csv", type=Path, default=Path("data/runtime_state/gold/strict_7/guarded_demo_order_ledger.csv"))
     p.add_argument("--broker-symbol", default="GOLD#")
     p.add_argument("--expected-login", type=int, default=75539039)
@@ -261,9 +313,12 @@ def main() -> int:
     print(f"run_delay_seconds: {args.run_delay_seconds}", flush=True)
     print(f"tails: M5={args.tail_m5} H1={args.tail_h1} H4={args.tail_h4} D1={args.tail_d1}", flush=True)
     print(f"csv_dir: {args.csv_dir}", flush=True)
+    print(f"wrapper_out_dir_root: {resolve_repo_path(args.wrapper_out_dir)}", flush=True)
+    print("wrapper_run_dir_layout: YYYY/MM/YYYYMMDD_HHMMSS", flush=True)
+    print(f"root_latest_summary_json: {root_latest_summary_path(args)}", flush=True)
     print(f"summary_csv: {summary_csv}", flush=True)
     print(f"log_dir: {log_dir}", flush=True)
-    print("Safety: existing guarded sender only. max-orders=1. demo guard. position-policy guard.", flush=True)
+    print(f"Safety: existing guarded sender only. max-orders={args.max_orders}. demo guard. position-policy={args.position_policy}.", flush=True)
     print("=" * 100, flush=True)
 
     iteration = 0
