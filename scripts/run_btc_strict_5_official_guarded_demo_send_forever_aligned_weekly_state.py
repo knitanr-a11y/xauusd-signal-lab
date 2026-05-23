@@ -17,13 +17,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CHILD_SCRIPT = REPO_ROOT / "scripts" / "btc_strict_5_signals" / "run_btc_strict_5_official_guarded_demo_autotrade_from_csv.py"
 DEFAULT_LOG_BASE = Path("data/runtime_logs/btc")
 DEFAULT_STATE_DIR = Path("data/runtime_state/btc/strict_5")
+DEFAULT_CHILD_OUT_ROOT = Path("data/runtime_logs/btc_strict_5_official_guarded_demo_autotrade")
 SUMMARY_NAME = "latest_btc_strict_5_official_guarded_demo_send_forever_aligned_weekly_state_result.json"
+CHILD_SUMMARY_NAME = "latest_btc_strict_5_official_guarded_demo_autotrade_summary.json"
+SCHEMA_VERSION = "btc_strict_5_official_loop_v3_gold_aligned_child_logs"
 
 COLUMNS = [
     "cycle_index", "cycle_start_utc", "cycle_end_utc", "returncode", "cycle_ok", "reason",
     "filter_variant", "payload_rows", "signals_excluded_by_official_filter", "sender_sent_rows",
     "sender_order_send_called_count", "d1_used", "tail_m15", "tail_h1", "tail_h4",
-    "next_run_utc", "stdout_log", "stderr_log", "summary_json",
+    "next_run_utc", "stdout_log", "stderr_log", "summary_json", "child_out_root",
+    "child_period_out_dir", "child_root_latest_summary_json", "loop_root_latest_summary_json",
 ]
 
 
@@ -43,6 +47,11 @@ def mkdirp(path: Path) -> None:
     Path(windows_long_path(path)).mkdir(parents=True, exist_ok=True)
 
 
+def resolve_repo_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p if p.is_absolute() else REPO_ROOT / p
+
+
 def utc_now() -> datetime:
     return datetime.now(UTC)
 
@@ -53,6 +62,10 @@ def utc_text(dt: datetime | None = None) -> str:
 
 def stamp() -> str:
     return utc_now().strftime("%Y%m%d_%H%M%S")
+
+
+def year_month_dir(base: Path, dt: datetime) -> Path:
+    return base / f"{dt.year:04d}" / f"{dt.month:02d}"
 
 
 def write_text(path: Path, text: str) -> None:
@@ -98,6 +111,33 @@ def next_aligned(now: datetime, interval: int, offset: int) -> datetime:
     else:
         b = b.replace(minute=m)
     return b + timedelta(seconds=offset)
+
+
+def child_period_out_dir(args: argparse.Namespace, dt: datetime) -> Path:
+    child_root = resolve_repo_path(args.child_out_root)
+    return year_month_dir(child_root, dt)
+
+
+def child_root_latest_summary_path(args: argparse.Namespace) -> Path:
+    return resolve_repo_path(args.child_out_root) / CHILD_SUMMARY_NAME
+
+
+def loop_root_latest_summary_path(base: Path) -> Path:
+    return base / SUMMARY_NAME
+
+
+def sync_child_root_latest(args: argparse.Namespace, *, period_summary_path: Path, child_summary: dict[str, Any]) -> Path:
+    root_latest = child_root_latest_summary_path(args)
+    copied = dict(child_summary)
+    copied["root_latest_summary_json"] = str(root_latest)
+    copied["period_latest_summary_json"] = str(period_summary_path)
+    copied["log_layout"] = {
+        "schema_version": SCHEMA_VERSION,
+        "child_run_dir_layout": "YYYY/MM/YYYYMMDD_HHMMSS",
+        "root_latest_summary_preserved": True,
+    }
+    write_json(root_latest, copied)
+    return root_latest
 
 
 def build_cmd(args: argparse.Namespace, child_out: Path, ledger: Path) -> list[str]:
@@ -147,14 +187,17 @@ def run_cycle(args: argparse.Namespace, i: int, loop_dir: Path, ledger: Path) ->
     s = stamp()
     stdout = loop_dir / "cycle_logs" / f"cycle_{i:06d}_{s}_stdout.log"
     stderr = loop_dir / "cycle_logs" / f"cycle_{i:06d}_{s}_stderr.log"
-    child_out = loop_dir / "child_runs"
+    child_out = child_period_out_dir(args, start)
     mkdirp(child_out)
     cmd = build_cmd(args, child_out, ledger)
     proc = subprocess.run(cmd, cwd=str(REPO_ROOT), text=True, encoding="utf-8", errors="replace", capture_output=True)
     write_text(stdout, proc.stdout or "")
     write_text(stderr, proc.stderr or "")
-    summary_path = child_out / "latest_btc_strict_5_official_guarded_demo_autotrade_summary.json"
-    summary = read_json(summary_path)
+    period_summary_path = child_out / CHILD_SUMMARY_NAME
+    summary = read_json(period_summary_path)
+    child_root_latest = child_root_latest_summary_path(args)
+    if period_summary_path.exists() and summary.get("summary_json"):
+        child_root_latest = sync_child_root_latest(args, period_summary_path=period_summary_path, child_summary=summary)
     row = {
         "cycle_index": i,
         "cycle_start_utc": utc_text(start),
@@ -173,11 +216,15 @@ def run_cycle(args: argparse.Namespace, i: int, loop_dir: Path, ledger: Path) ->
         "tail_h4": args.tail_h4,
         "stdout_log": str(stdout),
         "stderr_log": str(stderr),
-        "summary_json": summary.get("summary_json", str(summary_path)),
+        "summary_json": summary.get("summary_json", str(period_summary_path)),
+        "child_out_root": str(resolve_repo_path(args.child_out_root)),
+        "child_period_out_dir": str(child_out),
+        "child_root_latest_summary_json": str(child_root_latest),
     }
     print(
         f"[CYCLE {i}] ok={row['cycle_ok']} reason={row['reason']} variant={row['filter_variant']} "
-        f"payload={row['payload_rows']} sent={row['sender_sent_rows']} excluded={row['signals_excluded_by_official_filter']}",
+        f"payload={row['payload_rows']} sent={row['sender_sent_rows']} excluded={row['signals_excluded_by_official_filter']} "
+        f"child_out={child_out}",
         flush=True,
     )
     if not row["cycle_ok"]:
@@ -192,6 +239,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--log-base", type=Path, default=DEFAULT_LOG_BASE)
     p.add_argument("--state-dir", type=Path, default=DEFAULT_STATE_DIR)
+    p.add_argument("--child-out-root", type=Path, default=DEFAULT_CHILD_OUT_ROOT)
     p.add_argument("--filter-variant", default="buy_h4_context_conservative_v1", choices=["buy_h4_context_conservative_v1", "baseline"])
     p.add_argument("--mql5-files-dir", type=Path, default=None)
     p.add_argument("--m15-csv", default="")
@@ -224,16 +272,22 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    base = args.log_base if args.log_base.is_absolute() else REPO_ROOT / args.log_base
-    state = args.state_dir if args.state_dir.is_absolute() else REPO_ROOT / args.state_dir
+    base = resolve_repo_path(args.log_base)
+    state = resolve_repo_path(args.state_dir)
+    child_root = resolve_repo_path(args.child_out_root)
     ledger = state / "official_guarded_demo_order_ledger.csv"
     mkdirp(state)
     mkdirp(base)
+    mkdirp(child_root)
     print(
         f"BTC strict 5 official loop variant={args.filter_variant} interval={args.interval_minutes}m "
         f"+{args.offset_seconds}s ledger={ledger}",
         flush=True,
     )
+    print(f"loop_log_base={base}", flush=True)
+    print(f"child_run_layout={child_root}/YYYY/MM/YYYYMMDD_HHMMSS", flush=True)
+    print(f"child_root_latest_summary={child_root_latest_summary_path(args)}", flush=True)
+    print(f"loop_root_latest_summary={loop_root_latest_summary_path(base)}", flush=True)
     i = 0
     try:
         while True:
@@ -243,16 +297,24 @@ def main() -> int:
             row = run_cycle(args, i, loop_dir, ledger)
             nxt = next_aligned(utc_now(), args.interval_minutes, args.offset_seconds)
             row["next_run_utc"] = utc_text(nxt)
+            row["loop_root_latest_summary_json"] = str(loop_root_latest_summary_path(base))
             loop_csv = loop_dir / "official_aligned_loop_log.csv"
             append_csv(loop_csv, row)
-            write_json(loop_dir / SUMMARY_NAME, {
-                "schema_version": "btc_strict_5_official_loop_v2_long_path_fix",
+            latest_loop_summary = {
+                "schema_version": SCHEMA_VERSION,
                 "updated_at_utc": utc_text(),
                 "filter_variant": args.filter_variant,
                 "last_cycle": row,
                 "loop_csv": str(loop_csv),
+                "loop_dir": str(loop_dir),
+                "loop_root_latest_summary_json": str(loop_root_latest_summary_path(base)),
+                "child_out_root": str(child_root),
+                "child_run_dir_layout": "YYYY/MM/YYYYMMDD_HHMMSS",
+                "child_root_latest_summary_json": str(child_root_latest_summary_path(args)),
                 "persistent_order_ledger_csv": str(ledger),
-            })
+            }
+            write_json(loop_dir / SUMMARY_NAME, latest_loop_summary)
+            write_json(loop_root_latest_summary_path(base), latest_loop_summary)
             if args.max_cycles > 0 and i >= args.max_cycles:
                 return 0 if bool(row.get("cycle_ok")) else 1
             time.sleep(max(1.0, (nxt - utc_now()).total_seconds()))
