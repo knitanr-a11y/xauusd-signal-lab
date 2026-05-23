@@ -25,10 +25,10 @@ python scripts\run_btc_strict_5_official_guarded_demo_send_forever_aligned_weekl
   --tail-m15 3000 ^
   --tail-h1 2000 ^
   --tail-h4 1000 ^
-  --position-policy block_any ^
-  --max-symbol-positions 1 ^
-  --max-symbol-lot 0.01 ^
-  --max-orders 1 ^
+  --position-policy allow_any_until_max ^
+  --max-symbol-positions 5 ^
+  --max-symbol-lot 0.05 ^
+  --max-orders 5 ^
   --lot 0.01 ^
   --allow-demo-send ^
   --send
