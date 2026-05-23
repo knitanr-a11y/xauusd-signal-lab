@@ -14,8 +14,10 @@ echo - reads latest confirmed CSV row: bar_offset=0
 echo - lightweight candle tails
 echo - expected-login and demo-account guard enabled
 echo - duplicate prevention by guarded_demo_order_ledger.csv
-echo - max-orders=1
-echo - position-policy=block_any
+echo - max-orders=7
+echo - position-policy=allow_any_until_max, same active magic is blocked by sender
+echo - max-symbol-positions=7
+echo - max-symbol-lot=0.07
 echo - lot=0.01
 echo - Python UTF-8 mode ENABLED to avoid cp932 print failures
 echo - no Discord send
@@ -38,10 +40,10 @@ python scripts\gold_strict_7_signals\run_gold_strict_7_guarded_demo_autotrade_fo
   --tail-h1 1000 ^
   --tail-h4 500 ^
   --tail-d1 300 ^
-  --max-orders 1 ^
-  --position-policy block_any ^
-  --max-symbol-positions 1 ^
-  --max-symbol-lot 0.01
+  --max-orders 7 ^
+  --position-policy allow_any_until_max ^
+  --max-symbol-positions 7 ^
+  --max-symbol-lot 0.07
 
 set EXIT_CODE=%ERRORLEVEL%
 echo.
