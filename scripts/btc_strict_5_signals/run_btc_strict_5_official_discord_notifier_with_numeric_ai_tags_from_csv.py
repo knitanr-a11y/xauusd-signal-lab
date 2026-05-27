@@ -5,9 +5,8 @@
 The original notifier body is kept next to this file as:
     _run_btc_strict_5_official_discord_notifier_with_numeric_ai_tags_from_csv_original.py
 
-This entrypoint executes that body after applying a narrow, in-memory cleanup
-for duplicate summary keys left by the duplicate-guard hotfix. No local patch
-step is required.
+This entrypoint executes that body after applying narrow, in-memory compatibility
+fixes for the current notifier body. No local patch step is required.
 """
 from __future__ import annotations
 
@@ -46,6 +45,39 @@ def _clean_source(text: str) -> str:
         "    return 0 if summary_errors_ok else 1\n",
         1,
     )
+
+    text = text.replace(
+        '    age = safe_float(row.get("wall_clock_signal_age_minutes"))\n'
+        '    age_line = "" if age is None else f"シグナル経過: {age:.1f}分（MT5+6h換算）"\n',
+        '    age = safe_float(row.get("wall_clock_signal_age_minutes"))\n'
+        '    age_line = "" if age is None else f"シグナル経過: {age:.1f}分（MT5+6h換算）"\n'
+        '    entry_ref = safe_float(row.get("next_m15_open_price")) if bool(row.get("next_m15_open_available", False)) else safe_float(row.get("signal_close_price"))\n'
+        '    tp_dist = safe_float(row.get("tp_price_distance")) or 0.0\n'
+        '    sl_dist = safe_float(row.get("sl_price_distance")) or 0.0\n'
+        '    if entry_ref is None:\n'
+        '        tp_price_text = "N/A"\n'
+        '        sl_price_text = "N/A"\n'
+        '    elif direction == "BUY":\n'
+        '        tp_price_text = fmt_num(entry_ref + tp_dist, 2)\n'
+        '        sl_price_text = fmt_num(entry_ref - sl_dist, 2)\n'
+        '    else:\n'
+        '        tp_price_text = fmt_num(entry_ref - tp_dist, 2)\n'
+        '        sl_price_text = fmt_num(entry_ref + sl_dist, 2)\n',
+        1,
+    )
+
+    text = text.replace(
+        '        f"next M15 open: {next_open}",\n'
+        '        f"TP距離: {fmt_num(row.get(\'tp_price_distance\'), 1)} price / {fmt_num(row.get(\'tp_pips\'), 1)} pips",\n'
+        '        f"SL距離: {fmt_num(row.get(\'sl_price_distance\'), 1)} price / {fmt_num(row.get(\'sl_pips\'), 1)} pips",\n',
+        '        f"next M15 open: {next_open}",\n'
+        '        f"TP価格目安: {tp_price_text}",\n'
+        '        f"SL価格目安: {sl_price_text}",\n'
+        '        f"TP距離: {fmt_num(row.get(\'tp_price_distance\'), 1)} price / {fmt_num(row.get(\'tp_pips\'), 1)} pips",\n'
+        '        f"SL距離: {fmt_num(row.get(\'sl_price_distance\'), 1)} price / {fmt_num(row.get(\'sl_pips\'), 1)} pips",\n',
+        1,
+    )
+
     return text
 
 
@@ -55,6 +87,8 @@ def _verify_source(text: str) -> None:
         "ledger_append_errors summary key": text.count('"ledger_append_errors": ledger_errors,') == 1,
         "summary_errors_ok includes seen_state_errors": "summary_errors_ok = len(send_errors) == 0 and len(ledger_errors) == 0 and len(seen_state_errors) == 0" in text,
         "return code uses summary_errors_ok": "return 0 if summary_errors_ok else 1" in text,
+        "BTC TP price displayed": "TP価格目安: {tp_price_text}" in text,
+        "BTC SL price displayed": "SL価格目安: {sl_price_text}" in text,
     }
     failed = [name for name, ok in checks.items() if not ok]
     if failed:
