@@ -4,7 +4,8 @@
 
 The pipeline is post-trade only:
 - build factual outcome rows from the strict 7 ledger and MT5 closed history
-- build feature snapshots
+- filter AI-reviewable strict 7 outcomes into a review-only intermediate CSV
+- build feature snapshots from the review-only intermediate CSV
 - build AI review payloads
 - evaluate only payloads that are not already present in the review ledger
 - summarize all live strict 7 reviews
@@ -26,10 +27,14 @@ from typing import Any
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
+DEFAULT_MQL5_FILES_DIR = Path("C:/Users/regen/AppData/Roaming/MetaQuotes/Terminal/2FA8A7E69CED7DC259B1AD86A247F675/MQL5/Files")
 DEFAULT_OUT_DIR = Path("data/runtime_logs/trade_ai_review_live_gold_strict_7")
 DEFAULT_LEDGER = Path("data/runtime_state/gold/strict_7/guarded_demo_order_ledger.csv")
 SCHEMA_VERSION = "gold_strict_7_live_ai_review_pipeline_v1"
+
+REVIEWABLE_OUTCOMES = {"WIN", "LOSS", "BREAKEVEN", "SMALL_WIN", "SMALL_LOSS"}
+REVIEWABLE_EXECUTION_STATUSES = {"CLOSED", "EXECUTED"}
+EXCLUDED_EXECUTION_STATUSES = {"SENT_NO_MT5_POSITION_MATCH", "NO_MT5_POSITION_MATCH"}
 
 
 def wpath(path: str | Path) -> str:
@@ -119,6 +124,22 @@ def clean(value: Any) -> str:
     return str(value).strip()
 
 
+def upper_col(df: pd.DataFrame, name: str) -> pd.Series:
+    if name in df.columns:
+        return df[name].fillna("").astype(str).str.strip().str.upper()
+    return pd.Series([""] * len(df), index=df.index, dtype=str)
+
+
+def reviewable_trade_mask(df: pd.DataFrame) -> pd.Series:
+    exe = upper_col(df, "execution_status")
+    out = upper_col(df, "outcome")
+    return (
+        exe.isin(REVIEWABLE_EXECUTION_STATUSES)
+        & out.isin(REVIEWABLE_OUTCOMES)
+        & ~exe.isin(EXCLUDED_EXECUTION_STATUSES)
+    )
+
+
 def utc_now() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -175,15 +196,60 @@ def write_pending_payloads(payload_jsonl: Path, review_jsonl: Path, pending_json
 def outcome_counts(path: Path) -> dict[str, Any]:
     df = read_csv(path)
     if df.empty:
-        return {"rows": 0, "reviewable_closed_rows": 0, "execution_status_counts": {}, "outcome_counts": {}}
-    exe = df.get("execution_status", pd.Series(dtype=str)).fillna("").astype(str).str.upper()
-    out = df.get("outcome", pd.Series(dtype=str)).fillna("").astype(str).str.upper()
-    reviewable = exe.eq("CLOSED") & out.isin(["WIN", "LOSS", "BREAKEVEN", "SMALL_WIN", "SMALL_LOSS"])
+        return {
+            "rows": 0,
+            "reviewable_trade_rows": 0,
+            "reviewable_closed_rows": 0,
+            "reviewable_executed_rows": 0,
+            "excluded_no_mt5_position_match_rows": 0,
+            "execution_status_counts": {},
+            "outcome_counts": {},
+            "reviewable_execution_status_counts": {},
+            "reviewable_outcome_counts": {},
+        }
+    exe = upper_col(df, "execution_status")
+    out = upper_col(df, "outcome")
+    reviewable = reviewable_trade_mask(df)
+    valid_outcome = out.isin(REVIEWABLE_OUTCOMES)
+    excluded = exe.isin(EXCLUDED_EXECUTION_STATUSES)
+    closed_reviewable = exe.eq("CLOSED") & valid_outcome & ~excluded
+    executed_reviewable = exe.eq("EXECUTED") & valid_outcome & ~excluded
     return {
         "rows": int(len(df)),
-        "reviewable_closed_rows": int(reviewable.sum()),
+        "reviewable_trade_rows": int(reviewable.sum()),
+        "reviewable_closed_rows": int(closed_reviewable.sum()),
+        "reviewable_executed_rows": int(executed_reviewable.sum()),
+        "excluded_no_mt5_position_match_rows": int(excluded.sum()),
         "execution_status_counts": exe.value_counts(dropna=False).to_dict(),
         "outcome_counts": out.value_counts(dropna=False).to_dict(),
+        "reviewable_execution_status_counts": exe[reviewable].value_counts(dropna=False).to_dict(),
+        "reviewable_outcome_counts": out[reviewable].value_counts(dropna=False).to_dict(),
+    }
+
+
+def write_reviewable_trade_outcome_csv(source_csv: Path, reviewable_csv: Path) -> dict[str, Any]:
+    df = read_csv(source_csv)
+    mask = reviewable_trade_mask(df) if not df.empty else pd.Series([], dtype=bool)
+    reviewable_df = df.loc[mask].copy() if not df.empty else df.copy()
+    mkdirp(reviewable_csv.parent)
+    reviewable_df.to_csv(wpath(reviewable_csv), index=False, encoding="utf-8-sig")
+
+    exe = upper_col(df, "execution_status") if not df.empty else pd.Series([], dtype=str)
+    out = upper_col(df, "outcome") if not df.empty else pd.Series([], dtype=str)
+    excluded = exe.isin(EXCLUDED_EXECUTION_STATUSES) if not df.empty else pd.Series([], dtype=bool)
+    return {
+        "source_csv": str(source_csv),
+        "reviewable_csv": str(reviewable_csv),
+        "source_rows": int(len(df)),
+        "reviewable_rows": int(len(reviewable_df)),
+        "excluded_no_mt5_position_match_rows": int(excluded.sum()) if len(excluded) else 0,
+        "reviewable_execution_status_counts": exe[mask].value_counts(dropna=False).to_dict() if len(mask) else {},
+        "reviewable_outcome_counts": out[mask].value_counts(dropna=False).to_dict() if len(mask) else {},
+        "rules": {
+            "include_execution_statuses": sorted(REVIEWABLE_EXECUTION_STATUSES),
+            "include_outcomes": sorted(REVIEWABLE_OUTCOMES),
+            "exclude_execution_statuses": sorted(EXCLUDED_EXECUTION_STATUSES),
+        },
     }
 
 
@@ -237,6 +303,7 @@ def main() -> int:
         "mt5_positions_csv": args.out_dir / "mt5_history" / "mt5_history_positions.csv",
         "mt5_deals_csv": args.out_dir / "mt5_history" / "mt5_history_deals.csv",
         "outcome_csv": args.out_dir / "trade_outcome_ledger.csv",
+        "reviewable_outcome_csv": args.out_dir / "trade_outcome_ledger_reviewable.csv",
         "outcome_json": args.out_dir / "trade_outcome_ledger_summary.json",
         "snapshot_csv": args.out_dir / "trade_feature_snapshot.csv",
         "snapshot_jsonl": args.out_dir / "trade_feature_snapshot.jsonl",
@@ -298,18 +365,29 @@ def main() -> int:
         return 2
 
     counts = outcome_counts(paths["outcome_csv"])
-    if int(counts.get("reviewable_closed_rows", 0)) <= 0 and args.allow_no_reviewable_trades_success:
+    reviewable_filter = write_reviewable_trade_outcome_csv(paths["outcome_csv"], paths["reviewable_outcome_csv"])
+    if int(counts.get("reviewable_trade_rows", 0)) <= 0 and args.allow_no_reviewable_trades_success:
         if not exists(paths["review_jsonl"]):
             write_text(paths["review_jsonl"], "")
         summary = {
             "schema_version": SCHEMA_VERSION,
             "created_at_utc": utc_now(),
             "cycle_ok": True,
-            "reason": "NO_REVIEWABLE_CLOSED_STRICT7_TRADE",
+            "reason": "NO_REVIEWABLE_STRICT7_TRADE",
             "out_dir": str(args.out_dir),
             "paths": {k: str(v) for k, v in paths.items()},
             "outcome_counts": counts,
-            "key_metrics": {"outcome_rows": counts.get("rows", 0), "reviewable_closed_rows": 0, "payload_rows": 0, "pending_rows": 0, "review_rows_final": len(read_jsonl(paths["review_jsonl"]))},
+            "reviewable_filter": reviewable_filter,
+            "key_metrics": {
+                "outcome_rows": counts.get("rows", 0),
+                "reviewable_trade_rows": 0,
+                "reviewable_closed_rows": int(counts.get("reviewable_closed_rows", 0)),
+                "reviewable_executed_rows": int(counts.get("reviewable_executed_rows", 0)),
+                "reviewable_outcome_rows": csv_len(paths["reviewable_outcome_csv"]),
+                "payload_rows": 0,
+                "pending_rows": 0,
+                "review_rows_final": len(read_jsonl(paths["review_jsonl"])),
+            },
             "steps": steps,
             "timing": {"total_seconds": round(time.perf_counter() - t0, 3)},
         }
@@ -319,7 +397,7 @@ def main() -> int:
 
     snapshot_cmd = [
         sys.executable, str(REPO_ROOT / "scripts" / "build_trade_feature_snapshots.py"),
-        "--trade-outcome-csv", str(paths["outcome_csv"]),
+        "--trade-outcome-csv", str(paths["reviewable_outcome_csv"]),
         "--m15-csv", str(m15_csv),
         "--output-csv", str(paths["snapshot_csv"]),
         "--output-jsonl", str(paths["snapshot_jsonl"]),
@@ -366,7 +444,7 @@ def main() -> int:
 
     steps.append(cmd_run("summarize_trade_ai_review_ledger", [
         sys.executable, str(REPO_ROOT / "scripts" / "summarize_trade_ai_review_ledger.py"),
-        "--trade-outcome-csv", str(paths["outcome_csv"]),
+        "--trade-outcome-csv", str(paths["reviewable_outcome_csv"]),
         "--ai-review-jsonl", str(paths["review_jsonl"]),
         "--output-csv", str(paths["tag_csv"]),
         "--output-json", str(paths["tag_json"]),
@@ -387,10 +465,14 @@ def main() -> int:
         "order_ledger_csv": str(args.order_ledger_csv),
         "paths": {k: str(v) for k, v in paths.items()},
         "outcome_counts": counts,
+        "reviewable_filter": reviewable_filter,
         "pending_summary": pending,
         "key_metrics": {
             "outcome_rows": csv_len(paths["outcome_csv"]),
+            "reviewable_trade_rows": int(counts.get("reviewable_trade_rows", 0)),
             "reviewable_closed_rows": int(counts.get("reviewable_closed_rows", 0)),
+            "reviewable_executed_rows": int(counts.get("reviewable_executed_rows", 0)),
+            "reviewable_outcome_rows": csv_len(paths["reviewable_outcome_csv"]),
             "feature_snapshot_rows": csv_len(paths["snapshot_csv"]),
             "payload_rows": int(pending.get("payload_rows", 0)),
             "pending_rows": int(pending.get("pending_rows", 0)),
@@ -412,7 +494,10 @@ def main() -> int:
         "cycle_ok": summary["cycle_ok"],
         "reason": summary["reason"],
         "outcome_rows": summary["key_metrics"]["outcome_rows"],
+        "reviewable_trade_rows": summary["key_metrics"]["reviewable_trade_rows"],
         "reviewable_closed_rows": summary["key_metrics"]["reviewable_closed_rows"],
+        "reviewable_executed_rows": summary["key_metrics"]["reviewable_executed_rows"],
+        "reviewable_outcome_rows": summary["key_metrics"]["reviewable_outcome_rows"],
         "payload_rows": summary["key_metrics"]["payload_rows"],
         "pending_rows": summary["key_metrics"]["pending_rows"],
         "skipped_already_reviewed_rows": summary["key_metrics"]["skipped_already_reviewed_rows"],
