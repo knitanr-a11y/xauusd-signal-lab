@@ -9,10 +9,11 @@ echo - settles virtual outcomes from M1 candles
 echo - builds AI review payloads for resolved shadow trades only
 echo - does NOT send MT5 orders
 echo - output root: data\verification\gold_strict7_shadow_review
+echo - run layout: YYYY\MM\YYYYMMDD_HHMMSS
 echo ============================================================
 
-python scripts\gold_strict_7_signals\run_gold_strict_7_shadow_ai_review_pipeline.py ^
-  --out-dir data\verification\gold_strict7_shadow_review ^
+python scripts\gold_strict_7_signals\run_gold_strict_7_shadow_ai_review_dated.py ^
+  --out-root data\verification\gold_strict7_shadow_review ^
   --mql5-files-dir "C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files" ^
   --shadow-ledger-csv data\runtime_state\gold\strict_7\gold_strict7_shadow_signal_ledger.csv ^
   --m1-file goldsharp_m1.csv ^
