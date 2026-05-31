@@ -1,21 +1,15 @@
-# GOLD specialist 8 新HTF big-moveシグナル探索仕様・結果
+# GOLD specialist 8 revised wide HTF big-move exploration
 
 作成日: 2026-05-31
-対象: GOLD / H1以上の大伸び / M15落とし込み / M5勝敗判定
 
-## 1. 実装名
+## 修正理由
 
-`GOLD specialist 8 new HTF big-move signal exploration`
+前回の `TP10/SL5` / `TP15/SL7.5` は、上位足の数百pips級伸びを取る設計ではなく、下髭で狩られやすいスキャル寄りだったため却下。
+今回は確定済みH1/H4/D1だけを使い、TP/SLを広げ、同一strategyの重複ポジションを禁止して再探索した。
 
-## 2. 目的
+## source of truth
 
-H1以上で数十USD以上伸びている局面を、M15へ落として押し目・再上昇で拾える追加シグナルを探す。
-
-今回の探索はAI評価ではない。OpenAI APIは呼ばない。
-
-## 3. 入力CSV
-
-今回の検証では、ユーザーがアップロードした以下のOHLCをsource of truthとして使用した。
+アップロードされたOHLC:
 
 ```text
 goldsharp_m15.csv
@@ -25,187 +19,123 @@ goldsharp_h4.csv
 goldsharp_d1.csv
 ```
 
-## 4. 出力
+## 未確定上位足禁止ルール
 
-ローカル検証で作成した出力:
+M15 signal_time に対して、H1/H4/D1は `close_time <= signal_time` の足だけを `merge_asof` で結合した。
+open中のH1/H4/D1足は使っていない。
+
+ledger監査結果:
 
 ```text
-gold_specialist_8_new_htf_bigmove_signal_summary_20260531.csv
-gold_specialist_8_new_htf_bigmove_source_trade_ledger_20260531.csv
-gold_specialist_8_new_htf_bigmove_period_audit_20260531.csv
-gold_specialist_8_new_htf_bigmove_rejected_sell_audit_20260531.csv
+HTF confirmed violations = 0
 ```
 
-## 5. 共通判定仕様
+## 勝敗判定
 
 ```text
-signal timeframe: M15
 entry_time: 次のM15足open
-entry_price: 次のM15足open
 outcome timeframe: M5
-outcome rule: M5先触れ判定
-same M5 bar TP/SL both touched: SL priority
-cooldown: strategy_id + direction 単位で60分
+same M5 bar TP/SL both hit: SL priority
+同一strategy重複: 禁止。前回trade exit_time + 240分 まで次を出さない
 AI API calls: 0
-MT5 order sends: 0
+MT5 sends: 0
 Discord sends: 0
 ```
 
-## 6. 追加候補1
-
-### strategy_id
+## 候補1
 
 ```text
-NEW_BUY_H4_DONCH36_BREAK_M15_EMA20_REJECT_TP10_SL5_CAP220
+NEW_BUY_CONFIRMED_D1H4_BIGMOVE_M15_EMA50_PULLBACK_TP100_SL50_CAP4320_NO_OVERLAP
 ```
 
-### direction
-
-```text
-BUY only
-```
-
-### 条件
+条件:
 
 ```text
 D1 close > D1 EMA20
-H4 close > previous H4 Donchian36 high
-H4 close > H4 EMA20
-H4 ADX14 >= 15
-H4 3本close変化 >= +40 USD
-M15 low <= M15 EMA20
-M15 close > M15 EMA20
-M15 bullish candle
-```
-
-### TP/SL
-
-```text
-TP: +10 USD
-SL: -5 USD
-CAP: 220分
-```
-
-### 結果
-
-```text
-expected_trades: 53
-wins: 30
-losses: 23
-win_rate: 56.60%
-PF: 2.58
-net: +178.74 USD
-avg: +3.37 USD/trade
-```
-
-### 期間別
-
-```text
-2025: 37件 / WR 59.46% / PF 2.90 / net +138.74 USD
-2026: 16件 / WR 50.00% / PF 2.00 / net +40.00 USD
-直近90日: 6件 / WR 50.00% / PF 2.00 / net +15.00 USD
-```
-
-## 7. 追加候補2
-
-### strategy_id
-
-```text
-NEW_BUY_H4H1_IMPULSE_M15_EMA20_RSI50_RECLAIM_TP15_SL75_CAP240
-```
-
-### direction
-
-```text
-BUY only
-```
-
-### 条件
-
-```text
+D1 EMA20 > D1 EMA50
+D1 3本close変化 >= +80 USD または D1 5本range >= +112 USD
 H4 close > H4 EMA20
 H4 EMA20 > H4 EMA50
-H4 6本close変化 >= +60 USD または H4 6本range >= +72 USD
-H1 close > H1 EMA20
-H1 EMA20 > H1 EMA50
-H1 ADX14 >= 20
-H1 8本close変化 >= +20 USD
-M15 low <= M15 EMA20
+H4 ADX14 >= 18
+H4 6本close変化 >= +80 USD または H4 12本range >= +120 USD
+M15 low <= M15 EMA50
 M15 close > M15 EMA20
 M15 bullish candle
-M15 RSI14 crosses above 50
 ```
 
-### TP/SL
+TP/SL:
 
 ```text
-TP: +15 USD
-SL: -7.5 USD
-CAP: 240分
+TP +100 USD
+SL -50 USD
+CAP 4320分
 ```
 
-### 結果
+結果:
 
 ```text
-expected_trades: 27
-wins: 16
-losses: 11
-win_rate: 59.26%
-PF: 2.91
-net: +157.50 USD
-avg: +5.83 USD/trade
+expected_trades 31
+WR 58.06%
+PF 2.24
+net +749.26 USD
+recent90: 3件 / 0勝3敗 / -150 USD
 ```
 
-### 期間別
+注意: 全期間では良いが、直近90日は全敗。即live採用不可。追加候補として保留監査が必要。
+
+## 候補2
 
 ```text
-2025: 10件 / WR 60.00% / PF 3.00 / net +60.00 USD
-2026: 17件 / WR 58.82% / PF 2.86 / net +97.50 USD
-直近90日: 9件 / WR 44.44% / PF 1.60 / net +22.50 USD
+NEW_SELL_CONFIRMED_H4H1_BIGDOWN_D1BELOW_M15_EMA20_REJECT_TP80_SL40_CAP2880_NO_OVERLAP
 ```
 
-## 8. 採用しない条件
-
-SELL対称形も検証したが、成績が弱い。
+条件:
 
 ```text
-NEW_SELL_H4_DONCH36_BREAK_M15_EMA20_REJECT_TP10_SL5_CAP220
-21件 / WR 38.10% / PF 1.23 / net +15.00 USD
-
-NEW_SELL_H4H1_IMPULSE_M15_EMA20_RSI50_RECLAIM_TP15_SL75_CAP240
-23件 / WR 30.43% / PF 0.88 / net -15.00 USD
+D1 close < D1 EMA20
+H4 close < H4 EMA20
+H4 EMA20 < H4 EMA50
+H4 6本close変化 <= -100 USD または H4 12本range >= +150 USD
+H1 close < H1 EMA20
+H1 EMA20 < H1 EMA50
+H1 ADX14 >= 20
+H1 8本close変化 <= -20 USD
+M15 high >= M15 EMA20
+M15 close < M15 EMA20
+M15 bearish candle
 ```
 
-そのため、今回追加候補はBUY専用2本とする。
-
-## 9. 成功条件
+TP/SL:
 
 ```text
-entry_time / direction / tp / sl / outcome がsource trade ledgerに出ている
-expected_tradesがsummaryとledgerで一致する
-AI API callsが0
-SELL対称形を混ぜない
+TP +80 USD
+SL -40 USD
+CAP 2880分
 ```
 
-## 10. 停止条件
+結果:
 
 ```text
-M5勝敗判定が作れない
-entry_timeが欠ける
-TP/SLが欠ける
-BUY以外を混ぜる
-AI APIを呼ぶ処理が混入する
+expected_trades 19
+WR 47.37%
+PF 1.29
+net +117.71 USD
+recent90: 16件 / WR 50.00% / PF 1.37 / net +117.71 USD
 ```
 
-## 11. 次にやること
+注意: 直近は比較的良いが、PFは強くない。採用候補ではなく監視候補。
 
-この2本は、いきなりAI評価やlive導線へ入れない。
+## 結論
 
-次の順序で進める。
+前回の狭いSL候補は破棄。
+広いSL/TPかつ確定済み上位足限定では、強く採用できる追加シグナルはまだない。
+候補として残すなら上記2本。ただし、候補1は直近90日が悪く、候補2はPFが弱い。
+
+## 次にやること
 
 ```text
-1. 新2本だけのsource trade ledgerを保存
-2. 既存selected_8との重複時刻を監査
-3. group aggregation仕様に追加するか判断
-4. audit-only通過後に初めてAI評価対象候補にする
+1. 既存selected_8とのentry_time重複監査
+2. 新2本だけを別ledgerでaudit-only
+3. group aggregationに混ぜる前に、直近90日と2026年だけで再評価
+4. AI APIはまだ呼ばない
 ```
