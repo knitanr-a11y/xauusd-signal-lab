@@ -138,7 +138,8 @@ python scripts\summarize_trade_ai_review_ledger.py ^
   --ai-review-jsonl "%OUT_DIR%\trade_ai_review_ledger.jsonl" ^
   --output-csv "%OUT_DIR%\trade_ai_tag_summary.csv" ^
   --output-json "%OUT_DIR%\trade_ai_tag_summary.json" ^
-  --min-sample 3
+  --min-sample 3 ^
+  --include-open-trades
 
 set "SUMMARY_EXIT=%ERRORLEVEL%"
 echo summary_exit_code=%SUMMARY_EXIT%
