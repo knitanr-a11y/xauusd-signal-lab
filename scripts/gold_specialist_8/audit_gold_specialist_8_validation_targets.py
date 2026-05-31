@@ -10,7 +10,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -87,7 +86,7 @@ def main() -> int:
         "trade_outcome_csv": str(args.trade_outcome_csv),
         "group_csv": str(args.group_csv),
         "component_csv": str(args.component_csv),
-        "review_ledger_jsonl": str(args.review_ledg er_jsonl) if False else str(args.review_ledger_jsonl),
+        "review_ledger_jsonl": str(args.review_ledger_jsonl),
         "trade_outcome_rows": int(len(trade)),
         "group_rows": int(len(group)),
         "component_rows": int(len(component)),
