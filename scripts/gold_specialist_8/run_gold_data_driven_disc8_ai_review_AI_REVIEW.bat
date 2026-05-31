@@ -3,12 +3,19 @@ setlocal EnableExtensions EnableDelayedExpansion
 chcp 65001 >nul
 
 REM ==============================================================================
-REM DISC8 AI review - REAL AI EXECUTION
+REM DISC8 AI review - REAL AI EXECUTION WITH PROGRESS
 REM ==============================================================================
 REM WARNING:
 REM   This BAT calls OpenAI API for pending DISC8 sample payloads.
 REM   It never reads full static_rule_trade_ledger.csv as review target.
 REM   It uses only latest_ai_review_sample_80_loss45.csv.
+REM
+REM Overnight mode:
+REM   MAX_PENDING=0 keeps all pending rows enabled.
+REM   Progress is printed per row into latest_disc8_ai_review_console.log.
+REM   Each successful review is appended immediately to trade_ai_review_ledger.jsonl.
+REM   If interrupted, rerun this BAT. The pipeline rebuilds pending rows and skips
+REM   already-reviewed payloads.
 REM ==============================================================================
 
 cd /d "%~dp0\..\.."
@@ -30,10 +37,10 @@ set "H1_CSV="
 set "H4_CSV="
 set "D1_CSV="
 
-REM Safety: set MAX_PENDING to a small number for a smoke test, or 0 for all pending.
-REM Example: set "MAX_PENDING=20"
+REM 0 = all pending rows. Keep this for overnight full run.
 set "MAX_PENDING=0"
 set "MODEL=gpt-5-mini"
+set "PROGRESS_EVERY=1"
 
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
@@ -53,7 +60,7 @@ exit /b %EXIT_CODE%
 
 :main
 echo ==============================================================================
-echo DISC8 AI review - REAL AI EXECUTION
+echo DISC8 AI review - REAL AI EXECUTION WITH PROGRESS
 echo ==============================================================================
 echo repo root    : %CD%
 echo sample csv   : %SAMPLE_CSV%
@@ -61,6 +68,7 @@ echo sample audit : %SAMPLE_AUDIT%
 echo out dir      : %OUT_DIR%
 echo model        : %MODEL%
 echo max pending  : %MAX_PENDING%
+echo progress     : every %PROGRESS_EVERY% row(s)
 echo AI API       : ENABLED
 echo CSV mode     : auto-discover MQL5 Files or repo root goldsharp_*.csv
 echo ==============================================================================
@@ -94,6 +102,8 @@ if errorlevel 1 (
   exit /b 13
 )
 
+echo.
+echo [STEP 1] Refresh payloads and pending list without calling AI...
 python scripts\gold_specialist_8\run_gold_data_driven_disc8_ai_review_pipeline.py ^
   --sample-csv "%SAMPLE_CSV%" ^
   --sample-audit-json "%SAMPLE_AUDIT%" ^
@@ -104,24 +114,46 @@ python scripts\gold_specialist_8\run_gold_data_driven_disc8_ai_review_pipeline.p
   --h4-csv "%H4_CSV%" ^
   --d1-csv "%D1_CSV%" ^
   --model "%MODEL%" ^
-  --max-pending "%MAX_PENDING%" ^
-  --run-ai
+  --max-pending "%MAX_PENDING%"
 
-set "PY_EXIT=%ERRORLEVEL%"
-echo.
-echo python_exit_code=%PY_EXIT%
-echo.
+set "PAYLOAD_EXIT=%ERRORLEVEL%"
+echo payload_refresh_exit_code=%PAYLOAD_EXIT%
+if not "%PAYLOAD_EXIT%"=="0" (
+  echo [ERROR] Payload refresh failed. Do NOT run AI review.
+  exit /b %PAYLOAD_EXIT%
+)
 
-if not "%PY_EXIT%"=="0" (
-  echo [ERROR] AI review pipeline failed or partial failure occurred. Check JSON summary and log.
-  echo.
-  echo If the error says M15 CSV not found, copy these files to the repo root or MQL5 Files folder:
-  echo   goldsharp_m15.csv
-  echo   goldsharp_m5.csv
-  echo   goldsharp_h1.csv
-  echo   goldsharp_h4.csv
-  echo   goldsharp_d1.csv
-  exit /b %PY_EXIT%
+echo.
+echo [STEP 2] Run OpenAI review for pending payloads with per-row progress...
+python scripts\gold_specialist_8\run_disc8_trade_ai_review_from_payloads_progress.py ^
+  --payload-jsonl "%OUT_DIR%\trade_ai_review_payloads_pending.jsonl" ^
+  --output-jsonl "%OUT_DIR%\trade_ai_review_ledger.jsonl" ^
+  --output-json "%OUT_DIR%\trade_ai_review_run_summary.json" ^
+  --model "%MODEL%" ^
+  --progress-every "%PROGRESS_EVERY%"
+
+set "AI_EXIT=%ERRORLEVEL%"
+echo ai_review_exit_code=%AI_EXIT%
+if not "%AI_EXIT%"=="0" (
+  echo [ERROR] AI review runner reported errors. Already successful rows were still appended incrementally.
+  echo Rerun this BAT after checking the log; pending-only refresh should skip completed rows.
+  exit /b %AI_EXIT%
+)
+
+echo.
+echo [STEP 3] Summarize AI tag ledger...
+python scripts\summarize_trade_ai_review_ledger.py ^
+  --trade-outcome-csv "%OUT_DIR%\disc8_review_trade_outcome_sample.csv" ^
+  --ai-review-jsonl "%OUT_DIR%\trade_ai_review_ledger.jsonl" ^
+  --output-csv "%OUT_DIR%\trade_ai_tag_summary.csv" ^
+  --output-json "%OUT_DIR%\trade_ai_tag_summary.json" ^
+  --min-sample 3
+
+set "SUMMARY_EXIT=%ERRORLEVEL%"
+echo summary_exit_code=%SUMMARY_EXIT%
+if not "%SUMMARY_EXIT%"=="0" (
+  echo [ERROR] Tag summary failed. AI review ledger may still be usable.
+  exit /b %SUMMARY_EXIT%
 )
 
 echo Outputs:
