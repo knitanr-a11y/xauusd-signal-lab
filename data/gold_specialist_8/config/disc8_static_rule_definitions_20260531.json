@@ -1,0 +1,169 @@
+{
+  "created_at": "2026-05-31",
+  "source": "gold_data_driven_static_rebacktest_20260531_outputs.zip",
+  "source_files": [
+    "recommended8_static_rules.csv",
+    "static_rule_definitions.csv",
+    "static_rule_definitions.json",
+    "static_rule_trade_ledger.csv"
+  ],
+  "rules": [
+    {
+      "selected_order": 1,
+      "candidate_id": "DISC_01_BUY_TP200_SL100_RR2",
+      "direction": "BUY",
+      "exit_model": "TP200_SL100_RR2",
+      "tp_pips": 200.0,
+      "sl_pips": 100.0,
+      "rr": 2.0,
+      "machine_rule": "h4_donch_pos_32 > 0.9956 AND h4_ret_8_atr > 2.196 AND donch_pos_72 <= 0.8082",
+      "conditions": [
+        {"feature": "h4_donch_pos_32", "operator": ">", "threshold": 0.9956},
+        {"feature": "h4_ret_8_atr", "operator": ">", "threshold": 2.196},
+        {"feature": "donch_pos_72", "operator": "<=", "threshold": 0.8082}
+      ],
+      "notification_title": "GOLD BUY DISC_01_BUY_TP200_SL100_RR2 TP200/SL100",
+      "notification_reason_jp": "買い条件: H4が直近32本レンジの高値圏/上抜けが強い/上側（h4_donch_pos_32 > 0.9956）、H4直近8本の上昇モメンタムが強い/上側（h4_ret_8_atr > 2.196）、M15の直近72本レンジ位置が抑制/下側（donch_pos_72 <= 0.8082）",
+      "backtest_metrics": {"trade_count": 107, "win_count": 67, "loss_count": 40, "win_rate": 0.6261682243, "profit_factor": 3.35, "total_r": 94.0, "test_count": 16, "test_win_rate": 0.6875, "test_pf": 4.4, "test_total_r": 17.0}
+    },
+    {
+      "selected_order": 2,
+      "candidate_id": "DISC_02_BUY_TP80_SL50_RR1p6",
+      "direction": "BUY",
+      "exit_model": "TP80_SL50_RR1p6",
+      "tp_pips": 80.0,
+      "sl_pips": 50.0,
+      "rr": 1.6,
+      "machine_rule": "d1_adx14 > 13.03 AND donch_pos_32 <= 0.3689 AND h1_donch_pos_48 > 0.7981 AND d1_macd_hist <= 5.422",
+      "conditions": [
+        {"feature": "d1_adx14", "operator": ">", "threshold": 13.03},
+        {"feature": "donch_pos_32", "operator": "<=", "threshold": 0.3689},
+        {"feature": "h1_donch_pos_48", "operator": ">", "threshold": 0.7981},
+        {"feature": "d1_macd_hist", "operator": "<=", "threshold": 5.422}
+      ],
+      "notification_title": "GOLD BUY DISC_02_BUY_TP80_SL50_RR1p6 TP80/SL50",
+      "notification_reason_jp": "買い条件: D1トレンド強度が強い/上側（d1_adx14 > 13.03）、M15の直近32本レンジ位置が抑制/下側（donch_pos_32 <= 0.3689）、H1の直近48本レンジ位置が強い/上側（h1_donch_pos_48 > 0.7981）、D1 MACDヒストグラムが抑制/下側（d1_macd_hist <= 5.422）",
+      "backtest_metrics": {"trade_count": 94, "win_count": 69, "loss_count": 25, "win_rate": 0.7340425532, "profit_factor": 4.416, "total_r": 85.4, "test_count": 16, "test_win_rate": 0.5625, "test_pf": 2.0571428571, "test_total_r": 7.4}
+    },
+    {
+      "selected_order": 3,
+      "candidate_id": "DISC_04_BUY_TP150_SL100_RR1p5",
+      "direction": "BUY",
+      "exit_model": "TP150_SL100_RR1p5",
+      "tp_pips": 150.0,
+      "sl_pips": 100.0,
+      "rr": 1.5,
+      "machine_rule": "h4_donch_pos_16 <= 1.11 AND d1_adx14 > 14.53 AND ret_96_atr <= 17.8 AND donch_pos_8 > 0.5705 AND h1_ret_8_atr > 3.818",
+      "conditions": [
+        {"feature": "h4_donch_pos_16", "operator": "<=", "threshold": 1.11},
+        {"feature": "d1_adx14", "operator": ">", "threshold": 14.53},
+        {"feature": "ret_96_atr", "operator": "<=", "threshold": 17.8},
+        {"feature": "donch_pos_8", "operator": ">", "threshold": 0.5705},
+        {"feature": "h1_ret_8_atr", "operator": ">", "threshold": 3.818}
+      ],
+      "notification_title": "GOLD BUY DISC_04_BUY_TP150_SL100_RR1p5 TP150/SL100",
+      "notification_reason_jp": "買い条件: H4の直近16本レンジ位置が抑制/下側（h4_donch_pos_16 <= 1.11）、D1トレンド強度が強い/上側（d1_adx14 > 14.53）、M15直近96本の変化率が抑制/下側（ret_96_atr <= 17.8）、M15直近8本レンジ位置が強い/上側（donch_pos_8 > 0.5705）、H1直近8本の変化率が強い/上側（h1_ret_8_atr > 3.818）",
+      "backtest_metrics": {"trade_count": 92, "win_count": 62, "loss_count": 30, "win_rate": 0.6739130435, "profit_factor": 3.0649, "total_r": 61.947, "test_count": 30, "test_win_rate": 0.6666666667, "test_pf": 3.0, "test_total_r": 20.0}
+    },
+    {
+      "selected_order": 4,
+      "candidate_id": "DISC_05_BUY_TP80_SL50_RR1p6",
+      "direction": "BUY",
+      "exit_model": "TP80_SL50_RR1p6",
+      "tp_pips": 80.0,
+      "sl_pips": 50.0,
+      "rr": 1.6,
+      "machine_rule": "d1_adx14 > 13.03 AND donch_pos_32 <= 0.3689 AND h1_donch_pos_48 > 0.7981 AND h1_ret_72_atr <= 6.742",
+      "conditions": [
+        {"feature": "d1_adx14", "operator": ">", "threshold": 13.03},
+        {"feature": "donch_pos_32", "operator": "<=", "threshold": 0.3689},
+        {"feature": "h1_donch_pos_48", "operator": ">", "threshold": 0.7981},
+        {"feature": "h1_ret_72_atr", "operator": "<=", "threshold": 6.742}
+      ],
+      "notification_title": "GOLD BUY DISC_05_BUY_TP80_SL50_RR1p6 TP80/SL50",
+      "notification_reason_jp": "買い条件: D1トレンド強度が強い/上側（d1_adx14 > 13.03）、M15の直近32本レンジ位置が抑制/下側（donch_pos_32 <= 0.3689）、H1の直近48本レンジ位置が強い/上側（h1_donch_pos_48 > 0.7981）、H1直近72本の変化率が抑制/下側（h1_ret_72_atr <= 6.742）",
+      "backtest_metrics": {"trade_count": 105, "win_count": 72, "loss_count": 33, "win_rate": 0.6857142857, "profit_factor": 3.4909090909, "total_r": 82.2, "test_count": 23, "test_win_rate": 0.6086956522, "test_pf": 2.4888888889, "test_total_r": 13.4}
+    },
+    {
+      "selected_order": 5,
+      "candidate_id": "DISC_06_SELL_TP80_SL50_RR1p6",
+      "direction": "SELL",
+      "exit_model": "TP80_SL50_RR1p6",
+      "tp_pips": 80.0,
+      "sl_pips": 50.0,
+      "rr": 1.6,
+      "machine_rule": "macd_hist > 3.026 AND h4_ret_48_atr <= 0.9836 AND h1_donch_pos_8 > 0.409",
+      "conditions": [
+        {"feature": "macd_hist", "operator": ">", "threshold": 3.026},
+        {"feature": "h4_ret_48_atr", "operator": "<=", "threshold": 0.9836},
+        {"feature": "h1_donch_pos_8", "operator": ">", "threshold": 0.409}
+      ],
+      "notification_title": "GOLD SELL DISC_06_SELL_TP80_SL50_RR1p6 TP80/SL50",
+      "notification_reason_jp": "売り条件: M15 MACDヒストグラムが強い/上側（macd_hist > 3.026）、H4直近48本の変化率が抑制/下側（h4_ret_48_atr <= 0.9836）、H1直近8本レンジ位置が強い/上側（h1_donch_pos_8 > 0.409）",
+      "backtest_metrics": {"trade_count": 118, "win_count": 80, "loss_count": 38, "win_rate": 0.6779661017, "profit_factor": 3.3684210526, "total_r": 90.0, "test_count": 15, "test_win_rate": 0.6, "test_pf": 2.4, "test_total_r": 8.4}
+    },
+    {
+      "selected_order": 6,
+      "candidate_id": "DISC_08_BUY_TP200_SL100_RR2",
+      "direction": "BUY",
+      "exit_model": "TP200_SL100_RR2",
+      "tp_pips": 200.0,
+      "sl_pips": 100.0,
+      "rr": 2.0,
+      "machine_rule": "h4_donch_pos_32 > 0.9956 AND h4_ret_8_atr > 2.196 AND h4_donch_pos_4 <= 1.906 AND dist_ema50_atr <= 2.897",
+      "conditions": [
+        {"feature": "h4_donch_pos_32", "operator": ">", "threshold": 0.9956},
+        {"feature": "h4_ret_8_atr", "operator": ">", "threshold": 2.196},
+        {"feature": "h4_donch_pos_4", "operator": "<=", "threshold": 1.906},
+        {"feature": "dist_ema50_atr", "operator": "<=", "threshold": 2.897}
+      ],
+      "notification_title": "GOLD BUY DISC_08_BUY_TP200_SL100_RR2 TP200/SL100",
+      "notification_reason_jp": "買い条件: H4が直近32本レンジの高値圏/上抜けが強い/上側（h4_donch_pos_32 > 0.9956）、H4直近8本の上昇モメンタムが強い/上側（h4_ret_8_atr > 2.196）、H4直近4本レンジ位置が抑制/下側（h4_donch_pos_4 <= 1.906）、M15価格とEMA50の距離が抑制/下側（dist_ema50_atr <= 2.897）",
+      "backtest_metrics": {"trade_count": 159, "win_count": 83, "loss_count": 76, "win_rate": 0.5220125786, "profit_factor": 2.02525, "total_r": 77.919, "test_count": 19, "test_win_rate": 0.5789473684, "test_pf": 2.75, "test_total_r": 14.0}
+    },
+    {
+      "selected_order": 7,
+      "candidate_id": "DISC_09_BUY_TP80_SL50_RR1p6",
+      "direction": "BUY",
+      "exit_model": "TP80_SL50_RR1p6",
+      "tp_pips": 80.0,
+      "sl_pips": 50.0,
+      "rr": 1.6,
+      "machine_rule": "d1_adx14 > 13.03 AND donch_pos_32 <= 0.3689 AND h1_donch_pos_48 > 0.7981",
+      "conditions": [
+        {"feature": "d1_adx14", "operator": ">", "threshold": 13.03},
+        {"feature": "donch_pos_32", "operator": "<=", "threshold": 0.3689},
+        {"feature": "h1_donch_pos_48", "operator": ">", "threshold": 0.7981}
+      ],
+      "notification_title": "GOLD BUY DISC_09_BUY_TP80_SL50_RR1p6 TP80/SL50",
+      "notification_reason_jp": "買い条件: D1トレンド強度が強い/上側（d1_adx14 > 13.03）、M15の直近32本レンジ位置が抑制/下側（donch_pos_32 <= 0.3689）、H1の直近48本レンジ位置が強い/上側（h1_donch_pos_48 > 0.7981）",
+      "backtest_metrics": {"trade_count": 193, "win_count": 114, "loss_count": 79, "win_rate": 0.5906735751, "profit_factor": 2.3088607595, "total_r": 103.4, "test_count": 30, "test_win_rate": 0.5666666667, "test_pf": 2.0923076923, "test_total_r": 14.2}
+    },
+    {
+      "selected_order": 8,
+      "candidate_id": "DISC_11_SELL_TP80_SL50_RR1p6",
+      "direction": "SELL",
+      "exit_model": "TP80_SL50_RR1p6",
+      "tp_pips": 80.0,
+      "sl_pips": 50.0,
+      "rr": 1.6,
+      "machine_rule": "macd_hist > 3.026 AND h4_ret_48_atr <= 0.9836 AND h1_donch_pos_8 > 0.409 AND h4_dist_ema200_atr <= 0.5223",
+      "conditions": [
+        {"feature": "macd_hist", "operator": ">", "threshold": 3.026},
+        {"feature": "h4_ret_48_atr", "operator": "<=", "threshold": 0.9836},
+        {"feature": "h1_donch_pos_8", "operator": ">", "threshold": 0.409},
+        {"feature": "h4_dist_ema200_atr", "operator": "<=", "threshold": 0.5223}
+      ],
+      "notification_title": "GOLD SELL DISC_11_SELL_TP80_SL50_RR1p6 TP80/SL50",
+      "notification_reason_jp": "売り条件: M15 MACDヒストグラムが強い/上側（macd_hist > 3.026）、H4直近48本の変化率が抑制/下側（h4_ret_48_atr <= 0.9836）、H1直近8本レンジ位置が強い/上側（h1_donch_pos_8 > 0.409）、H4価格とEMA200の距離が抑制/下側（h4_dist_ema200_atr <= 0.5223）",
+      "backtest_metrics": {"trade_count": 79, "win_count": 47, "loss_count": 32, "win_rate": 0.5949367089, "profit_factor": 2.35, "total_r": 43.2, "test_count": 15, "test_win_rate": 0.6, "test_pf": 2.4, "test_total_r": 8.4}
+    }
+  ],
+  "ai_review_sample_policy": {
+    "max_per_strategy": 80,
+    "max_loss_per_strategy": 45,
+    "max_non_loss_per_strategy": 35,
+    "max_total": 640,
+    "purpose": "AI tag extraction only; not for recalculating real win rate or PF."
+  }
+}
