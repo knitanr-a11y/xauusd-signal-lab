@@ -19,12 +19,16 @@ set "OUT_DIR=data\gold_specialist_8\verification\ai_review_data_driven\disc8_ai_
 set "LOG_DIR=data\gold_specialist_8\verification\ai_review_data_driven"
 set "LOG_FILE=%LOG_DIR%\latest_disc8_ai_review_console.log"
 
-REM Prefer repo-root candle CSVs first. If absent, the pipeline falls back to MQL5 Files default names.
-set "M15_CSV=goldsharp_m15.csv"
-set "M5_CSV=goldsharp_m5.csv"
-set "H1_CSV=goldsharp_h1.csv"
-set "H4_CSV=goldsharp_h4.csv"
-set "D1_CSV=goldsharp_d1.csv"
+REM Leave explicit CSV vars empty by default.
+REM The Python pipeline will auto-discover candles in this order:
+REM   1) MQL5 Files default folder + goldsharp_*.csv
+REM   2) repo root + goldsharp_*.csv
+REM If you want to force paths, fill these variables manually.
+set "M15_CSV="
+set "M5_CSV="
+set "H1_CSV="
+set "H4_CSV="
+set "D1_CSV="
 
 REM Safety: set MAX_PENDING to a small number for a smoke test, or 0 for all pending.
 REM Example: set "MAX_PENDING=20"
@@ -58,6 +62,7 @@ echo out dir      : %OUT_DIR%
 echo model        : %MODEL%
 echo max pending  : %MAX_PENDING%
 echo AI API       : ENABLED
+echo CSV mode     : auto-discover MQL5 Files or repo root goldsharp_*.csv
 echo ==============================================================================
 echo.
 
@@ -109,6 +114,13 @@ echo.
 
 if not "%PY_EXIT%"=="0" (
   echo [ERROR] AI review pipeline failed or partial failure occurred. Check JSON summary and log.
+  echo.
+  echo If the error says M15 CSV not found, copy these files to the repo root or MQL5 Files folder:
+  echo   goldsharp_m15.csv
+  echo   goldsharp_m5.csv
+  echo   goldsharp_h1.csv
+  echo   goldsharp_h4.csv
+  echo   goldsharp_d1.csv
   exit /b %PY_EXIT%
 )
 
