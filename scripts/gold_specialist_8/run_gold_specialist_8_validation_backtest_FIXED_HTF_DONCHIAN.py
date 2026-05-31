@@ -15,18 +15,23 @@ main() entry point.  No MT5 order send, no Discord send, no AI call.
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ORIGINAL = SCRIPT_DIR / "run_gold_specialist_8_validation_backtest.py"
+MODULE_NAME = "gold_specialist_8_validation_backtest_original"
 
-spec = importlib.util.spec_from_file_location("gold_specialist_8_validation_backtest_original", ORIGINAL)
+spec = importlib.util.spec_from_file_location(MODULE_NAME, ORIGINAL)
 if spec is None or spec.loader is None:
     raise RuntimeError(f"Could not load original validation backtest script: {ORIGINAL}")
 mod = importlib.util.module_from_spec(spec)
+# Python 3.12 dataclasses expects cls.__module__ to exist in sys.modules while
+# the class body is processed.  Register before exec_module to avoid
+# AttributeError: 'NoneType' object has no attribute '__dict__'.
+sys.modules[MODULE_NAME] = mod
 spec.loader.exec_module(mod)
 
 
