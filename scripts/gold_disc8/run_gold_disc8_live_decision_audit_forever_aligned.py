@@ -14,6 +14,12 @@ Current safety note:
 The operational runtime gate JSON requires a validated pre-send tagger. Until that
 exists, detected candidates are written as PENDING_TAGGER, not ALLOW. This prevents
 accidental connection to Discord/MT5 before tag-gate parity is validated.
+
+Diagnostics:
+- scanned_rows / fresh_rows / stale_suppressed_rows
+- strategy-level best partial matches
+- near-miss rows
+- missing feature counters
 """
 from __future__ import annotations
 
@@ -37,7 +43,7 @@ DEFAULT_MQL5_FILES_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Termin
 DEFAULT_MANIFEST_JSON = Path("data/gold_disc8/operational_candidate/group_tag_filtered/gold_disc8_operational_strategy_manifest.json")
 DEFAULT_GATE_RULES_JSON = Path("data/gold_disc8/operational_candidate/group_tag_filtered/gold_disc8_runtime_group_tag_gate_rules.json")
 DEFAULT_OUT_DIR = Path("data/runtime_logs/gold_disc8_live_decision_audit")
-SCHEMA_VERSION = "gold_disc8_live_decision_audit_v1_pending_tagger_common_ledger"
+SCHEMA_VERSION = "gold_disc8_live_decision_audit_v2_diagnostics_pending_tagger_common_ledger"
 
 CANDIDATE_COLUMNS = [
     "created_at", "schema_version", "decision_key", "decision", "dispatch_ready",
@@ -54,7 +60,27 @@ LOOP_SUMMARY_COLUMNS = [
     "loop_started_at", "loop_iteration", "scheduled_for", "started_at", "finished_at", "elapsed_seconds",
     "success", "csv_dir", "scan_recent_bars", "bar_offset", "max_signal_age_minutes", "candidates_detected",
     "allow_count", "pending_tagger_count", "block_count", "watch_count", "ledger_rows_appended",
+    "scanned_rows", "fresh_rows", "stale_suppressed_rows", "candidate_match_attempts", "conditions_evaluated",
+    "full_match_rows", "near_miss_rows", "max_strategy_matched_conditions", "missing_feature_total",
     "m15_rows", "h1_rows", "h4_rows", "d1_rows", "latest_m15_time", "summary_json", "candidates_csv",
+    "strategy_diagnostics_csv", "near_misses_csv", "stale_rows_csv",
+]
+
+STRATEGY_DIAGNOSTIC_COLUMNS = [
+    "strategy_id", "direction", "condition_count", "scanned_rows", "fresh_rows", "stale_suppressed_rows",
+    "attempts", "full_matches", "near_miss_rows", "max_matched_conditions", "best_entry_time",
+    "best_entry_age_minutes", "best_matched_conditions", "best_failed_conditions", "missing_feature_count",
+    "missing_features", "reason",
+]
+
+NEAR_MISS_COLUMNS = [
+    "entry_time", "strategy_id", "direction", "matched_count", "condition_count", "failed_count",
+    "entry_price", "wall_clock_signal_age_minutes", "fresh", "matched_conditions", "failed_conditions",
+    "missing_features",
+]
+
+STALE_ROW_COLUMNS = [
+    "entry_time", "close", "wall_clock_signal_time_local_est", "wall_clock_signal_age_minutes", "reason",
 ]
 
 
@@ -167,18 +193,9 @@ def as_float(value: Any) -> float | None:
         return None
 
 
-def safe_div(a: Any, b: Any) -> float | None:
-    x = as_float(a)
-    y = as_float(b)
-    if x is None or y is None or abs(y) <= 1e-12:
-        return None
-    return x / y
-
-
 def read_ohlc_csv(path: Path, *, tail: int = 0) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"OHLC CSV not found: {path}")
-    # MT5 exports in this project have used both semicolon and comma. sep=None handles both.
     df = pd.read_csv(windows_long_path(path), sep=None, engine="python", encoding="utf-8-sig")
     if df.empty:
         raise RuntimeError(f"OHLC CSV is empty: {path}")
@@ -230,7 +247,6 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     macd = ema12 - ema26
     signal = macd.ewm(span=9, adjust=False, min_periods=3).mean()
     out["macd_hist"] = macd - signal
-    # ADX14, Wilder-style approximation using rolling smoothing. Good enough for audit; not used to send orders.
     up_move = out["high"].diff()
     down_move = -out["low"].diff()
     plus_dm = pd.Series([u if (pd.notna(u) and pd.notna(d) and u > d and u > 0) else 0.0 for u, d in zip(up_move, down_move)], index=out.index)
@@ -282,7 +298,6 @@ def attach_context(m15: pd.DataFrame, h1: pd.DataFrame, h4: pd.DataFrame, d1: pd
 
 
 def extract_conditions(text: str) -> list[Condition]:
-    # Examples inside Japanese full-width parens: （h4_donch_pos_32 > 0.9956）
     conds: list[Condition] = []
     for match in re.finditer(r"([A-Za-z_][A-Za-z0-9_]*)\s*(<=|>=|<|>)\s*(-?\d+(?:\.\d+)?)", text):
         feature, op, threshold = match.group(1), match.group(2), float(match.group(3))
@@ -306,10 +321,8 @@ def compare_value(value: Any, op: str, threshold: float) -> bool:
 
 
 def get_feature(row: pd.Series, feature: str) -> Any:
-    # Manifest uses unprefixed M15 features and prefixed HTF features.
     if feature in row.index:
         return row[feature]
-    # A few source rules may use m15_ prefix; map to unprefixed live M15 columns.
     if feature.startswith("m15_") and feature[4:] in row.index:
         return row[feature[4:]]
     return None
@@ -332,22 +345,26 @@ def parse_manifest(manifest_json: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
-def evaluate_strategy(row: pd.Series, strategy: dict[str, Any]) -> tuple[bool, list[str], list[str]]:
-    matched = []
-    failed = []
+def evaluate_strategy(row: pd.Series, strategy: dict[str, Any]) -> tuple[bool, list[str], list[str], list[str]]:
+    matched: list[str] = []
+    failed: list[str] = []
+    missing_features: list[str] = []
     for cond in strategy.get("conditions", []):
         value = get_feature(row, cond.feature)
+        actual = as_float(value)
+        if actual is None:
+            missing_features.append(cond.feature)
         ok = compare_value(value, cond.op, cond.threshold)
-        text = f"{cond.source_text} actual={'' if as_float(value) is None else round(float(value), 6)}"
+        actual_text = "NA" if actual is None else str(round(float(actual), 6))
+        text = f"{cond.source_text} actual={actual_text}"
         if ok:
             matched.append(text)
         else:
             failed.append(text)
-    return len(failed) == 0 and len(matched) > 0, matched, failed
+    return len(failed) == 0 and len(matched) > 0, matched, failed, missing_features
 
 
 def pips_to_price(pips: Any) -> float | None:
-    # GOLD project convention in fixed-pip backtests used 10 pips ~= 1.0 USD.
     x = as_float(pips)
     if x is None:
         return None
@@ -436,10 +453,61 @@ def build_feature_frame(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[st
     return frame, info
 
 
-def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], gate_rules: dict[str, Any], tags_by_key: dict[str, list[dict[str, Any]]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def init_strategy_diag(manifest: list[dict[str, Any]], scanned_rows: int) -> dict[str, dict[str, Any]]:
+    diag = {}
+    for strategy in manifest:
+        sid = clean(strategy.get("strategy_id"))
+        diag[sid] = {
+            "strategy_id": sid,
+            "direction": clean(strategy.get("direction")),
+            "condition_count": len(strategy.get("conditions", [])),
+            "scanned_rows": int(scanned_rows),
+            "fresh_rows": 0,
+            "stale_suppressed_rows": 0,
+            "attempts": 0,
+            "full_matches": 0,
+            "near_miss_rows": 0,
+            "max_matched_conditions": 0,
+            "best_entry_time": "",
+            "best_entry_age_minutes": "",
+            "best_matched_conditions": "",
+            "best_failed_conditions": "",
+            "missing_feature_count": 0,
+            "missing_features": set(),
+            "reason": "NO_FRESH_ATTEMPTS_YET",
+        }
+    return diag
+
+
+def finalize_strategy_diag(diag: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for sid in sorted(diag):
+        r = dict(diag[sid])
+        missing_set = r.get("missing_features", set())
+        r["missing_features"] = " | ".join(sorted(missing_set)) if isinstance(missing_set, set) else clean(missing_set)
+        if int(r.get("attempts", 0)) == 0:
+            r["reason"] = "NO_FRESH_ROWS_AFTER_STALE_GUARD"
+        elif int(r.get("full_matches", 0)) > 0:
+            r["reason"] = "FULL_MATCH_FOUND"
+        elif int(r.get("max_matched_conditions", 0)) > 0:
+            r["reason"] = "PARTIAL_MATCH_ONLY"
+        else:
+            r["reason"] = "NO_CONDITION_MATCH"
+        rows.append(r)
+    return rows
+
+
+def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], gate_rules: dict[str, Any], tags_by_key: dict[str, list[dict[str, Any]]]) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, list[dict[str, Any]]]]:
     frame, info = build_feature_frame(args)
     if frame.empty:
-        return [], info
+        empty_diag = init_strategy_diag(manifest, 0)
+        diag_rows = finalize_strategy_diag(empty_diag)
+        info.update({
+            "scanned_rows": 0, "fresh_rows": 0, "stale_suppressed_rows": 0,
+            "candidate_match_attempts": 0, "conditions_evaluated": 0, "full_match_rows": 0,
+            "near_miss_rows": 0, "max_strategy_matched_conditions": 0, "missing_feature_total": 0,
+        })
+        return [], info, {"strategy_diagnostics": diag_rows, "near_misses": [], "stale_rows": []}
     if args.bar_offset < 0:
         raise RuntimeError("bar_offset must be >= 0")
     end_pos = len(frame) - int(args.bar_offset)
@@ -447,17 +515,78 @@ def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], ga
         scan = frame.iloc[0:0].copy()
     else:
         scan = frame.iloc[max(0, end_pos - int(args.scan_recent_bars)):end_pos].copy()
+
+    scanned_rows = int(len(scan))
+    strategy_diag = init_strategy_diag(manifest, scanned_rows)
     now_local = pd.Timestamp.now()
     rows: list[dict[str, Any]] = []
+    near_misses: list[dict[str, Any]] = []
+    stale_rows: list[dict[str, Any]] = []
+    fresh_rows = 0
+    stale_suppressed_rows = 0
+    attempts = 0
+    conditions_evaluated = 0
+    full_match_rows = 0
+    missing_feature_total = 0
+
     for _, bar in scan.iterrows():
         age_min = minutes_since_local_est(bar.get("time"), mt5_to_local_hours=float(args.mt5_to_local_hours), now_local=now_local)
-        if args.max_signal_age_minutes > 0 and age_min is not None and age_min > float(args.max_signal_age_minutes):
+        stale = bool(args.max_signal_age_minutes > 0 and age_min is not None and age_min > float(args.max_signal_age_minutes))
+        if stale:
+            stale_suppressed_rows += 1
+            stale_rows.append({
+                "entry_time": clean(bar.get("time")),
+                "close": clean(bar.get("close")),
+                "wall_clock_signal_time_local_est": clean(mt5_time_to_local_est(bar.get("time"), float(args.mt5_to_local_hours))),
+                "wall_clock_signal_age_minutes": "" if age_min is None else round(age_min, 3),
+                "reason": "STALE_SUPPRESSED_BY_MAX_SIGNAL_AGE",
+            })
+            for sid in strategy_diag:
+                strategy_diag[sid]["stale_suppressed_rows"] += 1
             continue
+        fresh_rows += 1
         for strategy in manifest:
-            ok, matched, failed = evaluate_strategy(bar, strategy)
+            sid = clean(strategy.get("strategy_id"))
+            sdiag = strategy_diag[sid]
+            sdiag["fresh_rows"] += 1
+            sdiag["attempts"] += 1
+            attempts += 1
+            conditions_evaluated += len(strategy.get("conditions", []))
+            ok, matched, failed, missing_features = evaluate_strategy(bar, strategy)
+            matched_count = len(matched)
+            condition_count = len(strategy.get("conditions", []))
+            if missing_features:
+                missing_feature_total += len(missing_features)
+                sdiag["missing_feature_count"] += len(missing_features)
+                if isinstance(sdiag["missing_features"], set):
+                    sdiag["missing_features"].update(missing_features)
+            if matched_count > int(sdiag.get("max_matched_conditions", 0)):
+                sdiag["max_matched_conditions"] = matched_count
+                sdiag["best_entry_time"] = clean(bar.get("time"))
+                sdiag["best_entry_age_minutes"] = "" if age_min is None else round(age_min, 3)
+                sdiag["best_matched_conditions"] = " | ".join(matched)
+                sdiag["best_failed_conditions"] = " | ".join(failed)
+            near_miss_threshold = max(1, condition_count - 1)
+            if not ok and condition_count > 0 and matched_count >= near_miss_threshold:
+                sdiag["near_miss_rows"] += 1
+                near_misses.append({
+                    "entry_time": clean(bar.get("time")),
+                    "strategy_id": sid,
+                    "direction": clean(strategy.get("direction")),
+                    "matched_count": matched_count,
+                    "condition_count": condition_count,
+                    "failed_count": len(failed),
+                    "entry_price": clean(bar.get("close")),
+                    "wall_clock_signal_age_minutes": "" if age_min is None else round(age_min, 3),
+                    "fresh": True,
+                    "matched_conditions": " | ".join(matched),
+                    "failed_conditions": " | ".join(failed),
+                    "missing_features": " | ".join(sorted(set(missing_features))),
+                })
             if not ok:
                 continue
-            sid = clean(strategy.get("strategy_id"))
+            sdiag["full_matches"] += 1
+            full_match_rows += 1
             direction = clean(strategy.get("direction"))
             entry_price = as_float(bar.get("close"))
             tp_step = pips_to_price(strategy.get("tp_pips"))
@@ -480,7 +609,7 @@ def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], ga
                 decision = "PENDING_TAGGER"
                 dispatch_ready = False
                 reason = "候補検出済み。ただし検証済みpre-send tagger未供給のため通知/発注禁止。"
-            row = {
+            rows.append({
                 "created_at": ts_text(),
                 "schema_version": SCHEMA_VERSION,
                 "decision_key": dkey,
@@ -495,7 +624,7 @@ def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], ga
                 "tp_pips": clean(strategy.get("tp_pips")),
                 "sl_pips": clean(strategy.get("sl_pips")),
                 "rr": clean(strategy.get("rr")),
-                "condition_count": len(strategy.get("conditions", [])),
+                "condition_count": condition_count,
                 "matched_conditions": " | ".join(matched),
                 "failed_conditions": " | ".join(failed),
                 "gate_status": gate_status,
@@ -510,10 +639,22 @@ def scan_candidates(args: argparse.Namespace, manifest: list[dict[str, Any]], ga
                 "wall_clock_signal_time_local_est": clean(mt5_time_to_local_est(bar.get("time"), float(args.mt5_to_local_hours))),
                 "wall_clock_signal_age_minutes": "" if age_min is None else round(age_min, 3),
                 "reason": reason,
-            }
-            rows.append(row)
+            })
     rows = rows[-int(args.max_decisions):] if args.max_decisions and len(rows) > int(args.max_decisions) else rows
-    return rows, info
+    strategy_diag_rows = finalize_strategy_diag(strategy_diag)
+    max_strategy_matched = max([int(r.get("max_matched_conditions", 0)) for r in strategy_diag_rows], default=0)
+    info.update({
+        "scanned_rows": scanned_rows,
+        "fresh_rows": int(fresh_rows),
+        "stale_suppressed_rows": int(stale_suppressed_rows),
+        "candidate_match_attempts": int(attempts),
+        "conditions_evaluated": int(conditions_evaluated),
+        "full_match_rows": int(full_match_rows),
+        "near_miss_rows": int(len(near_misses)),
+        "max_strategy_matched_conditions": int(max_strategy_matched),
+        "missing_feature_total": int(missing_feature_total),
+    })
+    return rows, info, {"strategy_diagnostics": strategy_diag_rows, "near_misses": near_misses, "stale_rows": stale_rows}
 
 
 def next_aligned_time(interval_minutes: int, delay_seconds: int) -> datetime:
@@ -539,11 +680,17 @@ def run_iteration(args: argparse.Namespace, *, loop_started_at: str, iteration: 
     gate_rules = read_json(args.gate_rules_json)
     manifest = parse_manifest(manifest_json)
     tags_by_key = load_pre_send_tags(args.pre_send_tags) if args.pre_send_tags else {}
-    candidates, info = scan_candidates(args, manifest, gate_rules, tags_by_key)
+    candidates, info, diagnostics = scan_candidates(args, manifest, gate_rules, tags_by_key)
     candidates_csv = latest_dir / "gold_disc8_live_decision_candidates.csv"
     summary_json = latest_dir / "gold_disc8_live_decision_audit_summary.json"
+    strategy_diagnostics_csv = latest_dir / "gold_disc8_live_decision_strategy_diagnostics.csv"
+    near_misses_csv = latest_dir / "gold_disc8_live_decision_near_misses.csv"
+    stale_rows_csv = latest_dir / "gold_disc8_live_decision_stale_rows.csv"
     ledger_csv = resolve_repo_path(args.out_dir) / "gold_disc8_live_decision_ledger.csv"
     write_csv(candidates_csv, candidates, CANDIDATE_COLUMNS)
+    write_csv(strategy_diagnostics_csv, diagnostics.get("strategy_diagnostics", []), STRATEGY_DIAGNOSTIC_COLUMNS)
+    write_csv(near_misses_csv, diagnostics.get("near_misses", []), NEAR_MISS_COLUMNS)
+    write_csv(stale_rows_csv, diagnostics.get("stale_rows", []), STALE_ROW_COLUMNS)
     ledger_rows = []
     for row in candidates:
         lr = dict(row)
@@ -580,7 +727,11 @@ def run_iteration(args: argparse.Namespace, *, loop_started_at: str, iteration: 
         "dispatch_ready_count": int(sum(1 for r in candidates if bool(r.get("dispatch_ready")))),
         "ledger_rows_appended": int(len(ledger_rows)),
         "candidates_csv": str(candidates_csv),
+        "strategy_diagnostics_csv": str(strategy_diagnostics_csv),
+        "near_misses_csv": str(near_misses_csv),
+        "stale_rows_csv": str(stale_rows_csv),
         "ledger_csv": str(ledger_csv),
+        "diagnostic_hint": "If candidates_detected=0, inspect stale_rows_csv and strategy_diagnostics_csv. If fresh_rows=0, freshness guard is suppressing all rows. If max_strategy_matched_conditions is low or missing_feature_total > 0, inspect feature/condition parity.",
         **info,
     }
     write_json(summary_json, summary)
@@ -588,6 +739,9 @@ def run_iteration(args: argparse.Namespace, *, loop_started_at: str, iteration: 
     loop_row["success"] = True
     loop_row["summary_json"] = str(summary_json)
     loop_row["candidates_csv"] = str(candidates_csv)
+    loop_row["strategy_diagnostics_csv"] = str(strategy_diagnostics_csv)
+    loop_row["near_misses_csv"] = str(near_misses_csv)
+    loop_row["stale_rows_csv"] = str(stale_rows_csv)
     append_csv(loop_summary_csv, [loop_row], LOOP_SUMMARY_COLUMNS)
     print(json.dumps(summary, ensure_ascii=False, indent=2, default=str), flush=True)
     return summary
@@ -637,12 +791,13 @@ def main() -> int:
     print(f"gate_rules_json: {args.gate_rules_json}", flush=True)
     print("Safety: audit-only. No Discord send. No MT5 order send. No OpenAI call.", flush=True)
     print("Without --pre-send-tags, detected candidates are PENDING_TAGGER and dispatch_ready=False.", flush=True)
+    print("Diagnostics are written to latest strategy_diagnostics / near_misses / stale_rows CSVs.", flush=True)
     print("=" * 100, flush=True)
     iteration = 0
     if args.run_immediately:
         iteration += 1
         try:
-            row = run_iteration(args, loop_started_at=loop_started_at, iteration=iteration, scheduled_for=now(), latest_dir=latest_dir, loop_summary_csv=loop_summary_csv)
+            run_iteration(args, loop_started_at=loop_started_at, iteration=iteration, scheduled_for=now(), latest_dir=latest_dir, loop_summary_csv=loop_summary_csv)
         except Exception as exc:
             print(f"[ERROR] iteration failed: {type(exc).__name__}: {exc}", flush=True)
             if args.stop_on_error:
