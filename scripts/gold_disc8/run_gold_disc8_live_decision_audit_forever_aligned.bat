@@ -19,6 +19,7 @@ echo - reads latest confirmed CSV row: bar_offset=0
 echo - runtime group-tag gate rules loaded
 echo - without validated pre-send tagger, decisions are PENDING_TAGGER
 echo - notification/autotrade must later read the SAME decision ledger
+echo - audit freshness window: 60 minutes for M15 diagnosis only
 echo - Python UTF-8 mode ENABLED to avoid cp932 print failures
 echo ============================================================
 
@@ -47,7 +48,7 @@ python scripts\gold_disc8\run_gold_disc8_live_decision_audit_forever_aligned.py 
   --run-delay-seconds 5 ^
   --scan-recent-bars 36 ^
   --bar-offset 0 ^
-  --max-signal-age-minutes 15 ^
+  --max-signal-age-minutes 60 ^
   --mt5-to-local-hours 6 ^
   --tail-m15 3000 ^
   --tail-h1 1500 ^
