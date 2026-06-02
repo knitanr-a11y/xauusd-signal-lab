@@ -15,7 +15,7 @@ echo - Discord send DISABLED
 echo - MT5 order_send DISABLED
 echo - OpenAI call DISABLED
 echo - aligned to every 1 minute + 05 seconds
-echo - reads latest CONFIRMED CSV row: bar_offset=1
+echo - source CSV exports confirmed candles only: bar_offset=0
 echo - runtime group-tag gate rules loaded for audit only
 echo - without validated pre-send tagger, decisions are PENDING_TAGGER
 echo - dispatch_ready is FORCE-FALSE in safe wrapper
@@ -48,7 +48,7 @@ python scripts\gold_disc8\run_gold_disc8_live_decision_audit_forever_safe.py ^
   --interval-minutes 1 ^
   --run-delay-seconds 5 ^
   --scan-recent-bars 36 ^
-  --bar-offset 1 ^
+  --bar-offset 0 ^
   --max-signal-age-minutes 60 ^
   --mt5-to-local-hours 6 ^
   --tail-m15 3000 ^
