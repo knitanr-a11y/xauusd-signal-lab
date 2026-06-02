@@ -17,6 +17,37 @@ reports/**/*.csv
 outputs/**/*.csv
 *.log
 
+# Generated research / audit artifacts
+# Keep heavy exploration outputs outside the repository.
+*_outputs/
+*_outputs.zip
+outputs/
+artifacts/
+analysis_outputs/
+research_outputs/
+backtest_outputs/
+walk_forward_outputs/
+*.zip
+*.parquet
+*.feather
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+*.pt
+*.pth
+*.onnx
+*.sqlite
+*.sqlite3
+*.db
+*.html
+
+# Large local market-data drops
+# Use explicit docs/config files in git; keep raw/derived data local.
+*.h5
+*.hdf5
+
 # OS / editor
 .DS_Store
 Thumbs.db
