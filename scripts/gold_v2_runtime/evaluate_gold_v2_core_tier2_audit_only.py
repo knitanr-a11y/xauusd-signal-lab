@@ -9,6 +9,12 @@ It only reads prebuilt GOLD V2 cluster ledgers and re-scores the frozen policy:
     Core  = fold4_rules + ABC entry gate + CAP5 sizing
     Tier2 = Core REJECT rows where trend_eff96 <= 0.4 and ret96 <= -25, CAP3 sizing
 
+It also evaluates an adaptive Tier2 gate:
+
+    Allow Tier2 only when the number of Core signals in the previous N business
+    days is below a configurable threshold.  Default: previous 10 business days
+    Core count < 5.
+
 Inputs expected by default:
 
     <input-dir>/abc_stack_cap_2025_fold4_cluster_ledger.csv
@@ -30,7 +36,7 @@ import json
 import math
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -39,8 +45,10 @@ import pandas as pd
 
 
 CORE_VIEW = "CORE_ABC_CAP5"
-TIER2_VIEW = "TIER2_CAP3"
-COMBINED_VIEW = "CORE_ABC_CAP5_PLUS_TIER2_CAP3"
+TIER2_VIEW = "TIER2_CAP3_STATIC"
+COMBINED_VIEW = "CORE_ABC_CAP5_PLUS_TIER2_CAP3_STATIC"
+ADAPTIVE_TIER2_VIEW = "TIER2_CAP3_ADAPTIVE_CORE_LT5_10BD"
+ADAPTIVE_COMBINED_VIEW = "CORE_ABC_CAP5_PLUS_TIER2_CAP3_ADAPTIVE"
 
 REQUIRED_COLUMNS = [
     "entry_month",
@@ -56,6 +64,13 @@ SORT_CANDIDATES = [
     "top_entry_time",
     "close_time",
     "entry_time",
+]
+
+DATE_CANDIDATES = [
+    "cluster_start",
+    "top_entry_time",
+    "entry_time",
+    "close_time",
 ]
 
 
@@ -90,6 +105,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     )
     parser.add_argument("--tier2-trend-eff96-max", type=float, default=0.4)
     parser.add_argument("--tier2-ret96-max", type=float, default=-25.0)
+    parser.add_argument("--adaptive-tier2-lookback-business-days", type=int, default=10)
+    parser.add_argument("--adaptive-tier2-core-threshold", type=int, default=5)
     parser.add_argument("--strict", action="store_true", help="Fail if any required input is missing or has no rows")
     return parser.parse_args(argv)
 
@@ -140,6 +157,17 @@ def sort_columns(df: pd.DataFrame) -> pd.DataFrame:
                 pass
             return df.sort_values(c).reset_index(drop=True)
     return df.reset_index(drop=True)
+
+
+def derive_entry_timestamp(df: pd.DataFrame) -> pd.Series:
+    for c in DATE_CANDIDATES:
+        if c in df.columns:
+            ts = pd.to_datetime(df[c], errors="coerce")
+            if ts.notna().any():
+                return ts
+    if "entry_month" in df.columns:
+        return pd.to_datetime(df["entry_month"].astype(str) + "-01", errors="coerce")
+    return pd.Series(pd.NaT, index=df.index)
 
 
 def metrics(values: Iterable[float]) -> Dict[str, float]:
@@ -222,11 +250,8 @@ def read_cluster_ledger(path: Path, dataset: str) -> Tuple[pd.DataFrame, InputAu
     df = normalize_signal_column(df)
 
     if "entry_month" not in df.columns:
-        for c in SORT_CANDIDATES:
-            if c in df.columns:
-                dt = pd.to_datetime(df[c], errors="coerce")
-                df["entry_month"] = dt.dt.to_period("M").astype(str)
-                break
+        ts = derive_entry_timestamp(df)
+        df["entry_month"] = ts.dt.to_period("M").astype(str)
 
     for c in ["trend_eff96", "ret96", "profit_cap3_from_members", "profit_cap5_from_members"]:
         if c in df.columns:
@@ -237,15 +262,74 @@ def read_cluster_ledger(path: Path, dataset: str) -> Tuple[pd.DataFrame, InputAu
     return df, audit_input(dataset, path, df)
 
 
-def build_portfolio(df: pd.DataFrame, trend_max: float, ret_max: float) -> pd.DataFrame:
+def compute_prev_business_day_core_counts(
+    df: pd.DataFrame,
+    core_mask: pd.Series,
+    lookback_business_days: int,
+) -> pd.Series:
+    ts = derive_entry_timestamp(df)
+    entry_dates = ts.dt.date
+    result = pd.Series(0, index=df.index, dtype=int)
+    valid_dates = entry_dates.dropna()
+    if valid_dates.empty:
+        return result
+
+    min_date = min(valid_dates)
+    max_date = max(valid_dates)
+    calendar = list(pd.bdate_range(pd.Timestamp(min_date) - pd.Timedelta(days=lookback_business_days * 3), pd.Timestamp(max_date)).date)
+    calendar = sorted(set(calendar))
+
+    core_daily = pd.Series(0, index=pd.Index(calendar, name="entry_date"), dtype=int)
+    core_dates = entry_dates[core_mask & entry_dates.notna()]
+    if not core_dates.empty:
+        counts = core_dates.value_counts()
+        for d, cnt in counts.items():
+            if d in core_daily.index:
+                core_daily.loc[d] = int(cnt)
+
+    cumulative = core_daily.cumsum()
+
+    def prev_count(d: object) -> int:
+        if not isinstance(d, date):
+            return 0
+        # Last business day strictly before current date. For weekend dates, this
+        # naturally uses the last business day before the weekend.
+        prev_days = [bd for bd in calendar if bd < d]
+        if not prev_days:
+            return 0
+        end_day = prev_days[-1]
+        start_idx = max(0, calendar.index(end_day) - lookback_business_days + 1)
+        start_day = calendar[start_idx]
+        before_start = calendar[start_idx - 1] if start_idx > 0 else None
+        total = cumulative.loc[end_day]
+        if before_start is not None:
+            total -= cumulative.loc[before_start]
+        return int(total)
+
+    return entry_dates.map(prev_count).fillna(0).astype(int)
+
+
+def build_portfolio(
+    df: pd.DataFrame,
+    trend_max: float,
+    ret_max: float,
+    adaptive_lookback_business_days: int,
+    adaptive_core_threshold: int,
+) -> pd.DataFrame:
     d = df.copy()
     core_mask = d["signal_ABC"].fillna("REJECT").astype(str).ne("REJECT")
-    tier2_mask = (
+    d["entry_timestamp"] = derive_entry_timestamp(d)
+    d["entry_date"] = d["entry_timestamp"].dt.date.astype(str)
+    d["core_prev_n_bdays_count"] = compute_prev_business_day_core_counts(d, core_mask, adaptive_lookback_business_days)
+
+    tier2_eligible_mask = (
         (~core_mask)
         & d["trend_eff96"].le(trend_max)
         & d["ret96"].le(ret_max)
         & d["profit_cap3_from_members"].notna()
     )
+
+    adaptive_allowed_mask = tier2_eligible_mask & d["core_prev_n_bdays_count"].lt(adaptive_core_threshold)
 
     pieces: List[pd.DataFrame] = []
 
@@ -253,7 +337,9 @@ def build_portfolio(df: pd.DataFrame, trend_max: float, ret_max: float) -> pd.Da
     if len(core):
         core["final_signal"] = "CORE_" + core["signal_ABC"].astype(str)
         core["priority"] = "HIGH"
-        core["view"] = CORE_VIEW
+        core["lane"] = "CORE"
+        core["tier2_static_allowed"] = False
+        core["tier2_adaptive_allowed"] = False
         core["final_profit_r"] = np.where(
             core["signal_ABC"].astype(str).eq("A"),
             core["profit_cap5_from_members"],
@@ -261,30 +347,40 @@ def build_portfolio(df: pd.DataFrame, trend_max: float, ret_max: float) -> pd.Da
         )
         pieces.append(core)
 
-    tier2 = d[tier2_mask].copy()
+    tier2 = d[tier2_eligible_mask].copy()
     if len(tier2):
         tier2["final_signal"] = "TIER2_trend_eff96_le_0p4_ret96_le_m25"
         tier2["priority"] = "MEDIUM"
-        tier2["view"] = TIER2_VIEW
+        tier2["lane"] = "TIER2"
+        tier2["tier2_static_allowed"] = True
+        tier2["tier2_adaptive_allowed"] = adaptive_allowed_mask.loc[tier2.index].astype(bool)
         tier2["final_profit_r"] = tier2["profit_cap3_from_members"]
         pieces.append(tier2)
 
     if not pieces:
-        return pd.DataFrame(columns=list(d.columns) + ["final_signal", "priority", "view", "final_profit_r"])
+        return pd.DataFrame(columns=list(d.columns) + ["final_signal", "priority", "lane", "tier2_static_allowed", "tier2_adaptive_allowed", "final_profit_r"])
 
     portfolio = pd.concat(pieces, ignore_index=True)
     return sort_columns(portfolio)
 
 
+def view_masks(g: pd.DataFrame) -> List[Tuple[str, pd.Series]]:
+    core = g["priority"].eq("HIGH")
+    tier2_static = g["priority"].eq("MEDIUM") & g["tier2_static_allowed"].astype(bool)
+    tier2_adaptive = g["priority"].eq("MEDIUM") & g["tier2_adaptive_allowed"].astype(bool)
+    return [
+        (CORE_VIEW, core),
+        (TIER2_VIEW, tier2_static),
+        (COMBINED_VIEW, core | tier2_static),
+        (ADAPTIVE_TIER2_VIEW, tier2_adaptive),
+        (ADAPTIVE_COMBINED_VIEW, core | tier2_adaptive),
+    ]
+
+
 def summarize_aggregate(portfolio: pd.DataFrame) -> pd.DataFrame:
     rows: List[Dict[str, object]] = []
     for dataset, g in portfolio.groupby("dataset", dropna=False):
-        views = [
-            (CORE_VIEW, g["priority"].eq("HIGH")),
-            (TIER2_VIEW, g["priority"].eq("MEDIUM")),
-            (COMBINED_VIEW, pd.Series(True, index=g.index)),
-        ]
-        for view_name, mask in views:
+        for view_name, mask in view_masks(g):
             gg = g[mask].copy()
             m = metrics(gg["final_profit_r"])
             m.update(
@@ -305,12 +401,7 @@ def summarize_monthly(portfolio: pd.DataFrame) -> pd.DataFrame:
     if portfolio.empty:
         return pd.DataFrame()
     for (dataset, month), g in portfolio.groupby(["dataset", "entry_month"], dropna=False):
-        views = [
-            (CORE_VIEW, g["priority"].eq("HIGH")),
-            (TIER2_VIEW, g["priority"].eq("MEDIUM")),
-            (COMBINED_VIEW, pd.Series(True, index=g.index)),
-        ]
-        for view_name, mask in views:
+        for view_name, mask in view_masks(g):
             gg = g[mask].copy()
             m = metrics(gg["final_profit_r"])
             m.update(
@@ -333,7 +424,14 @@ def summarize_signal(portfolio: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     for (dataset, priority, signal), g in portfolio.groupby(["dataset", "priority", "final_signal"], dropna=False):
         m = metrics(g["final_profit_r"])
-        m.update({"dataset": dataset, "priority": priority, "final_signal": signal})
+        m.update(
+            {
+                "dataset": dataset,
+                "priority": priority,
+                "final_signal": signal,
+                "adaptive_allowed_count": int(g.get("tier2_adaptive_allowed", pd.Series(False, index=g.index)).astype(bool).sum()),
+            }
+        )
         rows.append(m)
     return pd.DataFrame(rows).sort_values(["dataset", "priority", "final_signal"]).reset_index(drop=True)
 
@@ -386,6 +484,8 @@ def write_markdown_report(
     audits: List[InputAudit],
     trend_max: float,
     ret_max: float,
+    adaptive_lookback_business_days: int,
+    adaptive_core_threshold: int,
 ) -> None:
     lines: List[str] = []
     lines.append("# GOLD V2 Core/Tier2 audit-only evaluator report")
@@ -400,11 +500,15 @@ def write_markdown_report(
     lines.append("  A uses profit_cap5_from_members")
     lines.append("  B/C use profit_cap3_from_members")
     lines.append("")
-    lines.append("Tier2 / MEDIUM:")
+    lines.append("Tier2 static / MEDIUM:")
     lines.append("  signal_ABC == REJECT")
     lines.append(f"  trend_eff96 <= {trend_max}")
     lines.append(f"  ret96 <= {ret_max}")
     lines.append("  uses profit_cap3_from_members")
+    lines.append("")
+    lines.append("Tier2 adaptive:")
+    lines.append(f"  static Tier2 condition")
+    lines.append(f"  AND previous {adaptive_lookback_business_days} business days Core count < {adaptive_core_threshold}")
     lines.append("```")
     lines.append("")
     lines.append("## Input audit")
@@ -434,7 +538,7 @@ def write_markdown_report(
     lines.append(
         simple_markdown_table(
             signal,
-            ["dataset", "priority", "final_signal", "count", "win_rate", "pf", "total_r", "worst", "maxdd"],
+            ["dataset", "priority", "final_signal", "count", "win_rate", "pf", "total_r", "worst", "maxdd", "adaptive_allowed_count"],
         )
     )
     lines.append("")
@@ -478,7 +582,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print("[ERROR] No valid input ledgers loaded", file=sys.stderr)
         return 2
 
-    portfolio_parts = [build_portfolio(df, args.tier2_trend_eff96_max, args.tier2_ret96_max) for df in dataframes]
+    portfolio_parts = [
+        build_portfolio(
+            df,
+            args.tier2_trend_eff96_max,
+            args.tier2_ret96_max,
+            args.adaptive_tier2_lookback_business_days,
+            args.adaptive_tier2_core_threshold,
+        )
+        for df in dataframes
+    ]
     portfolio = pd.concat(portfolio_parts, ignore_index=True) if portfolio_parts else pd.DataFrame()
     portfolio = sort_columns(portfolio)
 
@@ -499,7 +612,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "output_dir": str(output_dir),
         "policy": {
             "core": "signal_ABC != REJECT; A uses CAP5; B/C use CAP3",
-            "tier2": f"signal_ABC == REJECT AND trend_eff96 <= {args.tier2_trend_eff96_max} AND ret96 <= {args.tier2_ret96_max}; uses CAP3",
+            "tier2_static": f"signal_ABC == REJECT AND trend_eff96 <= {args.tier2_trend_eff96_max} AND ret96 <= {args.tier2_ret96_max}; uses CAP3",
+            "tier2_adaptive": f"tier2_static AND previous {args.adaptive_tier2_lookback_business_days} business days Core count < {args.adaptive_tier2_core_threshold}",
         },
         "input_audit": [asdict(a) for a in audits],
         "aggregate": json_safe_records(aggregate),
@@ -514,6 +628,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         audits,
         args.tier2_trend_eff96_max,
         args.tier2_ret96_max,
+        args.adaptive_tier2_lookback_business_days,
+        args.adaptive_tier2_core_threshold,
     )
 
     print(f"[DONE] output_dir={output_dir}")
