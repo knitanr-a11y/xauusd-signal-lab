@@ -202,7 +202,215 @@ scripts/gold_v2_runtime/bat/12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY.bat
 docs/gold_v2/12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY_SPEC_20260603.md
 ```
 
-## 8. Execution order
+## 8. BAT仕様
+
+### 8.1 11_FREEZE_RULE_SOURCES_AUDIT_ONLY.bat
+
+BAT:
+
+```text
+scripts\gold_v2_runtime\bat\11_FREEZE_RULE_SOURCES_AUDIT_ONLY.bat
+```
+
+実行内容:
+
+```text
+python scripts\gold_v2_runtime\freeze_gold_v2_rule_sources_audit_only.py %*
+```
+
+役割:
+
+- ユーザー環境の探索済みCSVを読み、frozen rule-source manifest JSONを生成する。
+- これはlive evaluatorではない。
+- 近似再実装はしない。
+- Discord通知、MT5発注、AI API、live hookは呼ばない。
+
+主な生成先:
+
+```text
+configs/gold_v2/
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/
+```
+
+生成される必要ファイル:
+
+```text
+configs/gold_v2/frozen_coreA_fold4_ABC_CAP5_rules_20260603.json
+configs/gold_v2/frozen_coreB_rr125_buy_confluence_rules_20260603.json
+configs/gold_v2/frozen_medium_rules_20260603.json
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/frozen_coreA_fold4_ABC_CAP5_rules_20260603.json
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/frozen_coreB_rr125_buy_confluence_rules_20260603.json
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/frozen_medium_rules_20260603.json
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/gold_v2_frozen_rule_sources_summary.json
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/GOLD_V2_FROZEN_RULE_SOURCES_AUDIT_ONLY_REPORT.md
+```
+
+成功確認:
+
+```text
+core_status=FROZEN_RULE_SOURCE_READY
+coreb_status=FROZEN_RULE_SOURCE_READY
+medium_status=FROZEN_RULE_SOURCE_READY
+all_required_ready=True
+```
+
+停止条件:
+
+- required CSVが無い。
+- CSVが読めない。
+- CoreA/CoreB/MEDIUMのいずれかが `FROZEN_RULE_SOURCE_READY` にならない。
+
+### 8.2 10_EVALUATE_LIVE_RULES_AUDIT_ONLY.bat
+
+BAT:
+
+```text
+scripts\gold_v2_runtime\bat\10_EVALUATE_LIVE_RULES_AUDIT_ONLY.bat
+```
+
+実行内容:
+
+```text
+python scripts\gold_v2_runtime\evaluate_gold_v2_live_rules_audit_only.py %*
+```
+
+役割:
+
+- 最新M15特徴量を作成し、live rule evaluation audit gateを実行する。
+- CoreA/CoreB frozen JSONが無ければ `RULE_SOURCE_MISSING`。
+- CoreA/CoreB frozen JSONがあれば、現段階では `RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED`。
+- MEDIUM特徴条件は評価するが、CoreA/CoreB arbitration未接続のため最終signalにはしない。
+- NO_SIGNAL時は `notification_preview_text=""`、`notification_should_send=false`。
+- Discord通知、MT5発注、AI API、live hookは呼ばない。
+
+主な生成先:
+
+```text
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/
+```
+
+生成される必要ファイル:
+
+```text
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/gold_v2_live_rule_evaluation_packet.json
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/GOLD_V2_LIVE_RULE_EVALUATION_AUDIT_ONLY_REPORT.md
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/gold_v2_live_rule_core_eval.csv
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/gold_v2_live_rule_medium_eval.csv
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/gold_v2_live_rule_notification_preview.txt
+```
+
+成功確認:
+
+```text
+core_evaluators[].status=RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED
+final_signal_status=NO_SIGNAL または SIGNAL候補なし
+notification_should_send=false
+notification_preview_text=""  # NO_SIGNAL時
+external_actions.discord_send_allowed=false
+external_actions.mt5_order_allowed=false
+external_actions.ai_api_allowed=false
+external_actions.live_hook_allowed=false
+```
+
+停止条件:
+
+- M15 CSVが無い。
+- eval_timeがM15 CSVに存在しない。
+- candle列が不足している。
+- frozen JSON生成後なのにCoreA/CoreBが `RULE_SOURCE_MISSING` のまま。
+
+### 8.3 12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY.bat
+
+BAT:
+
+```text
+scripts\gold_v2_runtime\bat\12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY.bat
+```
+
+実行内容:
+
+```text
+python scripts\gold_v2_runtime\map_gold_v2_frozen_rules_to_live_evaluator_audit_only.py %*
+```
+
+役割:
+
+- 11番で生成された frozen CoreA/CoreB/MEDIUM JSONを読む。
+- policy JSONの安全設定を確認する。
+- manifest source fileのfingerprintを監査情報として保持する。
+- CoreA/CoreBについて、明示的なlive evaluator条件が無ければ `UNMAPPED_CONDITION` として止める。
+- MEDIUMについて、`definition.rules[].conditions` の `_min/_max/_eq` 条件だけをfeature-gate mappingする。
+- MEDIUMはfeature-gate mappingできても、CoreA/CoreB arbitration未接続のため `final_signal_allowed=false` のままにする。
+- 近似再実装、entry_time一致signal化、Discord通知、MT5発注、AI API、live hookは行わない。
+
+主な生成先:
+
+```text
+configs/gold_v2/
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/
+```
+
+生成される必要ファイル:
+
+```text
+configs/gold_v2/live_evaluator_mapping_coreA_20260603.json
+configs/gold_v2/live_evaluator_mapping_coreB_20260603.json
+configs/gold_v2/live_evaluator_mapping_medium_20260603.json
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/live_evaluator_mapping_coreA_20260603.json
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/live_evaluator_mapping_coreB_20260603.json
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/live_evaluator_mapping_medium_20260603.json
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/gold_v2_live_evaluator_mapping_summary.json
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/gold_v2_live_evaluator_mapping_status.csv
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/gold_v2_live_evaluator_mapping_audit_checks.csv
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/gold_v2_live_evaluator_mapping_unmapped_conditions.csv
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/GOLD_V2_LIVE_EVALUATOR_MAPPING_AUDIT_ONLY_REPORT.md
+```
+
+終了コード:
+
+| Code | 意味 | 扱い |
+|---:|---|---|
+| 0 | blocking `UNMAPPED_CONDITION` なし、または `--allow-unmapped-exit-zero` 指定時 | audit完了。ただしlive接続は別工程 |
+| 2 | blocking `UNMAPPED_CONDITION` あり | 正常な安全停止。live evaluatorへ接続してはいけない |
+| その他 | JSON欠落、policy safety失敗、読み込み失敗など | 異常停止 |
+
+成功確認:
+
+```text
+gold_v2_live_evaluator_mapping_summary.json
+  status=BLOCKED_UNMAPPED_CONDITION  # 現状の期待値
+  external_actions.discord_send_allowed=false
+  external_actions.mt5_order_allowed=false
+  external_actions.ai_api_allowed=false
+  external_actions.live_hook_allowed=false
+  no_signal_discord_policy=DO_NOT_NOTIFY_ON_NO_SIGNAL
+
+live_evaluator_mapping_coreA_20260603.json
+  status=MAPPING_BLOCKED_UNMAPPED_CONDITION
+  final_signal_allowed=false
+  historical_entry_time_match_allowed=false
+
+live_evaluator_mapping_coreB_20260603.json
+  status=MAPPING_BLOCKED_UNMAPPED_CONDITION
+  final_signal_allowed=false
+  historical_entry_time_match_allowed=false
+
+live_evaluator_mapping_medium_20260603.json
+  status=MAPPED_FEATURE_GATES_ONLY_BLOCKED_FOR_FINAL_SIGNAL または MAPPING_BLOCKED_UNMAPPED_CONDITION
+  final_signal_allowed=false
+```
+
+停止条件:
+
+- frozen JSONが存在しない。
+- frozen JSONがparseできない。
+- frozen manifest statusが `FROZEN_RULE_SOURCE_READY` ではない。
+- policy safetyがaudit-only false条件を満たさない。
+- CoreA/CoreBの明示live条件が足りない。
+- MEDIUM条件に対応外suffixがある。
+- blocking `UNMAPPED_CONDITION` がある。
+
+## 9. Execution order and required generated files
 
 Run in this order:
 
@@ -212,13 +420,125 @@ scripts\gold_v2_runtime\bat\10_EVALUATE_LIVE_RULES_AUDIT_ONLY.bat
 scripts\gold_v2_runtime\bat\12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY.bat
 ```
 
+### 9.1 After running 11
+
+Check this folder:
+
+```text
+Files/FX_OUTPUTS/gold_v2_frozen_rule_sources_audit_only/
+```
+
+Required files:
+
+```text
+GOLD_V2_FROZEN_RULE_SOURCES_AUDIT_ONLY_REPORT.md
+gold_v2_frozen_rule_sources_summary.json
+frozen_coreA_fold4_ABC_CAP5_rules_20260603.json
+frozen_coreB_rr125_buy_confluence_rules_20260603.json
+frozen_medium_rules_20260603.json
+```
+
+Also check these config files:
+
+```text
+configs/gold_v2/frozen_coreA_fold4_ABC_CAP5_rules_20260603.json
+configs/gold_v2/frozen_coreB_rr125_buy_confluence_rules_20260603.json
+configs/gold_v2/frozen_medium_rules_20260603.json
+```
+
+Expected status:
+
+```text
+core_status=FROZEN_RULE_SOURCE_READY
+coreb_status=FROZEN_RULE_SOURCE_READY
+medium_status=FROZEN_RULE_SOURCE_READY
+```
+
+Do not continue if any frozen source is missing or incomplete.
+
+### 9.2 After running 10
+
+Check this folder:
+
+```text
+Files/FX_OUTPUTS/gold_v2_live_rule_evaluation_audit_only/
+```
+
+Required files:
+
+```text
+gold_v2_live_rule_evaluation_packet.json
+GOLD_V2_LIVE_RULE_EVALUATION_AUDIT_ONLY_REPORT.md
+gold_v2_live_rule_core_eval.csv
+gold_v2_live_rule_medium_eval.csv
+gold_v2_live_rule_notification_preview.txt
+```
+
+Expected status:
+
+```text
+CoreA/CoreB:
+  RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED
+
+NO_SIGNALの場合:
+  notification_preview_text=""
+  notification_should_send=false
+```
+
+Do not continue if CoreA/CoreB are still `RULE_SOURCE_MISSING` after 11 generated the frozen JSON.
+
+### 9.3 After running 12
+
+Check this folder:
+
+```text
+Files/FX_OUTPUTS/gold_v2_live_evaluator_mapping_audit_only/
+```
+
+Required files:
+
+```text
+GOLD_V2_LIVE_EVALUATOR_MAPPING_AUDIT_ONLY_REPORT.md
+gold_v2_live_evaluator_mapping_summary.json
+gold_v2_live_evaluator_mapping_status.csv
+gold_v2_live_evaluator_mapping_audit_checks.csv
+gold_v2_live_evaluator_mapping_unmapped_conditions.csv
+live_evaluator_mapping_coreA_20260603.json
+live_evaluator_mapping_coreB_20260603.json
+live_evaluator_mapping_medium_20260603.json
+```
+
+Also check these config files:
+
+```text
+configs/gold_v2/live_evaluator_mapping_coreA_20260603.json
+configs/gold_v2/live_evaluator_mapping_coreB_20260603.json
+configs/gold_v2/live_evaluator_mapping_medium_20260603.json
+```
+
 Expected current result:
 
-- 10番: CoreA/CoreB should be `RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED` when frozen JSON exists locally.
-- 12番: CoreA/CoreB should be blocked as `MAPPING_BLOCKED_UNMAPPED_CONDITION` unless future frozen JSON contains explicit evaluator predicates.
-- 12番: MEDIUM feature gates can be mapped from explicit thresholds, but final signal remains blocked until arbitration.
+```text
+CoreA:
+  status=MAPPING_BLOCKED_UNMAPPED_CONDITION
 
-## 9. Things not implemented in this step
+CoreB:
+  status=MAPPING_BLOCKED_UNMAPPED_CONDITION
+
+MEDIUM:
+  status=MAPPED_FEATURE_GATES_ONLY_BLOCKED_FOR_FINAL_SIGNAL
+  or status=MAPPING_BLOCKED_UNMAPPED_CONDITION if frozen MEDIUM conditions are incomplete
+
+Summary:
+  status=BLOCKED_UNMAPPED_CONDITION
+  live_evaluator_connection_allowed=false
+```
+
+This is a safe stop, not a failure of the guard. It means CoreA/CoreB still do not have enough explicit frozen predicates for a live evaluator.
+
+Do not run or implement step 13 as a signal-producing evaluator until the mapping JSON has no blocking `UNMAPPED_CONDITION`.
+
+## 10. Things not implemented in this step
 
 - Live evaluator execution.
 - CoreA/CoreB rule approximation.
@@ -229,6 +549,6 @@ Expected current result:
 - Live hook integration.
 - NO_SIGNAL notification.
 
-## 10. Next step after this audit
+## 11. Next step after this audit
 
 Step 13 may connect a live evaluator only after CoreA/CoreB mapping JSON has no blocking `UNMAPPED_CONDITION`. Until then, live signal generation must remain blocked.
