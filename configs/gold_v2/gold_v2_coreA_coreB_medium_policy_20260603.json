@@ -1,0 +1,121 @@
+{
+  "policy_id": "GOLD_V2_COREA_COREB_MEDIUM_POLICY_20260603",
+  "status": "AUDIT_ONLY_RUNTIME_CANDIDATE",
+  "created_date_jst": "2026-06-03",
+  "safety": {
+    "ai_api_enabled": false,
+    "discord_enabled": false,
+    "mt5_order_enabled": false,
+    "live_hook_enabled": false,
+    "audit_only": true,
+    "reason": "Freeze CoreA/CoreB/MEDIUM policy for reproducible audit before any demo/runtime connection."
+  },
+  "inputs": {
+    "core_input_dir_default": "Files/FX_OUTPUTS/gold_v2_ABC_stack_cap_2025_2026_validation_outputs",
+    "rr125_input_dir_default": "Files/FX_OUTPUTS/gold_v2_rr125_second_core_probe_outputs",
+    "medium_input_dir_default": "Files/FX_OUTPUTS/gold_v2_coreb_refined_probe_outputs",
+    "required_files": [
+      "abc_stack_cap_2025_fold4_cluster_ledger.csv",
+      "abc_stack_cap_2026_cluster_ledger.csv",
+      "rr125_top_ledgers.csv",
+      "coreb_refined_rule_ledgers.csv"
+    ]
+  },
+  "coreA": {
+    "enabled": true,
+    "priority": "HIGH_A",
+    "name": "CoreA_fold4_ABC_CAP5",
+    "definition": "fold4_rules + ABC entry gate + CAP5 sizing",
+    "sizing": {
+      "signal_A": "CAP5",
+      "signal_B": "CAP3",
+      "signal_C": "CAP3"
+    },
+    "lot_multiplier": 1.0
+  },
+  "coreB": {
+    "enabled": true,
+    "priority": "HIGH_B",
+    "name": "RR125_BUY_CONFLUENCE",
+    "definition": "RR1.0-derived BUY rules re-evaluated with TP = 1.25 * SL; same_count >= 15; CAP3 sizing",
+    "source_policy": "RR125_from_RR1_rules",
+    "source_filter": "same_count>=15",
+    "direction": "BUY_ONLY",
+    "rr": 1.25,
+    "tp_sl_rule": "TP = 1.25 * SL",
+    "same_count_min": 15,
+    "sizing": "CAP3",
+    "lot_multiplier": 1.0
+  },
+  "confluence": {
+    "enabled": true,
+    "name": "CoreA_BUY_plus_CoreB_BUY_same_entry_time",
+    "condition": "same entry_time and same direction BUY",
+    "initial_extra_coreB_exposure": 0.5,
+    "audit_extra_coreB_exposure_candidates": [0.0, 0.5, 1.0],
+    "initial_effective_lot_description": "CoreA 1.0 + extra CoreB 0.5 = 1.5 equivalent when CoreA BUY and CoreB BUY overlap exactly.",
+    "conflict_rule": "If CoreA SELL conflicts with CoreB BUY at the exact same entry_time, CoreA has priority and CoreB is skipped until a separate conflict audit approves otherwise."
+  },
+  "medium": {
+    "enabled": true,
+    "priority": "MEDIUM",
+    "default_lot_multiplier": 0.5,
+    "execution_mode_initial": "AUDIT_OR_NOTIFICATION_ONLY_UNTIL_DEMO_APPROVED",
+    "precedence_rule": "CoreA/CoreB > MEDIUM. Skip MEDIUM when it shares entry_time with any CoreA/CoreB signal. If multiple MEDIUM signals share entry_time + direction, keep the first by priority.",
+    "priority_order": [
+      "RANGE96_REFINED",
+      "VOL_TRMEAN32_REFINED",
+      "TIER2_HVT"
+    ],
+    "signals": {
+      "RANGE96_REFINED": {
+        "enabled": true,
+        "definition": "CoreA REJECT add-on: range96 >= 129.6835 AND trend_eff96 <= 0.355591 AND top_direction == SELL; CAP3",
+        "sizing": "CAP3"
+      },
+      "VOL_TRMEAN32_REFINED": {
+        "enabled": true,
+        "definition": "CoreA REJECT add-on: tr_mean_32 >= 10.867578 AND ret96 <= -2.725 AND range96 >= 176.453; CAP3",
+        "sizing": "CAP3"
+      },
+      "TIER2_HVT": {
+        "enabled": true,
+        "definition": "CoreA REJECT add-on: Tier2 static plus HIGH_VOL_TREND; CAP3",
+        "sizing": "CAP3"
+      }
+    }
+  },
+  "watch": {
+    "ORIGIN010_REFINED": {
+      "enabled_by_default": false,
+      "priority": "WATCH",
+      "definition": "CoreA REJECT add-on: top_candidate_id == GOLDV2_ORIGIN_010 AND range96 >= 41.99 AND same_direction_count <= 9; CAP3",
+      "reason": "Improved by filtering but kept out of default MEDIUM because 2025 drawdown was heavier and it is less clean than RANGE96/VOL/TIER2_HVT."
+    }
+  },
+  "default_audit": {
+    "script": "scripts/gold_v2_runtime/evaluate_gold_v2_coreA_coreB_medium_audit_only.py",
+    "bat": "scripts/gold_v2_runtime/bat/03_RUN_COREA_COREB_MEDIUM_AUDIT_ONLY.bat",
+    "output_dir_default": "Files/FX_OUTPUTS/gold_v2_coreA_coreB_medium_audit_only"
+  },
+  "known_latest_audit_result": {
+    "coreA_coreB_medium_extra0p5": {
+      "2025": {
+        "count": 346,
+        "win_rate": 0.6908,
+        "pf": 2.84,
+        "total_r": 439.51,
+        "worst": -5.0,
+        "maxdd": 19.2
+      },
+      "2026": {
+        "count": 183,
+        "win_rate": 0.7213,
+        "pf": 3.65,
+        "total_r": 248.75,
+        "worst": -5.0,
+        "maxdd": 7.0
+      }
+    }
+  }
+}
