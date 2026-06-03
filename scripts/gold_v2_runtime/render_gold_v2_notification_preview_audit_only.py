@@ -5,12 +5,8 @@
 No external side effects are performed. The script only reads local files and
 writes preview text/json files.
 
-Notification template changes:
-  - Title does not include "V2".
-  - BUY title uses a green circle; SELL title uses a red circle.
-  - Footnote-like technical rows are omitted from the notification body.
-  - Entry price, TP, and SL are shown immediately under the signal time when
-    they can be derived from source ledgers and/or M15 candles.
+Default behavior is current-audit oriented: only dataset 2026 is rendered.
+Use --datasets 2025,2026 when a comparison preview is needed.
 """
 
 from __future__ import annotations
@@ -21,7 +17,7 @@ import math
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 import pandas as pd
 
@@ -36,9 +32,14 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--output-dir", default=None)
     parser.add_argument("--symbol", default="GOLD")
     parser.add_argument("--timeframe", default="M15")
+    parser.add_argument("--datasets", default="2026", help="Comma-separated datasets to render. Default: 2026")
     parser.add_argument("--candles-m15", default=None, help="Optional M15 candle CSV for entry price lookup")
     parser.add_argument("--pips-to-price", type=float, default=PIPS_TO_PRICE_DEFAULT)
     return parser.parse_args(argv)
+
+
+def parse_datasets(text: str) -> Set[str]:
+    return {x.strip() for x in str(text).split(",") if x.strip()}
 
 
 def repo_root() -> Path:
@@ -224,9 +225,9 @@ def detect_time_col(columns: Sequence[str]) -> Optional[str]:
 
 def detect_close_col(columns: Sequence[str]) -> Optional[str]:
     lowered = {c.lower(): c for c in columns}
-    for name in ["close", "Close", "bidclose", "bid_close"]:
-        if name.lower() in lowered:
-            return lowered[name.lower()]
+    for name in ["close", "bidclose", "bid_close"]:
+        if name in lowered:
+            return lowered[name]
     return None
 
 
@@ -385,17 +386,20 @@ def render_message(record: Dict[str, Any], levels: Dict[str, Any], *, symbol: st
     return "\n".join(lines)
 
 
-def render_summary(summary: Dict[str, Any]) -> str:
+def render_summary(summary: Dict[str, Any], datasets: Set[str]) -> str:
     lines = [
         "GOLD 通知候補サマリー（AUDIT ONLY）",
         "━━━━━━━━━━━━━━━━━━━━",
         f"作成UTC: {summary.get('created_utc', '-')}",
         f"view: {summary.get('view', '-')}",
         f"record_count: {summary.get('record_count', '-')}",
+        f"表示dataset: {','.join(sorted(datasets))}",
         "",
     ]
     for row in summary.get("summary", []):
         if row.get("priority") != "ALL":
+            continue
+        if str(row.get("dataset")) not in datasets:
             continue
         wr = row.get("win_rate")
         wr_text = "-" if wr is None else f"{float(wr) * 100:.2f}%"
@@ -409,6 +413,7 @@ def render_summary(summary: Dict[str, Any]) -> str:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_args(argv)
+    datasets = parse_datasets(args.datasets)
     input_dir = Path(args.input_dir).expanduser().resolve() if args.input_dir else default_input_dir()
     output_dir = Path(args.output_dir).expanduser().resolve() if args.output_dir else default_output_dir()
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -424,6 +429,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     latest = json.loads(latest_path.read_text(encoding="utf-8"))
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    latest_records = [r for r in latest.get("latest_by_dataset", []) if str(r.get("dataset")) in datasets]
+    if not latest_records:
+        print(f"[ERROR] no latest records for datasets={sorted(datasets)}")
+        return 2
+
     candle_path = Path(args.candles_m15).expanduser().resolve() if args.candles_m15 else find_default_m15_csv()
     candle_close = load_candle_close_map(candle_path)
     core_rows = load_core_rows()
@@ -433,7 +443,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     messages: List[Dict[str, Any]] = []
     text_blocks: List[str] = []
     md_blocks: List[str] = []
-    for rec in latest.get("latest_by_dataset", []):
+    for rec in latest_records:
         source_row = find_source_row(rec, core_rows, medium_rows, rr_raw)
         levels = compute_levels(rec, source_row, candle_close, args.pips_to_price)
         msg = render_message(rec, levels, symbol=args.symbol, timeframe=args.timeframe)
@@ -441,7 +451,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         text_blocks.append(msg)
         md_blocks.append("```text\n" + msg + "\n```")
 
-    summary_text = render_summary(summary)
+    summary_text = render_summary(summary, datasets)
     (output_dir / "gold_v2_notification_preview_latest.txt").write_text("\n\n".join(text_blocks) + "\n", encoding="utf-8")
     (output_dir / "gold_v2_notification_preview_latest.md").write_text("# GOLD notification preview latest\n\n" + "\n\n".join(md_blocks) + "\n", encoding="utf-8")
     (output_dir / "gold_v2_notification_preview_summary.txt").write_text(summary_text + "\n", encoding="utf-8")
@@ -450,6 +460,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "status": "AUDIT_ONLY_NOTIFICATION_PREVIEW",
         "input_dir": str(input_dir),
         "output_dir": str(output_dir),
+        "datasets": sorted(datasets),
         "candles_m15": None if candle_path is None else str(candle_path),
         "pips_to_price": args.pips_to_price,
         "message_count": len(messages),
@@ -463,6 +474,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "# GOLD notification preview audit-only report",
         "",
         f"Created UTC: {datetime.now(timezone.utc).isoformat()}",
+        f"Datasets: {','.join(sorted(datasets))}",
         "",
         "## Summary",
         "",
