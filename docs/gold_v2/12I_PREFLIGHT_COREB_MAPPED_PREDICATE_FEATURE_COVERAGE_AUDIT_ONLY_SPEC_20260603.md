@@ -36,10 +36,12 @@ Optional feature input:
 --feature-csv path\to\feature_file.csv
 ```
 
-If `--feature-csv` is omitted, 12I searches candidate CSV files under:
+If `--feature-csv` is omitted, 12I searches candidate CSV files under these roots:
 
 ```text
 Files/FX_OUTPUTS
+Files
+repository root
 ```
 
 The search is header-only. It does not treat any row as a signal.
@@ -76,7 +78,21 @@ No aliasing or approximate matching is allowed.
 
 For example, `m5_ret_4_atr` must exist exactly as `m5_ret_4_atr`. It must not be accepted as `ret_4_atr`, `M5_ret_4_atr`, or any other approximation.
 
-## 5. Coverage status
+## 5. Candidate CSV selection rule
+
+12I selects a candidate CSV only if it has at least one exact required-field match.
+
+A CSV with:
+
+```text
+matched_field_count = 0
+```
+
+must not be reported as `selected_feature_file`.
+
+This prevents ledger/filter/result CSVs such as `rr125_filter_results.csv` from being treated as feature data.
+
+## 6. Coverage status
 
 Possible output statuses:
 
@@ -84,12 +100,13 @@ Possible output statuses:
 COREB_PREDICATE_FEATURE_COVERAGE_READY_AUDIT_ONLY
 COREB_PREDICATE_FEATURE_COVERAGE_BLOCKED_MISSING_FIELDS
 COREB_PREDICATE_FEATURE_COVERAGE_BLOCKED_NO_FEATURE_DATA
+COREB_PREDICATE_FEATURE_COVERAGE_BLOCKED_NO_EXACT_MATCHING_FEATURE_FILE
 COREB_PREDICATE_FEATURE_COVERAGE_BLOCKED_POLICY_OR_MAPPING
 ```
 
 Even if status is READY, final signal remains blocked.
 
-## 6. Non-negotiable guards
+## 7. Non-negotiable guards
 
 12I must not:
 
@@ -114,7 +131,7 @@ step13_allowed=false
 notification_should_send=false
 ```
 
-## 7. BAT specification
+## 8. BAT specification
 
 BAT:
 
@@ -143,7 +160,7 @@ Exit codes:
 | 2 | Policy/mapping unsafe or unreadable. |
 | other | Unexpected runtime error. |
 
-## 8. Next step after 12I
+## 9. Next step after 12I
 
 If all CoreB predicate fields are present, CoreB can move to a deeper non-signal dry-run evaluator preflight.
 
