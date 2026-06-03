@@ -134,12 +134,12 @@ source policy: FROZEN_GOLD_V2_COREB_RR125_BUY_CONFLUENCE_20260603
 CoreB = RR1.0-derived BUY rules re-evaluated with TP = 1.25 * SL
 ```
 
-固定内容:
+確定済みのCoreB採用条件:
 
 ```text
 direction = BUY only
+source_policy = RR125_from_RR1_rules
 source rules = BUY rules originally selected at RR1.0
-entry conditions = original RR1.0 BUY rule entry conditions
 SL width = original source rule SL width
 TP width = 1.25 * SL width
 same_count >= 15
@@ -147,7 +147,59 @@ sizing = CAP3
 lot_multiplier_candidate = 1.0
 ```
 
-### 3.3 CoreB confluence
+### 3.3 CoreBでまだ未凍結の条件
+
+ここが重要。現時点の文書・frozen JSONに書けているのは、CoreBの**採用後フィルタ**と**sourceファイルのmanifest**までです。CoreBの元になった **RR1.0 BUY source rule の個別エントリー条件式そのもの** は、まだlive evaluatorへ渡せる形で凍結されていません。
+
+未凍結のもの:
+
+```text
+- RR1.0 BUY source ruleごとの具体的なentry condition式
+- source_rule_count の内訳となる各source ruleの条件式
+- same_countをliveで再計算するための母集団ルール定義
+- base_condition / added_filter_text を実行可能condition objectへ変換したmapping
+- candidate_id / origin_idごとの明示的条件表
+```
+
+CoreB frozen JSONに存在する `rr125_top_ledgers.csv` と `rr125_raw_signal_ledger.csv` はsource lineageとして重要だが、それだけではlive条件式としては不十分。特に `entry_time` やhistorical `same_count` をそのまま使ってlive BUYを出してはいけない。
+
+したがって、次チャットでCoreBを実装する場合、まず以下を作る必要がある:
+
+```text
+12A_FREEZE_COREB_SOURCE_RULE_CONDITIONS_AUDIT_ONLY
+  input:
+    rr125_raw_signal_ledger.csv
+    rr125_top_ledgers.csv
+  output:
+    configs/gold_v2/frozen_coreB_rr125_source_rule_conditions_20260603.json
+  required extracted columns:
+    policy
+    candidate_id
+    origin_id
+    direction
+    variant
+    tp_pips
+    sl_pips
+    rr
+    rr_bucket
+    base_condition
+    added_filter_text
+    train_score
+  required validation:
+    direction must be BUY
+    policy must include RR125_from_RR1_rules
+    source RR1.0 base conditions must be non-empty
+    unique source rule definitions must be listed explicitly
+```
+
+`base_condition` / `added_filter_text` が自然文または未解析文字列のままなら、CoreB evaluatorはまだ実装不可。必ず:
+
+```text
+CoreB status = UNMAPPED_SOURCE_RULE_CONDITIONS
+signal_eligible = false
+```
+
+### 3.4 CoreB confluence
 
 CoreA BUY と CoreB BUY が同じ `entry_time` の場合:
 
@@ -164,17 +216,20 @@ CoreA has priority
 CoreB is skipped
 ```
 
-### 3.4 CoreBで禁止すること
+### 3.5 CoreBで禁止すること
 
 ```text
 - rr125_top_ledgers.csv の entry_time を未来のliveシグナル源にすること
+- rr125_raw_signal_ledger.csv の historical entry_time をliveシグナル源にすること
 - historical same_count をlive計算済み条件として扱うこと
 - 現在足が上昇っぽいだけでBUYを出すこと
 - RR1.0 source rules を candidate_id / origin_id から推測すること
+- base_condition / added_filter_text を読まずにCoreBを作ること
+- base_condition / added_filter_text を読んでも、実行可能condition objectへ落とさずにシグナル化すること
 - CoreBでSELLを許可すること
 ```
 
-### 3.5 CoreBの停止状態
+### 3.6 CoreBの停止状態
 
 ```text
 RULE_SOURCE_MISSING
@@ -183,6 +238,9 @@ RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED
 EVALUATOR_MAPPING_INCOMPLETE
 UNMAPPED_CONDITION
 UNMAPPED_SAME_COUNT_SOURCE
+UNMAPPED_SOURCE_RULE_CONDITIONS
+UNPARSED_BASE_CONDITION
+UNPARSED_ADDED_FILTER_TEXT
 ```
 
 上記の場合は必ず:
@@ -313,8 +371,14 @@ NO_SIGNALはDiscordに通知しない。
 ## 6. 次の実装順
 
 ```text
+12A_FREEZE_COREB_SOURCE_RULE_CONDITIONS_AUDIT_ONLY
+  - rr125_raw_signal_ledger.csv からCoreB元ルール条件を抽出
+  - base_condition / added_filter_text を明示的に一覧化
+  - 解析不能なら UNPARSED_* として止める
+
 12_MAP_FROZEN_RULES_TO_LIVE_EVALUATOR_AUDIT_ONLY
   - frozen manifestを明示condition objectへ落とす
+  - CoreBは12Aのsource rule conditionsなしでは実装禁止
   - mapped/unmappedを出す
   - signalはまだ出さない
 
@@ -350,6 +414,18 @@ feature_values_used
 blocked_reason
 ```
 
+CoreB evaluatorは追加で必ず出す:
+
+```text
+source_rule_condition_count
+source_rule_conditions_mapped_count
+source_rule_conditions_unmapped_count
+same_count_live_recalculated
+same_count_source_rule_ids
+base_condition_parse_status
+added_filter_text_parse_status
+```
+
 最終packetは必ず出す:
 
 ```text
@@ -372,12 +448,15 @@ external_actions.live_hook_allowed
 
 CoreA/CoreB/MEDIUMは、完全なfrozen-rule mappingができるまでlive signalにしてはいけない。
 
+特にCoreBは、現在の文書だけでは元RR1.0 BUYルールの個別entry条件がまだ不足している。次に必ず `12A_FREEZE_COREB_SOURCE_RULE_CONDITIONS_AUDIT_ONLY` を作り、`base_condition` / `added_filter_text` をsource of truthとして凍結すること。
+
 それまでは:
 
 ```text
 CoreA/CoreB:
   RULE_SOURCE_PRESENT_BUT_EVALUATOR_NOT_IMPLEMENTED
   or EVALUATOR_MAPPING_INCOMPLETE
+  or UNMAPPED_SOURCE_RULE_CONDITIONS
 
 MEDIUM:
   FEATURE_GATE_ONLY
