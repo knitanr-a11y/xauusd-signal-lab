@@ -20,6 +20,15 @@ if errorlevel 1 (
   exit /b 1
 )
 
+python scripts\gold_v2_runtime\fix_gold_v2_runtime_candidate_json_strict.py
+
+if errorlevel 1 (
+  echo.
+  echo [ERROR] GOLD V2 runtime signal candidate strict JSON sanitize failed.
+  pause
+  exit /b 1
+)
+
 echo.
 echo [OK] GOLD V2 runtime signal candidate export completed.
 echo Output is under Files\FX_OUTPUTS\gold_v2_runtime_signal_candidates_audit_only by default.
