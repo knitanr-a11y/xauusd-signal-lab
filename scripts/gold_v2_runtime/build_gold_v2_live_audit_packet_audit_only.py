@@ -4,6 +4,9 @@
 
 This script has no external side effects. It only reads local audit outputs and
 writes a packet that can be inspected before any future external integration.
+
+Default behavior is current-audit oriented: only dataset 2026 is included.
+Use --datasets 2025,2026 when a comparison packet is needed.
 """
 
 from __future__ import annotations
@@ -12,7 +15,7 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Set
 
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
@@ -21,7 +24,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--preview-dir", default=None)
     parser.add_argument("--config", default="configs/gold_v2/gold_v2_coreA_coreB_medium_policy_20260603.json")
     parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--datasets", default="2026", help="Comma-separated datasets to include. Default: 2026")
     return parser.parse_args(argv)
+
+
+def parse_datasets(text: str) -> Set[str]:
+    return {x.strip() for x in str(text).split(",") if x.strip()}
 
 
 def repo_root() -> Path:
@@ -98,12 +106,17 @@ def compact_candidate(record: Dict[str, Any]) -> Dict[str, Any]:
     return {k: record.get(k) for k in keys}
 
 
+def filter_aggregate(rows: List[Dict[str, Any]], datasets: Set[str]) -> List[Dict[str, Any]]:
+    return [r for r in rows if str(r.get("dataset")) in datasets]
+
+
 def build_markdown(packet: Dict[str, Any]) -> str:
     lines: List[str] = []
     lines.append("# GOLD live-audit packet")
     lines.append("")
     lines.append(f"Created UTC: {packet.get('created_utc')}")
     lines.append(f"Status: {packet.get('status')}")
+    lines.append(f"Datasets: {','.join(packet.get('datasets', []))}")
     lines.append("")
     lines.append("## Safety gate")
     lines.append("")
@@ -135,6 +148,7 @@ def build_markdown(packet: Dict[str, Any]) -> str:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_args(argv)
+    datasets = parse_datasets(args.datasets)
     candidate_dir = Path(args.candidate_dir).expanduser().resolve() if args.candidate_dir else default_candidate_dir()
     preview_dir = Path(args.preview_dir).expanduser().resolve() if args.preview_dir else default_preview_dir()
     config_path = resolve_path(args.config)
@@ -162,11 +176,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     preview_text = read_text_if_exists(preview_text_path)
     preview_summary_text = read_text_if_exists(preview_summary_path)
 
-    latest_records = [compact_candidate(r) for r in latest_candidate.get("latest_by_dataset", [])]
+    latest_records = [
+        compact_candidate(r)
+        for r in latest_candidate.get("latest_by_dataset", [])
+        if str(r.get("dataset")) in datasets
+    ]
+    if not latest_records:
+        print(f"[ERROR] no latest candidates for datasets={sorted(datasets)}")
+        return 2
     gate = safety_gate(policy, summary_candidate, preview)
     packet = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "status": "AUDIT_ONLY_LIVE_PACKET",
+        "datasets": sorted(datasets),
         "policy_id": policy.get("policy_id"),
         "candidate_dir": str(candidate_dir),
         "preview_dir": str(preview_dir),
@@ -177,7 +199,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "notification_preview_text": preview_text,
         "notification_preview_summary_text": preview_summary_text,
         "safety_gate": gate,
-        "aggregate_summary": summary_candidate.get("summary", []),
+        "aggregate_summary": filter_aggregate(summary_candidate.get("summary", []), datasets),
         "next_allowed_step": "Inspect packet only. Future Discord/MT5 integration requires a separate explicit implementation and preflight.",
     }
 
@@ -189,6 +211,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_txt.write_text(preview_text + "\n\n" + preview_summary_text, encoding="utf-8")
 
     print(f"[DONE] output_dir={output_dir}")
+    print(f"datasets={','.join(sorted(datasets))}")
     print(f"safety_gate={gate.get('status')}")
     print(preview_text)
     return 0
