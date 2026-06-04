@@ -73,6 +73,8 @@ def main():
         "mapped_rule_count": len(rules),
         "mapped_condition_count": len(conds),
         "required_field_count": len({c.get("field") for c in conds if c.get("field")}),
+        "entry_time_history_reuse_allowed": False,
+        "historical_same_count_live_reuse_allowed": False,
         "history_time_reuse_allowed": False,
         "history_count_reuse_allowed": False,
         "live_evaluator_ready": True,
@@ -80,6 +82,7 @@ def main():
         "live_evaluator_connection_allowed": False,
         "final_signal_allowed": False,
         "step13_allowed": False,
+        "notification_should_send": False,
         "feature_preflight_required": True
     }
     write_json(out / "previous_live_evaluator_mapping_coreB_20260603.json", prev)
@@ -87,7 +90,7 @@ def main():
     write_json(out / "live_evaluator_mapping_coreB_20260603.json", mapping)
     pd.DataFrame(rules).to_csv(out / "gold_v2_coreb_mapping_rebuilt_from_12a_rules.csv", index=False, encoding="utf-8-sig")
     pd.DataFrame(conds).to_csv(out / "gold_v2_coreb_mapping_rebuilt_from_12a_conditions.csv", index=False, encoding="utf-8-sig")
-    summary = {"created_utc":mapping["created_utc"], "status":mapping["status"], "written":True, "previous_status":prev.get("status"), "mapped_rule_count":len(rules), "mapped_condition_count":len(conds), "required_field_count":mapping["required_field_count"], "final_signal_allowed":False, "step13_allowed":False, "output_dir":str(out)}
+    summary = {"created_utc":mapping["created_utc"], "status":mapping["status"], "written":True, "previous_status":prev.get("status"), "mapped_rule_count":len(rules), "mapped_condition_count":len(conds), "required_field_count":mapping["required_field_count"], "entry_time_history_reuse_allowed":False, "historical_same_count_live_reuse_allowed":False, "final_signal_allowed":False, "step13_allowed":False, "notification_should_send":False, "output_dir":str(out)}
     write_json(out / "gold_v2_coreb_mapping_rebuilt_from_12a_summary.json", summary)
     (out / "GOLD_V2_COREB_MAPPING_REBUILT_FROM_12A_AUDIT_ONLY_REPORT.md").write_text("# GOLD V2 CoreB mapping rebuilt from 12A audit-only report\n\n" + "\n".join(f"- {k}: `{v}`" for k,v in summary.items()), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
