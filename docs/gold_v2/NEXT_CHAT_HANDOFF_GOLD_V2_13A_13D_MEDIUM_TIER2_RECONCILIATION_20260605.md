@@ -899,3 +899,299 @@ External:
 ```
 
 次の作業は **13D-2**。
+
+---
+
+## 15. ハンドオフ自己監査追記（2026-06-05）
+
+この追記は、次チャットで抜けが起きないように、上の本文を再点検して不足しやすい点を補強したもの。
+
+### 15.1 結論：既存ハンドオフは使えるが、13D-2入力仕様を明示してから進める
+
+既存ハンドオフに、13A〜13Dの流れ・結論・ブロッカー・次工程は入っている。  
+ただし、次工程の **13D-2** は実装対象なので、次チャットで迷わないように以下を必ず明示する。
+
+13D-2は新規探索ではない。  
+13Dで作成済みのsource行とmanifest照合結果をsource of truthとして、TIER2_HVTのmismatchを分解する監査である。
+
+---
+
+## 16. 次工程 13D-2 の厳密仕様
+
+### 16.1 工程名
+
+```text
+13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY
+```
+
+### 16.2 実行禁止
+
+13D-2でも以下は禁止。
+
+```text
+AI API禁止
+Discord送信禁止
+MT5発注禁止
+live hook禁止
+OHLCから再探索禁止
+近似条件の勝手な採用禁止
+```
+
+### 16.3 13D-2の入力ファイル
+
+優先入力は13D出力。新規にOHLCから再検出しない。
+
+```text
+Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_source_rows_with_manifest_match.csv
+Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_recomputed_final_rows.csv
+Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_final_sot_rule_summary.csv
+Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_rule_manifest_inventory.csv
+Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_rule_manifest_coverage.csv
+```
+
+参照用入力:
+
+```text
+configs\gold_v2\frozen_medium_rules_20260603.json
+Files\FX_OUTPUTS\gold_v2_final_portfolio_sot_freeze_audit_only\gold_v2_final_portfolio_2025_2026_sot_ledger.csv
+Files\FX_OUTPUTS\gold_v2_coreb_refined_probe_outputs\coreb_refined_rule_ledgers.csv
+```
+
+### 16.4 13D-2の期待件数
+
+13Dから引き継ぐ期待件数は以下。
+
+```text
+MEDIUM source rows = 118
+MEDIUM final SOT rows = 87
+internal priority dropped rows = 31
+
+RANGE96_REFINED:
+  source_rows = 51
+  final_rows = 51
+  manifest_match_rows = 51
+  manifest_mismatch_rows = 0
+
+VOL_TRMEAN32_REFINED:
+  source_rows = 36
+  final_rows = 23
+  internal_priority_dropped_rows = 13
+  manifest_match_rows = 36
+  manifest_mismatch_rows = 0
+
+TIER2_HVT:
+  source_rows = 31
+  internal_priority_selected_rows = 13
+  internal_priority_dropped_rows = 18
+  final_rows = 13
+  manifest_match_rows = 19
+  manifest_mismatch_rows = 12
+  final_sot_manifest_match_rows = 2
+  final_sot_manifest_mismatch_rows = 11
+```
+
+### 16.5 13D-2の出力フォルダ
+
+```text
+Files\FX_OUTPUTS\gold_v2_13d2_medium_tier2_hvt_source_definition_reconciliation_audit_only
+```
+
+### 16.6 13D-2の予定GitHubファイル
+
+本体:
+
+```text
+scripts\gold_v2_runtime\audit_gold_v2_13d2_medium_tier2_hvt_source_definition_reconciliation_audit_only.py
+```
+
+BAT:
+
+```text
+scripts\gold_v2_runtime\bat\13D2_AUDIT_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY.bat
+```
+
+### 16.7 13D-2の最初に見るファイル
+
+```text
+GOLD_V2_13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY_REPORT.md
+gold_v2_13d2_medium_tier2_hvt_reconciliation_summary.json
+```
+
+### 16.8 13D-2の補助ファイル
+
+最低限、以下を出すこと。
+
+```text
+gold_v2_13d2_input_audit.csv
+gold_v2_13d2_tier2_source_rows.csv
+gold_v2_13d2_tier2_final_sot_rows.csv
+gold_v2_13d2_tier2_manifest_match_rows.csv
+gold_v2_13d2_tier2_manifest_mismatch_rows.csv
+gold_v2_13d2_tier2_final_manifest_mismatch_rows.csv
+gold_v2_13d2_tier2_feature_range_by_match_status.csv
+gold_v2_13d2_tier2_feature_range_by_final_status.csv
+gold_v2_13d2_tier2_variant_candidate_conditions.csv
+gold_v2_13d2_tier2_reconciliation_decision_matrix.csv
+gold_v2_13d2_tier2_blockers.csv
+```
+
+可能なら追加で出すこと。
+
+```text
+gold_v2_13d2_tier2_mismatch_examples.csv
+gold_v2_13d2_tier2_match_vs_mismatch_diff_summary.csv
+gold_v2_13d2_tier2_candidate_rule_manifest_patch_preview.json
+```
+
+### 16.9 13D-2で確認する特徴量
+
+TIER2_HVTについて、少なくとも以下を確認する。
+
+```text
+range96
+trend_eff96
+ret96
+tr_mean_32
+regime
+top_direction
+entry_month
+dataset
+top_candidate_id
+top_variant
+profit / selected_profit_r
+manifest match flag
+internal priority selected/dropped
+final SOT retained/dropped
+```
+
+`gold_v2_13d_medium_source_rows_with_manifest_match.csv` に存在する列を優先する。  
+存在しない列をOHLCから作り直してはいけない。必要列が足りない場合は **MISSING_SOURCE_FIELD** として停止する。
+
+### 16.10 13D-2の成功条件
+
+```text
+TIER2_HVT source 31件を match 19 / mismatch 12 に正しく分解できる
+TIER2_HVT final SOT 13件を match 2 / mismatch 11 に正しく分解できる
+mismatch 12件が、どのfeature範囲でmanifest外になっているか説明できる
+TIER2_HVTを単一条件修正で表せるか、複数variant分割が必要か判断できる
+修正候補を出す場合も audit-only patch preview に留める
+final_signal_allowed=false を維持する
+```
+
+### 16.11 13D-2の停止条件
+
+```text
+13D出力が見つからない
+TIER2_HVT source rows が31件でない
+TIER2_HVT final SOT rows が13件でない
+manifest mismatch 12件 / final mismatch 11件が再現しない
+必要feature列がsourceに存在しない
+単一条件/variant候補でmismatchが説明できない
+```
+
+停止した場合は、無理にlive用条件を作らず、どの列・どのsourceが不足しているかを報告する。
+
+---
+
+## 17. 13C-4 / 13C-5の解釈注意
+
+13C-4では `original_algorithm_candidate_files = 10` が出たが、これはキーワードスコア上の候補であり、真の元クラスタリング実装ではない。  
+13C-5で深掘りした結果、真の元クラスタリング候補は以下で確定。
+
+```text
+true_original_clustering_candidate_files = 0
+```
+
+よってCoreBの扱いは以下で固定。
+
+```text
+CoreB historical SOT = allowed
+CoreB live evaluator = blocked
+Approximate same_count = forbidden
+```
+
+13C-4だけを読んで「CoreB live可能」と判断しないこと。  
+必ず13C-5の結論を優先する。
+
+---
+
+## 18. 新チャットで最初に確認するファイル順
+
+新チャットでは、以下の順で読むと抜けにくい。
+
+```text
+1. docs/gold_v2/NEXT_CHAT_HANDOFF_GOLD_V2_13A_13D_MEDIUM_TIER2_RECONCILIATION_20260605.md
+2. Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\GOLD_V2_13D_MEDIUM_FEATURE_ARBITRATION_AUDIT_ONLY_REPORT.md
+3. Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_feature_arbitration_summary.json
+4. Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_source_rows_with_manifest_match.csv
+5. Files\FX_OUTPUTS\gold_v2_13d_medium_feature_arbitration_audit_only\gold_v2_13d_medium_recomputed_final_rows.csv
+```
+
+CoreBを再確認する必要がある場合だけ、以下を読む。
+
+```text
+Files\FX_OUTPUTS\gold_v2_13c5_coreb_review_restored_clustering_script_parity_audit_only\GOLD_V2_13C5_REVIEW_RESTORED_CLUSTERING_SCRIPT_PARITY_AUDIT_ONLY_REPORT.md
+Files\FX_OUTPUTS\gold_v2_13c5_coreb_review_restored_clustering_script_parity_audit_only\gold_v2_13c5_review_restored_clustering_script_parity_summary.json
+```
+
+---
+
+## 19. 13D-2の次に想定される分岐
+
+13D-2の結果に応じて次は分岐する。
+
+### A. TIER2_HVTを単一修正版で説明できる場合
+
+```text
+13D3_FREEZE_MEDIUM_TIER2_HVT_RECONCILED_RULE_AUDIT_ONLY
+```
+
+内容:
+
+```text
+frozen_medium_rules_20260603.json のTIER2_HVT定義修正案を audit-only で作る
+source 31件 / final 13件のreplay一致を確認
+live feature/asof parityはまだ別工程
+```
+
+### B. TIER2_HVTが複数variantに分かれる場合
+
+```text
+13D3_SPLIT_MEDIUM_TIER2_HVT_VARIANTS_AUDIT_ONLY
+```
+
+内容:
+
+```text
+TIER2_HVT_V1 / V2 などに分ける
+各variantのsource rows / final rows / performanceを出す
+variantごとのlive-computable fieldsを確認
+```
+
+### C. TIER2_HVTが説明不能な場合
+
+```text
+13D3_MEDIUM_TIER2_HVT_HISTORICAL_ONLY_BLOCK_AUDIT_ONLY
+```
+
+内容:
+
+```text
+TIER2_HVTをhistorical SOT onlyにしてlive evaluator対象から外す
+RANGE96_REFINED / VOL_TRMEAN32_REFINEDだけlive候補として残せるか次工程で確認
+```
+
+---
+
+## 20. 最終的な安全状態
+
+このハンドオフ時点で、どのケースでも以下は変えない。
+
+```text
+final_signal_allowed = false
+step13_allowed = false
+discord_send_allowed = false
+mt5_order_allowed = false
+ai_api_allowed = false
+live_hook_allowed = false
+```
