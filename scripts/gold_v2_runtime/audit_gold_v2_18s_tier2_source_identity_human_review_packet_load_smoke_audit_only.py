@@ -35,6 +35,32 @@ FORBIDDEN_SUMMARY_FLAGS = [
     "final_signal_allowed",
     "no_signal_discord_notified",
 ]
+AFFIRMATIVE_APPROVAL_MARKERS = [
+    "approval granted",
+    "approval_granted: true",
+    "approved by this script",
+    "script approved",
+    "decision made by this script",
+    "decision_made: true",
+    "source-of-truth accepted",
+    "source of truth accepted",
+    "source-of-truth acceptance granted",
+    "source identity finalization approved",
+    "source recovery approved",
+    "live readiness granted",
+    "final signal readiness granted",
+    "ready for live trading",
+    "live evaluator enabled",
+    "final signal enabled",
+]
+REQUIRED_MARKDOWN_NEGATIONS = [
+    "not approval",
+    "not source recovery",
+    "not source identity finalization",
+    "not source-of-truth acceptance",
+    "not live readiness",
+    "not final signal readiness",
+]
 
 
 def root() -> Path:
@@ -130,6 +156,16 @@ def forbidden_summary_true(summary: dict[str, Any]) -> int:
     return n
 
 
+def affirmative_approval_language_found(markdown_text: str) -> bool:
+    lowered = markdown_text.lower()
+    return any(marker in lowered for marker in AFFIRMATIVE_APPROVAL_MARKERS)
+
+
+def required_negation_language_present(markdown_text: str) -> bool:
+    lowered = markdown_text.lower()
+    return all(marker in lowered for marker in REQUIRED_MARKDOWN_NEGATIONS)
+
+
 def safety(success: bool) -> pd.DataFrame:
     return pd.DataFrame([
         ["audit_only", True, True, "PASS"],
@@ -168,7 +204,7 @@ def stop_conditions() -> pd.DataFrame:
         ["18S-S003", "18R made decision or granted approval", "STOP"],
         ["18S-S004", "any upstream STOP row present", "STOP"],
         ["18S-S005", "packet files missing", "STOP"],
-        ["18S-S006", "markdown empty or suggests approval", "STOP"],
+        ["18S-S006", "markdown empty or has affirmative approval/final readiness language", "STOP"],
         ["18S-S007", "manual questions are not manual-only", "STOP"],
         ["18S-S008", "blocked actions are not blocked", "STOP"],
         ["18S-S009", "forbidden gate allowed", "STOP"],
@@ -240,20 +276,26 @@ def main() -> int:
     packet_file_audit = pd.DataFrame(packet_file_rows)
     markdown_nonempty = bool(markdown.strip())
     markdown_audit_only = "audit-only" in markdown.lower()
-    approval_bad = any(token in markdown.lower() for token in ["approval granted", "approved", "source-of-truth acceptance", "live readiness"])
+    markdown_required_negations = required_negation_language_present(markdown)
+    approval_bad = affirmative_approval_language_found(markdown)
     markdown_audit = pd.DataFrame([
         ["18S-MD001", "markdown non-empty", markdown_nonempty, True, "PASS" if markdown_nonempty else "STOP"],
         ["18S-MD002", "markdown contains audit-only language", markdown_audit_only, True, "PASS" if markdown_audit_only else "STOP"],
-        ["18S-MD003", "markdown has no approval/final readiness language", approval_bad, False, "PASS" if not approval_bad else "STOP"],
+        ["18S-MD003", "markdown contains required negative readiness language", markdown_required_negations, True, "PASS" if markdown_required_negations else "STOP"],
+        ["18S-MD004", "markdown has no affirmative approval/final readiness language", approval_bad, False, "PASS" if not approval_bad else "STOP"],
     ], columns=["markdown_check_id", "check", "observed", "expected", "status"])
     manual_bad = 999
     if "script_decision_status" in manual_questions.columns:
         manual_bad = int((manual_questions["script_decision_status"].astype(str) != "NO_SCRIPT_DECISION").sum())
-    manual_audit = pd.DataFrame([["18S-Q001", "manual questions remain no-script-decision", manual_bad, 0, "PASS" if manual_bad == 0 else "STOP"]], columns=["question_check_id", "check", "observed", "expected", "status"])
+    manual_audit = pd.DataFrame([[
+        "18S-Q001", "manual questions remain no-script-decision", manual_bad, 0, "PASS" if manual_bad == 0 else "STOP"
+    ]], columns=["question_check_id", "check", "observed", "expected", "status"])
     blocked_bad = 999
     if "status" in blocked_actions.columns:
         blocked_bad = int((blocked_actions["status"].astype(str) != "BLOCKED").sum())
-    blocked_audit = pd.DataFrame([["18S-A001", "blocked actions remain BLOCKED", blocked_bad, 0, "PASS" if blocked_bad == 0 else "STOP"]], columns=["action_check_id", "check", "observed", "expected", "status"])
+    blocked_audit = pd.DataFrame([[
+        "18S-A001", "blocked actions remain BLOCKED", blocked_bad, 0, "PASS" if blocked_bad == 0 else "STOP"
+    ]], columns=["action_check_id", "check", "observed", "expected", "status"])
     forbidden_gate_true = 999
     if {"next_step", "allowed_after_18r_success"}.issubset(gates.columns):
         forbidden = gates[gates["next_step"].astype(str).isin(FORBIDDEN_GATES)]
