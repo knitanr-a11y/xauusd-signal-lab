@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -40,9 +41,32 @@ def fx_outputs() -> Path:
     return (root.parents[1] if len(root.parents) >= 2 else root.parent) / "FX_OUTPUTS"
 
 
+def fs_path(path: Path) -> Path:
+    """Return a Windows extended-length path for local filesystem I/O.
+
+    The MT5 Files directory can make GOLD V2 output paths exceed the classic
+    Windows MAX_PATH limit. Python then raises FileNotFoundError even when the
+    parent directory exists. This helper keeps normal paths on non-Windows and
+    converts Windows paths to the \\?\ form for read/write/stat operations.
+    """
+    p = path if path.is_absolute() else path.resolve()
+    if os.name != "nt":
+        return p
+    s = str(p)
+    if s.startswith("\\\\?\\"):
+        return Path(s)
+    if s.startswith("\\\\"):
+        return Path("\\\\?\\UNC\\" + s[2:])
+    return Path("\\\\?\\" + s)
+
+
+def ensure_parent(path: Path) -> None:
+    fs_path(path.parent).mkdir(parents=True, exist_ok=True)
+
+
 def out_dir() -> Path:
     p = fx_outputs() / OUT_DIR_NAME
-    p.mkdir(parents=True, exist_ok=True)
+    fs_path(p).mkdir(parents=True, exist_ok=True)
     return p
 
 
@@ -74,25 +98,39 @@ def clean(value: Any) -> Any:
     return value
 
 
+def write_text(path: Path, text: str) -> None:
+    ensure_parent(path)
+    fs_path(path).write_text(text, encoding="utf-8")
+
+
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.write_text(json.dumps(clean(obj), ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    write_text(path, json.dumps(clean(obj), ensure_ascii=False, indent=2, allow_nan=False))
 
 
 def write_csv(df: pd.DataFrame, path: Path) -> None:
-    df.to_csv(path, index=False, encoding="utf-8-sig")
+    ensure_parent(path)
+    df.to_csv(fs_path(path), index=False, encoding="utf-8-sig")
 
 
 def read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(fs_path(path).read_text(encoding="utf-8"))
 
 
 def read_csv(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path)
+    return pd.read_csv(fs_path(path))
+
+
+def path_exists(path: Path) -> bool:
+    return fs_path(path).exists()
+
+
+def path_stat(path: Path) -> os.stat_result:
+    return fs_path(path).stat()
 
 
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
-    with path.open("rb") as fh:
+    with fs_path(path).open("rb") as fh:
         for chunk in iter(lambda: fh.read(1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()
@@ -111,10 +149,11 @@ def input_audit() -> pd.DataFrame:
     rows = []
     for role in INPUTS:
         path = ip(role)
-        row = {"role": role, "path": str(path), "required": True, "exists": path.exists()}
-        if path.exists():
+        exists = path_exists(path)
+        row = {"role": role, "path": str(path), "required": True, "exists": exists}
+        if exists:
             row["sha256"] = sha256_file(path)
-            row["bytes"] = path.stat().st_size
+            row["bytes"] = path_stat(path).st_size
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -131,7 +170,7 @@ def stop_missing(out: Path, now: str, audit: pd.DataFrame) -> int:
     )
     write_csv(blockers, out / "gold_v2_18f_blockers.csv")
     write_json(out / "gold_v2_18f_tier2_source_artifact_content_inspection_authorization_gate_summary.json", {"created_utc": now, "step": STEP, "status": STOP_STATUS, "audit_only": True, "missing_required_inputs": missing[["role", "path"]].to_dict("records"), "content_inspection_authorized": False})
-    (out / REPORT_NAME).write_text("\n".join(["# GOLD V2 18F TIER2 source artifact content inspection authorization gate audit-only report", "", f"Created UTC: {now}", f"Status: `{STOP_STATUS}`", "", markdown_table(audit), "", markdown_table(blockers)]), encoding="utf-8")
+    write_text(out / REPORT_NAME, "\n".join(["# GOLD V2 18F TIER2 source artifact content inspection authorization gate audit-only report", "", f"Created UTC: {now}", f"Status: `{STOP_STATUS}`", "", markdown_table(audit), "", markdown_table(blockers)]))
     print(json.dumps({"status": STOP_STATUS, "output_dir": str(out)}, ensure_ascii=False, indent=2))
     return 2
 
@@ -228,7 +267,7 @@ def main() -> int:
     summary = {"created_utc": now, "step": STEP, "status": status, "audit_only": True, "authorization_gate_ready": ok, "selected_priority_artifacts": int(selected_18e.shape[0]), "blocked_execution_rows": int(blocked_execution.shape[0]), "content_inspection_authorized": False, "content_inspection_executed": False, "source_recovery_executed": False, "implementation_allowed": False, "oh_lc_replay_allowed": False, "live_enabled": False, "medium_live_evaluator_allowed": False, "final_signal_allowed": False, "external_actions": {"discord_send_allowed": False, "mt5_order_allowed": False, "ai_api_allowed": False, "live_hook_allowed": False}, "no_signal_discord_notified": False, "next_recommended_step": "AWAIT_EXPLICIT_TIER2_CONTENT_INSPECTION_APPROVAL" if ok else "STOP_REVIEW_18F_OUTPUTS"}
     write_json(out / "gold_v2_18f_tier2_source_artifact_content_inspection_authorization_gate_summary.json", summary)
     report = ["# GOLD V2 18F TIER2 source artifact content inspection authorization gate audit-only report", "", f"Created UTC: {now}", f"Status: `{status}`", "", "## Final decision", "- 18F records the authorization gate only.", "- Content inspection remains blocked because no explicit approval artifact/command is provided.", "- It does not inspect content, recover source identity, reconstruct from OHLC, implement predicates/arbitration, run replay, enable live mode, create final signals, or enable external actions.", "", "## Input audit", markdown_table(audit), "", "## Authorization gate checks", markdown_table(gate_checks), "", "## Authorization matrix", markdown_table(authorization), "", "## Blocked execution plan", markdown_table(blocked_execution), "", "## Required next gates", markdown_table(next_required), "", "## Blockers", markdown_table(blockers), "", "## Safety", markdown_table(safety), "", "## 18E selected artifacts carry-forward", markdown_table(selected_18e), "", "## 18E required fields carry-forward", markdown_table(fields_18e), "", "## 18E stop conditions carry-forward", markdown_table(stops_18e)]
-    (out / REPORT_NAME).write_text("\n".join(report), encoding="utf-8")
+    write_text(out / REPORT_NAME, "\n".join(report))
     print(json.dumps(clean({"status": status, "output_dir": str(out), "next_recommended_step": summary["next_recommended_step"]}), ensure_ascii=False, indent=2))
     return 0 if ok else 2
 
