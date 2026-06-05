@@ -130,12 +130,12 @@ def forbidden_summary_count(s: dict[str, Any]) -> int:
 def next_gates(success: bool) -> pd.DataFrame:
     return pd.DataFrame([
         ["20I", "TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_DRAFT_AUDIT_ONLY", "Prepare the actual decision value capture draft only; value still not collected by 20H.", bool(success)],
-        ["ACTUAL_DECISION_COLLECTION", "Still blocked after 20H; not completed or authorized as an action by this step.", False],
-        ["SOURCE_IDENTITY_FINALIZATION", "Blocked after 20H.", False],
-        ["SOURCE_RECOVERY", "Blocked after 20H.", False],
-        ["LIVE", "Blocked after 20H.", False],
-        ["FINAL_SIGNAL", "Blocked after 20H.", False],
-    ], columns=["next_step", "purpose", "allowed_after_20h_success"])
+        ["ACTUAL_DECISION_COLLECTION", "TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_ACTUAL_DECISION_COLLECTION", "Still blocked after 20H; not completed or authorized as an action by this step.", False],
+        ["SOURCE_IDENTITY_FINALIZATION", "TIER2_SOURCE_IDENTITY_FINALIZATION", "Blocked after 20H.", False],
+        ["SOURCE_RECOVERY", "TIER2_SOURCE_IDENTITY_RECOVERY_EXECUTION", "Blocked after 20H.", False],
+        ["LIVE", "MEDIUM_FULL_SET_LIVE_EVALUATOR", "Blocked after 20H.", False],
+        ["FINAL_SIGNAL", "MEDIUM_FINAL_SIGNAL", "Blocked after 20H.", False],
+    ], columns=["next_step", "name", "purpose", "allowed_after_20h_success"])
 
 
 def safety_matrix(success: bool) -> pd.DataFrame:
