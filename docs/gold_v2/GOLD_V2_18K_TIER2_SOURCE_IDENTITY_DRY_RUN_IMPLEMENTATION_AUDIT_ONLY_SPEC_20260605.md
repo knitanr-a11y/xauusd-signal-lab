@@ -191,19 +191,20 @@ This status means only that the dry-run candidate identity ledger was generated 
 
 ## What was implemented in 18K
 
-18K adds a script and BAT that create an audit-only dry-run candidate identity ledger from 18J-selected CSV rows, using the corrected 18I field recipe. The implementation writes row-count, field-derivation, validation, blocker, next-gate, safety, summary, and report outputs.
+18K adds a Python script that creates an audit-only dry-run candidate identity ledger from 18J-selected CSV rows, using the corrected 18I field recipe. The implementation writes row-count, field-derivation, validation, blocker, next-gate, safety, summary, and report outputs.
+
+The BAT launcher was attempted but blocked by the tool safety layer during GitHub write. Until the BAT is created manually, run the Python script directly from the repository root.
 
 ## Files to review
 
 - this specification
 - `scripts/gold_v2_runtime/audit_gold_v2_18k_tier2_source_identity_dry_run_implementation_audit_only.py`
-- `scripts/gold_v2_runtime/bat/18K_AUDIT_TIER2_SOURCE_IDENTITY_DRY_RUN_IMPLEMENTATION_AUDIT_ONLY.bat`
 - outputs under `FX_OUTPUTS/gold_v2_18k_tier2_source_identity_dry_run_implementation_audit_only`
 
-## BAT execution order
+## Execution order
 
 1. Confirm 18I and 18J outputs already exist and are the latest audit-only outputs.
-2. Run `scripts\gold_v2_runtime\bat\18K_AUDIT_TIER2_SOURCE_IDENTITY_DRY_RUN_IMPLEMENTATION_AUDIT_ONLY.bat`.
+2. From the repository root, run `python scripts\gold_v2_runtime\audit_gold_v2_18k_tier2_source_identity_dry_run_implementation_audit_only.py`.
 3. Review `gold_v2_18k_implementation_checks.csv`.
 4. Review `gold_v2_18k_dry_run_validation_checks.csv`.
 5. Review `gold_v2_18k_safety_matrix.csv`.
