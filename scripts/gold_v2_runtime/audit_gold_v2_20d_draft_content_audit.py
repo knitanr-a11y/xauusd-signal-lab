@@ -18,8 +18,13 @@ REPORT = "GOLD_V2_20D_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_DRAFT_CONTENT_
 SUCCESS = "TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_DRAFT_CONTENT_AUDIT_PASSED_AUDIT_ONLY_SOURCE_RECOVERY_STILL_BLOCKED"
 EXPECTED_20C = "TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_DRAFT_LOAD_SMOKE_PASSED_AUDIT_ONLY_SOURCE_RECOVERY_STILL_BLOCKED"
 AUTH_SCOPE = "ACTUAL_DECISION_INTAKE_AUDIT_ONLY_PREPARATION_ONLY"
+
+# 20D may validate that the minimum intake fields exist, but must not invent allowed
+# decision values. The allowed decision values are source-defined by the 19H/20B
+# artifacts and are audited for structure/no-action only.
 EXPECTED_FIELDS = {"decision_id", "decision_timestamp_utc", "decision_value", "human_reviewer", "evidence_acknowledged", "explicit_phrase"}
-EXPECTED_VALUES = {"UNSET", "APPROVE_SOURCE_RECOVERY_NEXT_AUDIT_ONLY", "REJECT_SOURCE_RECOVERY", "REQUEST_MORE_EVIDENCE"}
+MIN_ALLOWED_VALUE_ROWS = 4
+
 FORBIDDEN_GATES = {"ACTUAL_DECISION_COLLECTION", "SOURCE_IDENTITY_FINALIZATION", "SOURCE_RECOVERY", "LIVE", "FINAL_SIGNAL"}
 FORBIDDEN_FLAGS = [
     "actual_decision_collection_allowed", "source_recovery_executed", "source_identity_finalized", "source_identity_recovered",
@@ -128,18 +133,38 @@ def forbidden_summary_count(s: dict[str, Any]) -> int:
     return n
 
 
-def field_values(df: pd.DataFrame) -> list[str]:
-    for col in ("field_name", "field", "name"):
+def first_existing_col(df: pd.DataFrame, names: tuple[str, ...]) -> str | None:
+    for col in names:
         if col in df.columns:
-            return df[col].astype(str).str.strip().tolist()
-    return []
+            return col
+    return None
+
+
+def field_values(df: pd.DataFrame) -> list[str]:
+    col = first_existing_col(df, ("field_name", "field", "name"))
+    if col is None:
+        return []
+    return df[col].astype(str).str.strip().tolist()
 
 
 def decision_values(df: pd.DataFrame) -> list[str]:
-    for col in ("decision_value", "value", "name"):
-        if col in df.columns:
-            return df[col].astype(str).str.strip().tolist()
-    return []
+    col = first_existing_col(df, ("decision_value", "value", "name"))
+    if col is None:
+        return []
+    return df[col].astype(str).str.strip().tolist()
+
+
+def expected_field_required_false_count(fields: pd.DataFrame, fvals: list[str]) -> int:
+    """Count required=false only for the expected core intake fields.
+
+    Optional fields such as notes are allowed to be non-required and must not stop
+    the audit. A missing required column is still a STOP condition.
+    """
+    field_col = first_existing_col(fields, ("field_name", "field", "name"))
+    if field_col is None or "required" not in fields.columns:
+        return 999
+    mask = fields[field_col].astype(str).str.strip().isin(EXPECTED_FIELDS)
+    return int(fields.loc[mask, "required"].map(lambda x: not truthy(x)).sum())
 
 
 def next_gates(success: bool) -> pd.DataFrame:
@@ -181,8 +206,8 @@ def stop_conditions() -> pd.DataFrame:
         ["20D-S001", "required inputs missing", "STOP"],
         ["20D-S002", "20C status not passed", "STOP"],
         ["20D-S003", "draft content no longer unset/no-action", "STOP"],
-        ["20D-S004", "required fields missing or duplicated", "STOP"],
-        ["20D-S005", "allowed values missing, duplicated, or action-executing", "STOP"],
+        ["20D-S004", "core required fields missing, duplicated, or marked non-required", "STOP"],
+        ["20D-S005", "allowed value source malformed, duplicated, empty, too small, or action-executing", "STOP"],
         ["20D-S006", "upstream STOP rows present", "STOP"],
         ["20D-S007", "forbidden gate or summary flag allowed", "STOP"],
     ], columns=["stop_id", "condition", "action"])
@@ -256,10 +281,10 @@ def main() -> int:
     fvals = field_values(fields)
     dvals = decision_values(values)
     missing_fields = sorted(EXPECTED_FIELDS.difference(set(fvals)))
-    missing_values = sorted(EXPECTED_VALUES.difference(set(dvals)))
     duplicated_fields = int(pd.Series(fvals).duplicated().sum()) if fvals else 999
     duplicated_values = int(pd.Series(dvals).duplicated().sum()) if dvals else 999
-    required_false = int((fields["required"].map(lambda x: not truthy(x))).sum()) if "required" in fields.columns else 999
+    expected_required_false = expected_field_required_false_count(fields, fvals)
+    empty_allowed_values = int((pd.Series(dvals).astype(str).str.strip() == "").sum()) if dvals else 999
     action_values = int(values.get("executes_action_in_18x", pd.Series(dtype=bool)).map(truthy).sum()) if not values.empty else 999
     unset_bad = sum(int(draft.get(k) != "UNSET") for k in UNSET_FIELDS)
     restricted_true = sum(int(bool(draft.get(k, False))) for k in RESTRICTED_DRAFT_FLAGS)
@@ -269,17 +294,17 @@ def main() -> int:
 
     field_audit = pd.DataFrame([
         check_row("20D-F001", "field column present", bool(fvals), True, bool(fvals)),
-        check_row("20D-F002", "missing expected fields", len(missing_fields), 0, len(missing_fields) == 0),
+        check_row("20D-F002", "missing expected core fields", len(missing_fields), 0, len(missing_fields) == 0),
         check_row("20D-F003", "duplicate fields", duplicated_fields, 0, duplicated_fields == 0),
-        check_row("20D-F004", "required false rows", required_false, 0, required_false == 0),
+        check_row("20D-F004", "expected core fields required=false rows", expected_required_false, 0, expected_required_false == 0),
         check_row("20D-F005", "field rows", len(fields), ">=6", len(fields) >= 6),
     ])
     value_audit = pd.DataFrame([
         check_row("20D-V001", "decision value column present", bool(dvals), True, bool(dvals)),
-        check_row("20D-V002", "missing expected values", len(missing_values), 0, len(missing_values) == 0),
+        check_row("20D-V002", "empty allowed values", empty_allowed_values, 0, empty_allowed_values == 0),
         check_row("20D-V003", "duplicate values", duplicated_values, 0, duplicated_values == 0),
         check_row("20D-V004", "action-executing values", action_values, 0, action_values == 0),
-        check_row("20D-V005", "value rows", len(values), ">=4", len(values) >= 4),
+        check_row("20D-V005", "value rows", len(values), f">={MIN_ALLOWED_VALUE_ROWS}", len(values) >= MIN_ALLOWED_VALUE_ROWS),
     ])
     write_csv(out / "gold_v2_20d_required_field_audit.csv", field_audit)
     write_csv(out / "gold_v2_20d_allowed_value_audit.csv", value_audit)
@@ -331,7 +356,7 @@ def main() -> int:
         "field_rows": int(len(fields)),
         "value_rows": int(len(values)),
         "missing_required_fields": missing_fields,
-        "missing_allowed_values": missing_values,
+        "allowed_decision_values_audited": dvals,
         "total_stop_rows": int(total_stop),
         "source_recovery_executed": False,
         "source_identity_finalized": False,
