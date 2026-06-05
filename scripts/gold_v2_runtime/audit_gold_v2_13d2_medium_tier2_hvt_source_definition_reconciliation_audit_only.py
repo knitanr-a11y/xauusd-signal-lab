@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 """13D2 audit: MEDIUM TIER2_HVT source definition reconciliation.
 
-Audit-only. Uses 13D outputs as source of truth. No OHLC rediscovery, AI API,
-Discord, MT5, or live hook.
+Audit-only. 13D outputs are the source of truth. This script does not perform
+OHLC rediscovery and does not call AI API, Discord, MT5, or live hooks.
+
+The MT5 Files path can be very long on Windows, so all file I/O uses a Windows
+long-path prefix when needed.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import math
+import os
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +26,7 @@ STEP = "13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY"
 OUT_NAME = "gold_v2_13d2_medium_tier2_hvt_source_definition_reconciliation_audit_only"
 SRC13D = "gold_v2_13d_medium_feature_arbitration_audit_only"
 COMP = "TIER2_HVT"
+REPORT_NAME = "GOLD_V2_13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY_REPORT.md"
 EXPECTED = {
     "tier2_source_rows": 31,
     "tier2_final_rows": 13,
@@ -44,18 +49,57 @@ def fx_outputs() -> Path:
     return (root.parents[1] if len(root.parents) >= 2 else root.parent) / "FX_OUTPUTS"
 
 
+def long_path(path: Path | str) -> str:
+    """Return a filesystem path usable beyond MAX_PATH on Windows."""
+    p = Path(path)
+    s = str(p.resolve(strict=False))
+    if os.name != "nt" or s.startswith("\\\\?\\"):
+        return s
+    if s.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + s.lstrip("\\")
+    return "\\\\?\\" + s
+
+
+def exists(path: Path | str) -> bool:
+    return os.path.exists(long_path(path))
+
+
+def ensure_dir(path: Path) -> None:
+    os.makedirs(long_path(path), exist_ok=True)
+
+
 def out_dir() -> Path:
     p = fx_outputs() / OUT_NAME
-    p.mkdir(parents=True, exist_ok=True)
+    ensure_dir(p)
     return p
 
 
-def sha256_file(p: Path) -> str:
+def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
-    with p.open("rb") as f:
+    with open(long_path(path), "rb") as f:
         for b in iter(lambda: f.read(1024 * 1024), b""):
             h.update(b)
     return h.hexdigest()
+
+
+def write_text(path: Path, text: str) -> None:
+    ensure_dir(path.parent)
+    with open(long_path(path), "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def write_csv(df: pd.DataFrame, path: Path) -> None:
+    ensure_dir(path.parent)
+    df.to_csv(long_path(path), index=False, encoding="utf-8-sig")
+
+
+def read_csv_path(path: Path) -> pd.DataFrame:
+    return pd.read_csv(long_path(path))
+
+
+def read_json_path(path: Path) -> dict[str, Any]:
+    with open(long_path(path), "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 INPUTS = [
@@ -70,35 +114,34 @@ INPUTS = [
 
 
 def find_input(name: str, folder: str | None = None) -> Path:
-    candidates = []
+    candidates: list[Path] = []
     if folder:
         candidates.append(fx_outputs() / folder / name)
     if name.endswith(".json"):
         candidates.append(repo_root() / "configs" / "gold_v2" / name)
     candidates += [fx_outputs() / name, repo_root() / name]
     for p in candidates:
-        if p.exists():
+        if exists(p):
             return p
-    hits = list(fx_outputs().rglob(name))
-    return hits[0] if hits else candidates[0]
+    try:
+        hits = list(fx_outputs().rglob(name))
+        if hits:
+            return hits[0]
+    except OSError:
+        pass
+    return candidates[0]
 
 
 def read_csv(name: str, folder: str | None = None) -> pd.DataFrame:
     p = find_input(name, folder)
-    if not p.exists():
+    if not exists(p):
         raise FileNotFoundError(str(p))
-    return pd.read_csv(p)
+    return read_csv_path(p)
 
 
 def read_optional_json(name: str, folder: str | None = None) -> dict[str, Any] | None:
     p = find_input(name, folder)
-    if not p.exists():
-        return None
-    return json.loads(p.read_text(encoding="utf-8"))
-
-
-def write_csv(df: pd.DataFrame, path: Path) -> None:
-    df.to_csv(path, index=False, encoding="utf-8-sig")
+    return read_json_path(p) if exists(p) else None
 
 
 def to_num(s: Any) -> pd.Series:
@@ -137,7 +180,7 @@ def clean(v: Any) -> Any:
 
 
 def write_json(path: Path, obj: dict[str, Any]) -> None:
-    path.write_text(json.dumps(clean(obj), ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    write_text(path, json.dumps(clean(obj), ensure_ascii=False, indent=2, allow_nan=False))
 
 
 def metrics(s: Any) -> dict[str, Any]:
@@ -188,18 +231,18 @@ def input_audit() -> pd.DataFrame:
     rows = []
     for role, name, required, folder in INPUTS:
         p = find_input(name, folder)
-        row = {"role": role, "name": name, "required": required, "path": str(p), "exists": p.exists()}
-        if p.exists():
+        row: dict[str, Any] = {"role": role, "name": name, "required": required, "path": str(p), "exists": exists(p)}
+        if exists(p):
             row["sha256"] = sha256_file(p)
-            row["bytes"] = p.stat().st_size
+            row["bytes"] = os.path.getsize(long_path(p))
             if p.suffix.lower() == ".csv":
-                df = pd.read_csv(p)
-                row["rows"] = len(df)
-                row["columns"] = len(df.columns)
+                df = read_csv_path(p)
+                row["rows"] = int(len(df))
+                row["columns"] = int(len(df.columns))
                 row["column_names"] = "|".join(map(str, df.columns))
             elif p.suffix.lower() == ".json":
                 try:
-                    obj = json.loads(p.read_text(encoding="utf-8"))
+                    obj = read_json_path(p)
                     row["json_keys"] = "|".join(obj.keys()) if isinstance(obj, dict) else ""
                 except Exception as exc:
                     row["json_error"] = str(exc)
@@ -374,7 +417,7 @@ def diff_summary(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def envelope(df: pd.DataFrame) -> dict[str, Any]:
-    out = {}
+    out: dict[str, Any] = {}
     for f in [c for c in NUMERIC if c in df.columns]:
         v = to_num(df[f]).dropna()
         if len(v):
@@ -407,7 +450,7 @@ def stop_report(out: Path, audit: pd.DataFrame, status: str, block: pd.DataFrame
     now = datetime.now(timezone.utc).isoformat()
     write_json(out / "gold_v2_13d2_medium_tier2_hvt_reconciliation_summary.json", {"created_utc": now, "step": STEP, "status": status, "audit_only": True, "final_signal_allowed": False, "step13_allowed": False, "medium_live_evaluator_allowed": False, "external_actions": EXTERNAL, **extra})
     report = ["# GOLD V2 13D2 MEDIUM TIER2_HVT source definition reconciliation audit-only report", "", f"Created UTC: {now}", f"Status: `{status}`", "", "## Final decision", "- 13D2 stopped before live-rule reconciliation.", "- No OHLC rediscovery was performed.", "- Discord, MT5, AI API, and live hook remain disabled.", "", "## Input audit", md_table(audit, ["role", "name", "required", "exists", "rows", "columns", "path"], 30), "", "## Blockers", md_table(block), "", "## Safety", "- final_signal_allowed: false", "- step13_allowed: false", "- medium_live_evaluator_allowed: false", "- Discord/MT5/AI/live_hook: false"]
-    (out / "GOLD_V2_13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY_REPORT.md").write_text("\n".join(report), encoding="utf-8")
+    write_text(out / REPORT_NAME, "\n".join(report))
     return 2
 
 
@@ -585,14 +628,14 @@ def main() -> int:
         "- `gold_v2_13d2_tier2_variant_candidate_conditions.csv`",
         "- `gold_v2_13d2_tier2_reconciliation_decision_matrix.csv`", "",
     ]
-    (out / "GOLD_V2_13D2_MEDIUM_TIER2_HVT_SOURCE_DEFINITION_RECONCILIATION_AUDIT_ONLY_REPORT.md").write_text("\n".join(report), encoding="utf-8")
+    write_text(out / REPORT_NAME, "\n".join(report))
 
     zip_path = fx_outputs() / "gold_v2_13d2_medium_tier2_hvt_source_definition_reconciliation_audit.zip"
-    if zip_path.exists():
-        zip_path.unlink()
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    if exists(zip_path):
+        os.remove(long_path(zip_path))
+    with zipfile.ZipFile(long_path(zip_path), "w", zipfile.ZIP_DEFLATED) as z:
         for p in out.iterdir():
-            z.write(p, arcname=p.name)
+            z.write(long_path(p), arcname=p.name)
 
     print(json.dumps(clean({"status": status, "output_dir": str(out), "zip": str(zip_path), **observed, "next_recommended_step": next_step, "audit_only": True, "external_actions": EXTERNAL}), ensure_ascii=False, indent=2, allow_nan=False))
     return 0 if counts_ok else 2
