@@ -63,12 +63,26 @@ def rjson(path: Path) -> dict[str, Any]:
 
 
 def rcsv(path: Path) -> pd.DataFrame:
+    last: Exception | None = None
     for enc in ("utf-8-sig", "utf-8", "cp932"):
         try:
-            return pd.read_csv(lp(path), encoding=enc)
-        except Exception:
-            pass
-    return pd.read_csv(lp(path))
+            return pd.read_csv(lp(path), encoding=enc, keep_default_na=False)
+        except Exception as exc:
+            last = exc
+    raise RuntimeError(f"csv read failed: {path}: {last}")
+
+
+def cell(value: Any) -> str:
+    if value is None:
+        return ""
+    text = str(value).strip()
+    return "" if text.lower() == "nan" else text
+
+
+def pick_columns(row: pd.Series) -> str:
+    direct = cell(row.get("direct_column", ""))
+    derived = cell(row.get("candidate_columns_present", ""))
+    return direct or derived
 
 
 def mdtable(df: pd.DataFrame, limit: int = 80) -> str:
@@ -91,32 +105,33 @@ def main() -> int:
         "checks_18h": base / "gold_v2_18h_plan_checks.csv",
         "mapping_18h": base / "gold_v2_18h_identity_field_mapping_plan.csv",
         "ranking_18h": base / "gold_v2_18h_candidate_artifact_ranking.csv",
-        "missing_18h": base / "gold_v2_18h_missing_required_fields.csv",
-        "next_gates_18h": base / "gold_v2_18h_required_next_gates.csv",
         "blockers_18h": base / "gold_v2_18h_blockers.csv",
         "safety_18h": base / "gold_v2_18h_safety_matrix.csv",
     }
     audit = pd.DataFrame([{"role": k, "path": str(v), "required": True, "exists": lp(v).exists()} for k, v in inputs.items()])
     wcsv(audit, out / "gold_v2_18i_input_audit.csv")
     if not audit["exists"].all():
-        summary = {"created_utc": now, "step": STEP, "status": "18I_STOP_MISSING_INPUTS", "audit_only": True, "source_recovery_executed": False}
-        wjson(out / "gold_v2_18i_tier2_source_identity_extraction_dry_run_design_summary.json", summary)
+        wjson(out / "gold_v2_18i_tier2_source_identity_extraction_dry_run_design_summary.json", {"created_utc": now, "step": STEP, "status": "18I_STOP_MISSING_INPUTS", "audit_only": True})
         return 2
 
-    summary18h = rjson(inputs["summary_18h"])
+    s18h = rjson(inputs["summary_18h"])
     checks18h = rcsv(inputs["checks_18h"])
     mapping = rcsv(inputs["mapping_18h"])
     ranking = rcsv(inputs["ranking_18h"])
     blockers = rcsv(inputs["blockers_18h"])
     safety18h = rcsv(inputs["safety_18h"])
-    checks = []
-    checks.append(["18I-C001", "18H status", summary18h.get("status"), EXPECTED_18H, "PASS" if summary18h.get("status") == EXPECTED_18H else "STOP"])
-    checks.append(["18I-C002", "18H checks STOP rows", int((checks18h["status"].astype(str) == "STOP").sum()), 0, "PASS" if int((checks18h["status"].astype(str) == "STOP").sum()) == 0 else "STOP"])
-    checks.append(["18I-C003", "18H safety STOP rows", int((safety18h["status"].astype(str) == "STOP").sum()), 0, "PASS" if int((safety18h["status"].astype(str) == "STOP").sum()) == 0 else "STOP"])
-    checks.append(["18I-C004", "18H source recovery executed", bool(summary18h.get("source_recovery_executed", False)), False, "PASS" if not bool(summary18h.get("source_recovery_executed", False)) else "STOP"])
 
-    csv_ranking = ranking[ranking["inspection_status"].astype(str).str.contains("CSV", na=False)].copy()
-    selected = csv_ranking.sort_values(["missing_required_fields", "direct_required_fields", "derivable_required_fields"], ascending=[True, False, False]).head(5).copy()
+    stop_checks_18h = int((checks18h["status"].astype(str) == "STOP").sum())
+    stop_safety_18h = int((safety18h["status"].astype(str) == "STOP").sum())
+    checks = pd.DataFrame([
+        ["18I-C001", "18H status", s18h.get("status"), EXPECTED_18H, "PASS" if s18h.get("status") == EXPECTED_18H else "STOP"],
+        ["18I-C002", "18H checks STOP rows", stop_checks_18h, 0, "PASS" if stop_checks_18h == 0 else "STOP"],
+        ["18I-C003", "18H safety STOP rows", stop_safety_18h, 0, "PASS" if stop_safety_18h == 0 else "STOP"],
+        ["18I-C004", "18H source recovery executed", bool(s18h.get("source_recovery_executed", False)), False, "PASS" if not bool(s18h.get("source_recovery_executed", False)) else "STOP"],
+    ], columns=["check_id", "check", "observed", "expected", "status"])
+
+    selected = ranking[ranking["inspection_status"].astype(str).str.contains("CSV", na=False)].copy()
+    selected = selected.sort_values(["missing_required_fields", "direct_required_fields", "derivable_required_fields"], ascending=[True, False, False]).head(5).copy()
     selected["selection_role"] = ["PRIMARY" if i == 0 else "BACKUP" for i in range(len(selected))]
     selected["dry_run_design_only"] = True
     selected["source_recovery_executed"] = False
@@ -126,15 +141,13 @@ def main() -> int:
         rel = str(art["relative_path"])
         sub = mapping[mapping["relative_path"].astype(str).eq(rel)]
         for field in REQ_FIELDS:
-            row = sub[sub["field"].astype(str).eq(field)]
-            if row.empty:
-                status = "NOT_AVAILABLE_IN_18H_PLAN"
-                cols = ""
-                action = "BLOCK_DRY_RUN_FIELD"
+            m = sub[sub["field"].astype(str).eq(field)]
+            if m.empty:
+                status, cols, action = "NOT_AVAILABLE_IN_18H_PLAN", "", "BLOCK_DRY_RUN_FIELD"
             else:
-                r = row.iloc[0]
-                status = str(r.get("mapping_status", ""))
-                cols = str(r.get("direct_column", "")) or str(r.get("candidate_columns_present", ""))
+                row = m.iloc[0]
+                status = str(row.get("mapping_status", ""))
+                cols = pick_columns(row)
                 if status == "DIRECT_COLUMN_PRESENT":
                     action = "COPY_DIRECT_COLUMN_IN_FUTURE_DRY_RUN"
                 elif status == "DERIVATION_CANDIDATE_COLUMNS_PRESENT":
@@ -143,12 +156,13 @@ def main() -> int:
                     action = "BLOCK_DRY_RUN_FIELD"
             recipe_rows.append({"relative_path": rel, "filename": art.get("filename", ""), "selection_role": art.get("selection_role", ""), "field": field, "mapping_status": status, "candidate_columns": cols, "future_dry_run_action": action, "dry_run_implemented": False, "source_recovery_executed": False, "row_hash_computed": False, "implementation_allowed": False, "final_signal_allowed": False})
     recipe = pd.DataFrame(recipe_rows)
+
     stop_conditions = pd.DataFrame([
         ["18I-S001", "attempt to read source data rows during 18I", "STOP"],
         ["18I-S002", "attempt to compute source_row_hash during 18I", "STOP"],
         ["18I-S003", "attempt to finalize or recover source identity during 18I", "STOP"],
         ["18I-S004", "attempt to reconstruct from OHLC", "STOP"],
-        ["18I-S005", "attempt to enable predicate/arbitration implementation or replay", "STOP"],
+        ["18I-S005", "attempt to enable implementation or replay", "STOP"],
         ["18I-S006", "attempt to enable live/final/external actions", "STOP"],
         ["18I-S007", "NO_SIGNAL Discord notification true", "STOP"],
     ], columns=["stop_id", "condition", "action"])
@@ -180,11 +194,11 @@ def main() -> int:
         ["live_hook_allowed", False, False, "PASS"],
         ["no_signal_discord_notified", False, False, "PASS"],
     ], columns=["safety_item", "observed", "expected", "status"])
-    checkdf = pd.DataFrame(checks, columns=["check_id", "check", "observed", "expected", "status"])
-    ok = int((checkdf["status"].astype(str) == "STOP").sum()) == 0
+
+    ok = int((checks["status"].astype(str) == "STOP").sum()) == 0
     status = SUCCESS if ok else "18I_STOP_REVIEW_OUTPUTS"
     for name, df in [
-        ("gold_v2_18i_design_checks.csv", checkdf),
+        ("gold_v2_18i_design_checks.csv", checks),
         ("gold_v2_18i_selected_artifact_design.csv", selected),
         ("gold_v2_18i_dry_run_field_recipe.csv", recipe),
         ("gold_v2_18i_dry_run_stop_conditions.csv", stop_conditions),
@@ -195,7 +209,7 @@ def main() -> int:
         wcsv(df, out / name)
     summary = {"created_utc": now, "step": STEP, "status": status, "audit_only": True, "dry_run_design_ready": ok, "selected_artifacts": int(len(selected)), "recipe_rows": int(len(recipe)), "dry_run_implemented": False, "source_rows_read": False, "row_hash_computed": False, "source_recovery_executed": False, "implementation_allowed": False, "oh_lc_replay_allowed": False, "live_enabled": False, "final_signal_allowed": False, "external_actions": {"discord_send_allowed": False, "mt5_order_allowed": False, "ai_api_allowed": False, "live_hook_allowed": False}, "no_signal_discord_notified": False, "next_recommended_step": "18J_TIER2_ROW_LEVEL_SOURCE_IDENTITY_EXTRACTION_DRY_RUN_IMPLEMENTATION_PLAN_AUDIT_ONLY" if ok else "STOP_REVIEW_18I_OUTPUTS"}
     wjson(out / "gold_v2_18i_tier2_source_identity_extraction_dry_run_design_summary.json", summary)
-    report = ["# GOLD V2 18I TIER2 row-level source identity extraction dry-run design audit-only report", "", f"Created UTC: {now}", f"Status: `{status}`", "", "## Final decision", "- 18I created a dry-run design only.", "- It did not read source rows, compute row hashes, recover identity, reconstruct from OHLC, implement predicates/arbitration, run replay, enable live/final, or enable external actions.", "", "## Checks", mdtable(checkdf), "", "## Selected artifact design", mdtable(selected), "", "## Dry-run field recipe", mdtable(recipe), "", "## Stop conditions", mdtable(stop_conditions), "", "## Next gates", mdtable(nextg), "", "## Blockers", mdtable(blockers), "", "## Safety", mdtable(safety)]
+    report = ["# GOLD V2 18I TIER2 row-level source identity extraction dry-run design audit-only report", "", f"Created UTC: {now}", f"Status: `{status}`", "", "## Final decision", "- 18I created a dry-run design only.", "- It did not read source rows, compute row hashes, recover identity, reconstruct from OHLC, implement predicates/arbitration, run replay, enable live/final, or enable external actions.", "", "## Checks", mdtable(checks), "", "## Selected artifact design", mdtable(selected), "", "## Dry-run field recipe", mdtable(recipe), "", "## Stop conditions", mdtable(stop_conditions), "", "## Next gates", mdtable(nextg), "", "## Blockers", mdtable(blockers), "", "## Safety", mdtable(safety)]
     wtxt(out / REPORT, "\n".join(report))
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if ok else 2
