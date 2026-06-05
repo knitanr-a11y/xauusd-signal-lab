@@ -5,6 +5,17 @@ Repo: `knitanr-a11y/xauusd-signal-lab`
 Current completed step: `18J_TIER2_SOURCE_IDENTITY_DRY_RUN_IMPLEMENTATION_PLAN_AUDIT_ONLY`
 Next recommended step: `18K_TIER2_SOURCE_IDENTITY_DRY_RUN_IMPLEMENTATION_AUDIT_ONLY`
 
+## Start here in the next chat
+
+The next chat should read this file first and treat it as the current handoff.
+
+Then, if the user provides the latest 18J outputs again, inspect these files before writing 18K:
+
+- `GOLD_V2_18J_TIER2_SOURCE_IDENTITY_DRY_RUN_IMPLEMENTATION_PLAN_AUDIT_ONLY_REPORT.md`
+- `gold_v2_18j_tier2_source_identity_dry_run_implementation_plan_summary.json`
+
+Do not start from older 17/18 documents unless this handoff explicitly references them. In particular, the older `NEXT_CHAT_HANDOFF_GOLD_V2_18I_SUCCESS_CANDIDATE_COLUMNS_RENDERING_FIX_PENDING_20260605.md` is historical only. The 18I candidate column rendering issue was fixed before 18J was created.
+
 ## Non-negotiable safety state
 
 GOLD V2 remains audit-only.
@@ -180,11 +191,16 @@ Recommended next action:
 
 2. Create 18K audit-only dry-run implementation script and BAT.
 
-18K may implement an audit-only dry-run script using 18J plan, but must keep the following false:
+18K may implement an audit-only dry-run script using 18J plan and selected artifacts.
+
+18K is allowed to read the selected CSV artifact rows only for audit-only dry-run derivation. If it does this, it must report the read as `source_rows_read: true` and keep all finalization/recovery flags false. This is not source recovery.
+
+18K must keep the following false:
 
 - `source_recovery_executed`
 - `source_identity_finalized`
-- `implementation_allowed` for live/final
+- `source_identity_recovered`
+- `live_or_final_implementation_allowed`
 - `oh_lc_replay_allowed`
 - `live_enabled`
 - `final_signal_allowed`
@@ -194,7 +210,9 @@ Recommended next action:
 - `live_hook_allowed`
 - `no_signal_discord_notified`
 
-18K must be careful with source rows. If it reads CSV rows, it must do so only as an audit-only dry-run and must output clearly that the identity is not finalized/recovered. It should not call it source recovery.
+18K must not call its output source-of-truth. It may call it a dry-run candidate identity ledger only.
+
+18K must not produce final MEDIUM signals or executable parity claims.
 
 ## Suggested 18K output folder
 
