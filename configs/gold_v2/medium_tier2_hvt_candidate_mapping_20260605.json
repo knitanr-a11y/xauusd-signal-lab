@@ -1,0 +1,44 @@
+{
+  "schema_version": "gold_v2_medium_candidate_mapping.v1",
+  "created_utc": "2026-06-05T00:00:00+00:00",
+  "status": "MEDIUM_TIER2_HVT_USER_APPROVED_CANDIDATE_MAPPING",
+  "scope": "MEDIUM_TIER2_HVT_ONLY",
+  "rule": {
+    "rule_id": "MEDIUM_TIER2_HVT_RECONCILED_13D3",
+    "active_for_audit_evaluator": true,
+    "component": "TIER2_HVT",
+    "feature_source": "coreb_refined_rule_ledgers.csv",
+    "conditions": [
+      {"feature": "trend_eff96", "operator": "lte", "value": 0.4},
+      {"feature": "ret96", "operator": "lte", "value": -25.0},
+      {"feature": "tr_mean_32", "operator": "gte", "value": 5.105624999999989}
+    ],
+    "expected_replay": {
+      "source_rows": 31,
+      "selected_rows": 31,
+      "reproduced_source_rows": 31,
+      "missing_source_rows": 0,
+      "extra_selected_rows": 0
+    }
+  },
+  "audit_chain": {
+    "13D3": "TIER2_HVT_RECONCILED_RULE_CANDIDATE_FROZEN_AUDIT_ONLY",
+    "13E5": "FEATURE_SOURCE_CHAIN_FIXED_AUDIT_ONLY",
+    "13G": "MEDIUM_TIER2_HVT_LIVE_EVALUATOR_REPLAY_PROVEN_AUDIT_ONLY",
+    "13H": "MEDIUM_CONFIG_PATCH_PREVIEW_BUILT_AUDIT_ONLY",
+    "13I": "PATCH_PREVIEW_LIVE_DRY_RUN_PASSED_AUDIT_ONLY",
+    "13J": "FINAL_APPROVAL_GATE_READY_AUDIT_ONLY_USER_APPROVAL_REQUIRED"
+  },
+  "blocked_components": {
+    "CoreA": "LIVE_BLOCKED_A_GATE_NOT_FULLY_FROZEN",
+    "CoreB": "LIVE_BLOCKED_SAME_COUNT_CLUSTER_SOURCE_NOT_RESTORED",
+    "MEDIUM_FULL_SET": "ONLY_TIER2_HVT_IS_INCLUDED_HERE"
+  },
+  "safety": {
+    "final_signal_enabled": false,
+    "discord_enabled": false,
+    "mt5_enabled": false,
+    "ai_api_enabled": false,
+    "external_hook_enabled": false
+  }
+}
