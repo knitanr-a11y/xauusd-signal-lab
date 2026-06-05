@@ -11,7 +11,9 @@ Mode: audit-only
 
 20D is content-audit-only. It does not collect a decision value, does not approve anything, does not make a human decision, does not promote any ledger to source-of-truth, and does not relax any blocked action.
 
-20D focuses on semantic/content integrity: the draft must remain a non-decision, all human-entered fields must remain unset, allowed values must be present but no-action, and the required human intake fields must be complete before any later actual decision collection is separately authorized.
+20D focuses on semantic/content integrity: the draft must remain a non-decision, all human-entered fields must remain unset, allowed values must be present but no-action, and the core human intake fields must be present before any later actual decision collection is separately authorized.
+
+Important correction: 20D must not invent allowed decision values. The allowed decision values are source-defined by the 19H/20B artifacts. 20D audits the copied source definition for structure, duplicates, non-empty values, minimum row count, and no-action behavior only.
 
 This spec intentionally uses a short repository path to avoid Windows/GitHub Desktop checkout failures.
 
@@ -83,13 +85,14 @@ Required 20C inputs:
 - evidence acknowledgement remains false
 - approval and actual decision collection remain false
 - all restricted action flags remain false
-- required decision field definitions contain the expected required fields
-- allowed decision values contain required values while still executing no action
-- no duplicate required fields or allowed values exist
+- core required decision field definitions are present
+- optional fields are allowed and are not forced to required
+- allowed decision values are present, non-empty, unique, and no-action
+- allowed decision value names are not hard-coded by 20D
 - upstream 20C load checks, draft-load audit, and safety matrix have zero STOP rows
 - forbidden next gates remain blocked
 
-## Expected required field names
+## Expected core required field names
 
 20D expects the field definition source to include at least:
 
@@ -100,16 +103,19 @@ Required 20C inputs:
 - `evidence_acknowledged`
 - `explicit_phrase`
 
-## Expected allowed decision values
+Only these core fields are required to be marked required. Optional fields such as `notes` may be present and may be non-required.
 
-20D expects the allowed value source to include at least:
+## Allowed decision values
 
-- `UNSET`
-- `APPROVE_SOURCE_RECOVERY_NEXT_AUDIT_ONLY`
-- `REJECT_SOURCE_RECOVERY`
-- `REQUEST_MORE_EVIDENCE`
+20D does not assert a hard-coded set of allowed decision value names. It checks only that the source-defined allowed value table:
 
-All allowed values must remain no-action at this stage.
+- has a decision value column
+- has at least 4 rows
+- has no empty values
+- has no duplicate values
+- has zero action-executing rows
+
+This preserves the source-of-truth 19H/20B definition and prevents approximate redefinition inside 20D.
 
 ## Outputs
 
@@ -162,7 +168,7 @@ The only next recommended gate after success is:
 
 ## Stop conditions
 
-20D must stop when any required input is missing, upstream 20C did not pass, draft is no longer unset, actual decision collection is allowed, any decision/approval flag is true, any upstream STOP row exists, required field/value definitions are incomplete or duplicated, any restricted draft flag is true, any allowed value executes action, or any forbidden gate/summary flag is allowed.
+20D must stop when any required input is missing, upstream 20C did not pass, draft is no longer unset, actual decision collection is allowed, any decision/approval flag is true, any upstream STOP row exists, core required field definitions are incomplete or duplicated, core required fields are marked non-required, allowed values are malformed/duplicated/empty/action-executing, any restricted draft flag is true, or any forbidden gate/summary flag is allowed.
 
 ## Implemented files
 
