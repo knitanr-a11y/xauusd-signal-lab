@@ -83,11 +83,13 @@ This status means only that the 18K files passed load-smoke checks. It is not so
 
 18M may inspect ledger content more deeply, still audit-only.
 
-## Execution order
+## BAT execution order
 
 1. Confirm 18K outputs exist.
-2. Execute the 18L Python audit script from the repository root.
+2. Run `scripts\gold_v2_runtime\bat\18L_AUDIT_TIER2_SOURCE_IDENTITY_DRY_RUN_LOAD_SMOKE_AUDIT_ONLY.bat` from the repository root or by double-clicking it after syncing.
 3. Review load checks, ledger column audit, ledger safety audit, safety matrix, summary, and report.
+
+The BAT is intentionally minimal and invokes the 18L Python audit script. If local execution environment requires working-directory correction, run the same Python command from the repository root.
 
 ## Stop conditions
 
