@@ -65,7 +65,14 @@ def canon_feature_cols(cols):
         if f in lows: out[f]=lows[f]
         elif f+"_source" in lows: out[f]=lows[f+"_source"]
         elif f+"_m15" in lows: out[f]=lows[f+"_m15"]
+        elif f+"_src" in lows: out[f]=lows[f+"_src"]
+        elif f+"_cand" in lows: out[f]=lows[f+"_cand"]
     return out
+
+def pick_col(cols, candidates):
+    for c in candidates:
+        if c in cols: return c
+    return None
 
 def inventory():
     roots=[rr(),files_root(),fx()]; seen=set(); rows=[]
@@ -84,16 +91,29 @@ def inventory():
 
 def score_file(p,src):
     try: d=read_any(p)
-    except Exception as e: return {"path":str(p),"read_error":str(e)} , None
+    except Exception as e: return {"path":str(p),"read_error":str(e),"total_feature_matches":0,"found_rows":0,"feature_col_count":0,"all_four_full_match":False}, None
     t=find_time(d.columns); fcols=canon_feature_cols(d.columns)
     row={"path":str(p),"rows":len(d),"columns":len(d.columns),"time_col":t,"feature_cols":"|".join(fcols.keys()),"feature_col_count":len(fcols)}
-    if not t or len(fcols)==0: return row,None
+    if not t or len(fcols)==0:
+        row.update({"found_rows":0,"total_feature_matches":0,"all_four_full_match":False})
+        return row,None
     d=d.copy(); d["__time__"]=pd.to_datetime(d[t],errors="coerce"); d=d.dropna(subset=["__time__"]).drop_duplicates("__time__",keep="last")
-    m=src.merge(d[["__time__"]+list(fcols.values())],left_on="entry_time_dt",right_on="__time__",how="left",suffixes=("_src","_cand"))
-    row["found_rows"]=int(m.__time__.notna().sum()); total=0
+    cand_cols=[]
+    for c in fcols.values():
+        if c not in cand_cols: cand_cols.append(c)
+    m=src.merge(d[["__time__"]+cand_cols],left_on="entry_time_dt",right_on="__time__",how="left",suffixes=("_src","_cand"))
+    row["found_rows"]=int(m.__time__.notna().sum()); total=0; missing=[]
     for f,c in fcols.items():
-        s=num(m[f]); v=num(m[c]); diff=(v-s).abs(); ok=diff.le(1e-6)
+        scol=pick_col(m.columns,[f, f+"_src", f+"_source", f+"_m15_src"])
+        vcol=pick_col(m.columns,[c, c+"_cand", f+"_cand", f+"_m15", f+"_source_cand"])
+        if scol is None or vcol is None:
+            missing.append(f"{f}:src={scol},cand={vcol}")
+            row[f+"_matched_rows"]=0; row[f+"_max_abs_diff"]=None
+            continue
+        s=num(m[scol]); v=num(m[vcol]); diff=(v-s).abs(); ok=diff.le(1e-6)
+        row[f+"_source_col"]=scol; row[f+"_candidate_col"]=vcol
         row[f+"_matched_rows"]=int(ok.sum()); row[f+"_max_abs_diff"]=float(diff.max()) if diff.notna().any() else None; total+=int(ok.sum())
+    row["missing_after_merge"]= "|".join(missing)
     row["total_feature_matches"]=total; row["all_four_full_match"]=bool(total==len(src)*4 and len(fcols)==4)
     return row,m
 
@@ -110,7 +130,11 @@ def main():
         row,m=score_file(Path(r.path),src); scores.append(row)
         if "total_feature_matches" in row and (best is None or row.get("total_feature_matches",0)>best.get("total_feature_matches",0)):
             best=row; bestm=m
-    sc=pd.DataFrame(scores).sort_values(["all_four_full_match","total_feature_matches","found_rows","feature_col_count"],ascending=[False,False,False,False]); wcsv(sc,out/"gold_v2_13e3_candidate_file_scores.csv")
+    sc=pd.DataFrame(scores)
+    for c,default in [("all_four_full_match",False),("total_feature_matches",0),("found_rows",0),("feature_col_count",0)]:
+        if c not in sc.columns: sc[c]=default
+        sc[c]=sc[c].fillna(default)
+    sc=sc.sort_values(["all_four_full_match","total_feature_matches","found_rows","feature_col_count"],ascending=[False,False,False,False]); wcsv(sc,out/"gold_v2_13e3_candidate_file_scores.csv")
     if bestm is not None: wcsv(bestm,out/"gold_v2_13e3_best_candidate_join_rows.csv")
     found=bool(best and best.get("all_four_full_match") is True)
     status="FEATURE_SOURCE_FILE_FULL_MATCH_FOUND_AUDIT_ONLY" if found else "FEATURE_SOURCE_FILE_FULL_MATCH_NOT_FOUND_AUDIT_ONLY"
