@@ -60,6 +60,11 @@ def wcsv(df: pd.DataFrame, path: Path) -> None:
     df.to_csv(lp(path), index=False, encoding="utf-8-sig")
 
 
+def wtxt(path: Path, value: str) -> None:
+    ensure(path)
+    lp(path).write_text(value, encoding="utf-8")
+
+
 def wjson(obj: dict[str, Any], path: Path) -> None:
     ensure(path)
     lp(path).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
