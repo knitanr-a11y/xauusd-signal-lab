@@ -32,15 +32,41 @@ The latest verified stage is 19L.
 
 19L is blocker-review-only. It did not collect a decision, did not approve anything, did not make a human decision, did not promote any ledger to source-of-truth, and did not relax any blocked action.
 
-## Important upload note from previous chat
+## Important verification note from previous chat
 
 The 19L Markdown report was inspected and passed.
 
-The JSON file uploaded at the same time in the previous chat appeared to contain a 19K summary, not a 19L summary. This does not change the 19L Markdown report result, but if the next chat needs JSON evidence, use the generated file from FX_OUTPUTS rather than the chat-uploaded JSON, or ask the user to re-upload the correct 19L summary JSON.
+The user re-uploaded the JSON evidence and it was rechecked directly from the sandbox file. It is a 19L summary, not a 19K summary. The earlier note saying the chat-uploaded JSON appeared to be 19K was incorrect and has been corrected here.
 
 Expected 19L summary file in runtime outputs:
 
 `FX_OUTPUTS/gold_v2_19l_tier2_source_identity_human_decision_intake_actual_decision_template_blocker_review_audit_only/gold_v2_19l_tier2_source_identity_human_decision_intake_actual_decision_template_blocker_review_summary.json`
+
+## 19L BAT and script verification
+
+19L BAT path:
+
+`scripts/gold_v2_runtime/bat/19L_BLOCKER_REVIEW.bat`
+
+Expected BAT body:
+
+```bat
+@echo off
+cd /d "%~dp0\..\..\.."
+python scripts\gold_v2_runtime\audit_gold_v2_19l_blocker_review.py
+pause
+```
+
+The BAT points to the 19L script, not 19K.
+
+The 19L script uses:
+
+- `STEP = "19L_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_ACTUAL_DECISION_TEMPLATE_BLOCKER_REVIEW_AUDIT_ONLY"`
+- `OUT_DIR = "gold_v2_19l_tier2_source_identity_human_decision_intake_actual_decision_template_blocker_review_audit_only"`
+- `IN19K = "gold_v2_19k_tier2_source_identity_human_decision_intake_actual_decision_template_reconciliation_audit_only"`
+- `IN19E = "gold_v2_19e_tier2_source_identity_human_decision_intake_actual_decision_plan_blocker_review_audit_only"`
+
+Reading 19K as upstream input is correct for 19L, because 19L validates the previous 19K reconciliation before performing blocker review. It does not mean the 19L output is a 19K summary.
 
 ## 19L audit result summary
 
@@ -249,10 +275,8 @@ NO_SIGNAL時はDiscord通知しません。
 - 19L status は TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_ACTUAL_DECISION_TEMPLATE_BLOCKER_REVIEW_PASSED_AUDIT_ONLY_SOURCE_RECOVERY_STILL_BLOCKED。
 - 19Lはactual decision template blocker reviewだけで、判断値・承認・source recovery・finalization・live解除は一切していません。
 - blocker 11件はすべてBLOCKED、script_can_clear=False、still_in_force_after_19l=Trueです。
+- 19L JSONも19L summaryとして確認済みです。
 - 次に許可されるのは19M_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_ACTUAL_DECISION_TEMPLATE_FINAL_AUDIT_ONLYのみです。
-
-注意:
-前チャットで19L Markdownレポートは確認済みですが、同時アップロードされたJSONは中身が19K summaryでした。必要ならFX_OUTPUTS上の19L summary JSONを確認するか、正しい19L JSONの再アップロードを依頼してください。
 
 次は19Mの仕様書・スクリプト・BATを短いファイル名で作り、19M final audit-onlyを実行できる状態にしてください。
 ```
