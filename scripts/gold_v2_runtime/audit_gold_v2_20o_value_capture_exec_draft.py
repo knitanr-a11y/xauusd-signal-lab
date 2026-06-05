@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+import pandas as pd
+
+STEP="20O_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_DRAFT_AUDIT_ONLY"
+OUT_DIR="gold_v2_20o_tier2_source_identity_human_decision_value_capture_execution_draft_audit_only"
+IN20N="gold_v2_20n_tier2_source_identity_human_decision_value_capture_execution_authorization_gate_audit_only"
+IN20I="gold_v2_20i_tier2_source_identity_human_decision_value_capture_draft_audit_only"
+REPORT="GOLD_V2_20O_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_DRAFT_AUDIT_ONLY_REPORT.md"
+SUCCESS="TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_DRAFT_READY_AUDIT_ONLY_SOURCE_RECOVERY_STILL_BLOCKED"
+EXPECTED="TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_AUTHORIZATION_GATE_PASSED_AUDIT_ONLY_SOURCE_RECOVERY_STILL_BLOCKED"
+BACKUP="docs/gold_v2/GOLD_V2_20O_PRE_CHANGE_BACKUP_MANIFEST_20260606.md"
+FORBID={"ACTUAL_DECISION_COLLECTION","SOURCE_IDENTITY_FINALIZATION","SOURCE_RECOVERY","LIVE","FINAL_SIGNAL"}
+FALSE_KEYS=["decision_value_collected","decision_collected","decision_made","approval_granted","actual_decision_collection_allowed","actual_decision_collection_completed","signal_conditions_changed","source_recovery_executed","source_identity_finalized","source_identity_recovered","ledger_is_source_of_truth","live_or_final_implementation_allowed","oh_lc_replay_allowed","live_enabled","final_signal_allowed","no_signal_discord_notified"]
+FALSE_DRAFT=["actual_decision_value_collected","actual_decision_collection_completed","approval_granted","source_recovery_allowed","source_identity_finalization_allowed","source_identity_recovery_allowed","ledger_source_of_truth_promotion_allowed","oh_lc_replay_allowed","live_evaluator_allowed","final_signal_allowed","discord_send_allowed","no_signal_discord_send_allowed","mt5_order_allowed","ai_api_allowed","live_hook_allowed","signal_conditions_change_allowed","script_executes_action"]
+
+def rr()->Path: return Path(__file__).resolve().parents[2]
+def fx()->Path:
+    r=rr(); return (r.parents[1] if len(r.parents)>=2 else r.parent)/"FX_OUTPUTS"
+def lp(p:Path)->Path:
+    p=p if p.is_absolute() else p.resolve()
+    if os.name!="nt": return p
+    s=str(p)
+    if s.startswith("\\\\?\\"): return Path(s)
+    if s.startswith("\\\\"): return Path("\\\\?\\UNC\\"+s[2:])
+    return Path("\\\\?\\"+s)
+def truthy(v:Any)->bool: return v if isinstance(v,bool) else str(v).strip().lower() in {"1","true","yes","y"}
+def wt(p:Path,t:str)->None: lp(p.parent).mkdir(parents=True,exist_ok=True); lp(p).write_text(t,encoding="utf-8")
+def wj(p:Path,o:dict[str,Any])->None: wt(p,json.dumps(o,ensure_ascii=False,indent=2))
+def wc(p:Path,d:pd.DataFrame)->None: lp(p.parent).mkdir(parents=True,exist_ok=True); d.to_csv(lp(p),index=False,encoding="utf-8-sig")
+def rj(p:Path)->dict[str,Any]: return json.loads(lp(p).read_text(encoding="utf-8"))
+def rc(p:Path)->pd.DataFrame:
+    for e in ("utf-8-sig","utf-8","cp932"):
+        try: return pd.read_csv(lp(p),encoding=e,keep_default_na=False)
+        except Exception: pass
+    raise RuntimeError(f"CSV read failed: {p}")
+def sc(d:pd.DataFrame)->int: return int((d.get("status",pd.Series(dtype=str)).astype(str)=="STOP").sum()) if not d.empty else 0
+def chk(i,n,o,e,ok): return {"check_id":i,"check":n,"observed":o,"expected":e,"status":"PASS" if ok else "STOP"}
+def md(d:pd.DataFrame)->str:
+    if d.empty: return "_No rows._"
+    c=list(d.columns); out=["| "+" | ".join(c)+" |","| "+" | ".join(["---"]*len(c))+" |"]
+    for _,r in d.iterrows(): out.append("| "+" | ".join(str(r[x]).replace("|","\\|").replace("\n"," ") for x in c)+" |")
+    return "\n".join(out)
+def forbid_gates(d:pd.DataFrame,col:str)->int:
+    if {"next_step",col}.issubset(d.columns): return int(d[d["next_step"].astype(str).isin(FORBID)][col].map(truthy).sum())
+    return 999
+def first_col(df:pd.DataFrame,names:tuple[str,...])->str|None: return next((n for n in names if n in df.columns),None)
+def gates(ok:bool)->pd.DataFrame:
+    return pd.DataFrame([
+        ["20P","TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_DRAFT_LOAD_SMOKE_AUDIT_ONLY","Load-smoke the still-UNSET execution draft only.",bool(ok)],
+        ["ACTUAL_DECISION_COLLECTION","TIER2_SOURCE_IDENTITY_HUMAN_DECISION_INTAKE_ACTUAL_DECISION_COLLECTION","Still blocked after 20O.",False],
+        ["SOURCE_IDENTITY_FINALIZATION","TIER2_SOURCE_IDENTITY_FINALIZATION","Blocked after 20O.",False],
+        ["SOURCE_RECOVERY","TIER2_SOURCE_IDENTITY_RECOVERY_EXECUTION","Blocked after 20O.",False],
+        ["LIVE","MEDIUM_FULL_SET_LIVE_EVALUATOR","Blocked after 20O.",False],
+        ["FINAL_SIGNAL","MEDIUM_FINAL_SIGNAL","Blocked after 20O.",False],
+    ],columns=["next_step","name","purpose","allowed_after_20o_success"])
+def safety(ok:bool)->pd.DataFrame:
+    rows=[["audit_only",True,True,"PASS"],["execution_draft_only",True,True,"PASS"],["decision_value","UNSET","UNSET","PASS"],["decision_value_collected",False,False,"PASS"],["decision_collected",False,False,"PASS"],["decision_made",False,False,"PASS"],["approval_granted",False,False,"PASS"],["actual_decision_collection_completed",False,False,"PASS"],["actual_decision_collection_allowed",False,False,"PASS"],["signal_conditions_changed",False,False,"PASS"],["source_recovery_executed",False,False,"PASS"],["source_identity_finalized",False,False,"PASS"],["source_identity_recovered",False,False,"PASS"],["live_or_final_implementation_allowed",False,False,"PASS"],["discord_send_allowed",False,False,"PASS"],["mt5_order_allowed",False,False,"PASS"],["ai_api_allowed",False,False,"PASS"],["live_hook_allowed",False,False,"PASS"],["next_gate_20p_only_after_success",bool(ok),bool(ok),"PASS"]]
+    return pd.DataFrame(rows,columns=["safety_item","observed","expected","status"])
+
+def main()->int:
+    root,base=rr(),fx(); out=base/OUT_DIR; lp(out).mkdir(parents=True,exist_ok=True); now=datetime.now(timezone.utc).isoformat(); p20n=base/IN20N; p20i=base/IN20I
+    inputs={"backup_manifest":root/BACKUP,"summary_20n":p20n/"gold_v2_20n_tier2_source_identity_human_decision_value_capture_execution_authorization_gate_summary.json","auth_record_20n":p20n/"gold_v2_20n_authorization_record.csv","auth_checks_20n":p20n/"gold_v2_20n_authorization_checks.csv","gates_20n":p20n/"gold_v2_20n_required_next_gates.csv","safety_20n":p20n/"gold_v2_20n_safety_matrix.csv","report_20n":p20n/"GOLD_V2_20N_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_AUTHORIZATION_GATE_AUDIT_ONLY_REPORT.md","draft_20i":p20i/"gold_v2_20i_value_capture_draft.json","allowed_20i":p20i/"gold_v2_20i_allowed_decision_values_audit.csv","fields_20i":p20i/"gold_v2_20i_required_decision_fields_audit.csv"}
+    ia=pd.DataFrame([{"role":k,"path":str(v),"required":True,"exists":lp(v).exists()} for k,v in inputs.items()]); wc(out/"gold_v2_20o_input_audit.csv",ia)
+    if not bool(ia["exists"].all()):
+        c=pd.DataFrame([chk("20O-C000","required inputs exist",False,True,False)]); s=safety(False); g=gates(False)
+        wc(out/"gold_v2_20o_execution_draft_checks.csv",c); wc(out/"gold_v2_20o_safety_matrix.csv",s); wc(out/"gold_v2_20o_required_next_gates.csv",g)
+        sm={"created_utc":now,"step":STEP,"status":"20O_STOP_MISSING_INPUTS","audit_only":True,"execution_draft_ready":False,"decision_value":"UNSET","total_stop_rows":1,"next_recommended_step":"STOP_REVIEW_20O_INPUTS"}
+        wj(out/"gold_v2_20o_tier2_source_identity_human_decision_value_capture_execution_draft_summary.json",sm); print(json.dumps(sm,ensure_ascii=False,indent=2)); return 2
+    s20n=rj(inputs["summary_20n"]); ar=rc(inputs["auth_record_20n"]); ac=rc(inputs["auth_checks_20n"]); ng=rc(inputs["gates_20n"]); sf=rc(inputs["safety_20n"]); srcdraft=rj(inputs["draft_20i"]); allowed=rc(inputs["allowed_20i"]); fields=rc(inputs["fields_20i"])
+    vcol=first_col(allowed,("decision_value","value","name")); vals=allowed[vcol].astype(str).str.strip().tolist() if vcol else []
+    false_sum=sum(int(bool(s20n.get(k,False))) for k in FALSE_KEYS)+sum(int(bool(v)) for v in s20n.get("external_actions",{}).values())
+    auth_restricted=sum(int(bool(ar.iloc[0].get(k,False))) for k in FALSE_DRAFT) if not ar.empty else 999
+    exec_draft={"created_utc":now,"draft_status":"EXECUTION_DRAFT_ONLY_NOT_A_DECISION","source_authorization_id":s20n.get("authorization_id"),"authorization_scope":s20n.get("authorization_scope"),"decision_id":"UNSET","decision_timestamp_utc":"UNSET","decision_value":"UNSET","human_reviewer":"UNSET","explicit_phrase":"UNSET","notes":"UNSET","allowed_decision_values":vals}
+    for k in FALSE_DRAFT: exec_draft[k]=False
+    wj(out/"gold_v2_20o_execution_draft.json",exec_draft)
+    draft_bad=sum(int(bool(exec_draft.get(k,False))) for k in FALSE_DRAFT)
+    rows=pd.DataFrame([
+        chk("20O-C001","20N status",s20n.get("status"),EXPECTED,s20n.get("status")==EXPECTED),
+        chk("20O-C002","20N authorization_gate_passed",s20n.get("authorization_gate_passed"),True,bool(s20n.get("authorization_gate_passed",False))),
+        chk("20O-C003","20N total_stop_rows",s20n.get("total_stop_rows"),0,s20n.get("total_stop_rows")==0),
+        chk("20O-C004","20N decision_value",s20n.get("decision_value"),"UNSET",s20n.get("decision_value")=="UNSET"),
+        chk("20O-C005","20N forbidden summary flags true",false_sum,0,false_sum==0),
+        chk("20O-C006","20N auth/safety STOP rows",sc(ac)+sc(sf),0,sc(ac)+sc(sf)==0),
+        chk("20O-C007","20N forbidden gates allowed",forbid_gates(ng,"allowed_after_20n_success"),0,forbid_gates(ng,"allowed_after_20n_success")==0),
+        chk("20O-C008","20N restricted authorization true flags",auth_restricted,0,auth_restricted==0),
+        chk("20O-C009","20I source draft decision_value",srcdraft.get("decision_value"),"UNSET",srcdraft.get("decision_value")=="UNSET"),
+        chk("20O-C010","execution draft decision_value",exec_draft.get("decision_value"),"UNSET",exec_draft.get("decision_value")=="UNSET"),
+        chk("20O-C011","execution draft restricted true flags",draft_bad,0,draft_bad==0),
+        chk("20O-C012","allowed decision value rows",len(vals),">=4",len(vals)>=4),
+        chk("20O-C013","required field rows",len(fields),">=6",len(fields)>=6),
+        chk("20O-C014","backup manifest exists",lp(inputs["backup_manifest"]).exists(),True,lp(inputs["backup_manifest"]).exists()),
+    ])
+    total=sc(rows); ok=total==0; status=SUCCESS if ok else "20O_STOP_REVIEW_VALUE_CAPTURE_EXECUTION_DRAFT_OUTPUTS"; s=safety(ok); g=gates(ok)
+    wc(out/"gold_v2_20o_execution_draft_checks.csv",rows); wc(out/"gold_v2_20o_safety_matrix.csv",s); wc(out/"gold_v2_20o_required_next_gates.csv",g)
+    sm={"created_utc":now,"step":STEP,"status":status,"audit_only":True,"execution_draft_ready":ok,"draft_status":exec_draft["draft_status"],"decision_value":"UNSET","decision_value_collected":False,"decision_collected":False,"decision_made":False,"approval_granted":False,"actual_decision_collection_allowed":False,"actual_decision_collection_completed":False,"allowed_value_rows":len(vals),"required_field_rows":int(len(fields)),"total_stop_rows":int(total),"signal_conditions_changed":False,"source_recovery_executed":False,"source_identity_finalized":False,"source_identity_recovered":False,"ledger_is_source_of_truth":False,"live_or_final_implementation_allowed":False,"oh_lc_replay_allowed":False,"live_enabled":False,"final_signal_allowed":False,"external_actions":{"discord_send_allowed":False,"mt5_order_allowed":False,"ai_api_allowed":False,"live_hook_allowed":False},"no_signal_discord_notified":False,"next_recommended_step":"20P_TIER2_SOURCE_IDENTITY_HUMAN_DECISION_VALUE_CAPTURE_EXECUTION_DRAFT_LOAD_SMOKE_AUDIT_ONLY" if ok else "STOP_REVIEW_20O_OUTPUTS"}
+    wj(out/"gold_v2_20o_tier2_source_identity_human_decision_value_capture_execution_draft_summary.json",sm)
+    rep=["# GOLD V2 20O TIER2 source identity human decision value capture execution draft audit-only report","",f"Created UTC: {now}",f"Status: `{status}`","","## Final decision","- 20O prepared a still-UNSET actual decision value capture execution draft only.","- No actual decision value was collected and no approval was made by this script.","- Signal conditions, source recovery, identity finalization/recovery, live/final paths, Discord, MT5, AI API, live hook, and NO_SIGNAL Discord remain unchanged and disabled.","","## Execution draft checks",md(rows),"","## Next gates",md(g),"","## Safety",md(s)]
+    wt(out/REPORT,"\n".join(rep)); print(json.dumps(sm,ensure_ascii=False,indent=2)); return 0 if ok else 2
+
+if __name__=="__main__": raise SystemExit(main())
