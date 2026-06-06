@@ -10,7 +10,7 @@ Purpose: record pre-24D references before adding the source recovery gap resolut
 | --- | --- | --- |
 | 24C pre-change manifest | `docs/gold_v2/GOLD_V2_24C_PRE_CHANGE_BACKUP_MANIFEST_20260606.md` | `8e99d047f7729c26674f20f18fe3bccf94d82aaa` |
 | 24C spec | `docs/gold_v2/GOLD_V2_24C_SOURCE_RECOVERY_EVIDENCE_PACKAGE_REVIEW_AUDIT_SPEC_20260606.md` | `197500388e12a9603649055f3e1719a39b817502` |
-| 24C script | `scripts/gold_v2_runtime/audit_gold_v2_24c_source_recovery_evidence_package_review.py` | `7` |
+| 24C script | `scripts/gold_v2_runtime/audit_gold_v2_24c_source_recovery_evidence_package_review.py` | `1df5698efaf1d651b60836f933602c24182aed84` |
 | 24C BAT | `scripts/gold_v2_runtime/bat/24C_SOURCE_RECOVERY_EVIDENCE_PACKAGE_REVIEW.bat` | `2fe10b2acb40ff36b5a5f1657b6432dcc6c27ffe` |
 
 ## Uploaded 24C output review summary
