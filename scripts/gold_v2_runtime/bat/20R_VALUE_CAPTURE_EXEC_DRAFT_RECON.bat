@@ -1,0 +1,4 @@
+@echo off
+cd /d "%~dp0\..\..\.."
+python scripts\gold_v2_runtime\audit_gold_v2_20r_value_capture_exec_draft_recon.py
+pause
