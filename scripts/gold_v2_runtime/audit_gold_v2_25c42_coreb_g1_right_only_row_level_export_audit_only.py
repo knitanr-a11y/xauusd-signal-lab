@@ -32,6 +32,23 @@ EXPECTED_VARIANTS = {
     "A003_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC8_PAIR",
     "A004_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC10_PAIR",
 }
+REQUIRED_OUTPUT_COLUMNS = [
+    "variant",
+    "dataset",
+    "entry_time",
+    "policy",
+    "_merge",
+    "replay_present",
+    "target_present",
+    "baseline_merge",
+    "baseline_replay_present",
+    "baseline_target_present",
+    "adjusted_replay_present",
+    "adjusted_target_present",
+    "right_only_reason",
+    "source_step",
+    "source_artifact",
+]
 
 
 def repo_root() -> Path:
@@ -108,6 +125,27 @@ def norm(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def status_from_exists(path: Path) -> str:
+    return "PASS" if lp(path).exists() else "STOP"
+
+
+def resolve_contract_path(fx_root: Path, raw_path: object) -> Path:
+    """
+    25C41 contract paths are intentionally written as FX_OUTPUTS/...
+    The runtime fx_root is already the FX_OUTPUTS directory, so this resolver
+    strips one leading FX_OUTPUTS segment instead of producing FX_OUTPUTS/FX_OUTPUTS.
+    Absolute paths are preserved.
+    """
+    raw = str(raw_path).strip().strip('"').strip("'")
+    p = Path(raw)
+    if p.is_absolute():
+        return p
+    parts = list(p.parts)
+    if parts and parts[0].lower() == "fx_outputs":
+        return fx_root / Path(*parts[1:])
+    return fx_root / p
+
+
 def path_from_audit(df: pd.DataFrame, name: str) -> Path:
     if "normalized_path" in df.columns:
         m = df[df["normalized_path"].astype(str).str.contains(name, case=False, regex=False, na=False)]
@@ -120,10 +158,6 @@ def path_from_audit(df: pd.DataFrame, name: str) -> Path:
                 if c in df.columns:
                     return Path(str(m.iloc[0][c]))
     return Path("")
-
-
-def status_from_exists(path: Path) -> str:
-    return "PASS" if lp(path).exists() else "STOP"
 
 
 def contract_rows_from_25c41(s41: dict, next_plan: pd.DataFrame) -> list[dict]:
@@ -178,36 +212,66 @@ def compare_variant(name: str, replay_df: pd.DataFrame, target_key: pd.DataFrame
     cmp["right_only_reason"] = cmp.apply(lambda r: "target_present_replay_absent_after_variant_filter_exclusion" if r["_merge"] == "right_only" else "", axis=1)
     cmp["source_step"] = STEP
     cmp["source_artifact"] = source_artifact
-    return cmp[[
-        "variant", "dataset", "entry_time", "policy", "_merge", "replay_present", "target_present",
-        "baseline_merge", "baseline_replay_present", "baseline_target_present", "adjusted_replay_present",
-        "adjusted_target_present", "right_only_reason", "source_step", "source_artifact"
-    ]]
+    return cmp[REQUIRED_OUTPUT_COLUMNS]
 
 
-def write_stop_outputs(out: Path, status: str, input_audit: pd.DataFrame, contract_audit: pd.DataFrame, total_stop_rows: int) -> None:
+def file_request_df() -> pd.DataFrame:
+    unnecessary = ["raw OHLC", "old GOLD/DISC8 files", "source recovery files", "new dry-run outputs", "AI review ledgers"]
+    necessary = [
+        "01_25c42_GOLD_V2_COREB_G1_RIGHT_ONLY_ROW_LEVEL_EXPORT_AUDIT_ONLY_REPORT.md",
+        "02_25c42_coreb_g1_right_only_row_level_export_summary.json",
+        "03_25c42_input_audit.csv",
+        "04_25c42_variant_full_row_level_compare_rows.csv",
+        "05_25c42_variant_right_only_row_level_compare_rows.csv",
+        "06_25c42_right_only_by_variant_dataset_policy.csv",
+        "07_25c42_right_only_export_reconciliation_matrix.csv",
+        "08_25c42_execution_boundary_matrix.csv",
+        "09_25c42_acceptance_gate_matrix.csv",
+        "10_25c42_next_step_plan.csv",
+    ]
+    return pd.DataFrame(
+        [{"section": "00_不要_貼らなくてOK", "rank": i + 1, "item": x} for i, x in enumerate(unnecessary)]
+        + [{"section": "必要・見るファイル", "rank": i + 1, "item": x} for i, x in enumerate(necessary)]
+    )
+
+
+def write_stop_outputs(out: Path, status: str, input_audit: pd.DataFrame, diagnostic: pd.DataFrame, total_stop_rows: int) -> None:
     empty = pd.DataFrame()
+    write_csv(out / "00_不要_25c42_file_request_list.csv", file_request_df())
     write_csv(out / "04_25c42_variant_full_row_level_compare_rows.csv", empty)
     write_csv(out / "05_25c42_variant_right_only_row_level_compare_rows.csv", empty)
     write_csv(out / "06_25c42_right_only_by_variant_dataset_policy.csv", empty)
-    write_csv(out / "07_25c42_right_only_export_reconciliation_matrix.csv", contract_audit)
-    write_csv(out / "08_25c42_execution_boundary_matrix.csv", pd.DataFrame([
+    write_csv(out / "07_25c42_right_only_export_reconciliation_matrix.csv", diagnostic)
+    boundary = pd.DataFrame([
         {"boundary": "row_level_export_execution", "allowed": False, "observed": False},
+        {"boundary": "run_new_dry_run", "allowed": False, "observed": False},
+        {"boundary": "change_coreb_conditions", "allowed": False, "observed": False},
+        {"boundary": "source_recovery", "allowed": False, "observed": False},
+        {"boundary": "source_mutation", "allowed": False, "observed": False},
         {"boundary": "coreb_live_evaluator_unblock", "allowed": False, "observed": False},
+        {"boundary": "discord_notification", "allowed": False, "observed": False},
+        {"boundary": "mt5_order", "allowed": False, "observed": False},
         {"boundary": "ai_api_call", "allowed": False, "observed": False},
-    ]))
-    write_csv(out / "09_25c42_acceptance_gate_matrix.csv", contract_audit)
-    write_csv(out / "10_25c42_next_step_plan.csv", pd.DataFrame([{"rank": 1, "next_step": "STOP", "allowed_now": False, "purpose": status}]))
+        {"boundary": "live_hook", "allowed": False, "observed": False},
+        {"boundary": "final_signal", "allowed": False, "observed": False},
+        {"boundary": "no_signal_discord_notify", "allowed": False, "observed": False},
+    ])
+    write_csv(out / "08_25c42_execution_boundary_matrix.csv", boundary)
+    write_csv(out / "09_25c42_acceptance_gate_matrix.csv", diagnostic)
+    next_plan = pd.DataFrame([{"rank": 1, "next_step": "STOP", "allowed_now": False, "purpose": status, "execution_allowed_in_25c42": False}])
+    write_csv(out / "10_25c42_next_step_plan.csv", next_plan)
     summary = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "step": STEP,
         "status": status,
         "audit_only": True,
+        "human_acceptance_flag_supplied": status != STOP_ACCEPT,
         "row_level_export_executed": False,
         "dry_run_executed": False,
         "condition_changed": False,
         "source_recovery_executed": False,
         "source_mutation_executed": False,
+        "best_variant_approved": False,
         "coreb_live_evaluator_unblocked": False,
         "discord_notification_sent": False,
         "mt5_order_sent": False,
@@ -218,6 +282,34 @@ def write_stop_outputs(out: Path, status: str, input_audit: pd.DataFrame, contra
         "total_stop_rows": int(total_stop_rows),
     }
     write_json(out / "02_25c42_coreb_g1_right_only_row_level_export_summary.json", summary)
+    report = "\n".join([
+        "# GOLD V2 25C42 CoreB G1 right_only row-level export audit-only report",
+        "",
+        f"Created UTC: {summary['created_utc']}",
+        f"Step: `{STEP}`",
+        f"Status: `{status}`",
+        "",
+        "## Diagnostic",
+        "",
+        md_table(diagnostic),
+        "",
+        "## Input audit",
+        "",
+        md_table(input_audit),
+        "",
+        "## Execution boundaries",
+        "",
+        md_table(boundary),
+        "",
+        "## Next step plan",
+        "",
+        md_table(next_plan),
+        "",
+        "## Safety",
+        "",
+        "- Stop status written. No row-level export, dry-run, source recovery, source mutation, live evaluator, Discord, MT5, AI API, live hook, or final signal executed.",
+    ])
+    lp(out / "01_25c42_GOLD_V2_COREB_G1_RIGHT_ONLY_ROW_LEVEL_EXPORT_AUDIT_ONLY_REPORT.md").write_text(report, encoding="utf-8")
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -240,21 +332,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "gates41": base41 / "08_25c41_acceptance_gate_matrix.csv",
         "next41": base41 / "09_25c41_next_step_plan.csv",
     }
-    input_rows = [{"role": k, "path": str(v), "exists": lp(v).exists(), "status": status_from_exists(v), "source": "25C41 control"} for k, v in control_req.items()]
-    input_audit = pd.DataFrame(input_rows)
+    input_audit = pd.DataFrame([
+        {"role": k, "path": str(v), "exists": lp(v).exists(), "status": status_from_exists(v), "source": "25C41 control"}
+        for k, v in control_req.items()
+    ])
     write_csv(out / "03_25c42_input_audit.csv", input_audit)
-
     if not bool(input_audit["exists"].all()):
         write_stop_outputs(out, STOP_MISSING, input_audit, input_audit, int((input_audit["status"] == "STOP").sum()))
         return 2
 
     if not args.accept_25c42_row_level_export:
-        write_stop_outputs(out, STOP_ACCEPT, input_audit, pd.DataFrame([{"contract_id": "ACCEPT", "check": "--accept-25c42-row-level-export supplied", "observed": False, "status": "STOP"}]), 1)
+        diagnostic = pd.DataFrame([{"contract_id": "ACCEPT", "check": "--accept-25c42-row-level-export supplied", "observed": False, "status": "STOP"}])
+        write_stop_outputs(out, STOP_ACCEPT, input_audit, diagnostic, 1)
         return 2
 
     s41 = read_json(control_req["s41"])
     future_inputs = read_csv(control_req["input_contract"])
-    schema = read_csv(control_req["schema_contract"])
     recon_contract = read_csv(control_req["recon_contract"])
     next41 = read_csv(control_req["next41"])
     contract_audit = pd.DataFrame(contract_rows_from_25c41(s41, next41))
@@ -262,17 +355,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         write_stop_outputs(out, STOP_CONTRACT, input_audit, contract_audit, int((contract_audit["status"] == "STOP").sum()))
         return 2
 
-    future_map = {str(r["role"]): Path(str(r["path"])) for _, r in future_inputs.iterrows()}
-    req_paths = {
-        "25C36 summary": fx_root / future_map["25C36 summary"],
-        "25C36 adjusted bundles": fx_root / future_map["25C36 adjusted bundles"],
-        "25C36 adjusted membership": fx_root / future_map["25C36 adjusted membership"],
-        "25C10 filter replay rows": fx_root / future_map["25C10 filter replay rows"],
-        "25C15 selected policy summary": fx_root / future_map["25C15 selected policy summary"],
-        "25C7 target compare window summary": fx_root / future_map["25C7 target compare window summary"],
-        "25B3 shortlist file audit": fx_root / future_map["25B3 shortlist file audit"],
-    }
-    extra_audit = pd.DataFrame([{"role": k, "path": str(v), "exists": lp(v).exists(), "status": status_from_exists(v), "source": "25C42 future export input"} for k, v in req_paths.items()])
+    future_map = {str(r["role"]): resolve_contract_path(fx_root, r["path"]) for _, r in future_inputs.iterrows()}
+    required_roles = [
+        "25C36 summary",
+        "25C36 adjusted bundles",
+        "25C36 adjusted membership",
+        "25C10 filter replay rows",
+        "25C15 selected policy summary",
+        "25C7 target compare window summary",
+        "25B3 shortlist file audit",
+    ]
+    missing_roles = [r for r in required_roles if r not in future_map]
+    if missing_roles:
+        diagnostic = pd.DataFrame([{"contract_id": "FUTURE_INPUT_ROLE", "check": "required future input role exists", "observed": ",".join(missing_roles), "status": "STOP"}])
+        write_stop_outputs(out, STOP_CONTRACT, input_audit, diagnostic, len(missing_roles))
+        return 2
+
+    req_paths = {role: future_map[role] for role in required_roles}
+    extra_audit = pd.DataFrame([
+        {"role": k, "path": str(v), "exists": lp(v).exists(), "status": status_from_exists(v), "source": "25C42 future export input"}
+        for k, v in req_paths.items()
+    ])
     input_audit = pd.concat([input_audit, extra_audit], ignore_index=True)
     write_csv(out / "03_25c42_input_audit.csv", input_audit)
     if not bool(extra_audit["exists"].all()):
@@ -281,7 +384,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     s36 = read_json(req_paths["25C36 summary"])
     if not as_bool(s36.get("requires_human_acceptance_before_25c37", False)):
-        write_stop_outputs(out, STOP_CONTRACT, input_audit, pd.DataFrame([{"contract_id": "C015", "check": "25C36 accepted before 25C37", "observed": s36.get("requires_human_acceptance_before_25c37"), "status": "STOP"}]), 1)
+        diagnostic = pd.DataFrame([{"contract_id": "C015", "check": "25C36 accepted before 25C37", "observed": s36.get("requires_human_acceptance_before_25c37"), "status": "STOP"}])
+        write_stop_outputs(out, STOP_CONTRACT, input_audit, diagnostic, 1)
         return 2
 
     bundles = read_csv(req_paths["25C36 adjusted bundles"])
@@ -295,10 +399,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     selected = set(s15.get("selected_output_policies", []))
     fmin = pd.to_datetime(s7.get("feature_min_time"), errors="coerce")
     fmax = pd.to_datetime(s7.get("feature_max_time"), errors="coerce")
+
     target_path = path_from_audit(audit, TARGET_NAME)
     if not str(target_path):
-        write_stop_outputs(out, STOP_MISSING, input_audit, pd.DataFrame([{"contract_id": "TARGET", "check": "target rr125_top_ledgers.csv resolved from 25B3 audit", "observed": False, "status": "STOP"}]), 1)
+        diagnostic = pd.DataFrame([{"contract_id": "TARGET", "check": "target rr125_top_ledgers.csv resolved from 25B3 audit", "observed": False, "status": "STOP"}])
+        write_stop_outputs(out, STOP_MISSING, input_audit, diagnostic, 1)
         return 2
+
     target = norm(read_csv(target_path))
     target["time_norm"] = pd.to_datetime(target["entry_time"], errors="coerce")
     target = target[(target["time_norm"] >= fmin) & (target["time_norm"] <= fmax) & target["policy"].isin(selected)].copy()
@@ -327,7 +434,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     full = pd.concat(frames, ignore_index=True)
     missing_variants = sorted(EXPECTED_VARIANTS - set(full["variant"].astype(str).unique()))
     if missing_variants:
-        write_stop_outputs(out, STOP_CONTRACT, input_audit, pd.DataFrame([{"contract_id": "VARIANTS", "check": "all expected variants exported", "observed": ",".join(missing_variants), "status": "STOP"}]), len(missing_variants))
+        diagnostic = pd.DataFrame([{"contract_id": "VARIANTS", "check": "all expected variants exported", "observed": ",".join(missing_variants), "status": "STOP"}])
+        write_stop_outputs(out, STOP_CONTRACT, input_audit, diagnostic, len(missing_variants))
         return 2
 
     right_only = full[(full["variant"].ne("BASELINE_CURRENT")) & (full["_merge"].eq("right_only"))].copy()
@@ -337,6 +445,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for c in ["both", "left_only", "right_only"]:
         if c not in actual_counts.columns:
             actual_counts[c] = 0
+
     recon = recon_contract.copy()
     for c in ["expected_both", "expected_left_only", "expected_right_only"]:
         recon[c] = pd.to_numeric(recon[c], errors="coerce").fillna(-1).astype(int)
@@ -353,6 +462,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     recon["right_only_match"] = recon["expected_right_only"].eq(recon["exported_right_only"])
     recon["status"] = recon.apply(lambda r: "PASS" if r["both_match"] and r["left_only_match"] and r["right_only_match"] else "STOP", axis=1)
 
+    write_csv(out / "00_不要_25c42_file_request_list.csv", file_request_df())
     write_csv(out / "04_25c42_variant_full_row_level_compare_rows.csv", full.sort_values(["variant"] + KEY))
     write_csv(out / "05_25c42_variant_right_only_row_level_compare_rows.csv", right_only.sort_values(["variant"] + KEY))
     write_csv(out / "06_25c42_right_only_by_variant_dataset_policy.csv", by_policy.sort_values(["variant", "dataset", "policy"]))
@@ -362,7 +472,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     boundary = pd.DataFrame([
         {"boundary": "human_acceptance_flag_supplied", "allowed": True, "observed": True},
         {"boundary": "row_level_export_execution", "allowed": True, "observed": True},
-        {"boundary": "recompute_coreb_compare_for_export_only", "allowed": True, "observed": True},
+        {"boundary": "reconstruct_25c37_compare_for_export_only", "allowed": True, "observed": True},
         {"boundary": "run_new_dry_run", "allowed": False, "observed": False},
         {"boundary": "change_coreb_conditions", "allowed": False, "observed": False},
         {"boundary": "source_recovery", "allowed": False, "observed": False},
@@ -389,38 +499,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ])
     write_csv(out / "09_25c42_acceptance_gate_matrix.csv", gates)
 
+    next_recommended = "25C43_COREB_G1_RIGHT_ONLY_DRIVER_REVIEW_AUDIT_ONLY" if recon_ok else "STOP_RECONCILIATION_MISMATCH"
     next_plan = pd.DataFrame([
-        {"rank": 1, "next_step": "25C43_COREB_G1_RIGHT_ONLY_DRIVER_REVIEW_AUDIT_ONLY" if recon_ok else "STOP_RECONCILIATION_MISMATCH", "allowed_now": bool(recon_ok), "purpose": "review exported right_only rows to identify target-damaging drivers; no live unblock", "requires_human_acceptance_before_execution": False, "execution_allowed_in_25c42": False},
+        {"rank": 1, "next_step": next_recommended, "allowed_now": bool(recon_ok), "purpose": "review exported right_only rows to identify target-damaging drivers; no live unblock", "requires_human_acceptance_before_execution": False, "execution_allowed_in_25c42": False},
         {"rank": 2, "next_step": "future adjusted narrowing plan/dry-run", "allowed_now": False, "purpose": "blocked until driver review and separate human acceptance gate", "requires_human_acceptance_before_execution": True, "execution_allowed_in_25c42": False},
         {"rank": 3, "next_step": "CoreB live evaluator / final signal / Discord / MT5 / AI API", "allowed_now": False, "purpose": "blocked because no exact match and no source recovery approval", "requires_human_acceptance_before_execution": True, "execution_allowed_in_25c42": False},
     ])
     write_csv(out / "10_25c42_next_step_plan.csv", next_plan)
 
-    unnecessary = ["raw OHLC", "old GOLD/DISC8 files", "source recovery files", "new dry-run outputs", "AI review ledgers"]
-    necessary = [
-        "01_25c42_GOLD_V2_COREB_G1_RIGHT_ONLY_ROW_LEVEL_EXPORT_AUDIT_ONLY_REPORT.md",
-        "02_25c42_coreb_g1_right_only_row_level_export_summary.json",
-        "03_25c42_input_audit.csv",
-        "04_25c42_variant_full_row_level_compare_rows.csv",
-        "05_25c42_variant_right_only_row_level_compare_rows.csv",
-        "06_25c42_right_only_by_variant_dataset_policy.csv",
-        "07_25c42_right_only_export_reconciliation_matrix.csv",
-        "08_25c42_execution_boundary_matrix.csv",
-        "09_25c42_acceptance_gate_matrix.csv",
-        "10_25c42_next_step_plan.csv",
-    ]
-    write_csv(out / "00_不要_25c42_file_request_list.csv", pd.DataFrame(
-        [{"section": "00_不要_貼らなくてOK", "rank": i + 1, "item": x} for i, x in enumerate(unnecessary)] +
-        [{"section": "必要・見るファイル", "rank": i + 1, "item": x} for i, x in enumerate(necessary)]
-    ))
-
-    if not recon_ok:
-        status = STOP_RECON
-        next_recommended = "STOP_RECONCILIATION_MISMATCH"
-    else:
-        status = STATUS
-        next_recommended = "25C43_COREB_G1_RIGHT_ONLY_DRIVER_REVIEW_AUDIT_ONLY"
-
+    status = STATUS if recon_ok else STOP_RECON
     summary = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "step": STEP,
@@ -449,6 +536,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     write_json(out / "02_25c42_coreb_g1_right_only_row_level_export_summary.json", summary)
 
+    req_df = file_request_df()
     report = "\n".join([
         "# GOLD V2 25C42 CoreB G1 right_only row-level export audit-only report",
         "",
@@ -476,6 +564,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "",
         md_table(pd.DataFrame([{"full_row_count": len(full), "right_only_row_count": len(right_only), "reconciliation_passed": recon_ok}])),
         "",
+        "## Input audit",
+        "",
+        md_table(input_audit),
+        "",
         "## Execution boundaries",
         "",
         md_table(boundary),
@@ -488,10 +580,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "",
         "```text",
         "00_不要_貼らなくてOK",
-        *[f"00-{i+1}. {x}" for i, x in enumerate(unnecessary)],
+        *[f"00-{i+1}. {x}" for i, x in enumerate(req_df[req_df["section"].eq("00_不要_貼らなくてOK")]["item"].tolist())],
         "",
         "必要・見るファイル",
-        *[f"{i+1:02d}. {x}" for i, x in enumerate(necessary)],
+        *[f"{i+1:02d}. {x}" for i, x in enumerate(req_df[req_df["section"].eq("必要・見るファイル")]["item"].tolist())],
         "```",
         "",
         "## Next step plan",
