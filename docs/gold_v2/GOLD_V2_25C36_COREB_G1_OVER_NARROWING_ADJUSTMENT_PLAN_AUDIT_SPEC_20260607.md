@@ -1,0 +1,41 @@
+# GOLD V2 25C36 CoreB G1 over-narrowing adjustment plan audit spec
+
+Date: 2026-06-07
+Step: `25C36_COREB_G1_OVER_NARROWING_ADJUSTMENT_PLAN_AUDIT_ONLY`
+Mode: audit-only plan
+
+## Purpose
+
+25C35 concluded that B002 improves left_only but over-narrows: right_only increases and both decreases too much.
+
+25C36 prepares less destructive adjustment bundles between B001 and B002. It does not run another dry-run and does not change conditions.
+
+## Inputs
+
+```text
+FX_OUTPUTS/gold_v2_25c35_coreb_g1_retention_aware_dry_run_result_review_audit_only/02_25c35_coreb_g1_retention_aware_dry_run_result_review_summary.json
+FX_OUTPUTS/gold_v2_25c35_coreb_g1_retention_aware_dry_run_result_review_audit_only/04_25c35_variant_tradeoff_matrix.csv
+FX_OUTPUTS/gold_v2_25c35_coreb_g1_retention_aware_dry_run_result_review_audit_only/05_25c35_best_variant_review_matrix.csv
+FX_OUTPUTS/gold_v2_25c34_coreb_g1_retention_aware_dry_run_audit_only/04_25c34_variant_filter_contract.csv
+FX_OUTPUTS/gold_v2_25c33_coreb_g1_retention_aware_narrowing_plan_audit_only/05_25c33_bundle_filter_membership.csv
+```
+
+## Outputs
+
+```text
+00_不要_25c36_file_request_list.csv
+01_25c36_GOLD_V2_COREB_G1_OVER_NARROWING_ADJUSTMENT_PLAN_AUDIT_ONLY_REPORT.md
+02_25c36_coreb_g1_over_narrowing_adjustment_plan_summary.json
+03_25c36_input_audit.csv
+04_25c36_adjusted_bundle_candidate_matrix.csv
+05_25c36_adjusted_bundle_membership.csv
+06_25c36_execution_boundary_matrix.csv
+07_25c36_acceptance_gate_matrix.csv
+08_25c36_next_step_plan.csv
+```
+
+Expected status:
+
+```text
+COREB_G1_OVER_NARROWING_ADJUSTMENT_PLAN_READY_AUDIT_ONLY_HUMAN_ACCEPTANCE_REQUIRED_BEFORE_DRY_RUN
+```
