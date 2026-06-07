@@ -44,6 +44,7 @@ NO_SIGNAL Discord notification remains forbidden.
 
 ```text
 docs/gold_v2/GOLD_V2_24AF_PAUSE_AND_CORE_LIVE_EVALUATOR_REFOCUS_20260607.md
+docs/gold_v2/GOLD_V2_COREB_LIVE_EVALUATOR_BLOCKER_CONFIRMATION_20260607.md
 docs/gold_v2/NEXT_CHAT_HANDOFF_GOLD_V2_COREA_COREB_MEDIUM_LIVE_RULES_20260603.md
 docs/gold_v2/NEXT_CHAT_HANDOFF_GOLD_V2_13A_13D_MEDIUM_TIER2_RECONCILIATION_20260605.md
 ```
@@ -103,8 +104,15 @@ B/C are partially executable but require:
 Current status:
 
 ```text
-historical_sot = allowed
+historical_sot = reproduced / allowed
 live_evaluator = blocked
+```
+
+The prior-chat review confirmed the same conclusion as the repository audits:
+
+```text
+CoreB historical backtest is reproduced.
+However, regenerating CoreB RR125_BUY_CONFLUENCE from OHLC as a live evaluator remains blocked because same_count / cluster_id / membership source-of-truth generation evidence is insufficient.
 ```
 
 Known blockers:
@@ -117,6 +125,15 @@ Approximate same_count is forbidden.
 ```
 
 25A must not reconstruct same_count by guessing windows/components.
+
+CoreB 25A classification should be:
+
+```text
+component = CoreB RR125_BUY_CONFLUENCE
+historical_status = REPRODUCED_HISTORICAL_SOT_ALLOWED
+live_evaluator_status = BLOCKED_SOURCE_CLUSTER_MEMBERSHIP_REQUIRED
+recommended_action = DO_NOT_MAP_COREB_TO_LIVE_EVALUATOR_YET
+```
 
 ### MEDIUM
 
