@@ -1,0 +1,46 @@
+# GOLD V2 25C16 CoreB selected-scope target review audit spec
+
+Date: 2026-06-07
+Step: `25C16_COREB_SELECTED_SCOPE_TARGET_REVIEW_AUDIT_ONLY`
+Mode: audit-only selected-scope comparison review
+
+## Purpose
+
+25C15 defined the selected-output policy scope:
+
+```text
+selected output policy: RR125_from_RR1_rules
+source-only policy: RR125_from_ALL_BUY_rules
+```
+
+25C16 reviews the 25C10 filter replay result again after limiting direct target comparison to selected-output policies only. This separates true selected-output mismatch from source-only policy rows.
+
+## Inputs
+
+```text
+FX_OUTPUTS/gold_v2_25c15_coreb_selected_policy_replay_contract_audit_only/02_25c15_coreb_selected_policy_replay_contract_summary.json
+FX_OUTPUTS/gold_v2_25c15_coreb_selected_policy_replay_contract_audit_only/06_25c15_target_policy_handling_contract.csv
+FX_OUTPUTS/gold_v2_25c10_coreb_target_filter_contract_replay_dry_run_audit_only/04_25c10_filter_replay_signal_rows.csv
+FX_OUTPUTS/gold_v2_25c7_coreb_target_compare_mismatch_triage_audit_only/02_25c7_coreb_target_compare_mismatch_triage_summary.json
+FX_OUTPUTS/gold_v2_25b3_coreb_source_shortlist_content_audit_only/gold_v2_25b3_shortlist_file_content_audit.csv
+```
+
+## Outputs
+
+```text
+00_不要_25c16_file_request_list.csv
+01_25c16_GOLD_V2_COREB_SELECTED_SCOPE_TARGET_REVIEW_AUDIT_ONLY_REPORT.md
+02_25c16_coreb_selected_scope_target_review_summary.json
+03_25c16_input_audit.csv
+04_25c16_selected_scope_policy_matrix.csv
+05_25c16_selected_scope_filter_compare_matrix.csv
+06_25c16_excluded_source_only_target_policy_matrix.csv
+07_25c16_selected_scope_mismatch_decision_matrix.csv
+08_25c16_next_step_plan.csv
+```
+
+Expected status:
+
+```text
+COREB_SELECTED_SCOPE_TARGET_REVIEW_COMPLETED_AUDIT_ONLY_SELECTED_SCOPE_MISMATCH_REVIEW_REQUIRED
+```
