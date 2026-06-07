@@ -201,6 +201,14 @@ gold_v2_25a_safety_matrix.csv
 gold_v2_25a_corea_coreb_medium_live_evaluator_readiness_summary.json
 ```
 
+Implemented supporting artifacts:
+
+```text
+gold_v2_25a_input_audit.csv
+gold_v2_25a_reference_doc_audit.csv
+gold_v2_25a_final_sot_count_audit.csv
+```
+
 ## 6. Success status
 
 Expected status:
@@ -244,4 +252,88 @@ source_identity_finalization_allowed_now = false
 live_evaluator_final_signal_allowed = false
 external_actions_allowed = false
 old_gold_disc8_quarantined = true
+```
+
+## 9. Implemented files
+
+25A is implemented by:
+
+```text
+scripts/gold_v2_runtime/audit_gold_v2_25a_corea_coreb_medium_live_evaluator_readiness_audit_only.py
+scripts/gold_v2_runtime/bat/25A_COREA_COREB_MEDIUM_LIVE_EVALUATOR_READINESS_AUDIT_ONLY.bat
+```
+
+Related implementation record:
+
+```text
+docs/gold_v2/GOLD_V2_25A_25B_READINESS_AND_COREB_CLUSTER_RECOVERY_IMPLEMENTATION_RECORD_20260607.md
+```
+
+25B strict spec:
+
+```text
+docs/gold_v2/GOLD_V2_25B_COREB_CLUSTER_SOURCE_RECOVERY_AUDIT_SPEC_20260607.md
+```
+
+## 10. Execution order
+
+Run 25A first:
+
+```text
+scripts/gold_v2_runtime/bat/25A_COREA_COREB_MEDIUM_LIVE_EVALUATOR_READINESS_AUDIT_ONLY.bat
+```
+
+Then run 25B:
+
+```text
+scripts/gold_v2_runtime/bat/25B_COREB_CLUSTER_SOURCE_RECOVERY_AUDIT_ONLY.bat
+```
+
+Do not run 24AG unless the user explicitly requests the paused 24-series branch.
+
+## 11. 25A success conditions
+
+25A passes when:
+
+```text
+total_stop_rows = 0
+required reference docs exist
+final SOT ledger exists
+final SOT rows = 529
+2025 rows = 346
+2026 rows = 183
+source breakdown matches frozen expectations
+safety flags remain disabled
+recommended primary next = 25B_COREB_CLUSTER_SOURCE_RECOVERY_AUDIT_ONLY
+```
+
+## 12. 25A stop conditions
+
+25A stops if:
+
+```text
+any required reference doc is missing
+final SOT ledger is missing
+final SOT count does not match 529
+dataset counts do not match 346 / 183
+source breakdown does not match frozen expected counts
+any safety condition is not audit-only/off
+```
+
+## 13. Explicitly still forbidden
+
+```text
+24AG continuation without explicit request
+source recovery execution
+source mutation
+source identity finalization
+live evaluator final signal
+Discord send
+MT5 order
+AI API
+live hook
+NO_SIGNAL Discord notification
+CoreB same_count approximation
+CoreA A gate approximation
+MEDIUM-only final signal substitution
 ```
