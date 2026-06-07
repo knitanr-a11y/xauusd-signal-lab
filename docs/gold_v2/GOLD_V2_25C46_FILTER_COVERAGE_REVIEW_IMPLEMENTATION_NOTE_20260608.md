@@ -110,6 +110,8 @@ From the repository root:
 scripts\gold_v2_runtime\bat\25C46_COREB_G1_FILTER_COVERAGE_REVIEW_AUDIT_ONLY.bat
 ```
 
+The BAT keeps the command window open with `pause` on both success and STOP/error paths, so the console remains visible until a key is pressed.
+
 Or:
 
 ```bat
