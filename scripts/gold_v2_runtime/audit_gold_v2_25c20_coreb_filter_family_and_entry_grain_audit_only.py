@@ -55,6 +55,12 @@ def family_name(x:str)->str:
     if "unique_origins" in s: return "unique_origins_only"
     if "same_count" in s: return "same_count_only"
     return "other"
+def fill_missing_numeric_only(df:pd.DataFrame)->pd.DataFrame:
+    out=df.copy()
+    numeric_cols=out.select_dtypes(include=["number"]).columns.tolist()
+    if numeric_cols:
+        out[numeric_cols]=out[numeric_cols].fillna(0)
+    return out
 
 def main(argv:Optional[Sequence[str]]=None)->int:
     ap=argparse.ArgumentParser(); ap.add_argument("--output-dir", default=None); args=ap.parse_args(argv)
@@ -83,13 +89,16 @@ def main(argv:Optional[Sequence[str]]=None)->int:
     signals["filter_family"]=signals["filter"].map(family_name); target["filter_family"]=target["filter"].map(family_name)
     sk=signals[["dataset","entry_time","policy","filter_family"]].drop_duplicates(); tk=target[["dataset","entry_time","policy","filter_family"]].drop_duplicates()
     fam=sk.merge(tk,on=["dataset","entry_time","policy","filter_family"],how="outer",indicator=True)
-    fam_m=fam.groupby(["policy","filter_family","_merge"],dropna=False).size().reset_index(name="rows")
+    fam["_merge"]=fam["_merge"].astype(str)
+    fam_m=fam.groupby(["policy","filter_family","_merge"],dropna=False, observed=False).size().reset_index(name="rows")
     write_csv(out/"04_25c20_filter_family_mismatch_matrix.csv", fam_m)
     s_entry=signals.groupby(["dataset","entry_time","policy"],dropna=False).agg(filter_rows=("filter","count"),filter_unique=("filter","nunique"),family_unique=("filter_family","nunique")).reset_index()
     t_entry=target.groupby(["dataset","entry_time","policy"],dropna=False).agg(filter_rows=("filter","count"),filter_unique=("filter","nunique"),family_unique=("filter_family","nunique")).reset_index()
     write_csv(out/"05_25c20_replay_entry_grain_distribution.csv", s_entry.describe(include="all").reset_index())
     write_csv(out/"06_25c20_target_entry_grain_distribution.csv", t_entry.describe(include="all").reset_index())
-    eg=s_entry.merge(t_entry,on=["dataset","entry_time","policy"],how="outer",suffixes=("_replay","_target"),indicator=True).fillna(0)
+    eg=s_entry.merge(t_entry,on=["dataset","entry_time","policy"],how="outer",suffixes=("_replay","_target"),indicator=True)
+    eg["_merge"]=eg["_merge"].astype(str)
+    eg=fill_missing_numeric_only(eg)
     eg_summary=eg["_merge"].value_counts(dropna=False).reset_index(); eg_summary.columns=["entry_compare_status","entry_rows"]
     write_csv(out/"07_25c20_entry_grain_compare_matrix.csv", eg_summary)
     fam_left=int((fam["_merge"]=="left_only").sum()); fam_right=int((fam["_merge"]=="right_only").sum()); entry_left=int((eg["_merge"]=="left_only").sum()); entry_right=int((eg["_merge"]=="right_only").sum())
