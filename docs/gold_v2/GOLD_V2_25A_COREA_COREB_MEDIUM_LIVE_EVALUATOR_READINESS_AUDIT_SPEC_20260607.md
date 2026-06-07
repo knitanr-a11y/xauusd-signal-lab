@@ -21,6 +21,13 @@ GLOBAL arbitration / feature parity / safety
 
 and decide which component can be safely mapped to live evaluator work next without approximate reimplementation.
 
+Important update:
+
+```text
+CoreB cluster recovery is now the primary blocker for the full CoreA/CoreB/MEDIUM live evaluator path.
+Proceeding with Medium-only work is still possible as a partial evaluator, but the full portfolio cannot be considered meaningful if CoreB same_count / cluster_id / membership semantics remain unrecovered.
+```
+
 ## 2. Non-goals
 
 25A must not:
@@ -45,6 +52,7 @@ NO_SIGNAL Discord notification remains forbidden.
 ```text
 docs/gold_v2/GOLD_V2_24AF_PAUSE_AND_CORE_LIVE_EVALUATOR_REFOCUS_20260607.md
 docs/gold_v2/GOLD_V2_COREB_LIVE_EVALUATOR_BLOCKER_CONFIRMATION_20260607.md
+docs/gold_v2/GOLD_V2_COREB_CLUSTER_RECOVERY_STRICT_PLAN_20260607.md
 docs/gold_v2/NEXT_CHAT_HANDOFF_GOLD_V2_COREA_COREB_MEDIUM_LIVE_RULES_20260603.md
 docs/gold_v2/NEXT_CHAT_HANDOFF_GOLD_V2_13A_13D_MEDIUM_TIER2_RECONCILIATION_20260605.md
 ```
@@ -106,6 +114,7 @@ Current status:
 ```text
 historical_sot = reproduced / allowed
 live_evaluator = blocked
+full_portfolio_live_path = blocked_until_cluster_recovered
 ```
 
 The prior-chat review confirmed the same conclusion as the repository audits:
@@ -132,7 +141,7 @@ CoreB 25A classification should be:
 component = CoreB RR125_BUY_CONFLUENCE
 historical_status = REPRODUCED_HISTORICAL_SOT_ALLOWED
 live_evaluator_status = BLOCKED_SOURCE_CLUSTER_MEMBERSHIP_REQUIRED
-recommended_action = DO_NOT_MAP_COREB_TO_LIVE_EVALUATOR_YET
+recommended_action = PRIORITIZE_25B_COREB_CLUSTER_SOURCE_RECOVERY_AUDIT_ONLY
 ```
 
 ### MEDIUM
@@ -142,6 +151,8 @@ Current status:
 ```text
 historical_sot_replay = OK
 live_evaluator = blocked
+partial_live_path = possible_after_feature_asof_and_tier2_reconciliation
+full_portfolio_dependency = CoreB and CoreA HIGH arbitration unresolved
 ```
 
 Known positives:
@@ -195,28 +206,30 @@ gold_v2_25a_corea_coreb_medium_live_evaluator_readiness_summary.json
 Expected status:
 
 ```text
-COREA_COREB_MEDIUM_LIVE_EVALUATOR_READINESS_REVIEW_READY_AUDIT_ONLY
+COREA_COREB_MEDIUM_LIVE_EVALUATOR_READINESS_REVIEW_READY_AUDIT_ONLY_COREB_CLUSTER_RECOVERY_REQUIRED
 ```
 
 This does not mean live evaluator is enabled.
-It only means the readiness matrix is complete.
+It only means the readiness matrix is complete and the CoreB cluster recovery priority is explicit.
 
 ## 7. Expected recommendation
 
-Based on current evidence, 25A is expected to recommend:
+Based on current evidence and the user direction, 25A is expected to recommend:
 
 ```text
-Primary next: 25B_MEDIUM_FEATURE_ASOF_PARITY_AND_TIER2_RECONCILIATION_AUDIT_ONLY
-Secondary: 25C_COREA_A_GATE_EXECUTABLE_SOURCE_FREEZE_AUDIT_ONLY
-Blocked: CoreB live evaluator until original clustering / membership evidence exists
+Primary next: 25B_COREB_CLUSTER_SOURCE_RECOVERY_AUDIT_ONLY
+Secondary: 25C_MEDIUM_FEATURE_ASOF_PARITY_AND_TIER2_RECONCILIATION_AUDIT_ONLY
+Parallel: 25D_COREA_A_GATE_EXECUTABLE_SOURCE_FREEZE_AUDIT_ONLY
+Blocked: full CoreA/CoreB/MEDIUM live evaluator until CoreB cluster/same_count/membership source-of-truth is recovered or CoreB is explicitly removed from the live portfolio by a later human decision.
 ```
 
 Rationale:
 
 ```text
-MEDIUM arbitration replay already matches final SOT, but needs feature/asof and TIER2 reconciliation.
+CoreB historical SOT is reproduced, but live regeneration is blocked by unrecovered same_count/cluster/membership semantics.
+A full-portfolio live evaluator that includes CoreB is not meaningful without exact CoreB cluster recovery.
+MEDIUM remains promising but is only a partial path unless HIGH/CoreB dependencies are resolved.
 CoreA needs A gate executable freeze before live mapping.
-CoreB cannot safely proceed to live because same_count semantics are not recovered.
 ```
 
 ## 8. Safety conditions
