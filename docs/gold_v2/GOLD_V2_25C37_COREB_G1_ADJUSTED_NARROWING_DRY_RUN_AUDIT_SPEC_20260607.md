@@ -1,0 +1,67 @@
+# GOLD V2 25C37 CoreB G1 adjusted narrowing dry-run audit spec
+
+Date: 2026-06-07
+Step: `25C37_COREB_G1_ADJUSTED_NARROWING_DRY_RUN_AUDIT_ONLY`
+Mode: audit-only dry-run
+
+## Human acceptance
+
+25C36 over-narrowing adjustment plan was explicitly accepted before this step.
+
+## Purpose
+
+Run audit-only G1 comparisons for the adjusted A001-A004 bundles created in 25C36.
+
+Variants:
+
+```text
+BASELINE_CURRENT
+A001_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC8
+A002_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC8U
+A003_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC8_PAIR
+A004_PRIMARY_PLUS_TOP_RETAINER_PLUS_SC10_PAIR
+```
+
+## Non-goals
+
+```text
+No source recovery.
+No source mutation.
+No live evaluator unblock.
+No final signal.
+No condition mutation.
+```
+
+## Inputs
+
+```text
+FX_OUTPUTS/gold_v2_25c36_coreb_g1_over_narrowing_adjustment_plan_audit_only/02_25c36_coreb_g1_over_narrowing_adjustment_plan_summary.json
+FX_OUTPUTS/gold_v2_25c36_coreb_g1_over_narrowing_adjustment_plan_audit_only/04_25c36_adjusted_bundle_candidate_matrix.csv
+FX_OUTPUTS/gold_v2_25c36_coreb_g1_over_narrowing_adjustment_plan_audit_only/05_25c36_adjusted_bundle_membership.csv
+FX_OUTPUTS/gold_v2_25c10_coreb_target_filter_contract_replay_dry_run_audit_only/04_25c10_filter_replay_signal_rows.csv
+FX_OUTPUTS/gold_v2_25c15_coreb_selected_policy_replay_contract_audit_only/02_25c15_coreb_selected_policy_replay_contract_summary.json
+FX_OUTPUTS/gold_v2_25c7_coreb_target_compare_mismatch_triage_audit_only/02_25c7_coreb_target_compare_mismatch_triage_summary.json
+FX_OUTPUTS/gold_v2_25b3_coreb_source_shortlist_content_audit_only/gold_v2_25b3_shortlist_file_content_audit.csv
+```
+
+## Outputs
+
+```text
+00_不要_25c37_file_request_list.csv
+01_25c37_GOLD_V2_COREB_G1_ADJUSTED_NARROWING_DRY_RUN_AUDIT_ONLY_REPORT.md
+02_25c37_coreb_g1_adjusted_narrowing_dry_run_summary.json
+03_25c37_input_audit.csv
+04_25c37_variant_filter_contract.csv
+05_25c37_variant_compare_matrix.csv
+06_25c37_variant_delta_matrix.csv
+07_25c37_variant_by_dataset_policy.csv
+08_25c37_best_variant_left_only_samples.csv
+09_25c37_acceptance_gate_matrix.csv
+10_25c37_next_step_plan.csv
+```
+
+Expected status when mismatch remains:
+
+```text
+COREB_G1_ADJUSTED_NARROWING_DRY_RUN_COMPLETED_AUDIT_ONLY_RESULT_REVIEW_REQUIRED
+```
