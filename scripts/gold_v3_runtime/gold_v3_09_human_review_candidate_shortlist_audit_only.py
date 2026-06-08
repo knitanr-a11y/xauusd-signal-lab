@@ -89,6 +89,27 @@ def input_inventory(paths:list[Path]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def strict_true(value: Any) -> bool:
+    """NaN/blank must be invalid; only explicit true is valid."""
+    try:
+        if pd.isna(value):
+            return False
+    except Exception:
+        pass
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() == "true"
+
+
+def nonempty_value(value: Any) -> bool:
+    try:
+        if pd.isna(value):
+            return False
+    except Exception:
+        pass
+    return str(value).strip() != ""
+
+
 def review_score(row: pd.Series) -> float:
     return float(row["positive_test_fold_rate"])*100.0 + float(row["test_lift_mean"])*10.0 + float(row["test_avg_result_mean"]) + math.log10(float(row["test_rows_total"])+1.0)
 
@@ -100,7 +121,10 @@ def reject_reason(row: pd.Series) -> str:
     if float(row.get("test_avg_result_mean",0)) <= 0: reasons.append("test_avg_not_positive")
     if float(row.get("test_lift_mean",0)) <= 0: reasons.append("lift_not_positive")
     if int(row.get("test_rows_total",0)) < MIN_ROWS: reasons.append("rows_lt_min")
-    if not bool(row.get("all_boundaries_valid", False)): reasons.append("boundary_invalid")
+    if not strict_true(row.get("all_boundaries_valid", False)):
+        reasons.append("boundary_invalid_or_missing")
+    if not nonempty_value(row.get("lower_values", "")) or not nonempty_value(row.get("upper_values", "")):
+        reasons.append("boundary_values_missing")
     return ";".join(reasons) if reasons else "PASS"
 
 
@@ -123,20 +147,22 @@ def main() -> int:
         stab08=pd.read_csv(paths[3])
         boundary_rows=pd.read_csv(paths[4])
         joined=stab07.merge(stab08[["profile_id","direction","feature_column","all_boundaries_valid","lower_values","upper_values"]], on=["profile_id","direction","feature_column"], how="left")
+        joined["boundary_strict_valid"] = joined["all_boundaries_valid"].apply(strict_true) & joined["lower_values"].apply(nonempty_value) & joined["upper_values"].apply(nonempty_value)
         joined["reject_reason"] = joined.apply(reject_reason, axis=1)
         joined["review_score"] = joined.apply(review_score, axis=1)
         shortlist=joined[joined["reject_reason"].eq("PASS")].copy().sort_values(["review_score","positive_test_fold_rate","test_lift_mean","test_avg_result_mean"], ascending=[False,False,False,False])
         rejected=joined[~joined["reject_reason"].eq("PASS")].copy().sort_values(["review_score"], ascending=False)
-        preview_keys=shortlist[["profile_id","direction","feature_column"]].drop_duplicates().head(30)
-        boundary_preview=boundary_rows.merge(preview_keys, on=["profile_id","direction","feature_column"], how="inner")
+        preview_keys=shortlist[["profile_id","direction","feature_column"]].drop_duplicates().head(30) if not shortlist.empty else pd.DataFrame(columns=["profile_id","direction","feature_column"])
+        boundary_preview=boundary_rows.merge(preview_keys, on=["profile_id","direction","feature_column"], how="inner") if not preview_keys.empty else pd.DataFrame()
     else:
         stab07=pd.DataFrame(); stab08=pd.DataFrame(); boundary_rows=pd.DataFrame(); joined=pd.DataFrame(); shortlist=pd.DataFrame(); rejected=pd.DataFrame(); boundary_preview=pd.DataFrame()
-    status="GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_READY_AUDIT_ONLY" if inputs_ok and upstream_ok and not shortlist.empty else ("GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_INPUT_REVIEW_REQUIRED_AUDIT_ONLY" if not (inputs_ok and upstream_ok) else "GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_BLOCKED_AUDIT_ONLY")
+    status="GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_READY_AUDIT_ONLY" if inputs_ok and upstream_ok and not shortlist.empty and bool(shortlist["boundary_strict_valid"].all()) else ("GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_INPUT_REVIEW_REQUIRED_AUDIT_ONLY" if not (inputs_ok and upstream_ok) else "GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_BLOCKED_AUDIT_ONLY")
     decision_df=pd.DataFrame([
         ["inputs_present",inputs_ok,True,"PASS" if inputs_ok else "FAIL"],
         ["upstream_07_08_ok",upstream_ok,True,"PASS" if upstream_ok else "FAIL"],
         ["candidate_stability_rows",len(joined),">0","PASS" if len(joined)>0 else "FAIL"],
         ["shortlist_rows",len(shortlist),">0","PASS" if len(shortlist)>0 else "FAIL"],
+        ["shortlist_boundary_strict_valid", bool(shortlist["boundary_strict_valid"].all()) if not shortlist.empty else False, True, "PASS" if (not shortlist.empty and bool(shortlist["boundary_strict_valid"].all())) else "FAIL"],
         ["boundary_preview_rows",len(boundary_preview),">0","PASS" if len(boundary_preview)>0 else "FAIL"],
         ["final_candidate_approval",False,False,"PASS"],
         ["threshold_finalization",False,False,"PASS"],
@@ -147,13 +173,13 @@ def main() -> int:
     ],columns=["decision_item","observed","required","status"])
     blocker_df=pd.DataFrame([
         ["G3-09-001","07/08 inputs","CLOSED" if inputs_ok and upstream_ok else "OPEN","HARD","07 stability and 08 boundary provenance required."],
-        ["G3-09-002","human review shortlist","CLOSED" if len(shortlist)>0 else "OPEN","HARD","Shortlist rows required for human review."],
+        ["G3-09-002","human review shortlist","CLOSED" if len(shortlist)>0 and (not shortlist.empty and bool(shortlist["boundary_strict_valid"].all())) else "OPEN","HARD","Shortlist rows require strict valid boundary provenance."],
         ["G3-09-003","final approval","CLOSED_BLOCKED_BY_POLICY","HARD","This step is review shortlist only; no final candidate approval."],
         ["G3-09-004","signal/live","CLOSED_BLOCKED_BY_POLICY","HARD","No signals or live integration."],
         ["G3-09-005","zip output","CLOSED_DISABLED","INFO","ZIP output disabled."],
         ["G3-09-006","external actions","CLOSED","HARD","No external actions performed."],
     ],columns=["blocker_id","component","status","severity","detail"])
-    summary={"created_utc":created,"step":STEP,"status":status,"audit_only":True,"source_recovery_approved":False,"candidate_stability_rows":int(len(joined)),"shortlist_rows":int(len(shortlist)),"rejected_rows":int(len(rejected)),"boundary_preview_rows":int(len(boundary_preview)),"top_shortlist_rows":shortlist.head(20).to_dict(orient="records") if not shortlist.empty else [],"final_candidate_approval":False,"threshold_finalization":False,"model_training":False,"signals_generated":False,"zip_output_created":False,"external_actions":ACTIONS}
+    summary={"created_utc":created,"step":STEP,"status":status,"audit_only":True,"source_recovery_approved":False,"candidate_stability_rows":int(len(joined)),"shortlist_rows":int(len(shortlist)),"rejected_rows":int(len(rejected)),"boundary_preview_rows":int(len(boundary_preview)),"shortlist_boundary_strict_valid":bool(shortlist["boundary_strict_valid"].all()) if not shortlist.empty else False,"top_shortlist_rows":shortlist.head(20).to_dict(orient="records") if not shortlist.empty else [],"final_candidate_approval":False,"threshold_finalization":False,"model_training":False,"signals_generated":False,"zip_output_created":False,"external_actions":ACTIONS}
     inv_df.to_csv(out/"gold_v3_09_input_inventory.csv",index=False,encoding="utf-8-sig")
     shortlist.to_csv(out/"gold_v3_09_human_review_candidate_shortlist.csv",index=False,encoding="utf-8-sig")
     rejected.to_csv(out/"gold_v3_09_rejected_candidate_diagnostics.csv",index=False,encoding="utf-8-sig")
@@ -161,7 +187,7 @@ def main() -> int:
     decision_df.to_csv(out/"gold_v3_09_decision_matrix.csv",index=False,encoding="utf-8-sig")
     blocker_df.to_csv(out/"gold_v3_09_blocker_matrix.csv",index=False,encoding="utf-8-sig")
     write_json(out/"gold_v3_09_summary.json",summary)
-    report="\n".join(["# GOLD V3 09 human review candidate shortlist audit-only report","",f"Created UTC: {created}",f"Status: `{status}`","","## Shortlist top rows",md(shortlist.head(40)),"","## Decision matrix",md(decision_df),"","## Blockers",md(blocker_df),"","## Safety","- GOLD V3 only; no V2 artifacts used.","- Human review shortlist only; no final approval.","- No threshold finalization, no model training, no signals.","- No ZIP output.","- External actions remain OFF."])
+    report="\n".join(["# GOLD V3 09 human review candidate shortlist audit-only report","",f"Created UTC: {created}",f"Status: `{status}`","","## Shortlist top rows",md(shortlist.head(40)),"","## Decision matrix",md(decision_df),"","## Blockers",md(blocker_df),"","## Safety","- GOLD V3 only; no V2 artifacts used.","- Human review shortlist only; no final approval.","- Shortlist requires strict valid boundary provenance.","- No threshold finalization, no model training, no signals.","- No ZIP output.","- External actions remain OFF."])
     (out/"GOLD_V3_09_HUMAN_REVIEW_CANDIDATE_SHORTLIST_AUDIT_ONLY_REPORT.md").write_text(report,encoding="utf-8")
     print(json.dumps({"status":status,"output_dir":str(out),"zip_output_created":False},ensure_ascii=False,indent=2))
     print("No ZIP, final candidate approval, threshold finalization, model training, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
