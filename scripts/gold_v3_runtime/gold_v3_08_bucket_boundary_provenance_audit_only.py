@@ -95,15 +95,26 @@ def edges_from_train(s: pd.Series) -> list[float]:
     return edges
 
 
-def bucket_bounds(edges: list[float], bucket_id: str) -> tuple[float | str, float | str, bool]:
+def bucket_bounds(edges: list[float], bucket_id: str) -> tuple[str, str, bool]:
     if len(edges) < 2 or not str(bucket_id).startswith("B"):
         return "", "", False
     idx = int(str(bucket_id)[1:]) - 1
     if idx < 0 or idx >= len(edges)-1:
         return "", "", False
-    lower = "-inf" if idx == 0 else edges[idx]
-    upper = "inf" if idx == len(edges)-2 else edges[idx+1]
+    lower = "-inf" if idx == 0 else f"{edges[idx]:.12g}"
+    upper = "inf" if idx == len(edges)-2 else f"{edges[idx+1]:.12g}"
     return lower, upper, True
+
+
+def join_unique_boundary_values(values: pd.Series) -> str:
+    """Return stable printable boundary values without mixing str/float comparisons."""
+    cleaned = []
+    for v in values.dropna().tolist():
+        if isinstance(v, float):
+            cleaned.append(f"{v:.12g}")
+        else:
+            cleaned.append(str(v))
+    return ";".join(sorted(set(cleaned), key=lambda x: (x not in {"-inf", "inf"}, x)))[:1000]
 
 
 def main() -> int:
@@ -147,14 +158,17 @@ def main() -> int:
                 "test_avg_result_usd": r.get("test_avg_result_usd", None), "test_lift_vs_baseline_avg_usd": r.get("test_lift_vs_baseline_avg_usd", None),
             })
         boundary_df = pd.DataFrame(rows)
-        stab = boundary_df.groupby(["profile_id","direction","feature_column"], dropna=False).agg(
-            folds=("fold_id","nunique"), valid_boundaries=("boundary_valid","sum"), train_rows_min=("train_rows","min"),
-            lower_values=("bucket_lower", lambda x: ";".join(map(str, sorted(set(x))))[:1000]),
-            upper_values=("bucket_upper", lambda x: ";".join(map(str, sorted(set(x))))[:1000]),
-            test_avg_result_mean=("test_avg_result_usd","mean"), test_lift_mean=("test_lift_vs_baseline_avg_usd","mean"),
-        ).reset_index()
-        stab["all_boundaries_valid"] = stab["folds"].eq(stab["valid_boundaries"])
-        stab = stab.sort_values(["all_boundaries_valid","test_lift_mean","test_avg_result_mean"], ascending=[False,False,False])
+        if not boundary_df.empty:
+            stab = boundary_df.groupby(["profile_id","direction","feature_column"], dropna=False).agg(
+                folds=("fold_id","nunique"), valid_boundaries=("boundary_valid","sum"), train_rows_min=("train_rows","min"),
+                lower_values=("bucket_lower", join_unique_boundary_values),
+                upper_values=("bucket_upper", join_unique_boundary_values),
+                test_avg_result_mean=("test_avg_result_usd","mean"), test_lift_mean=("test_lift_vs_baseline_avg_usd","mean"),
+            ).reset_index()
+            stab["all_boundaries_valid"] = stab["folds"].eq(stab["valid_boundaries"])
+            stab = stab.sort_values(["all_boundaries_valid","test_lift_mean","test_avg_result_mean"], ascending=[False,False,False])
+        else:
+            stab = pd.DataFrame()
     else:
         top=pd.DataFrame(); selected=pd.DataFrame(); boundary_df=pd.DataFrame(); stab=pd.DataFrame(); needed_feats=[]
     status = "GOLD_V3_08_BUCKET_BOUNDARY_PROVENANCE_READY_AUDIT_ONLY" if inputs_ok and upstream_ok and not boundary_df.empty and bool(boundary_df["boundary_valid"].all()) else ("GOLD_V3_08_BUCKET_BOUNDARY_PROVENANCE_INPUT_REVIEW_REQUIRED_AUDIT_ONLY" if not (inputs_ok and upstream_ok) else "GOLD_V3_08_BUCKET_BOUNDARY_PROVENANCE_BLOCKED_AUDIT_ONLY")
