@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import hashlib, json, zipfile
+import hashlib, json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -180,7 +180,6 @@ def main() -> int:
         m15 = pd.DataFrame()
         m5 = pd.DataFrame()
     contract_df, excluded_df, entry_df = build_contract(m15, m5) if inputs_ok else (pd.DataFrame(), pd.DataFrame(), pd.DataFrame())
-    contract_path = out / "gold_v3_02_label_contract.json"
     contract_obj = {
         "strategy_id": STRATEGY_ID,
         "feature_bar_timeframe": "M15",
@@ -197,8 +196,8 @@ def main() -> int:
         "ai_api_called": False,
         "features_created": False,
         "signals_generated": False,
+        "zip_output_created": False,
     }
-    write_json(contract_path, contract_obj)
     source_m15_rows = int(len(m15))
     source_m5_rows = int(len(m5))
     entry_universe_rows = int(len(entry_df))
@@ -228,6 +227,7 @@ def main() -> int:
         ["short_count", int(direction_counts.get("SHORT", 0))],
         ["outcome_not_evaluated_count", int(outcome_counts.get("NOT_EVALUATED_CONTRACT_ONLY", 0))],
         ["ai_api_called", False],
+        ["zip_output_created", False],
     ], columns=["metric", "value"])
     decision_df = pd.DataFrame([
         ["inputs_present", inputs_ok, True, "PASS" if inputs_ok else "FAIL"],
@@ -238,6 +238,7 @@ def main() -> int:
         ["features_created", False, False, "PASS"],
         ["signals_generated", False, False, "PASS"],
         ["ai_api_called", False, False, "PASS"],
+        ["zip_output_created", False, False, "PASS"],
         ["external_actions", False, False, "PASS"],
     ], columns=["decision_item", "observed", "required", "status"])
     blocker_df = pd.DataFrame([
@@ -245,7 +246,8 @@ def main() -> int:
         ["G3-02-002", "M5 entry open availability", "CLOSED" if not material_missing else "OPEN", "HARD", "Every contract entry_time must exist as native M5 open."],
         ["G3-02-003", "lookahead window availability", "REVIEW" if len(excluded_df) else "CLOSED", "INFO", "Late M15 bars can be excluded due insufficient M5 horizon."],
         ["G3-02-004", "outcome evaluation", "CLOSED_BLOCKED_BY_POLICY", "HARD", "02 is contract-only; no outcomes evaluated."],
-        ["G3-02-005", "external actions", "CLOSED", "HARD", "No external actions performed."],
+        ["G3-02-005", "zip output", "CLOSED_DISABLED", "INFO", "ZIP output disabled by user request."],
+        ["G3-02-006", "external actions", "CLOSED", "HARD", "No external actions performed."],
     ], columns=["blocker_id", "component", "status", "severity", "detail"])
     summary = {
         "created_utc": created,
@@ -265,6 +267,7 @@ def main() -> int:
         "features_created": False,
         "labels_evaluated": False,
         "signals_generated": False,
+        "zip_output_created": False,
         "external_actions": ACTIONS,
     }
     inv_df.to_csv(out / "gold_v3_02_input_inventory.csv", index=False, encoding="utf-8-sig")
@@ -273,6 +276,7 @@ def main() -> int:
     excluded_df.to_csv(out / "gold_v3_02_excluded_entry_times.csv", index=False, encoding="utf-8-sig")
     decision_df.to_csv(out / "gold_v3_02_decision_matrix.csv", index=False, encoding="utf-8-sig")
     blocker_df.to_csv(out / "gold_v3_02_blocker_matrix.csv", index=False, encoding="utf-8-sig")
+    write_json(out / "gold_v3_02_label_contract.json", contract_obj)
     write_json(out / "gold_v3_02_summary.json", summary)
     report = "\n".join([
         "# GOLD V3 02 label contract audit-only report",
@@ -284,6 +288,7 @@ def main() -> int:
         f"- strategy_id: `{STRATEGY_ID}`",
         "- M15 closed-bar entry contract, M5 first-touch evaluation contract, TP10/SL5/H28.",
         "- Outcomes are not evaluated in this step.",
+        "- ZIP output is disabled.",
         "",
         "## Audit summary",
         md(audit_summary),
@@ -300,18 +305,12 @@ def main() -> int:
         "## Safety",
         "- GOLD V3 only; no V2 artifacts used.",
         "- No features, no evaluated labels/outcomes, no candidates, no signals.",
+        "- No ZIP package is written.",
         "- Discord/MT5/AI/live/final remain OFF.",
     ])
     (out / "GOLD_V3_02_LABEL_CONTRACT_AUDIT_ONLY_REPORT.md").write_text(report, encoding="utf-8")
-    zip_path = v3_output_root() / f"{OUT_NAME}.zip"
-    if zip_path.exists():
-        zip_path.unlink()
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for p in out.iterdir():
-            if p.is_file():
-                z.write(p, arcname=p.name)
-    print(json.dumps({"status": status, "output_dir": str(out), "zip": str(zip_path)}, ensure_ascii=False, indent=2))
-    print("No features, evaluated labels, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
+    print(json.dumps({"status": status, "output_dir": str(out), "zip_output_created": False}, ensure_ascii=False, indent=2))
+    print("No ZIP, features, evaluated labels, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
     return 0
 
 
