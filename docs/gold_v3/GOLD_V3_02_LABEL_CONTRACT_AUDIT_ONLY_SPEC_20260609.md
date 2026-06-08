@@ -41,20 +41,30 @@ GOLD_V3_01B_NATIVE_CANDLE_USE_READY_WITH_GAP_GUARDS_AUDIT_ONLY
 
 The first clean V3 label contract is deliberately simple and fixed. It is not optimized.
 
+Important unit clarification:
+
 ```text
-strategy_id = GOLD_V3_LABEL_BASE_M15_CLOSE_M5_FIRST_TOUCH_TP10_SL5_H28_V1
+TP/SL unit = XAUUSD price-distance USD, not pips.
+TP 10.0 means entry_price +/- 10.0 on the GOLD# price scale.
+SL 5.0 means entry_price -/+ 5.0 on the GOLD# price scale.
+Example LONG entry 3300.00 => TP 3310.00, SL 3295.00.
+```
+
+```text
+strategy_id = GOLD_V3_LABEL_BASE_M15_CLOSE_M5_FIRST_TOUCH_USDPRICE_TP10_SL5_H28_V1
 entry_time = feature_bar_open_utc + 15 minutes
 feature_timeframe = M15 closed bar
 execution/evaluation timeframe = native M5
 entry_price_source = native M5 open at entry_time
 directions = LONG, SHORT
-TP = 10.0 USD
-SL = 5.0 USD
+TP price distance = 10.0 USD on XAUUSD/GOLD# price scale
+SL price distance = 5.0 USD on XAUUSD/GOLD# price scale
 horizon_m15_bars = 28
 horizon_minutes = 420
 same_bar_priority = SL_FIRST
 outcome = NOT_EVALUATED_CONTRACT_ONLY in this step
 AI API = not called
+ZIP output = disabled
 ```
 
 Direction-specific target prices:
@@ -129,11 +139,7 @@ gold_v3_02_decision_matrix.csv
 gold_v3_02_blocker_matrix.csv
 ```
 
-A zip package may also be written to:
-
-```text
-Files/FX_OUTPUTS/gold_v3/02_label_contract_audit_only.zip
-```
+ZIP output is disabled by user request. GOLD V3 scripts must not create zip packages unless explicitly requested.
 
 ## Audit method
 
@@ -149,6 +155,7 @@ entry_time uniqueness count
 direction counts
 outcome value counts
 AI API called = false
+ZIP output created = false
 ```
 
 ## Status names
@@ -175,9 +182,11 @@ GOLD_V3_02_LABEL_CONTRACT_READY_AUDIT_ONLY
 
 - GOLD V3 only.
 - Do not read or reuse GOLD V2 selected/source/final/arbitration artifacts.
+- TP/SL are XAUUSD USD price-distance values, not pips.
 - No features.
 - No evaluated labels or outcomes.
 - No candidate exploration.
 - No signals.
+- No ZIP output unless explicitly requested.
 - No Discord, MT5, AI API, live hook, live evaluator, or final signal.
 - NO_SIGNAL must not notify Discord.
