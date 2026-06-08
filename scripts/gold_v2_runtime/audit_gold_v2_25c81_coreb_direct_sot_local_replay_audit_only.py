@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """GOLD V2 25C81: CoreB direct SOT local replay audit-only.
 
-This is the local-official replay step after 25C80 sync.
-It uses CoreB 13C selected top-ledger 125 rows as the direct historical SOT.
-A002 is deliberately not used for WR/PF or CoreB performance.
+Corrected local replay:
+- RR bucket accepts both RR125 and RR1.25 textual forms.
+- Final SOT joins normalize CoreB numeric keys so 5 and 5.0 match.
+- A002 is deliberately not used for CoreB WR/PF or performance.
 
 No Discord, MT5, AI API, live hook, live evaluator enablement, or final signal.
 """
@@ -38,7 +39,9 @@ INPUTS = {
     "local_sync_summary": "25c80_local_sync_summary.json",
 }
 
-COREB_SPECIFIC_JOIN = ["dataset", "entry_time", "coreb_cluster_id", "coreb_profit_r"]
+COREB_KEY_COLUMNS = ["dataset", "entry_time", "coreb_cluster_id", "coreb_profit_r"]
+TOP_KEY_COLUMNS = ["dataset", "entry_time", "cluster_id", "top_candidate_id", "profit", "filter", "policy"]
+RR125_ACCEPTED = {"RR125", "RR1.25", "1.25", "1.250000", "125"}
 
 
 def repo_root() -> Path:
@@ -171,12 +174,67 @@ def input_inventory(paths: dict[str, Path | None]) -> pd.DataFrame:
             row["sha256"] = sha256_file(p)
             if p.suffix.lower() == ".csv":
                 try:
+                    df0 = pd.read_csv(p, nrows=0)
                     row["row_count"] = int(len(pd.read_csv(p)))
-                    row["columns"] = ";".join(pd.read_csv(p, nrows=0).columns)
+                    row["columns"] = ";".join(df0.columns)
                 except Exception as exc:
                     row["read_error"] = repr(exc)
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def normalize_timestamp(s: pd.Series) -> pd.Series:
+    parsed = pd.to_datetime(s, errors="coerce")
+    out = parsed.dt.strftime("%Y-%m-%d %H:%M:%S")
+    return out.fillna(s.astype(str).str.strip())
+
+
+def normalize_int_like(s: pd.Series) -> pd.Series:
+    n = pd.to_numeric(s, errors="coerce")
+    out = n.round(0).astype("Int64").astype(str)
+    return out.where(n.notna(), s.astype(str).str.strip())
+
+
+def normalize_float_like(s: pd.Series, ndigits: int = 6) -> pd.Series:
+    n = pd.to_numeric(s, errors="coerce")
+    out = n.round(ndigits).map(lambda v: f"{v:.{ndigits}f}" if pd.notna(v) else "")
+    return out.where(n.notna(), s.astype(str).str.strip())
+
+
+def normalize_top_key_frame(df: pd.DataFrame) -> pd.DataFrame:
+    d = df.copy()
+    if "dataset" in d.columns:
+        d["dataset"] = normalize_int_like(d["dataset"])
+    if "entry_time" in d.columns:
+        d["entry_time"] = normalize_timestamp(d["entry_time"])
+    for c in ["cluster_id", "top_candidate_id"]:
+        if c in d.columns:
+            d[c] = normalize_int_like(d[c])
+    if "profit" in d.columns:
+        d["profit"] = normalize_float_like(d["profit"], 6)
+    for c in ["filter", "policy"]:
+        if c in d.columns:
+            d[c] = d[c].astype(str).str.strip()
+    return d
+
+
+def normalize_coreb_key_frame(df: pd.DataFrame) -> pd.DataFrame:
+    d = df.copy()
+    if "dataset" in d.columns:
+        d["dataset"] = normalize_int_like(d["dataset"])
+    if "entry_time" in d.columns:
+        d["entry_time"] = normalize_timestamp(d["entry_time"])
+    if "coreb_cluster_id" in d.columns:
+        d["coreb_cluster_id"] = normalize_int_like(d["coreb_cluster_id"])
+    if "coreb_profit_r" in d.columns:
+        d["coreb_profit_r"] = normalize_float_like(d["coreb_profit_r"], 6)
+    return d
+
+
+def key_set(df: pd.DataFrame, cols: list[str]) -> set[tuple[str, ...]]:
+    if df.empty or any(c not in df.columns for c in cols):
+        return set()
+    return set(map(tuple, df[cols].astype(str).to_numpy()))
 
 
 def build_coreb_metrics(selected: pd.DataFrame) -> pd.DataFrame:
@@ -193,29 +251,33 @@ def build_coreb_metrics(selected: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def normalize_key_df(df: pd.DataFrame, cols: list[str]) -> set[tuple[str, ...]]:
-    if df.empty or any(c not in df.columns for c in cols):
-        return set()
-    return set(map(tuple, df[cols].astype(str).to_numpy()))
+def rr125_mask(series: pd.Series) -> pd.Series:
+    normalized = series.astype(str).str.strip().str.upper().str.replace("_", "", regex=False)
+    accepted = {v.upper().replace("_", "") for v in RR125_ACCEPTED}
+    return normalized.isin(accepted)
 
 
 def top_filter_parity(selected: pd.DataFrame, top: pd.DataFrame) -> pd.DataFrame:
     if selected.empty or top.empty:
         return pd.DataFrame([{"check_id": "C81-T000", "check": "input_present", "status": "FAIL", "detail": "selected or top missing"}])
+
     target = top[(top["policy"].astype(str).eq("RR125_from_RR1_rules")) & (top["filter"].astype(str).eq("same_count>=15"))].copy()
-    key_cols = [c for c in ["dataset", "entry_time", "cluster_id", "top_candidate_id", "profit", "filter", "policy"] if c in selected.columns and c in target.columns]
-    selected_set = normalize_key_df(selected, key_cols)
-    target_set = normalize_key_df(target, key_cols)
+    key_cols = [c for c in TOP_KEY_COLUMNS if c in selected.columns and c in target.columns]
+    selected_set = key_set(normalize_top_key_frame(selected), key_cols)
+    target_set = key_set(normalize_top_key_frame(target), key_cols)
+    diff = selected_set.symmetric_difference(target_set)
+
     same_count_num = pd.to_numeric(selected.get("same_count"), errors="coerce") if "same_count" in selected.columns else pd.Series(dtype="float64")
-    rows = [
+    rr_ok = rr125_mask(selected["rr_bucket"]) if "rr_bucket" in selected.columns else pd.Series([False] * len(selected))
+
+    return pd.DataFrame([
         {"check_id": "C81-T001", "check": "selected_rows", "observed": int(len(selected)), "expected": 125, "status": "PASS" if len(selected) == 125 else "FAIL"},
         {"check_id": "C81-T002", "check": "top_filter_rows", "observed": int(len(target)), "expected": 125, "status": "PASS" if len(target) == 125 else "FAIL"},
-        {"check_id": "C81-T003", "check": "selected_equals_top_filter_set_diff", "observed": int(len(selected_set.symmetric_difference(target_set))), "expected": 0, "status": "PASS" if not selected_set.symmetric_difference(target_set) and key_cols else "FAIL", "key_cols": ";".join(key_cols)},
+        {"check_id": "C81-T003", "check": "selected_equals_top_filter_set_diff", "observed": int(len(diff)), "expected": 0, "status": "PASS" if not diff and key_cols else "FAIL", "key_cols": ";".join(key_cols)},
         {"check_id": "C81-T004", "check": "all_buy", "observed": int(selected.get("top_direction", pd.Series(dtype=str)).astype(str).str.upper().eq("BUY").sum()), "expected": 125, "status": "PASS" if "top_direction" in selected.columns and selected["top_direction"].astype(str).str.upper().eq("BUY").all() else "FAIL"},
-        {"check_id": "C81-T005", "check": "all_rr125", "observed": int(selected.get("rr_bucket", pd.Series(dtype=str)).astype(str).eq("RR125").sum()), "expected": 125, "status": "PASS" if "rr_bucket" in selected.columns and selected["rr_bucket"].astype(str).eq("RR125").all() else "FAIL"},
+        {"check_id": "C81-T005", "check": "all_rr125_or_rr1_25", "observed": int(rr_ok.sum()), "expected": 125, "status": "PASS" if len(rr_ok) == len(selected) and bool(rr_ok.all()) else "FAIL", "accepted_values": ";".join(sorted(RR125_ACCEPTED))},
         {"check_id": "C81-T006", "check": "same_count_min15", "observed": int((same_count_num >= 15).sum()) if not same_count_num.empty else 0, "expected": 125, "status": "PASS" if not same_count_num.empty and (same_count_num >= 15).all() else "FAIL"},
-    ]
-    return pd.DataFrame(rows)
+    ])
 
 
 def final_sot_join_parity(selected: pd.DataFrame, coreb_final: pd.DataFrame, final_portfolio: pd.DataFrame) -> pd.DataFrame:
@@ -223,51 +285,49 @@ def final_sot_join_parity(selected: pd.DataFrame, coreb_final: pd.DataFrame, fin
     if selected.empty:
         return pd.DataFrame([{"check_id": "C81-F000", "check": "selected_present", "status": "FAIL"}])
 
-    selected_key = selected.rename(columns={"cluster_id": "coreb_cluster_id", "profit": "coreb_profit_r"})
-    selected_set = normalize_key_df(selected_key, COREB_SPECIFIC_JOIN)
+    selected_key = selected.rename(columns={"cluster_id": "coreb_cluster_id", "profit": "coreb_profit_r"}).copy()
+    selected_set = key_set(normalize_coreb_key_frame(selected_key), COREB_KEY_COLUMNS)
 
-    final_coreb_set = normalize_key_df(coreb_final, COREB_SPECIFIC_JOIN)
+    final_set = key_set(normalize_coreb_key_frame(coreb_final), COREB_KEY_COLUMNS)
+    inter_final = selected_set.intersection(final_set)
     rows.append({
         "check_id": "C81-F001",
-        "check": "selected_rows_in_13c_final_sot_by_coreb_key",
-        "observed": int(len(selected_set.intersection(final_coreb_set))),
+        "check": "selected_rows_in_13c_final_sot_by_normalized_coreb_key",
+        "observed": int(len(inter_final)),
         "expected": 125,
-        "status": "PASS" if len(selected_set.intersection(final_coreb_set)) == 125 else "FAIL",
-        "key_cols": ";".join(COREB_SPECIFIC_JOIN),
+        "status": "PASS" if len(inter_final) == 125 else "FAIL",
+        "key_cols": ";".join(COREB_KEY_COLUMNS),
     })
     rows.append({
         "check_id": "C81-F002",
         "check": "13c_final_sot_coreb_key_rows_in_selected",
-        "observed": int(len(final_coreb_set.intersection(selected_set))),
+        "observed": int(len(final_set.intersection(selected_set))),
         "expected": 125,
-        "status": "PASS" if len(final_coreb_set.intersection(selected_set)) == 125 else "FAIL",
-        "key_cols": ";".join(COREB_SPECIFIC_JOIN),
+        "status": "PASS" if len(final_set.intersection(selected_set)) == 125 else "FAIL",
+        "key_cols": ";".join(COREB_KEY_COLUMNS),
     })
 
-    if not final_portfolio.empty:
-        coreb_cols_present = all(c in final_portfolio.columns for c in COREB_SPECIFIC_JOIN)
-        fp_coreb = final_portfolio.copy() if coreb_cols_present else pd.DataFrame()
-        if coreb_cols_present:
-            fp_coreb = fp_coreb[fp_coreb["coreb_cluster_id"].notna() & fp_coreb["coreb_profit_r"].notna()].copy()
-        fp_set = normalize_key_df(fp_coreb, COREB_SPECIFIC_JOIN)
+    if not final_portfolio.empty and all(c in final_portfolio.columns for c in COREB_KEY_COLUMNS):
+        fp_coreb = final_portfolio[final_portfolio["coreb_cluster_id"].notna() & final_portfolio["coreb_profit_r"].notna()].copy()
+        fp_set = key_set(normalize_coreb_key_frame(fp_coreb), COREB_KEY_COLUMNS)
         rows.append({
             "check_id": "C81-F003",
-            "check": "selected_rows_in_final_portfolio_coreb_rows_by_coreb_key",
+            "check": "selected_rows_in_final_portfolio_coreb_rows_by_normalized_coreb_key",
             "observed": int(len(selected_set.intersection(fp_set))),
             "expected": 125,
             "status": "PASS" if len(selected_set.intersection(fp_set)) == 125 else "FAIL",
-            "key_cols": ";".join(COREB_SPECIFIC_JOIN),
+            "key_cols": ";".join(COREB_KEY_COLUMNS),
         })
         rows.append({
             "check_id": "C81-F004",
-            "check": "final_portfolio_coreb_rows_in_selected_by_coreb_key",
+            "check": "final_portfolio_coreb_rows_in_selected_by_normalized_coreb_key",
             "observed": int(len(fp_set.intersection(selected_set))),
             "expected": 125,
             "status": "PASS" if len(fp_set.intersection(selected_set)) == 125 else "FAIL",
-            "key_cols": ";".join(COREB_SPECIFIC_JOIN),
+            "key_cols": ";".join(COREB_KEY_COLUMNS),
         })
     else:
-        rows.append({"check_id": "C81-F003", "check": "final_portfolio_present", "status": "FAIL"})
+        rows.append({"check_id": "C81-F003", "check": "final_portfolio_coreb_key_present", "status": "FAIL"})
 
     component_counts = coreb_final.get("component", pd.Series(dtype=str)).astype(str).value_counts().to_dict() if not coreb_final.empty and "component" in coreb_final.columns else {}
     rows.append({
@@ -288,15 +348,14 @@ def final_sot_join_parity(selected: pd.DataFrame, coreb_final: pd.DataFrame, fin
 
 
 def readiness_matrix(all_pass: bool) -> pd.DataFrame:
-    rows = [
+    return pd.DataFrame([
         ["CoreB_direct_sot_metrics", "READY" if all_pass else "REVIEW", "CoreB 125 selected top-ledger metrics recomputed locally."],
         ["CoreB_topledger_filter_parity", "PASS" if all_pass else "REVIEW", "Selected 125 rows equal rr125_top_ledgers RR125_from_RR1_rules / same_count>=15 if checks pass."],
-        ["CoreB_final_sot_join", "PASS" if all_pass else "REVIEW", "CoreB-specific key join required: dataset+entry_time+coreb_cluster_id+coreb_profit_r."],
+        ["CoreB_final_sot_join", "PASS" if all_pass else "REVIEW", "CoreB-specific normalized key: dataset+entry_time+coreb_cluster_id+coreb_profit_r."],
         ["A002_in_coreb_main_path", "DEMOTED", "A002 is not used for CoreB WR/PF."],
         ["CoreB_live_evaluator", "BLOCKED", "Cluster representative logic still missing."],
         ["live_final_signal", "OFF", "No external/final actions."],
-    ]
-    return pd.DataFrame(rows, columns=["gate", "status", "detail"])
+    ], columns=["gate", "status", "detail"])
 
 
 def guardrail_matrix() -> pd.DataFrame:
@@ -354,8 +413,14 @@ def build_report(summary: dict[str, Any], inv: pd.DataFrame, metrics_df: pd.Data
         "",
         "## Important",
         "",
-        "CoreB direct historical SOT is locally replayed only if all PASS checks succeed. CoreB live evaluator remains blocked because same_count/cluster representative logic is not recovered.",
+        "This corrected replay accepts RR1.25 as the local rr_bucket label for RR125 and normalizes CoreB numeric join keys so integer and float representations match. CoreB live evaluator remains blocked because same_count/cluster representative logic is not recovered.",
     ])
+
+
+def status_all_pass(df: pd.DataFrame) -> bool:
+    if df.empty or "status" not in df.columns:
+        return False
+    return bool((df["status"].astype(str) == "PASS").all())
 
 
 def main() -> int:
@@ -376,8 +441,8 @@ def main() -> int:
 
     required_inputs_present = bool(inv["exists"].all()) if not inv.empty else False
     sync_ready = bool(sync.get("coreb_direct_sot_inputs_ready") is True and sync.get("local_official_status") == "25C79_A002_ID_JOIN_BLOCKED")
-    top_pass = bool((top_parity["status"] == "PASS").all()) if not top_parity.empty and "status" in top_parity else False
-    final_pass = bool(final_parity["status"].isin(["PASS"]).all()) if not final_parity.empty and "status" in final_parity else False
+    top_pass = status_all_pass(top_parity)
+    final_pass = status_all_pass(final_parity)
     metric_total = metrics_df[metrics_df.get("dataset", pd.Series(dtype=str)).astype(str).eq("total")] if not metrics_df.empty and "dataset" in metrics_df.columns else pd.DataFrame()
     metrics_pass = bool(len(metric_total) and int(metric_total.iloc[0].get("count", -1)) == 125)
 
