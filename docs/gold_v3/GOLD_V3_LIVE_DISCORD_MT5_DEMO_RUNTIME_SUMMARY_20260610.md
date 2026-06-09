@@ -4,7 +4,51 @@ Created: 2026-06-10 JST
 Last reviewed: 2026-06-10 JST  
 Repository: `knitanr-a11y/xauusd-signal-lab`
 
-## 0. Current policy
+## 0. New chat handoff: read this first
+
+This document is the current handoff for the GOLD V3 live Discord / MT5 demo runtime path.
+
+Continue from these facts:
+
+- GOLD V3 ranked candidates from Stage36 are the only active source for the current live notification path.
+- GOLD V2 / old GOLD / DISC8 remain quarantined and must not be used as fallback.
+- Discord notification is for signal detection only.
+- MT5 execution is demo-only.
+- MT5 execution results must not be posted to Discord.
+- MT5 execution results are saved to files for later verification.
+- Discord loop and MT5 demo executor loop are separate BATs.
+- NO_SIGNAL must not notify Discord.
+- Same signal must not be notified or executed every minute.
+- Both loops use post-minute delay: Discord at 5 seconds, MT5 at 7 seconds.
+- Error/stop conditions in either loop should notify Discord.
+
+Current runtime files and BATs:
+
+```text
+scripts/gold_v3_runtime/gold_v3_37_ranked_live_discord_notify.py
+scripts/gold_v3_runtime/gold_v3_38_live_minute_loop.py
+scripts/gold_v3_runtime/gold_v3_39_live_runtime_layout.py
+scripts/gold_v3_runtime/gold_v3_40_mt5_demo_executor_loop.py
+
+scripts/gold_v3_runtime/bat/GOLD_V3_38_LIVE_MINUTE_LOOP_DISCORD.bat
+scripts/gold_v3_runtime/bat/GOLD_V3_39_LIVE_RUNTIME_LAYOUT.bat
+scripts/gold_v3_runtime/bat/GOLD_V3_40_MT5_DEMO_EXECUTOR_LOOP.bat
+```
+
+Minimum run order:
+
+```text
+1. Run GOLD_V3_39_LIVE_RUNTIME_LAYOUT.bat once.
+2. Confirm Stage36 outputs exist.
+3. Prepare a small live snapshot CSV.
+4. Start GOLD_V3_38_LIVE_MINUTE_LOOP_DISCORD.bat.
+5. Confirm live_runtime/current/latest_signal.json updates.
+6. Start GOLD_V3_40_MT5_DEMO_EXECUTOR_LOOP.bat only after demo MT5 terminal is ready.
+```
+
+Do not treat the current setup as fully unattended-ready until the unverified list in section 13 is checked.
+
+## 1. Current policy
 
 GOLD V3 was moved from pure audit-only candidate review into a controlled live-runtime preparation path.
 
@@ -22,7 +66,7 @@ Important policy decisions:
 - Both Discord and MT5 loops use post-minute lag to avoid reading incomplete candle/snapshot data.
 - Error/stop conditions in either loop should notify Discord.
 
-## 0.1 Review result after implementation check
+## 2. Review result after implementation check
 
 The document was reviewed against the current Stage37/38/39/40 files.
 
@@ -47,7 +91,7 @@ Important caveats discovered during review:
 4. The actual live snapshot producer is not implemented here. These stages consume the snapshot only.
 5. Multiple-process lock enforcement is still a known hardening item. Do not start duplicate BAT instances.
 
-## 1. Ranked candidates fixed by Stage36
+## 3. Ranked candidates fixed by Stage36
 
 Stage36 created the final ranked naming/contract packet from Stage35 outputs.
 
@@ -66,7 +110,7 @@ Ranked candidate order:
 | R03 | 1 | `R03_P1_R1_ONLY_CD60_PRUNE_111` |
 | R04 | 4 | `R04_P4_R1_ONLY_CD60_PRUNE_115` |
 | R05 | 9 | `R05_P9_MAIN_R1_R2_CD90_PRUNE_133` |
-| R06 | 11 | `R06_P11_MAIN_R1_R2_CD120_PRUNE_132` |
+| R06 | 11 | `R06_P11_MAIN_R1_R2_CD90_PRUNE_132` |
 | R07 | 13 | `R07_P13_MAIN_R1_R2_CD120_PRUNE_122` |
 
 Stage36 output location:
@@ -84,7 +128,7 @@ gold_v3_36_summary.json
 GOLD_V3_36_FINAL_RANKED_CANDIDATE_CONTRACT_AUDIT_ONLY_REPORT.md
 ```
 
-## 2. Discord notification format
+## 4. Discord notification format
 
 User-specified signal notification format:
 
@@ -114,7 +158,7 @@ TP/SL: 2335.120 / 2350.120
 
 MT5 result notifications must not be sent to Discord. Only signal detection and fatal/error conditions are posted.
 
-## 3. Stage37: ranked live Discord notifier
+## 5. Stage37: ranked live Discord notifier
 
 Script:
 
@@ -158,7 +202,7 @@ FX_OUTPUTS/gold_v3/live_runtime/current/latest_status.json
 FX_OUTPUTS/gold_v3/live_runtime/logs/signal_events_YYYYMMDD.csv
 ```
 
-## 4. Stage38: minute loop for Discord notification
+## 6. Stage38: minute loop for Discord notification
 
 Script:
 
@@ -217,7 +261,7 @@ Default max retained loop rows:
 10080 rows = 60 minutes * 24 hours * 7 days
 ```
 
-## 5. Stage39: live runtime layout
+## 7. Stage39: live runtime layout
 
 Script:
 
@@ -272,7 +316,7 @@ Policy:
 - MT5 result Discord notification is disabled.
 - Notification BAT and MT5 demo executor BAT are separated.
 
-## 6. Stage40: MT5 demo executor loop
+## 8. Stage40: MT5 demo executor loop
 
 Script:
 
@@ -330,7 +374,7 @@ FX_OUTPUTS/gold_v3/live_runtime/logs/mt5_results_YYYYMMDD.csv
 FX_OUTPUTS/gold_v3/live_runtime/current/latest_mt5_result.json
 ```
 
-## 7. Execution order
+## 9. Execution order
 
 Initial setup, run once:
 
@@ -359,7 +403,7 @@ Recommended runtime order:
 5. Start Stage40 MT5 demo executor loop.
 6. Verify `mt5_results_YYYYMMDD.csv` and `latest_mt5_result.json`.
 
-## 8. Required live snapshot
+## 10. Required live snapshot
 
 Stage37 expects a live snapshot CSV from the live side.
 
@@ -386,7 +430,7 @@ features used by final_filter_contract.csv
 optional tp_price/sl_price or tp/sl distance fields
 ```
 
-## 9. Logging policy
+## 11. Logging policy
 
 Do not create a new folder every minute.
 
@@ -410,7 +454,7 @@ Do not append full NO_SIGNAL detail every minute. Use counters in `latest_status
 
 Stage38 compact loop log keeps a rolling cap of 10080 rows by default.
 
-## 10. Known remaining concerns
+## 12. Known remaining concerns
 
 These items should be verified before trusting the live demo loop for decision-making:
 
@@ -429,7 +473,36 @@ These items should be verified before trusting the live demo loop for decision-m
 13. Before unattended use, verify that MT5 direct execution does not proceed from a signal whose Discord signal notification failed.
 14. `latest_discord_dispatch.csv` should be monitored during test runs to ensure it does not grow unexpectedly; if it grows, Stage37 should be changed to overwrite that current file.
 
-## 11. Key commits
+## 13. Unverified / not yet tested locally
+
+The following items are not confirmed by this chat and must be checked on the user's Windows/MT5 environment:
+
+1. Stage39 BAT actually creates `FX_OUTPUTS/gold_v3/live_runtime/` in the expected location on the user's machine.
+2. The live snapshot CSV exists at one of the Stage37 default paths, or Stage38 is launched with `--live-snapshot` pointing to the real file.
+3. The live snapshot producer writes a complete row after candle close and before Stage38's 5 second read.
+4. The live snapshot is written atomically enough to avoid partial reads.
+5. Stage37 can match live rows to Stage36 candidates using `packet_row`, `source_scenario_key`, or `variant_key`.
+6. Stage37 has all feature columns needed by `gold_v3_36_final_filter_contract.csv`.
+7. Stage37 Discord signal notification succeeds with the real `GOLD_V3_DISCORD_WEBHOOK_URL`.
+8. Stage37 NO_SIGNAL remains silent.
+9. Stage37 duplicate suppression prevents repeated notification for the same signal over multiple minutes.
+10. Stage37's `latest_signal.json` contains the intended latest selected signal and a suitable `discord_status`.
+11. Stage40 does not execute if `latest_signal.json` is NO_SIGNAL or stale.
+12. Stage40 does not execute if the previous Discord signal notification failed.
+13. Stage40 imports Python `MetaTrader5` successfully in the same Python environment used by the BAT.
+14. MT5 terminal is open, logged in, and connected to the intended demo account.
+15. Stage40 correctly detects and blocks non-demo accounts on the user's terminal.
+16. Broker symbol name is exactly `XAUUSD`, or the BAT/script is adjusted to the broker symbol.
+17. Default lot size `0.01` is acceptable for the user's demo test.
+18. TP/SL prices are accepted by the broker and not rejected due to stops level, freeze level, digits, or filling mode.
+19. `ORDER_FILLING_IOC` is accepted by the broker; if rejected, filling mode needs adjustment.
+20. Stage40 duplicate execution guard prevents repeated order sends across repeated minute loops.
+21. Error Discord notifications are actually received for Stage38 and Stage40 failures/stops.
+22. Multiple BAT instances are not running simultaneously; strict lock enforcement is not fully implemented yet.
+23. Daily/result logs remain small enough for long operation.
+24. `latest_discord_dispatch.csv` does not grow unexpectedly.
+
+## 14. Key commits
 
 - Stage36 ranked candidate contract script: `7c65ff65824f74cff308b55fb362eb78c990021e`
 - Stage36 BAT: `5455650c217a5972e165bd8d4ae28ecf51fb5fb2`
@@ -445,8 +518,9 @@ These items should be verified before trusting the live demo loop for decision-m
 - Stage38 error Discord notifications: `762b0414c4b246c9f53f185ec873fda1c9a1e08a`
 - Stage40 MT5 demo direct send + error Discord: `359959fba44394323d00099f56f6bc7f31c7f309`
 - Stage40 BAT direct demo flag: `a5e60d17405b8d5571454d5185d3f3ac6c318226`
+- Summary document review correction: `c16f7f2be5d314a5049159aa2fc1e93292912e33`
 
-## 12. Next recommended checks
+## 15. Next recommended checks
 
 Before leaving this running unattended:
 
