@@ -104,9 +104,9 @@ def build_once(args,repo):
     snap=live/'gold_v3_live_candidate_snapshot.csv'
     tmp=snap.with_suffix('.tmp')
     wcsv(tmp,rows,SNAP); tmp.replace(snap)
-    review=[{'review_key':'status','value':status,'detail':reason},{'review_key':'m5_path','value':str(m5p),'detail':'input'},{'review_key':'h1_path','value':str(h1p),'detail':'input currently inventoried'},{'review_key':'h4_path','value':str(h4p),'detail':'input'},{'review_key':'snapshot_rows','value':len(rows),'detail':str(snap)}]
+    review=[{'review_key':'status','value':status,'detail':reason},{'review_key':'m5_path','value':str(m5p),'detail':'input'},{'review_key':'h1_path','value':str(h1p),'detail':'input currently inventoried'},{'review_key':'h4_path','value':str(h4p),'detail':'input'},{'review_key':'snapshot_rows','value':len(rows),'detail':str(snap)},{'review_key':'delay_seconds','value':args.delay_seconds,'detail':'post-minute read delay'}]
     wcsv(out/'gold_v3_41_review_matrix.csv',review,REV)
-    summary={'created_at_utc':now(),'step':STEP,'status':status,'reason':reason,'m5_path':str(m5p),'h1_path':str(h1p),'h4_path':str(h4p),'snapshot_path':str(snap),'snapshot_rows':len(rows),'fallback_direction':args.fallback_direction,'warning':'This builder does not reconstruct historical entry rules; it only creates live feature rows for Stage37. Do not use fallback direction without manual approval.'}
+    summary={'created_at_utc':now(),'step':STEP,'status':status,'reason':reason,'m5_path':str(m5p),'h1_path':str(h1p),'h4_path':str(h4p),'snapshot_path':str(snap),'snapshot_rows':len(rows),'fallback_direction':args.fallback_direction,'delay_seconds_after_minute':args.delay_seconds,'warning':'This builder does not reconstruct historical entry rules; it only creates live feature rows for Stage37. Do not use fallback direction without manual approval.'}
     wjson(out/'gold_v3_41_summary.json',summary)
     print(json.dumps(summary,ensure_ascii=False,indent=2)); return 0 if status in [READY,NO_SIGNAL] else 2
 def next_tick(delay):
@@ -119,7 +119,7 @@ def sleep_until(ts):
         if left<=0: return
         time.sleep(min(left,0.25))
 def main(argv=None):
-    ap=argparse.ArgumentParser(); ap.add_argument('--repo-root',default=''); ap.add_argument('--m5',default=''); ap.add_argument('--h1',default=''); ap.add_argument('--h4',default=''); ap.add_argument('--fallback-direction',default=''); ap.add_argument('--delay-seconds',type=int,default=3); ap.add_argument('--loop',action='store_true'); ap.add_argument('--run-once',action='store_true')
+    ap=argparse.ArgumentParser(); ap.add_argument('--repo-root',default=''); ap.add_argument('--m5',default=''); ap.add_argument('--h1',default=''); ap.add_argument('--h4',default=''); ap.add_argument('--fallback-direction',default=''); ap.add_argument('--delay-seconds',type=int,default=4); ap.add_argument('--loop',action='store_true'); ap.add_argument('--run-once',action='store_true')
     args=ap.parse_args(argv); repo=Path(args.repo_root).resolve() if args.repo_root else repo_default()
     if not args.loop and not args.run_once: args.run_once=True
     try:
