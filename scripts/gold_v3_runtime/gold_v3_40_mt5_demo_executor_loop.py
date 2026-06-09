@@ -20,6 +20,25 @@ def jst(dt): return (dt+__import__('datetime').timedelta(hours=9)).strftime('%Y-
 def repo_default(): return Path(__file__).resolve().parents[2]
 def files_root(repo): return repo.parents[1] if len(repo.parents)>=2 else repo.parent
 def root(repo): return files_root(repo)/'FX_OUTPUTS'/'gold_v3'
+def load_env_file(path):
+    if not path.exists() or not path.is_file(): return False
+    try:
+        for raw in path.read_text(encoding='utf-8-sig').splitlines():
+            line=raw.strip()
+            if not line or line.startswith('#') or '=' not in line: continue
+            k,v=line.split('=',1); k=k.strip(); v=v.strip().strip('"').strip("'")
+            if k and k not in os.environ: os.environ[k]=v
+        return True
+    except Exception: return False
+def load_runtime_env(repo):
+    paths=[files_root(repo)/'.env',repo/'.env',root(repo)/'.env']
+    loaded=[]; seen=set()
+    for p in paths:
+        s=str(p)
+        if s in seen: continue
+        seen.add(s)
+        if load_env_file(p): loaded.append(s)
+    return loaded
 def wjson(p,o): p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(o,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
 def rjson(p): return json.loads(p.read_text(encoding='utf-8')) if p.exists() else {}
 def wcsv_append(p,row,fields):
@@ -75,6 +94,7 @@ def send_demo_order(args,sig):
         tick=mt5.symbol_info_tick(symbol)
         if tick is None: return 'MT5_TICK_FAILED',str(mt5.last_error()),'',''
         side=str(sig.get('direction','')).upper()
+        if side not in ['BUY','SELL']: return 'MT5_BLOCKED_BAD_DIRECTION',f'direction={side}','',''
         typ=mt5.ORDER_TYPE_BUY if side=='BUY' else mt5.ORDER_TYPE_SELL
         price=tick.ask if side=='BUY' else tick.bid
         req={'action':mt5.TRADE_ACTION_DEAL,'symbol':symbol,'volume':fnum(sig.get('volume'),args.volume),'type':typ,'price':float(price),'sl':fnum(sig.get('sl_price')),'tp':fnum(sig.get('tp_price')),'deviation':args.deviation,'magic':args.magic,'comment':f"GOLDV3_{sig.get('rank','')}_{sig.get('packet_row','')}"[:31],'type_time':mt5.ORDER_TIME_GTC,'type_filling':mt5.ORDER_FILLING_IOC}
@@ -96,6 +116,8 @@ def run_once(args,repo,run_id,scheduled):
         status=BLOCKED; reason='latest_signal.json not found; run GOLD_V3_39 first and notification loop before MT5 executor'
     elif str(sig.get('status','')).upper() not in ['SIGNAL','SELECTED_FOR_DISCORD','DISCORD_SENT','READY']:
         status=NO_SIGNAL; reason=f"no executable signal status={sig.get('status','')}"
+    elif args.require_discord_success and str(sig.get('discord_status','')).upper() not in ['HTTP_200','HTTP_204']:
+        status=BLOCKED; reason=f"discord_status not successful: {sig.get('discord_status','')}"
     else:
         key=str(sig.get('dedupe_key',''))
         if not key:
@@ -119,13 +141,13 @@ def run_once(args,repo,run_id,scheduled):
         except Exception as e: err_notify=f'ERROR_NOTIFY_FAILED:{e.__class__.__name__}:{e}'
     wcsv_append(out/'gold_v3_40_loop_runs.csv',{'run_id':run_id,'scheduled_at_utc':datetime.fromtimestamp(scheduled,tz=timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),'started_at_utc':start.replace(microsecond=0).isoformat().replace('+00:00','Z'),'finished_at_utc':finish.replace(microsecond=0).isoformat().replace('+00:00','Z'),'elapsed_seconds':round(elapsed,6),'status':status,'reason':reason,'error_discord_status':err_notify},LOOP_FIELDS)
     wjson(live/'current'/'latest_mt5_result.json',result_row)
-    summary={'created_at_utc':now(),'step':STEP,'status':READY if status in ['PENDING_DEMO_BRIDGE',NO_SIGNAL,'MT5_ORDER_DONE'] else status,'delay_seconds_after_minute':args.delay_seconds,'mt5_result_discord_notify':False,'error_discord_notify':bool(args.notify_errors_to_discord),'result_log_only':True,'direct_mt5_enabled':bool(args.enable_mt5_demo_order),'last_result':result_row}
+    summary={'created_at_utc':now(),'step':STEP,'status':READY if status in ['PENDING_DEMO_BRIDGE',NO_SIGNAL,'MT5_ORDER_DONE'] else status,'delay_seconds_after_minute':args.delay_seconds,'mt5_result_discord_notify':False,'error_discord_notify':bool(args.notify_errors_to_discord),'env_files_loaded_count':len(args.loaded_env_files),'result_log_only':True,'direct_mt5_enabled':bool(args.enable_mt5_demo_order),'require_discord_success':bool(args.require_discord_success),'last_result':result_row}
     wjson(out/'gold_v3_40_summary.json',summary)
     return status
 
 def main(argv=None):
-    ap=argparse.ArgumentParser(); ap.add_argument('--repo-root',default=''); ap.add_argument('--delay-seconds',type=int,default=7); ap.add_argument('--loop',action='store_true'); ap.add_argument('--run-once',action='store_true'); ap.add_argument('--symbol',default='XAUUSD'); ap.add_argument('--volume',type=float,default=0.01); ap.add_argument('--deviation',type=int,default=30); ap.add_argument('--magic',type=int,default=370040); ap.add_argument('--enable-mt5-demo-order',action='store_true'); ap.add_argument('--discord-webhook-env',default='GOLD_V3_DISCORD_WEBHOOK_URL'); ap.add_argument('--discord-webhook-url',default=''); ap.add_argument('--notify-errors-to-discord',action='store_true',default=True); ap.add_argument('--no-error-discord',dest='notify_errors_to_discord',action='store_false')
-    args=ap.parse_args(argv); repo=Path(args.repo_root).resolve() if args.repo_root else repo_default()
+    ap=argparse.ArgumentParser(); ap.add_argument('--repo-root',default=''); ap.add_argument('--delay-seconds',type=int,default=7); ap.add_argument('--loop',action='store_true'); ap.add_argument('--run-once',action='store_true'); ap.add_argument('--symbol',default='XAUUSD'); ap.add_argument('--volume',type=float,default=0.01); ap.add_argument('--deviation',type=int,default=30); ap.add_argument('--magic',type=int,default=370040); ap.add_argument('--enable-mt5-demo-order',action='store_true'); ap.add_argument('--require-discord-success',action='store_true',default=True); ap.add_argument('--allow-mt5-without-discord-success',dest='require_discord_success',action='store_false'); ap.add_argument('--discord-webhook-env',default='GOLD_V3_DISCORD_WEBHOOK_URL'); ap.add_argument('--discord-webhook-url',default=''); ap.add_argument('--notify-errors-to-discord',action='store_true',default=True); ap.add_argument('--no-error-discord',dest='notify_errors_to_discord',action='store_false')
+    args=ap.parse_args(argv); repo=Path(args.repo_root).resolve() if args.repo_root else repo_default(); args.loaded_env_files=load_runtime_env(repo)
     if not args.loop and not args.run_once: args.run_once=True
     run_id=0
     try:
@@ -135,10 +157,10 @@ def main(argv=None):
     except KeyboardInterrupt:
         try: post_error(args,'GOLD V3 MT5 LOOP STOPPED','MT5 demo executor loop was stopped by KeyboardInterrupt.')
         except Exception: pass
-        wjson(root(repo)/OUT/'gold_v3_40_summary.json',{'created_at_utc':now(),'step':STEP,'status':'STOPPED_BY_USER'}); return 0
+        wjson(root(repo)/OUT/'gold_v3_40_summary.json',{'created_at_utc':now(),'step':STEP,'status':'STOPPED_BY_USER','env_files_loaded_count':len(args.loaded_env_files)}); return 0
     except Exception as e:
         out=root(repo)/OUT; out.mkdir(parents=True,exist_ok=True)
         try: post_error(args,'GOLD V3 MT5 LOOP EXCEPTION',f'{e.__class__.__name__}: {e}\n{traceback.format_exc()}')
         except Exception: pass
-        wjson(out/'gold_v3_40_summary.json',{'created_at_utc':now(),'step':STEP,'status':ERR,'blocked_reason':f'{e.__class__.__name__}: {e}'}); (out/'gold_v3_40_exception.txt').write_text(traceback.format_exc(),encoding='utf-8'); print(traceback.format_exc(),file=sys.stderr); return 1
+        wjson(out/'gold_v3_40_summary.json',{'created_at_utc':now(),'step':STEP,'status':ERR,'blocked_reason':f'{e.__class__.__name__}: {e}','env_files_loaded_count':len(args.loaded_env_files)}); (out/'gold_v3_40_exception.txt').write_text(traceback.format_exc(),encoding='utf-8'); print(traceback.format_exc(),file=sys.stderr); return 1
 if __name__=='__main__': raise SystemExit(main())
