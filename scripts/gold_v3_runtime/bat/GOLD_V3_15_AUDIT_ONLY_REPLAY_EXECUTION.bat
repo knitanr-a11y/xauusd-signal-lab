@@ -6,6 +6,9 @@ rem Runtime BAT location: scripts\gold_v3_runtime\bat\
 rem This BAT executes only the Stage 15 audit-only replay from existing GOLD V3 Stage 14 and Stage 05 artifacts.
 rem It must not approve final candidates, finalize thresholds, train models, generate signals, create ZIP output,
 rem call AI APIs, notify Discord, place MT5 orders, or enable live hooks/evaluators/final signals.
+rem
+rem 2026-06-09 fix: run through gold_v3_15_audit_only_replay_execution_fixed_runner.py
+rem to patch the sha256_file sentinel bug in the original Stage 15 module.
 
 set "EXIT_CODE=1"
 
@@ -19,7 +22,7 @@ cd /d "%~dp0\..\..\.."
 if errorlevel 1 goto FATAL_CD
 
 set "REPO_ROOT=%CD%"
-set "SCRIPT_PATH=scripts\gold_v3_runtime\gold_v3_15_audit_only_replay_execution.py"
+set "SCRIPT_PATH=scripts\gold_v3_runtime\gold_v3_15_audit_only_replay_execution_fixed_runner.py"
 
 echo [GOLD_V3_15] repo_root=%REPO_ROOT%
 echo [GOLD_V3_15] script=%SCRIPT_PATH%
