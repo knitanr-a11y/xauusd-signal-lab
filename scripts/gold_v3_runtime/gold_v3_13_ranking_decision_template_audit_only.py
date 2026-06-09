@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""GOLD V3 13 ranking decision template audit-only runtime script."""
+"""GOLD V3 13 ranking decision template audit-only runtime script.
+
+This script is intentionally audit-only. It creates a ranking-oriented human
+review template from GOLD V3 12 outputs. It never approves candidates, runs
+replay, trains models, generates signals, creates ZIP files, or calls external
+systems.
+"""
 
 from __future__ import annotations
 
@@ -15,18 +21,19 @@ import traceback
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Tuple
+from typing import Any, Iterable, Sequence
 
+STEP = "GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY"
 STAGE12_READY_STATUS = "GOLD_V3_12_DEPLOYABILITY_REVIEW_PACKET_READY_AUDIT_ONLY"
 READY_STATUS = "GOLD_V3_13_RANKING_DECISION_TEMPLATE_READY_AUDIT_ONLY"
 BLOCKED_STATUS = "GOLD_V3_13_RANKING_DECISION_TEMPLATE_BLOCKED_AUDIT_ONLY"
 EXCEPTION_STATUS = "GOLD_V3_13_RANKING_DECISION_TEMPLATE_EXCEPTION_AUDIT_ONLY"
 EXPECTED_PACKET_ROWS = 8
+OUT_NAME = "13_ranking_decision_template_audit_only"
+UPSTREAM_NAME = "12_deployability_review_packet_audit_only"
 ALLOWED_DECISIONS = "APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY | REJECT | REQUEST_MORE_AUDIT"
-INPUT_REL = Path("Files") / "FX_OUTPUTS" / "gold_v3" / "12_deployability_review_packet_audit_only"
-OUTPUT_REL = Path("Files") / "FX_OUTPUTS" / "gold_v3" / "13_ranking_decision_template_audit_only"
 FALLBACK_ESTIMATED_TRADE_DAYS = 151.0
-FALLBACK_ESTIMATED_TRADE_DAYS_SOURCE = "fallback_from_gold_v3_12_summary_input_preview_rows_proxy; not_exact_calendar_days; recompute_exactly_in_replay"
+FALLBACK_ESTIMATED_TRADE_DAYS_SOURCE = "proxy_from_stage12_input_preview_rows; not_exact_calendar_days; recompute_exactly_in_replay"
 
 FALSE_FLAGS = {
     "auto_approval": False,
@@ -55,10 +62,15 @@ TEMPLATE_FIELDS = [
     "human_decision", "allowed_decisions", "human_note", "reviewer", "reviewed_at_utc",
 ]
 GROUP_FIELDS = [
-    "candidate_group_id", "group_rows", "profiles", "direction_values", "feature_columns", "condition_preview",
-    "best_profile_id_by_proxy", "best_rank_by_proxy", "best_pf_winrate_priority_score",
+    "candidate_group_id", "group_rank", "group_rows", "profiles", "direction_values", "feature_columns",
+    "condition_preview", "best_profile_id_by_proxy", "best_rank_by_proxy", "best_pf_winrate_priority_score",
     "max_narrowing_potential_score", "total_test_rows_proxy_sum", "max_estimated_trades_per_day",
     "risk_flags_union", "same_condition_overlap_note", "human_decision", "allowed_decisions", "human_note",
+]
+DEFERRED_FIELDS = [
+    "source_deferred_row_number", "readiness_label", "profile_id", "direction", "feature_column",
+    "rule_expression_preview", "risk_flags", "deferred_reason", "suggested_next_audit", "human_decision",
+    "allowed_decisions", "human_note",
 ]
 BLOCKER_FIELDS = ["blocker_id", "blocker_name", "status", "detail"]
 DECISION_FIELDS = ["decision_key", "value", "detail"]
@@ -73,6 +85,30 @@ def repo_root_default() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def files_root(repo_root: Path) -> Path:
+    # Match the path convention used by earlier GOLD V3 runtime scripts.
+    return repo_root.parents[1] if len(repo_root.parents) >= 2 else repo_root.parent
+
+
+def v3_root_candidates(repo_root: Path) -> list[Path]:
+    primary = files_root(repo_root) / "FX_OUTPUTS" / "gold_v3"
+    legacy = repo_root / "Files" / "FX_OUTPUTS" / "gold_v3"
+    candidates: list[Path] = []
+    for p in [primary, legacy]:
+        if p not in candidates:
+            candidates.append(p)
+    return candidates
+
+
+def select_v3_root(repo_root: Path) -> tuple[Path, str]:
+    candidates = v3_root_candidates(repo_root)
+    for p in candidates:
+        upstream = p / UPSTREAM_NAME
+        if (upstream / "gold_v3_12_summary.json").exists() or (upstream / "gold_v3_12_deployability_review_packet.csv").exists():
+            return p, "selected_existing_stage12_root"
+    return candidates[0], "selected_primary_gold_v3_root_no_stage12_inputs_found"
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -81,33 +117,33 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def read_json(path: Path) -> Dict[str, Any]:
+def read_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def read_csv(path: Path) -> List[Dict[str, str]]:
+def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
 
 
-def write_json(path: Path, obj: Dict[str, Any]) -> None:
+def write_json(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2, sort_keys=True)
         f.write("\n")
 
 
-def write_csv(path: Path, rows: Sequence[Dict[str, Any]], fields: Sequence[str]) -> None:
+def write_csv(path: Path, rows: Sequence[dict[str, Any]], fields: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as f:
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(fields), extrasaction="ignore")
         writer.writeheader()
         for row in rows:
             writer.writerow({k: row.get(k, "") for k in fields})
 
 
-def as_float(row: Dict[str, Any], key: str, default: float = 0.0) -> float:
+def as_float(row: dict[str, Any], key: str, default: float = 0.0) -> float:
     value = row.get(key, "")
     if value in (None, ""):
         return default
@@ -118,11 +154,11 @@ def as_float(row: Dict[str, Any], key: str, default: float = 0.0) -> float:
         return default
 
 
-def as_int(row: Dict[str, Any], key: str, default: int = 0) -> int:
+def as_int(row: dict[str, Any], key: str, default: int = 0) -> int:
     return int(round(as_float(row, key, float(default))))
 
 
-def first_present(row: Dict[str, Any], keys: Iterable[str], default: str = "") -> str:
+def first_present(row: dict[str, Any], keys: Iterable[str], default: str = "") -> str:
     for key in keys:
         value = row.get(key)
         if value not in (None, ""):
@@ -144,11 +180,11 @@ def normalize(value: float, values: Iterable[float]) -> float:
     return clamp((value - lo) / (hi - lo))
 
 
-def infer_expr(row: Dict[str, Any]) -> str:
+def infer_expr(row: dict[str, Any]) -> str:
     return first_present(row, ["rule_expression_preview", "rule_expression", "condition", "expression"], "")
 
 
-def infer_feature(row: Dict[str, Any]) -> str:
+def infer_feature(row: dict[str, Any]) -> str:
     explicit = first_present(row, ["feature_column", "feature", "rule_feature", "column", "metric"], "")
     if explicit:
         return explicit
@@ -159,7 +195,7 @@ def infer_feature(row: Dict[str, Any]) -> str:
     return "UNKNOWN_FEATURE"
 
 
-def infer_profile(row: Dict[str, Any]) -> str:
+def infer_profile(row: dict[str, Any]) -> str:
     explicit = first_present(row, ["profile_id", "strategy_id", "candidate_id", "tp_sl_profile"], "")
     if explicit:
         return explicit
@@ -168,15 +204,15 @@ def infer_profile(row: Dict[str, Any]) -> str:
     return match.group(0) if match else "UNKNOWN_PROFILE"
 
 
-def infer_direction(row: Dict[str, Any]) -> str:
+def infer_direction(row: dict[str, Any]) -> str:
     return first_present(row, ["direction", "side"], "UNKNOWN_DIRECTION")
 
 
-def signature(row: Dict[str, Any]) -> str:
+def signature(row: dict[str, Any]) -> str:
     return f"{infer_direction(row)}||{infer_feature(row)}||{infer_expr(row)}"
 
 
-def group_id(row: Dict[str, Any]) -> str:
+def group_id(row: dict[str, Any]) -> str:
     feature = infer_feature(row)
     expr = infer_expr(row)
     if feature == "h1_atr56" or "h1_atr56" in expr:
@@ -205,7 +241,7 @@ def frequency_bucket(tpd: float) -> str:
     return "UNKNOWN_FREQUENCY_PROXY"
 
 
-def recommended_bucket(row: Dict[str, Any]) -> str:
+def recommended_bucket(row: dict[str, Any]) -> str:
     risk = str(row.get("risk_flags", ""))
     priority = float(row.get("pf_winrate_priority_score", 0.0))
     narrowing = float(row.get("narrowing_potential_score", 0.0))
@@ -229,7 +265,7 @@ def md(value: Any) -> str:
     return str(value).replace("\n", " ").replace("\r", " ").replace("|", "/")
 
 
-def inventory_rows(inputs: Sequence[Tuple[str, Path]]) -> List[Dict[str, Any]]:
+def inventory_rows(inputs: Sequence[tuple[str, Path]]) -> list[dict[str, Any]]:
     rows = []
     for label, path in inputs:
         rows.append({
@@ -242,7 +278,7 @@ def inventory_rows(inputs: Sequence[Tuple[str, Path]]) -> List[Dict[str, Any]]:
     return rows
 
 
-def blockers(status_ready: bool, packet_ok: bool, deferred_ok: bool, template_ok: bool, family_ok: bool, h1_ok: bool) -> List[Dict[str, Any]]:
+def blockers(status_ready: bool, packet_ok: bool, deferred_ok: bool, template_ok: bool, family_ok: bool, h1_ok: bool) -> list[dict[str, Any]]:
     def c(ok: bool) -> str:
         return "CLOSED" if ok else "OPEN_BLOCKER"
     return [
@@ -260,8 +296,9 @@ def blockers(status_ready: bool, packet_ok: bool, deferred_ok: bool, template_ok
     ]
 
 
-def decision_rows() -> List[Dict[str, Any]]:
+def decision_rows(selected_root: Path, root_selection_reason: str) -> list[dict[str, Any]]:
     return [
+        {"decision_key": "selected_gold_v3_output_root", "value": str(selected_root), "detail": root_selection_reason},
         {"decision_key": "auto_approval", "value": False, "detail": "stage 13 never auto-approves"},
         {"decision_key": "final_candidate_approval", "value": False, "detail": "blocked by policy"},
         {"decision_key": "threshold_finalization", "value": False, "detail": "blocked by policy"},
@@ -274,7 +311,7 @@ def decision_rows() -> List[Dict[str, Any]]:
     ]
 
 
-def build_rows(packet: Sequence[Dict[str, str]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], bool]:
+def build_rows(packet: Sequence[dict[str, str]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], bool]:
     sig_count = defaultdict(int)
     for row in packet:
         sig_count[signature(row)] += 1
@@ -353,7 +390,7 @@ def build_rows(packet: Sequence[Dict[str, str]]) -> Tuple[List[Dict[str, Any]], 
     for rank, row in enumerate(output, 1):
         row["rank"] = rank
 
-    grouped: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in output:
         grouped[str(row["candidate_group_id"])].append(row)
 
@@ -380,12 +417,42 @@ def build_rows(packet: Sequence[Dict[str, str]]) -> Tuple[List[Dict[str, Any]], 
             "human_note": "",
         })
     groups.sort(key=lambda r: (float(r["best_pf_winrate_priority_score"]), float(r["max_narrowing_potential_score"])), reverse=True)
+    for idx, group in enumerate(groups, 1):
+        group["group_rank"] = idx
     has_h1 = any(r["candidate_group_id"] == "GROUP_H1_ATR56_HIGH_VOL" for r in output)
     h1_ok = not has_h1 or any(g["candidate_group_id"] == "GROUP_H1_ATR56_HIGH_VOL" and int(g["group_rows"]) >= 2 and "same entry condition" in str(g["same_condition_overlap_note"]) for g in groups)
     return output, groups, h1_ok
 
 
-def report(summary: Dict[str, Any], rows: Sequence[Dict[str, Any]], groups: Sequence[Dict[str, Any]], blocker_rows: Sequence[Dict[str, Any]]) -> str:
+def build_deferred_rows(deferred: Sequence[dict[str, str]]) -> list[dict[str, Any]]:
+    rows = []
+    for i, src in enumerate(deferred, 1):
+        readiness = first_present(src, ["readiness_label"], "")
+        risk = first_present(src, ["risk_flags"], "none") or "none"
+        if "UNSTABLE" in readiness:
+            suggestion = "REQUEST_MORE_AUDIT_BOUNDARY_OR_BUCKET_STABILITY"
+        elif "RAW_PRICE" in readiness or has_risk(risk, "raw_price"):
+            suggestion = "DEFER_RAW_PRICE_LEVEL_DO_NOT_DEPLOY"
+        else:
+            suggestion = "DEFER_DIAGNOSTIC_ONLY"
+        rows.append({
+            "source_deferred_row_number": i,
+            "readiness_label": readiness,
+            "profile_id": infer_profile(src),
+            "direction": infer_direction(src),
+            "feature_column": infer_feature(src),
+            "rule_expression_preview": infer_expr(src),
+            "risk_flags": risk,
+            "deferred_reason": readiness or risk,
+            "suggested_next_audit": suggestion,
+            "human_decision": "PENDING_HUMAN_REVIEW",
+            "allowed_decisions": ALLOWED_DECISIONS,
+            "human_note": "",
+        })
+    return rows
+
+
+def report(summary: dict[str, Any], rows: Sequence[dict[str, Any]], groups: Sequence[dict[str, Any]], blocker_rows: Sequence[dict[str, Any]]) -> str:
     lines = [
         "# GOLD V3 13 ranking decision template audit-only report", "",
         f"Created UTC: `{summary.get('created_at_utc', '')}`",
@@ -393,9 +460,12 @@ def report(summary: Dict[str, Any], rows: Sequence[Dict[str, Any]], groups: Sequ
         "## Scope", "",
         "This stage creates a ranking-oriented audit-only decision template from the GOLD V3 12 deployability packet.",
         "No approval, replay, training, signal generation, ZIP output, AI API, Discord, MT5, live hook, live evaluator, or final signal action was performed.", "",
+        "## Path resolution", "",
+        f"- selected_gold_v3_output_root: `{summary.get('selected_gold_v3_output_root', '')}`",
+        f"- path_resolution_note: `{summary.get('path_resolution_note', '')}`", "",
         "## Counts", "",
     ]
-    for key in ["packet_rows", "expected_packet_rows", "ranking_template_rows", "candidate_family_group_rows", "deferred_rows"]:
+    for key in ["packet_rows", "expected_packet_rows", "ranking_template_rows", "candidate_family_group_rows", "deferred_rows", "deferred_narrowing_rows"]:
         lines.append(f"- {key}: `{summary.get(key, '')}`")
     lines += ["", "## Top proxy-ranked candidates", "", "| rank | group | profile | feature | est trades/day | priority | narrowing | bucket | risk |", "|---:|---|---|---|---:|---:|---:|---|---|"]
     for row in rows[:8]:
@@ -410,10 +480,26 @@ def report(summary: Dict[str, Any], rows: Sequence[Dict[str, Any]], groups: Sequ
     return "\n".join(lines)
 
 
-def write_blocked(output_dir: Path, inventory: List[Dict[str, Any]], reason: str, stage12_status: str = "", packet_count: int = 0, deferred_count: int = 0) -> None:
+def write_all_outputs(output_dir: Path, inventory: list[dict[str, Any]], rows: list[dict[str, Any]], groups: list[dict[str, Any]], deferred_rows: list[dict[str, Any]], decision: list[dict[str, Any]], block_rows: list[dict[str, Any]], summary: dict[str, Any]) -> None:
+    write_csv(output_dir / "gold_v3_13_input_inventory.csv", inventory, INVENTORY_FIELDS)
+    write_csv(output_dir / "gold_v3_13_ranked_rule_candidate_rows.csv", rows, TEMPLATE_FIELDS)
+    write_csv(output_dir / "gold_v3_13_ranked_candidate_family_groups.csv", groups, GROUP_FIELDS)
+    write_csv(output_dir / "gold_v3_13_decision_template.csv", rows, TEMPLATE_FIELDS)
+    write_csv(output_dir / "gold_v3_13_deferred_narrowing_candidates.csv", deferred_rows, DEFERRED_FIELDS)
+    # Backward-compatible aliases for earlier 13 draft names.
+    write_csv(output_dir / "gold_v3_13_ranking_decision_template.csv", rows, TEMPLATE_FIELDS)
+    write_csv(output_dir / "gold_v3_13_candidate_family_group_summary.csv", groups, GROUP_FIELDS)
+    write_csv(output_dir / "gold_v3_13_decision_matrix.csv", decision, DECISION_FIELDS)
+    write_csv(output_dir / "gold_v3_13_blocker_matrix.csv", block_rows, BLOCKER_FIELDS)
+    write_json(output_dir / "gold_v3_13_summary.json", summary)
+    (output_dir / "GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_REPORT.md").write_text(report(summary, rows, groups, block_rows), encoding="utf-8")
+
+
+def write_blocked(output_dir: Path, inventory: list[dict[str, Any]], decision: list[dict[str, Any]], reason: str, stage12_status: str = "", packet_count: int = 0, deferred_count: int = 0) -> None:
     block_rows = blockers(stage12_status == STAGE12_READY_STATUS, packet_count == EXPECTED_PACKET_ROWS, deferred_count >= 0, False, False, False)
     summary = {
         "created_at_utc": utc_now(),
+        "step": STEP,
         "status": BLOCKED_STATUS,
         "blocked_reason": reason,
         "stage12_status": stage12_status,
@@ -422,35 +508,32 @@ def write_blocked(output_dir: Path, inventory: List[Dict[str, Any]], reason: str
         "deferred_rows": deferred_count,
         "ranking_template_rows": 0,
         "candidate_family_group_rows": 0,
+        "deferred_narrowing_rows": 0,
         "human_decision_required": True,
         "ranking_is_proxy_only": True,
         "old_gold_disc8_quarantined": True,
         "gold_v2_live_sot_used": False,
         **FALSE_FLAGS,
     }
-    write_csv(output_dir / "gold_v3_13_input_inventory.csv", inventory, INVENTORY_FIELDS)
-    write_csv(output_dir / "gold_v3_13_ranking_decision_template.csv", [], TEMPLATE_FIELDS)
-    write_csv(output_dir / "gold_v3_13_candidate_family_group_summary.csv", [], GROUP_FIELDS)
-    write_csv(output_dir / "gold_v3_13_decision_matrix.csv", decision_rows(), DECISION_FIELDS)
-    write_csv(output_dir / "gold_v3_13_blocker_matrix.csv", block_rows, BLOCKER_FIELDS)
-    write_json(output_dir / "gold_v3_13_summary.json", summary)
-    (output_dir / "GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_REPORT.md").write_text(report(summary, [], [], block_rows), encoding="utf-8")
+    write_all_outputs(output_dir, inventory, [], [], [], decision, block_rows, summary)
 
 
 def run(repo_root: Path) -> int:
     repo_root = repo_root.resolve()
-    input_dir = repo_root / INPUT_REL
-    output_dir = repo_root / OUTPUT_REL
+    selected_v3_root, root_reason = select_v3_root(repo_root)
+    input_dir = selected_v3_root / UPSTREAM_NAME
+    output_dir = selected_v3_root / OUT_NAME
     output_dir.mkdir(parents=True, exist_ok=True)
     summary_path = input_dir / "gold_v3_12_summary.json"
     packet_path = input_dir / "gold_v3_12_deployability_review_packet.csv"
     deferred_path = input_dir / "gold_v3_12_deferred_candidate_diagnostics.csv"
     inputs = [("gold_v3_12_summary", summary_path), ("gold_v3_12_deployability_review_packet", packet_path), ("gold_v3_12_deferred_candidate_diagnostics", deferred_path)]
     inventory = inventory_rows(inputs)
+    decision = decision_rows(selected_v3_root, root_reason)
     missing = [str(r["input_label"]) for r in inventory if not r["exists"]]
     if missing:
         reason = "missing required stage12 inputs: " + ", ".join(missing)
-        write_blocked(output_dir, inventory, reason)
+        write_blocked(output_dir, inventory, decision, reason)
         print("[GOLD_V3_13] BLOCKED: " + reason)
         return 2
 
@@ -460,16 +543,17 @@ def run(repo_root: Path) -> int:
     stage12_status = str(stage12.get("status", ""))
     if stage12_status != STAGE12_READY_STATUS:
         reason = f"stage12 status is not READY: {stage12_status}"
-        write_blocked(output_dir, inventory, reason, stage12_status, len(packet), len(deferred))
+        write_blocked(output_dir, inventory, decision, reason, stage12_status, len(packet), len(deferred))
         print("[GOLD_V3_13] BLOCKED: " + reason)
         return 2
     if len(packet) != EXPECTED_PACKET_ROWS:
         reason = f"stage12 packet row count is {len(packet)}, expected {EXPECTED_PACKET_ROWS}"
-        write_blocked(output_dir, inventory, reason, stage12_status, len(packet), len(deferred))
+        write_blocked(output_dir, inventory, decision, reason, stage12_status, len(packet), len(deferred))
         print("[GOLD_V3_13] BLOCKED: " + reason)
         return 2
 
     rows, groups, h1_ok = build_rows(packet)
+    deferred_rows = build_deferred_rows(deferred)
     template_ok = len(rows) == EXPECTED_PACKET_ROWS
     family_ok = len(groups) > 0
     block_rows = blockers(True, True, True, template_ok, family_ok, h1_ok)
@@ -477,13 +561,17 @@ def run(repo_root: Path) -> int:
     status = READY_STATUS if success else BLOCKED_STATUS
     summary = {
         "created_at_utc": utc_now(),
+        "step": STEP,
         "status": status,
+        "selected_gold_v3_output_root": str(selected_v3_root),
+        "path_resolution_note": root_reason,
         "stage12_status": stage12_status,
         "packet_rows": len(packet),
         "expected_packet_rows": EXPECTED_PACKET_ROWS,
         "deferred_rows": len(deferred),
         "ranking_template_rows": len(rows),
         "candidate_family_group_rows": len(groups),
+        "deferred_narrowing_rows": len(deferred_rows),
         "h1_atr56_overlap_disclosed": h1_ok,
         "human_decision_required": True,
         "ranking_is_proxy_only": True,
@@ -495,26 +583,22 @@ def run(repo_root: Path) -> int:
         "gold_v2_live_sot_used": False,
         **FALSE_FLAGS,
     }
-    write_csv(output_dir / "gold_v3_13_input_inventory.csv", inventory, INVENTORY_FIELDS)
-    write_csv(output_dir / "gold_v3_13_ranking_decision_template.csv", rows, TEMPLATE_FIELDS)
-    write_csv(output_dir / "gold_v3_13_candidate_family_group_summary.csv", groups, GROUP_FIELDS)
-    write_csv(output_dir / "gold_v3_13_decision_matrix.csv", decision_rows(), DECISION_FIELDS)
-    write_csv(output_dir / "gold_v3_13_blocker_matrix.csv", block_rows, BLOCKER_FIELDS)
-    write_json(output_dir / "gold_v3_13_summary.json", summary)
-    (output_dir / "GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_REPORT.md").write_text(report(summary, rows, groups, block_rows), encoding="utf-8")
-    print(json.dumps({"status": status, "packet_rows": len(packet), "ranking_template_rows": len(rows), "candidate_family_group_rows": len(groups), "top_candidate_group_id_by_proxy": summary["top_candidate_group_id_by_proxy"], "top_profile_id_by_proxy": summary["top_profile_id_by_proxy"], "output_dir": str(output_dir), "external_actions_all_false": all(v is False for v in FALSE_FLAGS.values())}, ensure_ascii=True, indent=2))
+    write_all_outputs(output_dir, inventory, rows, groups, deferred_rows, decision, block_rows, summary)
+    print(json.dumps({"status": status, "packet_rows": len(packet), "ranking_template_rows": len(rows), "candidate_family_group_rows": len(groups), "deferred_narrowing_rows": len(deferred_rows), "top_candidate_group_id_by_proxy": summary["top_candidate_group_id_by_proxy"], "top_profile_id_by_proxy": summary["top_profile_id_by_proxy"], "output_dir": str(output_dir), "zip_output_created": False}, ensure_ascii=True, indent=2))
     return 0 if success else 2
 
 
 def write_exception(repo_root: Path, exc: BaseException) -> None:
-    output_dir = repo_root.resolve() / OUTPUT_REL
+    selected_v3_root, root_reason = select_v3_root(repo_root.resolve())
+    output_dir = selected_v3_root / OUT_NAME
     output_dir.mkdir(parents=True, exist_ok=True)
     text = traceback.format_exc()
-    write_json(output_dir / "gold_v3_13_summary.json", {"created_at_utc": utc_now(), "status": EXCEPTION_STATUS, "exception_type": exc.__class__.__name__, "exception_message": str(exc), "human_decision_required": True, "ranking_is_proxy_only": True, "old_gold_disc8_quarantined": True, "gold_v2_live_sot_used": False, **FALSE_FLAGS})
+    summary = {"created_at_utc": utc_now(), "step": STEP, "status": EXCEPTION_STATUS, "path_resolution_note": root_reason, "exception_type": exc.__class__.__name__, "exception_message": str(exc), "human_decision_required": True, "ranking_is_proxy_only": True, "old_gold_disc8_quarantined": True, "gold_v2_live_sot_used": False, **FALSE_FLAGS}
+    write_json(output_dir / "gold_v3_13_summary.json", summary)
     (output_dir / "gold_v3_13_exception.txt").write_text(text, encoding="utf-8")
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default="")
     args = parser.parse_args(argv)
@@ -523,7 +607,7 @@ def main(argv: List[str] | None = None) -> int:
         return run(repo_root)
     except Exception as exc:
         write_exception(repo_root, exc)
-        print("[GOLD_V3_13] EXCEPTION. See Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_exception.txt", file=sys.stderr)
+        print("[GOLD_V3_13] EXCEPTION. See selected FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_exception.txt", file=sys.stderr)
         print(traceback.format_exc(), file=sys.stderr)
         return 1
 
