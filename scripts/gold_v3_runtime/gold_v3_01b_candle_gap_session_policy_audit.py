@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import hashlib, json, zipfile
+import hashlib, json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -213,6 +213,7 @@ def main() -> int:
         ["features_created", False, False, "PASS"],
         ["labels_created", False, False, "PASS"],
         ["signals_generated", False, False, "PASS"],
+        ["zip_output_created", False, False, "PASS"],
         ["external_actions", False, False, "PASS"],
     ], columns=["decision_item", "observed", "required", "status"])
     blocker_df = pd.DataFrame([
@@ -220,7 +221,8 @@ def main() -> int:
         ["G3-01B-002", "M1 label guard", "REVIEW" if m5_m1_ratio <= 0.001 else "OPEN", "HARD", "M1 exact-open gaps require affected-bar guard before M1 labels."],
         ["G3-01B-003", "HTF reconstruction", "CLOSED_BLOCKED_BY_POLICY", "HARD", "Reconstructing H4 from H1 or D1 from H4 is not allowed."],
         ["G3-01B-004", "native HTF asof", "REVIEW", "WARN", "Native H4/D1 closed/asof join can proceed only after label/feature spec records convention."],
-        ["G3-01B-005", "external actions", "CLOSED", "HARD", "No external actions performed."],
+        ["G3-01B-005", "zip output", "CLOSED_DISABLED", "INFO", "ZIP output disabled."],
+        ["G3-01B-006", "external actions", "CLOSED", "HARD", "No external actions performed."],
     ], columns=["blocker_id", "component", "status", "severity", "detail"])
     summary = {
         "created_utc": created,
@@ -235,6 +237,7 @@ def main() -> int:
         "m1_label_gap_guard_required": True,
         "reconstruct_h4_from_h1_allowed": False,
         "reconstruct_d1_from_h4_allowed": False,
+        "zip_output_created": False,
         "external_actions": ACTIONS,
     }
 
@@ -267,19 +270,12 @@ def main() -> int:
         "## Safety",
         "- GOLD V3 only; no V2 artifacts used.",
         "- No features, no labels, no signals.",
+        "- No ZIP output.",
         "- Discord/MT5/AI/live/final remain OFF.",
     ])
     (out / "GOLD_V3_01B_CANDLE_GAP_SESSION_POLICY_AUDIT_REPORT.md").write_text(report, encoding="utf-8")
-
-    zip_path = v3_output_root() / f"{OUT_NAME}.zip"
-    if zip_path.exists():
-        zip_path.unlink()
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for p in out.iterdir():
-            if p.is_file():
-                z.write(p, arcname=p.name)
-    print(json.dumps({"status": status, "output_dir": str(out), "zip": str(zip_path)}, ensure_ascii=False, indent=2))
-    print("No features, labels, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
+    print(json.dumps({"status": status, "output_dir": str(out), "zip_output_created": False}, ensure_ascii=False, indent=2))
+    print("No ZIP, features, labels, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
     return 0
 
 
