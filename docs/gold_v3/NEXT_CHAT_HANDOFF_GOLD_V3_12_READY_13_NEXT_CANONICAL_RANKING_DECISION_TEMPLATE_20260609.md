@@ -4,7 +4,7 @@ Created: 2026-06-09
 
 Repository: `knitanr-a11y/xauusd-signal-lab`
 
-## IMPORTANT - this document supersedes prior handoff docs
+## IMPORTANT - this document is the only primary handoff
 
 This is the canonical handoff document for the next chat.
 
@@ -17,16 +17,28 @@ docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_RANKING_OBJECTIVE_ADDEND
 
 If any instruction conflicts, this canonical document wins.
 
-## What went wrong in the prior handoff
+## What went wrong before
 
-The prior handoff split the next objective across two files:
+The earlier handoff was bad because it split the objective across two files and made stage 13 sound like a readability-focused human template.
 
-- one file emphasized `HUMAN_DECISION_TEMPLATE`
-- another file added the ranking/PF/win-rate objective
+That is not the user's intent.
 
-That split is ambiguous. The next assistant may incorrectly create a pretty human-readable template or ask the user to decide immediately.
+The user wants ranking by likely trading quality:
 
-Do not do that.
+```text
+勝率/PFが高そうな候補、または絞れば勝率/PFが上がりそうな候補を優先。
+日に2トレード以上あると助かる。
+人間が読みやすいことは重要ではない。
+```
+
+Also, the handoff was not strict enough about paths. This caused risk of:
+
+- output folder not being created
+- BAT being created in the wrong directory
+- BAT `cd` target being wrong
+- scripts stopping before writing audit files when inputs are missing
+
+Stage 13 must fix this with an explicit path/run contract.
 
 ## Current position
 
@@ -50,9 +62,11 @@ The next implementation task is exactly:
 Create GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY spec/script/BAT.
 ```
 
-Do not create `GOLD_V3_13_HUMAN_DECISION_TEMPLATE_AUDIT_ONLY` as a plain human-readable template. If that naming is used anywhere for continuity, the content must still be ranking-oriented and machine-oriented.
+Do not create a plain readability-focused `GOLD_V3_13_HUMAN_DECISION_TEMPLATE_AUDIT_ONLY` and stop.
 
-Recommended canonical stage 13 names:
+## Hard implementation path contract for stage 13
+
+Create exactly these repository files:
 
 ```text
 docs/gold_v3/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_SPEC_20260609.md
@@ -60,24 +74,97 @@ scripts/gold_v3_runtime/gold_v3_13_ranking_decision_template_audit_only.py
 scripts/gold_v3_runtime/bat/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY.bat
 ```
 
-## User objective for stage 13
+Do not place the BAT directly under `scripts/gold_v3_runtime/`.
 
-The user clarified:
+Do not place the BAT under `docs/`.
+
+Do not create a local-only patch instead of committing these files through GitHub.
+
+## Hard output folder contract for stage 13
+
+The script must create the output directory at runtime with `mkdir(parents=True, exist_ok=True)`.
+
+Expected local runtime output directory:
 
 ```text
-人間が読めなくてもいいので候補を勝率・PFが高そうなものか、勝率は悪いけど件数を絞れば高くなりそうなものを選んでほしいです。日に2トレード以上あれば助かります。
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/
 ```
 
-Interpretation:
+This folder is not created by GitHub file creation. It is created only when the BAT/script is run locally.
 
-- Human readability is not important.
-- Candidate ranking quality is important.
-- Prefer candidates likely to have high win rate and high PF.
-- Also keep candidates that may become good after narrowing, even if current broad condition is not ideal.
-- Frequency matters; around 2 trades/day or more would be helpful.
-- Do not overfit by choosing tiny sample candidates.
-- Stage 13 should rank candidates and families for audit-only next decisions.
-- Stage 13 must not approve, finalize, replay, train, or generate signals.
+The script must create this folder even if required input files are missing. If inputs are missing, still write at least:
+
+```text
+gold_v3_13_input_inventory.csv
+gold_v3_13_summary.json
+gold_v3_13_decision_matrix.csv
+gold_v3_13_blocker_matrix.csv
+GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_REPORT.md
+```
+
+with a blocked/input-review status.
+
+## Required runtime path helper contract
+
+Use the same path convention as previous GOLD V3 runtime scripts.
+
+The script should include this pattern or an equivalent that resolves the same locations:
+
+```python
+from pathlib import Path
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+def files_root() -> Path:
+    r = repo_root()
+    return r.parents[1] if len(r.parents) >= 2 else r.parent
+
+def v3_output_root() -> Path:
+    return files_root() / "FX_OUTPUTS" / "gold_v3"
+
+def out_dir() -> Path:
+    p = v3_output_root() / "13_ranking_decision_template_audit_only"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+```
+
+Do not use the repository root itself as the output root.
+
+Do not write outputs into `docs/` or `scripts/`.
+
+Do not rely on an already-existing output folder.
+
+## Required BAT contract
+
+Create the BAT exactly here:
+
+```text
+scripts/gold_v3_runtime/bat/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY.bat
+```
+
+The BAT should run from the repository root. Because it lives in `scripts/gold_v3_runtime/bat/`, it must go up three levels.
+
+Recommended BAT contents:
+
+```bat
+@echo off
+setlocal
+cd /d "%~dp0\..\..\.."
+python scripts\gold_v3_runtime\gold_v3_13_ranking_decision_template_audit_only.py
+if errorlevel 1 (
+  echo [ERROR] GOLD V3 13 failed.
+  pause
+  exit /b 1
+)
+echo [OK] GOLD V3 13 completed.
+pause
+endlocal
+```
+
+Do not use only two `..` segments from the BAT folder.
+
+Do not assume the user's current working directory is already the repo root.
 
 ## Non-negotiable guardrails
 
@@ -473,6 +560,9 @@ G3-13-010 external actions: CLOSED
 - Do not run replay in stage 13.
 - Do not approve anything automatically.
 - Do not create ZIP output.
+- Do not put BAT in the wrong folder.
+- Do not write output files into the repository tree.
+- Do not fail silently when inputs are missing; write audit files with blocked status.
 
 ## Next chat start prompt
 
@@ -500,6 +590,13 @@ GOLD_V3_12_DEPLOYABILITY_REVIEW_PACKET_READY_AUDIT_ONLY
 - h1_atr56 >= 9.95812 は5つのTP/SL profileで共有される同一条件familyなので、独立候補として雑に数えないでください。
 - 13ではranking-oriented audit-only decision templateを作るだけで、自動承認しないでください。
 - true PF/true win rateがまだ無い場合は proxy と明記してください。
+- spec/script/BATは以下の正しいrepo pathに作成してください:
+  docs/gold_v3/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY_SPEC_20260609.md
+  scripts/gold_v3_runtime/gold_v3_13_ranking_decision_template_audit_only.py
+  scripts/gold_v3_runtime/bat/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY.bat
+- BATは scripts/gold_v3_runtime/bat/ から repo root へ cd /d "%~dp0\..\..\.." してください。
+- scriptは Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/ を mkdir(parents=True, exist_ok=True) で必ず生成してください。
+- 入力不足でもフォルダと input_inventory / summary / decision_matrix / blocker_matrix / report を必ず出力してください。
 - final candidate approvalは禁止です。
 - threshold finalizationは禁止です。
 - replay実行はまだ禁止です。
