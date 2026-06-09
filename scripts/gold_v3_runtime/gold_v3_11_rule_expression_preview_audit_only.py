@@ -12,6 +12,8 @@ import pandas as pd
 STEP = "GOLD_V3_11_RULE_EXPRESSION_PREVIEW_AUDIT_ONLY"
 OUT_NAME = "11_rule_expression_preview_audit_only"
 EXPECTED_10_STATUS = "GOLD_V3_10_CANDIDATE_FAMILY_REVIEW_CARD_READY_AUDIT_ONLY"
+EXPECTED_08_STATUS = "GOLD_V3_08_BUCKET_BOUNDARY_PROVENANCE_READY_AUDIT_ONLY"
+DOMINANT_BUCKET_MIN_RATE = 0.60
 ACTIONS = {"discord_send_allowed": False, "mt5_order_allowed": False, "ai_api_allowed": False, "live_hook_allowed": False, "live_evaluator_allowed": False, "final_signal_allowed": False}
 
 
@@ -29,6 +31,8 @@ def out_dir() -> Path:
     return p
 
 def dir10() -> Path: return v3_output_root() / "10_candidate_family_review_card_audit_only"
+
+def dir08() -> Path: return v3_output_root() / "08_bucket_boundary_provenance_audit_only"
 
 def sha256_file(p: Path) -> str:
     h=hashlib.sha256()
@@ -83,15 +87,21 @@ def finite_values(series: pd.Series) -> list[float]:
         if v is not None and math.isfinite(v): vals.append(v)
     return vals
 
-def dominant_bucket(s: pd.Series) -> str:
+def dominant_bucket_info(s: pd.Series) -> tuple[str, int, float]:
     vc=s.dropna().astype(str).value_counts()
-    return vc.index[0] if len(vc) else ""
+    if not len(vc):
+        return "", 0, 0.0
+    bucket=str(vc.index[0])
+    count=int(vc.iloc[0])
+    total=int(vc.sum())
+    rate=float(count/total) if total else 0.0
+    return bucket, count, rate
 
 def threshold_type_for_group(g: pd.DataFrame) -> str:
+    if g.empty: return "missing"
     lower_inf=sum(str(x).strip().lower()=="-inf" for x in g["bucket_lower"].tolist())
     upper_inf=sum(str(x).strip().lower()=="inf" for x in g["bucket_upper"].tolist())
     n=len(g)
-    if n == 0: return "missing"
     if lower_inf == n and upper_inf == 0: return "upper_bound"
     if upper_inf == n and lower_inf == 0: return "lower_bound"
     if lower_inf == 0 and upper_inf == 0: return "range"
@@ -106,6 +116,10 @@ def expression(feature: str, typ: str, lower: float | None, upper: float | None)
 def readiness(row: pd.Series) -> str:
     if "raw_price_level_stationarity_risk" in str(row.get("risk_flags", "")):
         return "REVIEW_ONLY_NOT_DEPLOYABLE_RAW_PRICE_LEVEL"
+    if int(row.get("boundary_rows", 0)) <= 0:
+        return "MANUAL_REVIEW_BOUNDARY_MISSING"
+    if float(row.get("dominant_bucket_rate", 0.0)) < DOMINANT_BUCKET_MIN_RATE:
+        return "MANUAL_REVIEW_BUCKET_UNSTABLE"
     if row.get("threshold_type") == "mixed" or row.get("rule_expression_preview") == "MANUAL_REVIEW_REQUIRED":
         return "MANUAL_REVIEW_BOUNDARY_UNSTABLE"
     if "has_negative_test_fold" in str(row.get("risk_flags", "")):
@@ -115,28 +129,36 @@ def readiness(row: pd.Series) -> str:
 def main() -> int:
     created=datetime.now(timezone.utc).isoformat()
     out=out_dir()
-    paths=[dir10()/"gold_v3_10_summary.json", dir10()/"gold_v3_10_candidate_family_review_rows.csv", dir10()/"gold_v3_10_boundary_card_rows.csv"]
+    paths=[
+        dir10()/"gold_v3_10_summary.json",
+        dir10()/"gold_v3_10_candidate_family_review_rows.csv",
+        dir08()/"gold_v3_08_summary.json",
+        dir08()/"gold_v3_08_selected_bucket_boundary_rows.csv",
+    ]
     inv_df=input_inventory(paths)
-    s10=read_json(paths[0])
+    s10=read_json(paths[0]); s08=read_json(paths[2])
     inputs_ok=bool(inv_df["exists"].all())
-    upstream_ok=s10.get("status")==EXPECTED_10_STATUS
+    upstream_ok=s10.get("status")==EXPECTED_10_STATUS and s08.get("status")==EXPECTED_08_STATUS
     if inputs_ok:
         reviews=pd.read_csv(paths[1])
-        boundaries=pd.read_csv(paths[2])
+        boundaries=pd.read_csv(paths[3])
         rows=[]
         for _, r in reviews.iterrows():
             g=boundaries[(boundaries["profile_id"].eq(r["profile_id"])) & (boundaries["direction"].eq(r["direction"])) & (boundaries["feature_column"].eq(r["feature_column"]))]
-            typ=threshold_type_for_group(g)
-            lower_vals=finite_values(g["bucket_lower"]) if not g.empty else []
-            upper_vals=finite_values(g["bucket_upper"]) if not g.empty else []
+            dom_bucket, dom_count, dom_rate = dominant_bucket_info(g["bucket_id"]) if not g.empty else ("", 0, 0.0)
+            bg=g[g["bucket_id"].astype(str).eq(dom_bucket)].copy() if dom_bucket else g.iloc[0:0].copy()
+            typ=threshold_type_for_group(bg)
+            lower_vals=finite_values(bg["bucket_lower"]) if not bg.empty else []
+            upper_vals=finite_values(bg["bucket_upper"]) if not bg.empty else []
             lower_med=float(np.median(lower_vals)) if lower_vals else None
             upper_med=float(np.median(upper_vals)) if upper_vals else None
-            dom_bucket=dominant_bucket(g["bucket_id"]) if not g.empty else ""
             preview=expression(str(r["feature_column"]), typ, lower_med, upper_med)
             d=r.to_dict()
             d.update({
                 "boundary_rows": int(len(g)),
                 "dominant_bucket_id": dom_bucket,
+                "dominant_bucket_count": dom_count,
+                "dominant_bucket_rate": dom_rate,
                 "threshold_type": typ,
                 "preview_lower_median": lower_med,
                 "preview_upper_median": upper_med,
@@ -154,14 +176,14 @@ def main() -> int:
             avg_test_lift_mean=("test_lift_mean","mean"),
             avg_test_result_mean=("test_avg_result_mean","mean"),
         ).reset_index().sort_values(["max_review_score","avg_test_lift_mean"], ascending=[False,False])
-        diag=expr_df[["profile_id","direction","feature_column","feature_family","boundary_rows","dominant_bucket_id","threshold_type","preview_lower_median","preview_upper_median","rule_expression_preview","readiness_label","risk_flags","review_score"]].copy()
+        diag=expr_df[["profile_id","direction","feature_column","feature_family","boundary_rows","dominant_bucket_id","dominant_bucket_count","dominant_bucket_rate","threshold_type","preview_lower_median","preview_upper_median","rule_expression_preview","readiness_label","risk_flags","review_score"]].copy()
     else:
         reviews=pd.DataFrame(); boundaries=pd.DataFrame(); expr_df=pd.DataFrame(); fam_summary=pd.DataFrame(); diag=pd.DataFrame()
     rows_ok=inputs_ok and upstream_ok and not expr_df.empty
     status="GOLD_V3_11_RULE_EXPRESSION_PREVIEW_READY_AUDIT_ONLY" if rows_ok else ("GOLD_V3_11_RULE_EXPRESSION_PREVIEW_INPUT_REVIEW_REQUIRED_AUDIT_ONLY" if not (inputs_ok and upstream_ok) else "GOLD_V3_11_RULE_EXPRESSION_PREVIEW_BLOCKED_AUDIT_ONLY")
     decision_df=pd.DataFrame([
         ["inputs_present",inputs_ok,True,"PASS" if inputs_ok else "FAIL"],
-        ["upstream_10_ok",upstream_ok,True,"PASS" if upstream_ok else "FAIL"],
+        ["upstream_10_08_ok",upstream_ok,True,"PASS" if upstream_ok else "FAIL"],
         ["rule_expression_preview_rows",len(expr_df),">0","PASS" if len(expr_df)>0 else "FAIL"],
         ["family_readiness_summary_rows",len(fam_summary),">0","PASS" if len(fam_summary)>0 else "FAIL"],
         ["final_candidate_approval",False,False,"PASS"],
@@ -172,7 +194,7 @@ def main() -> int:
         ["external_actions",False,False,"PASS"],
     ],columns=["decision_item","observed","required","status"])
     blocker_df=pd.DataFrame([
-        ["G3-11-001","10 inputs","CLOSED" if inputs_ok and upstream_ok else "OPEN","HARD","10 review card outputs required."],
+        ["G3-11-001","10/08 inputs","CLOSED" if inputs_ok and upstream_ok else "OPEN","HARD","10 review card and 08 full boundary provenance outputs required."],
         ["G3-11-002","preview expressions","CLOSED" if len(expr_df)>0 else "OPEN","HARD","Rule expression preview rows required."],
         ["G3-11-003","final approval","CLOSED_BLOCKED_BY_POLICY","HARD","Preview only; no final candidate approval."],
         ["G3-11-004","threshold finalization","CLOSED_BLOCKED_BY_POLICY","HARD","Median thresholds are preview-only, not live final thresholds."],
@@ -188,7 +210,7 @@ def main() -> int:
     decision_df.to_csv(out/"gold_v3_11_decision_matrix.csv",index=False,encoding="utf-8-sig")
     blocker_df.to_csv(out/"gold_v3_11_blocker_matrix.csv",index=False,encoding="utf-8-sig")
     write_json(out/"gold_v3_11_summary.json",summary)
-    report="\n".join(["# GOLD V3 11 rule expression preview audit-only report","",f"Created UTC: {created}",f"Status: `{status}`","","## Family readiness summary",md(fam_summary),"","## Top preview rows",md(expr_df.head(40)),"","## Decision matrix",md(decision_df),"","## Blockers",md(blocker_df),"","## Safety","- GOLD V3 only; no V2 artifacts used.","- Preview expressions only; no final candidate approval.","- Median thresholds are preview-only, not final live thresholds.","- No model training, no signals, no ZIP.","- External actions remain OFF."])
+    report="\n".join(["# GOLD V3 11 rule expression preview audit-only report","",f"Created UTC: {created}",f"Status: `{status}`","","## Family readiness summary",md(fam_summary),"","## Top preview rows",md(expr_df.head(40)),"","## Decision matrix",md(decision_df),"","## Blockers",md(blocker_df),"","## Safety","- GOLD V3 only; no V2 artifacts used.","- Full 08 boundary provenance is used for all preview rows.","- Preview expressions only; no final candidate approval.","- Median thresholds are preview-only, not final live thresholds.","- No model training, no signals, no ZIP.","- External actions remain OFF."])
     (out/"GOLD_V3_11_RULE_EXPRESSION_PREVIEW_AUDIT_ONLY_REPORT.md").write_text(report,encoding="utf-8")
     print(json.dumps({"status":status,"output_dir":str(out),"zip_output_created":False},ensure_ascii=False,indent=2))
     print("No ZIP, final candidate approval, threshold finalization, model training, signals, Discord, MT5, AI API, live hook, live evaluator, or final signal action was performed.")
