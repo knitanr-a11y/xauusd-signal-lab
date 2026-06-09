@@ -1,6 +1,7 @@
 # GOLD V3 Live Discord / MT5 Demo Runtime Summary
 
 Created: 2026-06-10 JST  
+Last reviewed: 2026-06-10 JST  
 Repository: `knitanr-a11y/xauusd-signal-lab`
 
 ## 0. Current policy
@@ -19,6 +20,32 @@ Important policy decisions:
 - NO_SIGNAL is not posted to Discord.
 - Same signal must not be notified or executed every minute.
 - Both Discord and MT5 loops use post-minute lag to avoid reading incomplete candle/snapshot data.
+- Error/stop conditions in either loop should notify Discord.
+
+## 0.1 Review result after implementation check
+
+The document was reviewed against the current Stage37/38/39/40 files.
+
+Verified as implemented:
+
+- Stage37 writes a selected signal into `live_runtime/current/latest_signal.json` for Stage40.
+- Stage38 runs Stage37 every minute with a default 5 second post-minute delay.
+- Stage38 has rolling loop-log retention using `--max-log-rows 10080` by default.
+- Stage38 sends Discord error notifications for Stage37 failure, timeout, loop exception, and stop handling.
+- Stage39 initializes the live runtime directory layout.
+- Stage40 runs separately with a default 7 second post-minute delay.
+- Stage40 BAT enables demo MT5 order execution with `--enable-mt5-demo-order`.
+- Stage40 blocks non-demo account mode before order execution.
+- Stage40 logs MT5 results and does not send normal MT5 results to Discord.
+- Stage40 sends Discord notifications for MT5 loop/execution errors.
+
+Important caveats discovered during review:
+
+1. `live_runtime/current/latest_discord_dispatch.csv` is intended to be a latest/current file. It should remain small. If it grows during testing, change Stage37 to overwrite that file instead of appending.
+2. The broader `discord_events_YYYYMMDD.csv`, `mt5_events_YYYYMMDD.csv`, and `loop_runs_YYYYMMDD.csv` paths are part of the desired live-runtime layout. The currently implemented daily append logs are primarily `signal_events_YYYYMMDD.csv` and `mt5_results_YYYYMMDD.csv`; Stage38 still keeps compact loop logs under the Stage38 output folder.
+3. Stage40 should only execute from a valid, current, intentionally selected signal. Before unattended use, verify that a failed Discord signal notification does not cause MT5 execution. The safest rule is: MT5 execution should require a latest signal with successful signal dispatch metadata.
+4. The actual live snapshot producer is not implemented here. These stages consume the snapshot only.
+5. Multiple-process lock enforcement is still a known hardening item. Do not start duplicate BAT instances.
 
 ## 1. Ranked candidates fixed by Stage36
 
@@ -39,7 +66,7 @@ Ranked candidate order:
 | R03 | 1 | `R03_P1_R1_ONLY_CD60_PRUNE_111` |
 | R04 | 4 | `R04_P4_R1_ONLY_CD60_PRUNE_115` |
 | R05 | 9 | `R05_P9_MAIN_R1_R2_CD90_PRUNE_133` |
-| R06 | 11 | `R06_P11_MAIN_R1_R2_CD90_PRUNE_132` |
+| R06 | 11 | `R06_P11_MAIN_R1_R2_CD120_PRUNE_132` |
 | R07 | 13 | `R07_P13_MAIN_R1_R2_CD120_PRUNE_122` |
 
 Stage36 output location:
@@ -127,6 +154,7 @@ FX_OUTPUTS/gold_v3/37_ranked_live_discord_notify/gold_v3_37_summary.json
 FX_OUTPUTS/gold_v3/37_ranked_live_discord_notify/gold_v3_37_signal_dispatch_log.csv
 FX_OUTPUTS/gold_v3/37_ranked_live_discord_notify/gold_v3_37_event_log.csv
 FX_OUTPUTS/gold_v3/live_runtime/current/latest_signal.json
+FX_OUTPUTS/gold_v3/live_runtime/current/latest_status.json
 FX_OUTPUTS/gold_v3/live_runtime/logs/signal_events_YYYYMMDD.csv
 ```
 
@@ -219,25 +247,26 @@ FX_OUTPUTS/gold_v3/live_runtime/
     latest_status.json
     latest_signal.json
     latest_discord_dispatch.csv
-    latest_mt5_result.csv
+    latest_mt5_result.json        # Stage40 writes this
+    latest_mt5_result.csv         # legacy/current placeholder from Stage39 initialization if present
 
   logs/
-    signal_events_YYYYMMDD.csv
-    discord_events_YYYYMMDD.csv
-    mt5_results_YYYYMMDD.csv
-    mt5_events_YYYYMMDD.csv
-    loop_runs_YYYYMMDD.csv
+    signal_events_YYYYMMDD.csv    # implemented
+    mt5_results_YYYYMMDD.csv      # implemented
+    discord_events_YYYYMMDD.csv   # reserved / future hardening
+    mt5_events_YYYYMMDD.csv       # reserved / future hardening
+    loop_runs_YYYYMMDD.csv        # reserved / future hardening
 
   state/
     dedupe_state.json
-    live_loop.lock
+    live_loop.lock                # policy placeholder; strict lock enforcement still needs hardening
 
   archive/
 ```
 
 Policy:
 
-- `current/` files are overwrite/latest state.
+- `current/` files are intended as latest/current state.
 - `logs/` files are daily append files used for later verification.
 - NO_SIGNAL detail is not appended every minute; counters are enough.
 - MT5 result Discord notification is disabled.
@@ -361,7 +390,7 @@ optional tp_price/sl_price or tp/sl distance fields
 
 Do not create a new folder every minute.
 
-Keep current state in overwrite files:
+Keep current state in latest/current files:
 
 ```text
 live_runtime/current/latest_status.json
@@ -397,6 +426,8 @@ These items should be verified before trusting the live demo loop for decision-m
 10. Multiple BAT instances should not be launched simultaneously; a lock file policy exists conceptually but should still be enforced more strictly if duplicate Windows processes are possible.
 11. Discord webhook should be provided by environment variable `GOLD_V3_DISCORD_WEBHOOK_URL`, not hard-coded in BAT.
 12. MT5 result Discord notification is intentionally disabled; only MT5 errors/stops notify Discord.
+13. Before unattended use, verify that MT5 direct execution does not proceed from a signal whose Discord signal notification failed.
+14. `latest_discord_dispatch.csv` should be monitored during test runs to ensure it does not grow unexpectedly; if it grows, Stage37 should be changed to overwrite that current file.
 
 ## 11. Key commits
 
@@ -426,6 +457,9 @@ Before leaving this running unattended:
 5. Confirm Discord receives only `GOLD BUY` or `GOLD SELL` signal messages.
 6. Confirm NO_SIGNAL is silent.
 7. Confirm duplicate signal does not repeat every minute.
-8. Run Stage40 once with demo MT5 terminal open and logged into demo.
-9. Confirm non-demo account is blocked if accidentally connected.
-10. Confirm `mt5_results_YYYYMMDD.csv` contains the result and no Discord MT5-result notification is sent.
+8. Confirm `latest_signal.json` has the expected selected signal and `discord_status`.
+9. Run Stage40 once with demo MT5 terminal open and logged into demo.
+10. Confirm non-demo account is blocked if accidentally connected.
+11. Confirm `mt5_results_YYYYMMDD.csv` contains the result and no Discord MT5-result notification is sent.
+12. Confirm MT5 errors/stops notify Discord.
+13. Confirm Stage37/Stage40 do not execute duplicate signals across repeated minute loops.
