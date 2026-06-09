@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse,csv,hashlib,json,os,sys,traceback,urllib.request
 from datetime import datetime,timezone
 from pathlib import Path
-from typing import Any
 import pandas as pd
 
 STEP='GOLD_V3_37_RANKED_LIVE_DISCORD_NOTIFY'
@@ -17,6 +16,7 @@ ERR='GOLD_V3_37_RANKED_LIVE_DISCORD_NOTIFY_EXCEPTION'
 INV=['input_label','path','required','exists','size_bytes','sha256']
 SIG=['selected','dispatch_status','rank','ranked_candidate_name','packet_row','source_scenario_key','variant_key','direction','entry_time_utc','entry_time_jst','entry_price','tp_price','sl_price','symbol','matched_filters','blocked_filters','discord_status','dedupe_key']
 EVT=['event_time_utc','level','event_key','detail']; BLK=['blocker_id','blocker_name','status','detail']; REV=['review_key','value','detail']
+SIGNAL_EVENT=['event_time_utc','status','title','rank','ranked_candidate_name','packet_row','direction','symbol','entry_time_utc','entry_time_jst','entry_price','tp_price','sl_price','dedupe_key','discord_status']
 
 def now(): return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def repo_default(): return Path(__file__).resolve().parents[2]
@@ -27,6 +27,10 @@ def pick(repo):
     for r in roots(repo):
         if (r/UP36/'gold_v3_36_summary.json').exists(): return r,'stage36_root'
     return roots(repo)[0],'fallback_root_no_stage36'
+def live_runtime(root):
+    live=root/'live_runtime';
+    for sub in ['current','logs','state','archive']: (live/sub).mkdir(parents=True,exist_ok=True)
+    return live
 def sha(p):
     h=hashlib.sha256()
     with p.open('rb') as f:
@@ -35,12 +39,18 @@ def sha(p):
 def inv(paths): return [dict(input_label=k,path=str(p),required=req,exists=p.exists(),size_bytes=p.stat().st_size if p.exists() else '',sha256=sha(p) if p.exists() else '') for k,p,req in paths]
 def rcsv(p):
     with p.open('r',encoding='utf-8-sig',newline='') as f: return list(csv.DictReader(f))
-def rjson(p): return json.loads(p.read_text(encoding='utf-8'))
+def rjson(p): return json.loads(p.read_text(encoding='utf-8')) if p.exists() else {}
 def wcsv(p,rows,fields):
     p.parent.mkdir(parents=True,exist_ok=True)
     with p.open('w',encoding='utf-8-sig',newline='') as f:
         w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore'); w.writeheader()
         for r in rows: w.writerow({k:r.get(k,'') for k in fields})
+def acsv(p,row,fields):
+    p.parent.mkdir(parents=True,exist_ok=True); exists=p.exists()
+    with p.open('a',encoding='utf-8-sig',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore')
+        if not exists: w.writeheader()
+        w.writerow({k:row.get(k,'') for k in fields})
 def wjson(p,o): p.parent.mkdir(parents=True,exist_ok=True); p.write_text(json.dumps(o,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf-8')
 def f(x,d=0.0):
     try:
@@ -115,14 +125,31 @@ def by_packet(rows):
     d={}
     for r in rows: d.setdefault(str(r.get('packet_row','')),[]).append(r)
     return d
+def write_live_current(live,selected,status):
+    current=live/'current'; logs=live/'logs'; state=live/'state'
+    if selected:
+        sig=dict(selected[0]); sig.update({'updated_at_utc':now(),'status':'SIGNAL','title':f"GOLD {sig.get('direction','')}"})
+        wjson(current/'latest_signal.json',sig)
+        acsv(current/'latest_discord_dispatch.csv',{'updated_at_utc':now(),'status':sig.get('discord_status',''),'title':sig.get('title',''),'rank':sig.get('rank',''),'entry_time_jst':sig.get('entry_time_jst',''),'entry_price':sig.get('entry_price',''),'tp_price':sig.get('tp_price',''),'sl_price':sig.get('sl_price',''),'dedupe_key':sig.get('dedupe_key','')},['updated_at_utc','status','title','rank','entry_time_jst','entry_price','tp_price','sl_price','dedupe_key'])
+        acsv(logs/f"signal_events_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv",{'event_time_utc':now(),'status':'SIGNAL','title':sig.get('title',''),'rank':sig.get('rank',''),'ranked_candidate_name':sig.get('ranked_candidate_name',''),'packet_row':sig.get('packet_row',''),'direction':sig.get('direction',''),'symbol':sig.get('symbol',''),'entry_time_utc':sig.get('entry_time_utc',''),'entry_time_jst':sig.get('entry_time_jst',''),'entry_price':sig.get('entry_price',''),'tp_price':sig.get('tp_price',''),'sl_price':sig.get('sl_price',''),'dedupe_key':sig.get('dedupe_key',''),'discord_status':sig.get('discord_status','')},SIGNAL_EVENT)
+    else:
+        wjson(current/'latest_signal.json',{'updated_at_utc':now(),'status':'NO_SIGNAL'})
+    st=rjson(current/'latest_status.json') if (current/'latest_status.json').exists() else {}
+    st.setdefault('no_signal_count_today',0); st.setdefault('signal_count_today',0); st.setdefault('error_count_today',0)
+    if selected: st['signal_count_today']=int(st.get('signal_count_today',0))+len(selected)
+    else: st['no_signal_count_today']=int(st.get('no_signal_count_today',0))+1
+    st.update({'updated_at_utc':now(),'status':status})
+    wjson(current/'latest_status.json',st)
+
 def run(args):
-    repo=Path(args.repo_root).resolve() if args.repo_root else repo_default(); root,note=pick(repo); out=root/OUT
+    repo=Path(args.repo_root).resolve() if args.repo_root else repo_default(); root,note=pick(repo); out=root/OUT; live_rt=live_runtime(root)
     ranked=root/UP36/'gold_v3_36_ranked_candidate_contract.csv'; filters=root/UP36/'gold_v3_36_final_filter_contract.csv'; summ=root/UP36/'gold_v3_36_summary.json'; live=live_path(root,args.live_snapshot)
     inv_rows=inv([('stage36_summary',summ,True),('ranked_candidate_contract',ranked,True),('final_filter_contract',filters,True),('live_snapshot',live,True)])
     events=[]; sigs=[]; blockers=[]
     if not all(x['exists'] for x in inv_rows):
         summary={'created_at_utc':now(),'step':STEP,'status':BLOCKED,'selected_gold_v3_output_root':str(root),'path_resolution_note':note,'blocked_reason':'missing Stage36 output or live snapshot','discord_enabled_requested':bool(args.enable_discord)}
         blockers=[{'blocker_id':'G3-37-001','blocker_name':'required inputs','status':'OPEN_BLOCKER','detail':'Stage36 outputs and live snapshot required'}]
+        write_live_current(live_rt,[],BLOCKED)
         out.mkdir(parents=True,exist_ok=True); wcsv(out/'gold_v3_37_input_inventory.csv',inv_rows,INV); wcsv(out/'gold_v3_37_signal_dispatch_log.csv',sigs,SIG); wcsv(out/'gold_v3_37_event_log.csv',events,EVT); wcsv(out/'gold_v3_37_blocker_matrix.csv',blockers,BLK); wjson(out/'gold_v3_37_summary.json',summary); print(json.dumps(summary,ensure_ascii=False,indent=2)); return 2
     rank_rows=rcsv(ranked); filt_by=by_packet(rcsv(filters)); live_rows=rcsv(live); stage36=rjson(summ)
     state_path=out/'gold_v3_37_live_state.json'; state=state_load(state_path); sent=set(state.get('sent_keys',[])); candidates=[]
@@ -162,15 +189,16 @@ def run(args):
         sent.add(sig['dedupe_key'])
     state['sent_keys']=sorted(sent)[-500:]; state_save(state_path,state)
     status=READY if selected else NO_SIGNAL
-    blockers=[{'blocker_id':'G3-37-001','blocker_name':'required inputs','status':'CLOSED','detail':'Stage36 outputs and live snapshot found'},{'blocker_id':'G3-37-002','blocker_name':'duplicate control','status':'CLOSED','detail':'highest-rank-per-bar/direction by default'},{'blocker_id':'G3-37-003','blocker_name':'mt5 direct send','status':'CLOSED_BLOCKED','detail':'direct MT5 execution was not added; Discord notify only'}]
-    review=[{'review_key':'status','value':status,'detail':'live candidate snapshot evaluated'},{'review_key':'stage36_status','value':stage36.get('status',''),'detail':'ranked source'},{'review_key':'discord_enabled','value':bool(args.enable_discord),'detail':'Discord flag'},{'review_key':'mt5_direct_send_enabled','value':False,'detail':'not implemented by this script'},{'review_key':'candidate_hits','value':len(candidates),'detail':'unblocked candidate hits'},{'review_key':'selected_dispatches','value':len(selected),'detail':'selected highest-rank signals'}]
-    summary={'created_at_utc':now(),'step':STEP,'status':status,'selected_gold_v3_output_root':str(root),'path_resolution_note':note,'live_snapshot_path':str(live),'candidate_hits':len(candidates),'selected_dispatches':len(selected),'discord_enabled':bool(args.enable_discord),'discord_webhook_env':args.discord_webhook_env,'mt5_direct_send_enabled':False,'symbol':args.symbol,'notify_all_hits':bool(args.notify_all_hits),'message_title':'GOLD BUY / GOLD SELL','message_order':'rank -> entry time JST -> entry price -> TP/SL','ai_api_called':False}
+    write_live_current(live_rt,selected,status)
+    blockers=[{'blocker_id':'G3-37-001','blocker_name':'required inputs','status':'CLOSED','detail':'Stage36 outputs and live snapshot found'},{'blocker_id':'G3-37-002','blocker_name':'duplicate control','status':'CLOSED','detail':'highest-rank-per-bar/direction by default'},{'blocker_id':'G3-37-003','blocker_name':'live runtime current signal','status':'CLOSED','detail':'latest_signal.json updated for MT5 executor'}]
+    review=[{'review_key':'status','value':status,'detail':'live candidate snapshot evaluated'},{'review_key':'stage36_status','value':stage36.get('status',''),'detail':'ranked source'},{'review_key':'discord_enabled','value':bool(args.enable_discord),'detail':'Discord flag'},{'review_key':'latest_signal_written','value':True,'detail':'live_runtime/current/latest_signal.json updated'},{'review_key':'candidate_hits','value':len(candidates),'detail':'unblocked candidate hits'},{'review_key':'selected_dispatches','value':len(selected),'detail':'selected highest-rank signals'}]
+    summary={'created_at_utc':now(),'step':STEP,'status':status,'selected_gold_v3_output_root':str(root),'path_resolution_note':note,'live_snapshot_path':str(live),'candidate_hits':len(candidates),'selected_dispatches':len(selected),'discord_enabled':bool(args.enable_discord),'discord_webhook_env':args.discord_webhook_env,'mt5_direct_send_enabled':False,'symbol':args.symbol,'notify_all_hits':bool(args.notify_all_hits),'latest_signal_written':True,'message_title':'GOLD BUY / GOLD SELL','message_order':'rank -> entry time JST -> entry price -> TP/SL','ai_api_called':False}
     out.mkdir(parents=True,exist_ok=True); wcsv(out/'gold_v3_37_input_inventory.csv',inv_rows,INV); wcsv(out/'gold_v3_37_signal_dispatch_log.csv',sigs,SIG); wcsv(out/'gold_v3_37_event_log.csv',events,EVT); wcsv(out/'gold_v3_37_review_matrix.csv',review,REV); wcsv(out/'gold_v3_37_blocker_matrix.csv',blockers,BLK); wjson(out/'gold_v3_37_summary.json',summary)
-    report=['# GOLD V3 37 ranked live Discord notify report','',f"Created UTC: `{summary['created_at_utc']}`",f"Status: `{status}`",'', '## Message format','- Title: `GOLD BUY` or `GOLD SELL`','- Order: rank -> entry time JST -> entry price -> TP/SL','', '## MT5','- Direct MT5 execution is not included in this script.']
+    report=['# GOLD V3 37 ranked live Discord notify report','',f"Created UTC: `{summary['created_at_utc']}`",f"Status: `{status}`",'', '## Message format','- Title: `GOLD BUY` or `GOLD SELL`','- Order: rank -> entry time JST -> entry price -> TP/SL','', '## Live runtime','- Writes `live_runtime/current/latest_signal.json` for the MT5 demo executor.']
     (out/'GOLD_V3_37_RANKED_LIVE_DISCORD_NOTIFY_REPORT.md').write_text('\n'.join(report)+'\n',encoding='utf-8')
     print(json.dumps(summary,ensure_ascii=False,indent=2)); return 0
 def fail(repo,e):
-    root,note=pick(repo.resolve()); out=root/OUT; out.mkdir(parents=True,exist_ok=True); wjson(out/'gold_v3_37_summary.json',{'created_at_utc':now(),'step':STEP,'status':ERR,'blocked_reason':f'{e.__class__.__name__}: {e}','path_resolution_note':note}); (out/'gold_v3_37_exception.txt').write_text(traceback.format_exc(),encoding='utf-8'); print(traceback.format_exc(),file=sys.stderr); return 1
+    root,note=pick(repo.resolve()); out=root/OUT; out.mkdir(parents=True,exist_ok=True); live_rt=live_runtime(root); wjson(live_rt/'current'/'latest_status.json',{'updated_at_utc':now(),'status':ERR,'error':f'{e.__class__.__name__}: {e}'}); wjson(out/'gold_v3_37_summary.json',{'created_at_utc':now(),'step':STEP,'status':ERR,'blocked_reason':f'{e.__class__.__name__}: {e}','path_resolution_note':note}); (out/'gold_v3_37_exception.txt').write_text(traceback.format_exc(),encoding='utf-8'); print(traceback.format_exc(),file=sys.stderr); return 1
 def main(argv=None):
     ap=argparse.ArgumentParser(); ap.add_argument('--repo-root',default=''); ap.add_argument('--live-snapshot',default=''); ap.add_argument('--entry-time-column',default='entry_time_utc'); ap.add_argument('--symbol',default='XAUUSD'); ap.add_argument('--default-tp-usd',type=float,default=10.0); ap.add_argument('--default-sl-usd',type=float,default=5.0); ap.add_argument('--enable-discord',action='store_true'); ap.add_argument('--discord-webhook-env',default='GOLD_V3_DISCORD_WEBHOOK_URL'); ap.add_argument('--discord-webhook-url',default=''); ap.add_argument('--notify-all-hits',action='store_true'); ap.add_argument('--resend-duplicate',action='store_true')
     args=ap.parse_args(argv); repo=Path(args.repo_root).resolve() if args.repo_root else repo_default()
