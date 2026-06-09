@@ -69,6 +69,23 @@ def append_csv(path: Path, row: dict[str, Any], fields: list[str]) -> None:
         writer.writerow({k: row.get(k, "") for k in fields})
 
 
+def prune_csv_tail(path: Path, fields: list[str], max_rows: int) -> int:
+    """Keep only the latest max_rows records in a small operational CSV log."""
+    if max_rows <= 0 or not path.exists():
+        return 0
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        rows = list(csv.DictReader(f))
+    if len(rows) <= max_rows:
+        return 0
+    trimmed = rows[-max_rows:]
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+        writer.writeheader()
+        for row in trimmed:
+            writer.writerow({k: row.get(k, "") for k in fields})
+    return len(rows) - len(trimmed)
+
+
 def tail_text(s: str, limit: int = 1200) -> str:
     s = s.replace("\r", " ").replace("\n", " | ")
     return s[-limit:]
@@ -127,7 +144,9 @@ def run_once(args: argparse.Namespace, repo_root: Path, out_dir: Path, run_id: i
         "stdout_tail": tail_text(proc.stdout),
         "stderr_tail": tail_text(proc.stderr),
     }
-    append_csv(out_dir / "gold_v3_38_loop_runs.csv", row, LOOP_FIELDS)
+    loop_log = out_dir / "gold_v3_38_loop_runs.csv"
+    append_csv(loop_log, row, LOOP_FIELDS)
+    pruned_rows = prune_csv_tail(loop_log, LOOP_FIELDS, args.max_log_rows)
     write_json(
         out_dir / "gold_v3_38_summary.json",
         {
@@ -141,6 +160,10 @@ def run_once(args: argparse.Namespace, repo_root: Path, out_dir: Path, run_id: i
             "stage37_script": "scripts/gold_v3_runtime/gold_v3_37_ranked_live_discord_notify.py",
             "discord_enabled": bool(args.enable_discord),
             "mt5_direct_send_enabled": False,
+            "loop_log_path": str(loop_log),
+            "loop_log_max_rows": args.max_log_rows,
+            "loop_log_pruned_rows_last_run": pruned_rows,
+            "stage37_logs_are_overwritten_each_run": True,
         },
     )
     return row
@@ -152,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--delay-seconds", type=int, default=5)
     ap.add_argument("--target-seconds", type=float, default=5.0)
     ap.add_argument("--stage37-timeout-seconds", type=float, default=15.0)
+    ap.add_argument("--max-log-rows", type=int, default=10080)
     ap.add_argument("--loop", action="store_true")
     ap.add_argument("--run-once", action="store_true")
     ap.add_argument("--live-snapshot", default="")
