@@ -6,6 +6,9 @@ rem Runtime BAT location: scripts\gold_v3_runtime\bat\
 rem This BAT reviews all Stage 15 replay candidates, including rank 4/6/7/8 h1_atr56 comparison profiles.
 rem It must not approve final candidates, finalize thresholds, train models, generate signals, create ZIP output,
 rem call AI APIs, notify Discord, place MT5 orders, or enable live hooks/evaluators/final signals.
+rem
+rem 2026-06-09 fix: run through gold_v3_16_all_replay_result_review_and_narrowing_fixed_runner.py
+rem to avoid duplicate safety-key expansion in the original Stage 16 module summary.
 
 set "EXIT_CODE=1"
 
@@ -19,7 +22,7 @@ cd /d "%~dp0\..\..\.."
 if errorlevel 1 goto FATAL_CD
 
 set "REPO_ROOT=%CD%"
-set "SCRIPT_PATH=scripts\gold_v3_runtime\gold_v3_16_all_replay_result_review_and_narrowing_audit_only.py"
+set "SCRIPT_PATH=scripts\gold_v3_runtime\gold_v3_16_all_replay_result_review_and_narrowing_fixed_runner.py"
 
 echo [GOLD_V3_16] repo_root=%REPO_ROOT%
 echo [GOLD_V3_16] script=%SCRIPT_PATH%
