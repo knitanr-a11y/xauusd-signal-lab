@@ -18,6 +18,18 @@ docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_RANKING_OBJECTIVE_ADDEND
 
 If any instruction conflicts, this document wins.
 
+## GOLD V2 / old GOLD quarantine
+
+GOLD V3 is the only active audit chain for the next task.
+
+GOLD V2, old GOLD, DISC8, and any related legacy artifacts are quarantined.
+
+For Stage 14, do **not** read, import, compare, merge, recover from, copy from, backfill from, or use GOLD V2 / old GOLD / DISC8 artifacts as source-of-truth, fallback, reference logic, replay input, feature source, rule source, candidate source, or validation source.
+
+The next chat should use only GOLD V3 Stage 13 outputs as the immediate source-of-truth inputs for Stage 14.
+
+The only acceptable mention of GOLD V2 in this handoff is this quarantine warning and the already-recorded safety flag that V2 live SOT was not used.
+
 ## Current status
 
 GOLD V3 remains audit-only.
@@ -364,6 +376,7 @@ It must not:
 - enable live hook
 - enable live evaluator
 - create final signal
+- read or use GOLD V2, old GOLD, or DISC8 artifacts
 ```
 
 ## Stage-14 success status
@@ -388,6 +401,7 @@ repo: knitanr-a11y/xauusd-signal-lab
 docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_13_READY_14_NEXT_HUMAN_DECISION_REPLAY_PREP_20260609.md
 
 GOLD V3は現在audit-onlyです。
+GOLD V2 / 旧GOLD / DISC8 は隔離中です。14では読まない・使わない・参照しない・fallbackにしないでください。
 13は完了済みで、statusは以下です。
 GOLD_V3_13_RANKING_DECISION_TEMPLATE_READY_AUDIT_ONLY
 
@@ -413,7 +427,7 @@ GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY
 - APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY はfinal承認でもlive承認でもありません。
 - REQUEST_MORE_AUDIT は承認ではありません。
 - 旧GOLD/DISC8は隔離継続です。
-- GOLD V2 artifactはhistorical/audit referenceのみで、live SOTではありません。
+- GOLD V2 artifactは参照禁止です。Stage 14では使用しないでください。
 
 13 outputsを確認して、14のspec/script/BATを作ってください。
 ただし、replay実行はまだしないでください。
