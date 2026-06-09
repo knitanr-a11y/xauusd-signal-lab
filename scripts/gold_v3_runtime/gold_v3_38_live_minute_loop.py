@@ -54,6 +54,42 @@ def v3_root(repo_root: Path) -> Path:
     return files_root(repo_root) / "FX_OUTPUTS" / "gold_v3"
 
 
+def load_env_file(path: Path) -> bool:
+    if not path.exists() or not path.is_file():
+        return False
+    try:
+        for raw in path.read_text(encoding="utf-8-sig").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+        return True
+    except Exception:
+        return False
+
+
+def load_runtime_env(repo_root: Path) -> list[str]:
+    candidates = [
+        files_root(repo_root) / ".env",
+        repo_root / ".env",
+        v3_root(repo_root) / ".env",
+    ]
+    loaded: list[str] = []
+    seen: set[str] = set()
+    for path in candidates:
+        key = str(path)
+        if key in seen:
+            continue
+        seen.add(key)
+        if load_env_file(path):
+            loaded.append(str(path))
+    return loaded
+
+
 def write_json(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
@@ -191,6 +227,7 @@ def run_once(args: argparse.Namespace, repo_root: Path, out_dir: Path, run_id: i
             "stage37_script": "scripts/gold_v3_runtime/gold_v3_37_ranked_live_discord_notify.py",
             "discord_enabled": bool(args.enable_discord),
             "error_discord_enabled": bool(args.notify_errors_to_discord),
+            "env_files_loaded_count": len(args.loaded_env_files),
             "mt5_direct_send_enabled": False,
             "loop_log_path": str(loop_log),
             "loop_log_max_rows": args.max_log_rows,
@@ -222,6 +259,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     repo_root = Path(args.repo_root).resolve() if args.repo_root else repo_root_default()
+    args.loaded_env_files = load_runtime_env(repo_root)
     out_dir = v3_root(repo_root) / OUT
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -242,14 +280,14 @@ def main(argv: list[str] | None = None) -> int:
             post_discord_error(args, "GOLD V3 LOOP STOPPED", "Discord notification loop was stopped by KeyboardInterrupt.")
         except Exception:
             pass
-        write_json(out_dir / "gold_v3_38_summary.json", {"created_at_utc": utc_text(), "step": STEP, "status": "STOPPED_BY_USER"})
+        write_json(out_dir / "gold_v3_38_summary.json", {"created_at_utc": utc_text(), "step": STEP, "status": "STOPPED_BY_USER", "env_files_loaded_count": len(args.loaded_env_files)})
         return 0
     except Exception as exc:
         try:
             post_discord_error(args, "GOLD V3 LOOP EXCEPTION", f"{exc.__class__.__name__}: {exc}\n{traceback.format_exc()}")
         except Exception:
             pass
-        write_json(out_dir / "gold_v3_38_summary.json", {"created_at_utc": utc_text(), "step": STEP, "status": EXCEPTION_STATUS, "blocked_reason": f"{exc.__class__.__name__}: {exc}"})
+        write_json(out_dir / "gold_v3_38_summary.json", {"created_at_utc": utc_text(), "step": STEP, "status": EXCEPTION_STATUS, "blocked_reason": f"{exc.__class__.__name__}: {exc}", "env_files_loaded_count": len(args.loaded_env_files)})
         (out_dir / "gold_v3_38_exception.txt").write_text(traceback.format_exc(), encoding="utf-8")
         print(traceback.format_exc(), file=sys.stderr)
         return 1
