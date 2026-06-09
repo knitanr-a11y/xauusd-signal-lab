@@ -1,6 +1,22 @@
-# NEXT CHAT HANDOFF - GOLD V3 13 READY / 14 NEXT HUMAN DECISION REPLAY PREP
+# CANONICAL NEXT CHAT HANDOFF - GOLD V3 13 READY / 14 HUMAN DECISION REPLAY PREP
 
 Created: 2026-06-09
+
+Repository: `knitanr-a11y/xauusd-signal-lab`
+
+## IMPORTANT - this document is the only primary handoff now
+
+This is the canonical handoff document for the next chat.
+
+It supersedes all earlier GOLD V3 12-ready / 13-next handoff documents, including:
+
+```text
+docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_CANONICAL_RANKING_DECISION_TEMPLATE_20260609.md
+docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_HUMAN_DECISION_TEMPLATE_20260609.md
+docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_RANKING_OBJECTIVE_ADDENDUM_20260609.md
+```
+
+If any instruction conflicts, this document wins.
 
 ## Current status
 
@@ -18,7 +34,7 @@ Current status:
 GOLD_V3_13_RANKING_DECISION_TEMPLATE_READY_AUDIT_ONLY
 ```
 
-Stage 13 has produced a ranking-oriented human decision template from the GOLD V3 12 deployability packet.
+Stage 13 produced a ranking-oriented human decision template from the GOLD V3 12 deployability packet.
 
 No final candidate approval has been given.
 No replay has been executed.
@@ -175,7 +191,7 @@ proxy_from_stage12_input_preview_rows; not_exact_calendar_days; recompute_exactl
 ```
 
 Do not treat these numbers as true expected trades per day.
-True trade frequency must be recomputed in the next audit-only replay stage.
+True trade frequency must be recomputed in the next audit-only replay planning/replay stage.
 
 ## Repository repairs completed before this handoff
 
@@ -200,7 +216,7 @@ scripts/gold_v3_runtime/gold_v3_13_ranking_decision_template_audit_only.py
 scripts/gold_v3_runtime/bat/GOLD_V3_13_RANKING_DECISION_TEMPLATE_AUDIT_ONLY.bat
 ```
 
-## Next step
+## Next stage
 
 Next stage should be:
 
@@ -227,7 +243,140 @@ REQUEST_MORE_AUDIT
 `APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY` is not final approval and not live approval.
 `REQUEST_MORE_AUDIT` is not approval.
 
-## Recommended human decision prompt
+## Stage-14 implementation target paths
+
+Stage 14 has not been implemented yet. The next chat must create exactly these files unless the user explicitly instructs otherwise:
+
+```text
+docs/gold_v3/GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY_SPEC_20260609.md
+scripts/gold_v3_runtime/gold_v3_14_human_ranking_decision_intake_audit_only.py
+scripts/gold_v3_runtime/bat/GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY.bat
+```
+
+Do not create a root-level BAT.
+Do not create a root-level Python wrapper.
+Do not create files outside `docs/gold_v3/` and `scripts/gold_v3_runtime/` unless explicitly needed for audit documentation.
+
+## Stage-14 BAT contract
+
+The BAT must be placed here:
+
+```text
+scripts/gold_v3_runtime/bat/GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY.bat
+```
+
+Because the BAT is inside `scripts/gold_v3_runtime/bat/`, it must return to the repository root with:
+
+```bat
+cd /d "%~dp0\..\..\.."
+```
+
+The BAT must then run:
+
+```bat
+python scripts\gold_v3_runtime\gold_v3_14_human_ranking_decision_intake_audit_only.py
+```
+
+or use `py -3` fallback first, but the script path must still be the runtime script path above.
+
+The BAT must not call any replay script, training script, signal script, Discord script, MT5 script, AI API script, live hook, live evaluator, or ZIP process.
+
+## Stage-14 script path and output contract
+
+The Stage-14 script must create this output directory:
+
+```text
+Files/FX_OUTPUTS/gold_v3/14_human_ranking_decision_intake_audit_only/
+```
+
+Use the same output-root convention as the repaired stage-13 runtime script: prefer the existing GOLD V3 output root selected from the stage-13/stage-12 outputs, with the legacy repo-root `Files/FX_OUTPUTS` path only as fallback.
+
+The script must create the output directory with:
+
+```python
+p.mkdir(parents=True, exist_ok=True)
+```
+
+Required outputs even when inputs are missing:
+
+```text
+gold_v3_14_summary.json
+gold_v3_14_input_inventory.csv
+gold_v3_14_human_decision_intake_template.csv
+gold_v3_14_replay_plan_preview.csv
+gold_v3_14_decision_matrix.csv
+gold_v3_14_blocker_matrix.csv
+GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY_REPORT.md
+```
+
+If inputs are missing or invalid, write these files with a blocked/input-review status. Do not stop before writing `input_inventory`, `summary`, `decision_matrix`, `blocker_matrix`, and report.
+
+## Stage-14 required inputs
+
+Stage 14 must read Stage 13 outputs as source-of-truth inputs:
+
+```text
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_summary.json
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_decision_template.csv
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_ranked_rule_candidate_rows.csv
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_ranked_candidate_family_groups.csv
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_deferred_narrowing_candidates.csv
+Files/FX_OUTPUTS/gold_v3/13_ranking_decision_template_audit_only/gold_v3_13_blocker_matrix.csv
+```
+
+Stage 14 must require:
+
+```text
+gold_v3_13_summary.status == GOLD_V3_13_RANKING_DECISION_TEMPLATE_READY_AUDIT_ONLY
+ranking_template_rows == 8
+candidate_family_group_rows == 4
+human_decision_required == true
+```
+
+## Stage-14 purpose guardrails
+
+Stage 14 is an intake/planning stage only.
+
+It may:
+
+```text
+- read stage-13 ranked candidates
+- create a blank or user-filled human decision intake template
+- validate human decision values if provided by a local CSV/input file
+- map APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY candidates to a replay-plan preview
+- keep REJECT and REQUEST_MORE_AUDIT rows separated
+- write blocker and decision matrices
+```
+
+It must not:
+
+```text
+- execute replay
+- calculate final true PF/win rate as final proof
+- approve candidates for live
+- finalize thresholds
+- train models
+- generate signals
+- create ZIP output
+- call AI API
+- notify Discord
+- place MT5 orders
+- enable live hook
+- enable live evaluator
+- create final signal
+```
+
+## Stage-14 success status
+
+Use this status only when input files are present, Stage 13 is READY, and the stage-14 intake template / replay-plan preview / matrices are written:
+
+```text
+GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_READY_AUDIT_ONLY
+```
+
+Use a blocked/input-review status if human decision content is missing, invalid, or not yet provided. This is acceptable because Stage 14 may be a template/intake stage.
+
+## Recommended next chat prompt
 
 Use this for the next chat if you want to proceed:
 
@@ -250,6 +399,10 @@ GOLD_V3_14_HUMAN_RANKING_DECISION_INTAKE_AUDIT_ONLY
 - 8 rowsは8個のトレードポイントではなく、8個のルール候補です。
 - h1_atr56 >= 9.95812 は5つのTP/SL profileで共有される同一entry familyです。独立候補として数えないでください。
 - 次にやることはhuman decision intakeとaudit-only replay planの準備です。
+- 14のspec/script/BATはhandoff記載の正しいrepo pathに作成してください。
+- BATは scripts/gold_v3_runtime/bat/ に置き、cd /d "%~dp0\..\..\.." でrepo rootへ戻してください。
+- 14 scriptは出力フォルダを mkdir(parents=True, exist_ok=True) で必ず作ってください。
+- 入力不足でも input_inventory / summary / decision_matrix / blocker_matrix / report を必ず出してください。
 - replay executionはまだ禁止です。実行する場合は別途明示指示が必要です。
 - final candidate approvalは禁止です。
 - threshold finalizationは禁止です。
