@@ -4,6 +4,20 @@ Created: 2026-06-09
 
 Repository: `knitanr-a11y/xauusd-signal-lab`
 
+## Read this first in the next chat
+
+This document is the handoff source-of-truth for the next chat.
+
+The next assistant should **not** ask the user to approve/reject the 8 candidates immediately. The next assistant should first create the stage 13 audit-only human decision template artifacts.
+
+Immediate next implementation task:
+
+```text
+Create GOLD_V3_13_HUMAN_DECISION_TEMPLATE_AUDIT_ONLY spec/script/BAT.
+```
+
+Do not create stage 14, do not run replay, and do not perform any live/signal action until explicitly requested later.
+
 ## Current position
 
 GOLD V3 has reached:
@@ -29,6 +43,7 @@ Stage 13 has not been created yet.
 ## Non-negotiable guardrails
 
 - GOLD V3 remains audit-only.
+- No source recovery has been approved.
 - No final candidate approval has been given.
 - No threshold finalization has been done.
 - No model training has been done.
@@ -41,6 +56,7 @@ Stage 13 has not been created yet.
 - No ZIP output should be created.
 - External actions remain OFF.
 - `APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY` is not final approval and not live deployment approval.
+- `REQUEST_MORE_AUDIT` is not approval.
 - Old GOLD/DISC8 remains quarantined.
 - GOLD V2 source/final/arbitration artifacts remain historical/audit references only, not live source-of-truth.
 - Future/profit/exit data is label/evaluation only and must never be used as a live feature selector.
@@ -113,6 +129,8 @@ G3-12-008 external actions: CLOSED
 Important explanation already given to the user:
 
 The 8 rows are not 8 individual trades. They are 8 rule candidates, each representing a rule condition applied to many historical entry rows. The next audit-only replay should examine all historical entries matching approved rule candidates, not just 8 trade timestamps.
+
+In stage 13, do not replay those entries yet. Stage 13 only creates a human decision template.
 
 ## Stage 12 deployability review packet rows
 
@@ -331,6 +349,7 @@ Suggested purpose:
 - Do not auto-approve anything.
 - Do not finalize thresholds.
 - Do not run replay yet.
+- Do not ask the user for manual decisions before creating the template.
 
 Suggested outputs:
 
@@ -369,7 +388,40 @@ G3-13-008 zip output: CLOSED_DISABLED
 G3-13-009 external actions: CLOSED
 ```
 
-## Next chat start prompt
+## Next chat start prompt - Japanese recommended
+
+```text
+repo: knitanr-a11y/xauusd-signal-lab
+
+まず以下を読んで、続きからお願いします。
+docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_12_READY_13_NEXT_HUMAN_DECISION_TEMPLATE_20260609.md
+
+GOLD V3は現在audit-onlyです。
+12は完了済みで、statusは以下です。
+GOLD_V3_12_DEPLOYABILITY_REVIEW_PACKET_READY_AUDIT_ONLY
+
+13はまだ作成されていません。
+次にやることは、GOLD_V3_13_HUMAN_DECISION_TEMPLATE_AUDIT_ONLY のspec/script/BAT作成です。
+
+重要:
+- 8 packet rowsは8個のトレードポイントではなく、8個のルール候補です。
+- 13では人間判断テンプレートを作るだけで、判断値を自動入力しないでください。
+- 人間判断をユーザーに求めるのは、13テンプレート作成後です。
+- 自動承認は禁止です。
+- final candidate approvalは禁止です。
+- threshold finalizationは禁止です。
+- replay実行はまだ禁止です。
+- model trainingは禁止です。
+- signal generationは禁止です。
+- ZIP outputは禁止です。
+- Discord / MT5 / AI API / live hook / live evaluator / final signal はOFFです。
+- APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY はfinal承認でもlive承認でもありません。
+- REQUEST_MORE_AUDIT は承認ではありません。
+- 旧GOLD/DISC8は隔離継続です。
+- GOLD V2 artifactはhistorical/audit referenceのみで、live SOTではありません。
+```
+
+## Next chat start prompt - English fallback
 
 ```text
 repo: knitanr-a11y/xauusd-signal-lab
@@ -386,6 +438,8 @@ Next task is to create GOLD_V3_13_HUMAN_DECISION_TEMPLATE_AUDIT_ONLY.
 
 Important:
 - The 8 packet rows are rule candidates, not 8 trade points.
+- In stage 13, create the human decision template only; do not auto-fill decisions.
+- Ask for human decisions only after stage 13 template is created.
 - Do not auto-approve anything.
 - Do not finalize thresholds.
 - Do not run replay yet.
@@ -394,6 +448,7 @@ Important:
 - Do not create ZIP output.
 - Discord / MT5 / AI API / live hook / live evaluator / final signal remain OFF.
 - APPROVE_FOR_NEXT_AUDIT_ONLY_REPLAY is not final approval and not live deployment approval.
+- REQUEST_MORE_AUDIT is not approval.
 - Old GOLD/DISC8 remains quarantined.
 - GOLD V2 artifacts remain historical/audit references only, not live SOT.
 ```
