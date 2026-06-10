@@ -1,0 +1,32 @@
+{
+  "stage": "GOLD_V3_43_EXACT_ENTRY_AND_PRUNE_CONTRACT_FOR_HONMEI_SET_AUDIT_ONLY",
+  "created_jst": "2026-06-10",
+  "status": "BLOCKED_SOURCE_OF_TRUTH_ARTIFACTS_MISSING",
+  "exact_entry_prune_contract_ready": false,
+  "source_of_truth_constrained": true,
+  "live_allowed": false,
+  "mt5_bat_created": false,
+  "mt5_execution_enabled": false,
+  "discord_live_enabled": false,
+  "live_code_created": false,
+  "stage41_trading_source_used": false,
+  "ohlc_approximation_used": false,
+  "quarantined_sources_used": false,
+  "stage42_decision_rows_read": 3,
+  "honmei_candidates": [
+    "R03_P1_R1_ONLY_CD60_PRUNE_111",
+    "R04_P4_R1_ONLY_CD60_PRUNE_115",
+    "R1_ONLY_CD90_PRUNE_050_RESTORE"
+  ],
+  "blocker_count": 7,
+  "blockers": ["B43-001", "B43-002", "B43-003", "B43-004", "B43-005", "B43-006", "B43-007"],
+  "created_outputs": [
+    "docs/gold_v3/gold_v3_43_honmei_exact_entry_prune_contract.csv",
+    "docs/gold_v3/gold_v3_43_honmei_exact_entry_prune_contract.json",
+    "docs/gold_v3/GOLD_V3_43_EXACT_ENTRY_AND_PRUNE_CONTRACT_FOR_HONMEI_SET_AUDIT_ONLY_REPORT.md",
+    "docs/gold_v3/gold_v3_43_input_inventory.csv",
+    "docs/gold_v3/gold_v3_43_blocker_matrix.csv",
+    "docs/gold_v3/gold_v3_43_summary.json"
+  ],
+  "required_resolution": "Make the Stage15/21/22/30/35/36 source-of-truth artifacts available, then rerun Stage43 without using handoff summaries as proof."
+}
