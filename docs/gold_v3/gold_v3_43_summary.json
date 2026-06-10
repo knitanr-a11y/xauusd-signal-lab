@@ -1,9 +1,10 @@
 {
   "stage": "GOLD_V3_43_EXACT_ENTRY_AND_PRUNE_CONTRACT_FOR_HONMEI_SET_AUDIT_ONLY",
   "created_jst": "2026-06-10",
-  "status": "BLOCKED_SOURCE_OF_TRUTH_ARTIFACTS_MISSING",
-  "exact_entry_prune_contract_ready": false,
+  "status": "READY_AUDIT_ONLY_EXACT_ENTRY_PRUNE_CONTRACT_FOR_8_HONMEI_CANDIDATES",
+  "exact_entry_prune_contract_ready": true,
   "source_of_truth_constrained": true,
+  "honmei_candidate_count": 8,
   "live_allowed": false,
   "mt5_bat_created": false,
   "mt5_execution_enabled": false,
@@ -12,14 +13,34 @@
   "stage41_trading_source_used": false,
   "ohlc_approximation_used": false,
   "quarantined_sources_used": false,
-  "stage42_decision_rows_read": 3,
   "honmei_candidates": [
+    "R01_P7_R1_ONLY_CD60_PRUNE_015",
+    "R02_P8_R1_ONLY_CD60_PRUNE_015",
     "R03_P1_R1_ONLY_CD60_PRUNE_111",
     "R04_P4_R1_ONLY_CD60_PRUNE_115",
-    "R1_ONLY_CD90_PRUNE_050_RESTORE"
+    "R05_P9_MAIN_R1_R2_CD90_PRUNE_133",
+    "R06_P11_MAIN_R1_R2_CD90_PRUNE_132",
+    "R07_P13_MAIN_R1_R2_CD120_PRUNE_122",
+    "R1_ONLY_CD90_PRUNE_050__R1_ONLY_CD90_PRUNE_050_S030__R1_ONLY_CD90_PRUNE_050_S024"
   ],
-  "blocker_count": 7,
-  "blockers": ["B43-001", "B43-002", "B43-003", "B43-004", "B43-005", "B43-006", "B43-007"],
+  "base_source_ranks_used": ["1", "2"],
+  "excluded_stage15_source_ranks": ["3", "4", "6", "7", "8"],
+  "contract_row_mode": "candidate_level_with_machine_readable_filter_chain_fields",
+  "blocker_count": 0,
+  "warnings": [
+    "R01/R02 have negative_months_final=1 but were explicitly included by user clarification.",
+    "CD90 restore candidate remains Stage22 REQUEST_MORE_AUDIT_LOW_FREQUENCY and is not a Stage36 packet.",
+    "Stage36 final filters are not automatically applied to the restore candidate.",
+    "Audit-only contract only; no live/MT5/Discord enablement."
+  ],
+  "source_artifacts_verified": [
+    "Stage15 replay candidate metrics/report",
+    "Stage21 filter traceability/report",
+    "Stage22 filter traceability/further pruned metrics/report",
+    "Stage30 retained candidate/filter contract/report",
+    "Stage35 before-after/cut plan/report",
+    "Stage36 ranked candidate/final filter contract/report"
+  ],
   "created_outputs": [
     "docs/gold_v3/gold_v3_43_honmei_exact_entry_prune_contract.csv",
     "docs/gold_v3/gold_v3_43_honmei_exact_entry_prune_contract.json",
@@ -28,5 +49,5 @@
     "docs/gold_v3/gold_v3_43_blocker_matrix.csv",
     "docs/gold_v3/gold_v3_43_summary.json"
   ],
-  "required_resolution": "Make the Stage15/21/22/30/35/36 source-of-truth artifacts available, then rerun Stage43 without using handoff summaries as proof."
+  "next_allowed_stage": "Exact contract review / dry-run evaluator planning only; no live/MT5/Discord enablement."
 }
