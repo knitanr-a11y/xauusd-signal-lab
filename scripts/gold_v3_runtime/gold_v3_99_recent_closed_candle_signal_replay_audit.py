@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import argparse, json, shutil, subprocess, sys, time
+import argparse, json, shutil, subprocess, sys, tempfile, time
 from pathlib import Path
 from typing import Any
 import pandas as pd
@@ -64,16 +64,20 @@ def vrow(cid, passed, obs, exp, sev="BLOCKER"):
 
 def copy_required_deps(src_base: Path, dst_base: Path) -> list[dict[str, Any]]:
     copied = []
+    dst_base.mkdir(parents=True, exist_ok=True)
     for d in REQUIRED_DEP_DIRS:
         sp = src_base / d
         dp = dst_base / d
         if sp.exists():
             if dp.exists():
                 shutil.rmtree(dp)
-            shutil.copytree(sp, dp)
-            copied.append({"dir": d, "copied": True, "src": str(sp), "dst": str(dp)})
+            try:
+                shutil.copytree(sp, dp)
+                copied.append({"dir": d, "copied": True, "src": str(sp), "dst": str(dp), "error": ""})
+            except Exception as e:
+                copied.append({"dir": d, "copied": False, "src": str(sp), "dst": str(dp), "error": repr(e)})
         else:
-            copied.append({"dir": d, "copied": False, "src": str(sp), "dst": str(dp)})
+            copied.append({"dir": d, "copied": False, "src": str(sp), "dst": str(dp), "error": "source_missing"})
     return copied
 
 
@@ -82,20 +86,26 @@ def main() -> int:
     ap.add_argument("--candle-dir", default="")
     ap.add_argument("--bars", type=int, default=32)
     ap.add_argument("--output-dir", default="")
+    ap.add_argument("--keep-temp", action="store_true")
     args = ap.parse_args()
 
     repo = Path(__file__).resolve().parents[2]
     src = Path(args.candle_dir).resolve() if args.candle_dir else find_files_dir()
     src_base = src / "FX_OUTPUTS" / "gold_v3"
     out = Path(args.output_dir).resolve() if args.output_dir else src_base / "99c"
-    replay_root = out / "replay_inputs"
     out.mkdir(parents=True, exist_ok=True)
-    replay_root.mkdir(parents=True, exist_ok=True)
+
+    temp_root = Path(tempfile.gettempdir()) / "g99_replay"
+    if temp_root.exists() and not args.keep_temp:
+        shutil.rmtree(temp_root, ignore_errors=True)
+    temp_root.mkdir(parents=True, exist_ok=True)
+    replay_root = temp_root
 
     checks = []
     blockers = []
     p_m15 = src / "goldsharp_m15.csv"
     checks.append(vrow("source_m15_present", p_m15.exists(), str(p_m15), "exists"))
+    checks.append(vrow("replay_root_is_temp_short_path", str(replay_root).lower().find("g99_replay") >= 0, str(replay_root), "temp/g99_replay"))
     for d in REQUIRED_DEP_DIRS:
         checks.append(vrow(f"dep_{d}_present", (src_base / d).exists(), str(src_base / d), "exists"))
     if not p_m15.exists():
@@ -114,13 +124,15 @@ def main() -> int:
     dep_rows = []
     if not blockers:
         for i, ts in enumerate(bars, start=1):
-            rdir = replay_root / f"{i:03d}_{safe_name(ts)}"
+            rdir = replay_root / f"r{i:03d}"
             if rdir.exists():
-                shutil.rmtree(rdir)
+                shutil.rmtree(rdir, ignore_errors=True)
             rdir.mkdir(parents=True, exist_ok=True)
             rbase = rdir / "FX_OUTPUTS" / "gold_v3"
             rbase.mkdir(parents=True, exist_ok=True)
-            dep_rows.extend([{**x, "idx": i, "asof_m15": str(ts)} for x in copy_required_deps(src_base, rbase)])
+            copied = copy_required_deps(src_base, rbase)
+            dep_rows.extend([{**x, "idx": i, "asof_m15": str(ts)} for x in copied])
+            dep_failed = [x for x in copied if not x.get("copied")]
             for name in CSV_NAMES:
                 sp = src / name
                 if not sp.exists():
@@ -130,8 +142,12 @@ def main() -> int:
                     t = pd.to_datetime(df["time"], errors="coerce")
                     df = df[t <= ts].copy()
                 write_csv(df, rdir / name, sep)
-            rc, tail, sec = run_stage80(repo, rdir)
-            summ = rj(rbase / "80_immutable_runtime_monitor_audit_only" / "gold_v3_80_immutable_runtime_monitor_summary.json")
+            if dep_failed:
+                rc, tail, sec = 1, "DEPENDENCY_COPY_FAILED: " + json.dumps(dep_failed, ensure_ascii=False), 0.0
+                summ = {}
+            else:
+                rc, tail, sec = run_stage80(repo, rdir)
+                summ = rj(rbase / "80_immutable_runtime_monitor_audit_only" / "gold_v3_80_immutable_runtime_monitor_summary.json")
             decision = str(summ.get("sidecar_decision", ""))
             if not decision:
                 decision = str(summ.get("decision", ""))
@@ -156,6 +172,8 @@ def main() -> int:
 
     res_df = pd.DataFrame(results)
     dep_df = pd.DataFrame(dep_rows)
+    if len(dep_df):
+        checks.append(vrow("all_dependency_copies_ok", bool(dep_df["copied"].all()), int((~dep_df["copied"]).sum()), 0))
     if len(res_df):
         checks += [
             vrow("all_stage80_returncode_zero", bool((res_df["returncode"] == 0).all()), int((res_df["returncode"] != 0).sum()), 0),
@@ -200,6 +218,7 @@ def main() -> int:
         "no_signal_count": int((res_df["decision"] == "NO_SIGNAL").sum()) if len(res_df) else 0,
         "unknown_count": int((~res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"])).sum()) if len(res_df) else 0,
         "returncode_nonzero_count": int((res_df["returncode"] != 0).sum()) if len(res_df) else 0,
+        "replay_root": str(replay_root),
         "blocker_count": len(blockers),
     }
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -222,6 +241,7 @@ def main() -> int:
         f"no_signal_count: {int((res_df['decision'] == 'NO_SIGNAL').sum()) if len(res_df) else 0}",
         f"unknown_count: {int((~res_df['decision'].isin(['NO_SIGNAL','SIGNAL'])).sum()) if len(res_df) else 0}",
         f"returncode_nonzero_count: {int((res_df['returncode'] != 0).sum()) if len(res_df) else 0}",
+        f"replay_root: {replay_root}",
         f"blocker_count: {len(blockers)}",
         "", "SIGNAL_ROWS", signal_df.drop(columns=["tail"], errors="ignore").to_string(index=False) if len(signal_df) else "NO_SIGNAL_ROWS_FOUND_IN_REPLAY_WINDOW",
         "", "ERROR_ROWS", error_df[["idx", "asof_m15", "returncode", "decision", "tail"]].head(8).to_string(index=False) if len(error_df) else "NO_ERROR_ROWS",
@@ -232,7 +252,7 @@ def main() -> int:
         "", "OUTPUTS", "paste_me.txt", "summary.json", "replay_results.csv", "replay_results_with_tail.csv", "signal_rows.csv", "dependency_copy_matrix.csv", "validation.csv", "blockers.csv", "report.md",
     ]
     (out / "paste_me.txt").write_text("\n".join(paste) + "\n", encoding="utf-8")
-    (out / "report.md").write_text(f"# GOLD V3 99 recent closed candle signal replay\n\nStatus: `{status}`\n\nReplayed bars: `{len(res_df)}`\nSignal count: `{len(signal_df)}`\nNonzero returncodes: `{summary['returncode_nonzero_count']}`\nBlockers: `{len(blockers)}`\n", encoding="utf-8")
+    (out / "report.md").write_text(f"# GOLD V3 99 recent closed candle signal replay\n\nStatus: `{status}`\n\nReplayed bars: `{len(res_df)}`\nSignal count: `{len(signal_df)}`\nNonzero returncodes: `{summary['returncode_nonzero_count']}`\nReplay root: `{replay_root}`\nBlockers: `{len(blockers)}`\n", encoding="utf-8")
     print(f"[{status}] {out / 'paste_me.txt'}")
     return 0 if status == READY else 1
 
