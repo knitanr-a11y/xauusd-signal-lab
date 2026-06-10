@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,18 @@ POOL_POLICY = "poolから外さない。rolling health gateに判断させる。
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def clean_cell(v: Any) -> str:
+    """Normalize blank/NaN-ish values to an empty string for downstream payloads."""
+    if v is None:
+        return ""
+    if isinstance(v, float) and math.isnan(v):
+        return ""
+    s = str(v).strip()
+    if s.lower() in {"nan", "none", "null", "nat"}:
+        return ""
+    return s
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -84,14 +97,16 @@ def main() -> int:
     val.append(ok("stage74_guarded_monitor_ready", j74.get("guarded_live_csv_monitor_ready") is True, j74.get("guarded_live_csv_monitor_ready"), True))
     val.append(ok("stage73_source_stage_is_stage71", j74.get("stage73_source_stage") == "stage71", j74.get("stage73_source_stage"), "stage71"))
 
-    latest = str(j74.get("latest_m15_time", "") or "")
-    stage73_time = str(j74.get("stage73_latest_closed_m15_time", "") or snap.get("latest_closed_m15_time", "") or "")
-    decision = str(j74.get("decision", snap.get("decision", "")) or "")
-    reason = str(j74.get("no_signal_reason", snap.get("no_signal_reason", "")) or "")
-    action = str(j74.get("emission_action", snap.get("emission_action", "")) or "")
-    selected_candidate = str(snap.get("selected_candidate_label", "") or "")
-    signal_uid = str(snap.get("signal_uid", f"{stage73_time}|{decision}|{selected_candidate}") or "")
+    latest = clean_cell(j74.get("latest_m15_time", ""))
+    stage73_time = clean_cell(j74.get("stage73_latest_closed_m15_time", "") or snap.get("latest_closed_m15_time", ""))
+    decision = clean_cell(j74.get("decision", snap.get("decision", "")))
+    reason = clean_cell(j74.get("no_signal_reason", snap.get("no_signal_reason", "")))
+    action = clean_cell(j74.get("emission_action", snap.get("emission_action", "")))
+    selected_candidate = clean_cell(snap.get("selected_candidate_label", ""))
+    signal_uid = clean_cell(snap.get("signal_uid", "")) or f"{stage73_time}|{decision}|{selected_candidate}"
 
+    val.append(ok("selected_candidate_label_clean", selected_candidate.lower() != "nan", selected_candidate, "not_nan"))
+    val.append(ok("signal_uid_clean", "nan" not in signal_uid.lower(), signal_uid, "not_contains_nan"))
     val.append(ok("stage74_time_matches_stage73_time", latest == stage73_time and latest != "", stage73_time, latest))
     val.append(ok("decision_is_signal_or_no_signal", decision in {"SIGNAL", "NO_SIGNAL"}, decision, "SIGNAL|NO_SIGNAL"))
     val.append(ok("emission_action_known", action in {"NO_ACTION", "ALLOW_AUDIT_SIGNAL_EVENT", "SUPPRESS_DUPLICATE_SIGNAL"}, action, "known"))
