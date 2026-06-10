@@ -25,6 +25,7 @@ import pandas as pd
 STEP = "GOLD_V3_72_LIVE_CSV_UPDATE_MONITOR_AUDIT_ONLY"
 READY_STATUS = "GOLD_V3_72_LIVE_CSV_UPDATE_MONITOR_READY_AUDIT_ONLY"
 BLOCKED_STATUS = "GOLD_V3_72_LIVE_CSV_UPDATE_MONITOR_BLOCKED_AUDIT_ONLY"
+STAGE71_READY = "GOLD_V3_71_LIVE_CSV_SIGNAL_AUDIT_PIPELINE_PACKAGE_READY_AUDIT_ONLY"
 CSV_CONTRACT = "open/in-progress candles are not written to CSV"
 POOL_POLICY = "poolから外さない。rolling health gateに判断させる。"
 
@@ -116,6 +117,7 @@ def write_common_outputs(out: Path, status: str, val: list[dict[str, Any]], bloc
     paste.append(f"latest_m15_time: {summary.get('latest_m15_time','')}")
     paste.append(f"last_pipeline_run_time: {summary.get('last_pipeline_run_time','')}")
     paste.append(f"last_pipeline_returncode: {summary.get('last_pipeline_returncode','')}")
+    paste.append(f"stage71_snapshot_m15_time: {summary.get('stage71_snapshot_m15_time','')}")
     paste.append(f"stage71_decision: {summary.get('stage71_decision','')}")
     paste.append(f"stage71_no_signal_reason: {summary.get('stage71_no_signal_reason','')}")
     paste.append(f"stage71_latest_condition_candidate_rows: {summary.get('stage71_latest_condition_candidate_rows','')}")
@@ -141,6 +143,7 @@ def write_common_outputs(out: Path, status: str, val: list[dict[str, Any]], bloc
 Status: `{status}`
 
 - latest_m15_time: `{summary.get('latest_m15_time','')}`
+- stage71_snapshot_m15_time: `{summary.get('stage71_snapshot_m15_time','')}`
 - last_pipeline_run_time: `{summary.get('last_pipeline_run_time','')}`
 - stage71_decision: `{summary.get('stage71_decision','')}`
 - stage71_no_signal_reason: `{summary.get('stage71_no_signal_reason','')}`
@@ -149,6 +152,15 @@ Status: `{status}`
 Audit-only. No MT5, Discord, AI API, live hook, live evaluator, or final signal.
 """
     (out / "GOLD_V3_72_REPORT.md").write_text(report, encoding="utf-8")
+
+
+def load_state(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return read_json(path)
+    except Exception:
+        return {}
 
 
 def main() -> int:
@@ -166,12 +178,10 @@ def main() -> int:
         repo_root / "scripts" / "gold_v3_runtime" / "gold_v3_70_live_csv_signal_decision_preview_audit.py",
         repo_root / "scripts" / "gold_v3_runtime" / "gold_v3_71_live_csv_signal_audit_pipeline_package.py",
     ]
-    last_seen = ""
-    if state_path.exists():
-        try:
-            last_seen = str(read_json(state_path).get("latest_m15_time", ""))
-        except Exception:
-            last_seen = ""
+    state = load_state(state_path)
+    last_seen = str(state.get("latest_m15_time", ""))
+    persisted_last_run_time = str(state.get("last_pipeline_run_time", ""))
+    persisted_last_returncode = str(state.get("last_pipeline_returncode", ""))
 
     first = True
     while True:
@@ -181,12 +191,12 @@ def main() -> int:
         for s in scripts:
             val.append(ok(f"script_present_{s.name}", s.exists(), str(s), "exists"))
         latest = ""
-        rc = ""
-        run_time = ""
+        current_run_rc = ""
+        current_run_time = ""
         stage71_decision = ""
         stage71_reason = ""
         stage71_rows = ""
-        detail = ""
+        stage71_snapshot_time = ""
         try:
             latest = read_latest_m15_time(p_m15)
             val.append(ok("latest_m15_time_read", True, latest, "readable"))
@@ -199,20 +209,18 @@ def main() -> int:
         should_run = bool(latest and not blockers and ((first and not a.no_startup_run) or latest != last_seen))
         if should_run:
             append_event(event_log, {"created_at_utc": utc_now(), "event": "PIPELINE_START", "latest_m15_time": latest, "status": "RUNNING", "detail": "Stage69->70->71"})
-            run_time = utc_now()
-            args69 = ["--candle-dir", str(cdir)]
-            args70 = ["--candle-dir", str(cdir)]
-            args71 = ["--candle-dir", str(cdir)]
-            for script, argsx in zip(scripts, [args69, args70, args71]):
-                rci, outtxt = run_stage(script, argsx, repo_root)
-                detail = outtxt
-                rc = str(rci)
+            current_run_time = utc_now()
+            for script in scripts:
+                rci, outtxt = run_stage(script, ["--candle-dir", str(cdir)], repo_root)
+                current_run_rc = str(rci)
                 append_event(event_log, {"created_at_utc": utc_now(), "event": script.name, "latest_m15_time": latest, "status": "OK" if rci == 0 else "FAILED", "detail": outtxt.replace("\r", " ").replace("\n", " ")[-1000:]})
                 if rci != 0:
                     blockers.append(blocker("pipeline_stage_failed", str(script), "PIPELINE_STAGE_RETURNED_NONZERO", {"returncode": rci, "output_tail": outtxt[-2000:]}))
                     break
             if not blockers:
                 last_seen = latest
+                persisted_last_run_time = current_run_time
+                persisted_last_returncode = current_run_rc or "0"
                 append_event(event_log, {"created_at_utc": utc_now(), "event": "PIPELINE_DONE", "latest_m15_time": latest, "status": "OK", "detail": "Stage69->70->71 completed"})
         else:
             append_event(event_log, {"created_at_utc": utc_now(), "event": "HEARTBEAT", "latest_m15_time": latest, "status": "NO_CHANGE" if latest == last_seen else "BLOCKED", "detail": "no pipeline run"})
@@ -225,8 +233,9 @@ def main() -> int:
             stage71_decision = str(j71.get("decision", ""))
             stage71_reason = str(j71.get("no_signal_reason", ""))
             stage71_rows = str(j71.get("latest_condition_candidate_rows", ""))
+            stage71_snapshot_time = str(j71.get("latest_closed_m15_time", ""))
             val.append(ok("stage71_summary_present", True, str(p71), "exists"))
-            val.append(ok("stage71_ready", j71.get("status") == "GOLD_V3_71_LIVE_CSV_SIGNAL_AUDIT_PIPELINE_PACKAGE_READY_AUDIT_ONLY", j71.get("status"), "GOLD_V3_71_LIVE_CSV_SIGNAL_AUDIT_PIPELINE_PACKAGE_READY_AUDIT_ONLY"))
+            val.append(ok("stage71_ready", j71.get("status") == STAGE71_READY, j71.get("status"), STAGE71_READY))
         else:
             val.append(ok("stage71_summary_present", False, str(p71), "exists"))
             if should_run:
@@ -234,6 +243,8 @@ def main() -> int:
         if p71_snap_csv.exists():
             try:
                 snap_df = pd.read_csv(p71_snap_csv, encoding="utf-8-sig")
+                if not snap_df.empty and "latest_closed_m15_time" in snap_df.columns:
+                    stage71_snapshot_time = str(snap_df["latest_closed_m15_time"].iloc[0])
                 snap_df.to_csv(out / "gold_v3_72_latest_pipeline_snapshot.csv", index=False, encoding="utf-8-sig")
                 if p71_snap_json.exists():
                     (out / "gold_v3_72_latest_pipeline_snapshot.json").write_text(p71_snap_json.read_text(encoding="utf-8"), encoding="utf-8")
@@ -246,10 +257,26 @@ def main() -> int:
         elif should_run:
             val.append(ok("stage71_snapshot_present", False, str(p71_snap_csv), "exists"))
             blockers.append(blocker("stage71_snapshot_missing_after_pipeline", str(p71_snap_csv), "STAGE71_SNAPSHOT_MISSING_AFTER_PIPELINE"))
+        snapshot_fresh = bool(latest and stage71_snapshot_time and str(latest) == str(stage71_snapshot_time))
+        val.append(ok("stage71_snapshot_time_matches_latest_m15", snapshot_fresh, stage71_snapshot_time, latest))
+        if not snapshot_fresh:
+            blockers.append(blocker("stage71_snapshot_stale", str(p71_snap_csv), "STAGE71_SNAPSHOT_TIME_DOES_NOT_MATCH_LATEST_M15", {"latest_m15_time": latest, "stage71_snapshot_m15_time": stage71_snapshot_time}))
+        val.append(ok("last_pipeline_run_time_recorded", bool(persisted_last_run_time), persisted_last_run_time, "nonempty"))
+        val.append(ok("last_pipeline_returncode_zero", str(persisted_last_returncode) == "0", persisted_last_returncode, "0"))
+        val.append(ok("latest_closed_time_present", latest != "", latest, "nonempty"))
         val.append(ok("csv_open_bar_exclusion_required_false", True, False, False))
         val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
         failed = [v for v in val if v.get("result") != "PASS"]
         status = READY_STATUS if not failed and not blockers else BLOCKED_STATUS
+        state = {
+            "latest_m15_time": latest,
+            "stage71_snapshot_m15_time": stage71_snapshot_time,
+            "last_pipeline_run_time": persisted_last_run_time,
+            "last_pipeline_returncode": persisted_last_returncode,
+            "updated_at_utc": utc_now(),
+            "status": status,
+        }
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         summary = {
             "step": STEP,
             "candle_dir": str(cdir),
@@ -271,8 +298,9 @@ def main() -> int:
             "live_csv_update_monitor_ready": status == READY_STATUS,
             "pool_policy": POOL_POLICY,
             "latest_m15_time": latest,
-            "last_pipeline_run_time": run_time,
-            "last_pipeline_returncode": rc,
+            "stage71_snapshot_m15_time": stage71_snapshot_time,
+            "last_pipeline_run_time": persisted_last_run_time,
+            "last_pipeline_returncode": persisted_last_returncode,
             "stage71_decision": stage71_decision,
             "stage71_no_signal_reason": stage71_reason,
             "stage71_latest_condition_candidate_rows": stage71_rows,
@@ -280,9 +308,8 @@ def main() -> int:
             "validation_failure_count": len(failed),
             "blocker_count": len(blockers),
         }
-        state_path.write_text(json.dumps({"latest_m15_time": latest, "updated_at_utc": utc_now(), "status": status}, ensure_ascii=False, indent=2), encoding="utf-8")
         write_common_outputs(out, status, val, blockers, summary)
-        print(f"[{utc_now()}] {status} latest={latest} decision={stage71_decision} reason={stage71_reason} blockers={len(blockers)}")
+        print(f"[{utc_now()}] {status} latest={latest} snapshot={stage71_snapshot_time} decision={stage71_decision} reason={stage71_reason} last_run={persisted_last_run_time} blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
