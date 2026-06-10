@@ -6,6 +6,9 @@ Watches goldsharp_m15.csv latest closed row. When the latest timestamp changes,
 runs Stage69 -> Stage70 -> Stage71 -> Stage73 Python scripts directly and writes
 a stable guarded monitor snapshot.
 
+Critical: Stage73 is called with --stage71-dir so it consumes the freshly generated
+Stage71 latest closed snapshot, not any older Stage72 wrapper snapshot.
+
 No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 """
 from __future__ import annotations
@@ -77,8 +80,8 @@ def append_event(path: Path, row: dict[str, Any]) -> None:
         w.writerow({k: row.get(k, "") for k in fields})
 
 
-def run_stage(script: Path, cdir: Path, cwd: Path) -> tuple[int, str]:
-    p = subprocess.run([sys.executable, str(script), "--candle-dir", str(cdir)], cwd=str(cwd), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def run_script(script: Path, args: list[str], cwd: Path) -> tuple[int, str]:
+    p = subprocess.run([sys.executable, str(script)] + args, cwd=str(cwd), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return int(p.returncode), p.stdout[-4000:]
 
 
@@ -117,6 +120,7 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         f"last_guarded_pipeline_run_time: {summary.get('last_guarded_pipeline_run_time','')}",
         f"last_guarded_pipeline_returncode: {summary.get('last_guarded_pipeline_returncode','')}",
         f"stage73_latest_closed_m15_time: {summary.get('stage73_latest_closed_m15_time','')}",
+        f"stage73_source_stage: {summary.get('stage73_source_stage','')}",
         f"decision: {summary.get('decision','')}",
         f"no_signal_reason: {summary.get('no_signal_reason','')}",
         f"emission_action: {summary.get('emission_action','')}",
@@ -143,6 +147,7 @@ Status: `{status}`
 
 - latest_m15_time: `{summary.get('latest_m15_time','')}`
 - stage73_latest_closed_m15_time: `{summary.get('stage73_latest_closed_m15_time','')}`
+- stage73_source_stage: `{summary.get('stage73_source_stage','')}`
 - decision: `{summary.get('decision','')}`
 - emission_action: `{summary.get('emission_action','')}`
 - should_notify_discord: `{summary.get('should_notify_discord','')}`
@@ -164,12 +169,11 @@ def main() -> int:
     state_path = out/"gold_v3_74_monitor_state.json"
     event_log = out/"gold_v3_74_monitor_event_log.csv"
     p_m15 = cdir/"goldsharp_m15.csv"
-    scripts = [
-        repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_69_live_csv_condition_detector_audit.py",
-        repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_70_live_csv_signal_decision_preview_audit.py",
-        repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_71_live_csv_signal_audit_pipeline_package.py",
-        repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_73_signal_emission_guard_audit.py",
-    ]
+    s69 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_69_live_csv_condition_detector_audit.py"
+    s70 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_70_live_csv_signal_decision_preview_audit.py"
+    s71 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_71_live_csv_signal_audit_pipeline_package.py"
+    s73 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_73_signal_emission_guard_audit.py"
+    scripts = [s69, s70, s71, s73]
     state = read_json(state_path) if state_path.exists() else {}
     last_seen = str(state.get("latest_m15_time", ""))
     last_run_time = str(state.get("last_guarded_pipeline_run_time", ""))
@@ -180,6 +184,7 @@ def main() -> int:
         blockers: list[dict[str, Any]] = []
         latest = ""
         stage73_time = ""
+        stage73_source_stage = ""
         decision = ""
         reason = ""
         action = ""
@@ -200,11 +205,17 @@ def main() -> int:
             blockers.append(blocker("latest_m15_time_read_failed", str(p_m15), "LATEST_M15_TIME_READ_FAILED", repr(e)))
         should_run = bool(latest and not blockers and ((first and not a.no_startup_run) or latest != last_seen))
         if should_run:
-            append_event(event_log, {"created_at_utc": utc_now(), "event": "GUARDED_PIPELINE_START", "latest_m15_time": latest, "status": "RUNNING", "detail": "Stage69->70->71->73"})
+            append_event(event_log, {"created_at_utc": utc_now(), "event": "GUARDED_PIPELINE_START", "latest_m15_time": latest, "status": "RUNNING", "detail": "Stage69->70->71->73(stage71 input)"})
             last_run_time = utc_now()
             last_rc = ""
-            for script in scripts:
-                rc, tail = run_stage(script, cdir, repo_root)
+            pipeline = [
+                (s69, ["--candle-dir", str(cdir)]),
+                (s70, ["--candle-dir", str(cdir)]),
+                (s71, ["--candle-dir", str(cdir)]),
+                (s73, ["--candle-dir", str(cdir), "--stage71-dir", str(base_out/"71_live_csv_signal_audit_pipeline_package_audit_only")]),
+            ]
+            for script, argsx in pipeline:
+                rc, tail = run_script(script, argsx, repo_root)
                 last_rc = str(rc)
                 append_event(event_log, {"created_at_utc": utc_now(), "event": script.name, "latest_m15_time": latest, "status": "OK" if rc == 0 else "FAILED", "detail": tail.replace("\r", " ").replace("\n", " ")[-1000:]})
                 if rc != 0:
@@ -213,7 +224,7 @@ def main() -> int:
             if not blockers:
                 last_seen = latest
                 last_rc = last_rc or "0"
-                append_event(event_log, {"created_at_utc": utc_now(), "event": "GUARDED_PIPELINE_DONE", "latest_m15_time": latest, "status": "OK", "detail": "Stage69->70->71->73 completed"})
+                append_event(event_log, {"created_at_utc": utc_now(), "event": "GUARDED_PIPELINE_DONE", "latest_m15_time": latest, "status": "OK", "detail": "Stage69->70->71->73(stage71 input) completed"})
         else:
             append_event(event_log, {"created_at_utc": utc_now(), "event": "HEARTBEAT", "latest_m15_time": latest, "status": "NO_CHANGE" if latest == last_seen else "BLOCKED", "detail": "no guarded pipeline run"})
 
@@ -222,6 +233,7 @@ def main() -> int:
         if p73_summary.exists():
             j73 = read_json(p73_summary)
             stage73_time = str(j73.get("latest_closed_m15_time", ""))
+            stage73_source_stage = str(j73.get("source_stage", ""))
             decision = str(j73.get("decision", ""))
             reason = str(j73.get("no_signal_reason", ""))
             action = str(j73.get("emission_action", ""))
@@ -231,6 +243,7 @@ def main() -> int:
             should_final = str(j73.get("should_enable_final_signal", ""))
             val.append(ok("stage73_summary_present", True, str(p73_summary), "exists"))
             val.append(ok("stage73_ready", j73.get("status") == STAGE73_READY, j73.get("status"), STAGE73_READY))
+            val.append(ok("stage73_source_stage_is_stage71", stage73_source_stage == "stage71", stage73_source_stage, "stage71"))
         else:
             val.append(ok("stage73_summary_present", False, str(p73_summary), "exists"))
             if should_run:
@@ -245,7 +258,7 @@ def main() -> int:
             blockers.append(blocker("stage73_emission_decision_missing_after_pipeline", str(p73_decision), "STAGE73_DECISION_MISSING_AFTER_PIPELINE"))
         val.append(ok("stage73_time_matches_latest_m15", bool(latest and stage73_time and latest == stage73_time), stage73_time, latest))
         if not (latest and stage73_time and latest == stage73_time):
-            blockers.append(blocker("stage73_snapshot_stale", str(p73_summary), "STAGE73_TIME_DOES_NOT_MATCH_LATEST_M15", {"latest": latest, "stage73": stage73_time}))
+            blockers.append(blocker("stage73_snapshot_stale", str(p73_summary), "STAGE73_TIME_DOES_NOT_MATCH_LATEST_M15", {"latest": latest, "stage73": stage73_time, "source_stage": stage73_source_stage}))
         val.append(ok("last_guarded_pipeline_run_time_recorded", bool(last_run_time), last_run_time, "nonempty"))
         val.append(ok("last_guarded_pipeline_returncode_zero", str(last_rc) == "0", last_rc, "0"))
         val.append(ok("discord_notification_false", should_discord == "False", should_discord, "False"))
@@ -256,7 +269,7 @@ def main() -> int:
         val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
         failed = [v for v in val if v.get("result") != "PASS"]
         status = READY_STATUS if not failed and not blockers else BLOCKED_STATUS
-        state = {"latest_m15_time": latest, "stage73_latest_closed_m15_time": stage73_time, "last_guarded_pipeline_run_time": last_run_time, "last_guarded_pipeline_returncode": last_rc, "updated_at_utc": utc_now(), "status": status}
+        state = {"latest_m15_time": latest, "stage73_latest_closed_m15_time": stage73_time, "stage73_source_stage": stage73_source_stage, "last_guarded_pipeline_run_time": last_run_time, "last_guarded_pipeline_returncode": last_rc, "updated_at_utc": utc_now(), "status": status}
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         summary = {
             "step": STEP,
@@ -280,6 +293,7 @@ def main() -> int:
             "pool_policy": POOL_POLICY,
             "latest_m15_time": latest,
             "stage73_latest_closed_m15_time": stage73_time,
+            "stage73_source_stage": stage73_source_stage,
             "last_guarded_pipeline_run_time": last_run_time,
             "last_guarded_pipeline_returncode": last_rc,
             "decision": decision,
@@ -294,7 +308,7 @@ def main() -> int:
             "blocker_count": len(blockers),
         }
         write_outputs(out, status, val, blockers, summary)
-        print(f"[{utc_now()}] {status} latest={latest} stage73={stage73_time} decision={decision} action={action} blockers={len(blockers)}")
+        print(f"[{utc_now()}] {status} latest={latest} stage73={stage73_time} source={stage73_source_stage} decision={decision} action={action} blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
