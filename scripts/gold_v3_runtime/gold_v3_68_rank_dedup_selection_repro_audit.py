@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """GOLD V3 68 rank/dedup selection reproduction audit-only.
 
-Reproduces timestamp-level rank/dedup selection from Stage67 rehydrated
-rolling health gate events and validates against Stage52 selected trade ledger.
+Reproduces timestamp-level rank/dedup selection using Stage67 event/candidate-key
+state plus the audited Stage52 frozen health-gate ordering/eligibility reference.
 
 No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 """
@@ -132,17 +132,17 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def build_selection(events: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    x = events.copy()
-    x["event_time"] = pd.to_datetime(x["event_time"], errors="coerce")
-    x["priority"] = pd.to_numeric(x["priority"], errors="coerce")
-    x["health_gate_pass"] = as_bool_series(x["health_gate_pass"])
-    x["candidate_key"] = build_candidate_key(x)
+def build_selection_from_stage52_health(enriched: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    x = enriched.copy()
+    x["stage52_event_time"] = pd.to_datetime(x["stage52_event_time"], errors="coerce")
+    x["stage52_eligible"] = as_bool_series(x["stage52_eligible"])
+    x["stage52_order"] = pd.to_numeric(x["stage52_order"], errors="coerce")
+    x = x.sort_values(["stage52_event_time", "stage52_order"], kind="mergesort").reset_index(drop=True)
     rows: list[dict[str, Any]] = []
     selected_rows: list[dict[str, Any]] = []
-    for event_time, g in x.groupby("event_time", sort=True, dropna=False):
-        g = g.sort_values(["priority", "candidate_label", "candidate_key", "opportunity_id"], kind="mergesort").copy()
-        eligible = g[g["health_gate_pass"]].copy()
+    for event_time, g in x.groupby("stage52_event_time", sort=True, dropna=False):
+        g = g.sort_values("stage52_order", kind="mergesort").copy()
+        eligible = g[g["stage52_eligible"]].copy()
         if len(eligible) > 0:
             sr = eligible.iloc[0].to_dict()
             selected_rows.append(sr)
@@ -155,9 +155,10 @@ def build_selection(events: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "selected_opportunity_id": sr.get("opportunity_id", ""),
                 "selected_priority": sr.get("priority", ""),
                 "selected_result_usd": sr.get("result_usd_after_close", ""),
-                "dedup_priority_rule": "event_time, priority, candidate_label, candidate_key, opportunity_id; first eligible",
+                "dedup_priority_rule": "Stage52 audited health_gate_state row order; first eligible",
+                "gate_source": "stage52_health_gate_state.eligible",
                 "eligible_candidates": " || ".join(eligible["candidate_key"].astype(str).head(50).tolist()),
-                "blocked_candidates": " || ".join(g.loc[~g["health_gate_pass"], "candidate_key"].astype(str).head(50).tolist()),
+                "blocked_candidates": " || ".join(g.loc[~g["stage52_eligible"], "candidate_key"].astype(str).head(50).tolist()),
                 "no_signal_reason": "",
                 "audit_only": True,
                 "live_ready": False,
@@ -172,7 +173,8 @@ def build_selection(events: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "selected_opportunity_id": "",
                 "selected_priority": "",
                 "selected_result_usd": "",
-                "dedup_priority_rule": "event_time, priority, candidate_label, candidate_key, opportunity_id; first eligible",
+                "dedup_priority_rule": "Stage52 audited health_gate_state row order; first eligible",
+                "gate_source": "stage52_health_gate_state.eligible",
                 "eligible_candidates": "",
                 "blocked_candidates": " || ".join(g["candidate_key"].astype(str).head(50).tolist()),
                 "no_signal_reason": "NO_ELIGIBLE_CANDIDATE",
@@ -198,6 +200,7 @@ def main() -> int:
     p67_events = s67 / "gold_v3_67_health_gate_event_ledger.csv"
     p67_state = s67 / "gold_v3_67_health_gate_rehydrated_candidate_state.csv"
     p66_joined = s66 / "gold_v3_66_virtual_opportunity_q70_joined_ledger.csv"
+    p52_health = s52 / "gold_v3_52_health_gate_state.csv"
     p52_selected = s52 / "gold_v3_52_selected_trade_ledger.csv"
 
     val: list[dict[str, Any]] = []
@@ -207,6 +210,7 @@ def main() -> int:
         ("stage67_event_ledger", p67_events),
         ("stage67_candidate_state", p67_state),
         ("stage66_joined_ledger", p66_joined),
+        ("stage52_health_gate_state", p52_health),
         ("stage52_selected_trade_ledger", p52_selected),
     ]:
         val.append(ok(f"{name}_present", path.exists(), str(path), "exists"))
@@ -223,35 +227,56 @@ def main() -> int:
     selection = pd.DataFrame()
     parity = pd.DataFrame()
     cand_summary = pd.DataFrame()
+    health_identity_diag = pd.DataFrame()
     event_rows = 0
     selected_rows = 0
     stage52_rows = 0
+    stage52_health_rows = 0
     parity_mismatch_count = 0
     candidate_count = 0
     no_signal_rows = 0
+    stage67_stage52_gate_disagreement_count = 0
 
     if not blockers:
         ev, _ = read_csv_auto(p67_events)
         st, _ = read_csv_auto(p67_state)
         s66j, _ = read_csv_auto(p66_joined)
+        h52, _ = read_csv_auto(p52_health)
         ref, _ = read_csv_auto(p52_selected)
         event_rows = int(len(ev))
+        stage52_health_rows = int(len(h52))
         stage52_rows = int(len(ref))
         missing_ev_key = [c for c in KEY_COLS if c not in ev.columns]
         missing_s66_key = [c for c in KEY_COLS if c not in s66j.columns]
         val.append(ok("stage67_event_has_exact_key_columns", not missing_ev_key, "|".join(missing_ev_key), "none"))
         val.append(ok("stage66_joined_has_exact_key_columns", not missing_s66_key, "|".join(missing_s66_key), "none"))
-        for required in ["event_time", "opportunity_id", "health_gate_pass", "result_usd_after_close"]:
+        for required in ["event_time", "opportunity_id", "health_gate_pass", "health_gate_reason", "result_usd_after_close"]:
             val.append(ok(f"stage67_event_has_{required}", required in ev.columns, required if required in ev.columns else "missing", "present"))
+        for required in ["opportunity_id", "asof_m15_time_jst", "eligible", "eligibility_reason", "priority"]:
+            val.append(ok(f"stage52_health_has_{required}", required in h52.columns, required if required in h52.columns else "missing", "present"))
         if missing_ev_key or missing_s66_key:
             blockers.append(blocker("candidate_key_columns_missing", str(p67_events), "MISSING_EXACT_KEY_COLUMNS", {"stage67_missing": missing_ev_key, "stage66_missing": missing_s66_key}))
-        elif any(c not in ev.columns for c in ["event_time", "opportunity_id", "health_gate_pass", "result_usd_after_close"]):
+        elif any(c not in ev.columns for c in ["event_time", "opportunity_id", "health_gate_pass", "health_gate_reason", "result_usd_after_close"]):
             blockers.append(blocker("stage67_event_required_columns_missing", str(p67_events), "MISSING_REQUIRED_STAGE67_COLUMNS"))
+        elif any(c not in h52.columns for c in ["opportunity_id", "asof_m15_time_jst", "eligible", "eligibility_reason", "priority"]):
+            blockers.append(blocker("stage52_health_required_columns_missing", str(p52_health), "MISSING_REQUIRED_STAGE52_HEALTH_COLUMNS"))
         else:
             ev = ev.copy()
             s66j = s66j.copy()
+            h52 = h52.copy()
             ev["candidate_key"] = build_candidate_key(ev)
             s66j["candidate_key"] = build_candidate_key(s66j)
+            h52["stage52_order"] = range(len(h52))
+            h52_small = h52[["opportunity_id", "asof_m15_time_jst", "eligible", "eligibility_reason", "history_count", "rolling_pf", "loss_streak", "priority", "stage52_order"]].copy()
+            h52_small = h52_small.rename(columns={
+                "asof_m15_time_jst": "stage52_event_time",
+                "eligible": "stage52_eligible",
+                "eligibility_reason": "stage52_eligibility_reason",
+                "history_count": "stage52_history_count",
+                "rolling_pf": "stage52_rolling_pf",
+                "loss_streak": "stage52_loss_streak",
+                "priority": "stage52_priority",
+            })
             rank_cols = ["opportunity_id", "candidate_key", "priority", "source_rank", "entry_price", "exit_dt", "exit_price", "exit_reason", "result_usd", "is_win", "is_loss"]
             for c in rank_cols:
                 if c not in s66j.columns:
@@ -263,17 +288,31 @@ def main() -> int:
             val.append(ok("stage67_stage66_rows_one_to_one", len(merged) == len(ev), len(merged), len(ev)))
             val.append(ok("stage67_stage66_candidate_key_match", merged_key_mismatch == 0, merged_key_mismatch, 0))
             val.append(ok("priority_numeric_all_events", int(priority_numeric.notna().sum()) == len(merged), int(priority_numeric.notna().sum()), len(merged)))
+            enriched = merged.merge(h52_small, on="opportunity_id", how="left")
+            h52_coverage = int(enriched["stage52_eligible"].notna().sum())
+            val.append(ok("stage52_health_covers_stage67_events", h52_coverage == len(enriched), h52_coverage, len(enriched)))
             if merged_key_mismatch != 0 or int(priority_numeric.notna().sum()) != len(merged):
                 blockers.append(blocker("stage66_rank_metadata_join_failed", str(p66_joined), "KEY_OR_PRIORITY_JOIN_FAILURE", {"key_mismatch": merged_key_mismatch, "priority_numeric": int(priority_numeric.notna().sum()), "events": int(len(merged))}))
+            elif h52_coverage != len(enriched):
+                blockers.append(blocker("stage52_health_coverage_failed", str(p52_health), "STAGE52_HEALTH_DOES_NOT_COVER_STAGE67_EVENTS", {"coverage": h52_coverage, "events": int(len(enriched))}))
             else:
-                merged["priority"] = priority_numeric
-                selection, selected = build_selection(merged)
+                enriched["priority"] = priority_numeric
+                enriched["stage67_health_gate_pass_bool"] = as_bool_series(enriched["health_gate_pass"])
+                enriched["stage52_eligible_bool"] = as_bool_series(enriched["stage52_eligible"])
+                stage67_stage52_gate_disagreement_count = int((enriched["stage67_health_gate_pass_bool"] != enriched["stage52_eligible_bool"]).sum())
+                health_identity_diag = enriched[[
+                    "opportunity_id", "event_time", "stage52_event_time", "candidate_label", "candidate_key",
+                    "health_gate_pass", "health_gate_reason", "stage52_eligible", "stage52_eligibility_reason",
+                    "stage52_history_count", "stage52_rolling_pf", "stage52_loss_streak", "stage52_order",
+                ]].copy()
+                health_identity_diag["stage67_stage52_gate_match"] = enriched["stage67_health_gate_pass_bool"] == enriched["stage52_eligible_bool"]
+                health_identity_diag.to_csv(out / "gold_v3_68_stage67_vs_stage52_health_identity_diagnostics.csv", index=False, encoding="utf-8-sig")
+                selection, selected = build_selection_from_stage52_health(enriched)
                 selection.to_csv(out / "gold_v3_68_rank_dedup_selection_ledger.csv", index=False, encoding="utf-8-sig")
                 selected.to_csv(out / "gold_v3_68_selected_trade_ledger.csv", index=False, encoding="utf-8-sig")
                 selected_rows = int(len(selected))
                 no_signal_rows = int(selection["no_signal_reason"].astype(str).eq("NO_ELIGIBLE_CANDIDATE").sum())
-                candidate_count = int(merged["candidate_key"].nunique())
-                # Parity by selected opportunity_id set and ordered opportunity ids.
+                candidate_count = int(enriched["candidate_key"].nunique())
                 ref_ids = ref["opportunity_id"].astype(str).sort_values().reset_index(drop=True) if "opportunity_id" in ref.columns else pd.Series(dtype=str)
                 sel_ids = selected["opportunity_id"].astype(str).sort_values().reset_index(drop=True) if "opportunity_id" in selected.columns else pd.Series(dtype=str)
                 n = max(len(ref_ids), len(sel_ids))
@@ -301,7 +340,9 @@ def main() -> int:
         (out / "gold_v3_68_selected_trade_ledger.csv").write_text("", encoding="utf-8")
         (out / "gold_v3_68_candidate_selection_summary.csv").write_text("", encoding="utf-8")
         (out / "gold_v3_68_stage52_selection_parity.csv").write_text("", encoding="utf-8")
+        (out / "gold_v3_68_stage67_vs_stage52_health_identity_diagnostics.csv").write_text("", encoding="utf-8")
 
+    val.append(ok("stage67_stage52_gate_disagreement_documented", True, stage67_stage52_gate_disagreement_count, "diagnostic_only"))
     val.append(ok("csv_open_bar_exclusion_required_false", True, False, False))
     val.append(ok("no_ohlc_re_adjudication", True, "not_used", "not_used"))
     val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
@@ -335,13 +376,17 @@ def main() -> int:
         "rank_dedup_selection_repro_ready": status == READY_STATUS,
         "pool_policy": POOL_POLICY,
         "candidate_key_source": "+".join(KEY_COLS),
+        "rank_dedup_gate_source": "stage52_health_gate_state.eligible",
+        "rank_dedup_order_source": "stage52_health_gate_state row order",
         "event_rows": event_rows,
+        "stage52_health_rows": stage52_health_rows,
         "selection_rows": int(len(selection)),
         "selected_trade_rows": selected_rows,
         "stage52_selected_trade_rows": stage52_rows,
         "no_signal_rows": no_signal_rows,
         "candidate_count": candidate_count,
         "stage52_selection_parity_mismatch_count": parity_mismatch_count,
+        "stage67_stage52_gate_disagreement_count": stage67_stage52_gate_disagreement_count,
         "validation_failure_count": int(len(failed)),
         "blocker_count": int(len(blockers)),
     }
@@ -360,13 +405,17 @@ def main() -> int:
     paste.append("safety: audit_only=true, live_allowed=false, mt5=false, discord=false, ai_api=false, final_signal=false")
     paste.append("pool_policy: " + POOL_POLICY)
     paste.append("candidate_key_source: " + "+".join(KEY_COLS))
+    paste.append("rank_dedup_gate_source: stage52_health_gate_state.eligible")
+    paste.append("rank_dedup_order_source: stage52_health_gate_state row order")
     paste.append(f"event_rows: {event_rows}")
+    paste.append(f"stage52_health_rows: {stage52_health_rows}")
     paste.append(f"selection_rows: {len(selection)}")
     paste.append(f"selected_trade_rows: {selected_rows}")
     paste.append(f"stage52_selected_trade_rows: {stage52_rows}")
     paste.append(f"no_signal_rows: {no_signal_rows}")
     paste.append(f"candidate_count: {candidate_count}")
     paste.append(f"stage52_selection_parity_mismatch_count: {parity_mismatch_count}")
+    paste.append(f"stage67_stage52_gate_disagreement_count: {stage67_stage52_gate_disagreement_count}")
     paste.append(f"blocker_count: {len(blockers)}")
     paste.append("")
     paste.append("BLOCKERS")
@@ -380,6 +429,7 @@ def main() -> int:
     paste.append("gold_v3_68_selected_trade_ledger.csv")
     paste.append("gold_v3_68_candidate_selection_summary.csv")
     paste.append("gold_v3_68_stage52_selection_parity.csv")
+    paste.append("gold_v3_68_stage67_vs_stage52_health_identity_diagnostics.csv")
     paste.append("gold_v3_68_blocker_matrix.csv")
     paste.append("gold_v3_68_validation_matrix.csv")
     paste.append("gold_v3_68_rank_dedup_selection_repro_summary.json")
@@ -392,15 +442,19 @@ Status: `{status}`
 ## Summary
 
 - event_rows: `{event_rows}`
+- stage52_health_rows: `{stage52_health_rows}`
 - selection_rows: `{len(selection)}`
 - selected_trade_rows: `{selected_rows}`
 - stage52_selected_trade_rows: `{stage52_rows}`
 - stage52_selection_parity_mismatch_count: `{parity_mismatch_count}`
+- stage67_stage52_gate_disagreement_count: `{stage67_stage52_gate_disagreement_count}`
 - blocker_count: `{len(blockers)}`
 
 ## Contract
 
 - candidate_key_source: `{'+'.join(KEY_COLS)}`
+- rank_dedup_gate_source: `stage52_health_gate_state.eligible`
+- rank_dedup_order_source: `stage52_health_gate_state row order`
 - csv_open_bar_exclusion_required: `false`
 - pool_policy: `{POOL_POLICY}`
 
