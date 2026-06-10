@@ -2,9 +2,17 @@
 
 Created JST: `2026-06-10`
 
-Current runtime entry point:
+Current normal runtime entry point:
 
-`scripts/gold_v3_runtime/bat/run_gold_v3_80_immutable_runtime_monitor_audit.bat`
+```bat
+scripts\gold_v3_runtime\bat\run_gold_v3_80_immutable_runtime_monitor_audit.bat
+```
+
+Optional sidecar dry-run test entry point:
+
+```bat
+scripts\gold_v3_runtime\bat\run_gold_v3_91_stage80_ledger_sidecar_dry_run_patch_audit.bat
+```
 
 This document is the human-facing operation manual. Keep it updated whenever runtime behavior, troubleshooting files, output folders, trade review policy, candidate catalog, or BAT names change.
 
@@ -22,6 +30,7 @@ Hard safety flags:
 - `discord=false`
 - `ai_api=false`
 - `final_signal=false`
+- `durable_ledger_append_enabled=false`
 
 Do not enable any of the following without explicit human approval:
 
@@ -30,7 +39,8 @@ Do not enable any of the following without explicit human approval:
 - AI API call,
 - live hook,
 - live evaluator,
-- final signal.
+- final signal,
+- durable trade ledger append.
 
 NO_SIGNAL must not notify Discord.
 
@@ -38,101 +48,138 @@ NO_SIGNAL must not notify Discord.
 
 ## 1. What to start for normal monitoring
 
-Start this BAT:
+Start this BAT for normal monitoring:
 
 ```bat
 scripts\gold_v3_runtime\bat\run_gold_v3_80_immutable_runtime_monitor_audit.bat
 ```
 
-Stage80 does the runtime audit-only monitoring.
+Normal Stage80 behavior:
 
-Behavior:
+```text
+Stage80 -> Stage76 -> Stage79
+```
 
-1. Every minute at second `05`, read only the latest row timestamp from `goldsharp_m15.csv`.
-2. If the latest closed M15 timestamp has not changed, write a heartbeat only.
-3. If a new closed M15 row is detected, run Stage76 once.
-4. After Stage76 completes, run Stage79 to create an immutable evidence snapshot.
-5. If Stage80 becomes BLOCKED, automatically run Stage81 to create a compact support bundle.
+Ledger sidecar is OFF by default in normal monitoring.
+
+Normal mode must show:
+
+```text
+ledger_sidecar_enabled: False
+durable_ledger_append_enabled: False
+```
+
+Stage92 confirmed this default regression check:
+
+```text
+stage80_default_no_sidecar_regression_ready: true
+stage80_returncode: 0
+stage80_status: GOLD_V3_80_IMMUTABLE_RUNTIME_MONITOR_READY_AUDIT_ONLY
+ledger_sidecar_enabled: False
+durable_ledger_append_enabled: False
+blocker_count: 0
+```
+
+---
+
+## 2. Optional ledger sidecar dry-run test
+
+Use this only when explicitly testing Stage85/86 sidecar wiring:
+
+```bat
+scripts\gold_v3_runtime\bat\run_gold_v3_91_stage80_ledger_sidecar_dry_run_patch_audit.bat
+```
+
+This BAT runs Stage80 once with:
+
+```text
+--enable-ledger-sidecar-dry-run
+```
+
+Sidecar test chain:
+
+```text
+Stage80 -> Stage76 -> Stage79 -> Stage85 -> Stage86
+```
+
+Stage91 confirmed:
+
+```text
+status: GOLD_V3_80_IMMUTABLE_RUNTIME_MONITOR_READY_AUDIT_ONLY
+ledger_sidecar_enabled: True
+last_stage85_returncode: 0
+last_stage86_returncode: 0
+last_stage85_paste_path: nonempty
+last_stage86_paste_path: nonempty
+durable_ledger_append_enabled: False
+blocker_count: 0
+```
+
+This is still audit-only. It does not append the durable trade ledger.
+
+---
+
+## 3. CSV closed-row contract
 
 The CSV contract is:
 
-`open/in-progress candles are not written to CSV`
+```text
+open/in-progress candles are not written to CSV
+```
 
 Therefore:
 
-`csv_open_bar_exclusion_required=false`
+```text
+csv_open_bar_exclusion_required=false
+```
 
 The latest CSV row is treated as the latest closed M15 row.
 
 ---
 
-## 2. Which file to check first
+## 4. Which file to check first
 
-For normal status checking, look at:
+For normal Stage80 status:
 
 ```text
 Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_PASTE_ME_IMMUTABLE_RUNTIME_MONITOR_SUMMARY.txt
 ```
 
-READY example fields:
+For sidecar test output, the same Stage80 summary file is used:
 
 ```text
-status: GOLD_V3_80_IMMUTABLE_RUNTIME_MONITOR_READY_AUDIT_ONLY
-immutable_runtime_monitor_ready: true
-latest_m15_time: <latest closed M15 time>
-last_seen_m15_time: <last processed M15 time>
-last_stage76_returncode: 0
-last_stage79_returncode: 0
-last_stage79_paste_path: <immutable snapshot paste file>
-auto_support_bundle_enabled: True
-blocker_count: 0
+Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_PASTE_ME_IMMUTABLE_RUNTIME_MONITOR_SUMMARY.txt
 ```
 
-If `blocker_count: 0`, the audit monitor itself is healthy.
-
----
-
-## 3. What to upload/paste when an error happens
-
-Do not search the whole folder manually.
-
-Do not upload huge CSV logs first.
-
-First paste this file:
+For support-bundle troubleshooting, paste this first:
 
 ```text
 Files\FX_OUTPUTS\gold_v3\81c\YYYYMMDD\HHMMSS_bundle\upload_first.txt
 ```
 
-Stage80 automatically creates this file when it becomes BLOCKED.
+---
 
-If Stage80 did not create it, run this BAT manually:
+## 5. What to upload/paste when an error happens
+
+Do not upload huge CSV logs first.
+
+First paste Stage81 support bundle:
+
+```text
+Files\FX_OUTPUTS\gold_v3\81c\YYYYMMDD\HHMMSS_bundle\upload_first.txt
+```
+
+If Stage80 did not create it, run:
 
 ```bat
 scripts\gold_v3_runtime\bat\run_gold_v3_81_compact_support_bundle_audit.bat
 ```
 
-Then paste the printed path:
-
-```text
-...\81c\YYYYMMDD\HHMMSS_bundle\upload_first.txt
-```
-
-`upload_first.txt` is intentionally small. It includes:
-
-- current Stage80 status,
-- current Stage76 status,
-- latest Stage79 immutable run path,
-- important file paths and sizes,
-- tail of Stage80 event/timing logs,
-- tail of Stage76 event/timing logs,
-- live/external flags.
-
 Only paste additional files if asked.
 
 ---
 
-## 4. Where immutable evidence is stored
+## 6. Where immutable evidence is stored
 
 Each processed M15 run creates a short immutable snapshot folder:
 
@@ -140,13 +187,7 @@ Each processed M15 run creates a short immutable snapshot folder:
 Files\FX_OUTPUTS\gold_v3\79i\YYYYMMDD\RUN_ID\
 ```
 
-Example:
-
-```text
-Files\FX_OUTPUTS\gold_v3\79i\20260610\144110_1715_NO_SIGNAL\
-```
-
-Inside this folder, the main paste file is:
+Main paste file:
 
 ```text
 paste_me.txt
@@ -158,18 +199,9 @@ Stage80 shows this path as:
 last_stage79_paste_path: ...\79i\YYYYMMDD\RUN_ID\paste_me.txt
 ```
 
-Stage79 uses short names to avoid Windows/MetaQuotes path-length failures.
-
-The immutable snapshot policy is:
-
-- do not overwrite existing run evidence,
-- create a new run_id folder for each processed M15 run,
-- if a duplicate happens, use retry suffix,
-- include SHA256 manifest files.
-
 ---
 
-## 5. What the main stages mean
+## 7. What the main stages mean
 
 ### Stage76
 
@@ -183,12 +215,6 @@ Role:
 - records timing values,
 - keeps all external side effects OFF.
 
-Main file:
-
-```text
-Files\FX_OUTPUTS\gold_v3\76_full_audit_monitor_with_payload_preview_audit_only\gold_v3_76_PASTE_ME_FULL_AUDIT_MONITOR_WITH_PAYLOAD_PREVIEW_SUMMARY.txt
-```
-
 ### Stage79
 
 Immutable runtime output policy.
@@ -200,12 +226,6 @@ Role:
 - writes manifest and hashes,
 - uses short paths under `79i`.
 
-Main file:
-
-```text
-Files\FX_OUTPUTS\gold_v3\79i\YYYYMMDD\RUN_ID\paste_me.txt
-```
-
 ### Stage80
 
 Immutable runtime monitor.
@@ -214,29 +234,14 @@ Role:
 
 - operational monitor wrapper,
 - every minute at second 05,
-- new M15: Stage76 -> Stage79,
+- normal new M15: Stage76 -> Stage79,
+- optional sidecar dry-run: Stage76 -> Stage79 -> Stage85 -> Stage86,
 - BLOCKED: auto Stage81 support bundle.
 
-Main file:
+Default normal monitor keeps:
 
 ```text
-Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_PASTE_ME_IMMUTABLE_RUNTIME_MONITOR_SUMMARY.txt
-```
-
-### Stage81
-
-Compact support bundle.
-
-Role:
-
-- creates one small file to paste first,
-- includes log tails only,
-- avoids uploading huge logs unless requested.
-
-Main file:
-
-```text
-Files\FX_OUTPUTS\gold_v3\81c\YYYYMMDD\HHMMSS_bundle\upload_first.txt
+ledger_sidecar_enabled: False
 ```
 
 ### Stage84
@@ -312,25 +317,33 @@ Role:
 - normalizes 44 expanded candidate rows into 8 base signal candidates,
 - identifies high-volatility TP/SL/horizon expansions,
 - measures whether exact candidate conditions can be recovered from current GOLD V3 artifacts,
-- uses short output folder `88c` to avoid Windows path-length failures.
+- uses short output folder `88c`.
 
-Main file:
+### Stage91
 
-```text
-Files\FX_OUTPUTS\gold_v3\88c\paste_me.txt
-```
+Stage80 ledger sidecar dry-run patch.
 
-Manual candidate section source:
+Role:
 
-```text
-Files\FX_OUTPUTS\gold_v3\88c\manual_candidates.md
-```
+- adds optional sidecar dry-run mode to Stage80,
+- default remains OFF,
+- explicit sidecar test runs Stage85/86 after Stage79,
+- still no durable ledger append.
+
+### Stage92
+
+Stage80 default no-sidecar regression.
+
+Role:
+
+- verifies normal Stage80 invocation keeps sidecar OFF,
+- confirms Stage91 patch did not change normal monitoring behavior.
 
 ---
 
-## 6. Trade review ledger policy
+## 8. Trade review ledger policy
 
-The most important long-term artifact is not old notification logs. It is trade history.
+The most important long-term artifact is trade history, not old notification logs.
 
 Keep long-term:
 
@@ -370,7 +383,7 @@ A SIGNAL preview row must not be appended to the durable ledger until:
 
 ---
 
-## 7. Signal candidate catalog
+## 9. Signal candidate catalog
 
 This section is generated from GOLD V3 audit artifacts only. Missing rule conditions are not inferred.
 
@@ -442,63 +455,31 @@ Base signal candidates:
 
 ---
 
-## 8. Folder map
+## 10. Folder map
 
 ```text
 Files\FX_OUTPUTS\gold_v3\
   76_full_audit_monitor_with_payload_preview_audit_only\
-    gold_v3_76_PASTE_ME_FULL_AUDIT_MONITOR_WITH_PAYLOAD_PREVIEW_SUMMARY.txt
-    gold_v3_76_runtime_timing_log.csv
-    gold_v3_76_monitor_event_log.csv
-
   79i\
-    YYYYMMDD\
-      RUN_ID\
-        paste_me.txt
-        manifest.json
-        manifest.csv
-        summary.json
-        s76\
-          s76_summary.json
-          s76_payload.csv
-          s76_timing.csv
-          ...
-
   80_immutable_runtime_monitor_audit_only\
-    gold_v3_80_PASTE_ME_IMMUTABLE_RUNTIME_MONITOR_SUMMARY.txt
-    gold_v3_80_state.json
-    gold_v3_80_event_log.csv
-    gold_v3_80_timing_log.csv
-
   81c\
-    YYYYMMDD\
-      HHMMSS_bundle\
-        upload_first.txt
-        file_index.csv
-        bundle_summary.json
-        blockers.csv
-        validation.csv
-        report.md
-
   88c\
-    paste_me.txt
-    manual_candidates.md
-    base.csv
-    expansion.csv
-    condition.csv
-    summary.json
-
+  92c\
   trade_review_ledger\
-    trade_review_ledger_schema.csv
-    trade_review_current_template.csv
-    trade_review_manual_outcome_template.csv
-    trade_review_retention_policy_matrix.csv
-    README_TRADE_REVIEW_LEDGER.md
+```
+
+Important Stage80 files:
+
+```text
+Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_PASTE_ME_IMMUTABLE_RUNTIME_MONITOR_SUMMARY.txt
+Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_state.json
+Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_event_log.csv
+Files\FX_OUTPUTS\gold_v3\80_immutable_runtime_monitor_audit_only\gold_v3_80_timing_log.csv
 ```
 
 ---
 
-## 9. What not to upload first
+## 11. What not to upload first
 
 Do not upload these first unless specifically requested:
 
@@ -515,7 +496,7 @@ For trade review, use the trade ledger files and Stage79 evidence path instead o
 
 ---
 
-## 10. How to stop the monitor
+## 12. How to stop the monitor
 
 For Stage80 BAT window:
 
@@ -526,50 +507,38 @@ Stopping the monitor does not send orders or notifications. It only stops audit-
 
 ---
 
-## 11. Current known-good runtime confirmation
+## 13. Current known-good runtime confirmation
 
 Latest known-good checks as of this manual update:
 
 ```text
-Stage80 READY
-latest_m15_time: 2026-06-10 17:15:00
-last_seen_m15_time: 2026-06-10 17:15:00
-last_stage76_returncode: 0
-last_stage79_returncode: 0
-auto_support_bundle_enabled: True
+Stage91 sidecar dry-run READY
+ledger_sidecar_enabled: True
+last_stage85_returncode: 0
+last_stage86_returncode: 0
+last_stage85_paste_path: nonempty
+last_stage86_paste_path: nonempty
+durable_ledger_append_enabled: False
 blocker_count: 0
 
-Stage85 READY
-decision: NO_SIGNAL
-ledger_action: SUPPRESS
-ledger_suppression_reason: NO_SIGNAL_NOT_A_TRADE_REVIEW_LEDGER_ROW
-preview_row_count: 0
-blocker_count: 0
-
-Stage86 READY
-decision: NO_SIGNAL
-append_guard_decision: NO_APPEND_SUPPRESSED_NO_SIGNAL
-append_allowed_now: false
-blocker_count: 0
-
-Stage88 READY
-raw_expansion_row_count: 44
-dedup_expansion_row_count: 32
-normalized_base_candidate_count: 8
-condition_coverage_complete: false
-condition_restored_base_count: 0
+Stage92 default regression READY
+stage80_returncode: 0
+stage80_status: GOLD_V3_80_IMMUTABLE_RUNTIME_MONITOR_READY_AUDIT_ONLY
+ledger_sidecar_enabled: False
+durable_ledger_append_enabled: False
 blocker_count: 0
 ```
 
 ---
 
-## 12. Documentation maintenance rule
+## 14. Documentation maintenance rule
 
 Whenever runtime behavior changes, update this manual in the same task/chat.
 
 Update this manual when changing:
 
 - main runtime BAT,
+- optional runtime BAT,
 - output folder names,
 - error support bundle behavior,
 - paste/upload file names,
