@@ -38,6 +38,16 @@ def cat(fid, col, val, rank="ALL", desc=""):
 def band(fid, col, lo, hi, rank="ALL", desc=""):
     return {"id":fid,"type":"band","col":col,"lo":float(lo),"hi":float(hi),"rank":str(rank),"desc":desc or f"exclude {col} in [{lo},{hi})"}
 
+def safe_to_csv(df: pd.DataFrame, path: Path, **kwargs: Any) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, **kwargs)
+
+def safe_write_text(path: Path, text: str) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
 
 def base_candidates():
     sat = cat("GLOBAL_SATURDAY","jst_weekday","Saturday",desc="all packets exclude Saturday")
@@ -95,9 +105,10 @@ def atr(df,n):
 def find_dir(arg):
     cands = [Path(arg)] if arg else []
     root = Path(__file__).resolve().parents[2]
-    cands += [Path.cwd(), Path.cwd()/"Files", root, root/"Files", root.parent, root.parent/"Files"]
+    cands += [Path.cwd(), Path.cwd()/"Files", root, root/"Files", root.parent, root.parent/"Files", root.parent.parent]
     for d in cands:
-        if (d/"goldsharp_m5.csv").exists() and (d/"goldsharp_m15.csv").exists() and (d/"goldsharp_h4.csv").exists(): return d.resolve()
+        d = Path(d).expanduser().resolve()
+        if (d/"goldsharp_m5.csv").exists() and (d/"goldsharp_m15.csv").exists() and (d/"goldsharp_h4.csv").exists(): return d
     raise FileNotFoundError("goldsharp_m5/m15/h4.csv not found. Pass --candle-dir.")
 
 
@@ -245,30 +256,33 @@ def period(df,start,end):
 
 
 def main(argv):
-    a=parse_args(argv); cdir=find_dir(a.candle_dir); out=Path(a.output_dir) if a.output_dir else cdir/"FX_OUTPUTS"/"gold_v3"/"45_high_vol_sibling_strict_gate_walkforward_audit_only"; out.mkdir(parents=True,exist_ok=True)
+    a=parse_args(argv)
+    cdir=find_dir(a.candle_dir)
+    out=Path(a.output_dir).expanduser().resolve() if a.output_dir else (cdir/"FX_OUTPUTS"/"gold_v3"/"45_high_vol_sibling_strict_gate_walkforward_audit_only").resolve()
+    out.mkdir(parents=True,exist_ok=True)
     m15,m5=prepare(cdir,a.htf_asof,a.hv_rolling_days,a.hv_quantile); cands=base_candidates(); all_cands=cands+add_hv_siblings(cands); opp=evaluate(opportunities(m15,all_cands),m5,complete=not a.allow_incomplete_horizon); opp=period(opp,a.start_jst,a.end_jst)
     if opp.empty: raise RuntimeError("No evaluated opportunities after period/filtering.")
-    pd.DataFrame([{k:v for k,v in c.items() if k!="filters"} | {"filters":" || ".join([f['id'] for f in c['filters']])} for c in all_cands]).to_csv(out/"gold_v3_45_hv_sibling_candidate_definitions.csv",index=False,encoding="utf-8-sig")
-    opp.to_csv(out/"gold_v3_45_all_candidate_opportunity_ledger.csv",index=False,encoding="utf-8-sig")
-    summarize(opp,["candidate_label","hv_sibling"]).to_csv(out/"gold_v3_45_hv_sibling_all_candidate_summary.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(pd.DataFrame([{k:v for k,v in c.items() if k!="filters"} | {"filters":" || ".join([f['id'] for f in c['filters']])} for c in all_cands]), out/"gold_v3_45_hv_sibling_candidate_definitions.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(opp, out/"gold_v3_45_all_candidate_opportunity_ledger.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(summarize(opp,["candidate_label","hv_sibling"]), out/"gold_v3_45_hv_sibling_all_candidate_summary.csv",index=False,encoding="utf-8-sig")
     base=dedup(opp,False); base_gate=health_gate(opp,a.health_window,a.health_min_history,a.strict_pf_threshold,a.strict_loss_streak_lt,False); hv=dedup(opp,True); hv_gate=health_gate(opp,a.health_window,a.health_min_history,a.strict_pf_threshold,a.strict_loss_streak_lt,True)
     exps=[]
     for name,df in [("fixed_8_rank_dedup_no_hv",base),("fixed_8_strict_rolling_health_gate_no_hv",base_gate),("fixed_8_plus_hv_siblings_rank_dedup",hv),("fixed_8_plus_hv_siblings_strict_rolling_health_gate",hv_gate)]:
         d={"experiment":name}; d.update(metrics(df)); exps.append(d)
-    pd.DataFrame(exps).to_csv(out/"gold_v3_45_hv_sibling_gate_experiment_summary.csv",index=False,encoding="utf-8-sig")
-    hv_gate.to_csv(out/"gold_v3_45_hv_sibling_strict_gate_trade_ledger.csv",index=False,encoding="utf-8-sig")
-    summarize(hv_gate,["candidate_label","hv_sibling"]).to_csv(out/"gold_v3_45_hv_sibling_strict_gate_candidate_summary.csv",index=False,encoding="utf-8-sig")
-    summarize(hv_gate,["entry_month"]).to_csv(out/"gold_v3_45_hv_sibling_strict_gate_monthly_summary.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(pd.DataFrame(exps), out/"gold_v3_45_hv_sibling_gate_experiment_summary.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(hv_gate, out/"gold_v3_45_hv_sibling_strict_gate_trade_ledger.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(summarize(hv_gate,["candidate_label","hv_sibling"]), out/"gold_v3_45_hv_sibling_strict_gate_candidate_summary.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(summarize(hv_gate,["entry_month"]), out/"gold_v3_45_hv_sibling_strict_gate_monthly_summary.csv",index=False,encoding="utf-8-sig")
     wf=[]
     if a.run_walkforward:
         selected=health_gate(opp,a.health_window,a.health_min_history,a.strict_pf_threshold,a.strict_loss_streak_lt,True)
         for mo in sorted(opp.entry_month.dropna().unique()):
             d={"test_month":mo,"include_hv_siblings":True}; d.update(metrics(selected[selected.entry_month==mo])); wf.append(d)
-    pd.DataFrame(wf).to_csv(out/"gold_v3_45_hv_sibling_rolling_walkforward_monthly_summary.csv",index=False,encoding="utf-8-sig")
+    safe_to_csv(pd.DataFrame(wf), out/"gold_v3_45_hv_sibling_rolling_walkforward_monthly_summary.csv",index=False,encoding="utf-8-sig")
     summ=dict(step=STEP,status=READY_STATUS,created_at_utc=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00","Z"),candle_dir=str(cdir),output_dir=str(out),**FALSE_FLAGS,start_jst=a.start_jst,end_jst=a.end_jst or "DATA_END",htf_asof=a.htf_asof,complete_horizon_only=not a.allow_incomplete_horizon,hv_rule=f"m15_atr28 >= rolling prior {a.hv_rolling_days}D q{a.hv_quantile}",health_gate=dict(window=a.health_window,min_history=a.health_min_history,pf_threshold=a.strict_pf_threshold,loss_streak_lt=a.strict_loss_streak_lt,virtual_monitoring=True),experiment_summary=exps)
-    (out/"gold_v3_45_hv_sibling_strict_gate_summary.json").write_text(json.dumps(summ,ensure_ascii=False,indent=2),encoding="utf-8")
+    safe_write_text(out/"gold_v3_45_hv_sibling_strict_gate_summary.json", json.dumps(summ,ensure_ascii=False,indent=2))
     best=metrics(hv_gate)
-    (out/"GOLD_V3_45_HIGH_VOL_SIBLING_STRICT_GATE_AUDIT_ONLY_REPORT.md").write_text(f"# GOLD V3 45 high-vol sibling strict gate audit-only report\n\nStatus: `{READY_STATUS}`\n\nAudit-only. No MT5, Discord, AI API, live hook, or final signal.\n\n## Main result\n\n- trades: `{best['trades']}`\n- win_rate: `{best['win_rate']:.6f}`\n- profit_factor: `{best['profit_factor']:.6f}`\n- sum_result_usd: `{best['sum_result_usd']:.2f}`\n- max_drawdown_usd: `{best['max_drawdown_usd']:.2f}`\n\n## Safety\n\nThis is not live approval.\n",encoding="utf-8")
+    safe_write_text(out/"GOLD_V3_45_HIGH_VOL_SIBLING_STRICT_GATE_AUDIT_ONLY_REPORT.md", f"# GOLD V3 45 high-vol sibling strict gate audit-only report\n\nStatus: `{READY_STATUS}`\n\nAudit-only. No MT5, Discord, AI API, live hook, or final signal.\n\n## Main result\n\n- trades: `{best['trades']}`\n- win_rate: `{best['win_rate']:.6f}`\n- profit_factor: `{best['profit_factor']:.6f}`\n- sum_result_usd: `{best['sum_result_usd']:.2f}`\n- max_drawdown_usd: `{best['max_drawdown_usd']:.2f}`\n\n## Safety\n\nThis is not live approval.\n")
     print(f"[{READY_STATUS}] output_dir={out}"); return 0
 
 if __name__ == "__main__":
