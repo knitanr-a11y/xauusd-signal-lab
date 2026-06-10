@@ -4,9 +4,18 @@ Created JST: 2026-06-10
 
 ## Status
 
-`GOLD_V3_43_EXACT_ENTRY_AND_PRUNE_CONTRACT_FOR_HONMEI_SET_AUDIT_ONLY_BLOCKED_SOURCE_ARTIFACTS_MISSING`
+`GOLD_V3_43_EXACT_ENTRY_AND_PRUNE_CONTRACT_FOR_8_HONMEI_CANDIDATES_READY_AUDIT_ONLY`
 
-This Stage43 packet is **audit-only** and **blocked**. It does **not** create a usable live/trading contract.
+This replaces the earlier blocked Stage43 packet after the required Stage15/21/22/30/35/36 source-of-truth artifacts were uploaded and read.
+
+## Honmei set clarification
+
+The original Stage42 decision file contained three honmei-review rows. In this chat, the user explicitly clarified the current honmei set as:
+
+1. Stage36 R01-R07 active candidates.
+2. Stage22 restore candidate `R1_ONLY_CD90_PRUNE_050__R1_ONLY_CD90_PRUNE_050_S030__R1_ONLY_CD90_PRUNE_050_S024`.
+
+Therefore this Stage43 contract covers 8 candidates.
 
 ## Safety state
 
@@ -20,59 +29,62 @@ This Stage43 packet is **audit-only** and **blocked**. It does **not** create a 
 - No MT5 order path was enabled.
 - `live_allowed` remains `False`.
 
-## Inputs read successfully
+## Source-of-truth artifacts verified
 
-The following repository files were read successfully:
+- Stage15: base entry families / source_rank / direction / profile / replay source.
+- Stage21: initial selected prune filters.
+- Stage22: within-candidate added filters and CD90 restore candidate metrics.
+- Stage30: retained candidate set and retained filter contract.
+- Stage35: cumulative selected band pruning context.
+- Stage36: final ranked active candidate contract and final filters.
 
-| Stage | File | Use |
-| --- | --- | --- |
-| Handoff | `NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_NEXT_EXACT_ENTRY_PRUNE_HONMEI_20260610.md` | Stage43 task/honmei context |
-| Handoff | `NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_MUST_READ_SOURCE_CHECK_ADDENDUM_20260610.md` | Required source-check list and stopping rules |
-| Handoff | `NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_STAGE01_40_READCHECK_ADDENDUM_20260610.md` | Stage1-40 read-check/safety context |
-| Handoff | `NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_FINAL_READ_ORDER_AND_PROMPT_FIX_20260610.md` | Final read order and prompt override |
-| Stage42 | `gold_v3_42_primary_plus_restore_candidate_decision.csv` | Human decision rows |
-| Stage42 | `GOLD_V3_42_PRIMARY_PLUS_RESTORE_CANDIDATE_DECISION_AUDIT_ONLY_20260610.md` | Human decision report |
+## Base entry families used
 
-## Stage42 honmei decision verified
+| source_rank | candidate_group_id | entry_family_key | direction | live_side_if_later_enabled | feature_column | rule_expression | profile_id | tp_usd | sl_usd | horizon_profile_detail |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | GROUP_H4_RET4_MOMENTUM | `GROUP_H4_RET4_MOMENTUM||LONG||h4_ret4||h4_ret4 >= 0.00751699` | LONG | BUY | h4_ret4 | `h4_ret4 >= 0.00751699` | USDPRICE_TP150_SL60_H128 | 150 | 60 | H128 |
+| 2 | GROUP_M15_ATR28_MID_VOL_RANGE | `GROUP_M15_ATR28_MID_VOL_RANGE||LONG||m15_atr28||3.59086 <= m15_atr28 <= 4.29321` | LONG | BUY | m15_atr28 | `3.59086 <= m15_atr28 <= 4.29321` | USDPRICE_TP80_SL30_H64 | 80 | 30 | H64 |
 
-| decision_role | candidate_label | packet_row | source_scenario_key | variant_key | cooldown | source_stage | source_status | PF | WR | trades/day | negative_months | July PF | live_allowed |
-| --- | --- | ---: | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| HONMEI_ADD | `R03_P1_R1_ONLY_CD60_PRUNE_111` | 1 | `R1_ONLY_CD60_PRUNE_111` | `R1_ONLY_CD60_PRUNE_111__R1_ONLY_CD60_PRUNE_111_S021__R1_ONLY_CD60_PRUNE_111_S022` | 60 | Stage36 | ACTIVE_CANDIDATE | 2.6083250034 | 0.6684636119 | 2.0784313725 | 0 | 1.2486063766 | False |
-| HONMEI_ADD | `R04_P4_R1_ONLY_CD60_PRUNE_115` | 4 | `R1_ONLY_CD60_PRUNE_115` | `R1_ONLY_CD60_PRUNE_115__R1_ONLY_CD60_PRUNE_115_S020__R1_ONLY_CD60_PRUNE_115_S022` | 60 | Stage36 | ACTIVE_CANDIDATE | 2.5517460463 | 0.6688918558 | 2.0980392157 | 0 | 1.2416950739 | False |
-| HONMEI_RESTORE | `R1_ONLY_CD90_PRUNE_050_RESTORE` |  | `R1_ONLY_CD90_PRUNE_050` | `R1_ONLY_CD90_PRUNE_050__R1_ONLY_CD90_PRUNE_050_S030__R1_ONLY_CD90_PRUNE_050_S024` | 90 | Stage22 | REQUEST_MORE_AUDIT_LOW_FREQUENCY | 2.8726383868 | 0.6418219462 | 1.3529411765 | 0 | 5.5905567301 | False |
+Only source_rank 1 and source_rank 2 are used. Stage15 h1_atr56 ranks 3/4/6/7/8 remain excluded from this Stage43 honmei contract.
 
-These Stage42 rows verify only the human decision metadata. They do **not** verify the exact base entry family or prune filters.
+## Stage36 active honmei candidates
 
-## Required source-of-truth artifacts not available in the checked context
+| ranked_candidate_name | packet_row | source_scenario_key | variant_key | cooldown_minutes | trades_per_day_final | win_rate_final | profit_factor_final | negative_months_final | july_pf_final |
+| --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| R01_P7_R1_ONLY_CD60_PRUNE_015 | 7 | R1_ONLY_CD60_PRUNE_015 | R1_ONLY_CD60_PRUNE_015__R1_ONLY_CD60_PRUNE_015_S025__R1_ONLY_CD60_PRUNE_015_S001 | 60 | 1.7338935574 | 0.6736672052 | 2.9225153473 | 1 | 5.5883848011 |
+| R02_P8_R1_ONLY_CD60_PRUNE_015 | 8 | R1_ONLY_CD60_PRUNE_015 | R1_ONLY_CD60_PRUNE_015__R1_ONLY_CD60_PRUNE_015_S025__R1_ONLY_CD60_PRUNE_015_S027 | 60 | 1.8179271709 | 0.6656394453 | 2.7660260417 | 1 | 5.5883848011 |
+| R03_P1_R1_ONLY_CD60_PRUNE_111 | 1 | R1_ONLY_CD60_PRUNE_111 | R1_ONLY_CD60_PRUNE_111__R1_ONLY_CD60_PRUNE_111_S021__R1_ONLY_CD60_PRUNE_111_S022 | 60 | 2.0784313725 | 0.6684636119 | 2.6083250034 | 0 | 1.2486063766 |
+| R04_P4_R1_ONLY_CD60_PRUNE_115 | 4 | R1_ONLY_CD60_PRUNE_115 | R1_ONLY_CD60_PRUNE_115__R1_ONLY_CD60_PRUNE_115_S020__R1_ONLY_CD60_PRUNE_115_S022 | 60 | 2.0980392157 | 0.6688918558 | 2.5517460463 | 0 | 1.2416950739 |
+| R05_P9_MAIN_R1_R2_CD90_PRUNE_133 | 9 | MAIN_R1_R2_CD90_PRUNE_133 | MAIN_R1_R2_CD90_PRUNE_133__MAIN_R1_R2_CD90_PRUNE_133_S023__MAIN_R1_R2_CD90_PRUNE_133_S034 | 90 | 2.5083798883 | 0.6436525612 | 2.3377268732 | 0 | 1.0834451496 |
+| R06_P11_MAIN_R1_R2_CD90_PRUNE_132 | 11 | MAIN_R1_R2_CD90_PRUNE_132 | MAIN_R1_R2_CD90_PRUNE_132__MAIN_R1_R2_CD90_PRUNE_132_S034__MAIN_R1_R2_CD90_PRUNE_132_S001 | 90 | 2.5223463687 | 0.634551495 | 2.2303988979 | 0 | 1.0365994862 |
+| R07_P13_MAIN_R1_R2_CD120_PRUNE_122 | 13 | MAIN_R1_R2_CD120_PRUNE_122 | MAIN_R1_R2_CD120_PRUNE_122__MAIN_R1_R2_CD120_PRUNE_122_S030__MAIN_R1_R2_CD120_PRUNE_122_S035 | 120 | 1.9337016575 | 0.6514285714 | 2.2100676969 | 0 | 1.2909532639 |
 
-The Stage43 handoff/addenda explicitly require Stage15/21/22/30/35/36 source-of-truth artifacts before creating the exact contract. In the available GitHub connector context, the required artifacts below were not readable from the checked repository paths:
+## Stage22 restore honmei candidate
 
-| Stage | Required artifact examples | Result |
-| --- | --- | --- |
-| Stage15 | `GOLD_V3_15_AUDIT_ONLY_REPLAY_EXECUTION_REPORT.md`, `gold_v3_15_replay_candidate_metrics.csv`, `gold_v3_15_replay_trade_ledger.csv` | Not found/readable in checked GitHub paths |
-| Stage21 | `gold_v3_21_filter_traceability.csv` | Not found/readable in checked GitHub paths |
-| Stage22 | `gold_v3_22_filter_traceability.csv`, `gold_v3_22_further_pruned_candidate_metrics.csv` | Not found/readable in checked GitHub paths |
-| Stage30 | `gold_v3_30_all_retained_candidate_set.csv`, `gold_v3_30_all_retained_filter_contract.csv` | Not found/readable in checked GitHub paths |
-| Stage35 | `gold_v3_35_before_after_metrics.csv`, `gold_v3_35_selected_cut_plan.csv` | Not found/readable in checked GitHub paths |
-| Stage36 | `gold_v3_36_ranked_candidate_contract.csv`, `gold_v3_36_final_filter_contract.csv`, `GOLD_V3_36_FINAL_RANKED_CANDIDATE_CONTRACT_AUDIT_ONLY_REPORT.md` | Not found/readable in checked GitHub paths |
+| candidate_label | source_scenario_key | cooldown_minutes | trades_per_day | win_rate | profit_factor | negative_months | july_pf | audit_recommendation |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| R1_ONLY_CD90_PRUNE_050__R1_ONLY_CD90_PRUNE_050_S030__R1_ONLY_CD90_PRUNE_050_S024 | R1_ONLY_CD90_PRUNE_050 | 90 | 1.3529411765 | 0.6418219462 | 2.8726383868 | 0 | 5.5905567301 | REQUEST_MORE_AUDIT_LOW_FREQUENCY |
 
-The handoff warns these may exist only under the user's local GOLD V3 runtime output root. This environment cannot read that local Windows path directly.
+The restore candidate remains a Stage22 restore/low-frequency review candidate. It is not treated as a Stage36 packet, and Stage36 final filters are not automatically applied to it.
 
-## Why exact contract rows were not emitted
+## Contract row mode
 
-Stage43 stopping conditions require source verification of:
+`gold_v3_43_honmei_exact_entry_prune_contract.csv` is one row per honmei candidate. Each row contains:
 
-1. source_rank 1 base entry family, direction, profile, and replay ledger from Stage15;
-2. Stage21 F002/F003/F004/F006 definitions;
-3. Stage22 S020/S021/S022/S024/S030 definitions and restore metrics;
-4. Stage30 retained filter contract for R03/R04;
-5. Stage35 pruning context;
-6. Stage36 ranked active candidate contract and final filters for R03/R04;
-7. the Stage22/Stage36 boundary for the CD90 restore candidate.
+- base entry contract,
+- Stage21/22/30 prune filter chain,
+- Stage36 final filter chain when applicable,
+- metrics context,
+- live safety flags.
 
-Because these were not verified from source-of-truth artifacts, the exact contract is intentionally blocked. The CSV/JSON contract outputs contain blocked candidate-level rows only and must not be used by any live evaluator.
+## Important warnings
 
-## Output files created by this blocked Stage43 packet
+1. R01 and R02 are included because of the user's explicit honmei-set clarification, but both have `negative_months_final = 1` in Stage36.
+2. The CD90 restore candidate has high Stage22 PF but remains `REQUEST_MORE_AUDIT_LOW_FREQUENCY`.
+3. Stage36 final filters are applied only to Stage36 R01-R07 candidates, not automatically to the Stage22 restore candidate.
+4. This is an audit-only exact entry/prune contract. It is not live approval.
+
+## Output files
 
 - `gold_v3_43_honmei_exact_entry_prune_contract.csv`
 - `gold_v3_43_honmei_exact_entry_prune_contract.json`
@@ -81,10 +93,6 @@ Because these were not verified from source-of-truth artifacts, the exact contra
 - `gold_v3_43_blocker_matrix.csv`
 - `gold_v3_43_summary.json`
 
-## Required resolution before unblocking Stage43
+## Next allowed action
 
-Provide the required Stage15/21/22/30/35/36 artifacts from the local GOLD V3 runtime output root, or commit them to a non-quarantined GOLD V3 path. After that, Stage43 should be rerun to create a real exact entry/prune contract.
-
-Until then:
-
-`LIVE BLOCKED / EXACT CONTRACT BLOCKED / MT5 BLOCKED / DISCORD LIVE BLOCKED`
+Review this exact contract and prepare an audit-only dry-run evaluator plan. Do not enable live connector, Discord live, MT5 BAT, MT5 execution, or final signal behavior.
