@@ -6,7 +6,7 @@ Current runtime entry point:
 
 `scripts/gold_v3_runtime/bat/run_gold_v3_80_immutable_runtime_monitor_audit.bat`
 
-This document is the human-facing operation manual. Keep it updated whenever runtime behavior, troubleshooting files, output folders, or BAT names change.
+This document is the human-facing operation manual. Keep it updated whenever runtime behavior, troubleshooting files, output folders, trade review policy, or BAT names change.
 
 ---
 
@@ -239,9 +239,115 @@ Main file:
 Files\FX_OUTPUTS\gold_v3\81c\YYYYMMDD\HHMMSS_bundle\upload_first.txt
 ```
 
+### Stage84
+
+Trade review ledger policy.
+
+Role:
+
+- defines the long-term trade review ledger schema,
+- shifts long-term retention priority from operational logs to trade history,
+- creates templates for post-trade review.
+
+Main folder:
+
+```text
+Files\FX_OUTPUTS\gold_v3\trade_review_ledger\
+```
+
+Important files:
+
+```text
+trade_review_ledger_schema.csv
+trade_review_current_template.csv
+trade_review_manual_outcome_template.csv
+trade_review_retention_policy_matrix.csv
+README_TRADE_REVIEW_LEDGER.md
+```
+
+### Stage85
+
+Trade review ledger entry preview.
+
+Role:
+
+- if current decision is `NO_SIGNAL`, suppress ledger row creation,
+- if current decision is a real SIGNAL, create one preview row only,
+- does not append to the durable ledger.
+
+NO_SIGNAL suppression reason:
+
+```text
+NO_SIGNAL_NOT_A_TRADE_REVIEW_LEDGER_ROW
+```
+
+### Stage86
+
+Trade review ledger append guard.
+
+Role:
+
+- prevents NO_SIGNAL, heartbeat, notification errors, and incomplete/unconfirmed records from entering the durable trade ledger,
+- holds SIGNAL preview rows until execution or explicit human review intent is confirmed,
+- does not append to the durable ledger.
+
+Expected NO_SIGNAL guard decision:
+
+```text
+NO_APPEND_SUPPRESSED_NO_SIGNAL
+```
+
+Expected unconfirmed SIGNAL guard decision:
+
+```text
+HOLD_NOT_APPEND_UNTIL_EXECUTION_OR_HUMAN_REVIEW_CONFIRMED
+```
+
 ---
 
-## 6. Folder map
+## 6. Trade review ledger policy
+
+The most important long-term artifact is not old notification logs. It is trade history.
+
+Keep long-term:
+
+- trade review ledger rows,
+- per-trade compact evidence packet,
+- signal decision context,
+- candidate/profile key,
+- TP/SL/horizon,
+- health gate status,
+- evidence path,
+- outcome status,
+- realized result when available,
+- why the trade won/lost,
+- post-trade review notes.
+
+Short-term or summary-only:
+
+- old notification errors,
+- heartbeat logs,
+- full timing CSVs,
+- repeated NO_SIGNAL entries,
+- support-bundle diagnostics.
+
+Candidate key order must remain exactly:
+
+```text
+candidate_label+base_candidate_label+source_profile_id+profile_id+hv_profile+tp_usd+sl_usd+horizon_m15+horizon_m5_bars
+```
+
+NO_SIGNAL must not create durable trade review rows.
+
+A SIGNAL preview row must not be appended to the durable ledger until:
+
+1. execution is confirmed, or
+2. the human explicitly chooses to review it as a trade candidate,
+3. required candidate/profile context is complete.
+
+---
+
+## 7. Folder map
 
 ```text
 Files\FX_OUTPUTS\gold_v3\
@@ -278,11 +384,18 @@ Files\FX_OUTPUTS\gold_v3\
         blockers.csv
         validation.csv
         report.md
+
+  trade_review_ledger\
+    trade_review_ledger_schema.csv
+    trade_review_current_template.csv
+    trade_review_manual_outcome_template.csv
+    trade_review_retention_policy_matrix.csv
+    README_TRADE_REVIEW_LEDGER.md
 ```
 
 ---
 
-## 7. What not to upload first
+## 8. What not to upload first
 
 Do not upload these first unless specifically requested:
 
@@ -295,9 +408,11 @@ Do not upload these first unless specifically requested:
 
 Use Stage81 `upload_first.txt` first.
 
+For trade review, use the trade ledger files and Stage79 evidence path instead of uploading giant operational logs.
+
 ---
 
-## 8. How to stop the monitor
+## 9. How to stop the monitor
 
 For Stage80 BAT window:
 
@@ -308,9 +423,9 @@ Stopping the monitor does not send orders or notifications. It only stops audit-
 
 ---
 
-## 9. Current known-good runtime confirmation
+## 10. Current known-good runtime confirmation
 
-Latest known-good check as of this manual creation:
+Latest known-good checks as of this manual update:
 
 ```text
 Stage80 READY
@@ -320,13 +435,26 @@ last_stage76_returncode: 0
 last_stage79_returncode: 0
 auto_support_bundle_enabled: True
 blocker_count: 0
+
+Stage85 READY
+decision: NO_SIGNAL
+ledger_action: SUPPRESS
+ledger_suppression_reason: NO_SIGNAL_NOT_A_TRADE_REVIEW_LEDGER_ROW
+preview_row_count: 0
+blocker_count: 0
+
+Stage86 READY
+decision: NO_SIGNAL
+append_guard_decision: NO_APPEND_SUPPRESSED_NO_SIGNAL
+append_allowed_now: false
+blocker_count: 0
 ```
 
 ---
 
-## 10. Documentation maintenance rule
+## 11. Documentation maintenance rule
 
-Whenever runtime behavior changes, update this manual in the same chat/task.
+Whenever runtime behavior changes, update this manual in the same task/chat.
 
 Update this manual when changing:
 
@@ -337,6 +465,8 @@ Update this manual when changing:
 - safety flags,
 - timing/log policy,
 - immutable evidence policy,
+- trade review ledger policy,
+- ledger append guard behavior,
 - live release gate behavior.
 
 Do not rely only on stage specs. This manual is the human-facing operation guide.
