@@ -31,6 +31,18 @@ This is not a live approval stage.
 - Stage41 feature-only snapshot is not used as a trading source.
 - The BAT file is a local Python launcher only. It is not an MT5 execution BAT.
 
+## Correct local directory layout
+
+The BAT is intentionally placed under:
+
+`Files\xauusd-signal-lab-clean\xauusd-signal-lab\scripts\gold_v3_runtime\bat`
+
+The expected candle CSVs are two levels above the repo root in the surrounding `Files` directory for that layout. The BAT auto-detects this path first:
+
+`<repo_root>\..\..\goldsharp_m15.csv`
+
+You may still pass the candle directory explicitly as the first argument.
+
 ## Input files
 
 The local runner expects these candle CSVs in the MT5 `Files` directory, or in a directory passed to the BAT/script:
@@ -48,8 +60,6 @@ Required candle columns:
 - `high`
 - `low`
 - `close`
-
-The current implementation treats `time` as the same timestamp basis used by the exported Files candle CSVs.
 
 ## Feature definitions
 
@@ -104,8 +114,6 @@ The sibling keeps the original candidate filter chain and adds the high-vol cond
 
 ## Strict rolling health gate
 
-The strict gate runs per candidate label.
-
 Default parameters:
 
 - rolling virtual history window: `30` candidate opportunities
@@ -132,20 +140,20 @@ This is a local live-candle audit replay. Stage05 parity remains a separate revi
 Default run from repo root or by double-clicking the BAT:
 
 ```bat
-scripts\gold_v3_runtime\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat
+scripts\gold_v3_runtime\bat\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat
 ```
 
 Explicit candle directory:
 
 ```bat
-scripts\gold_v3_runtime\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files"
+scripts\gold_v3_runtime\bat\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files"
 ```
 
 Explicit candle directory and H4 asof mode:
 
 ```bat
-scripts\gold_v3_runtime\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files" closed
-scripts\gold_v3_runtime\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files" open
+scripts\gold_v3_runtime\bat\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files" closed
+scripts\gold_v3_runtime\bat\run_gold_v3_45_high_vol_sibling_strict_gate_walkforward_audit.bat "C:\path\to\MQL5\Files" open
 ```
 
 ## Output directory
