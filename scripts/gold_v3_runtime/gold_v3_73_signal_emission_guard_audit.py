@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 """GOLD V3 73 signal emission guard audit-only.
 
-Reads Stage72 latest pipeline snapshot and decides whether an audit-only signal
-would be emitted, suppressed as duplicate, or ignored as NO_SIGNAL.
+Reads the latest pipeline snapshot and decides whether an audit-only signal would
+be emitted, suppressed as duplicate, or ignored as NO_SIGNAL.
+
+Default input source remains Stage72 for backward compatibility. Stage74 passes
+--stage71-dir so Stage73 reads the freshly generated Stage71 snapshot directly.
 
 No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 """
@@ -22,6 +25,7 @@ STEP = "GOLD_V3_73_SIGNAL_EMISSION_GUARD_AUDIT_ONLY"
 READY_STATUS = "GOLD_V3_73_SIGNAL_EMISSION_GUARD_READY_AUDIT_ONLY"
 BLOCKED_STATUS = "GOLD_V3_73_SIGNAL_EMISSION_GUARD_BLOCKED_AUDIT_ONLY"
 STAGE72_READY = "GOLD_V3_72_LIVE_CSV_UPDATE_MONITOR_READY_AUDIT_ONLY"
+STAGE71_READY = "GOLD_V3_71_LIVE_CSV_SIGNAL_AUDIT_PIPELINE_PACKAGE_READY_AUDIT_ONLY"
 CSV_CONTRACT = "open/in-progress candles are not written to CSV"
 POOL_POLICY = "poolから外さない。rolling health gateに判断させる。"
 
@@ -52,15 +56,15 @@ def find_files_dir() -> Path:
     candidates = [Path.cwd(), Path.cwd() / "Files", root, root / "Files", root.parent, root.parent / "Files", root.parent.parent]
     for d in candidates:
         d = d.expanduser().resolve()
-        if (d / "FX_OUTPUTS" / "gold_v3" / "72_live_csv_update_monitor_audit_only").exists():
+        if (d / "FX_OUTPUTS" / "gold_v3").exists():
             return d
-    raise FileNotFoundError("Could not locate Files directory with Stage72 outputs")
+    raise FileNotFoundError("Could not locate Files directory with FX_OUTPUTS/gold_v3")
 
 
 def append_event(path: Path, row: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = [
-        "created_at_utc", "latest_closed_m15_time", "decision", "selected_candidate_label", "signal_uid",
+        "created_at_utc", "source_stage", "latest_closed_m15_time", "decision", "selected_candidate_label", "signal_uid",
         "emission_action", "should_notify_discord", "should_place_mt5_order", "duplicate_signal_suppressed",
         "no_signal_notification_suppressed", "detail",
     ]
@@ -76,50 +80,75 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=STEP)
     p.add_argument("--candle-dir", default="")
     p.add_argument("--stage72-dir", default="")
+    p.add_argument("--stage71-dir", default="", help="When supplied, read Stage71 latest snapshot directly instead of Stage72 wrapper snapshot")
     p.add_argument("--output-dir", default="")
     return p.parse_args()
+
+
+def source_paths(base_out: Path, a: argparse.Namespace) -> tuple[str, Path, Path]:
+    if a.stage71_dir:
+        s71 = Path(a.stage71_dir).expanduser().resolve()
+        return (
+            "stage71",
+            s71 / "gold_v3_71_live_csv_signal_audit_pipeline_package_summary.json",
+            s71 / "gold_v3_71_latest_signal_snapshot.json",
+        )
+    s72 = Path(a.stage72_dir).expanduser().resolve() if a.stage72_dir else base_out / "72_live_csv_update_monitor_audit_only"
+    return (
+        "stage72",
+        s72 / "gold_v3_72_live_csv_update_monitor_summary.json",
+        s72 / "gold_v3_72_latest_pipeline_snapshot.json",
+    )
 
 
 def main() -> int:
     a = parse_args()
     cdir = Path(a.candle_dir).expanduser().resolve() if a.candle_dir else find_files_dir()
     base_out = cdir / "FX_OUTPUTS" / "gold_v3"
-    s72 = Path(a.stage72_dir).expanduser().resolve() if a.stage72_dir else base_out / "72_live_csv_update_monitor_audit_only"
+    source_stage, p_summary, p_snapshot = source_paths(base_out, a)
     out = Path(a.output_dir).expanduser().resolve() if a.output_dir else base_out / "73_signal_emission_guard_audit_only"
     out.mkdir(parents=True, exist_ok=True)
 
-    p72_summary = s72 / "gold_v3_72_live_csv_update_monitor_summary.json"
-    p72_snapshot = s72 / "gold_v3_72_latest_pipeline_snapshot.json"
     state_path = out / "gold_v3_73_signal_emission_guard_state.json"
     event_ledger = out / "gold_v3_73_signal_emission_event_ledger.csv"
 
     val: list[dict[str, Any]] = []
     blockers: list[dict[str, Any]] = []
-    for name, path in [("stage72_summary", p72_summary), ("stage72_snapshot", p72_snapshot)]:
-        val.append(ok(f"{name}_present", path.exists(), str(path), "exists"))
-        if not path.exists():
-            blockers.append(blocker(f"{name}_missing", str(path), "REQUIRED_INPUT_MISSING"))
+    val.append(ok(f"{source_stage}_summary_present", p_summary.exists(), str(p_summary), "exists"))
+    val.append(ok(f"{source_stage}_snapshot_present", p_snapshot.exists(), str(p_snapshot), "exists"))
+    if not p_summary.exists():
+        blockers.append(blocker(f"{source_stage}_summary_missing", str(p_summary), "REQUIRED_INPUT_MISSING"))
+    if not p_snapshot.exists():
+        blockers.append(blocker(f"{source_stage}_snapshot_missing", str(p_snapshot), "REQUIRED_INPUT_MISSING"))
 
-    j72 = read_json(p72_summary) if p72_summary.exists() else {}
-    snap = read_json(p72_snapshot) if p72_snapshot.exists() else {}
-    val.append(ok("stage72_status_ready", j72.get("status") == STAGE72_READY, j72.get("status"), STAGE72_READY))
-    val.append(ok("stage72_monitor_ready", j72.get("live_csv_update_monitor_ready") is True, j72.get("live_csv_update_monitor_ready"), True))
+    js = read_json(p_summary) if p_summary.exists() else {}
+    snap = read_json(p_snapshot) if p_snapshot.exists() else {}
+    if source_stage == "stage71":
+        val.append(ok("stage71_status_ready", js.get("status") == STAGE71_READY, js.get("status"), STAGE71_READY))
+        val.append(ok("stage71_package_ready", js.get("live_csv_signal_audit_pipeline_package_ready") is True, js.get("live_csv_signal_audit_pipeline_package_ready"), True))
+        latest_summary_time = str(js.get("latest_closed_m15_time", "") or "")
+        decision = str(snap.get("decision", js.get("decision", "")) or "")
+        reason = str(snap.get("no_signal_reason", js.get("no_signal_reason", "")) or "")
+    else:
+        val.append(ok("stage72_status_ready", js.get("status") == STAGE72_READY, js.get("status"), STAGE72_READY))
+        val.append(ok("stage72_monitor_ready", js.get("live_csv_update_monitor_ready") is True, js.get("live_csv_update_monitor_ready"), True))
+        latest_summary_time = str(js.get("latest_m15_time", "") or "")
+        decision = str(snap.get("decision", js.get("stage71_decision", "")) or "")
+        reason = str(snap.get("no_signal_reason", js.get("stage71_no_signal_reason", "")) or "")
+
     for key in ["live_allowed", "mt5_execution_enabled", "discord_live_enabled", "ai_api_called", "final_signal_enabled", "contract_mutated", "manual_candidate_demotion_or_removal", "open_asof_allowed"]:
-        val.append(ok(f"stage72_{key}_false", j72.get(key) is False, j72.get(key), False))
+        val.append(ok(f"{source_stage}_{key}_false", js.get(key) is False, js.get(key), False))
 
-    latest_summary_time = str(j72.get("latest_m15_time", "") or "")
     latest_snapshot_time = str(snap.get("latest_closed_m15_time", "") or "")
-    decision = str(snap.get("decision", j72.get("stage71_decision", "")) or "")
-    reason = str(snap.get("no_signal_reason", j72.get("stage71_no_signal_reason", "")) or "")
     selected_candidate_label = str(snap.get("selected_candidate_label", "") or "")
     signal_uid = f"{latest_snapshot_time}|{decision}|{selected_candidate_label}"
 
-    val.append(ok("snapshot_time_matches_stage72_latest", latest_summary_time == latest_snapshot_time and latest_snapshot_time != "", latest_snapshot_time, latest_summary_time))
+    val.append(ok("snapshot_time_matches_source_latest", latest_summary_time == latest_snapshot_time and latest_snapshot_time != "", latest_snapshot_time, latest_summary_time))
     val.append(ok("decision_is_signal_or_no_signal", decision in {"SIGNAL", "NO_SIGNAL"}, decision, "SIGNAL|NO_SIGNAL"))
     if latest_summary_time != latest_snapshot_time or not latest_snapshot_time:
-        blockers.append(blocker("snapshot_time_mismatch", str(p72_snapshot), "SNAPSHOT_LATEST_TIME_DOES_NOT_MATCH_STAGE72_SUMMARY", {"stage72": latest_summary_time, "snapshot": latest_snapshot_time}))
+        blockers.append(blocker("snapshot_time_mismatch", str(p_snapshot), "SNAPSHOT_LATEST_TIME_DOES_NOT_MATCH_SOURCE_SUMMARY", {"source": latest_summary_time, "snapshot": latest_snapshot_time}))
     if decision not in {"SIGNAL", "NO_SIGNAL"}:
-        blockers.append(blocker("invalid_decision", str(p72_snapshot), "DECISION_NOT_SIGNAL_OR_NO_SIGNAL", decision))
+        blockers.append(blocker("invalid_decision", str(p_snapshot), "DECISION_NOT_SIGNAL_OR_NO_SIGNAL", decision))
 
     state: dict[str, Any] = {"emitted_signal_uids": [], "updated_at_utc": ""}
     if state_path.exists():
@@ -156,12 +185,14 @@ def main() -> int:
             emission_action = "BLOCKED"
 
     state["updated_at_utc"] = utc_now()
+    state["source_stage"] = source_stage
     state["last_seen_signal_uid"] = signal_uid
     state["last_emission_action"] = emission_action
     write_json(state_path, state)
 
     decision_row = {
         "created_at_utc": utc_now(),
+        "source_stage": source_stage,
         "latest_closed_m15_time": latest_snapshot_time,
         "decision": decision,
         "no_signal_reason": reason,
@@ -209,6 +240,7 @@ def main() -> int:
         "step": STEP,
         "status": status,
         "created_at_utc": utc_now(),
+        "source_stage": source_stage,
         "candle_dir": str(cdir),
         "output_dir": str(out),
         "audit_only": True,
@@ -250,6 +282,7 @@ def main() -> int:
     paste.append(f"status: {status}")
     paste.append("signal_emission_guard_ready: " + str(status == READY_STATUS).lower())
     paste.append("live_ready: false")
+    paste.append(f"source_stage: {source_stage}")
     paste.append("contract_mutated: false")
     paste.append("manual_candidate_demotion_or_removal: false")
     paste.append("open_asof_allowed: false")
@@ -291,6 +324,7 @@ def main() -> int:
 
 Status: `{status}`
 
+- source_stage: `{source_stage}`
 - latest_closed_m15_time: `{latest_snapshot_time}`
 - decision: `{decision}`
 - no_signal_reason: `{reason}`
