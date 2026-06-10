@@ -4,7 +4,10 @@
 
 Continuous wrapper: every minute + lag, read latest CSV row timestamp. When a new
 closed M15 timestamp is detected, run Stage76 --once, then Stage79 immutable
-snapshot. No MT5 orders, no Discord, no AI API, no final signal.
+snapshot. If the monitor becomes BLOCKED, automatically create a compact Stage81
+support bundle so the user only needs to upload one small upload_first.txt.
+
+No MT5 orders, no Discord, no AI API, no final signal.
 """
 from __future__ import annotations
 
@@ -129,6 +132,15 @@ def extract_stage79_paste_path(output: str) -> str:
     return m.group(1) if m else ""
 
 
+def extract_stage81_upload_path(output: str) -> str:
+    for line in output.splitlines():
+        s = line.strip()
+        if s.lower().endswith("upload_first.txt") and (":" in s or s.startswith("/")):
+            return s
+    m = re.search(r"([A-Za-z]:\\[^\r\n]+upload_first\.txt)", output)
+    return m.group(1) if m else ""
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=STEP)
     p.add_argument("--candle-dir", default="")
@@ -137,6 +149,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--run-immediately", action="store_true")
     p.add_argument("--once", action="store_true")
     p.add_argument("--no-startup-run", action="store_true")
+    p.add_argument("--disable-auto-support-bundle", action="store_true", help="do not auto-run Stage81 on BLOCKED; kept only for troubleshooting")
     return p.parse_args()
 
 
@@ -173,6 +186,9 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         f"last_total_seconds: {summary.get('last_total_seconds','')}",
         f"latest_check_seconds: {summary.get('latest_check_seconds','')}",
         f"last_stage79_paste_path: {summary.get('last_stage79_paste_path','')}",
+        f"auto_support_bundle_enabled: {summary.get('auto_support_bundle_enabled','')}",
+        f"last_support_bundle_returncode: {summary.get('last_support_bundle_returncode','')}",
+        f"last_support_bundle_upload_first_path: {summary.get('last_support_bundle_upload_first_path','')}",
         f"blocker_count: {len(blockers)}",
         "", "BLOCKERS", pd.DataFrame(blockers).to_string(index=False) if blockers else "NO_BLOCKERS",
         "", "VALIDATION", val_df.to_string(index=False),
@@ -196,11 +212,38 @@ Status: `{status}`
 - last_stage79_seconds: `{summary.get('last_stage79_seconds','')}`
 - last_total_seconds: `{summary.get('last_total_seconds','')}`
 - last_stage79_paste_path: `{summary.get('last_stage79_paste_path','')}`
+- auto_support_bundle_enabled: `{summary.get('auto_support_bundle_enabled','')}`
+- last_support_bundle_upload_first_path: `{summary.get('last_support_bundle_upload_first_path','')}`
 - blocker_count: `{len(blockers)}`
 
 Audit-only. No MT5, Discord, AI API, live hook, live evaluator, or final signal.
 """
     (out/"GOLD_V3_80_REPORT.md").write_text(report, encoding="utf-8")
+
+
+def build_summary(state: dict[str, Any], blockers: list[dict[str, Any]], failed: list[dict[str, Any]], status: str) -> dict[str, Any]:
+    return {
+        "step": STEP,
+        "audit_only": True,
+        "live_allowed": False,
+        "mt5_execution_enabled": False,
+        "mt5_bat_created": False,
+        "discord_live_enabled": False,
+        "ai_api_called": False,
+        "signals_generated": False,
+        "final_signal_enabled": False,
+        "contract_mutated": False,
+        "manual_candidate_demotion_or_removal": False,
+        "open_asof_allowed": False,
+        "csv_contract": CSV_CONTRACT,
+        "csv_open_bar_exclusion_required": False,
+        "live_ready": False,
+        "immutable_runtime_monitor_ready": status == READY_STATUS,
+        "pool_policy": POOL_POLICY,
+        **state,
+        "blocker_count": len(blockers),
+        "validation_failure_count": len(failed),
+    }
 
 
 def main() -> int:
@@ -216,15 +259,18 @@ def main() -> int:
     p_m15 = cdir/"goldsharp_m15.csv"
     s76 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_76_full_audit_monitor_with_payload_preview_audit.py"
     s79 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_79_immutable_runtime_output_policy_audit.py"
-    state = read_json(state_path) if state_path.exists() else {}
-    last_seen = str(state.get("last_seen_m15_time", ""))
-    last_pipeline_run_time = str(state.get("last_pipeline_run_time", ""))
-    last_stage76_rc = str(state.get("last_stage76_returncode", ""))
-    last_stage79_rc = str(state.get("last_stage79_returncode", ""))
-    last_stage76_seconds = float(state.get("last_stage76_seconds", 0.0) or 0.0)
-    last_stage79_seconds = float(state.get("last_stage79_seconds", 0.0) or 0.0)
-    last_total_seconds = float(state.get("last_total_seconds", 0.0) or 0.0)
-    last_stage79_paste_path = str(state.get("last_stage79_paste_path", ""))
+    s81 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_81_compact_support_bundle_audit.py"
+    state0 = read_json(state_path) if state_path.exists() else {}
+    last_seen = str(state0.get("last_seen_m15_time", ""))
+    last_pipeline_run_time = str(state0.get("last_pipeline_run_time", ""))
+    last_stage76_rc = str(state0.get("last_stage76_returncode", ""))
+    last_stage79_rc = str(state0.get("last_stage79_returncode", ""))
+    last_stage76_seconds = float(state0.get("last_stage76_seconds", 0.0) or 0.0)
+    last_stage79_seconds = float(state0.get("last_stage79_seconds", 0.0) or 0.0)
+    last_total_seconds = float(state0.get("last_total_seconds", 0.0) or 0.0)
+    last_stage79_paste_path = str(state0.get("last_stage79_paste_path", ""))
+    last_support_bundle_rc = str(state0.get("last_support_bundle_returncode", ""))
+    last_support_bundle_upload_path = str(state0.get("last_support_bundle_upload_first_path", ""))
     first = True
     event_fields = ["created_at_utc", "event", "latest_m15_time", "status", "detail"]
     timing_fields = ["created_at_utc", "latest_m15_time", "segment", "seconds", "returncode", "status", "detail"]
@@ -236,7 +282,7 @@ def main() -> int:
         latest = ""
         latest_check_seconds = 0.0
         val.append(ok("goldsharp_m15_present", p_m15.exists(), str(p_m15), "exists"))
-        for s in [s76, s79]:
+        for s in [s76, s79, s81]:
             val.append(ok(f"script_present_{s.name}", s.exists(), str(s), "exists"))
             if not s.exists():
                 blockers.append(blocker("required_script_missing", str(s), "REQUIRED_SCRIPT_MISSING"))
@@ -283,6 +329,7 @@ def main() -> int:
         val.append(ok("last_stage76_returncode_zero", str(last_stage76_rc) == "0", last_stage76_rc, "0"))
         val.append(ok("last_stage79_returncode_zero", str(last_stage79_rc) == "0", last_stage79_rc, "0"))
         val.append(ok("last_stage79_paste_path_present", bool(last_stage79_paste_path), last_stage79_paste_path, "nonempty"))
+        val.append(ok("auto_support_bundle_enabled", not a.disable_auto_support_bundle, str(not a.disable_auto_support_bundle), "true"))
         val.append(ok("csv_open_bar_exclusion_required_false", True, False, False))
         val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
         failed = [v for v in val if v.get("result") != "PASS"]
@@ -302,32 +349,29 @@ def main() -> int:
             "last_total_seconds": round(last_total_seconds, 6),
             "latest_check_seconds": round(latest_check_seconds, 6),
             "last_stage79_paste_path": last_stage79_paste_path,
+            "auto_support_bundle_enabled": not a.disable_auto_support_bundle,
+            "last_support_bundle_returncode": last_support_bundle_rc,
+            "last_support_bundle_upload_first_path": last_support_bundle_upload_path,
         }
+        summary = build_summary(state, blockers, failed, status)
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-        summary = {
-            "step": STEP,
-            "audit_only": True,
-            "live_allowed": False,
-            "mt5_execution_enabled": False,
-            "mt5_bat_created": False,
-            "discord_live_enabled": False,
-            "ai_api_called": False,
-            "signals_generated": False,
-            "final_signal_enabled": False,
-            "contract_mutated": False,
-            "manual_candidate_demotion_or_removal": False,
-            "open_asof_allowed": False,
-            "csv_contract": CSV_CONTRACT,
-            "csv_open_bar_exclusion_required": False,
-            "live_ready": False,
-            "immutable_runtime_monitor_ready": status == READY_STATUS,
-            "pool_policy": POOL_POLICY,
-            **state,
-            "blocker_count": len(blockers),
-            "validation_failure_count": len(failed),
-        }
         write_outputs(out, status, val, blockers, summary)
-        print(f"[{utc_now()}] {status} latest={latest} last_seen={last_seen} stage76={round(last_stage76_seconds, 6)}s stage79={round(last_stage79_seconds, 6)}s total={round(last_total_seconds, 6)}s paste={last_stage79_paste_path} blockers={len(blockers)}")
+
+        if status == BLOCKED_STATUS and not a.disable_auto_support_bundle and s81.exists():
+            rc81, tail81, sec81 = run_script(s81, ["--candle-dir", str(cdir)], repo_root)
+            last_support_bundle_rc = str(rc81)
+            upload_path = extract_stage81_upload_path(tail81)
+            if upload_path:
+                last_support_bundle_upload_path = upload_path
+            append_csv(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "stage81_auto_support_bundle", "seconds": round(sec81, 6), "returncode": rc81, "status": "OK" if rc81 == 0 else "FAILED", "detail": tail81.replace("\r", " ").replace("\n", " ")[-1000:]}, timing_fields)
+            append_csv(event_log, {"created_at_utc": utc_now(), "event": "AUTO_SUPPORT_BUNDLE", "latest_m15_time": latest, "status": "OK" if rc81 == 0 else "FAILED", "detail": f"upload_first={last_support_bundle_upload_path}"}, event_fields)
+            state["last_support_bundle_returncode"] = last_support_bundle_rc
+            state["last_support_bundle_upload_first_path"] = last_support_bundle_upload_path
+            summary = build_summary(state, blockers, failed, status)
+            state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+            write_outputs(out, status, val, blockers, summary)
+
+        print(f"[{utc_now()}] {status} latest={latest} last_seen={last_seen} stage76={round(last_stage76_seconds, 6)}s stage79={round(last_stage79_seconds, 6)}s total={round(last_total_seconds, 6)}s paste={last_stage79_paste_path} support={last_support_bundle_upload_path} blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
