@@ -3,6 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 REM GOLD V3 76 full audit monitor with payload preview audit-only.
 REM Keeps a console open and runs Stage74 --once -> Stage75 when goldsharp_m15.csv latest closed time changes.
+REM Schedule: every minute at second 05 by default.
 REM No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 
 set "SCRIPT_DIR=%~dp0"
@@ -37,7 +38,9 @@ echo CANDLE_DIR=%CANDLE_DIR%
 echo OUTPUT_DIR=%OUTPUT_DIR%
 echo.
 echo This window will stay open and monitor goldsharp_m15.csv.
-echo It runs Stage74 --once then Stage75 when latest closed M15 time changes.
+echo Schedule: every minute at second 05.
+echo It reads only the latest CSV row during idle checks.
+echo It runs Stage74 --once then Stage75 only when latest closed M15 time changes.
 echo No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 echo.
 echo To stop monitoring, close this window or press Ctrl+C.
@@ -46,7 +49,7 @@ echo.
 python "%REPO_ROOT%\scripts\gold_v3_runtime\gold_v3_76_full_audit_monitor_with_payload_preview_audit.py" ^
   --candle-dir "%CANDLE_DIR%" ^
   --output-dir "%OUTPUT_DIR%" ^
-  --poll-seconds 30
+  --minute-lag-seconds 5
 
 set "ERR=%ERRORLEVEL%"
 echo.
