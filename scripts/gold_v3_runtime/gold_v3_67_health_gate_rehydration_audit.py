@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 from collections import defaultdict, deque
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,6 +31,7 @@ MIN_HISTORY = 20
 PF_THRESHOLD = 1.10
 LOSS_STREAK_LT = 3
 CSV_CONTRACT = "open/in-progress candles are not written to CSV"
+POOL_POLICY = "poolから外さない。rolling health gateに判断させる。"
 KEY_COLS = [
     "candidate_label",
     "base_candidate_label",
@@ -91,10 +93,29 @@ def norm_cell(v: Any) -> str:
     return s
 
 
+def normalize_key_part(s: Any) -> str:
+    x = norm_cell(s)
+    if not x:
+        return ""
+    if re.fullmatch(r"[-+]?\d+(?:\.\d+)?", x):
+        try:
+            f = float(x)
+            if math.isfinite(f) and f.is_integer():
+                return str(int(f))
+            return (f"{f:.10f}").rstrip("0").rstrip(".")
+        except Exception:  # pragma: no cover
+            return x
+    return x
+
+
+def normalize_candidate_key_string(key: Any) -> str:
+    return "|".join(normalize_key_part(p) for p in str(key).split("|"))
+
+
 def build_candidate_key(df: pd.DataFrame) -> pd.Series:
     key = pd.Series([""] * len(df), index=df.index, dtype="object")
     for i, c in enumerate(KEY_COLS):
-        part = df[c].map(norm_cell)
+        part = df[c].map(normalize_key_part)
         key = part if i == 0 else key + "|" + part
     return key.astype(str)
 
@@ -173,7 +194,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def inventory_candidate(path: Path, stage: str, priority: int) -> dict[str, Any]:
-    inv: dict[str, Any] = {"stage": stage, "priority": priority, "path": str(path), "accepted": False}
+    inv: dict[str, Any] = {"stage": stage, "priority": priority, "path": str(path), "structurally_accepted": False}
     try:
         df, sep = read_csv_auto(path)
         inv["separator"] = sep
@@ -206,7 +227,7 @@ def inventory_candidate(path: Path, stage: str, priority: int) -> dict[str, Any]
         elif int(inv["numeric_result_rows"]) == 0:
             inv["reject_reason"] = "NO_NUMERIC_OUTCOME_VALUES"
         else:
-            inv["accepted"] = True
+            inv["structurally_accepted"] = True
         return inv
     except Exception as e:  # pragma: no cover
         inv["reject_reason"] = "READ_ERROR"
@@ -224,23 +245,23 @@ def discover_sources(base_out: Path, a: argparse.Namespace) -> list[dict[str, An
     seen: set[Path] = set()
     for stage, priority, d, patterns in dirs:
         if not d.exists():
-            rows.append({"stage": stage, "priority": priority, "path": str(d), "accepted": False, "reject_reason": "DIRECTORY_NOT_FOUND"})
+            rows.append({"stage": stage, "priority": priority, "path": str(d), "structurally_accepted": False, "reject_reason": "DIRECTORY_NOT_FOUND"})
             continue
         for pat in patterns:
             for p in d.glob(pat):
                 if p.is_file() and p not in seen:
                     seen.add(p)
                     rows.append(inventory_candidate(p, stage, priority))
-    rows.sort(key=lambda r: (int(r.get("priority", 99)), 0 if bool(r.get("accepted")) else 1, str(r.get("path", ""))))
+    rows.sort(key=lambda r: (int(r.get("priority", 99)), 0 if bool(r.get("structurally_accepted")) else 1, str(r.get("path", ""))))
     return rows
 
 
 def load_accepted_source(inventory: list[dict[str, Any]], stage66_joined: pd.DataFrame) -> tuple[pd.DataFrame | None, dict[str, Any] | None, list[dict[str, Any]]]:
-    blockers: list[dict[str, Any]] = []
+    rejections: list[dict[str, Any]] = []
     s66 = stage66_joined.copy()
     s66["candidate_key"] = build_candidate_key(s66)
     for inv in inventory:
-        if not bool(inv.get("accepted")):
+        if not bool(inv.get("structurally_accepted")):
             continue
         path = Path(str(inv["path"]))
         df, _ = read_csv_auto(path)
@@ -257,8 +278,13 @@ def load_accepted_source(inventory: list[dict[str, Any]], stage66_joined: pd.Dat
             coverage = int(merged["_result_usd"].notna().sum())
             key_mismatch = int((merged["candidate_key_stage66"].astype(str) != merged["candidate_key_source"].astype(str)).fillna(True).sum())
             if coverage == len(need) and key_mismatch == 0:
-                return df, inv, blockers
-            blockers.append(blocker("candidate_source_rejected", str(path), "STAGE66_OPPORTUNITY_COVERAGE_OR_KEY_MISMATCH", {"coverage": coverage, "required": int(len(need)), "key_mismatch": key_mismatch}))
+                inv = dict(inv)
+                inv["selected_as_outcome_source"] = True
+                inv["coverage"] = coverage
+                inv["required_coverage"] = int(len(need))
+                inv["key_mismatch"] = key_mismatch
+                return df, inv, rejections
+            rejections.append({"artifact": str(path), "reason": "STAGE66_OPPORTUNITY_COVERAGE_OR_KEY_MISMATCH", "coverage": coverage, "required": int(len(need)), "key_mismatch": key_mismatch})
         else:
             need = s66[["candidate_key", "_m15_time"]].copy() if "_m15_time" in s66.columns else s66[["candidate_key"]].copy()
             if "_m15_time" in need.columns:
@@ -270,9 +296,14 @@ def load_accepted_source(inventory: list[dict[str, Any]], stage66_joined: pd.Dat
                 merged = need.merge(got, on="candidate_key", how="left")
             coverage = int(merged["_result_usd"].notna().sum())
             if coverage == len(need):
-                return df, inv, blockers
-            blockers.append(blocker("candidate_source_rejected", str(path), "STAGE66_KEY_TIME_COVERAGE_MISMATCH", {"coverage": coverage, "required": int(len(need))}))
-    return None, None, blockers
+                inv = dict(inv)
+                inv["selected_as_outcome_source"] = True
+                inv["coverage"] = coverage
+                inv["required_coverage"] = int(len(need))
+                inv["key_mismatch"] = 0
+                return df, inv, rejections
+            rejections.append({"artifact": str(path), "reason": "STAGE66_KEY_TIME_COVERAGE_MISMATCH", "coverage": coverage, "required": int(len(need)), "key_mismatch": "n/a"})
+    return None, None, rejections
 
 
 def rehydrate(stage66_joined: pd.DataFrame, source: pd.DataFrame, source_inv: dict[str, Any]) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -338,7 +369,8 @@ def rehydrate(stage66_joined: pd.DataFrame, source: pd.DataFrame, source_inv: di
         state = pd.DataFrame(columns=["candidate_key", "candidate_retained", "health_gate_pass", "health_gate_reason"])
     else:
         state = latest.copy()
-        state["observed_event_count"] = event_ledger.groupby("candidate_key")["candidate_key"].transform("size")
+        counts = event_ledger.groupby("candidate_key").size().to_dict()
+        state["observed_event_count"] = state["candidate_key"].map(counts).fillna(0).astype(int)
         state = state[[
             "candidate_key", *[c for c in KEY_COLS if c in state.columns], "event_time", "observed_event_count",
             "history_count_before", "rolling_pf_before", "loss_streak_before", "candidate_retained",
@@ -373,13 +405,13 @@ def main() -> int:
         val.append(ok(f"stage66_{key}_false", j66.get(key) is False, j66.get(key), False))
 
     inventory = discover_sources(base_out, a)
-    pd.DataFrame(inventory).to_csv(out / "gold_v3_67_health_gate_inventory.csv", index=False, encoding="utf-8-sig")
 
     event_ledger = pd.DataFrame()
     candidate_state = pd.DataFrame()
     accepted_inv: dict[str, Any] | None = None
     source_rows = 0
     candidate_count = 0
+    source_rejections: list[dict[str, Any]] = []
 
     if p66_joined.exists() and not blockers:
         s66_joined, _ = read_csv_auto(p66_joined)
@@ -391,31 +423,39 @@ def main() -> int:
         else:
             s66_joined["candidate_key"] = build_candidate_key(s66_joined)
             candidate_count = int(s66_joined["candidate_key"].nunique())
-            source, accepted_inv, src_blockers = load_accepted_source(inventory, s66_joined)
-            blockers.extend(src_blockers)
+            source, accepted_inv, source_rejections = load_accepted_source(inventory, s66_joined)
             val.append(ok("acceptable_audited_outcome_source_found", source is not None and accepted_inv is not None, accepted_inv.get("path") if accepted_inv else "not_found", "Stage51/52/53 GOLD V3 outcome source"))
             if source is not None and accepted_inv is not None:
                 source_rows = int(len(source))
+                for inv in inventory:
+                    inv["selected_as_outcome_source"] = str(inv.get("path", "")) == str(accepted_inv.get("path", ""))
                 event_ledger, candidate_state = rehydrate(s66_joined, source, accepted_inv)
                 event_ledger.to_csv(out / "gold_v3_67_health_gate_event_ledger.csv", index=False, encoding="utf-8-sig")
                 candidate_state.to_csv(out / "gold_v3_67_health_gate_rehydrated_candidate_state.csv", index=False, encoding="utf-8-sig")
                 val.append(ok("rehydrated_event_rows_equal_stage66", len(event_ledger) == len(s66_joined), len(event_ledger), len(s66_joined)))
-                val.append(ok("numeric_result_all_rows", int(pd.to_numeric(event_ledger["result_usd_after_close"], errors="coerce").notna().sum()) == len(event_ledger), int(pd.to_numeric(event_ledger["result_usd_after_close"], errors="coerce").notna().sum()), len(event_ledger)))
+                numeric_count = int(pd.to_numeric(event_ledger["result_usd_after_close"], errors="coerce").notna().sum())
+                val.append(ok("numeric_result_all_rows", numeric_count == len(event_ledger), numeric_count, len(event_ledger)))
                 val.append(ok("candidate_count_preserved", int(candidate_state["candidate_key"].nunique()) == candidate_count, int(candidate_state["candidate_key"].nunique()), candidate_count))
                 val.append(ok("all_observed_candidates_retained", bool(candidate_state["candidate_retained"].eq(True).all()), "all_true", "all_true"))
                 val.append(ok("manual_candidate_demotion_or_removal_false", True, False, False))
                 if "candidate_key" in s66_state.columns:
-                    s66_keys = set(s66_state["candidate_key"].astype(str))
+                    s66_keys = set(s66_state["candidate_key"].map(normalize_candidate_key_string).astype(str))
                 elif all(c in s66_state.columns for c in KEY_COLS):
                     s66_keys = set(build_candidate_key(s66_state))
                 else:
                     s66_keys = set()
                 if s66_keys:
-                    val.append(ok("candidate_state_keys_match_stage66_state", set(candidate_state["candidate_key"].astype(str)) == s66_keys, len(set(candidate_state["candidate_key"].astype(str)).symmetric_difference(s66_keys)), 0))
+                    out_keys = set(candidate_state["candidate_key"].map(normalize_candidate_key_string).astype(str))
+                    val.append(ok("candidate_state_keys_match_stage66_state", out_keys == s66_keys, len(out_keys.symmetric_difference(s66_keys)), 0))
+            else:
+                blockers.append(blocker("no_usable_outcome_source", str(base_out), "NO_ACCEPTABLE_SOURCE_AFTER_STAGE66_COVERAGE_CHECK", source_rejections))
+
     if event_ledger.empty:
         (out / "gold_v3_67_health_gate_event_ledger.csv").write_text("", encoding="utf-8")
         (out / "gold_v3_67_health_gate_rehydrated_candidate_state.csv").write_text("", encoding="utf-8")
 
+    if not any(bool(r.get("structurally_accepted")) for r in inventory):
+        blockers.append(blocker("no_inventory_source_accepted", str(base_out), "NO_STAGE51_52_53_ARTIFACT_WITH_EXACT_KEY_AND_RESULT_COLUMNS"))
     val.append(ok("health_gate_window_30", WINDOW == 30, WINDOW, 30))
     val.append(ok("health_gate_min_history_20", MIN_HISTORY == 20, MIN_HISTORY, 20))
     val.append(ok("health_gate_pf_threshold_1_10", PF_THRESHOLD == 1.10, PF_THRESHOLD, 1.10))
@@ -424,11 +464,8 @@ def main() -> int:
     val.append(ok("no_ohlc_re_adjudication", True, "not_used", "not_used"))
     val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
 
-    if not any(bool(r.get("accepted")) for r in inventory):
-        blockers.append(blocker("no_inventory_source_accepted", str(base_out), "NO_STAGE51_52_53_ARTIFACT_WITH_EXACT_KEY_AND_RESULT_COLUMNS"))
-    if accepted_inv is None:
-        blockers.append(blocker("no_usable_outcome_source", str(base_out), "NO_ACCEPTABLE_SOURCE_AFTER_STAGE66_COVERAGE_CHECK"))
-
+    pd.DataFrame(inventory).to_csv(out / "gold_v3_67_health_gate_inventory.csv", index=False, encoding="utf-8-sig")
+    pd.DataFrame(source_rejections).to_csv(out / "gold_v3_67_source_rejection_diagnostics.csv", index=False, encoding="utf-8-sig")
     pd.DataFrame(blockers).to_csv(out / "gold_v3_67_blocker_matrix.csv", index=False, encoding="utf-8-sig")
     val_df = pd.DataFrame(val)
     failed = val_df[val_df["result"].ne("PASS")]
@@ -458,7 +495,7 @@ def main() -> int:
         "csv_open_bar_exclusion_required": False,
         "live_ready": False,
         "health_gate_rehydration_ready": status == READY_STATUS,
-        "pool_policy": "poolから外さない。rolling health gateに判断させる。",
+        "pool_policy": POOL_POLICY,
         "candidate_key_source": "+".join(KEY_COLS),
         "accepted_outcome_source": accepted_inv.get("path") if accepted_inv else "",
         "accepted_outcome_stage": accepted_inv.get("stage") if accepted_inv else "",
@@ -469,6 +506,7 @@ def main() -> int:
         "candidate_count": candidate_count,
         "health_gate_pass_candidate_count": pass_count,
         "health_gate_fail_candidate_count": fail_count,
+        "source_rejection_diagnostic_count": int(len(source_rejections)),
         "validation_failure_count": int(len(failed)),
         "blocker_count": int(len(blockers)),
         "health_gate": {"window": WINDOW, "min_history": MIN_HISTORY, "pf_threshold": PF_THRESHOLD, "loss_streak_lt": LOSS_STREAK_LT, "virtual_monitoring": True},
@@ -486,7 +524,7 @@ def main() -> int:
     paste.append("csv_contract: " + CSV_CONTRACT)
     paste.append("csv_open_bar_exclusion_required: false")
     paste.append("safety: audit_only=true, live_allowed=false, mt5=false, discord=false, ai_api=false, final_signal=false")
-    paste.append("pool_policy: poolから外さない。rolling health gateに判断させる。")
+    paste.append("pool_policy: " + POOL_POLICY)
     paste.append("candidate_key_source: " + "+".join(KEY_COLS))
     paste.append(f"accepted_outcome_source: {summary['accepted_outcome_source']}")
     paste.append(f"accepted_outcome_stage: {summary['accepted_outcome_stage']}")
@@ -495,11 +533,15 @@ def main() -> int:
     paste.append(f"candidate_count: {candidate_count}")
     paste.append(f"health_gate_pass_candidate_count: {pass_count}")
     paste.append(f"health_gate_fail_candidate_count: {fail_count}")
+    paste.append(f"source_rejection_diagnostic_count: {len(source_rejections)}")
     paste.append(f"blocker_count: {len(blockers)}")
     paste.append("health_gate: window=30, min_history=20, pf_threshold=1.10, loss_streak_lt=3, virtual_monitoring=true")
     paste.append("")
     paste.append("INVENTORY")
     paste.append(pd.DataFrame(inventory).to_string(index=False) if inventory else "NO_INVENTORY")
+    paste.append("")
+    paste.append("SOURCE_REJECTION_DIAGNOSTICS")
+    paste.append(pd.DataFrame(source_rejections).to_string(index=False) if source_rejections else "NO_SOURCE_REJECTIONS")
     paste.append("")
     paste.append("BLOCKERS")
     paste.append(pd.DataFrame(blockers).to_string(index=False) if blockers else "NO_BLOCKERS")
@@ -511,6 +553,7 @@ def main() -> int:
     paste.append("gold_v3_67_health_gate_rehydrated_candidate_state.csv")
     paste.append("gold_v3_67_health_gate_event_ledger.csv")
     paste.append("gold_v3_67_health_gate_inventory.csv")
+    paste.append("gold_v3_67_source_rejection_diagnostics.csv")
     paste.append("gold_v3_67_blocker_matrix.csv")
     paste.append("gold_v3_67_validation_matrix.csv")
     paste.append("gold_v3_67_health_gate_rehydration_summary.json")
@@ -527,13 +570,14 @@ Status: `{status}`
 - candidate_count: `{candidate_count}`
 - health_gate_pass_candidate_count: `{pass_count}`
 - health_gate_fail_candidate_count: `{fail_count}`
+- source_rejection_diagnostic_count: `{len(source_rejections)}`
 - blocker_count: `{len(blockers)}`
 
 ## Contract
 
 - candidate_key_source: `{'+'.join(KEY_COLS)}`
 - csv_open_bar_exclusion_required: `false`
-- pool_policy: `poolから外さない。rolling health gateに判断させる。`
+- pool_policy: `{POOL_POLICY}`
 
 ## Safety
 
