@@ -1,18 +1,20 @@
-stage,artifact,intended_use,path_or_query_checked,read_status,sha_or_status,notes
-Handoff,NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_NEXT_EXACT_ENTRY_PRUNE_HONMEI_20260610.md,Primary Stage43 handoff,docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_NEXT_EXACT_ENTRY_PRUNE_HONMEI_20260610.md,READ,34f90684699804f520ada8fa2950db315c46dbd5,Read order source; not used as proof for exact contract.
-Handoff,NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_MUST_READ_SOURCE_CHECK_ADDENDUM_20260610.md,Source-check checklist,docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_MUST_READ_SOURCE_CHECK_ADDENDUM_20260610.md,READ,5e5ec902cb4c90480f9e794a17b77e15ecc5e8e1,Explicitly says do not treat addendum as proof.
-Handoff,NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_STAGE01_40_READCHECK_ADDENDUM_20260610.md,Stage1-40 context/read-check map,docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_STAGE01_40_READCHECK_ADDENDUM_20260610.md,READ,3bc6cde673181e511f5f93746fb1810ba3b90643,Read-check only; not a replacement for SOT artifacts.
-Handoff,NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_FINAL_READ_ORDER_AND_PROMPT_FIX_20260610.md,Final override for read order/prompt,docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_FINAL_READ_ORDER_AND_PROMPT_FIX_20260610.md,READ,b48367d2161d0b59f7daff68940d6a65d6035556,Final read-order override.
-Stage42,gold_v3_42_primary_plus_restore_candidate_decision.csv,Human honmei decision rows,docs/gold_v3/gold_v3_42_primary_plus_restore_candidate_decision.csv,READ,17d462f0cd9b56e1533e7587adc2ab525369ee34,Source for candidate labels/decision metadata only.
-Stage42,GOLD_V3_42_PRIMARY_PLUS_RESTORE_CANDIDATE_DECISION_AUDIT_ONLY_20260610.md,Human decision report,docs/gold_v3/GOLD_V3_42_PRIMARY_PLUS_RESTORE_CANDIDATE_DECISION_AUDIT_ONLY_20260610.md,READ,9510fbccb0c77610720ea601ad52989f3037ae16,Confirms decision is not live approval.
-Stage15,GOLD_V3_15_AUDIT_ONLY_REPLAY_EXECUTION_REPORT.md,Base entry family/source_rank/direction/profile,docs/gold_v3/GOLD_V3_15_AUDIT_ONLY_REPLAY_EXECUTION_REPORT.md,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage15,gold_v3_15_replay_candidate_metrics.csv,Base entry/profile metrics,docs/gold_v3/gold_v3_15_replay_candidate_metrics.csv,NOT_FOUND_CHECKED_PATH,404 and GitHub search no result,Required; blocker.
-Stage21,gold_v3_21_filter_traceability.csv,F002/F003/F004/F006 definitions,docs/gold_v3/gold_v3_21_filter_traceability.csv,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage22,gold_v3_22_filter_traceability.csv,S020/S021/S022/S024/S030 definitions,docs/gold_v3/gold_v3_22_filter_traceability.csv,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage22,gold_v3_22_further_pruned_candidate_metrics.csv,Restore metrics/low-frequency flag,docs/gold_v3/gold_v3_22_further_pruned_candidate_metrics.csv,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage30,gold_v3_30_all_retained_filter_contract.csv,R03/R04 retained filter chain,docs/gold_v3/gold_v3_30_all_retained_filter_contract.csv,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage35,gold_v3_35_before_after_metrics.csv,Cumulative selected band pruning context,docs/gold_v3/gold_v3_35_before_after_metrics.csv,NOT_FOUND_CHECKED_PATH,404,Required context; blocker for full Stage43.
-Stage36,gold_v3_36_ranked_candidate_contract.csv,R03/R04 active candidate contract,docs/gold_v3/gold_v3_36_ranked_candidate_contract.csv,NOT_FOUND_CHECKED_PATH,404 and GitHub search no result,Required; blocker.
-Stage36,gold_v3_36_final_filter_contract.csv,Stage36 final Saturday filters for packet 1/4,docs/gold_v3/gold_v3_36_final_filter_contract.csv,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Stage36,GOLD_V3_36_FINAL_RANKED_CANDIDATE_CONTRACT_AUDIT_ONLY_REPORT.md,Stage36 final report,docs/gold_v3/GOLD_V3_36_FINAL_RANKED_CANDIDATE_CONTRACT_AUDIT_ONLY_REPORT.md,NOT_FOUND_CHECKED_PATH,404,Required; blocker.
-Local FX_OUTPUTS,FX_OUTPUTS gold_v3 runtime root,Possible runtime artifacts outside repo,local MT5 Files FX_OUTPUTS gold_v3 root,NOT_ACCESSIBLE_FROM_CONNECTOR_ENV,N/A,May exist on user's local PC. Upload/read locally before unblocking.
+stage,artifact,intended_use,path_or_source,read_status,notes
+Handoff,NEXT_CHAT_HANDOFF_GOLD_V3_42_DONE_43_NEXT_EXACT_ENTRY_PRUNE_HONMEI_20260610.md,Stage43 original handoff,GitHub docs/gold_v3,READ_PREVIOUSLY,Original three-candidate scope later superseded by user clarification in this chat.
+Stage43 user clarification,current chat message,Explicitly expands honmei set to Stage36 R01-R07 plus Stage22 CD90 restore,conversation,READ,Used as human decision for 8-candidate Stage43 contract.
+Stage15,GOLD_V3_15_AUDIT_ONLY_REPLAY_EXECUTION_REPORT.md,Stage15 status/safety/base family report,/mnt/data,READ,Audit-only; no live approval.
+Stage15,gold_v3_15_replay_candidate_metrics.csv,source_rank base entry families direction profile,/mnt/data,READ,source_rank 1 and 2 used; h1_atr56 ranks excluded.
+Stage15,gold_v3_15_replay_trade_ledger.csv,replay ledger availability,/mnt/data,AVAILABLE,Not needed row-by-row for contract; confirms source artifact uploaded.
+Stage21,GOLD_V3_21_SELECTED_PRUNING_RULE_VALIDATION_AUDIT_ONLY_REPORT.md,Stage21 status and filter trace report,/mnt/data,READ,Audit-only; no live approval.
+Stage21,gold_v3_21_filter_traceability.csv,initial selected prune filters,/mnt/data,READ,Used through Stage30 retained contract and direct Stage21 cross-check.
+Stage22,GOLD_V3_22_WITHIN_CANDIDATE_LOSS_FEATURE_PRUNING_AUDIT_ONLY_REPORT.md,Stage22 status and restore details,/mnt/data,READ,Audit-only; no switching/daily cap/month filter/live.
+Stage22,gold_v3_22_filter_traceability.csv,added filters and restore exact chain,/mnt/data,READ,Used for restore candidate exact filter chain.
+Stage22,gold_v3_22_further_pruned_candidate_metrics.csv,Stage22 variant metrics including restore low-frequency flag,/mnt/data,READ,Used for Stage22 restore metrics.
+Stage30,GOLD_V3_30_ALL_RETAINED_CANDIDATE_SET_RESTORE_AUDIT_ONLY_REPORT.md,Stage30 retained set report,/mnt/data,READ,Audit-only retained restore; no live approval.
+Stage30,gold_v3_30_all_retained_candidate_set.csv,retained candidate set roles and metrics,/mnt/data,READ,Used for Stage30 retained roles and flags.
+Stage30,gold_v3_30_all_retained_filter_contract.csv,retained filter chain for Stage36 active candidates,/mnt/data,READ,Used as exact Stage21 plus Stage22 prune chain for seven active candidates.
+Stage35,GOLD_V3_35_CUMULATIVE_SELECTED_BAND_PRUNING_WITH_PACKET9_AUDIT_ONLY_REPORT.md,Stage35 cumulative cut context,/mnt/data,READ,All seven candidates remain active; global Saturday cut used.
+Stage35,gold_v3_35_before_after_metrics.csv,before/final metrics and selected_cut_ids,/mnt/data,READ,Used for final metrics context.
+Stage35,gold_v3_35_selected_cut_plan.csv,selected cut plan including global Saturday and packet bands,/mnt/data,READ,Used as source for final cut semantics.
+Stage36,GOLD_V3_36_FINAL_RANKED_CANDIDATE_CONTRACT_AUDIT_ONLY_REPORT.md,Stage36 ranked candidate and final filter report,/mnt/data,READ,Audit-only final ranked naming contract.
+Stage36,gold_v3_36_ranked_candidate_contract.csv,R01-R07 ranked active candidate rows,/mnt/data,READ,Used for seven active honmei candidates.
+Stage36,gold_v3_36_final_filter_contract.csv,Stage36 final filters,/mnt/data,READ,Used for Stage36 final filters for active candidates only.
