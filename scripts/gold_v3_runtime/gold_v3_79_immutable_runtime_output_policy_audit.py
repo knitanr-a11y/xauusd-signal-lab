@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """GOLD V3 79 immutable runtime output policy audit-only.
 
-Creates an immutable run_id snapshot of Stage76 runtime evidence.
+Creates a short-path, run_id-based immutable snapshot of Stage76 runtime evidence.
 No MT5 orders, no Discord, no AI API, no final signal.
 """
 from __future__ import annotations
@@ -26,18 +26,19 @@ STAGE76_READY = "GOLD_V3_76_FULL_AUDIT_MONITOR_WITH_PAYLOAD_PREVIEW_READY_AUDIT_
 CSV_CONTRACT = "open/in-progress candles are not written to CSV"
 POOL_POLICY = "poolから外さない。rolling health gateに判断させる。"
 
-SOURCE_FILES = [
-    "gold_v3_76_monitor_state.json",
-    "gold_v3_76_monitor_event_log.csv",
-    "gold_v3_76_runtime_timing_log.csv",
-    "gold_v3_76_latest_payload_preview.csv",
-    "gold_v3_76_latest_payload_preview.json",
-    "gold_v3_76_blocker_matrix.csv",
-    "gold_v3_76_validation_matrix.csv",
-    "gold_v3_76_full_audit_monitor_with_payload_preview_summary.json",
-    "gold_v3_76_PASTE_ME_FULL_AUDIT_MONITOR_WITH_PAYLOAD_PREVIEW_SUMMARY.txt",
-    "GOLD_V3_76_REPORT.md",
-]
+# Keep destination names short. MetaQuotes paths are already long on Windows.
+SOURCE_FILE_MAP = {
+    "gold_v3_76_monitor_state.json": "s76_state.json",
+    "gold_v3_76_monitor_event_log.csv": "s76_event.csv",
+    "gold_v3_76_runtime_timing_log.csv": "s76_timing.csv",
+    "gold_v3_76_latest_payload_preview.csv": "s76_payload.csv",
+    "gold_v3_76_latest_payload_preview.json": "s76_payload.json",
+    "gold_v3_76_blocker_matrix.csv": "s76_blockers.csv",
+    "gold_v3_76_validation_matrix.csv": "s76_validation.csv",
+    "gold_v3_76_full_audit_monitor_with_payload_preview_summary.json": "s76_summary.json",
+    "gold_v3_76_PASTE_ME_FULL_AUDIT_MONITOR_WITH_PAYLOAD_PREVIEW_SUMMARY.txt": "s76_paste.txt",
+    "GOLD_V3_76_REPORT.md": "s76_report.md",
+}
 
 
 def utc_now() -> str:
@@ -85,10 +86,11 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def safe_part(s: str) -> str:
+def safe_part(s: str, max_len: int = 24) -> str:
     s = str(s or "").strip()
     s = re.sub(r"[^0-9A-Za-z_\-]+", "_", s)
-    return s.strip("_") or "NA"
+    s = s.strip("_") or "NA"
+    return s[:max_len]
 
 
 def find_files_dir() -> Path:
@@ -101,17 +103,18 @@ def find_files_dir() -> Path:
 
 
 def derive_run_id(summary: dict[str, Any]) -> tuple[str, str]:
-    created = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    # Short run_id to avoid Windows MAX_PATH failures under MetaQuotes.
+    created = datetime.now(timezone.utc).strftime("%H%M%S")
     latest = str(summary.get("latest_m15_time") or summary.get("latest_closed_m15_time") or "NA")
-    decision = safe_part(summary.get("decision", "NA"))
+    decision = safe_part(summary.get("decision", "NA"), 12)
     try:
         dt = pd.to_datetime(latest)
-        latest_part = dt.strftime("%Y%m%d_%H%M%S")
+        latest_part = dt.strftime("%H%M")
         day = dt.strftime("%Y%m%d")
     except Exception:
-        latest_part = safe_part(latest)
+        latest_part = safe_part(latest, 8)
         day = datetime.now(timezone.utc).strftime("%Y%m%d")
-    run_id = f"{created}_m15_{latest_part}_{decision}"
+    run_id = f"{created}_{latest_part}_{decision}"
     return day, run_id
 
 
@@ -121,7 +124,7 @@ def unique_run_dir(base: Path, day: str, run_id: str) -> tuple[Path, str]:
     if not candidate.exists():
         return candidate, run_id
     for i in range(1, 100):
-        rid = f"{run_id}_retry{i:02d}"
+        rid = f"{run_id}_r{i:02d}"
         candidate = day_dir / rid
         if not candidate.exists():
             return candidate, rid
@@ -132,7 +135,7 @@ def copy_new(src: Path, dst: Path) -> None:
     if dst.exists():
         raise FileExistsError(f"immutable copy target already exists: {dst}")
     dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    shutil.copyfile(src, dst)
 
 
 def parse_args() -> argparse.Namespace:
@@ -148,7 +151,8 @@ def main() -> int:
     cdir = Path(a.candle_dir).expanduser().resolve() if a.candle_dir else find_files_dir()
     base_out = cdir / "FX_OUTPUTS" / "gold_v3"
     stage76_dir = Path(a.stage76_dir).expanduser().resolve() if a.stage76_dir else base_out / "76_full_audit_monitor_with_payload_preview_audit_only"
-    immutable_root = Path(a.immutable_root).expanduser().resolve() if a.immutable_root else base_out / "runtime_immutable"
+    # Short default root to avoid long Windows paths.
+    immutable_root = Path(a.immutable_root).expanduser().resolve() if a.immutable_root else base_out / "79i"
     summary_path = stage76_dir / "gold_v3_76_full_audit_monitor_with_payload_preview_summary.json"
 
     val: list[dict[str, Any]] = []
@@ -157,31 +161,37 @@ def main() -> int:
     val.append(ok("stage76_summary_present", summary_path.exists(), str(summary_path), "exists"))
     if not summary_path.exists():
         blockers.append(blocker("stage76_summary_missing", str(summary_path), "STAGE76_SUMMARY_MISSING"))
-        status = BLOCKED_STATUS
-        print(f"[{status}] missing Stage76 summary: {summary_path}")
+        print(f"[{BLOCKED_STATUS}] missing Stage76 summary: {summary_path}")
         return 1
 
     j76 = read_json(summary_path)
     day, base_run_id = derive_run_id(j76)
     run_dir, run_id = unique_run_dir(immutable_root, day, base_run_id)
-    snapshot_dir = run_dir / "stage76_snapshot"
-    run_dir.mkdir(parents=True, exist_ok=False)
-    snapshot_dir.mkdir(parents=True, exist_ok=False)
+    snapshot_dir = run_dir / "s76"
+    try:
+        run_dir.mkdir(parents=True, exist_ok=False)
+        snapshot_dir.mkdir(parents=True, exist_ok=False)
+    except FileExistsError:
+        blockers.append(blocker("run_dir_already_exists", str(run_dir), "RUN_DIR_ALREADY_EXISTS"))
+        print(f"[{BLOCKED_STATUS}] run_dir already exists: {run_dir}")
+        return 1
 
     copied: list[dict[str, Any]] = []
     missing_optional: list[str] = []
     try:
-        for name in SOURCE_FILES:
-            src = stage76_dir / name
+        for source_name, dest_name in SOURCE_FILE_MAP.items():
+            src = stage76_dir / source_name
             if not src.exists():
-                missing_optional.append(name)
+                missing_optional.append(source_name)
                 continue
-            dst = snapshot_dir / name
+            dst = snapshot_dir / dest_name
             copy_new(src, dst)
             copied.append({
+                "source_name": source_name,
+                "snapshot_name": dest_name,
                 "source_path": str(src),
                 "snapshot_path": str(dst),
-                "relative_path": f"stage76_snapshot/{name}",
+                "relative_path": f"s76/{dest_name}",
                 "size_bytes": dst.stat().st_size,
                 "sha256": sha256_file(dst),
             })
@@ -190,6 +200,7 @@ def main() -> int:
         val.append(ok("run_dir_created_new", run_dir.exists(), str(run_dir), "new immutable directory"))
         val.append(ok("snapshot_dir_created_new", snapshot_dir.exists(), str(snapshot_dir), "new immutable directory"))
         val.append(ok("copied_file_count_positive", len(copied) > 0, len(copied), "> 0"))
+        val.append(ok("short_path_mode_enabled", True, "79i/s76/short_names", "enabled"))
         val.append(ok("no_existing_target_overwritten", True, "copy_new enforced", "no overwrite"))
         val.append(ok("csv_open_bar_exclusion_required_false", j76.get("csv_open_bar_exclusion_required") is False, j76.get("csv_open_bar_exclusion_required"), False))
         val.append(ok("discord_send_false", str(j76.get("should_notify_discord", "False")) == "False", j76.get("should_notify_discord"), False))
@@ -201,17 +212,17 @@ def main() -> int:
             blockers.append(blocker("stage76_not_ready", str(summary_path), "STAGE76_STATUS_NOT_READY", j76.get("status")))
 
         policy_rows = [
-            {"item": "runtime_evidence_overwrite", "policy": "forbidden", "observed": "new run_id directory", "result": "PASS"},
-            {"item": "latest_state_overwrite", "policy": "not used by Stage79 immutable evidence", "observed": "snapshot only", "result": "PASS"},
+            {"item": "runtime_evidence_overwrite", "policy": "forbidden", "observed": "new short run_id directory", "result": "PASS"},
+            {"item": "destination_path_length", "policy": "short names required", "observed": "79i/s76/short_names", "result": "PASS"},
             {"item": "run_id_uniqueness", "policy": "required", "observed": run_id, "result": "PASS"},
             {"item": "snapshot_hash_manifest", "policy": "required", "observed": len(copied), "result": "PASS" if copied else "FAIL"},
             {"item": "external_side_effects", "policy": "forbidden", "observed": "all_false", "result": "PASS"},
         ]
-        write_csv_new(run_dir / "gold_v3_79_output_policy_matrix.csv", policy_rows)
-        write_json(run_dir / "gold_v3_79_immutable_manifest.json", {"run_id": run_id, "created_at_utc": utc_now(), "source_stage": "stage76", "copied_files": copied, "missing_optional_files": missing_optional})
-        write_csv_new(run_dir / "gold_v3_79_immutable_manifest.csv", copied)
-        manifest_json = run_dir / "gold_v3_79_immutable_manifest.json"
-        manifest_csv = run_dir / "gold_v3_79_immutable_manifest.csv"
+        write_csv_new(run_dir / "policy.csv", policy_rows)
+        write_json(run_dir / "manifest.json", {"run_id": run_id, "created_at_utc": utc_now(), "source_stage": "stage76", "short_path_mode": True, "copied_files": copied, "missing_optional_files": missing_optional})
+        write_csv_new(run_dir / "manifest.csv", copied)
+        manifest_json = run_dir / "manifest.json"
+        manifest_csv = run_dir / "manifest.csv"
         val.append(ok("manifest_json_present", manifest_json.exists(), str(manifest_json), "exists"))
         val.append(ok("manifest_csv_present", manifest_csv.exists(), str(manifest_csv), "exists"))
         val.append(ok("all_copied_files_hashed", all(x.get("sha256") for x in copied), "all_hashed" if copied else "none", "all_hashed"))
@@ -237,6 +248,7 @@ def main() -> int:
             "csv_open_bar_exclusion_required": False,
             "live_ready": False,
             "immutable_runtime_output_policy_ready": status == READY_STATUS,
+            "short_path_mode": True,
             "pool_policy": POOL_POLICY,
             "stage76_summary_path": str(summary_path),
             "immutable_root": str(immutable_root),
@@ -254,9 +266,9 @@ def main() -> int:
             "blocker_count": len(blockers),
             "validation_failure_count": len(failed),
         }
-        write_csv_new(run_dir / "gold_v3_79_blocker_matrix.csv", blockers)
-        write_csv_new(run_dir / "gold_v3_79_validation_matrix.csv", val)
-        write_json(run_dir / "gold_v3_79_immutable_runtime_output_policy_summary.json", summary)
+        write_csv_new(run_dir / "blockers.csv", blockers)
+        write_csv_new(run_dir / "validation.csv", val)
+        write_json(run_dir / "summary.json", summary)
 
         paste = []
         paste.append("GOLD V3 79 PASTE_ME_IMMUTABLE_RUNTIME_OUTPUT_POLICY_SUMMARY")
@@ -270,6 +282,7 @@ def main() -> int:
         paste.append("csv_open_bar_exclusion_required: false")
         paste.append("safety: audit_only=true, live_allowed=false, mt5=false, discord=false, ai_api=false, final_signal=false")
         paste.append("pool_policy: " + POOL_POLICY)
+        paste.append("short_path_mode: true")
         paste.append(f"run_id: {run_id}")
         paste.append(f"run_dir: {run_dir}")
         paste.append(f"snapshot_dir: {snapshot_dir}")
@@ -292,15 +305,15 @@ def main() -> int:
         paste.append(pd.DataFrame(copied).to_string(index=False) if copied else "NO_COPIED_FILES")
         paste.append("")
         paste.append("OUTPUTS")
-        paste.append("gold_v3_79_immutable_manifest.json")
-        paste.append("gold_v3_79_immutable_manifest.csv")
-        paste.append("gold_v3_79_output_policy_matrix.csv")
-        paste.append("gold_v3_79_blocker_matrix.csv")
-        paste.append("gold_v3_79_validation_matrix.csv")
-        paste.append("gold_v3_79_immutable_runtime_output_policy_summary.json")
-        paste.append("gold_v3_79_PASTE_ME_IMMUTABLE_RUNTIME_OUTPUT_POLICY_SUMMARY.txt")
-        paste.append("GOLD_V3_79_REPORT.md")
-        write_text_new(run_dir / "gold_v3_79_PASTE_ME_IMMUTABLE_RUNTIME_OUTPUT_POLICY_SUMMARY.txt", "\n".join(paste) + "\n")
+        paste.append("manifest.json")
+        paste.append("manifest.csv")
+        paste.append("policy.csv")
+        paste.append("blockers.csv")
+        paste.append("validation.csv")
+        paste.append("summary.json")
+        paste.append("paste_me.txt")
+        paste.append("report.md")
+        write_text_new(run_dir / "paste_me.txt", "\n".join(paste) + "\n")
 
         report = f"""# GOLD V3 79 immutable runtime output policy audit-only report
 
@@ -314,24 +327,23 @@ Status: `{status}`
 - copied_file_count: `{len(copied)}`
 - blocker_count: `{len(blockers)}`
 
-This is an immutable evidence snapshot. Existing snapshot files are not overwritten.
+Short-path immutable evidence snapshot. Existing snapshot files are not overwritten.
 
 Audit-only. No MT5, Discord, AI API, live hook, live evaluator, or final signal.
 """
-        write_text_new(run_dir / "GOLD_V3_79_REPORT.md", report)
+        write_text_new(run_dir / "report.md", report)
 
     except Exception as e:
-        # Do not delete the run_dir. It is evidence of the attempted immutable write.
         blockers.append(blocker("stage79_exception", str(run_dir), "STAGE79_EXCEPTION", repr(e)))
         try:
-            write_csv_new(run_dir / "gold_v3_79_blocker_matrix.csv", blockers)
+            write_csv_new(run_dir / "blockers.csv", blockers)
         except Exception:
             pass
         print(f"[{BLOCKED_STATUS}] {repr(e)} run_dir={run_dir}")
         return 1
 
     print(f"[{status}] run_dir={run_dir}")
-    print(run_dir / "gold_v3_79_PASTE_ME_IMMUTABLE_RUNTIME_OUTPUT_POLICY_SUMMARY.txt")
+    print(run_dir / "paste_me.txt")
     return 0 if status == READY_STATUS else 1
 
 
