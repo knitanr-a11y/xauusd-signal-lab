@@ -128,7 +128,6 @@ def main() -> int:
     val.append(ok("m15_has_rows", len(m15) > 0, len(m15), ">0"))
     val.append(ok("h4_has_rows", len(h4) > 0, len(h4), ">0"))
 
-    # H4 closed readiness state: one row per H4 source row and a latest snapshot.
     h4_state = h4[["time", "open", "high", "low", "close"]].copy()
     h4_state["state_time_jst"] = pd.Timestamp.utcnow().tz_localize(None) + pd.Timedelta(hours=9)
     h4_state["latest_h4_open_time_jst"] = h4_state["time"]
@@ -139,7 +138,6 @@ def main() -> int:
     h4_out = h4_state[["state_time_jst", "latest_h4_open_time_jst", "latest_h4_close_time_jst", "is_closed_safe", "source_file", "source_row_hash"]]
     h4_out.to_csv(out / "gold_v3_50_h4_closed_readiness_state.csv", index=False, encoding="utf-8-sig")
 
-    # Stage45-compatible ATR/q70 state.
     m15 = m15.copy()
     m15["m15_atr28"] = atr(m15, 28)
     window_bars = int(a.hv_rolling_days) * 96
@@ -159,7 +157,6 @@ def main() -> int:
     })
     q_state.to_csv(out / "gold_v3_50_rolling_prior_60d_q70_state.csv", index=False, encoding="utf-8-sig")
 
-    # Validation for prior-only leakage behavior.
     first_valid_idx = q_state["atr28_q70"].first_valid_index()
     val.append(ok("q70_uses_shift1_formula", True, "m15_atr28.shift(1).rolling(...).quantile(0.70)", "shift(1) prior-only"))
     val.append(ok("q70_min_periods", min_periods == max(28, window_bars // 4), min_periods, max(28, window_bars // 4)))
@@ -255,7 +252,7 @@ This does not implement live trading.
 
 Audit-only. No MT5, Discord, AI API, live hook, or final signal.
 """
-    (out / "GOLD_V3_50_H4_CLOSED_READINESS_AND_PRIOR_60D_Q70_STATE_BUILDER_AUDIT_ONLY_REPORT.md").write_text(report, encoding="utf-8")
+    (out / "GOLD_V3_50_REPORT.md").write_text(report, encoding="utf-8")
 
     print(f"[{status}] output_dir={out}")
     print(out / "gold_v3_50_PASTE_ME_STATE_BUILDER_SUMMARY.txt")
