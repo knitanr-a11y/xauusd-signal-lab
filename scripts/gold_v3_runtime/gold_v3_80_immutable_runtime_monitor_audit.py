@@ -125,12 +125,32 @@ def run_script(script: Path, args: list[str], cwd: Path) -> tuple[int, str, floa
 
 
 def extract_paste_me_path(output: str) -> str:
+    """Extract short paste_me.txt or long *_PASTE_ME_*.txt artifact path.
+
+    Stage79 uses short `paste_me.txt`. Stage85/86 use long PASTE_ME summary
+    filenames, so matching only `paste_me.txt` incorrectly marks successful
+    sidecar runs as BLOCKED. This function accepts both forms.
+    """
+    patterns = [
+        r"([A-Za-z]:\\[^\r\n]*paste_me\.txt)",
+        r"([A-Za-z]:\\[^\r\n]*PASTE_ME[^\r\n]*\.txt)",
+        r"(/[^\r\n]*paste_me\.txt)",
+        r"(/[^\r\n]*PASTE_ME[^\r\n]*\.txt)",
+    ]
     for line in output.splitlines():
-        s = line.strip()
-        if s.lower().endswith("paste_me.txt") and (":" in s or s.startswith("/")):
+        s = line.strip().strip('"')
+        for pat in patterns:
+            m = re.search(pat, s, flags=re.IGNORECASE)
+            if m:
+                return m.group(1).strip().strip('"')
+        if s.lower().endswith(".txt") and "paste_me" in s.lower() and (":" in s or s.startswith("/")):
+            # Fallback for lines that are already the raw path.
             return s
-    m = re.search(r"([A-Za-z]:\\[^\r\n]+paste_me\.txt)", output)
-    return m.group(1) if m else ""
+    for pat in patterns:
+        m = re.search(pat, output, flags=re.IGNORECASE)
+        if m:
+            return m.group(1).strip().strip('"')
+    return ""
 
 
 def extract_stage79_paste_path(output: str) -> str:
