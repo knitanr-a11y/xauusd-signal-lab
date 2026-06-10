@@ -7,6 +7,9 @@ Watches goldsharp_m15.csv latest closed row. On an aligned schedule
 latest timestamp changes, runs Stage74 one-shot, then Stage75 payload preview,
 and writes a final monitor summary.
 
+This monitor also records runtime timings for the idle latest-row check and for
+new-candle audit runs.
+
 No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 """
 from __future__ import annotations
@@ -127,9 +130,30 @@ def append_event(path: Path, row: dict[str, Any]) -> None:
         w.writerow({k: row.get(k, "") for k in fields})
 
 
-def run_script(script: Path, args: list[str], cwd: Path) -> tuple[int, str]:
+def append_timing(path: Path, row: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fields = [
+        "created_at_utc",
+        "latest_m15_time",
+        "segment",
+        "seconds",
+        "returncode",
+        "status",
+        "detail",
+    ]
+    exists = path.exists()
+    with path.open("a", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        if not exists:
+            w.writeheader()
+        w.writerow({k: row.get(k, "") for k in fields})
+
+
+def run_script(script: Path, args: list[str], cwd: Path) -> tuple[int, str, float]:
+    t0 = time.perf_counter()
     p = subprocess.run([sys.executable, str(script)] + args, cwd=str(cwd), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return int(p.returncode), p.stdout[-4000:]
+    sec = time.perf_counter() - t0
+    return int(p.returncode), p.stdout[-4000:], sec
 
 
 def parse_args() -> argparse.Namespace:
@@ -170,6 +194,11 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         f"latest_m15_time: {summary.get('latest_m15_time','')}",
         f"last_full_audit_run_time: {summary.get('last_full_audit_run_time','')}",
         f"last_full_audit_returncode: {summary.get('last_full_audit_returncode','')}",
+        f"latest_row_check_seconds: {summary.get('latest_row_check_seconds','')}",
+        f"last_stage74_seconds: {summary.get('last_stage74_seconds','')}",
+        f"last_stage75_seconds: {summary.get('last_stage75_seconds','')}",
+        f"last_full_audit_seconds: {summary.get('last_full_audit_seconds','')}",
+        f"current_loop_seconds: {summary.get('current_loop_seconds','')}",
         f"stage75_latest_closed_m15_time: {summary.get('stage75_latest_closed_m15_time','')}",
         f"decision: {summary.get('decision','')}",
         f"emission_action: {summary.get('emission_action','')}",
@@ -184,6 +213,7 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         "", "OUTPUTS",
         "gold_v3_76_monitor_state.json",
         "gold_v3_76_monitor_event_log.csv",
+        "gold_v3_76_runtime_timing_log.csv",
         "gold_v3_76_latest_payload_preview.csv",
         "gold_v3_76_latest_payload_preview.json",
         "gold_v3_76_blocker_matrix.csv",
@@ -198,6 +228,11 @@ Status: `{status}`
 - schedule_mode: `{summary.get('schedule_mode','')}`
 - minute_lag_seconds: `{summary.get('minute_lag_seconds','')}`
 - latest_m15_time: `{summary.get('latest_m15_time','')}`
+- latest_row_check_seconds: `{summary.get('latest_row_check_seconds','')}`
+- last_stage74_seconds: `{summary.get('last_stage74_seconds','')}`
+- last_stage75_seconds: `{summary.get('last_stage75_seconds','')}`
+- last_full_audit_seconds: `{summary.get('last_full_audit_seconds','')}`
+- current_loop_seconds: `{summary.get('current_loop_seconds','')}`
 - stage75_latest_closed_m15_time: `{summary.get('stage75_latest_closed_m15_time','')}`
 - decision: `{summary.get('decision','')}`
 - emission_action: `{summary.get('emission_action','')}`
@@ -220,6 +255,7 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     state_path = out/"gold_v3_76_monitor_state.json"
     event_log = out/"gold_v3_76_monitor_event_log.csv"
+    timing_log = out/"gold_v3_76_runtime_timing_log.csv"
     p_m15 = cdir/"goldsharp_m15.csv"
     s74 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_74_guarded_live_csv_monitor_audit.py"
     s75 = repo_root/"scripts"/"gold_v3_runtime"/"gold_v3_75_external_action_payload_preview_audit.py"
@@ -227,11 +263,15 @@ def main() -> int:
     last_seen = str(state.get("latest_m15_time", ""))
     last_run_time = str(state.get("last_full_audit_run_time", ""))
     last_rc = str(state.get("last_full_audit_returncode", ""))
+    last_stage74_seconds = float(state.get("last_stage74_seconds", 0.0) or 0.0)
+    last_stage75_seconds = float(state.get("last_stage75_seconds", 0.0) or 0.0)
+    last_full_audit_seconds = float(state.get("last_full_audit_seconds", 0.0) or 0.0)
     first = True
     while True:
         if not a.once and not (first and a.run_immediately):
             sleep_s = seconds_until_next_minute_lag(a.minute_lag_seconds)
             time.sleep(sleep_s)
+        loop_t0 = time.perf_counter()
         val: list[dict[str, Any]] = []
         blockers: list[dict[str, Any]] = []
         latest = ""
@@ -243,39 +283,57 @@ def main() -> int:
         should_mt5 = ""
         should_ai = ""
         should_final = ""
+        latest_row_check_seconds = 0.0
         val.append(ok("goldsharp_m15_present", p_m15.exists(), str(p_m15), "exists"))
         for s in [s74, s75]:
             val.append(ok(f"script_present_{s.name}", s.exists(), str(s), "exists"))
             if not s.exists():
                 blockers.append(blocker("required_script_missing", str(s), "REQUIRED_SCRIPT_MISSING"))
         try:
+            t_latest = time.perf_counter()
             latest = read_latest_m15_time(p_m15)
+            latest_row_check_seconds = time.perf_counter() - t_latest
             val.append(ok("latest_m15_time_read", True, latest, "readable_latest_row_only"))
+            append_timing(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "latest_row_check", "seconds": round(latest_row_check_seconds, 6), "returncode": 0, "status": "OK", "detail": "latest CSV row only"})
         except Exception as e:
+            latest_row_check_seconds = time.perf_counter() - t_latest if "t_latest" in locals() else 0.0
             val.append(ok("latest_m15_time_read", False, repr(e), "readable_latest_row_only"))
             blockers.append(blocker("latest_m15_time_read_failed", str(p_m15), "LATEST_M15_TIME_READ_FAILED", repr(e)))
+            append_timing(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "latest_row_check", "seconds": round(latest_row_check_seconds, 6), "returncode": 1, "status": "FAILED", "detail": repr(e)})
         should_run = bool(latest and not blockers and ((first and not a.no_startup_run) or latest != last_seen))
         if should_run:
             append_event(event_log, {"created_at_utc": utc_now(), "event": "FULL_AUDIT_START", "latest_m15_time": latest, "status": "RUNNING", "detail": "Stage74 --once -> Stage75"})
+            full_t0 = time.perf_counter()
             last_run_time = utc_now()
             last_rc = ""
+            stage74_seconds_this = 0.0
+            stage75_seconds_this = 0.0
             pipeline = [
-                (s74, ["--candle-dir", str(cdir), "--once"]),
-                (s75, ["--candle-dir", str(cdir)]),
+                ("stage74_once", s74, ["--candle-dir", str(cdir), "--once"]),
+                ("stage75_payload_preview", s75, ["--candle-dir", str(cdir)]),
             ]
-            for script, argsx in pipeline:
-                rc, tail = run_script(script, argsx, repo_root)
+            for segment, script, argsx in pipeline:
+                rc, tail, sec = run_script(script, argsx, repo_root)
                 last_rc = str(rc)
-                append_event(event_log, {"created_at_utc": utc_now(), "event": script.name, "latest_m15_time": latest, "status": "OK" if rc == 0 else "FAILED", "detail": tail.replace("\r", " ").replace("\n", " ")[-1000:]})
+                if segment == "stage74_once":
+                    stage74_seconds_this = sec
+                    last_stage74_seconds = sec
+                elif segment == "stage75_payload_preview":
+                    stage75_seconds_this = sec
+                    last_stage75_seconds = sec
+                append_timing(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": segment, "seconds": round(sec, 6), "returncode": rc, "status": "OK" if rc == 0 else "FAILED", "detail": script.name})
+                append_event(event_log, {"created_at_utc": utc_now(), "event": script.name, "latest_m15_time": latest, "status": "OK" if rc == 0 else "FAILED", "detail": f"seconds={round(sec, 6)} " + tail.replace("\r", " ").replace("\n", " ")[-900:]})
                 if rc != 0:
-                    blockers.append(blocker("full_audit_stage_failed", str(script), "PIPELINE_STAGE_RETURNED_NONZERO", {"returncode": rc, "output_tail": tail[-2000:]}))
+                    blockers.append(blocker("full_audit_stage_failed", str(script), "PIPELINE_STAGE_RETURNED_NONZERO", {"returncode": rc, "seconds": sec, "output_tail": tail[-2000:]}))
                     break
+            last_full_audit_seconds = time.perf_counter() - full_t0
+            append_timing(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "total_full_audit", "seconds": round(last_full_audit_seconds, 6), "returncode": last_rc or 0, "status": "OK" if not blockers else "FAILED", "detail": f"stage74={round(stage74_seconds_this, 6)} stage75={round(stage75_seconds_this, 6)}"})
             if not blockers:
                 last_seen = latest
                 last_rc = last_rc or "0"
-                append_event(event_log, {"created_at_utc": utc_now(), "event": "FULL_AUDIT_DONE", "latest_m15_time": latest, "status": "OK", "detail": "Stage74 --once -> Stage75 completed"})
+                append_event(event_log, {"created_at_utc": utc_now(), "event": "FULL_AUDIT_DONE", "latest_m15_time": latest, "status": "OK", "detail": f"Stage74 --once -> Stage75 completed seconds={round(last_full_audit_seconds, 6)}"})
         else:
-            append_event(event_log, {"created_at_utc": utc_now(), "event": "HEARTBEAT", "latest_m15_time": latest, "status": "NO_CHANGE" if latest == last_seen else "BLOCKED", "detail": "no full audit run"})
+            append_event(event_log, {"created_at_utc": utc_now(), "event": "HEARTBEAT", "latest_m15_time": latest, "status": "NO_CHANGE" if latest == last_seen else "BLOCKED", "detail": f"no full audit run; latest_row_check_seconds={round(latest_row_check_seconds, 6)}"})
 
         p75 = base_out/"75_external_action_payload_preview_audit_only"/"gold_v3_75_external_action_payload_preview_summary.json"
         p75_csv = base_out/"75_external_action_payload_preview_audit_only"/"gold_v3_75_payload_preview.csv"
@@ -306,6 +364,9 @@ def main() -> int:
         val.append(ok("stage75_time_matches_latest_m15", bool(latest and stage75_time and latest == stage75_time), stage75_time, latest))
         if not (latest and stage75_time and latest == stage75_time):
             blockers.append(blocker("stage75_snapshot_stale", str(p75), "STAGE75_TIME_DOES_NOT_MATCH_LATEST_M15", {"latest": latest, "stage75": stage75_time}))
+        current_loop_seconds = time.perf_counter() - loop_t0
+        val.append(ok("latest_row_check_seconds_recorded", latest_row_check_seconds >= 0, round(latest_row_check_seconds, 6), ">=0"))
+        val.append(ok("runtime_timing_log_present", timing_log.exists(), str(timing_log), "exists"))
         val.append(ok("last_full_audit_run_time_recorded", bool(last_run_time), last_run_time, "nonempty"))
         val.append(ok("last_full_audit_returncode_zero", str(last_rc) == "0", last_rc, "0"))
         val.append(ok("payload_action_deterministic", payload_action in {"SUPPRESS_NO_SIGNAL_PAYLOAD", "SUPPRESS_DUPLICATE_PAYLOAD", "BUILD_AUDIT_PAYLOAD_PREVIEW"}, payload_action, "deterministic"))
@@ -317,7 +378,21 @@ def main() -> int:
         val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
         failed = [v for v in val if v.get("result") != "PASS"]
         status = READY_STATUS if not failed and not blockers else BLOCKED_STATUS
-        state = {"latest_m15_time": latest, "stage75_latest_closed_m15_time": stage75_time, "last_full_audit_run_time": last_run_time, "last_full_audit_returncode": last_rc, "updated_at_utc": utc_now(), "status": status, "schedule_mode": "aligned_minute_plus_lag", "minute_lag_seconds": max(0, min(59, int(a.minute_lag_seconds)))}
+        state = {
+            "latest_m15_time": latest,
+            "stage75_latest_closed_m15_time": stage75_time,
+            "last_full_audit_run_time": last_run_time,
+            "last_full_audit_returncode": last_rc,
+            "latest_row_check_seconds": round(latest_row_check_seconds, 6),
+            "last_stage74_seconds": round(last_stage74_seconds, 6),
+            "last_stage75_seconds": round(last_stage75_seconds, 6),
+            "last_full_audit_seconds": round(last_full_audit_seconds, 6),
+            "current_loop_seconds": round(current_loop_seconds, 6),
+            "updated_at_utc": utc_now(),
+            "status": status,
+            "schedule_mode": "aligned_minute_plus_lag",
+            "minute_lag_seconds": max(0, min(59, int(a.minute_lag_seconds))),
+        }
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         summary = {
             "step": STEP,
@@ -345,6 +420,12 @@ def main() -> int:
             "stage75_latest_closed_m15_time": stage75_time,
             "last_full_audit_run_time": last_run_time,
             "last_full_audit_returncode": last_rc,
+            "latest_row_check_seconds": round(latest_row_check_seconds, 6),
+            "last_stage74_seconds": round(last_stage74_seconds, 6),
+            "last_stage75_seconds": round(last_stage75_seconds, 6),
+            "last_full_audit_seconds": round(last_full_audit_seconds, 6),
+            "current_loop_seconds": round(current_loop_seconds, 6),
+            "runtime_timing_log": str(timing_log),
             "decision": decision,
             "emission_action": emission_action,
             "payload_action": payload_action,
@@ -357,7 +438,7 @@ def main() -> int:
             "blocker_count": len(blockers),
         }
         write_outputs(out, status, val, blockers, summary)
-        print(f"[{utc_now()}] {status} schedule=minute+{max(0, min(59, int(a.minute_lag_seconds)))}s latest={latest} stage75={stage75_time} decision={decision} payload={payload_action} blockers={len(blockers)}")
+        print(f"[{utc_now()}] {status} schedule=minute+{max(0, min(59, int(a.minute_lag_seconds)))}s latest={latest} stage75={stage75_time} decision={decision} payload={payload_action} latest_check={round(latest_row_check_seconds, 6)}s last_full={round(last_full_audit_seconds, 6)}s loop={round(current_loop_seconds, 6)}s blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
