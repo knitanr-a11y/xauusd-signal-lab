@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""GOLD V3 88 signal candidate normalization and condition coverage audit-only."""
+"""GOLD V3 88 signal candidate normalization and condition coverage audit-only.
+
+Short-output-path version. Uses FX_OUTPUTS/gold_v3/88c/paste_me.txt to avoid
+Windows/MetaQuotes MAX_PATH failures.
+"""
 from __future__ import annotations
 
 import argparse
@@ -46,6 +50,16 @@ def read_csv_safe(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def write_text_safe(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def write_csv_safe(df: pd.DataFrame, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False, encoding="utf-8-sig")
+
+
 def normalize_base(label: str) -> str:
     x = str(label).strip()
     if x.startswith("HV_"):
@@ -88,7 +102,7 @@ def main() -> int:
     a = parse_args()
     cdir = Path(a.candle_dir).expanduser().resolve() if a.candle_dir else find_files_dir()
     base = cdir / "FX_OUTPUTS" / "gold_v3"
-    out = Path(a.output_dir).expanduser().resolve() if a.output_dir else base / "88_signal_candidate_normalization_and_condition_coverage_audit_only"
+    out = Path(a.output_dir).expanduser().resolve() if a.output_dir else base / "88c"
     out.mkdir(parents=True, exist_ok=True)
 
     p87 = base / "87_runtime_chain_and_signal_candidate_catalog_audit_only" / "gold_v3_87_signal_candidate_catalog.csv"
@@ -109,13 +123,14 @@ def main() -> int:
                 continue
             base_label = normalize_base(label)
             is_hv = label.startswith("HV_") or "__HV_TP" in label
+            condition = extract_condition(row)
             expansion_rows.append({
                 "candidate_label": label,
                 "normalized_base_candidate": base_label,
                 "is_high_volatility_expansion": is_hv,
                 "hv_profile": hv_profile(label),
-                "condition_status": "RESTORED" if extract_condition(row) != CONDITION_MISSING else "NOT_RESTORED",
-                "condition_summary": extract_condition(row),
+                "condition_status": "RESTORED" if condition != CONDITION_MISSING else "NOT_RESTORED",
+                "condition_summary": condition,
             })
     exp_df = pd.DataFrame(expansion_rows).drop_duplicates() if expansion_rows else pd.DataFrame()
     base_groups = []
@@ -180,22 +195,23 @@ def main() -> int:
     section.append("")
     section.append("Manual warning: if condition status is NOT_RESTORED, do not present it as a known trading rule condition.")
 
-    exp_df.to_csv(out/"gold_v3_88_candidate_expansion_catalog.csv", index=False, encoding="utf-8-sig")
-    base_df.to_csv(out/"gold_v3_88_base_candidate_catalog.csv", index=False, encoding="utf-8-sig")
-    pd.DataFrame(coverage_rows).to_csv(out/"gold_v3_88_condition_coverage_matrix.csv", index=False, encoding="utf-8-sig")
-    (out/"gold_v3_88_manual_candidate_section.md").write_text("\n".join(section)+"\n", encoding="utf-8")
+    write_csv_safe(exp_df, out/"expansion.csv")
+    write_csv_safe(base_df, out/"base.csv")
+    write_csv_safe(pd.DataFrame(coverage_rows), out/"condition.csv")
+    write_text_safe(out/"manual_candidates.md", "\n".join(section)+"\n")
 
     val.extend([
-        ok("manual_candidate_section_written", (out/"gold_v3_88_manual_candidate_section.md").exists(), str(out/"gold_v3_88_manual_candidate_section.md"), "exists"),
+        ok("manual_candidate_section_written", (out/"manual_candidates.md").exists(), str(out/"manual_candidates.md"), "exists"),
         ok("candidate_key_order_exact", CANDIDATE_KEY_ORDER == "candidate_label+base_candidate_label+source_profile_id+profile_id+hv_profile+tp_usd+sl_usd+horizon_m15+horizon_m5_bars", CANDIDATE_KEY_ORDER, "exact"),
+        ok("short_output_path_used", out.name == "88c", str(out), ".../gold_v3/88c"),
         ok("csv_open_bar_exclusion_required_false", True, False, False),
         ok("live_flags_all_false", True, "all_false", "all_false"),
     ])
     failed = [v for v in val if v.get("result") != "PASS"]
     status = READY_STATUS if not failed and not blockers else BLOCKED_STATUS
 
-    pd.DataFrame(blockers).to_csv(out/"gold_v3_88_blocker_matrix.csv", index=False, encoding="utf-8-sig")
-    pd.DataFrame(val).to_csv(out/"gold_v3_88_validation_matrix.csv", index=False, encoding="utf-8-sig")
+    write_csv_safe(pd.DataFrame(blockers), out/"blockers.csv")
+    write_csv_safe(pd.DataFrame(val), out/"validation.csv")
     summary = {
         "step": STEP,
         "status": status,
@@ -217,16 +233,18 @@ def main() -> int:
         "pool_policy": POOL_POLICY,
         "candidate_key_order": CANDIDATE_KEY_ORDER,
         "stage87_catalog_path": str(p87),
+        "output_dir": str(out),
+        "paste_path": str(out/"paste_me.txt"),
         "raw_expansion_row_count": len(expansion_rows),
         "dedup_expansion_row_count": len(exp_df) if not exp_df.empty else 0,
         "normalized_base_candidate_count": base_count,
         "condition_coverage_complete": condition_coverage_complete,
         "condition_restored_base_count": condition_restored_count,
-        "manual_candidate_section_path": str(out/"gold_v3_88_manual_candidate_section.md"),
+        "manual_candidate_section_path": str(out/"manual_candidates.md"),
         "blocker_count": len(blockers),
         "validation_failure_count": len(failed),
     }
-    (out/"gold_v3_88_signal_candidate_normalization_and_condition_coverage_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_text_safe(out/"summary.json", json.dumps(summary, ensure_ascii=False, indent=2))
 
     paste = [
         "GOLD V3 88 PASTE_ME_SIGNAL_CANDIDATE_NORMALIZATION_AND_CONDITION_COVERAGE_SUMMARY",
@@ -241,29 +259,30 @@ def main() -> int:
         "safety: audit_only=true, live_allowed=false, mt5=false, discord=false, ai_api=false, final_signal=false",
         "pool_policy: " + POOL_POLICY,
         f"stage87_catalog_path: {p87}",
+        f"output_dir: {out}",
         f"raw_expansion_row_count: {len(expansion_rows)}",
         f"dedup_expansion_row_count: {len(exp_df) if not exp_df.empty else 0}",
         f"normalized_base_candidate_count: {base_count}",
         f"condition_coverage_complete: {condition_coverage_complete}",
         f"condition_restored_base_count: {condition_restored_count}",
-        f"manual_candidate_section_path: {out/'gold_v3_88_manual_candidate_section.md'}",
+        f"manual_candidate_section_path: {out/'manual_candidates.md'}",
         f"candidate_key_order: {CANDIDATE_KEY_ORDER}",
         f"blocker_count: {len(blockers)}",
         "", "MANUAL_CANDIDATE_SECTION", "\n".join(section[:120]),
         "", "BLOCKERS", pd.DataFrame(blockers).to_string(index=False) if blockers else "NO_BLOCKERS",
         "", "VALIDATION", pd.DataFrame(val).to_string(index=False),
         "", "OUTPUTS",
-        "gold_v3_88_candidate_expansion_catalog.csv",
-        "gold_v3_88_base_candidate_catalog.csv",
-        "gold_v3_88_condition_coverage_matrix.csv",
-        "gold_v3_88_manual_candidate_section.md",
-        "gold_v3_88_blocker_matrix.csv",
-        "gold_v3_88_validation_matrix.csv",
-        "gold_v3_88_signal_candidate_normalization_and_condition_coverage_summary.json",
-        "gold_v3_88_PASTE_ME_SIGNAL_CANDIDATE_NORMALIZATION_AND_CONDITION_COVERAGE_SUMMARY.txt",
-        "GOLD_V3_88_REPORT.md",
+        "expansion.csv",
+        "base.csv",
+        "condition.csv",
+        "manual_candidates.md",
+        "blockers.csv",
+        "validation.csv",
+        "summary.json",
+        "paste_me.txt",
+        "report.md",
     ]
-    (out/"gold_v3_88_PASTE_ME_SIGNAL_CANDIDATE_NORMALIZATION_AND_CONDITION_COVERAGE_SUMMARY.txt").write_text("\n".join(paste)+"\n", encoding="utf-8")
+    write_text_safe(out/"paste_me.txt", "\n".join(paste)+"\n")
     report = f"""# GOLD V3 88 signal candidate normalization and condition coverage audit-only report
 
 Status: `{status}`
@@ -277,8 +296,8 @@ Status: `{status}`
 
 Audit-only. Candidate conditions are not guessed.
 """
-    (out/"GOLD_V3_88_REPORT.md").write_text(report, encoding="utf-8")
-    print(f"[{status}] {out/'gold_v3_88_PASTE_ME_SIGNAL_CANDIDATE_NORMALIZATION_AND_CONDITION_COVERAGE_SUMMARY.txt'}")
+    write_text_safe(out/"report.md", report)
+    print(f"[{status}] {out/'paste_me.txt'}")
     return 0 if status == READY_STATUS else 1
 
 
