@@ -11,8 +11,12 @@ READY = "GOLD_V3_99_RECENT_CLOSED_CANDLE_SIGNAL_REPLAY_READY_AUDIT_ONLY"
 BLOCKED = "GOLD_V3_99_RECENT_CLOSED_CANDLE_SIGNAL_REPLAY_BLOCKED_AUDIT_ONLY"
 CSV_CONTRACT = "open/in-progress candles are not written to CSV"
 POOL_POLICY = "poolから外さない。rolling health gateに判断させる。"
-
 CSV_NAMES = ["goldsharp_m15.csv", "goldsharp_h1.csv", "goldsharp_h4.csv", "goldsharp_d1.csv", "goldsharp_m5.csv"]
+REQUIRED_DEP_DIRS = [
+    "68_rank_dedup_selection_repro_audit_only",
+    "51_full_candidate_virtual_opportunity_ledger_builder_audit_only",
+    "50_h4_closed_readiness_and_prior_60d_q70_state_builder_audit_only",
+]
 
 
 def find_files_dir() -> Path:
@@ -25,18 +29,14 @@ def find_files_dir() -> Path:
 
 
 def read_csv_any(path: Path) -> tuple[pd.DataFrame, str]:
-    sample = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()[0]
-    sep = ";" if sample.count(";") >= sample.count(",") else ","
+    first = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()[0]
+    sep = ";" if first.count(";") >= first.count(",") else ","
     return pd.read_csv(path, sep=sep, encoding="utf-8-sig"), sep
 
 
 def write_csv(df: pd.DataFrame, path: Path, sep: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, sep=sep, index=False, encoding="utf-8-sig")
-
-
-def latest_time(df: pd.DataFrame) -> pd.Series:
-    return pd.to_datetime(df["time"], errors="raise")
 
 
 def safe_name(ts: Any) -> str:
@@ -48,7 +48,7 @@ def run_stage80(repo: Path, cdir: Path) -> tuple[int, str, float]:
     cmd = [sys.executable, str(s80), "--candle-dir", str(cdir), "--once", "--run-immediately", "--enable-signal-gated-ledger-sidecar", "--disable-auto-support-bundle"]
     t0 = time.perf_counter()
     p = subprocess.run(cmd, cwd=str(repo), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    return int(p.returncode), p.stdout[-3000:], time.perf_counter() - t0
+    return int(p.returncode), p.stdout[-4000:], time.perf_counter() - t0
 
 
 def rj(p: Path) -> dict[str, Any]:
@@ -58,8 +58,23 @@ def rj(p: Path) -> dict[str, Any]:
         return {"_error": repr(e)}
 
 
-def row(cid, ok, obs, exp, sev="BLOCKER"):
-    return {"check_id": cid, "result": "PASS" if ok else "FAIL", "observed": obs, "expected": exp, "severity": sev}
+def vrow(cid, passed, obs, exp, sev="BLOCKER"):
+    return {"check_id": cid, "result": "PASS" if passed else "FAIL", "observed": obs, "expected": exp, "severity": sev}
+
+
+def copy_required_deps(src_base: Path, dst_base: Path) -> list[dict[str, Any]]:
+    copied = []
+    for d in REQUIRED_DEP_DIRS:
+        sp = src_base / d
+        dp = dst_base / d
+        if sp.exists():
+            if dp.exists():
+                shutil.rmtree(dp)
+            shutil.copytree(sp, dp)
+            copied.append({"dir": d, "copied": True, "src": str(sp), "dst": str(dp)})
+        else:
+            copied.append({"dir": d, "copied": False, "src": str(sp), "dst": str(dp)})
+    return copied
 
 
 def main() -> int:
@@ -71,8 +86,8 @@ def main() -> int:
 
     repo = Path(__file__).resolve().parents[2]
     src = Path(args.candle_dir).resolve() if args.candle_dir else find_files_dir()
-    base = src / "FX_OUTPUTS" / "gold_v3"
-    out = Path(args.output_dir).resolve() if args.output_dir else base / "99c"
+    src_base = src / "FX_OUTPUTS" / "gold_v3"
+    out = Path(args.output_dir).resolve() if args.output_dir else src_base / "99c"
     replay_root = out / "replay_inputs"
     out.mkdir(parents=True, exist_ok=True)
     replay_root.mkdir(parents=True, exist_ok=True)
@@ -80,68 +95,86 @@ def main() -> int:
     checks = []
     blockers = []
     p_m15 = src / "goldsharp_m15.csv"
-    checks.append(row("source_m15_present", p_m15.exists(), str(p_m15), "exists"))
+    checks.append(vrow("source_m15_present", p_m15.exists(), str(p_m15), "exists"))
+    for d in REQUIRED_DEP_DIRS:
+        checks.append(vrow(f"dep_{d}_present", (src_base / d).exists(), str(src_base / d), "exists"))
     if not p_m15.exists():
         blockers.append({"blocker_id": "source_m15_missing", "reason": "REQUIRED_INPUT_MISSING", "detail": str(p_m15), "severity": "BLOCKER"})
         bars = []
     else:
-        m15, sep15 = read_csv_any(p_m15)
-        m15["__time"] = latest_time(m15)
+        m15, _sep15 = read_csv_any(p_m15)
+        m15["__time"] = pd.to_datetime(m15["time"], errors="raise")
         bars = list(m15.tail(max(1, int(args.bars)))["__time"])
-        checks.append(row("replay_bar_count_positive", len(bars) > 0, len(bars), ">0"))
+        checks.append(vrow("replay_bar_count_positive", len(bars) > 0, len(bars), ">0"))
+    for d in REQUIRED_DEP_DIRS:
+        if not (src_base / d).exists():
+            blockers.append({"blocker_id": f"dep_{d}_missing", "reason": "REQUIRED_DEPENDENCY_MISSING", "detail": str(src_base / d), "severity": "BLOCKER"})
 
     results = []
-    for i, ts in enumerate(bars, start=1):
-        rdir = replay_root / f"{i:03d}_{safe_name(ts)}"
-        if rdir.exists():
-            shutil.rmtree(rdir)
-        rdir.mkdir(parents=True, exist_ok=True)
-        for name in CSV_NAMES:
-            sp = src / name
-            if not sp.exists():
-                continue
-            df, sep = read_csv_any(sp)
-            if "time" in df.columns:
-                t = pd.to_datetime(df["time"], errors="coerce")
-                df = df[t <= ts].copy()
-            write_csv(df, rdir / name, sep)
-        rc, tail, sec = run_stage80(repo, rdir)
-        summ = rj(rdir / "FX_OUTPUTS" / "gold_v3" / "80_immutable_runtime_monitor_audit_only" / "gold_v3_80_immutable_runtime_monitor_summary.json")
-        decision = str(summ.get("sidecar_decision", ""))
-        skip = str(summ.get("sidecar_skip_reason", ""))
-        s85 = str(summ.get("last_stage85_returncode", ""))
-        s86 = str(summ.get("last_stage86_returncode", ""))
-        status80 = str(summ.get("status", ""))
-        results.append({
-            "idx": i,
-            "asof_m15": str(ts),
-            "returncode": rc,
-            "seconds": round(sec, 6),
-            "stage80_status": status80,
-            "decision": decision,
-            "skip_reason": skip,
-            "stage85_returncode": s85,
-            "stage86_returncode": s86,
-            "latest_m15_time": summ.get("latest_m15_time", ""),
-            "replay_dir": str(rdir),
-            "tail": tail.replace("\r", " ").replace("\n", " ")[-500:],
-        })
+    dep_rows = []
+    if not blockers:
+        for i, ts in enumerate(bars, start=1):
+            rdir = replay_root / f"{i:03d}_{safe_name(ts)}"
+            if rdir.exists():
+                shutil.rmtree(rdir)
+            rdir.mkdir(parents=True, exist_ok=True)
+            rbase = rdir / "FX_OUTPUTS" / "gold_v3"
+            rbase.mkdir(parents=True, exist_ok=True)
+            dep_rows.extend([{**x, "idx": i, "asof_m15": str(ts)} for x in copy_required_deps(src_base, rbase)])
+            for name in CSV_NAMES:
+                sp = src / name
+                if not sp.exists():
+                    continue
+                df, sep = read_csv_any(sp)
+                if "time" in df.columns:
+                    t = pd.to_datetime(df["time"], errors="coerce")
+                    df = df[t <= ts].copy()
+                write_csv(df, rdir / name, sep)
+            rc, tail, sec = run_stage80(repo, rdir)
+            summ = rj(rbase / "80_immutable_runtime_monitor_audit_only" / "gold_v3_80_immutable_runtime_monitor_summary.json")
+            decision = str(summ.get("sidecar_decision", ""))
+            if not decision:
+                decision = str(summ.get("decision", ""))
+            skip = str(summ.get("sidecar_skip_reason", ""))
+            s85 = str(summ.get("last_stage85_returncode", ""))
+            s86 = str(summ.get("last_stage86_returncode", ""))
+            status80 = str(summ.get("status", ""))
+            results.append({
+                "idx": i,
+                "asof_m15": str(ts),
+                "returncode": rc,
+                "seconds": round(sec, 6),
+                "stage80_status": status80,
+                "decision": decision,
+                "skip_reason": skip,
+                "stage85_returncode": s85,
+                "stage86_returncode": s86,
+                "latest_m15_time": summ.get("latest_m15_time", ""),
+                "replay_dir": str(rdir),
+                "tail": tail.replace("\r", " ").replace("\n", " ")[-1200:],
+            })
 
     res_df = pd.DataFrame(results)
+    dep_df = pd.DataFrame(dep_rows)
     if len(res_df):
         checks += [
-            row("all_stage80_returncode_zero", bool((res_df["returncode"] == 0).all()), int((res_df["returncode"] != 0).sum()), 0),
-            row("all_decisions_detectable", bool(res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"]).all()), sorted(res_df[~res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"])] ["decision"].unique().tolist()), "NO_SIGNAL or SIGNAL"),
-            row("no_signal_rows_skip_sidecar", bool(res_df[res_df["decision"] == "NO_SIGNAL"]["stage85_returncode"].eq("SKIPPED_NO_SIGNAL").all()), "checked", "SKIPPED_NO_SIGNAL"),
+            vrow("all_stage80_returncode_zero", bool((res_df["returncode"] == 0).all()), int((res_df["returncode"] != 0).sum()), 0),
+            vrow("all_decisions_detectable", bool(res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"]).all()), sorted(res_df[~res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"])] ["decision"].unique().tolist()), "NO_SIGNAL or SIGNAL"),
+            vrow("no_signal_rows_skip_sidecar", bool(res_df[res_df["decision"] == "NO_SIGNAL"]["stage85_returncode"].eq("SKIPPED_NO_SIGNAL").all()), "checked", "SKIPPED_NO_SIGNAL"),
         ]
+    else:
+        checks.append(vrow("replay_results_nonempty", False, 0, ">0"))
     for c in checks:
         if c["result"] != "PASS":
             blockers.append({"blocker_id": c["check_id"], "reason": "VALIDATION_FAILED", "detail": c, "severity": "BLOCKER"})
     status = READY if not blockers else BLOCKED
     signal_df = res_df[res_df["decision"] == "SIGNAL"].copy() if len(res_df) else pd.DataFrame()
+    error_df = res_df[res_df["returncode"] != 0].copy() if len(res_df) else pd.DataFrame()
 
     res_df.drop(columns=["tail"], errors="ignore").to_csv(out / "replay_results.csv", index=False, encoding="utf-8-sig")
+    res_df.to_csv(out / "replay_results_with_tail.csv", index=False, encoding="utf-8-sig")
     signal_df.drop(columns=["tail"], errors="ignore").to_csv(out / "signal_rows.csv", index=False, encoding="utf-8-sig")
+    dep_df.to_csv(out / "dependency_copy_matrix.csv", index=False, encoding="utf-8-sig")
     pd.DataFrame(checks).to_csv(out / "validation.csv", index=False, encoding="utf-8-sig")
     pd.DataFrame(blockers).to_csv(out / "blockers.csv", index=False, encoding="utf-8-sig")
     summary = {
@@ -166,6 +199,7 @@ def main() -> int:
         "signal_count": int(len(signal_df)),
         "no_signal_count": int((res_df["decision"] == "NO_SIGNAL").sum()) if len(res_df) else 0,
         "unknown_count": int((~res_df["decision"].isin(["NO_SIGNAL", "SIGNAL"])).sum()) if len(res_df) else 0,
+        "returncode_nonzero_count": int((res_df["returncode"] != 0).sum()) if len(res_df) else 0,
         "blocker_count": len(blockers),
     }
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -187,16 +221,18 @@ def main() -> int:
         f"signal_count: {len(signal_df)}",
         f"no_signal_count: {int((res_df['decision'] == 'NO_SIGNAL').sum()) if len(res_df) else 0}",
         f"unknown_count: {int((~res_df['decision'].isin(['NO_SIGNAL','SIGNAL'])).sum()) if len(res_df) else 0}",
+        f"returncode_nonzero_count: {int((res_df['returncode'] != 0).sum()) if len(res_df) else 0}",
         f"blocker_count: {len(blockers)}",
         "", "SIGNAL_ROWS", signal_df.drop(columns=["tail"], errors="ignore").to_string(index=False) if len(signal_df) else "NO_SIGNAL_ROWS_FOUND_IN_REPLAY_WINDOW",
+        "", "ERROR_ROWS", error_df[["idx", "asof_m15", "returncode", "decision", "tail"]].head(8).to_string(index=False) if len(error_df) else "NO_ERROR_ROWS",
         "", "REPLAY_RESULTS_HEAD", res_df.drop(columns=["tail"], errors="ignore").head(10).to_string(index=False) if len(res_df) else "NO_ROWS",
         "", "REPLAY_RESULTS_TAIL", res_df.drop(columns=["tail"], errors="ignore").tail(10).to_string(index=False) if len(res_df) else "NO_ROWS",
         "", "BLOCKERS", pd.DataFrame(blockers).to_string(index=False) if blockers else "NO_BLOCKERS",
         "", "VALIDATION", pd.DataFrame(checks).to_string(index=False),
-        "", "OUTPUTS", "paste_me.txt", "summary.json", "replay_results.csv", "signal_rows.csv", "validation.csv", "blockers.csv", "report.md",
+        "", "OUTPUTS", "paste_me.txt", "summary.json", "replay_results.csv", "replay_results_with_tail.csv", "signal_rows.csv", "dependency_copy_matrix.csv", "validation.csv", "blockers.csv", "report.md",
     ]
     (out / "paste_me.txt").write_text("\n".join(paste) + "\n", encoding="utf-8")
-    (out / "report.md").write_text(f"# GOLD V3 99 recent closed candle signal replay\n\nStatus: `{status}`\n\nReplayed bars: `{len(res_df)}`\nSignal count: `{len(signal_df)}`\nBlockers: `{len(blockers)}`\n", encoding="utf-8")
+    (out / "report.md").write_text(f"# GOLD V3 99 recent closed candle signal replay\n\nStatus: `{status}`\n\nReplayed bars: `{len(res_df)}`\nSignal count: `{len(signal_df)}`\nNonzero returncodes: `{summary['returncode_nonzero_count']}`\nBlockers: `{len(blockers)}`\n", encoding="utf-8")
     print(f"[{status}] {out / 'paste_me.txt'}")
     return 0 if status == READY else 1
 
