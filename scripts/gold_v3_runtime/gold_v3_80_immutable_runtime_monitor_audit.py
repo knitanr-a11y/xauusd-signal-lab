@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""GOLD V3 80 immutable runtime monitor audit-only.
-
-Continuous wrapper: every minute + lag, read latest CSV row timestamp. When a new
-closed M15 timestamp is detected, run Stage76 --once, then Stage79 immutable
-snapshot. If explicitly enabled, run Stage85/86 as audit-only ledger sidecar dry-run.
-If the monitor becomes BLOCKED, automatically create a compact Stage81 support
-bundle so the user only needs to upload one small upload_first.txt.
-
-No MT5 orders, no Discord, no AI API, no final signal.
-"""
+"""GOLD V3 80 immutable runtime monitor audit-only."""
 from __future__ import annotations
 
 import argparse
@@ -125,12 +116,6 @@ def run_script(script: Path, args: list[str], cwd: Path) -> tuple[int, str, floa
 
 
 def extract_paste_me_path(output: str) -> str:
-    """Extract short paste_me.txt or long *_PASTE_ME_*.txt artifact path.
-
-    Stage79 uses short `paste_me.txt`. Stage85/86 use long PASTE_ME summary
-    filenames, so matching only `paste_me.txt` incorrectly marks successful
-    sidecar runs as BLOCKED. This function accepts both forms.
-    """
     patterns = [
         r"([A-Za-z]:\\[^\r\n]*paste_me\.txt)",
         r"([A-Za-z]:\\[^\r\n]*PASTE_ME[^\r\n]*\.txt)",
@@ -144,7 +129,6 @@ def extract_paste_me_path(output: str) -> str:
             if m:
                 return m.group(1).strip().strip('"')
         if s.lower().endswith(".txt") and "paste_me" in s.lower() and (":" in s or s.startswith("/")):
-            # Fallback for lines that are already the raw path.
             return s
     for pat in patterns:
         m = re.search(pat, output, flags=re.IGNORECASE)
@@ -166,6 +150,23 @@ def extract_stage81_upload_path(output: str) -> str:
     return m.group(1) if m else ""
 
 
+def infer_decision_from_stage79(stage79_output: str, stage79_paste_path: str) -> tuple[str, str]:
+    text = f"{stage79_output}\n{stage79_paste_path}".upper()
+    if "NO_SIGNAL" in text:
+        return "NO_SIGNAL", "stage79_output_or_path"
+    for pat in [r"DECISION\s*[:=]\s*([A-Z_]+)", r"PAYLOAD_ACTION\s*[:=]\s*([A-Z_]+)", r"ACTION\s*[:=]\s*([A-Z_]+)"]:
+        m = re.search(pat, text)
+        if m:
+            token = m.group(1).strip().upper()
+            if token in {"BUY", "SELL", "LONG", "SHORT", "SIGNAL", "ENTRY_SIGNAL", "TRADE_SIGNAL"}:
+                return "SIGNAL", f"regex:{pat}"
+            if token == "NO_SIGNAL":
+                return "NO_SIGNAL", f"regex:{pat}"
+    if "SIGNAL" in text:
+        return "SIGNAL", "stage79_output_or_path_signal_marker"
+    return "UNKNOWN", "not_detected"
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=STEP)
     p.add_argument("--candle-dir", default="")
@@ -174,9 +175,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--run-immediately", action="store_true")
     p.add_argument("--once", action="store_true")
     p.add_argument("--no-startup-run", action="store_true")
-    p.add_argument("--disable-auto-support-bundle", action="store_true", help="do not auto-run Stage81 on BLOCKED; kept only for troubleshooting")
-    p.add_argument("--enable-ledger-sidecar-dry-run", action="store_true", help="after Stage79, run Stage85 then Stage86 as audit-only sidecar; default OFF")
-    p.add_argument("--ledger-sidecar-nonblocking", action="store_true", help="record Stage85/86 failures but do not block Stage80; troubleshooting only")
+    p.add_argument("--disable-auto-support-bundle", action="store_true")
+    p.add_argument("--enable-ledger-sidecar-dry-run", action="store_true")
+    p.add_argument("--ledger-sidecar-nonblocking", action="store_true")
+    p.add_argument("--enable-signal-gated-ledger-sidecar", action="store_true")
     return p.parse_args()
 
 
@@ -208,19 +210,23 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         f"last_pipeline_run_time: {summary.get('last_pipeline_run_time','')}",
         f"last_stage76_returncode: {summary.get('last_stage76_returncode','')}",
         f"last_stage79_returncode: {summary.get('last_stage79_returncode','')}",
+        f"last_stage85_returncode: {summary.get('last_stage85_returncode','')}",
+        f"last_stage86_returncode: {summary.get('last_stage86_returncode','')}",
         f"last_stage76_seconds: {summary.get('last_stage76_seconds','')}",
         f"last_stage79_seconds: {summary.get('last_stage79_seconds','')}",
+        f"last_stage85_seconds: {summary.get('last_stage85_seconds','')}",
+        f"last_stage86_seconds: {summary.get('last_stage86_seconds','')}",
         f"last_total_seconds: {summary.get('last_total_seconds','')}",
         f"latest_check_seconds: {summary.get('latest_check_seconds','')}",
         f"last_stage79_paste_path: {summary.get('last_stage79_paste_path','')}",
-        f"ledger_sidecar_enabled: {summary.get('ledger_sidecar_enabled','')}",
-        f"ledger_sidecar_nonblocking: {summary.get('ledger_sidecar_nonblocking','')}",
-        f"last_stage85_returncode: {summary.get('last_stage85_returncode','')}",
-        f"last_stage86_returncode: {summary.get('last_stage86_returncode','')}",
-        f"last_stage85_seconds: {summary.get('last_stage85_seconds','')}",
-        f"last_stage86_seconds: {summary.get('last_stage86_seconds','')}",
         f"last_stage85_paste_path: {summary.get('last_stage85_paste_path','')}",
         f"last_stage86_paste_path: {summary.get('last_stage86_paste_path','')}",
+        f"ledger_sidecar_enabled: {summary.get('ledger_sidecar_enabled','')}",
+        f"ledger_sidecar_nonblocking: {summary.get('ledger_sidecar_nonblocking','')}",
+        f"signal_gated_sidecar_enabled: {summary.get('signal_gated_sidecar_enabled','')}",
+        f"sidecar_decision: {summary.get('sidecar_decision','')}",
+        f"sidecar_decision_source: {summary.get('sidecar_decision_source','')}",
+        f"sidecar_skip_reason: {summary.get('sidecar_skip_reason','')}",
         f"durable_ledger_append_enabled: {summary.get('durable_ledger_append_enabled','')}",
         f"auto_support_bundle_enabled: {summary.get('auto_support_bundle_enabled','')}",
         f"last_support_bundle_returncode: {summary.get('last_support_bundle_returncode','')}",
@@ -244,19 +250,14 @@ Status: `{status}`
 
 - latest_m15_time: `{summary.get('latest_m15_time','')}`
 - last_seen_m15_time: `{summary.get('last_seen_m15_time','')}`
-- last_stage76_seconds: `{summary.get('last_stage76_seconds','')}`
-- last_stage79_seconds: `{summary.get('last_stage79_seconds','')}`
-- last_total_seconds: `{summary.get('last_total_seconds','')}`
-- last_stage79_paste_path: `{summary.get('last_stage79_paste_path','')}`
 - ledger_sidecar_enabled: `{summary.get('ledger_sidecar_enabled','')}`
-- last_stage85_returncode: `{summary.get('last_stage85_returncode','')}`
-- last_stage86_returncode: `{summary.get('last_stage86_returncode','')}`
+- signal_gated_sidecar_enabled: `{summary.get('signal_gated_sidecar_enabled','')}`
+- sidecar_decision: `{summary.get('sidecar_decision','')}`
+- sidecar_skip_reason: `{summary.get('sidecar_skip_reason','')}`
 - durable_ledger_append_enabled: `{summary.get('durable_ledger_append_enabled','')}`
-- auto_support_bundle_enabled: `{summary.get('auto_support_bundle_enabled','')}`
-- last_support_bundle_upload_first_path: `{summary.get('last_support_bundle_upload_first_path','')}`
 - blocker_count: `{len(blockers)}`
 
-Audit-only. No MT5, Discord, AI API, live hook, live evaluator, or final signal.
+Audit-only.
 """
     (out/"GOLD_V3_80_REPORT.md").write_text(report, encoding="utf-8")
 
@@ -317,8 +318,11 @@ def main() -> int:
     last_stage79_paste_path = str(state0.get("last_stage79_paste_path", ""))
     last_stage85_paste_path = str(state0.get("last_stage85_paste_path", ""))
     last_stage86_paste_path = str(state0.get("last_stage86_paste_path", ""))
+    sidecar_decision = str(state0.get("sidecar_decision", ""))
+    sidecar_decision_source = str(state0.get("sidecar_decision_source", ""))
+    sidecar_skip_reason = str(state0.get("sidecar_skip_reason", ""))
     last_support_bundle_rc = str(state0.get("last_support_bundle_returncode", ""))
-    last_support_bundle_upload_path = str(state0.get("last_support_bundle_upload_first_path", ""))
+    last_support_bundle_upload_path = str(state0.get("last_support_bundle_first_path", state0.get("last_support_bundle_upload_first_path", "")))
     first = True
     event_fields = ["created_at_utc", "event", "latest_m15_time", "status", "detail"]
     timing_fields = ["created_at_utc", "latest_m15_time", "segment", "seconds", "returncode", "status", "detail"]
@@ -329,14 +333,19 @@ def main() -> int:
         blockers: list[dict[str, Any]] = []
         latest = ""
         latest_check_seconds = 0.0
+        sidecar_decision = ""
+        sidecar_decision_source = ""
+        sidecar_skip_reason = ""
         val.append(ok("goldsharp_m15_present", p_m15.exists(), str(p_m15), "exists"))
         required_scripts = [s76, s79, s81]
-        if a.enable_ledger_sidecar_dry_run:
+        if a.enable_ledger_sidecar_dry_run or a.enable_signal_gated_ledger_sidecar:
             required_scripts.extend([s85, s86])
         for s in required_scripts:
             val.append(ok(f"script_present_{s.name}", s.exists(), str(s), "exists"))
             if not s.exists():
                 blockers.append(blocker("required_script_missing", str(s), "REQUIRED_SCRIPT_MISSING"))
+        if a.enable_ledger_sidecar_dry_run and a.enable_signal_gated_ledger_sidecar:
+            blockers.append(blocker("conflicting_sidecar_modes", "Stage80 args", "ENABLE_ONLY_ONE_SIDECAR_MODE"))
         try:
             t0 = time.perf_counter()
             latest = read_latest_m15_time(p_m15)
@@ -354,6 +363,8 @@ def main() -> int:
             pipeline_detail = "Stage76 --once -> Stage79 immutable snapshot"
             if a.enable_ledger_sidecar_dry_run:
                 pipeline_detail += " -> Stage85 ledger preview -> Stage86 append guard"
+            if a.enable_signal_gated_ledger_sidecar:
+                pipeline_detail += " -> signal-gated sidecar"
             append_csv(event_log, {"created_at_utc": utc_now(), "event": "PIPELINE_START", "latest_m15_time": latest, "status": "RUNNING", "detail": pipeline_detail}, event_fields)
             rc76, tail76, sec76 = run_script(s76, ["--candle-dir", str(cdir), "--once", "--run-immediately"], repo_root)
             last_stage76_rc = str(rc76)
@@ -361,6 +372,7 @@ def main() -> int:
             append_csv(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "stage76_once", "seconds": round(sec76, 6), "returncode": rc76, "status": "OK" if rc76 == 0 else "FAILED", "detail": tail76.replace("\r", " ").replace("\n", " ")[-1000:]}, timing_fields)
             if rc76 != 0:
                 blockers.append(blocker("stage76_once_failed", str(s76), "STAGE76_RETURNED_NONZERO", {"returncode": rc76, "output_tail": tail76[-2000:]}))
+            tail79 = ""
             if not blockers:
                 rc79, tail79, sec79 = run_script(s79, ["--candle-dir", str(cdir)], repo_root)
                 last_stage79_rc = str(rc79)
@@ -371,7 +383,24 @@ def main() -> int:
                     blockers.append(blocker("stage79_immutable_snapshot_failed", str(s79), "STAGE79_RETURNED_NONZERO", {"returncode": rc79, "output_tail": tail79[-2000:]}))
                 if not last_stage79_paste_path:
                     blockers.append(blocker("stage79_paste_path_missing", str(s79), "STAGE79_PASTE_PATH_NOT_DETECTED"))
-            if not blockers and a.enable_ledger_sidecar_dry_run:
+            run_sidecar_now = False
+            if not blockers and a.enable_signal_gated_ledger_sidecar:
+                sidecar_decision, sidecar_decision_source = infer_decision_from_stage79(tail79, last_stage79_paste_path)
+                if sidecar_decision == "NO_SIGNAL":
+                    sidecar_skip_reason = "NO_SIGNAL_SKIP_LEDGER_SIDECAR"
+                    last_stage85_rc = "SKIPPED_NO_SIGNAL"
+                    last_stage86_rc = "SKIPPED_NO_SIGNAL"
+                    last_stage85_seconds = 0.0
+                    last_stage86_seconds = 0.0
+                    last_stage85_paste_path = ""
+                    last_stage86_paste_path = ""
+                    append_csv(event_log, {"created_at_utc": utc_now(), "event": "LEDGER_SIDECAR_SIGNAL_GATE", "latest_m15_time": latest, "status": "SKIPPED", "detail": sidecar_skip_reason}, event_fields)
+                elif sidecar_decision == "SIGNAL":
+                    run_sidecar_now = True
+                else:
+                    sidecar_skip_reason = "DECISION_NOT_DETECTABLE"
+                    blockers.append(blocker("sidecar_decision_not_detectable", str(s79), "DECISION_NOT_DETECTABLE", {"paste": last_stage79_paste_path}))
+            if not blockers and (a.enable_ledger_sidecar_dry_run or run_sidecar_now):
                 rc85, tail85, sec85 = run_script(s85, ["--candle-dir", str(cdir)], repo_root)
                 last_stage85_rc = str(rc85)
                 last_stage85_seconds = sec85
@@ -391,12 +420,12 @@ def main() -> int:
                     last_stage86_rc = "SKIPPED_AFTER_STAGE85_FAILURE"
                     last_stage86_seconds = 0.0
                     last_stage86_paste_path = ""
-                append_csv(event_log, {"created_at_utc": utc_now(), "event": "LEDGER_SIDECAR_DRY_RUN", "latest_m15_time": latest, "status": "OK" if not blockers else "FAILED", "detail": f"stage85={last_stage85_rc} paste85={last_stage85_paste_path} stage86={last_stage86_rc} paste86={last_stage86_paste_path}"}, event_fields)
+                append_csv(event_log, {"created_at_utc": utc_now(), "event": "LEDGER_SIDECAR_RUN", "latest_m15_time": latest, "status": "OK" if not blockers else "FAILED", "detail": f"stage85={last_stage85_rc} paste85={last_stage85_paste_path} stage86={last_stage86_rc} paste86={last_stage86_paste_path}"}, event_fields)
             last_total_seconds = time.perf_counter() - pipeline_t0
             append_csv(timing_log, {"created_at_utc": utc_now(), "latest_m15_time": latest, "segment": "total_stage76_stage79_sidecar", "seconds": round(last_total_seconds, 6), "returncode": 0 if not blockers else 1, "status": "OK" if not blockers else "FAILED", "detail": pipeline_detail}, timing_fields)
             if not blockers:
                 last_seen = latest
-                append_csv(event_log, {"created_at_utc": utc_now(), "event": "PIPELINE_DONE", "latest_m15_time": latest, "status": "OK", "detail": f"paste={last_stage79_paste_path} sidecar={a.enable_ledger_sidecar_dry_run}"}, event_fields)
+                append_csv(event_log, {"created_at_utc": utc_now(), "event": "PIPELINE_DONE", "latest_m15_time": latest, "status": "OK", "detail": f"paste={last_stage79_paste_path} sidecar_dry={a.enable_ledger_sidecar_dry_run} signal_gated={a.enable_signal_gated_ledger_sidecar}"}, event_fields)
         else:
             append_csv(event_log, {"created_at_utc": utc_now(), "event": "HEARTBEAT", "latest_m15_time": latest, "status": "NO_CHANGE" if latest == last_seen else "BLOCKED", "detail": "no pipeline run"}, event_fields)
 
@@ -404,12 +433,23 @@ def main() -> int:
         val.append(ok("last_stage76_returncode_zero", str(last_stage76_rc) == "0", last_stage76_rc, "0"))
         val.append(ok("last_stage79_returncode_zero", str(last_stage79_rc) == "0", last_stage79_rc, "0"))
         val.append(ok("last_stage79_paste_path_present", bool(last_stage79_paste_path), last_stage79_paste_path, "nonempty"))
-        val.append(ok("ledger_sidecar_default_safe", bool(a.enable_ledger_sidecar_dry_run) in {False, True}, bool(a.enable_ledger_sidecar_dry_run), "explicit boolean"))
         if a.enable_ledger_sidecar_dry_run:
             val.append(ok("last_stage85_returncode_zero", str(last_stage85_rc) == "0", last_stage85_rc, "0"))
             val.append(ok("last_stage86_returncode_zero", str(last_stage86_rc) == "0", last_stage86_rc, "0"))
             val.append(ok("last_stage85_paste_path_present", bool(last_stage85_paste_path), last_stage85_paste_path, "nonempty"))
             val.append(ok("last_stage86_paste_path_present", bool(last_stage86_paste_path), last_stage86_paste_path, "nonempty"))
+        if a.enable_signal_gated_ledger_sidecar:
+            val.append(ok("signal_gated_sidecar_enabled_true", True, True, True))
+            val.append(ok("sidecar_decision_detectable", sidecar_decision in {"NO_SIGNAL", "SIGNAL"}, sidecar_decision, "NO_SIGNAL or SIGNAL"))
+            if sidecar_decision == "NO_SIGNAL":
+                val.append(ok("no_signal_sidecar_skipped", sidecar_skip_reason == "NO_SIGNAL_SKIP_LEDGER_SIDECAR", sidecar_skip_reason, "NO_SIGNAL_SKIP_LEDGER_SIDECAR"))
+                val.append(ok("stage85_skipped_for_no_signal", last_stage85_rc == "SKIPPED_NO_SIGNAL", last_stage85_rc, "SKIPPED_NO_SIGNAL"))
+                val.append(ok("stage86_skipped_for_no_signal", last_stage86_rc == "SKIPPED_NO_SIGNAL", last_stage86_rc, "SKIPPED_NO_SIGNAL"))
+            elif sidecar_decision == "SIGNAL":
+                val.append(ok("signal_stage85_returncode_zero", str(last_stage85_rc) == "0", last_stage85_rc, "0"))
+                val.append(ok("signal_stage86_returncode_zero", str(last_stage86_rc) == "0", last_stage86_rc, "0"))
+                val.append(ok("signal_stage85_paste_path_present", bool(last_stage85_paste_path), last_stage85_paste_path, "nonempty"))
+                val.append(ok("signal_stage86_paste_path_present", bool(last_stage86_paste_path), last_stage86_paste_path, "nonempty"))
         val.append(ok("durable_ledger_append_disabled", True, False, False))
         val.append(ok("auto_support_bundle_enabled", not a.disable_auto_support_bundle, str(not a.disable_auto_support_bundle), "true"))
         val.append(ok("csv_open_bar_exclusion_required_false", True, False, False))
@@ -439,6 +479,10 @@ def main() -> int:
             "last_stage86_paste_path": last_stage86_paste_path,
             "ledger_sidecar_enabled": bool(a.enable_ledger_sidecar_dry_run),
             "ledger_sidecar_nonblocking": bool(a.ledger_sidecar_nonblocking),
+            "signal_gated_sidecar_enabled": bool(a.enable_signal_gated_ledger_sidecar),
+            "sidecar_decision": sidecar_decision,
+            "sidecar_decision_source": sidecar_decision_source,
+            "sidecar_skip_reason": sidecar_skip_reason,
             "durable_ledger_append_enabled": False,
             "auto_support_bundle_enabled": not a.disable_auto_support_bundle,
             "last_support_bundle_returncode": last_support_bundle_rc,
@@ -462,7 +506,7 @@ def main() -> int:
             state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
             write_outputs(out, status, val, blockers, summary)
 
-        print(f"[{utc_now()}] {status} latest={latest} last_seen={last_seen} stage76={round(last_stage76_seconds, 6)}s stage79={round(last_stage79_seconds, 6)}s stage85={round(last_stage85_seconds, 6)}s stage86={round(last_stage86_seconds, 6)}s total={round(last_total_seconds, 6)}s paste={last_stage79_paste_path} sidecar={a.enable_ledger_sidecar_dry_run} support={last_support_bundle_upload_path} blockers={len(blockers)}")
+        print(f"[{utc_now()}] {status} latest={latest} last_seen={last_seen} decision={sidecar_decision} skip={sidecar_skip_reason} stage76={round(last_stage76_seconds, 6)}s stage79={round(last_stage79_seconds, 6)}s stage85={round(last_stage85_seconds, 6)}s stage86={round(last_stage86_seconds, 6)}s total={round(last_total_seconds, 6)}s sidecar_dry={a.enable_ledger_sidecar_dry_run} signal_gated={a.enable_signal_gated_ledger_sidecar} blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
