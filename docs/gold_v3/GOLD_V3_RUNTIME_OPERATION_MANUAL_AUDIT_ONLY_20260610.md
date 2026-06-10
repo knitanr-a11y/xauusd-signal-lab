@@ -6,7 +6,7 @@ Current runtime entry point:
 
 `scripts/gold_v3_runtime/bat/run_gold_v3_80_immutable_runtime_monitor_audit.bat`
 
-This document is the human-facing operation manual. Keep it updated whenever runtime behavior, troubleshooting files, output folders, trade review policy, or BAT names change.
+This document is the human-facing operation manual. Keep it updated whenever runtime behavior, troubleshooting files, output folders, trade review policy, candidate catalog, or BAT names change.
 
 ---
 
@@ -303,6 +303,29 @@ Expected unconfirmed SIGNAL guard decision:
 HOLD_NOT_APPEND_UNTIL_EXECUTION_OR_HUMAN_REVIEW_CONFIRMED
 ```
 
+### Stage88
+
+Signal candidate normalization and condition coverage.
+
+Role:
+
+- normalizes 44 expanded candidate rows into 8 base signal candidates,
+- identifies high-volatility TP/SL/horizon expansions,
+- measures whether exact candidate conditions can be recovered from current GOLD V3 artifacts,
+- uses short output folder `88c` to avoid Windows path-length failures.
+
+Main file:
+
+```text
+Files\FX_OUTPUTS\gold_v3\88c\paste_me.txt
+```
+
+Manual candidate section source:
+
+```text
+Files\FX_OUTPUTS\gold_v3\88c\manual_candidates.md
+```
+
 ---
 
 ## 6. Trade review ledger policy
@@ -347,7 +370,79 @@ A SIGNAL preview row must not be appended to the durable ledger until:
 
 ---
 
-## 7. Folder map
+## 7. Signal candidate catalog
+
+This section is generated from GOLD V3 audit artifacts only. Missing rule conditions are not inferred.
+
+Current Stage88 status:
+
+```text
+raw_expansion_row_count: 44
+dedup_expansion_row_count: 32
+normalized_base_candidate_count: 8
+condition_coverage_complete: false
+condition_restored_base_count: 0
+```
+
+Candidate key order:
+
+```text
+candidate_label+base_candidate_label+source_profile_id+profile_id+hv_profile+tp_usd+sl_usd+horizon_m15+horizon_m5_bars
+```
+
+Manual warning:
+
+- Current candidate names and high-volatility expansions are restored.
+- Exact rule conditions are not restored from current artifacts.
+- Do not present `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS` as a known trading rule.
+- Do not guess rule conditions.
+
+Base signal candidates:
+
+- **R01_P7_R1_ONLY_CD60_PRUNE_015**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R02_P8_R1_ONLY_CD60_PRUNE_015**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R03_P1_R1_ONLY_CD60_PRUNE_111**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R04_P4_R1_ONLY_CD60_PRUNE_115**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R05_P9_MAIN_R1_R2_CD90_PRUNE_133**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R06_P11_MAIN_R1_R2_CD90_PRUNE_132**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R07_P13_MAIN_R1_R2_CD120_PRUNE_122**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+- **R1_ONLY_CD90_PRUNE_050__R1_ONLY_CD90_PRUNE_050_S030__R1_ONLY_CD90_PRUNE_050_S024**
+  - variants: `4`
+  - high-volatility profiles: `HV_TP180_SL70_H128;HV_TP200_SL80_H128;HV_TP220_SL90_H128`
+  - condition status: `NOT_RESTORED`
+  - condition: `CONDITION_NOT_RESTORED_FROM_CURRENT_ARTIFACTS`
+
+---
+
+## 8. Folder map
 
 ```text
 Files\FX_OUTPUTS\gold_v3\
@@ -385,6 +480,14 @@ Files\FX_OUTPUTS\gold_v3\
         validation.csv
         report.md
 
+  88c\
+    paste_me.txt
+    manual_candidates.md
+    base.csv
+    expansion.csv
+    condition.csv
+    summary.json
+
   trade_review_ledger\
     trade_review_ledger_schema.csv
     trade_review_current_template.csv
@@ -395,7 +498,7 @@ Files\FX_OUTPUTS\gold_v3\
 
 ---
 
-## 8. What not to upload first
+## 9. What not to upload first
 
 Do not upload these first unless specifically requested:
 
@@ -412,7 +515,7 @@ For trade review, use the trade ledger files and Stage79 evidence path instead o
 
 ---
 
-## 9. How to stop the monitor
+## 10. How to stop the monitor
 
 For Stage80 BAT window:
 
@@ -423,7 +526,7 @@ Stopping the monitor does not send orders or notifications. It only stops audit-
 
 ---
 
-## 10. Current known-good runtime confirmation
+## 11. Current known-good runtime confirmation
 
 Latest known-good checks as of this manual update:
 
@@ -448,11 +551,19 @@ decision: NO_SIGNAL
 append_guard_decision: NO_APPEND_SUPPRESSED_NO_SIGNAL
 append_allowed_now: false
 blocker_count: 0
+
+Stage88 READY
+raw_expansion_row_count: 44
+dedup_expansion_row_count: 32
+normalized_base_candidate_count: 8
+condition_coverage_complete: false
+condition_restored_base_count: 0
+blocker_count: 0
 ```
 
 ---
 
-## 11. Documentation maintenance rule
+## 12. Documentation maintenance rule
 
 Whenever runtime behavior changes, update this manual in the same task/chat.
 
@@ -467,6 +578,7 @@ Update this manual when changing:
 - immutable evidence policy,
 - trade review ledger policy,
 - ledger append guard behavior,
+- signal candidate catalog,
 - live release gate behavior.
 
 Do not rely only on stage specs. This manual is the human-facing operation guide.
