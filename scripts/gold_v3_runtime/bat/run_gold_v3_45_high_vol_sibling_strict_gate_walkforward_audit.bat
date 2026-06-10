@@ -38,6 +38,9 @@ if "%CANDLE_DIR%"=="" (
     exit /b 1
 )
 
+REM Normalize CANDLE_DIR so Python/Pandas does not receive a path containing .. segments.
+for %%I in ("%CANDLE_DIR%") do set "CANDLE_DIR=%%~fI"
+
 if not exist "%CANDLE_DIR%\goldsharp_m5.csv" (
     echo [ERROR] Missing %CANDLE_DIR%\goldsharp_m5.csv
     pause
@@ -55,8 +58,16 @@ if not exist "%CANDLE_DIR%\goldsharp_h4.csv" (
 )
 
 set "OUTPUT_DIR=%CANDLE_DIR%\FX_OUTPUTS\gold_v3\45_high_vol_sibling_strict_gate_walkforward_audit_only"
+REM Normalize OUTPUT_DIR as well. This fixes FileNotFoundError caused by unresolved .. paths.
+for %%I in ("%OUTPUT_DIR%") do set "OUTPUT_DIR=%%~fI"
 
 if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
+if not exist "%OUTPUT_DIR%" (
+    echo [ERROR] Could not create OUTPUT_DIR:
+    echo %OUTPUT_DIR%
+    pause
+    exit /b 1
+)
 
 echo [GOLD V3 45 AUDIT ONLY]
 echo REPO_ROOT=%REPO_ROOT%
