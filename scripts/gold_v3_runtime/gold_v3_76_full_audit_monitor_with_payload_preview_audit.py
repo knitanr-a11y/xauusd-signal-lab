@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """GOLD V3 76 full audit monitor with payload preview audit-only.
 
-Watches goldsharp_m15.csv latest closed row. When the latest timestamp changes,
-runs Stage74 one-shot, then Stage75 payload preview, and writes a final monitor
-summary.
+Watches goldsharp_m15.csv latest closed row. On an aligned schedule
+(default: every minute at second=05), reads only the latest CSV row. When the
+latest timestamp changes, runs Stage74 one-shot, then Stage75 payload preview,
+and writes a final monitor summary.
 
 No MT5 orders, no Discord, no AI API, no live hook, no final signal.
 """
@@ -16,7 +17,7 @@ import json
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -55,15 +56,64 @@ def find_files_dir() -> Path:
     raise FileNotFoundError("Could not locate Files directory with goldsharp_m15.csv")
 
 
+def read_last_nonempty_line(path: Path, block_size: int = 8192) -> str:
+    """Read the last non-empty line without loading the whole CSV."""
+    with path.open("rb") as f:
+        f.seek(0, 2)
+        pos = f.tell()
+        data = b""
+        while pos > 0:
+            step = min(block_size, pos)
+            pos -= step
+            f.seek(pos)
+            data = f.read(step) + data
+            lines = data.splitlines()
+            if len(lines) >= 2 or pos == 0:
+                for line in reversed(lines):
+                    if line.strip():
+                        return line.decode("utf-8-sig", errors="replace")
+    raise ValueError(f"no non-empty lines: {path}")
+
+
 def read_latest_m15_time(path: Path) -> str:
-    df = pd.read_csv(path, encoding="utf-8-sig", usecols=lambda c: str(c).strip().lower() == "time")
-    if df.empty:
-        raise ValueError(f"empty CSV: {path}")
-    col = df.columns[0]
-    t = pd.to_datetime(df[col], errors="coerce").dropna()
-    if t.empty:
-        raise ValueError(f"no valid time values: {path}")
-    return str(t.max())
+    """Read the latest closed M15 timestamp from the latest CSV row.
+
+    CSV contract: open/in-progress candles are not written to CSV, so the latest
+    row is the latest closed row. This function intentionally does not skip the
+    latest row.
+    """
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        header = f.readline().strip()
+    if not header:
+        raise ValueError(f"empty CSV header: {path}")
+    delim = ";" if header.count(";") >= header.count(",") else ","
+    header_cols = next(csv.reader([header], delimiter=delim))
+    time_idx = None
+    for i, c in enumerate(header_cols):
+        if str(c).strip().lower() == "time":
+            time_idx = i
+            break
+    if time_idx is None:
+        raise ValueError(f"time column not found: {path}")
+    last_line = read_last_nonempty_line(path)
+    if last_line.strip() == header.strip():
+        raise ValueError(f"CSV has header only: {path}")
+    row = next(csv.reader([last_line], delimiter=delim))
+    if time_idx >= len(row):
+        raise ValueError(f"latest row has no time column: {path}")
+    value = str(row[time_idx]).strip()
+    if not value:
+        raise ValueError(f"latest row time is blank: {path}")
+    return str(pd.to_datetime(value, errors="raise"))
+
+
+def seconds_until_next_minute_lag(lag_seconds: int) -> float:
+    lag = max(0, min(59, int(lag_seconds)))
+    now = datetime.now()
+    target = now.replace(second=lag, microsecond=0)
+    if now >= target:
+        target = (now + timedelta(minutes=1)).replace(second=lag, microsecond=0)
+    return max(0.1, (target - now).total_seconds())
 
 
 def append_event(path: Path, row: dict[str, Any]) -> None:
@@ -86,7 +136,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=STEP)
     p.add_argument("--candle-dir", default="")
     p.add_argument("--output-dir", default="")
-    p.add_argument("--poll-seconds", type=int, default=30)
+    p.add_argument("--poll-seconds", type=int, default=30, help="legacy fallback value kept for compatibility; aligned minute scheduling is used by default")
+    p.add_argument("--minute-lag-seconds", type=int, default=5, help="run each loop at every minute second=N; default N=5")
+    p.add_argument("--run-immediately", action="store_true", help="run the first check immediately, then align to minute+lag")
     p.add_argument("--once", action="store_true")
     p.add_argument("--no-startup-run", action="store_true")
     return p.parse_args()
@@ -113,6 +165,8 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
         "csv_open_bar_exclusion_required: false",
         "safety: audit_only=true, live_allowed=false, mt5=false, discord=false, ai_api=false, final_signal=false",
         "pool_policy: " + POOL_POLICY,
+        f"schedule_mode: {summary.get('schedule_mode','')}",
+        f"minute_lag_seconds: {summary.get('minute_lag_seconds','')}",
         f"latest_m15_time: {summary.get('latest_m15_time','')}",
         f"last_full_audit_run_time: {summary.get('last_full_audit_run_time','')}",
         f"last_full_audit_returncode: {summary.get('last_full_audit_returncode','')}",
@@ -141,6 +195,8 @@ def write_outputs(out: Path, status: str, val: list[dict[str, Any]], blockers: l
 
 Status: `{status}`
 
+- schedule_mode: `{summary.get('schedule_mode','')}`
+- minute_lag_seconds: `{summary.get('minute_lag_seconds','')}`
 - latest_m15_time: `{summary.get('latest_m15_time','')}`
 - stage75_latest_closed_m15_time: `{summary.get('stage75_latest_closed_m15_time','')}`
 - decision: `{summary.get('decision','')}`
@@ -173,6 +229,9 @@ def main() -> int:
     last_rc = str(state.get("last_full_audit_returncode", ""))
     first = True
     while True:
+        if not a.once and not (first and a.run_immediately):
+            sleep_s = seconds_until_next_minute_lag(a.minute_lag_seconds)
+            time.sleep(sleep_s)
         val: list[dict[str, Any]] = []
         blockers: list[dict[str, Any]] = []
         latest = ""
@@ -191,9 +250,9 @@ def main() -> int:
                 blockers.append(blocker("required_script_missing", str(s), "REQUIRED_SCRIPT_MISSING"))
         try:
             latest = read_latest_m15_time(p_m15)
-            val.append(ok("latest_m15_time_read", True, latest, "readable"))
+            val.append(ok("latest_m15_time_read", True, latest, "readable_latest_row_only"))
         except Exception as e:
-            val.append(ok("latest_m15_time_read", False, repr(e), "readable"))
+            val.append(ok("latest_m15_time_read", False, repr(e), "readable_latest_row_only"))
             blockers.append(blocker("latest_m15_time_read_failed", str(p_m15), "LATEST_M15_TIME_READ_FAILED", repr(e)))
         should_run = bool(latest and not blockers and ((first and not a.no_startup_run) or latest != last_seen))
         if should_run:
@@ -258,7 +317,7 @@ def main() -> int:
         val.append(ok("live_flags_all_false", True, "all_false", "all_false"))
         failed = [v for v in val if v.get("result") != "PASS"]
         status = READY_STATUS if not failed and not blockers else BLOCKED_STATUS
-        state = {"latest_m15_time": latest, "stage75_latest_closed_m15_time": stage75_time, "last_full_audit_run_time": last_run_time, "last_full_audit_returncode": last_rc, "updated_at_utc": utc_now(), "status": status}
+        state = {"latest_m15_time": latest, "stage75_latest_closed_m15_time": stage75_time, "last_full_audit_run_time": last_run_time, "last_full_audit_returncode": last_rc, "updated_at_utc": utc_now(), "status": status, "schedule_mode": "aligned_minute_plus_lag", "minute_lag_seconds": max(0, min(59, int(a.minute_lag_seconds)))}
         state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
         summary = {
             "step": STEP,
@@ -280,6 +339,8 @@ def main() -> int:
             "live_ready": False,
             "full_audit_monitor_with_payload_preview_ready": status == READY_STATUS,
             "pool_policy": POOL_POLICY,
+            "schedule_mode": "aligned_minute_plus_lag",
+            "minute_lag_seconds": max(0, min(59, int(a.minute_lag_seconds))),
             "latest_m15_time": latest,
             "stage75_latest_closed_m15_time": stage75_time,
             "last_full_audit_run_time": last_run_time,
@@ -291,16 +352,15 @@ def main() -> int:
             "should_place_mt5_order": should_mt5,
             "should_call_ai_api": should_ai,
             "should_enable_final_signal": should_final,
-            "poll_seconds": int(a.poll_seconds),
+            "legacy_poll_seconds": int(a.poll_seconds),
             "validation_failure_count": len(failed),
             "blocker_count": len(blockers),
         }
         write_outputs(out, status, val, blockers, summary)
-        print(f"[{utc_now()}] {status} latest={latest} stage75={stage75_time} decision={decision} payload={payload_action} blockers={len(blockers)}")
+        print(f"[{utc_now()}] {status} schedule=minute+{max(0, min(59, int(a.minute_lag_seconds)))}s latest={latest} stage75={stage75_time} decision={decision} payload={payload_action} blockers={len(blockers)}")
         if a.once:
             return 0 if status == READY_STATUS else 1
         first = False
-        time.sleep(max(5, int(a.poll_seconds)))
 
 
 if __name__ == "__main__":
