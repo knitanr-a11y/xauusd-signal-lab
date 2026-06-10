@@ -88,7 +88,79 @@ Use `upload_first.txt` first. It already includes short log tails and important 
 
 ---
 
-## 5. Where immutable evidence is
+## 5. Trade review ledger rule
+
+Long-term value is in trade review records, not old heartbeat/notification logs.
+
+Main folder:
+
+```text
+Files\FX_OUTPUTS\gold_v3\trade_review_ledger\
+```
+
+Keep long-term:
+
+```text
+trade review ledger rows
+signal decision context
+candidate/profile key
+TP/SL/horizon
+health gate status
+Stage79 evidence path
+outcome result
+why win/loss note
+post-trade review note
+```
+
+Do not treat these as long-term primary learning records:
+
+```text
+old notification errors
+heartbeat logs
+full timing CSVs
+repeated NO_SIGNAL entries
+support bundle diagnostics
+```
+
+Candidate key order must stay exactly:
+
+```text
+candidate_label+base_candidate_label+source_profile_id+profile_id+hv_profile+tp_usd+sl_usd+horizon_m15+horizon_m5_bars
+```
+
+---
+
+## 6. Signal / NO_SIGNAL ledger rule
+
+For NO_SIGNAL:
+
+```text
+Do not append to trade_review_ledger.
+Expected Stage85 reason:
+NO_SIGNAL_NOT_A_TRADE_REVIEW_LEDGER_ROW
+Expected Stage86 guard:
+NO_APPEND_SUPPRESSED_NO_SIGNAL
+```
+
+For SIGNAL:
+
+```text
+Create preview row only.
+Do not append durable ledger yet.
+Hold until execution is confirmed or human explicitly chooses to review it.
+Outcome starts as PENDING.
+manual_review_required=True.
+```
+
+If candidate/profile context is missing:
+
+```text
+BLOCK; do not append.
+```
+
+---
+
+## 7. Where immutable evidence is
 
 After each processed new M15 row:
 
@@ -102,9 +174,11 @@ The current path is shown in Stage80 summary as:
 last_stage79_paste_path: ...\79i\YYYYMMDD\RUN_ID\paste_me.txt
 ```
 
+For trade review, keep the Stage79 evidence path in the ledger row instead of uploading full folders first.
+
 ---
 
-## 6. Stop monitoring
+## 8. Stop monitoring
 
 To stop Stage80:
 
@@ -115,7 +189,7 @@ Stopping monitor does not send orders or notifications.
 
 ---
 
-## 7. Things not to touch without approval
+## 9. Things not to touch without approval
 
 Do not enable:
 
@@ -130,7 +204,7 @@ GOLD V3 remains audit-only.
 
 ---
 
-## 8. Documentation rule
+## 10. Documentation rule
 
 If runtime behavior changes, update both:
 
@@ -138,3 +212,5 @@ If runtime behavior changes, update both:
 docs/gold_v3/GOLD_V3_RUNTIME_OPERATION_MANUAL_AUDIT_ONLY_20260610.md
 docs/gold_v3/GOLD_V3_RUNTIME_OPERATOR_CHECKLIST_AUDIT_ONLY_20260610.md
 ```
+
+Also update these when trade review ledger or append guard rules change.
