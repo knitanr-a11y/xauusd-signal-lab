@@ -18,6 +18,7 @@ STEP = "GOLD_V3_55_REPLAY_FROM_CHECKPOINT_DRY_RUN_AUDIT_ONLY"
 READY_STATUS = "GOLD_V3_55_REPLAY_FROM_CHECKPOINT_DRY_RUN_READY_AUDIT_ONLY"
 BLOCKED_STATUS = "GOLD_V3_55_REPLAY_FROM_CHECKPOINT_DRY_RUN_BLOCKED_AUDIT_ONLY"
 STAGE54_READY = "GOLD_V3_54_RESTART_REPLAY_CHECKPOINT_STATE_READY_AUDIT_ONLY"
+MUTABLE_SOURCE_ARTIFACTS = {"m5_csv", "m15_csv", "h4_csv"}
 
 
 def sha256_file(path: Path) -> str:
@@ -90,6 +91,7 @@ def main() -> int:
     hashes = pd.read_csv(p_hashes, encoding="utf-8-sig")
     recheck_rows = []
     for _, r in hashes.iterrows():
+        artifact_id = str(r["artifact_id"])
         path = Path(str(r["path"]))
         exists = path.exists()
         current_sha = sha256_file(path) if exists else ""
@@ -103,12 +105,21 @@ def main() -> int:
             except Exception:
                 row_match = str(expected_rows) == str(current_rows)
         recheck_rows.append({
-            "artifact_id": r["artifact_id"], "path": str(path), "exists": exists,
-            "expected_sha256": expected_sha, "current_sha256": current_sha, "sha_match": current_sha == expected_sha,
-            "expected_row_count_if_csv": expected_rows, "current_row_count_if_csv": current_rows, "row_count_match": row_match,
+            "artifact_id": artifact_id,
+            "artifact_role": "mutable_source_candle" if artifact_id in MUTABLE_SOURCE_ARTIFACTS else "state_artifact",
+            "path": str(path),
+            "exists": exists,
+            "expected_sha256": expected_sha,
+            "current_sha256": current_sha,
+            "sha_match": current_sha == expected_sha,
+            "expected_row_count_if_csv": expected_rows,
+            "current_row_count_if_csv": current_rows,
+            "row_count_match": row_match,
         })
     recheck = pd.DataFrame(recheck_rows)
+    mismatch = recheck[(~recheck["sha_match"]) | (~recheck["row_count_match"])].copy()
     recheck.to_csv(out / "gold_v3_55_hash_recheck.csv", index=False, encoding="utf-8-sig")
+    mismatch.to_csv(out / "gold_v3_55_hash_mismatch_details.csv", index=False, encoding="utf-8-sig")
     val.append(ok("all_artifact_paths_exist", bool(recheck["exists"].all()), int((~recheck["exists"]).sum()), 0))
     val.append(ok("all_artifact_hashes_match", bool(recheck["sha_match"].all()), int((~recheck["sha_match"]).sum()), 0))
     val.append(ok("all_csv_row_counts_match", bool(recheck["row_count_match"].all()), int((~recheck["row_count_match"]).sum()), 0))
@@ -133,15 +144,34 @@ def main() -> int:
     status = READY_STATUS if failed.empty else BLOCKED_STATUS
     val_df.to_csv(out / "gold_v3_55_validation_matrix.csv", index=False, encoding="utf-8-sig")
 
+    hash_mismatch_ids = recheck.loc[~recheck["sha_match"], "artifact_id"].astype(str).tolist()
+    row_mismatch_ids = recheck.loc[~recheck["row_count_match"], "artifact_id"].astype(str).tolist()
     summary = {
-        "step": STEP, "status": status, "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
-        "candle_dir": str(cdir), "output_dir": str(out), "audit_only": True,
-        "live_allowed": False, "mt5_execution_enabled": False, "mt5_bat_created": False,
-        "discord_live_enabled": False, "ai_api_called": False, "signals_generated": False, "final_signal_enabled": False,
-        "contract_mutated": False, "manual_candidate_demotion_or_removal": False, "open_asof_allowed": False, "live_ready": False,
-        "replay_dry_run_ready": failed.empty, "hash_recheck_rows": int(len(recheck)),
-        "hash_mismatch_count": int((~recheck["sha_match"]).sum()), "row_count_mismatch_count": int((~recheck["row_count_match"]).sum()),
-        "restart_plan_steps": int(len(restart)), "anchor_mismatch_count": int((~anchors["match"]).sum()),
+        "step": STEP,
+        "status": status,
+        "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "candle_dir": str(cdir),
+        "output_dir": str(out),
+        "audit_only": True,
+        "live_allowed": False,
+        "mt5_execution_enabled": False,
+        "mt5_bat_created": False,
+        "discord_live_enabled": False,
+        "ai_api_called": False,
+        "signals_generated": False,
+        "final_signal_enabled": False,
+        "contract_mutated": False,
+        "manual_candidate_demotion_or_removal": False,
+        "open_asof_allowed": False,
+        "live_ready": False,
+        "replay_dry_run_ready": failed.empty,
+        "hash_recheck_rows": int(len(recheck)),
+        "hash_mismatch_count": int((~recheck["sha_match"]).sum()),
+        "row_count_mismatch_count": int((~recheck["row_count_match"]).sum()),
+        "hash_mismatch_artifact_ids": hash_mismatch_ids,
+        "row_count_mismatch_artifact_ids": row_mismatch_ids,
+        "restart_plan_steps": int(len(restart)),
+        "anchor_mismatch_count": int((~anchors["match"]).sum()),
         "validation_failure_count": int(len(failed)),
     }
     (out / "gold_v3_55_replay_dry_run_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -158,8 +188,13 @@ def main() -> int:
     paste.append(f"hash_recheck_rows: {len(recheck)}")
     paste.append(f"hash_mismatch_count: {int((~recheck['sha_match']).sum())}")
     paste.append(f"row_count_mismatch_count: {int((~recheck['row_count_match']).sum())}")
+    paste.append("hash_mismatch_artifact_ids: " + json.dumps(hash_mismatch_ids, ensure_ascii=False))
+    paste.append("row_count_mismatch_artifact_ids: " + json.dumps(row_mismatch_ids, ensure_ascii=False))
     paste.append(f"restart_plan_steps: {len(restart)}")
     paste.append(f"anchor_mismatch_count: {int((~anchors['match']).sum())}")
+    paste.append("")
+    paste.append("MISMATCH_DETAILS")
+    paste.append("NONE" if mismatch.empty else mismatch.to_string(index=False))
     paste.append("")
     paste.append("ANCHORS")
     paste.append(anchors.to_string(index=False))
@@ -169,6 +204,7 @@ def main() -> int:
     paste.append("")
     paste.append("OUTPUTS")
     paste.append("gold_v3_55_hash_recheck.csv")
+    paste.append("gold_v3_55_hash_mismatch_details.csv")
     paste.append("gold_v3_55_restart_anchor_recheck.csv")
     paste.append("gold_v3_55_replay_anchor_check_matrix.csv")
     (out / "gold_v3_55_PASTE_ME_REPLAY_DRY_RUN_SUMMARY.txt").write_text("\n".join(paste) + "\n", encoding="utf-8")
