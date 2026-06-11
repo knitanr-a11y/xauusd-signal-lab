@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 
 REM GOLD V3 Stage107 audit-only runner.
 REM Do not use GOLD V2 / old GOLD / DISC8 / Stage41 as trading source.
@@ -10,7 +10,11 @@ set "BAT_DIR=%~dp0"
 pushd "%BAT_DIR%\..\..\.."
 set "REPO_ROOT=%CD%"
 
-REM Optional: user may set MT5_FILES_DIR externally. If unset, repo root is used as MT5 Files-like root.
+REM If MT5_FILES_DIR is not set, locate the nearest ancestor named MQL5\Files.
+REM This matters when the repo itself is under MQL5\Files\xauusd-signal-lab-clean\xauusd-signal-lab.
+if "%MT5_FILES_DIR%"=="" (
+  for /f "usebackq delims=" %%D in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$p=(Resolve-Path -LiteralPath '%REPO_ROOT%').Path; while($true){ $leaf=Split-Path -Leaf $p; $parent=Split-Path -Parent $p; $pleaf=Split-Path -Leaf $parent; if($leaf -ieq 'Files' -and $pleaf -ieq 'MQL5'){ Write-Output $p; exit 0 }; if([string]::IsNullOrEmpty($parent) -or $parent -eq $p){ exit 1 }; $p=$parent }"`) do set "MT5_FILES_DIR=%%D"
+)
 if "%MT5_FILES_DIR%"=="" set "MT5_FILES_DIR=%REPO_ROOT%"
 
 set "OUT_DIR=%MT5_FILES_DIR%\FX_OUTPUTS\gold_v3\107c"
@@ -59,8 +63,8 @@ call :log Blocked status is acceptable if inputs are incomplete: BLOCKED_INPUT_I
 call :log ============================================================
 
 echo.
-echo 画面が閉じないように止めています。
-echo エラーが出ている場合は、以下のどちらかを貼ってください。
+echo Window is paused so errors remain visible.
+echo If Stage107 is blocked or failed, paste one of these files back into ChatGPT:
 echo   1^) %OUT_DIR%\paste_me.txt
 echo   2^) %LOG_PATH%
 echo.
