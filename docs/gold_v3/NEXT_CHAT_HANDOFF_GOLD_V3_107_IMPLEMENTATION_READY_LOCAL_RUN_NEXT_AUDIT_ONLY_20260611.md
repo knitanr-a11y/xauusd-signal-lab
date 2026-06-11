@@ -52,27 +52,35 @@ Candidate pool policy:
 poolから外さない。rolling health gateに判断させる。
 ```
 
-## What was created
+## New-document correction applied
 
-### Spec
+The updated handoff requires the runtime-stage layout and `paste_me.txt` continuation protocol.
+
+Correct implementation paths:
 
 ```text
 docs/gold_v3/GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_ONLY_SPEC_20260611.md
+scripts/gold_v3_runtime/gold_v3_107_normal_and_hv_direction_assumption_audit.py
+scripts/gold_v3_runtime/bat/run_gold_v3_107_normal_and_hv_direction_assumption.bat
 ```
 
-### Script
+Correct output path:
+
+```text
+FX_OUTPUTS/gold_v3/107c/paste_me.txt
+```
+
+Do not use the earlier misplaced helper paths for continuation:
 
 ```text
 scripts/gold_v3_stage107_normal_and_hv_direction_assumption_audit_only.py
-```
-
-### BAT runner
-
-```text
 run_gold_v3_stage107_normal_and_hv_direction_assumption_audit_only.bat
+reports/gold_v3/stage107/
 ```
 
-## Stage107 objective
+Those were superseded by the runtime/paste_me protocol.
+
+## What Stage107 does
 
 ```text
 GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_ONLY
@@ -91,48 +99,69 @@ Purpose:
 
 No runtime logic may be changed.
 
-## Expected local command
+## Exact BAT path to run
 
 Run from repo root on Windows:
 
 ```bat
-run_gold_v3_stage107_normal_and_hv_direction_assumption_audit_only.bat
+scripts\gold_v3_runtime\bat\run_gold_v3_107_normal_and_hv_direction_assumption.bat
 ```
 
 Optional explicit inputs if auto-discovery cannot find safe files:
 
 ```bat
-python scripts\gold_v3_stage107_normal_and_hv_direction_assumption_audit_only.py ^
+scripts\gold_v3_runtime\bat\run_gold_v3_107_normal_and_hv_direction_assumption.bat ^
   --candidate-file "<candidate artifact path>" ^
-  --m5-csv "<M5 OHLC path>" ^
-  --out-dir "reports\gold_v3\stage107"
+  --m5-csv "<M5 OHLC path>"
 ```
 
-## Expected output directory
+Optional MT5 files root override:
+
+```bat
+set MT5_FILES_DIR=<path to MQL5\Files>
+scripts\gold_v3_runtime\bat\run_gold_v3_107_normal_and_hv_direction_assumption.bat
+```
+
+## Exact paste_me path to paste back
 
 ```text
-reports/gold_v3/stage107/
+FX_OUTPUTS/gold_v3/107c/paste_me.txt
 ```
 
-Expected artifacts:
+If `MT5_FILES_DIR` is set, the path is:
 
 ```text
-gold_v3_107_trade_level_long_short_proxy.csv
-gold_v3_107_per_candidate_long_short_metrics.csv
-gold_v3_107_segment_h4_bucket_metrics.csv
-gold_v3_107_segment_jst_hour_metrics.csv
-gold_v3_107_segment_jst_weekday_metrics.csv
-gold_v3_107_direction_assumption_summary.json
-GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_ONLY_REPORT.md
+%MT5_FILES_DIR%/FX_OUTPUTS/gold_v3/107c/paste_me.txt
 ```
 
-If candidate/M5 inputs are missing or schema is insufficient, the script writes:
+## Expected status name
+
+Ready:
+
+```text
+GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_READY_AUDIT_ONLY
+```
+
+Blocked but acceptable if inputs are incomplete:
 
 ```text
 BLOCKED_INPUT_INCOMPLETE_AUDIT_ARTIFACTS_WRITTEN
 ```
 
-This is acceptable. Do not guess or use forbidden sources.
+## Expected output files
+
+```text
+FX_OUTPUTS/gold_v3/107c/paste_me.txt
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_direction_assumption_summary.json
+FX_OUTPUTS/gold_v3/107c/GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_ONLY_REPORT.md
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_trade_level_long_short_proxy.csv
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_per_candidate_long_short_metrics.csv
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_segment_h4_bucket_metrics.csv
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_segment_jst_hour_metrics.csv
+FX_OUTPUTS/gold_v3/107c/gold_v3_107_segment_jst_weekday_metrics.csv
+```
+
+The user should paste only `paste_me.txt` back into ChatGPT for ordinary continuation.
 
 ## Important interpretation notes
 
@@ -151,8 +180,7 @@ The JST vs MT5/CSV time basis issue is not resolved by Stage107.
 If Stage107 outputs READY artifacts, review:
 
 ```text
-reports/gold_v3/stage107/GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_ONLY_REPORT.md
-reports/gold_v3/stage107/gold_v3_107_direction_assumption_summary.json
+FX_OUTPUTS/gold_v3/107c/paste_me.txt
 ```
 
 Then create a Stage107 result-review handoff and only after that proceed to:
@@ -181,6 +209,11 @@ candidate poolから外さないでください。
 現在status:
 GOLD_V3_107_IMPLEMENTATION_READY_LOCAL_RUN_NEXT_AUDIT_ONLY
 
-次はローカルでStage107 BATを実行し、reports/gold_v3/stage107/ のsummary/reportを確認してください。
+次は以下のBATをローカル実行してください。
+scripts/gold_v3_runtime/bat/run_gold_v3_107_normal_and_hv_direction_assumption.bat
+
+実行後、以下だけを貼ってください。
+FX_OUTPUTS/gold_v3/107c/paste_me.txt
+
 Stage108はStage107結果レビュー後にしてください。
 ```
