@@ -6,6 +6,20 @@ Use this together with:
 
 `docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_99_106_DONE_107_NEXT_DIRECTION_AND_TIME_AUDIT_20260611.md`
 
+## Official Stage107 status names
+
+READY:
+
+`GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_READY_AUDIT_ONLY`
+
+BLOCKED:
+
+`GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_BLOCKED_INPUT_INCOMPLETE_AUDIT_ONLY`
+
+Do not use `BLOCKED_INPUT_INCOMPLETE_AUDIT_ARTIFACTS_WRITTEN` for Stage107. That was an ambiguous draft wording, not the official Stage107 status.
+
+Even when BLOCKED, Stage107 must still write `FX_OUTPUTS/gold_v3/107c/paste_me.txt` with blockers, validation, and output path information.
+
 ## Correct source-of-truth
 
 For Stage107, rebuild candidates from GOLD V3 code, not from Stage99-106 CSV outputs.
@@ -95,6 +109,3 @@ Create only:
 - `FX_OUTPUTS/gold_v3/107c/paste_me.txt`
 
 User should paste back only `FX_OUTPUTS/gold_v3/107c/paste_me.txt`.
-
-READY: `GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_READY_AUDIT_ONLY`
-BLOCKED: `GOLD_V3_107_NORMAL_AND_HV_DIRECTION_ASSUMPTION_AUDIT_BLOCKED_INPUT_INCOMPLETE_AUDIT_ONLY`
