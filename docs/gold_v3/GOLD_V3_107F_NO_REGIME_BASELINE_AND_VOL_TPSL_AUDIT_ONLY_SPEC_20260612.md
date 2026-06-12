@@ -14,14 +14,19 @@ GOLD_V3_107F_NO_REGIME_BASELINE_AND_VOL_TPSL_AUDIT_ONLY
 
 Stage107F preserves a backtest path that does **not** use regime arbitration, because regime may be unnecessary or may overfit.
 
-Stage107F also introduces an audit-only volatility-adjusted TP/SL candidate path with a hard minimum profit width requirement:
+Stage107F also introduces an audit-only volatility-adjusted TP/SL candidate path with a hard minimum **profit width** requirement only:
 
 ```text
 minimum TP width = 5.0 USD
-minimum SL width = 5.0 USD unless explicitly overridden in later audit
+minimum SL width = no fixed 5.0 USD floor
+SL may be derived from reward/risk, e.g. TP=5.0 and RR=2.0 implies SL=2.5
 ```
 
 This stage is audit-only. It must not change live runtime, Stage45, Stage69, candidate pool, Discord, MT5 execution, or final signal.
+
+## Important correction
+
+The minimum 5 USD requirement applies to the **profit target width**. It must not be incorrectly applied as a hard SL minimum. A 2.5 USD SL is valid when the TP is 5.0 USD and the intended reward/risk is 2.0.
 
 ## Required comparison classes
 
@@ -59,14 +64,21 @@ Candidate formula examples:
 
 ```text
 TP = max(5.0, m15_atr28 * tp_mult)
-SL = max(5.0, m15_atr28 * sl_mult)
+SL = TP / rr
 ```
 
-Candidate multiplier grid:
+Candidate grid:
 
 ```text
 tp_mult: 0.50, 0.75, 1.00, 1.25
-sl_mult: 0.25, 0.35, 0.50, 0.75
+rr:      1.50, 2.00, 2.50, 3.00
+```
+
+This means:
+
+```text
+TP = 5.0, RR = 2.0 => SL = 2.5
+TP = 10.0, RR = 2.0 => SL = 5.0
 ```
 
 If M5 candles are not available, Stage107F must write a clear SKIPPED reason and still complete no-regime tests.
