@@ -19,6 +19,10 @@ DYN=[('TPmax5_ATR0.50_RR1.5_H64','dynamic',0.50,1.5,64),('TPmax5_ATR0.75_RR2.0_H
 PROFILES=FIXED+DYN
 COOLDOWNS=[0,2,4]
 
+def save(df,p):
+    p.parent.mkdir(parents=True,exist_ok=True)
+    df.to_csv(p,index=False,encoding='utf-8-sig')
+
 def bad(p):
     s=str(p).replace('\\','/').lower(); return any(x in s for x in FORBIDDEN)
 
@@ -95,7 +99,6 @@ def merge_htf(m15,h1,h4,d1):
         x=pd.merge_asof(x.sort_values('time'),f[cols].sort_values('time'),on='time',direction='backward')
     return x
 
-def vtrue(x): return pd.Series(True,index=x.index)
 def vf(s): return s.fillna(False).astype(bool)
 
 def build_vectors(df):
@@ -113,7 +116,6 @@ def build_vectors(df):
     hv=vf(x.high_vol); nhv=vf(x.non_high_vol); s1=vf(x.session_7_15); s2=vf(x.session_16_22)
     vec=[]
     def add(side,fam,name,mask): vec.append(dict(side=side,family=fam,condition=name,mask=vf(mask).values))
-    # LONG families
     add('LONG','LONG_TREND_CONTINUATION','h4_up&h1_up&m15_uptrend&momentum_long',h4_up&h1_up&uptrend&mom_up)
     add('LONG','LONG_TREND_CONTINUATION','h1_up&m15_uptrend&body_up&session_16_22',h1_up&uptrend&body_up&s2)
     add('LONG','LONG_TREND_CONTINUATION','d1_up&h4_up&m15_uptrend&non_high_vol',d1_up&h4_up&uptrend&nhv)
@@ -128,7 +130,6 @@ def build_vectors(df):
     add('LONG','LONG_SESSION_CONTINUATION','session_7_15&h1_up&momentum_long',s1&h1_up&mom_up)
     add('LONG','LONG_SESSION_CONTINUATION','session_16_22&h4_up&break_hi20',s2&h4_up&vf(x.break_hi20))
     add('LONG','LONG_HTF_UP_M15_MOMENTUM','h4_up&h1_up&ret16_positive&close_above_ema20',h4_up&h1_up&vf(x.ret16>0)&vf(x.close>x.ema20))
-    # SHORT families
     add('SHORT','SHORT_BEARISH_CONTINUATION','h4_down&h1_down&m15_downtrend&momentum_short',h4_down&h1_down&downtrend&mom_down)
     add('SHORT','SHORT_BEARISH_CONTINUATION','h1_down&m15_downtrend&body_down&session_7_15',h1_down&downtrend&body_down&s1)
     add('SHORT','SHORT_BEARISH_CONTINUATION','d1_down&h4_down&m15_downtrend&non_high_vol',d1_down&h4_down&downtrend&nhv)
