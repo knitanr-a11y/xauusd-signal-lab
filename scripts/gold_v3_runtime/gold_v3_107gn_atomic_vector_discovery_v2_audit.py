@@ -158,7 +158,7 @@ def eval_seed(df,m5,seed,prof,cool,cache):
     m.update(side=seed['side'],family=seed['family'],condition=seed['condition'],profile_id=pid,profile_kind=kind,cooldown_bars=cool,horizon_m15=h,raw_events=int(seed['raw_events']),entry_count=len(idx),forward_edge=float(seed['forward_edge']))
     rows=pd.DataFrame({'entry_dt':[df.iloc[i].time for i in entries],'side':seed['side'],'family':seed['family'],'condition':seed['condition'],'profile_id':pid,'cooldown_bars':cool,'result_usd':vals}) if vals else pd.DataFrame()
     return m,rows
-def split_cols(rows):
+def split_perf(rows):
     if rows.empty: return {}
     x=rows.copy(); x['entry_dt']=pd.to_datetime(x.entry_dt); d=x.entry_dt
     ss={'2025':d.dt.year==2025,'2026':d.dt.year==2026,'2025H1':(d>=pd.Timestamp('2025-01-01'))&(d<pd.Timestamp('2025-07-01')),'2025H2':(d>=pd.Timestamp('2025-07-01'))&(d<pd.Timestamp('2026-01-01')),'2026_03_PLUS':d>=pd.Timestamp('2026-03-01'),'2026_05_06':d>=pd.Timestamp('2026-05-01')}
@@ -198,7 +198,7 @@ def main():
             for prof in PROFILES:
                 for cd in COOLDOWNS:
                     m,lg=eval_seed(df,m5,seed,prof,cd,cache)
-                    if not lg.empty: m.update(split_cols(lg))
+                    if not lg.empty: m.update(split_perf(lg))
                     m['quality_score']=quality_score(m); rows.append(m)
                     if not lg.empty and m['trades']>=20 and (m['profit_factor']>=1.5 or m['win_rate']>=0.55):
                         key=f"{seed['side']}||{seed['family']}||{seed['condition']}||{prof[0]}||CD{cd}"
@@ -219,8 +219,8 @@ def main():
                 b=g.sort_values('quality_score',ascending=False).iloc[0]
                 fam.append(dict(side=side,family=family,candidate_count=len(g),best_condition=b.condition,best_profile_id=b.profile_id,best_trades=int(b.trades),best_win_rate=float(b.win_rate),best_profit_factor=float(b.profit_factor),best_negative_month_count=int(b.negative_month_count),best_quality_score=float(b.quality_score)))
             save(pd.DataFrame(fam),out/'gold_v3_107gn_family_summary.csv'); outputs.append('gold_v3_107gn_family_summary.csv')
-            split_cols=[c for c in summ.columns if any(c.startswith(p+'_') for p in ['2025','2026','2025H1','2025H2','2026_03_PLUS','2026_05_06'])]
-            save(summ[['side','family','condition','profile_id','cooldown_bars','trades','win_rate','profit_factor','sum_result_usd','negative_month_count','quality_score']+split_cols].sort_values('quality_score',ascending=False).head(120),out/'gold_v3_107gn_split_summary.csv'); outputs.append('gold_v3_107gn_split_summary.csv')
+            split_columns=[c for c in summ.columns if any(c.startswith(p+'_') for p in ['2025','2026','2025H1','2025H2','2026_03_PLUS','2026_05_06'])]
+            save(summ[['side','family','condition','profile_id','cooldown_bars','trades','win_rate','profit_factor','sum_result_usd','negative_month_count','quality_score']+split_columns].sort_values('quality_score',ascending=False).head(120),out/'gold_v3_107gn_split_summary.csv'); outputs.append('gold_v3_107gn_split_summary.csv')
             goodL=long_s[(long_s.trades>=150)&(long_s.profit_factor>=2.0)&(long_s.win_rate>=0.55)&(long_s.negative_month_count<=2)]
             goodS=short_s[(short_s.trades>=150)&(short_s.profit_factor>=2.0)&(short_s.win_rate>=0.55)&(short_s.negative_month_count<=2)]
             gates=pd.DataFrame([dict(gate='long_viable_count',observed=len(goodL),operator='>=',threshold=1,result='PASS' if len(goodL)>=1 else 'FAIL'),dict(gate='short_viable_count',observed=len(goodS),operator='>=',threshold=1,result='PASS' if len(goodS)>=1 else 'FAIL')])
