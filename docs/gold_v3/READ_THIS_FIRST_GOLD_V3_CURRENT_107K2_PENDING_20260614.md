@@ -14,7 +14,7 @@ Read these two files first:
 The following file is a reusable prompt for opening the next chat. If the user already pasted it into the new chat, it does not need to be read again as source-of-truth:
 
 ```text
-_docs/gold_v3/NEXT_CHAT_START_PROMPT_GOLD_V3_107K2_PENDING_REGIME_BALANCED_JA_20260614.md
+docs/gold_v3/NEXT_CHAT_START_PROMPT_GOLD_V3_107K2_PENDING_REGIME_BALANCED_JA_20260614.md
 ```
 
 The user will attach the Stage107K2 result in the new chat:
