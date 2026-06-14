@@ -4,11 +4,18 @@ Created JST: `2026-06-14`
 
 This file is the current reading guide for the next chat.
 
-## Read these files first, in this order
+## Required read order for the next chat
+
+Read these two files first:
 
 1. `docs/gold_v3/READ_THIS_FIRST_GOLD_V3_CURRENT_107K2_PENDING_20260614.md`
 2. `docs/gold_v3/NEXT_CHAT_HANDOFF_GOLD_V3_107K2_PENDING_REGIME_BALANCED_20260614.md`
-3. `docs/gold_v3/NEXT_CHAT_START_PROMPT_GOLD_V3_107K2_PENDING_REGIME_BALANCED_JA_20260614.md`
+
+The following file is a reusable prompt for opening the next chat. If the user already pasted it into the new chat, it does not need to be read again as source-of-truth:
+
+```text
+_docs/gold_v3/NEXT_CHAT_START_PROMPT_GOLD_V3_107K2_PENDING_REGIME_BALANCED_JA_20260614.md
+```
 
 The user will attach the Stage107K2 result in the new chat:
 
@@ -38,6 +45,8 @@ GOLD_V3_107K2_DIRECT_REGIME_BALANCED_ADAPTIVE_SCORE_PENDING_AUDIT_ONLY
 
 The next chat must inspect the attached `107k2c/paste_me.txt` first.
 
+Do not infer the Stage107K2 result from earlier Stage107H/107I2 May-heavy results.
+
 ## Important interpretation rule
 
 The core goal is not to fit only 2026 May.
@@ -50,6 +59,14 @@ The system must handle materially different regimes:
 ```
 
 Any candidate that works only in 2026 May or only one narrow regime is not enough.
+
+## Data availability rule for regime windows
+
+Some regime specs use future upper-bound labels such as `test end: 2027-01-01`.
+
+That is only a window upper bound. Actual evaluation must use only rows that exist in the attached/result CSVs at run time.
+
+Do not assume data after the latest available CSV row exists.
 
 ## Hard guardrails
 
