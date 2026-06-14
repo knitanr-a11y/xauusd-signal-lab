@@ -79,6 +79,14 @@ Pool policy:
 poolから外さない。rolling health gateに判断させる。
 ```
 
+## Data availability rule
+
+Regime test-end dates such as `2027-01-01` are upper bounds only.
+
+The actual available data may end earlier, depending on the CSVs and the user's attached result.
+
+The next chat must judge Stage107K2 using the actual date coverage reported in `107k2c/paste_me.txt`, not by assuming future rows exist.
+
 ## What was done in this chat
 
 ### Stage107GY — light non-calendar subfilter search
@@ -287,7 +295,7 @@ test:  2026-01-01 to 2026-05-01
 
 REGIME_2026_HIGHVOL_MAYJUN
 train: 2025-01-01 to 2026-05-01
-test:  2026-05-01 to 2027-01-01
+test:  2026-05-01 to 2027-01-01 upper bound, actual available rows only
 ```
 
 ## Next chat action
@@ -297,6 +305,7 @@ test:  2026-05-01 to 2027-01-01
 3. If `107K2` is READY:
    - summarize per-regime results.
    - focus on `all_regime_pass_65_count`, `all_regime_pass_60_count`, `best_min_wr`, `best_min_pf`, `best_min_trades`, and `best_policy_regime_rows`.
+   - check actual date coverage of each regime row.
 4. If `107K2` is BLOCKED:
    - identify blocker.
    - do not call it strategy failure unless regime frontier was created and metrics actually failed.
