@@ -36,6 +36,13 @@ def load_json(p: Path) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+def fval(row: pd.Series, col: str, default: float = 0.0) -> float:
+    try:
+        return float(row[col]) if col in row.index and not pd.isna(row[col]) else float(default)
+    except Exception:
+        return float(default)
+
+
 def classify(value: float, watch: float, caution: float, stop: float) -> str:
     if pd.isna(value):
         return "MISSING"
@@ -97,9 +104,20 @@ def main() -> int:
         rows = []
         tmap = {}
         for _, r in th.iterrows():
-            tmap[(int(r.window), str(r.metric))] = dict(watch=float(r.watch_level), caution=float(r.caution_level), stop=float(r.stop_review_level), q05=float(r.q05), q10=float(r.q10), q25=float(r.q25), median=float(r.median))
+            # Use bracket access only. Column names such as `median` collide with pandas Series methods.
+            win = int(r["window"])
+            metric_name = str(r["metric"])
+            tmap[(win, metric_name)] = dict(
+                watch=fval(r, "watch_level"),
+                caution=fval(r, "caution_level"),
+                stop=fval(r, "stop_review_level"),
+                q05=fval(r, "q05", float("nan")),
+                q10=fval(r, "q10", float("nan")),
+                q25=fval(r, "q25", float("nan")),
+                median=fval(r, "median", float("nan")),
+            )
         for i, r in roll.iterrows():
-            w = int(r.window)
+            w = int(r["window"])
             for metric in ["win_rate", "profit_factor", "sum_result_usd"]:
                 if (w, metric) not in tmap:
                     continue
@@ -107,7 +125,7 @@ def main() -> int:
                 value = pd.to_numeric(pd.Series([r[metric]]), errors="coerce").iloc[0]
                 state = classify(value, tm["watch"], tm["caution"], tm["stop"])
                 rows.append(dict(
-                    end_exit_dt=r.end_exit_dt,
+                    end_exit_dt=r["end_exit_dt"],
                     window=w,
                     metric=metric,
                     value=value,
@@ -125,12 +143,12 @@ def main() -> int:
         outputs.append("gold_v3_111_virtual_monitor_events.csv")
         counts = events.groupby(["window", "metric", "monitor_state"], dropna=False).size().reset_index(name="events") if not events.empty else pd.DataFrame()
         if not counts.empty:
-            totals = counts.groupby(["window", "metric"]).events.transform("sum")
-            counts["event_share"] = counts.events / totals
+            totals = counts.groupby(["window", "metric"])["events"].transform("sum")
+            counts["event_share"] = counts["events"] / totals
         save(counts, out / "gold_v3_111_virtual_monitor_state_counts.csv")
         outputs.append("gold_v3_111_virtual_monitor_state_counts.csv")
         ev = events.copy()
-        ev["end_exit_dt"] = pd.to_datetime(ev.end_exit_dt, errors="coerce")
+        ev["end_exit_dt"] = pd.to_datetime(ev["end_exit_dt"], errors="coerce")
         latest_rows = []
         for (w, metric), g in ev.groupby(["window", "metric"]):
             g = g.sort_values("end_exit_dt")
@@ -138,7 +156,7 @@ def main() -> int:
         latest = pd.DataFrame(latest_rows).sort_values(["state_rank", "window", "metric"], ascending=[False, True, True]) if latest_rows else pd.DataFrame()
         save(latest, out / "gold_v3_111_latest_monitor_state.csv")
         outputs.append("gold_v3_111_latest_monitor_state.csv")
-        stop_examples = ev[ev.monitor_state.eq("STOP_REVIEW")].sort_values(["end_exit_dt", "window", "metric"]).tail(100)
+        stop_examples = ev[ev["monitor_state"].eq("STOP_REVIEW")].sort_values(["end_exit_dt", "window", "metric"]).tail(100)
         save(stop_examples, out / "gold_v3_111_stop_review_examples.csv")
         outputs.append("gold_v3_111_stop_review_examples.csv")
         prog(4, 5, "monitor dry run outputs written")
@@ -170,10 +188,10 @@ This file is a design artifact only.
         (out / "gold_v3_111_monitor_dry_run_runbook.md").write_text(runbook, encoding="utf-8")
         outputs.append("gold_v3_111_monitor_dry_run_runbook.md")
 
-    stop_count = int((events.monitor_state == "STOP_REVIEW").sum()) if not events.empty else 0
-    caution_count = int((events.monitor_state == "CAUTION").sum()) if not events.empty else 0
-    watch_count = int((events.monitor_state == "WATCH").sum()) if not events.empty else 0
-    latest_worst = latest.iloc[0].monitor_state if not latest.empty else ""
+    stop_count = int((events["monitor_state"] == "STOP_REVIEW").sum()) if not events.empty else 0
+    caution_count = int((events["monitor_state"] == "CAUTION").sum()) if not events.empty else 0
+    watch_count = int((events["monitor_state"] == "WATCH").sum()) if not events.empty else 0
+    latest_worst = latest.iloc[0]["monitor_state"] if not latest.empty else ""
     qg = pd.DataFrame([
         qgate("110_ready", str(s110.get("status", "")) == "GOLD_V3_110_AUDIT_MONITORING_DESIGN_READY_AUDIT_ONLY", "==", True),
         qgate("threshold_rows_positive", int(len(th)), ">=", 1),
@@ -200,7 +218,7 @@ This file is a design artifact only.
     if not events.empty:
         vals.append(dict(check_id="virtual_monitor_events_positive", result="PASS", observed=len(events), expected=">0", severity="BLOCKER"))
     val = pd.DataFrame(vals)
-    validation_failure_count = int((~val.result.eq("PASS")).sum()) if not val.empty else 0
+    validation_failure_count = int((~val["result"].eq("PASS")).sum()) if not val.empty else 0
     status = READY if not blockers and validation_failure_count == 0 else BLOCKED
     decision = "VIRTUAL_MONITOR_DRY_RUN_READY_FOR_STAGE112_SELECTED_POLICY_AUDIT_FREEZE" if status == READY else "VIRTUAL_MONITOR_DRY_RUN_BLOCKED_INPUT_INCOMPLETE"
 
