@@ -90,6 +90,10 @@ def format_content(o):
     ]
     msg='\n'.join(lines)
     return msg[:1900]
+def write_paste(root,summary,blockers,args):
+    out=root/'115b'; lines=['GOLD V3 115B PASTE_ME_QUEUE_SENDER_LOCAL_ENV',f"status: {summary['status']}",f"ready: {str(summary['ready']).lower()}",f"loop_mode: {args.loop}",f"target_second: {args.target_second}",f"env_key_found: {summary.get('env_key_found')}",f"env_key_name: {summary.get('env_key_name','')}",f"sent: {summary.get('sent',0)}",f"skipped: {summary.get('skipped',0)}",f"errors: {summary.get('errors',0)}",f"message_format: {summary.get('message_format','')}",'secret_printed: false','source_csv_mutated: false','contract_mutated: false','open_asof_allowed: false','blocker_count: '+str(len(blockers)),'','KEY_METRICS']+[f'{k}: {v}' for k,v in summary.items()]+['','BLOCKERS','NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False)]
+    out.mkdir(parents=True,exist_ok=True)
+    (out/'paste_me.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 def run_once(root,repo_root,mt5,args,state):
     out=root/'115b'; cur=out/'current'; st=out/'state'; journal=out/'journal'
     for d in [cur,st,journal]: d.mkdir(parents=True,exist_ok=True)
@@ -113,11 +117,9 @@ def run_once(root,repo_root,mt5,args,state):
                 result['action']='SEND_ERROR'; result['error']=str(e); errors+=1
         app(month(journal,dt)/f'gold_v3_115b_sender_{ymd}.jsonl',result); last=result
     if len(state.get('sent_ids',[]))>5000: state['sent_ids']=state['sent_ids'][-5000:]
-    summary={'checked_at_jst':dt.isoformat(),'queue_rows':len(rows),'sent':sent,'skipped':skipped,'errors':errors,'env_key_found':bool(key),'env_key_name':key,'last_result':last,'message_format':'readable_code_block_v1'}
-    jw(cur/'latest_sender_result.json',summary); jw(st/'sender_state.json',state); return summary,state
-def write_paste(root,summary,blockers,args):
-    out=root/'115b'; lines=['GOLD V3 115B PASTE_ME_QUEUE_SENDER_LOCAL_ENV',f"status: {summary['status']}",f"ready: {str(summary['ready']).lower()}",f"loop_mode: {args.loop}",f"target_second: {args.target_second}",f"env_key_found: {summary.get('env_key_found')}",f"env_key_name: {summary.get('env_key_name','')}",f"sent: {summary.get('sent',0)}",f"skipped: {summary.get('skipped',0)}",f"errors: {summary.get('errors',0)}",f"message_format: {summary.get('message_format','')}",'secret_printed: false','source_csv_mutated: false','contract_mutated: false','open_asof_allowed: false','blocker_count: '+str(len(blockers)),'','KEY_METRICS']+[f'{k}: {v}' for k,v in summary.items()]+['','BLOCKERS','NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False)]
-    (out/'paste_me.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
+    base_summary={'checked_at_jst':dt.isoformat(),'queue_rows':len(rows),'sent':sent,'skipped':skipped,'errors':errors,'env_key_found':bool(key),'env_key_name':key,'last_result':last,'message_format':'readable_code_block_v1'}
+    full_summary={'step':STEP,'status':READY,'ready':True,'decision':'QUEUE_SENDER_READY','created_at_utc':datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),'output_dir':str(out),'source_csv_mutated':False,'contract_mutated':False,'open_asof_allowed':False}|base_summary
+    jw(cur/'latest_sender_result.json',base_summary); jw(st/'sender_state.json',state); jw(out/'gold_v3_115b_summary.json',full_summary|{'blockers':[]}); write_paste(root,full_summary,[],args); return base_summary,state
 def main():
     t0=time.time(); ap=argparse.ArgumentParser(); ap.add_argument('--mt5-files-dir',default=''); ap.add_argument('--env-file',default=''); ap.add_argument('--loop',action='store_true'); ap.add_argument('--target-second',type=int,default=5); ap.add_argument('--no-send',action='store_true'); ap.add_argument('--timeout',type=int,default=10)
     args=ap.parse_args(); repo_root=Path(__file__).resolve().parents[2]; mt5=gy.mt5_files_dir(args.mt5_files_dir); root=mt5/'FX_OUTPUTS'/'gold_v3'; out=root/'115b'; out.mkdir(parents=True,exist_ok=True)
