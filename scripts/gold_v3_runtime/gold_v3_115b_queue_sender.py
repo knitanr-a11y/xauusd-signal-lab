@@ -62,6 +62,34 @@ def iter_queue(root):
                 o=json.loads(line); o['_file']=str(p); o['_line']=i; rows.append(o)
             except Exception: pass
     return rows
+def nice(v, blank='-'):
+    if v is None or str(v)=='' or str(v).lower()=='none': return blank
+    return str(v)
+def message_title(side):
+    if side == 'LONG': return '🟢 GOLD V3 DEMO LONG'
+    if side == 'SHORT': return '🔴 GOLD V3 DEMO SHORT'
+    if side == 'STOP_REVIEW': return '⚠️ GOLD V3 REVIEW / STOP'
+    return 'ℹ️ GOLD V3 DEMO NOTICE'
+def format_content(o):
+    side=str(o.get('side',''))
+    title=message_title(side)
+    reason=nice(o.get('reason'))
+    lines=[
+        title,
+        '```',
+        f"symbol        : {nice(o.get('symbol'),'XAUUSD')}",
+        f"side          : {nice(side)}",
+        f"entry_dt      : {nice(o.get('entry_dt'))}",
+        f"entry_price   : {nice(o.get('entry_price'))}",
+        f"tp            : {nice(o.get('tp'))}",
+        f"sl            : {nice(o.get('sl'))}",
+        f"monitor_state : {nice(o.get('monitor_state'))}",
+        f"stale_minutes : {nice(o.get('stale_minutes'))}",
+        '```',
+        f"reason: {reason}",
+    ]
+    msg='\n'.join(lines)
+    return msg[:1900]
 def run_once(root,repo_root,mt5,args,state):
     out=root/'115b'; cur=out/'current'; st=out/'state'; journal=out/'journal'
     for d in [cur,st,journal]: d.mkdir(parents=True,exist_ok=True)
@@ -71,8 +99,8 @@ def run_once(root,repo_root,mt5,args,state):
     for o in rows:
         qid=str(o.get('queue_id') or o.get('key') or f"{o.get('_file')}:{o.get('_line')}")
         if qid in state.get('sent_ids',[]): skipped+=1; continue
-        content=str(o.get('content') or '\n'.join([f"GOLD V3 DEMO ALERT",f"symbol: {o.get('symbol','XAUUSD')}",f"side: {o.get('side','')}",f"entry_dt: {o.get('entry_dt','')}",f"entry_price: {o.get('entry_price','')}",f"tp: {o.get('tp','')}",f"sl: {o.get('sl','')}",f"monitor_state: {o.get('monitor_state','')}",f"reason: {o.get('reason','')}"]))
-        result={'processed_at_jst':dt.isoformat(),'queue_id':qid,'env_key_name':key,'action':'PENDING'}
+        content=str(o.get('content') or format_content(o))
+        result={'processed_at_jst':dt.isoformat(),'queue_id':qid,'env_key_name':key,'action':'PENDING','content_preview':content[:500]}
         if not url:
             result['action']='SKIPPED_NO_ENDPOINT'; skipped+=1
         elif args.no_send:
@@ -85,10 +113,10 @@ def run_once(root,repo_root,mt5,args,state):
                 result['action']='SEND_ERROR'; result['error']=str(e); errors+=1
         app(month(journal,dt)/f'gold_v3_115b_sender_{ymd}.jsonl',result); last=result
     if len(state.get('sent_ids',[]))>5000: state['sent_ids']=state['sent_ids'][-5000:]
-    summary={'checked_at_jst':dt.isoformat(),'queue_rows':len(rows),'sent':sent,'skipped':skipped,'errors':errors,'env_key_found':bool(key),'env_key_name':key,'last_result':last}
+    summary={'checked_at_jst':dt.isoformat(),'queue_rows':len(rows),'sent':sent,'skipped':skipped,'errors':errors,'env_key_found':bool(key),'env_key_name':key,'last_result':last,'message_format':'readable_code_block_v1'}
     jw(cur/'latest_sender_result.json',summary); jw(st/'sender_state.json',state); return summary,state
 def write_paste(root,summary,blockers,args):
-    out=root/'115b'; lines=['GOLD V3 115B PASTE_ME_QUEUE_SENDER_LOCAL_ENV',f"status: {summary['status']}",f"ready: {str(summary['ready']).lower()}",f"loop_mode: {args.loop}",f"target_second: {args.target_second}",f"env_key_found: {summary.get('env_key_found')}",f"env_key_name: {summary.get('env_key_name','')}",f"sent: {summary.get('sent',0)}",f"skipped: {summary.get('skipped',0)}",f"errors: {summary.get('errors',0)}",'secret_printed: false','source_csv_mutated: false','contract_mutated: false','open_asof_allowed: false','blocker_count: '+str(len(blockers)),'','KEY_METRICS']+[f'{k}: {v}' for k,v in summary.items()]+['','BLOCKERS','NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False)]
+    out=root/'115b'; lines=['GOLD V3 115B PASTE_ME_QUEUE_SENDER_LOCAL_ENV',f"status: {summary['status']}",f"ready: {str(summary['ready']).lower()}",f"loop_mode: {args.loop}",f"target_second: {args.target_second}",f"env_key_found: {summary.get('env_key_found')}",f"env_key_name: {summary.get('env_key_name','')}",f"sent: {summary.get('sent',0)}",f"skipped: {summary.get('skipped',0)}",f"errors: {summary.get('errors',0)}",f"message_format: {summary.get('message_format','')}",'secret_printed: false','source_csv_mutated: false','contract_mutated: false','open_asof_allowed: false','blocker_count: '+str(len(blockers)),'','KEY_METRICS']+[f'{k}: {v}' for k,v in summary.items()]+['','BLOCKERS','NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False)]
     (out/'paste_me.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 def main():
     t0=time.time(); ap=argparse.ArgumentParser(); ap.add_argument('--mt5-files-dir',default=''); ap.add_argument('--env-file',default=''); ap.add_argument('--loop',action='store_true'); ap.add_argument('--target-second',type=int,default=5); ap.add_argument('--no-send',action='store_true'); ap.add_argument('--timeout',type=int,default=10)
