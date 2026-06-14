@@ -30,6 +30,7 @@ GOLD_V3_107K2_DIRECT_REGIME_BALANCED_ADAPTIVE_SCORE_PENDING_AUDIT_ONLY
 - 2025相場と2026高ボラ相場の両方で成果を残せる、フレキシブルなGOLD V3を作ることです。
 - 5月だけ良い候補、2026だけ良い候補、2025だけ良い候補は完成扱いにしないでください。
 - 評価軸は `all_regime_pass_65_count`, `all_regime_pass_60_count`, `best_min_wr`, `best_min_pf`, `best_min_trades`, `best_policy_regime_rows` です。
+- 107K2の `test_end=2027-01-01` は上限です。実際には添付結果に存在する最新行までの評価として扱ってください。
 - 107Jはexit_dt不足でBLOCKEDです。rolling health gateは、exit_dtがあるresolved-only ledgerがない限り進めないでください。
 - health gate / rolling gateは必ず `exit_dt <= current entry_dt` の解決済み履歴だけを使ってください。
 - open中の足はCSVには入りません。CSVの最新行はCSV契約上closedです。
