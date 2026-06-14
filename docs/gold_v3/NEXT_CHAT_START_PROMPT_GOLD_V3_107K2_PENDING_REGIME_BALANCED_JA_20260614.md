@@ -25,6 +25,11 @@ GOLD_V3_107K2_DIRECT_REGIME_BALANCED_ADAPTIVE_SCORE_PENDING_AUDIT_ONLY
 次にやること:
 添付する `FX_OUTPUTS/gold_v3/107k2c/paste_me.txt` を読んで、107K2結果を判断してください。
 
+GitHub実装許可:
+この新チャットでは、必要なaudit-onlyのspec / script / BAT / handoff / report系ドキュメントをGitHub上に作成・更新して構いません。
+ただし、source CSV、CSV契約、candidate pool、Stage45 runtime、Stage69 runtime、live evaluator、live hook、final signal、MT5発注、Discord通知、AI APIを変更・有効化することは禁止です。
+実装してよいのは、明示的にaudit-onlyの検証・集計・再現・レポート作成に限ります。
+
 重要:
 - 目的は2026年5月だけに適応する候補ではありません。
 - 2025相場と2026高ボラ相場の両方で成果を残せる、フレキシブルなGOLD V3を作ることです。
