@@ -68,9 +68,17 @@ def read_input(inbox: Path):
         obj["signal_id"] = f"{obj.get('side','UNKNOWN')}|{obj.get('entry_dt','')}|{obj.get('symbol','XAUUSD')}"
     return obj, True
 
+def candle_key(sig: dict, side: str, monitor_state: str) -> str:
+    """One signal per candle per symbol/side/monitor-state, independent of volatile signal_id."""
+    symbol = str(sig.get("symbol", "XAUUSD"))
+    entry_dt = str(sig.get("entry_dt", ""))
+    if not entry_dt:
+        entry_dt = str(sig.get("bar_dt", "")) or str(sig.get("signal_dt", "")) or str(sig.get("signal_id", ""))
+    return f"{symbol}|{side}|{entry_dt}|{monitor_state}"
+
 def append_csv(path: Path, row: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
-    keys = ["queue_id", "signal_id", "entry_dt", "symbol", "side", "entry_price", "tp", "sl", "status", "outcome", "created_at_jst"]
+    keys = ["queue_id", "candle_key", "signal_id", "entry_dt", "symbol", "side", "entry_price", "tp", "sl", "status", "outcome", "created_at_jst"]
     exists = path.exists()
     with path.open("a", encoding="utf-8-sig") as f:
         if not exists:
@@ -95,29 +103,32 @@ def run_once(root: Path, args, state: dict):
     dt = jst()
     ymd = dt.strftime("%Y-%m-%d")
     side = str(sig.get("side", "NO_SIGNAL"))
-    queue_id = f"{sig.get('signal_id')}|{side}|{monitor_state}"
+    ck = candle_key(sig, side, monitor_state)
+    queue_id = f"{ck}|{sig.get('signal_id')}"
     event = {
         "evaluated_at_jst": dt.isoformat(),
         "input_present": present,
         "side": side,
         "signal_id": sig.get("signal_id"),
+        "candle_key": ck,
         "monitor_state": monitor_state,
         "action": "NO_QUEUE",
         "reason": sig.get("reason", ""),
     }
     if side not in ["", "NO_SIGNAL", "NONE"]:
-        if state.get("last_queue_id") == queue_id:
-            event["action"] = "SUPPRESSED_DUPLICATE"
+        if state.get("last_candle_key") == ck:
+            event["action"] = "SUPPRESSED_DUPLICATE_CANDLE"
         else:
             item = dict(event)
             item.update({"queue_id": queue_id, "symbol": sig.get("symbol", "XAUUSD"), "entry_dt": sig.get("entry_dt"), "entry_price": sig.get("entry_price"), "tp": sig.get("tp"), "sl": sig.get("sl")})
             append_jsonl(month_dir(queue, dt) / f"gold_v3_115a_queue_{ymd}.jsonl", item)
             append_jsonl(month_dir(notice_root, dt) / f"gold_v3_115a_notices_{ymd}.jsonl", item)
+            state["last_candle_key"] = ck
             state["last_queue_id"] = queue_id
             state["last_queue_at_jst"] = dt.isoformat()
             event["action"] = "QUEUED"
             if side in ["LONG", "SHORT"]:
-                append_csv(history / "gold_v3_115a_virtual_signal_ledger.csv", {"queue_id": queue_id, "signal_id": sig.get("signal_id"), "entry_dt": sig.get("entry_dt"), "symbol": sig.get("symbol", "XAUUSD"), "side": side, "entry_price": sig.get("entry_price"), "tp": sig.get("tp"), "sl": sig.get("sl"), "status": "OPEN_TRACKING_ONLY", "outcome": "PENDING", "created_at_jst": dt.isoformat()})
+                append_csv(history / "gold_v3_115a_virtual_signal_ledger.csv", {"queue_id": queue_id, "candle_key": ck, "signal_id": sig.get("signal_id"), "entry_dt": sig.get("entry_dt"), "symbol": sig.get("symbol", "XAUUSD"), "side": side, "entry_price": sig.get("entry_price"), "tp": sig.get("tp"), "sl": sig.get("sl"), "status": "OPEN_TRACKING_ONLY", "outcome": "PENDING", "created_at_jst": dt.isoformat()})
     append_jsonl(month_dir(eval_root, dt) / f"gold_v3_115a_evaluations_{ymd}.jsonl", event)
     removed = prune_old(notice_root, args.retention_days)
     event["pruned_notice_files"] = removed
@@ -147,6 +158,7 @@ def write_outputs(root: Path, args, blockers, summary):
         f"ready: {str(summary['ready']).lower()}",
         f"target_second: {summary['target_second']}",
         f"retention_days: {summary['retention_days']}",
+        "duplicate_scope: candle_key",
         "source_csv_mutated: false",
         "contract_mutated: false",
         "open_asof_allowed: false",
@@ -176,7 +188,7 @@ def main():
     if not blockers:
         while True:
             event, state = run_once(root, args, state)
-            print(f"action={event.get('action')} side={event.get('side')} signal_id={event.get('signal_id')}", flush=True)
+            print(f"action={event.get('action')} side={event.get('side')} signal_id={event.get('signal_id')} candle_key={event.get('candle_key')}", flush=True)
             if not args.loop:
                 break
             time.sleep(sleep_until_second(args.target_second))
@@ -190,6 +202,7 @@ def main():
         "target_second": args.target_second,
         "retention_days": args.retention_days,
         "loop_mode": args.loop,
+        "duplicate_scope": "candle_key",
         "source_csv_mutated": False,
         "contract_mutated": False,
         "open_asof_allowed": False,
