@@ -94,6 +94,21 @@ def daily_high_vol_map(led: pd.DataFrame, vol_col: str, q: float, min_history_da
     return out
 
 
+def progress(out_dir: Path, done: int, total: int, route_config: str, started: float) -> None:
+    pct = (done / total * 100.0) if total else 100.0
+    elapsed = time.time() - started
+    msg = f"[PROGRESS] config {done}/{total} ({pct:.1f}%) {route_config} elapsed={elapsed:.1f}s"
+    print(msg, flush=True)
+    (out_dir / "progress.txt").write_text(msg + "\n", encoding="utf-8")
+    (out_dir / "progress.json").write_text(json.dumps({
+        "done": done,
+        "total": total,
+        "percent": pct,
+        "route_config": route_config,
+        "elapsed_seconds": round(elapsed, 1),
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def evaluate(led: pd.DataFrame, champion_key: str, challenger_key: str, start: pd.Timestamp, end: pd.Timestamp, vol_col: str, vol_q: float, min_hist: int, champion_block_after: int, challenger_running_min: int, challenger_daily_cap: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     hv_map = daily_high_vol_map(led, vol_col, vol_q, min_hist)
     champ = led[led.policy_key.astype(str) == champion_key].copy()
@@ -218,6 +233,8 @@ def main() -> int:
         blockers.append({"blocker_id": "missing_vol_col", "vol_col": vol_col})
 
     summary_df = pd.DataFrame(); selected_daily = pd.DataFrame(); selected_monthly = pd.DataFrame()
+    total_configs = 0
+    completed_configs = 0
     if not blockers:
         led["entry_dt"] = pd.to_datetime(led.entry_dt, errors="coerce")
         led["result_usd"] = pd.to_numeric(led.get("result_usd"), errors="coerce")
@@ -225,14 +242,22 @@ def main() -> int:
         led["entry_date"] = led.entry_dt.dt.normalize()
         start = pd.Timestamp(args.start); end = pd.Timestamp(args.end_exclusive)
         led = led[(led.entry_dt >= start) & (led.entry_dt < end)].copy()
-        rows = []; monthlies = []; cache = {}
+        configs = []
         for cb in [2, 3, 4]:
             for cr in [1, 3, 5, 8]:
                 for cap in [1, 2, 3, 5, 8]:
-                    daily, rep, worst = evaluate(led, champion, challenger, start, end, vol_col, vol_q, args.min_history_days, cb, cr, cap)
-                    cfg = dict(route_config=f"INTRADAY_CAP|{vol_col}|Q{vol_q}|BLOCK_CHAMPION_GE_{cb}|CHAL_RUNNING_GE_{cr}|CHAL_CAP_{cap}", champion_block_after=cb, challenger_running_min=cr, challenger_daily_cap=cap, vol_col=vol_col, vol_q=vol_q)
-                    s, mon = summarize(daily, rep, worst, cfg)
-                    rows.append(s); monthlies.append(mon); cache[cfg["route_config"]] = (daily, mon)
+                    configs.append((cb, cr, cap))
+        total_configs = len(configs)
+        progress(out, 0, total_configs, "START", t0)
+        rows = []; monthlies = []; cache = {}
+        for idx, (cb, cr, cap) in enumerate(configs, start=1):
+            route_config = f"INTRADAY_CAP|{vol_col}|Q{vol_q}|BLOCK_CHAMPION_GE_{cb}|CHAL_RUNNING_GE_{cr}|CHAL_CAP_{cap}"
+            daily, rep, worst = evaluate(led, champion, challenger, start, end, vol_col, vol_q, args.min_history_days, cb, cr, cap)
+            cfg = dict(route_config=route_config, champion_block_after=cb, challenger_running_min=cr, challenger_daily_cap=cap, vol_col=vol_col, vol_q=vol_q)
+            s, mon = summarize(daily, rep, worst, cfg)
+            rows.append(s); monthlies.append(mon); cache[cfg["route_config"]] = (daily, mon)
+            completed_configs = idx
+            progress(out, completed_configs, total_configs, route_config, t0)
         summary_df = pd.DataFrame(rows)
         if not summary_df.empty:
             summary_df["score"] = summary_df.worst_sum_result_usd + summary_df.worst_pf * 100 - summary_df.negative_months_worst * 400 + summary_df.june_worst_sum_result_usd * 0.2 - summary_df.route_events * 0.5
@@ -264,6 +289,9 @@ def main() -> int:
         "output_dir": str(out),
         "audit_only": True,
         "review_only": True,
+        "progress_total_configs": total_configs,
+        "progress_completed_configs": completed_configs,
+        "progress_output": str(out / "progress.txt"),
         "source_141_decision": s141.get("decision", ""),
         "source_141_selected_route_config": s141.get("selected_route_config", ""),
         "champion_policy_key": champion,
