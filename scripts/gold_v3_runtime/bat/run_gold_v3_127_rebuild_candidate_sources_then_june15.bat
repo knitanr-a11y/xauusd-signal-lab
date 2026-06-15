@@ -8,7 +8,7 @@ echo GOLD V3 127 REBUILD CANDIDATE SOURCES THEN JUNE15
 echo MT5_FILES=%MT5_FILES%
 
 echo [01] 107GB
-py -3 scripts\gold_v3_runtime\gold_v3_107gb_dual_edge_walkforward_density_and_conflict_audit.py --mt5-files-dir "%MT5_FILES%"
+py -3 scripts\gold_v3_runtime\gold_v3_107gb_dual_edge_walkforward_density_and_conflict_audit.py --mt5-files-dir "%MT5_FILES%" --data-dir "%MT5_FILES%"
 if errorlevel 1 goto err
 
 echo [02] 107GC
@@ -20,11 +20,11 @@ py -3 scripts\gold_v3_runtime\gold_v3_107gd_edge_sharpening_and_diversification_
 if errorlevel 1 goto err
 
 echo [04] 107GL
-py -3 scripts\gold_v3_runtime\gold_v3_107gl_new_long_short_vector_family_generation_audit.py --mt5-files-dir "%MT5_FILES%"
+py -3 scripts\gold_v3_runtime\gold_v3_107gl_new_long_short_vector_family_generation_audit.py --mt5-files-dir "%MT5_FILES%" --data-dir "%MT5_FILES%"
 if errorlevel 1 goto err
 
 echo [05] 107GN
-py -3 scripts\gold_v3_runtime\gold_v3_107gn_atomic_vector_discovery_v2_audit.py --mt5-files-dir "%MT5_FILES%"
+py -3 scripts\gold_v3_runtime\gold_v3_107gn_atomic_vector_discovery_v2_audit.py --mt5-files-dir "%MT5_FILES%" --data-dir "%MT5_FILES%"
 if errorlevel 1 goto err
 
 echo [06] 107GO
