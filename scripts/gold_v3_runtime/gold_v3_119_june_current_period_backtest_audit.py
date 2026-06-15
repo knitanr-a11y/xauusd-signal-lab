@@ -16,9 +16,6 @@ STEP = "GOLD_V3_119_JUNE_CURRENT_PERIOD_BACKTEST_AUDIT_ONLY"
 READY = STEP + "_READY"
 BLOCKED = STEP + "_BLOCKED"
 
-START = pd.Timestamp("2026-06-01")
-END = pd.Timestamp("2026-07-01")
-
 
 def save(df: pd.DataFrame, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -41,11 +38,18 @@ def load_csv(path: Path) -> pd.DataFrame:
     return df
 
 
-def june(df: pd.DataFrame) -> pd.DataFrame:
+def period(df: pd.DataFrame, start: pd.Timestamp, end_exclusive: pd.Timestamp) -> pd.DataFrame:
     if df.empty or "entry_dt" not in df.columns:
         return pd.DataFrame()
     x = df[df["entry_dt"].notna()].copy()
-    return x[(x["entry_dt"] >= START) & (x["entry_dt"] < END)].copy()
+    return x[(x["entry_dt"] >= start) & (x["entry_dt"] < end_exclusive)].copy()
+
+
+def max_entry(df: pd.DataFrame) -> str:
+    if df.empty or "entry_dt" not in df.columns:
+        return ""
+    x = df["entry_dt"].dropna()
+    return str(x.max()) if len(x) else ""
 
 
 def pf(s) -> float:
@@ -98,8 +102,9 @@ def metrics(name: str, df: pd.DataFrame, note: str, live_valid: bool) -> dict:
         "max_entry_dt": str(x["entry_dt"].max()) if trades and "entry_dt" in x.columns else "",
     }
     if trades and "side" in x.columns:
-        out["long_trades"] = int((x["side"].astype(str).str.upper() == "LONG").sum())
-        out["short_trades"] = int((x["side"].astype(str).str.upper() == "SHORT").sum())
+        side = x["side"].astype(str).str.upper()
+        out["long_trades"] = int((side == "LONG").sum())
+        out["short_trades"] = int((side == "SHORT").sum())
     else:
         out["long_trades"] = 0
         out["short_trades"] = 0
@@ -122,7 +127,14 @@ def main() -> int:
     t0 = time.time()
     ap = argparse.ArgumentParser()
     ap.add_argument("--mt5-files-dir", default="")
+    ap.add_argument("--start", default="2026-06-01")
+    ap.add_argument("--end-exclusive", default="2026-07-01")
+    ap.add_argument("--require-min-input-max-entry-dt", default="")
     args = ap.parse_args()
+
+    start = pd.Timestamp(args.start)
+    end_exclusive = pd.Timestamp(args.end_exclusive)
+    required_max = pd.Timestamp(args.require_min_input_max_entry_dt) if args.require_min_input_max_entry_dt else None
 
     root = gy.mt5_files_dir(args.mt5_files_dir) / "FX_OUTPUTS" / "gold_v3"
     out = root / "119"
@@ -143,13 +155,19 @@ def main() -> int:
         else:
             data[k] = load_csv(p)
 
+    input_max = max_entry(data.get("upstream_107l", pd.DataFrame()))
+    if required_max is not None:
+        parsed_max = pd.to_datetime(input_max, errors="coerce") if input_max else pd.NaT
+        if pd.isna(parsed_max) or parsed_max < required_max:
+            blockers.append({"blocker_id": "upstream_107l_does_not_reach_required_target", "observed_max_entry_dt": input_max, "required_min_entry_dt": str(required_max), "action": "rerun upstream 107L/107Q source chain before judging June 1-15"})
+
     rows = []
     side_rows = []
     if not blockers:
-        selected_june = june(data["selected_109c"])
-        shadow_june = june(data["shadow_117j_best"])
-        upstream_june = june(data["upstream_107l"])
-        removed = data["removed_detail_117l"].copy()
+        selected_p = period(data["selected_109c"], start, end_exclusive)
+        shadow_p = period(data["shadow_117j_best"], start, end_exclusive)
+        upstream_p = period(data["upstream_107l"], start, end_exclusive)
+        removed = period(data["removed_detail_117l"], start, end_exclusive) if "entry_dt" in data["removed_detail_117l"].columns else data["removed_detail_117l"].copy()
         if "filter_removed" in removed.columns:
             removed_true = removed[removed["filter_removed"].astype(str).str.lower().isin(["true", "1", "yes"])].copy()
             kept_true = removed[~removed["filter_removed"].astype(str).str.lower().isin(["true", "1", "yes"])].copy()
@@ -157,49 +175,53 @@ def main() -> int:
             removed_true = pd.DataFrame()
             kept_true = removed.copy()
 
-        rows.append(metrics("raw_107l_june", upstream_june, "107L upstream June rows before F002 selected exclusion", False))
-        rows.append(metrics("dedup_107l_june", dedup(upstream_june), "deduplicated 107L upstream June rows", False))
-        rows.append(metrics("health_gate_selected_109c_june", selected_june, "current selected policy after F002 exclusion", True))
-        rows.append(metrics("shadow_117j_best_june", shadow_june, "shadow 107Q best family after F002 exclusion", True))
-        rows.append(metrics("f002_removed_june_review_only", removed_true, "June rows removed by F002; review-only, not live policy", False))
-        rows.append(metrics("f002_kept_june", kept_true, "June rows kept by F002", True))
-        rows.append(metrics("restore_all_8_review_only", pd.concat([selected_june, removed_true], ignore_index=True, sort=False), "selected policy plus all removed June rows; review-only", False))
-        rows.append(metrics("resolved_only_live_repro_selected_june", resolved(selected_june), "resolved-only view of current selected policy", True))
+        rows.append(metrics("raw_107l_period", upstream_p, "107L upstream rows before F002 selected exclusion", False))
+        rows.append(metrics("dedup_107l_period", dedup(upstream_p), "deduplicated 107L upstream rows", False))
+        rows.append(metrics("health_gate_selected_109c_period", selected_p, "current selected policy after F002 exclusion", True))
+        rows.append(metrics("shadow_117j_best_period", shadow_p, "shadow 107Q best family after F002 exclusion", True))
+        rows.append(metrics("f002_removed_period_review_only", removed_true, "rows removed by F002; review-only", False))
+        rows.append(metrics("f002_kept_period", kept_true, "rows kept by F002", True))
+        rows.append(metrics("restore_removed_period_review_only", pd.concat([selected_p, removed_true], ignore_index=True, sort=False), "selected policy plus removed period rows; review-only", False))
+        rows.append(metrics("resolved_only_live_repro_selected_period", resolved(selected_p), "resolved-only current selected policy", True))
 
-        save(upstream_june, out / "gold_v3_119_raw_107l_june_rows.csv")
-        save(selected_june, out / "gold_v3_119_selected_109c_june_rows.csv")
-        save(removed_true, out / "gold_v3_119_f002_removed_june_review_rows.csv")
-        side_parts = [side_metrics(upstream_june, "raw_107l_june"), side_metrics(removed_true, "f002_removed_june_review_only"), side_metrics(selected_june, "selected_109c_june")]
+        save(upstream_p, out / "gold_v3_119_raw_107l_period_rows.csv")
+        save(selected_p, out / "gold_v3_119_selected_109c_period_rows.csv")
+        save(removed_true, out / "gold_v3_119_f002_removed_period_review_rows.csv")
+        side_parts = [side_metrics(upstream_p, "raw_107l_period"), side_metrics(removed_true, "f002_removed_period_review_only"), side_metrics(selected_p, "selected_109c_period")]
         side_rows = [x for x in side_parts if not x.empty]
 
     comp = pd.DataFrame(rows)
-    save(comp, out / "gold_v3_119_june_current_period_backtest_comparison.csv")
+    save(comp, out / "gold_v3_119_period_backtest_comparison.csv")
     side_df = pd.concat(side_rows, ignore_index=True, sort=False) if side_rows else pd.DataFrame()
-    save(side_df, out / "gold_v3_119_june_direction_split.csv")
+    save(side_df, out / "gold_v3_119_period_direction_split.csv")
 
     status = READY if not blockers else BLOCKED
     summary = {
         "step": STEP,
         "status": status,
         "ready": status == READY,
-        "decision": "JUNE_CURRENT_PERIOD_BACKTEST_AUDIT_READY" if status == READY else "JUNE_CURRENT_PERIOD_BACKTEST_AUDIT_BLOCKED",
+        "decision": "PERIOD_BACKTEST_AUDIT_READY" if status == READY else "PERIOD_BACKTEST_AUDIT_BLOCKED_INPUT_COVERAGE",
         "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "output_dir": str(out),
-        "period_start": str(START),
-        "period_end_exclusive": str(END),
+        "period_start": str(start),
+        "period_end_exclusive": str(end_exclusive),
+        "required_min_input_max_entry_dt": str(required_max) if required_max is not None else "",
+        "observed_107l_max_entry_dt": input_max,
+        "selected_109c_max_entry_dt": max_entry(data.get("selected_109c", pd.DataFrame())),
+        "shadow_117j_max_entry_dt": max_entry(data.get("shadow_117j_best", pd.DataFrame())),
         "source_csv_mutated": False,
         "contract_mutated": False,
         "open_asof_allowed": False,
         "candidate_pool_removed": False,
         "f002_exclusion_bypassed": False,
-        "june_restore_auto_adopted": False,
+        "period_restore_auto_adopted": False,
         "review_only": True,
         "blocker_count": len(blockers),
         "elapsed_seconds": round(time.time() - t0, 2),
     }
     if not comp.empty:
         for _, r in comp.iterrows():
-            if r["bucket"] in ["raw_107l_june", "health_gate_selected_109c_june", "restore_all_8_review_only"]:
+            if r["bucket"] in ["raw_107l_period", "health_gate_selected_109c_period", "restore_removed_period_review_only"]:
                 prefix = r["bucket"]
                 summary[prefix + "_trades"] = int(r["resolved_trades"])
                 summary[prefix + "_wr"] = float(r["win_rate"])
@@ -209,7 +231,7 @@ def main() -> int:
     write_json(out / "gold_v3_119_summary.json", summary | {"blockers": blockers})
     save(pd.DataFrame([summary]), out / "gold_v3_119_decision.csv")
 
-    lines = ["GOLD V3 119 PASTE_ME_JUNE_CURRENT_PERIOD_BACKTEST_AUDIT"]
+    lines = ["GOLD V3 119 PASTE_ME_PERIOD_BACKTEST_AUDIT"]
     lines += [f"{k}: {v}" for k, v in summary.items()]
     lines += ["", "COMPARISON", comp.to_string(index=False) if not comp.empty else "NO_ROWS"]
     lines += ["", "DIRECTION_SPLIT", side_df.to_string(index=False) if not side_df.empty else "NO_DIRECTION_ROWS"]
