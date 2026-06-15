@@ -29,6 +29,12 @@ def met(v):
     return {'count':int(len(x)),'sum':float(x.sum()),'pf':pf(x),'wr':float((x>0).mean()) if len(x) else 0.0,'neg':int((x<0).sum())}
 def uniq(g,c): return int(g[c].nunique(dropna=True)) if c in g.columns else 0
 def vals(g,c): return ';'.join(map(str,g[c].dropna().astype(str).unique()[:8])) if c in g.columns else ''
+def get_mode_value(mode_df, mode_name, value_col, default=0.0):
+    if mode_df.empty or 'mode' not in mode_df.columns or value_col not in mode_df.columns:
+        return default
+    m=mode_df['mode'].astype(str).eq(mode_name)
+    if not m.any(): return default
+    return mode_df.loc[m,value_col].iloc[0]
 def main():
     t0=time.time(); ap=argparse.ArgumentParser(); ap.add_argument('--mt5-files-dir',default=''); args=ap.parse_args(); mt5=gy.mt5_files_dir(args.mt5_files_dir); root=mt5/'FX_OUTPUTS'/'gold_v3'; out=root/'162'; out.mkdir(parents=True,exist_ok=True)
     s161=readj(root/'161'/'gold_v3_161_summary.json'); cur=str(s161.get('current_best_policy_key') or CUR)
@@ -46,15 +52,14 @@ def main():
             summary_rows.append({'entry_dt':dt,'rows':int(len(g)),'stack_sum':result_sum,'row_mean':result_mean,'unique_side':uniq(g,'side'),'side_values':vals(g,'side'),'unique_condition':uniq(g,'condition'),'condition_values':vals(g,'condition'),'unique_profile_id':uniq(g,'profile_id'),'profile_values':vals(g,'profile_id'),'unique_candidate_key':uniq(g,'candidate_key'),'unique_result':uniq(g,rc),'min_result':float(g[rc].min()),'max_result':float(g[rc].max())})
         detail=pd.DataFrame(summary_rows).sort_values(['rows','entry_dt'],ascending=[False,True])
         save(detail,out/'gold_v3_162_current_best_entry_multiplicity.csv')
-        # metric modes: raw rows vs stacked timestamp PnL vs single best/worst/first rows
         raw_m=met(c[rc]); stack_m=met(detail['stack_sum'])
         first=c.sort_values('entry_dt').groupby('entry_dt',as_index=False).head(1); best=c.sort_values(['entry_dt',rc],ascending=[True,False]).groupby('entry_dt',as_index=False).head(1); worst=c.sort_values(['entry_dt',rc],ascending=[True,True]).groupby('entry_dt',as_index=False).head(1)
         modes=[{'mode':'RAW_ALL_ROWS_AS_SEPARATE_ORDERS',**raw_m},{'mode':'STACK_SUM_PER_ENTRY_DT',**stack_m},{'mode':'FIRST_ROW_PER_ENTRY_DT',**met(first[rc])},{'mode':'BEST_RESULT_PER_ENTRY_DT_DEBUG_ONLY',**met(best[rc])},{'mode':'WORST_RESULT_PER_ENTRY_DT_DEBUG_ONLY',**met(worst[rc])}]
         mode_df=pd.DataFrame(modes); save(mode_df,out/'gold_v3_162_current_best_stack_metric_modes.csv')
-        dist=detail.rows.value_counts().sort_index().reset_index(); dist.columns=['rows_per_entry_dt','entry_dt_count']; save(dist,out/'gold_v3_162_rows_per_entry_distribution.csv')
+        dist=detail['rows'].value_counts().sort_index().reset_index(); dist.columns=['rows_per_entry_dt','entry_dt_count']; save(dist,out/'gold_v3_162_rows_per_entry_distribution.csv')
     else:
         mode_df=pd.DataFrame(); dist=pd.DataFrame(); prog(out,1,1,'BLOCKED',t0)
-    multi=int((detail.rows>1).sum()) if not detail.empty else 0; mixed_side=int((detail.unique_side>1).sum()) if not detail.empty else 0; multi_profile=int((detail.unique_profile_id>1).sum()) if not detail.empty else 0; total_dt=int(len(detail)) if not detail.empty else 0
+    multi=int((detail['rows']>1).sum()) if not detail.empty else 0; mixed_side=int((detail['unique_side']>1).sum()) if not detail.empty else 0; multi_profile=int((detail['unique_profile_id']>1).sum()) if not detail.empty else 0; total_dt=int(len(detail)) if not detail.empty else 0
     if mixed_side>0:
         interpretation='MIXED_SIDE_EXISTS_REVIEW_REQUIRED_STACKING_NOT_SAFE_AS_IS'
     elif multi_profile>0 or multi>0:
@@ -62,7 +67,7 @@ def main():
     else:
         interpretation='SINGLE_ROW_PER_TIME_NO_STACKING_STRUCTURE'
     status='READY' if not blockers else 'INPUT_MISSING'; decision='CURRENT_BEST_MULTIPLICITY_STACK_READY' if status=='READY' else 'CURRENT_BEST_MULTIPLICITY_STACK_INPUT_MISSING'
-    summary={'step':STEP,'status':status,'ready':not blockers,'decision':decision,'created_at_utc':datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),'output_dir':str(out),'audit_only':True,'review_only':True,'current_best_policy_key':cur,'total_policy_rows':int(mode_df.loc[mode_df.mode.eq('RAW_ALL_ROWS_AS_SEPARATE_ORDERS'),'count'].iloc[0]) if not mode_df.empty else 0,'unique_entry_dt':total_dt,'multi_row_entry_dt':multi,'mixed_side_entry_dt':mixed_side,'multi_profile_entry_dt':multi_profile,'interpretation':interpretation,'raw_pf':float(mode_df.loc[mode_df.mode.eq('RAW_ALL_ROWS_AS_SEPARATE_ORDERS'),'pf'].iloc[0]) if not mode_df.empty else 0.0,'stack_sum_pf':float(mode_df.loc[mode_df.mode.eq('STACK_SUM_PER_ENTRY_DT'),'pf'].iloc[0]) if not mode_df.empty else 0.0,'source_csv_mutated':False,'contract_mutated':False,'open_asof_allowed':False,'candidate_pool_removed':False,'f002_exclusion_bypassed':False,'blocker_count':len(blockers),'elapsed_seconds':round(time.time()-t0,2)}
+    summary={'step':STEP,'status':status,'ready':not blockers,'decision':decision,'created_at_utc':datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),'output_dir':str(out),'audit_only':True,'review_only':True,'current_best_policy_key':cur,'total_policy_rows':int(get_mode_value(mode_df,'RAW_ALL_ROWS_AS_SEPARATE_ORDERS','count',0)),'unique_entry_dt':total_dt,'multi_row_entry_dt':multi,'mixed_side_entry_dt':mixed_side,'multi_profile_entry_dt':multi_profile,'interpretation':interpretation,'raw_pf':float(get_mode_value(mode_df,'RAW_ALL_ROWS_AS_SEPARATE_ORDERS','pf',0.0)),'stack_sum_pf':float(get_mode_value(mode_df,'STACK_SUM_PER_ENTRY_DT','pf',0.0)),'source_csv_mutated':False,'contract_mutated':False,'open_asof_allowed':False,'candidate_pool_removed':False,'f002_exclusion_bypassed':False,'blocker_count':len(blockers),'elapsed_seconds':round(time.time()-t0,2)}
     (out/'gold_v3_162_summary.json').write_text(json.dumps(summary|{'blockers':blockers},ensure_ascii=False,indent=2),encoding='utf-8'); save(pd.DataFrame([summary]),out/'gold_v3_162_decision.csv')
     lines=['GOLD V3 162 PASTE_ME_CURRENT_BEST_MULTIPLICITY_STACK_AUDIT']+[f'{k}: {v}' for k,v in summary.items()]+['','STACK_METRIC_MODES',mode_df.to_string(index=False) if not mode_df.empty else 'NO_MODES','','ROWS_PER_ENTRY_DISTRIBUTION',dist.to_string(index=False) if not dist.empty else 'NO_DISTRIBUTION','','TOP_MULTIPLICITY_ENTRY_DT',detail.head(80).to_string(index=False) if not detail.empty else 'NO_DETAIL','','INTERPRETATION','If mixed_side_entry_dt is 0 and many entry times have multiple rows/profiles, old current best may have been evaluated as stacked/vector rows. If mixed sides exist, MT5 stacking needs explicit conflict handling. Audit-only; no final/live.','','BLOCKERS','NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False,indent=2)]
     (out/'paste_me.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
