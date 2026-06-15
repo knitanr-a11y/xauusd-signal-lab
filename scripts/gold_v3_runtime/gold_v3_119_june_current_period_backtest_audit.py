@@ -70,19 +70,19 @@ def dedup(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values(keys).drop_duplicates(keys, keep="last").copy()
 
 
-def resolved(df: pd.DataFrame) -> pd.DataFrame:
+def resolved(df: pd.DataFrame, require_exit_dt: bool = True) -> pd.DataFrame:
     if df.empty:
         return df.copy()
     x = df.copy()
     if "result_usd" in x.columns:
         x = x[x["result_usd"].notna()].copy()
-    if "exit_dt" in x.columns:
+    if require_exit_dt and "exit_dt" in x.columns:
         x = x[x["exit_dt"].notna()].copy()
     return x
 
 
-def metrics(name: str, df: pd.DataFrame, note: str, live_valid: bool) -> dict:
-    x = resolved(df)
+def metrics(name: str, df: pd.DataFrame, note: str, live_valid: bool, require_exit_dt: bool = True) -> dict:
+    x = resolved(df, require_exit_dt=require_exit_dt)
     r = pd.to_numeric(x.get("result_usd", pd.Series(dtype=float)), errors="coerce").dropna()
     trades = int(len(r))
     wins = int((r > 0).sum())
@@ -91,6 +91,7 @@ def metrics(name: str, df: pd.DataFrame, note: str, live_valid: bool) -> dict:
         "bucket": name,
         "note": note,
         "live_valid": bool(live_valid),
+        "require_exit_dt": bool(require_exit_dt),
         "rows_before_resolved_filter": int(len(df)),
         "resolved_trades": trades,
         "wins": wins,
@@ -111,16 +112,27 @@ def metrics(name: str, df: pd.DataFrame, note: str, live_valid: bool) -> dict:
     return out
 
 
-def side_metrics(df: pd.DataFrame, bucket: str) -> pd.DataFrame:
-    x = resolved(df)
+def side_metrics(df: pd.DataFrame, bucket: str, require_exit_dt: bool = True) -> pd.DataFrame:
+    x = resolved(df, require_exit_dt=require_exit_dt)
     if x.empty or "side" not in x.columns:
         return pd.DataFrame()
     rows = []
     for side, g in x.groupby(x["side"].astype(str).str.upper()):
-        m = metrics(bucket + "|" + side, g, "direction split", False)
+        m = metrics(bucket + "|" + side, g, "direction split", False, require_exit_dt=require_exit_dt)
         m["side"] = side
         rows.append(m)
     return pd.DataFrame(rows)
+
+
+def concat_review(selected: pd.DataFrame, removed: pd.DataFrame) -> pd.DataFrame:
+    parts = []
+    if selected is not None and not selected.empty:
+        parts.append(selected.copy())
+    if removed is not None and not removed.empty:
+        parts.append(removed.copy())
+    if not parts:
+        return pd.DataFrame()
+    return pd.concat(parts, ignore_index=True, sort=False)
 
 
 def main() -> int:
@@ -128,13 +140,14 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mt5-files-dir", default="")
     ap.add_argument("--start", default="2026-06-01")
-    ap.add_argument("--end-exclusive", default="2026-07-01")
-    ap.add_argument("--require-min-input-max-entry-dt", default="")
+    ap.add_argument("--end-exclusive", default="2026-06-16")
+    ap.add_argument("--require-min-input-max-entry-dt", default="2026-06-15")
+    ap.add_argument("--allow-no-coverage-gate", action="store_true")
     args = ap.parse_args()
 
     start = pd.Timestamp(args.start)
     end_exclusive = pd.Timestamp(args.end_exclusive)
-    required_max = pd.Timestamp(args.require_min_input_max_entry_dt) if args.require_min_input_max_entry_dt else None
+    required_max = None if args.allow_no_coverage_gate else (pd.Timestamp(args.require_min_input_max_entry_dt) if args.require_min_input_max_entry_dt else None)
 
     root = gy.mt5_files_dir(args.mt5_files_dir) / "FX_OUTPUTS" / "gold_v3"
     out = root / "119"
@@ -159,7 +172,7 @@ def main() -> int:
     if required_max is not None:
         parsed_max = pd.to_datetime(input_max, errors="coerce") if input_max else pd.NaT
         if pd.isna(parsed_max) or parsed_max < required_max:
-            blockers.append({"blocker_id": "upstream_107l_does_not_reach_required_target", "observed_max_entry_dt": input_max, "required_min_entry_dt": str(required_max), "action": "rerun upstream 107L/107Q source chain before judging June 1-15"})
+            blockers.append({"blocker_id": "upstream_107l_does_not_reach_required_target", "observed_max_entry_dt": input_max, "required_min_entry_dt": str(required_max), "action": "rerun 107L or upstream 107K2 chain before judging June 1-15"})
 
     rows = []
     side_rows = []
@@ -174,20 +187,26 @@ def main() -> int:
         else:
             removed_true = pd.DataFrame()
             kept_true = removed.copy()
+        restore_review = concat_review(selected_p, removed_true)
 
-        rows.append(metrics("raw_107l_period", upstream_p, "107L upstream rows before F002 selected exclusion", False))
-        rows.append(metrics("dedup_107l_period", dedup(upstream_p), "deduplicated 107L upstream rows", False))
-        rows.append(metrics("health_gate_selected_109c_period", selected_p, "current selected policy after F002 exclusion", True))
-        rows.append(metrics("shadow_117j_best_period", shadow_p, "shadow 107Q best family after F002 exclusion", True))
-        rows.append(metrics("f002_removed_period_review_only", removed_true, "rows removed by F002; review-only", False))
-        rows.append(metrics("f002_kept_period", kept_true, "rows kept by F002", True))
-        rows.append(metrics("restore_removed_period_review_only", pd.concat([selected_p, removed_true], ignore_index=True, sort=False), "selected policy plus removed period rows; review-only", False))
-        rows.append(metrics("resolved_only_live_repro_selected_period", resolved(selected_p), "resolved-only current selected policy", True))
+        rows.append(metrics("raw_107l_period", upstream_p, "107L upstream rows before F002 selected exclusion", False, require_exit_dt=True))
+        rows.append(metrics("dedup_107l_period", dedup(upstream_p), "deduplicated 107L upstream rows", False, require_exit_dt=True))
+        rows.append(metrics("health_gate_selected_109c_period", selected_p, "current selected policy after F002 exclusion", True, require_exit_dt=True))
+        rows.append(metrics("shadow_117j_best_period", shadow_p, "shadow 107Q best family after F002 exclusion", True, require_exit_dt=True))
+        rows.append(metrics("f002_removed_period_review_only", removed_true, "rows removed by F002; review-only", False, require_exit_dt=False))
+        rows.append(metrics("f002_kept_period", kept_true, "rows kept by F002", True, require_exit_dt=False))
+        rows.append(metrics("restore_removed_period_review_only", restore_review, "selected policy plus removed period rows; review-only", False, require_exit_dt=False))
+        rows.append(metrics("resolved_only_live_repro_selected_period", selected_p, "resolved-only current selected policy", True, require_exit_dt=True))
 
         save(upstream_p, out / "gold_v3_119_raw_107l_period_rows.csv")
         save(selected_p, out / "gold_v3_119_selected_109c_period_rows.csv")
         save(removed_true, out / "gold_v3_119_f002_removed_period_review_rows.csv")
-        side_parts = [side_metrics(upstream_p, "raw_107l_period"), side_metrics(removed_true, "f002_removed_period_review_only"), side_metrics(selected_p, "selected_109c_period")]
+        side_parts = [
+            side_metrics(upstream_p, "raw_107l_period", require_exit_dt=True),
+            side_metrics(removed_true, "f002_removed_period_review_only", require_exit_dt=False),
+            side_metrics(selected_p, "selected_109c_period", require_exit_dt=True),
+            side_metrics(restore_review, "restore_removed_period_review_only", require_exit_dt=False),
+        ]
         side_rows = [x for x in side_parts if not x.empty]
 
     comp = pd.DataFrame(rows)
@@ -206,6 +225,7 @@ def main() -> int:
         "period_start": str(start),
         "period_end_exclusive": str(end_exclusive),
         "required_min_input_max_entry_dt": str(required_max) if required_max is not None else "",
+        "coverage_gate_enabled": required_max is not None,
         "observed_107l_max_entry_dt": input_max,
         "selected_109c_max_entry_dt": max_entry(data.get("selected_109c", pd.DataFrame())),
         "shadow_117j_max_entry_dt": max_entry(data.get("shadow_117j_best", pd.DataFrame())),
