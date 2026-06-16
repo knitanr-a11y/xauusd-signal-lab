@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,6 +44,44 @@ def safe_float(x: Any, default: float = math.nan) -> float:
         return default
 
 
+def normalize_col(c: Any) -> str:
+    s = str(c).strip()
+    s = s.strip('<>').strip()
+    s = s.lower()
+    s = re.sub(r'[^a-z0-9]+', '_', s).strip('_')
+    aliases = {
+        'tickvol': 'tick_volume',
+        'tick_vol': 'tick_volume',
+        'tick_volume': 'tick_volume',
+        'vol': 'tick_volume',
+        'volume': 'tick_volume',
+        'real_volume': 'real_volume',
+        'date': 'date',
+        'time': 'time',
+        'datetime': 'time',
+        'open': 'open',
+        'high': 'high',
+        'low': 'low',
+        'close': 'close',
+    }
+    return aliases.get(s, s)
+
+
+def add_dt_column(df: pd.DataFrame) -> pd.DataFrame:
+    cols = set(df.columns)
+    if 'dt' in cols:
+        df['dt'] = pd.to_datetime(df['dt'], errors='coerce')
+    elif 'entry_dt' in cols:
+        df['dt'] = pd.to_datetime(df['entry_dt'], errors='coerce')
+    elif 'datetime' in cols:
+        df['dt'] = pd.to_datetime(df['datetime'], errors='coerce')
+    elif 'time' in cols and 'date' in cols:
+        df['dt'] = pd.to_datetime(df['date'].astype(str).str.strip() + ' ' + df['time'].astype(str).str.strip(), errors='coerce')
+    elif 'time' in cols:
+        df['dt'] = pd.to_datetime(df['time'], errors='coerce')
+    return df
+
+
 def read_csv_any(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame()
@@ -52,49 +91,76 @@ def read_csv_any(path: Path) -> pd.DataFrame:
                 df = pd.read_csv(path, encoding=enc, sep=sep, low_memory=False)
                 if len(df.columns) <= 1:
                     continue
-                df.columns = [str(c).strip() for c in df.columns]
-                if 'time' in df.columns:
-                    df['dt'] = pd.to_datetime(df['time'], errors='coerce')
-                elif 'entry_dt' in df.columns:
-                    df['dt'] = pd.to_datetime(df['entry_dt'], errors='coerce')
-                elif 'dt' in df.columns:
-                    df['dt'] = pd.to_datetime(df['dt'], errors='coerce')
-                text_cols = {'time', 'entry_dt', 'dt', 'symbol', 'exported_at', 'is_closed'}
+                df.columns = [normalize_col(c) for c in df.columns]
+                df = add_dt_column(df)
+                text_cols = {'time', 'date', 'entry_dt', 'dt', 'symbol', 'exported_at', 'is_closed'}
                 for c in df.columns:
                     if c in text_cols:
                         continue
                     try:
-                        df[c] = pd.to_numeric(df[c])
+                        df[c] = pd.to_numeric(df[c], errors='raise')
                     except Exception:
                         pass
                 if 'dt' in df.columns:
-                    return df[df['dt'].notna()].drop_duplicates('dt').sort_values('dt').reset_index(drop=True)
+                    df = df[df['dt'].notna()].drop_duplicates('dt').sort_values('dt').reset_index(drop=True)
+                    return df
                 return df
             except Exception:
                 pass
     return pd.DataFrame()
 
 
-def combine(tf: str, data_dir: Path) -> pd.DataFrame:
-    live = read_csv_any(data_dir / f'goldsharp_{tf}.csv')
-    old = read_csv_any(data_dir / f'gold#_{tf}.csv')
+def summarize_raw(tf: str, kind: str, path: Path, df: pd.DataFrame) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        'tf': tf,
+        'source': kind,
+        'path': str(path),
+        'exists': bool(path.exists()),
+        'rows': int(len(df)) if not df.empty else 0,
+        'has_dt': bool('dt' in df.columns) if not df.empty else False,
+        'has_ohlc': bool({'open', 'high', 'low', 'close'}.issubset(df.columns)) if not df.empty else False,
+        'min_dt': '',
+        'max_dt': '',
+        'pre2025_rows': 0,
+        'y2025_rows': 0,
+        'y2026plus_rows': 0,
+    }
+    if not df.empty and 'dt' in df.columns:
+        row['min_dt'] = str(df['dt'].min())
+        row['max_dt'] = str(df['dt'].max())
+        row['pre2025_rows'] = int((df['dt'] < pd.Timestamp('2025-01-01')).sum())
+        row['y2025_rows'] = int(((df['dt'] >= pd.Timestamp('2025-01-01')) & (df['dt'] < pd.Timestamp('2026-01-01'))).sum())
+        row['y2026plus_rows'] = int((df['dt'] >= pd.Timestamp('2026-01-01')).sum())
+    return row
+
+
+def combine(tf: str, data_dir: Path) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+    live_path = data_dir / f'goldsharp_{tf}.csv'
+    old_path = data_dir / f'gold#_{tf}.csv'
+    live = read_csv_any(live_path)
+    old = read_csv_any(old_path)
+    diag = [summarize_raw(tf, 'goldsharp', live_path, live), summarize_raw(tf, 'gold#', old_path, old)]
+
     if live.empty and old.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(), diag
+
     parts: list[pd.DataFrame] = []
     # Contract for Stage177:
     # - 2025 uses gold#_*.
     # - 2026+ uses goldsharp_*.
     # - pre-2025 goldsharp_* is warm-up only for indicators.
-    if not live.empty:
+    if not live.empty and 'dt' in live.columns:
         parts.append(live[live['dt'] < pd.Timestamp('2025-01-01')])
-    if not old.empty:
+    if not old.empty and 'dt' in old.columns:
         parts.append(old[(old['dt'] >= pd.Timestamp('2025-01-01')) & (old['dt'] < pd.Timestamp('2026-01-01'))])
-    if not live.empty:
+    if not live.empty and 'dt' in live.columns:
         parts.append(live[live['dt'] >= pd.Timestamp('2026-01-01')])
     if not parts:
-        return pd.DataFrame()
+        return pd.DataFrame(), diag
     out = pd.concat(parts, ignore_index=True)
-    return out.drop_duplicates('dt', keep='last').sort_values('dt').reset_index(drop=True)
+    if out.empty:
+        return pd.DataFrame(), diag
+    return out.drop_duplicates('dt', keep='last').sort_values('dt').reset_index(drop=True), diag
 
 
 def save(df: pd.DataFrame, path: Path) -> None:
@@ -161,9 +227,8 @@ def make_features(df: pd.DataFrame, prefix: str) -> pd.DataFrame:
 
     x[f'{prefix}_rsi14_sma'] = rsi_sma(c, 14)
     x[f'{prefix}_rsi14_wilder'] = rsi_wilder(c, 14)
-    # Keep the historical column name for downstream compatibility. Primary stays SMA;
-    # alternatives are output in parity diagnostics and are searchable too.
-    x[f'{prefix}_rsi14'] = x[f'{prefix}_rsi14_sma']
+    # Stage177 OHLC-only search follows the live snapshot parity formula.
+    x[f'{prefix}_rsi14'] = x[f'{prefix}_rsi14_wilder']
 
     for p in [14, 20, 28, 50, 56]:
         x[f'{prefix}_range_atr{p}'] = x[f'{prefix}_range'] / x[f'{prefix}_atr{p}']
@@ -577,7 +642,6 @@ def profile_candidates(
         'best_pair_full_pf': best_pair.get('full_pf', math.nan),
     }
 
-    # Add month stats and benchmark flag for kept rows here so top/near output has them.
     for row in kept + near_kept:
         mask = np.ones(len(data), dtype=bool)
         for part in str(row['rule']).split(' & '):
@@ -592,6 +656,8 @@ def profile_candidates(
 
 def make_decision(ready: bool, top: pd.DataFrame, parity_fail: int, blockers: list[dict[str, Any]]) -> str:
     if not ready:
+        if any(str(b.get('id', '')).startswith('no_train') or str(b.get('id', '')).startswith('no_test') for b in blockers):
+            return 'OHLC_ONLY_REBUILD_SEARCH_BLOCKED_DATA_COVERAGE'
         return 'OHLC_ONLY_REBUILD_SEARCH_BLOCKED'
     parity_suffix = '_PARITY_FAIL_WARN' if parity_fail > 0 else ''
     if top.empty:
@@ -613,7 +679,14 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     progress('load and combine OHLC: 2025=gold#; 2026+=goldsharp; pre-2025 warmup=goldsharp if available')
-    frames = {tf: combine(tf, data_dir) for tf in ['m15', 'm5', 'h1', 'h4', 'd1']}
+    frames: dict[str, pd.DataFrame] = {}
+    raw_diag_rows: list[dict[str, Any]] = []
+    for tf in ['m15', 'm5', 'h1', 'h4', 'd1']:
+        frames[tf], diag = combine(tf, data_dir)
+        raw_diag_rows.extend(diag)
+    source_diag = pd.DataFrame(raw_diag_rows)
+    save(source_diag, out / 'gold_v3_177_source_coverage.csv')
+
     snap = read_csv_any(data_dir / 'gold_v3_live_feature_snapshot.csv')
 
     blockers: list[dict[str, Any]] = []
@@ -633,11 +706,33 @@ def main() -> int:
     parity = pd.DataFrame()
     parity_alt = pd.DataFrame()
     data = pd.DataFrame()
+    coverage_summary: dict[str, Any] = {}
 
     if not blockers:
         progress('build live-reproducible OHLC features')
         data = merge_features(frames['m15'], frames['h1'], frames['h4'], frames['d1'])
         save(data.head(500), out / 'gold_v3_177_feature_sample_head500.csv')
+
+        train_idx = ((data.dt >= pd.Timestamp('2025-01-02')) & (data.dt < pd.Timestamp('2026-01-01'))).values
+        test_idx = (data.dt >= pd.Timestamp('2026-01-01')).values
+        full_idx = (data.dt >= pd.Timestamp('2025-01-02')).values
+        months = data.month.values
+
+        coverage_summary = {
+            'combined_m15_rows': int(len(data)),
+            'combined_m15_min_dt': str(data['dt'].min()) if not data.empty else '',
+            'combined_m15_max_dt': str(data['dt'].max()) if not data.empty else '',
+            'train_rows': int(train_idx.sum()),
+            'test_rows': int(test_idx.sum()),
+            'full_rows': int(full_idx.sum()),
+        }
+
+        if int(train_idx.sum()) == 0:
+            blockers.append({'id': 'no_train_rows_after_combine', 'detail': '2025 gold# rows are missing or not parsed; search cannot evaluate train_pf'})
+        if int(test_idx.sum()) == 0:
+            blockers.append({'id': 'no_test_rows_after_combine', 'detail': '2026+ goldsharp rows are missing or not parsed; search cannot evaluate test_pf'})
+        if int(full_idx.sum()) == 0:
+            blockers.append({'id': 'no_full_rows_after_combine', 'detail': 'No 2025+ rows after combine'})
 
         if not snap.empty:
             progress('compare optional gold_v3_live_feature_snapshot.csv against Python OHLC features')
@@ -647,67 +742,65 @@ def main() -> int:
             if not parity.empty and 'status' in parity.columns and str(parity.iloc[0].get('status', '')).startswith('SNAPSHOT_PARITY_EXCEPTION'):
                 progress('snapshot parity failed non-blocking; continue OHLC-only search')
 
-        train_idx = ((data.dt >= pd.Timestamp('2025-01-02')) & (data.dt < pd.Timestamp('2026-01-01'))).values
-        test_idx = (data.dt >= pd.Timestamp('2026-01-01')).values
-        full_idx = (data.dt >= pd.Timestamp('2025-01-02')).values
-        months = data.month.values
+        if not blockers:
+            progress('build rule conditions')
+            conds = make_conditions(data)
+            names = [x[0] for x in conds]
+            masks = [x[1] for x in conds]
 
-        progress('build rule conditions')
-        conds = make_conditions(data)
-        names = [x[0] for x in conds]
-        masks = [x[1] for x in conds]
+            profiles: list[tuple[str, float, float, int]] = []
+            for direction in ['LONG', 'SHORT']:
+                for tp, sl, h in [(8, 4, 36), (10, 5, 48), (12, 6, 48), (15, 7.5, 64), (20, 10, 96), (25, 10, 96), (30, 15, 128), (40, 20, 192)]:
+                    profiles.append((direction, tp, sl, h))
 
-        profiles: list[tuple[str, float, float, int]] = []
-        for direction in ['LONG', 'SHORT']:
-            for tp, sl, h in [(8, 4, 36), (10, 5, 48), (12, 6, 48), (15, 7.5, 64), (20, 10, 96), (25, 10, 96), (30, 15, 128), (40, 20, 192)]:
-                profiles.append((direction, tp, sl, h))
+            results: list[dict[str, Any]] = []
+            near_rows: list[dict[str, Any]] = []
+            diag_rows: list[dict[str, Any]] = []
 
-        results: list[dict[str, Any]] = []
-        near_rows: list[dict[str, Any]] = []
-        diag_rows: list[dict[str, Any]] = []
+            for pi, (direction, tp, sl, h) in enumerate(profiles, 1):
+                kept, near_kept, diag = profile_candidates(
+                    data=data,
+                    m5=frames['m5'],
+                    names=names,
+                    masks=masks,
+                    train_idx=train_idx,
+                    test_idx=test_idx,
+                    full_idx=full_idx,
+                    months=months,
+                    direction=direction,
+                    tp=tp,
+                    sl=sl,
+                    h=h,
+                    profile_no=pi,
+                    profile_total=len(profiles),
+                )
+                results.extend(kept)
+                near_rows.extend(near_kept)
+                diag_rows.append(diag)
 
-        for pi, (direction, tp, sl, h) in enumerate(profiles, 1):
-            kept, near_kept, diag = profile_candidates(
-                data=data,
-                m5=frames['m5'],
-                names=names,
-                masks=masks,
-                train_idx=train_idx,
-                test_idx=test_idx,
-                full_idx=full_idx,
-                months=months,
-                direction=direction,
-                tp=tp,
-                sl=sl,
-                h=h,
-                profile_no=pi,
-                profile_total=len(profiles),
-            )
-            results.extend(kept)
-            near_rows.extend(near_kept)
-            diag_rows.append(diag)
+            allout = pd.DataFrame(results)
+            near = pd.DataFrame(near_rows)
+            profile_diag = pd.DataFrame(diag_rows)
+            save(profile_diag, out / 'gold_v3_177_profile_diagnostics.csv')
 
-        allout = pd.DataFrame(results)
-        near = pd.DataFrame(near_rows)
-        profile_diag = pd.DataFrame(diag_rows)
-        save(profile_diag, out / 'gold_v3_177_profile_diagnostics.csv')
+            if not allout.empty:
+                top = allout.sort_values(
+                    ['beats_old_pf_2_237', 'full_pf', 'test_pf', 'train_pf', 'full_n'],
+                    ascending=[False, False, False, False, False],
+                ).drop_duplicates(['direction', 'tp', 'sl', 'horizon_m5', 'rule']).head(100).copy()
+                save(allout, out / 'gold_v3_177_all_prelim_rules.csv')
+                save(top, out / 'gold_v3_177_top100_rules.csv')
 
-        if not allout.empty:
-            top = allout.sort_values(
-                ['beats_old_pf_2_237', 'full_pf', 'test_pf', 'train_pf', 'full_n'],
-                ascending=[False, False, False, False, False],
-            ).drop_duplicates(['direction', 'tp', 'sl', 'horizon_m5', 'rule']).head(100).copy()
-            save(allout, out / 'gold_v3_177_all_prelim_rules.csv')
-            save(top, out / 'gold_v3_177_top100_rules.csv')
+            if not near.empty:
+                near = near.sort_values(
+                    ['beats_old_pf_2_237', 'full_pf', 'test_pf', 'train_pf', 'full_n'],
+                    ascending=[False, False, False, False, False],
+                ).drop_duplicates(['direction', 'tp', 'sl', 'horizon_m5', 'rule']).head(200).copy()
+                save(near, out / 'gold_v3_177_near_miss_top200_rules.csv')
+        else:
+            progress('data coverage blocker found; skip candidate search and write diagnostics')
 
-        if not near.empty:
-            near = near.sort_values(
-                ['beats_old_pf_2_237', 'full_pf', 'test_pf', 'train_pf', 'full_n'],
-                ascending=[False, False, False, False, False],
-            ).drop_duplicates(['direction', 'tp', 'sl', 'horizon_m5', 'rule']).head(200).copy()
-            save(near, out / 'gold_v3_177_near_miss_top200_rules.csv')
-
-    ready = not blockers
+    ready = len(blockers) == 0
     snapshot_rows = int(len(snap)) if not snap.empty else 0
     parity_rows = int(len(parity)) if not parity.empty else 0
     parity_fail = int((~parity.get('match_1e_6', pd.Series(dtype=bool))).sum()) if not parity.empty and 'match_1e_6' in parity.columns else 0
@@ -747,6 +840,7 @@ def main() -> int:
         'live_snapshot_parity_fail_rows': parity_fail,
         'live_snapshot_parity_pass': parity_pass,
         'beats_old_pf_2_237': beats_any,
+        **coverage_summary,
         'source_csv_mutated': False,
         'contract_mutated': False,
         'open_asof_allowed': False,
@@ -769,6 +863,7 @@ def main() -> int:
 
     lines = ['GOLD V3 177 PASTE_ME_OHLC_ONLY_REBUILD_SEARCH_AUDIT']
     lines += [f'{k}: {v}' for k, v in summary.items()]
+    lines += ['', 'DATA_COVERAGE', source_diag.to_string(index=False) if not source_diag.empty else 'NO_DATA_COVERAGE']
     lines += ['', 'LIVE_SNAPSHOT_PARITY', parity.to_string(index=False) if not parity.empty else 'NO_LIVE_SNAPSHOT_PARITY']
     lines += ['', 'LIVE_SNAPSHOT_PARITY_ALTERNATIVES', parity_alt.head(40).to_string(index=False) if not parity_alt.empty else 'NO_LIVE_SNAPSHOT_PARITY_ALTERNATIVES']
     lines += ['', 'PROFILE_DIAGNOSTICS', profile_diag.to_string(index=False) if not profile_diag.empty else 'NO_PROFILE_DIAGNOSTICS']
@@ -778,7 +873,8 @@ def main() -> int:
         '',
         'INTERPRETATION',
         'This is an OHLC-only rebuild search. It uses 2025 gold# candles, 2026+ goldsharp candles, and goldsharp pre-2025 only as HTF warmup. Optional live snapshot is used only for parity audit and never as a backtest/search source. Rules are generated only from candle-derived features known at entry time. Outcome columns are used only after entry for audit metrics. Results are audit-only and must still pass spread/slippage/robustness gates before any live payload.',
-        'If TOP30_RULES is empty, check PROFILE_DIAGNOSTICS and NEAR_MISS_TOP30 before changing the candidate pool. LIVE_SNAPSHOT_PARITY failures are warnings for formula/parity audit and do not enable or block live trading by themselves.',
+        'If train_rows is zero, the 2025 gold# source files are missing or not parseable, so train_pf/test_pf/full_pf cannot be evaluated. In that case, do not treat NO_TOP_RULES as a strategy result; fix input coverage first.',
+        'If TOP30_RULES is empty while train_rows and test_rows are both positive, check PROFILE_DIAGNOSTICS and NEAR_MISS_TOP30 before changing the candidate pool. LIVE_SNAPSHOT_PARITY failures are warnings for formula/parity audit and do not enable or block live trading by themselves.',
     ]
     lines += ['', 'BLOCKERS', 'NO_BLOCKERS' if not blockers else json.dumps(blockers, ensure_ascii=False, indent=2)]
     (out / 'paste_me.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
