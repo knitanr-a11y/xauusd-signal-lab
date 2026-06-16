@@ -8,7 +8,14 @@ Status: `AUDIT_ONLY / TEXT_TEMPLATE_PREVIEW_ONLY / NO_SEND / NO_WEBHOOK / PAYLOA
 
 Stage221 revises the notification text template for future practical use.
 
-Stage219 proved the text-preview path was safe, but its message was too technical for practical reading. Stage221 replaces the user-visible message layout with a concise trading alert format while keeping technical identifiers in history metadata only.
+Stage219 proved the text-preview path was safe, but its message was too technical for practical reading. Stage221 replaces the user-visible message layout with a concise trading alert format.
+
+Revision note:
+
+```text
+The full signal_id should be displayed at the very bottom of the user-visible message.
+Other technical fields remain in history metadata only.
+```
 
 No send path is enabled.
 
@@ -35,8 +42,9 @@ Title: GOLD SELL/BUY SCALP when scalp strategy
 No separate symbol line
 Direction appears in the title / first line
 Entry time, entry price, TP/SL near the top
-Do not show route, strategy_role, candidate_id, signal_id, short_signal_id in the Discord body
-Keep history-required identifiers in metadata CSV/JSON only
+Full signal_id appears as the final line
+Do not show route, strategy_role, candidate_id, or short_signal_id as separate body fields
+Keep history-required identifiers in metadata CSV/JSON
 ```
 
 ## Final user-visible template
@@ -51,6 +59,7 @@ TP / SL: 15 / 5
 Horizon: 64 M5 bars
 
 [AUDIT_ONLY / NO_SEND]
+Signal ID: 20260615_163000_SECONDARY_AUDIT_CANDIDATE_SCALP_024_tp15_sl5_hz64_SHORT
 ```
 
 For BUY scalp:
@@ -63,13 +72,14 @@ TP / SL: <tp_usd> / <sl_usd>
 Horizon: <horizon_m5_bars> M5 bars
 
 [AUDIT_ONLY / NO_SEND]
+Signal ID: <signal_id>
 ```
 
 The audit/no-send marker remains until the user explicitly approves any future alert-only live path.
 
 ## History metadata policy
 
-The following should be retained outside the user-visible message:
+The following should be retained in metadata CSV/JSON:
 
 ```text
 signal_id
@@ -90,20 +100,21 @@ payload_action
 webhook_action
 ```
 
-## Forbidden in user-visible message body
+## Forbidden as separate user-visible body fields
 
 ```text
 symbol line
-route
-strategy_role
-candidate_id
-signal_id
-short_signal_id
+route field
+strategy_role field
+candidate_id field
+short_signal_id field
 actual execution / fill / slippage
 future result / win / loss / exit
 webhook URL / token / secret
 account balance / position size
 ```
+
+The full `signal_id` is allowed only as the final line.
 
 ## Output files
 
@@ -126,13 +137,14 @@ TR002 Stage220 basis is PASS
 TR003 SELL title begins with red circle + GOLD SELL SCALP
 TR004 BUY title rule is green circle + GOLD BUY SCALP
 TR005 user-visible body contains entry time, entry price, TP/SL, and horizon near the top
-TR006 user-visible body does not contain symbol line, route, strategy_role, candidate_id, signal_id, or short_signal_id
+TR006 user-visible body does not contain symbol line, route field, strategy_role field, candidate_id field, or short_signal_id field
 TR007 history metadata retains signal_id, short_signal_id, route, strategy_role, and candidate_id
 TR008 no send/webhook/payload/order/live/autotrade flags are enabled
 TR009 NO_SIGNAL notification remains disabled
 TR010 future TP/SL result, exit result, horizon outcome, and actual execution result are not used as message input
 TR011 CSV latest row remains contractually CLOSED; open/as-of is not introduced
 TR012 MT5/CSV timestamp basis is used; no JST detector conversion
+TR013 final user-visible line starts with Signal ID and contains the full signal_id
 ```
 
 ## Expected decision
