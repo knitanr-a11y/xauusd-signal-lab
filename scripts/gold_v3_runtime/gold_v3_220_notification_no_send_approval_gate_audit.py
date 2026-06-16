@@ -5,6 +5,10 @@ GOLD V3 Stage220 - Notification No-Send Approval Gate Audit
 
 Audit-only gate matrix proving Stage219 text preview cannot become a send/webhook/payload/order path
 without explicit future approvals.
+
+Stage220 fix note:
+- no_signal_notification_disabled is a protective safety guard, not a send approval.
+- It must not cause CASE_SIGNAL_NO_APPROVAL to be classified as partial approval.
 """
 
 from __future__ import annotations
@@ -63,6 +67,19 @@ MATRIX_COLUMNS = [
     "autotrade_enabled",
     "theoretical_result_used_as_gate_input",
     "actual_execution_used_as_gate_input",
+]
+
+NOTIFICATION_SEND_APPROVAL_KEYS = [
+    "manual_discord_alert_only_approval",
+    "approved_channel_scope_defined",
+    "payload_activation_approval",
+    "webhook_secret_audit_pass",
+]
+
+NON_NOTIFICATION_APPROVAL_KEYS = [
+    "mt5_order_approval",
+    "actual_import_approval",
+    "live_hook_approval",
 ]
 
 
@@ -127,17 +144,16 @@ def evaluate_gate(case: Dict[str, Any]) -> str:
     if case["route"] == "NO_SIGNAL":
         return "NO_MESSAGE_NO_SEND_NO_SIGNAL"
 
-    required = [
-        "manual_discord_alert_only_approval",
-        "approved_channel_scope_defined",
-        "payload_activation_approval",
-        "webhook_secret_audit_pass",
-        "no_signal_notification_disabled",
-    ]
-    if not any(bool(case.get(key)) for key in required):
+    # Important: no_signal_notification_disabled is a safety guard, not an approval.
+    notification_approval_values = [bool(case.get(key)) for key in NOTIFICATION_SEND_APPROVAL_KEYS]
+    non_notification_approval_values = [bool(case.get(key)) for key in NON_NOTIFICATION_APPROVAL_KEYS]
+
+    if not any(notification_approval_values) and not any(non_notification_approval_values):
         return "NO_SEND_AUDIT_ONLY"
-    if not all(bool(case.get(key)) for key in required):
+
+    if not all(notification_approval_values):
         return "NO_SEND_APPROVAL_INCOMPLETE"
+
     return "NO_SEND_STILL_BLOCKED_STAGE220_AUDIT_ONLY"
 
 
@@ -262,6 +278,7 @@ def write_paste_me(path: Path, summary: Dict[str, Any], checks: List[Dict[str, A
     lines.append("GATE_POLICY")
     lines.append("Default decision is NO_SEND_AUDIT_ONLY. A valid text preview is not enough to enable Discord/webhook/payload/order/live paths.")
     lines.append("NO_SIGNAL remains no-message/no-send.")
+    lines.append("no_signal_notification_disabled is a safety guard, not a send approval.")
     lines.append("")
     lines.append("VALIDATION_CHECKS")
     for check in checks:
@@ -321,6 +338,7 @@ def main() -> int:
         "GOLD V3 Stage220 notification no-send approval gate.\n"
         "Default state is NO_SEND_AUDIT_ONLY.\n"
         "A text preview is not a payload, webhook, Discord send, order, live hook, or autotrade approval.\n"
+        "no_signal_notification_disabled is a safety guard, not a send approval.\n"
         "NO_SIGNAL does not notify.\n",
         encoding="utf-8",
     )
