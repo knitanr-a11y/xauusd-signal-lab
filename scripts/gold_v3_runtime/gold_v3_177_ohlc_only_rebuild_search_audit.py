@@ -26,13 +26,20 @@ def read_csv_any(path:Path)->pd.DataFrame:
                 df=pd.read_csv(path,encoding=enc,sep=sep,low_memory=False)
                 if len(df.columns)>1:
                     df.columns=[str(c).strip() for c in df.columns]
-                    if 'time' in df.columns: df['dt']=pd.to_datetime(df['time'],errors='coerce')
-                    elif 'entry_dt' in df.columns: df['dt']=pd.to_datetime(df['entry_dt'],errors='coerce')
+                    if 'time' in df.columns:
+                        df['dt']=pd.to_datetime(df['time'],errors='coerce')
+                    elif 'entry_dt' in df.columns:
+                        df['dt']=pd.to_datetime(df['entry_dt'],errors='coerce')
+                    text_cols={'time','entry_dt','dt','symbol','exported_at','is_closed'}
                     for c in df.columns:
-                        if c not in ['time','entry_dt','dt','symbol','exported_at','is_closed']:
-                            df[c]=pd.to_numeric(df[c],errors='ignore')
+                        if c in text_cols:
+                            continue
+                        try:
+                            df[c]=pd.to_numeric(df[c])
+                        except Exception:
+                            pass
                     if 'dt' in df.columns:
-                        return df[df.dt.notna()].drop_duplicates('dt').sort_values('dt').reset_index(drop=True)
+                        return df[df['dt'].notna()].drop_duplicates('dt').sort_values('dt').reset_index(drop=True)
                     return df
             except Exception:
                 pass
@@ -43,9 +50,9 @@ def combine(tf:str, data_dir:Path)->pd.DataFrame:
     old=read_csv_any(data_dir/f'gold#_{tf}.csv')
     if live.empty and old.empty: return pd.DataFrame()
     parts=[]
-    if not live.empty: parts.append(live[live.dt<pd.Timestamp('2025-01-01')])
-    if not old.empty: parts.append(old[(old.dt>=pd.Timestamp('2025-01-01'))&(old.dt<pd.Timestamp('2026-01-01'))])
-    if not live.empty: parts.append(live[live.dt>=pd.Timestamp('2026-01-01')])
+    if not live.empty: parts.append(live[live['dt']<pd.Timestamp('2025-01-01')])
+    if not old.empty: parts.append(old[(old['dt']>=pd.Timestamp('2025-01-01'))&(old['dt']<pd.Timestamp('2026-01-01'))])
+    if not live.empty: parts.append(live[live['dt']>=pd.Timestamp('2026-01-01')])
     if not parts: return pd.DataFrame()
     return pd.concat(parts,ignore_index=True).drop_duplicates('dt',keep='last').sort_values('dt').reset_index(drop=True)
 
@@ -58,8 +65,8 @@ def rsi_sma(close:pd.Series,p:int=14)->pd.Series:
     out=100-100/(1+rs); return out.where(al.ne(0),100.0)
 
 def make_features(df:pd.DataFrame,prefix:str)->pd.DataFrame:
-    x=pd.DataFrame({'dt':df.dt})
-    o,h,l,c,v=df.open,df.high,df.low,df.close,df.tick_volume
+    x=pd.DataFrame({'dt':df['dt']})
+    o,h,l,c,v=df['open'],df['high'],df['low'],df['close'],df['tick_volume']
     for name,ser in [('open',o),('high',h),('low',l),('close',c),('tick_volume',v)]: x[f'{prefix}_{name}']=ser
     pc=c.shift(1); tr=pd.concat([(h-l).abs(),(h-pc).abs(),(l-pc).abs()],axis=1).max(axis=1)
     x[f'{prefix}_ret1']=c.diff(); x[f'{prefix}_ret3']=c.diff(3); x[f'{prefix}_ret8']=c.diff(8)
@@ -83,8 +90,8 @@ def merge_features(m15,h1,h4,d1)->pd.DataFrame:
     base=make_features(m15,'m15')
     for f in [make_features(h1,'h1'),make_features(h4,'h4'),make_features(d1,'d1')]:
         base=pd.merge_asof(base.sort_values('dt'),f.sort_values('dt'),on='dt',direction='backward')
-    base['hour']=base.dt.dt.hour
-    base['month']=base.dt.dt.to_period('M').astype(str)
+    base['hour']=base['dt'].dt.hour
+    base['month']=base['dt'].dt.to_period('M').astype(str)
     base['session_7_22']=((base.hour>=7)&(base.hour<=22)).astype(int)
     base['session_12_22']=((base.hour>=12)&(base.hour<=22)).astype(int)
     base['session_15_23']=((base.hour>=15)&(base.hour<=23)).astype(int)
@@ -97,30 +104,38 @@ def merge_features(m15,h1,h4,d1)->pd.DataFrame:
     return base
 
 def snapshot_parity(data:pd.DataFrame,snap:pd.DataFrame)->pd.DataFrame:
-    if snap.empty or 'entry_dt' not in snap.columns: return pd.DataFrame()
-    s=snap.copy(); s['dt']=pd.to_datetime(s['entry_dt'],errors='coerce'); s=s[s.dt.notna()].sort_values('dt')
-    if s.empty: return pd.DataFrame()
-    row=s.iloc[-1]
-    hit=data[data.dt.eq(row.dt)]
-    if hit.empty: return pd.DataFrame([{'snapshot_entry_dt':str(row.dt),'status':'NO_MATCHING_M15_BAR_IN_COMBINED_OHLC'}])
-    d=hit.iloc[-1]
-    pairs=[('m15_open','m15_open'),('m15_high','m15_high'),('m15_low','m15_low'),('m15_close','m15_close'),('m15_tick_volume','m15_tick_volume'),('m15_rsi14','m15_rsi14'),('h1_atr14','h1_atr14'),('h1_range_atr','h1_range_atr14'),('d1_atr14','d1_atr14'),('d1_dist_atr','d1_dist_close_atr14')]
-    rows=[]
-    for snap_col,py_col in pairs:
-        if snap_col not in row.index or py_col not in data.columns: continue
-        sv=pd.to_numeric(pd.Series([row[snap_col]]),errors='coerce').iloc[0]
-        pv=pd.to_numeric(pd.Series([d[py_col]]),errors='coerce').iloc[0]
-        diff=abs(float(sv)-float(pv)) if pd.notna(sv) and pd.notna(pv) else np.nan
-        rows.append({'snapshot_entry_dt':str(row.dt),'snapshot_col':snap_col,'python_col':py_col,'snapshot_value':sv,'python_value':pv,'abs_diff':diff,'match_1e_6':bool(pd.notna(diff) and diff<=1e-6)})
-    # additional h1_up comparisons: old EA snapshot may not equal final h1_up formula; report both.
-    if 'h1_up' in row.index:
-        sv=str(row['h1_up']).lower() in ['true','1','yes','y']
-        rows.append({'snapshot_entry_dt':str(row.dt),'snapshot_col':'h1_up','python_col':'h1_ema20_gt_ema50','snapshot_value':int(sv),'python_value':int(d.get('h1_ema20_gt_ema50',-1)),'abs_diff':abs(int(sv)-int(d.get('h1_ema20_gt_ema50',-1))),'match_1e_6':bool(int(sv)==int(d.get('h1_ema20_gt_ema50',-1)))})
-    return pd.DataFrame(rows)
+    try:
+        if snap.empty or 'entry_dt' not in snap.columns:
+            return pd.DataFrame()
+        s=snap.copy(); s['dt']=pd.to_datetime(s['entry_dt'],errors='coerce'); s=s[s['dt'].notna()].sort_values('dt')
+        if s.empty:
+            return pd.DataFrame([{'status':'SNAPSHOT_DT_PARSE_FAILED'}])
+        row=s.iloc[-1]
+        row_dt=row['dt']
+        hit=data[data['dt'].eq(row_dt)]
+        if hit.empty:
+            return pd.DataFrame([{'snapshot_entry_dt':str(row_dt),'status':'NO_MATCHING_M15_BAR_IN_COMBINED_OHLC'}])
+        d=hit.iloc[-1]
+        pairs=[('m15_open','m15_open'),('m15_high','m15_high'),('m15_low','m15_low'),('m15_close','m15_close'),('m15_tick_volume','m15_tick_volume'),('m15_rsi14','m15_rsi14'),('h1_atr14','h1_atr14'),('h1_range_atr','h1_range_atr14'),('d1_atr14','d1_atr14'),('d1_dist_atr','d1_dist_close_atr14')]
+        rows=[]
+        for snap_col,py_col in pairs:
+            if snap_col not in row.index or py_col not in data.columns:
+                continue
+            sv=pd.to_numeric(pd.Series([row[snap_col]]),errors='coerce').iloc[0]
+            pv=pd.to_numeric(pd.Series([d[py_col]]),errors='coerce').iloc[0]
+            diff=abs(float(sv)-float(pv)) if pd.notna(sv) and pd.notna(pv) else np.nan
+            rows.append({'snapshot_entry_dt':str(row_dt),'snapshot_col':snap_col,'python_col':py_col,'snapshot_value':sv,'python_value':pv,'abs_diff':diff,'match_1e_6':bool(pd.notna(diff) and diff<=1e-6)})
+        if 'h1_up' in row.index:
+            sv=str(row['h1_up']).lower() in ['true','1','yes','y']
+            pv=int(d.get('h1_ema20_gt_ema50',-1))
+            rows.append({'snapshot_entry_dt':str(row_dt),'snapshot_col':'h1_up','python_col':'h1_ema20_gt_ema50','snapshot_value':int(sv),'python_value':pv,'abs_diff':abs(int(sv)-pv),'match_1e_6':bool(int(sv)==pv)})
+        return pd.DataFrame(rows)
+    except Exception as e:
+        return pd.DataFrame([{'status':'SNAPSHOT_PARITY_EXCEPTION_NON_BLOCKING','error':repr(e)}])
 
 def compute_outcome(entries:pd.DataFrame,m5:pd.DataFrame,direction:str,tp:float,sl:float,horizon_m5:int)->np.ndarray:
     m5=m5.sort_values('dt').reset_index(drop=True)
-    times=m5.dt.values.astype('datetime64[ns]'); et=entries.dt.values.astype('datetime64[ns]')
+    times=m5['dt'].values.astype('datetime64[ns]'); et=entries['dt'].values.astype('datetime64[ns]')
     ep=entries.m15_close.values.astype(float); idx=np.searchsorted(times,et,side='right')
     highs=m5.high.values.astype(float); lows=m5.low.values.astype(float); closes=m5.close.values.astype(float)
     out=np.full(len(entries),np.nan,dtype=float)
@@ -196,6 +211,8 @@ def main()->int:
         if not snap.empty:
             progress('compare optional gold_v3_live_feature_snapshot.csv against Python OHLC features')
             parity=snapshot_parity(data,snap); save(parity,out/'gold_v3_177_live_snapshot_parity.csv')
+            if not parity.empty and 'status' in parity.columns and str(parity.iloc[0].get('status','')).startswith('SNAPSHOT_PARITY_EXCEPTION'):
+                progress('snapshot parity failed non-blocking; continue OHLC-only search')
         train_idx=((data.dt>=pd.Timestamp('2025-01-02'))&(data.dt<pd.Timestamp('2026-01-01'))).values
         test_idx=(data.dt>=pd.Timestamp('2026-01-01')).values
         full_idx=(data.dt>=pd.Timestamp('2025-01-02')).values
