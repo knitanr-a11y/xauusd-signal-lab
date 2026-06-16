@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,7 @@ import gold_v3_178_cost_spread_slippage_monthly_robustness_audit as s178
 STEP = 'GOLD_V3_179_MONTHLY_WINRATE_TRADECOUNT_AUDIT_ONLY'
 BENCHMARK_PF = 2.237
 DEFAULT_COST_POINTS = 3.0
+RULE_RE = re.compile(r'^\s*([A-Za-z0-9_]+)\s*(<=|>=|==|<|>)\s*(-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*$')
 
 
 def progress(msg: str) -> None:
@@ -74,6 +76,7 @@ def monthly_table(trades: pd.DataFrame, cost_points: float) -> pd.DataFrame:
             'losses': losses,
             'flats': flats,
             'win_rate': wins / n if n else math.nan,
+            'win_rate_pct': (wins / n * 100.0) if n else math.nan,
             'pf': pf_from_series(g['pnl_net']),
             'pnl_sum': float(g['pnl_net'].sum()),
             'avg_pnl': float(g['pnl_net'].mean()),
@@ -101,6 +104,7 @@ def yearly_table(monthly: pd.DataFrame) -> pd.DataFrame:
             'losses': losses,
             'flats': int(g['flats'].sum()),
             'win_rate': wins / trades if trades else math.nan,
+            'win_rate_pct': (wins / trades * 100.0) if trades else math.nan,
             'pnl_sum': float(g['pnl_sum'].sum()),
             'negative_months': int((g['pnl_sum'] < 0).sum()),
             'positive_months': int((g['pnl_sum'] > 0).sum()),
@@ -118,6 +122,50 @@ def choose_candidate(robust: pd.DataFrame, cost_points: float) -> pd.Series | No
     if not x_valid.empty:
         x = x_valid
     return x.sort_values(['full_pf', 'test_pf', 'train_pf', 'full_n'], ascending=[False, False, False, False]).iloc[0]
+
+
+def literal_rule_mask(rule: str, data: pd.DataFrame) -> tuple[np.ndarray, list[dict[str, Any]]]:
+    """Evaluate saved Stage177/178 rule text directly against current features.
+
+    Stage177 generated quantile thresholds as literal strings. If live CSV has advanced by
+    one closed bar, rebuilding the quantile condition pool can slightly change condition
+    names. For Stage179 replay, the saved rule itself is the source of truth, so parse and
+    evaluate each literal condition instead of requiring an exact regenerated condition name.
+    """
+    mask = np.ones(len(data), dtype=bool)
+    problems: list[dict[str, Any]] = []
+    for part in str(rule).split(' & '):
+        expr = part.strip()
+        if not expr:
+            continue
+        m = RULE_RE.match(expr)
+        if not m:
+            problems.append({'expr': expr, 'reason': 'parse_failed'})
+            mask &= False
+            continue
+        col, op, val_s = m.groups()
+        if col not in data.columns:
+            problems.append({'expr': expr, 'reason': 'missing_column', 'column': col})
+            mask &= False
+            continue
+        val = float(val_s)
+        x = pd.to_numeric(data[col], errors='coerce')
+        if op == '<=':
+            part_mask = x <= val
+        elif op == '>=':
+            part_mask = x >= val
+        elif op == '<':
+            part_mask = x < val
+        elif op == '>':
+            part_mask = x > val
+        elif op == '==':
+            part_mask = x == val
+        else:
+            problems.append({'expr': expr, 'reason': 'unsupported_operator', 'operator': op})
+            mask &= False
+            continue
+        mask &= part_mask.fillna(False).values
+    return mask, problems
 
 
 def main() -> int:
@@ -175,16 +223,20 @@ def main() -> int:
     monthly = pd.DataFrame()
     yearly = pd.DataFrame()
     selected_meta: dict[str, Any] = {}
+    rule_eval_problems: list[dict[str, Any]] = []
+    selected_entry_rows = 0
+    selected_dedup_rows = 0
     if not blockers and selected is not None:
         progress('replay selected candidate and build monthly table')
         data = s177.base.merge_features(frames['m15'], frames['h1'], frames['h4'], frames['d1'])
-        conds = s177.base.make_conditions(data)
-        rule_to_mask = {name: mask for name, mask in conds}
         rule = str(selected['rule'])
-        mask = s178.build_rule_mask(rule, rule_to_mask, len(data))
+        mask, rule_eval_problems = literal_rule_mask(rule, data)
         entries = data.loc[mask].copy()
-        if entries.empty:
-            blockers.append({'id': 'selected_rule_replay_empty', 'rule': rule})
+        selected_entry_rows = int(len(entries))
+        if rule_eval_problems:
+            blockers.append({'id': 'selected_rule_parse_problem', 'rule': rule, 'problems': rule_eval_problems})
+        elif entries.empty:
+            blockers.append({'id': 'selected_rule_replay_empty', 'rule': rule, 'eval_mode': 'literal_rule_mask'})
         else:
             direction = str(selected['direction'])
             tp = float(selected['tp'])
@@ -192,6 +244,7 @@ def main() -> int:
             horizon = int(selected['horizon_m5'])
             raw_trades = s178.compute_outcome_with_exit(entries, frames['m5'], direction, tp, sl, horizon)
             dedup_trades = s178.dedup_resolved_only(raw_trades)
+            selected_dedup_rows = int(len(dedup_trades))
             monthly = monthly_table(dedup_trades, args.cost_points)
             yearly = yearly_table(monthly)
             save(dedup_trades, out / 'gold_v3_179_selected_dedup_trades.csv')
@@ -206,6 +259,9 @@ def main() -> int:
                 'selected_rule': rule,
                 'selected_cost_points': float(args.cost_points),
                 'selected_scope': 'dedup_resolved_only',
+                'selected_rule_eval_mode': 'literal_rule_mask',
+                'selected_entry_rows_before_dedup': selected_entry_rows,
+                'selected_dedup_rows': selected_dedup_rows,
                 'selected_train_n': int(selected.get('train_n', 0)),
                 'selected_test_n': int(selected.get('test_n', 0)),
                 'selected_full_n': int(selected.get('full_n', 0)),
@@ -229,6 +285,7 @@ def main() -> int:
         **selected_meta,
         'monthly_rows': int(len(monthly)) if not monthly.empty else 0,
         'yearly_rows': int(len(yearly)) if not yearly.empty else 0,
+        'rule_eval_problem_count': len(rule_eval_problems),
         'source_csv_mutated': False,
         'contract_mutated': False,
         'open_asof_allowed': False,
@@ -257,6 +314,7 @@ def main() -> int:
         '',
         'INTERPRETATION',
         'Stage179 is audit-only. It selects the best Stage178 dedup_resolved_only candidate at the requested cost level, preferring candidates that satisfy the old PF benchmark and minimum train/test/full counts. Monthly win rate is computed after subtracting cost_points from each trade pnl. No live signal, payload, Discord, MT5 order, AI API, live hook, or autotrade is enabled.',
+        'Rules are replayed by parsing the saved literal rule text. This avoids quantile-condition name drift when a new closed live candle appears after Stage178.',
     ]
     lines += ['', 'BLOCKERS', 'NO_BLOCKERS' if not blockers else json.dumps(blockers, ensure_ascii=False, indent=2)]
     (out / 'paste_me.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
