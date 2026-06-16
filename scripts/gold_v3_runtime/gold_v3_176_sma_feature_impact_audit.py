@@ -160,7 +160,7 @@ def main() -> int:
     if features.empty: blockers.append({'id':'missing_or_unusable_ohlc_feature_table'})
     if not pc: blockers.append({'id':'missing_policy_column'})
     if not rc: blockers.append({'id':'missing_result_column'})
-    feature_diff=pd.DataFrame(); cand_metrics=pd.DataFrame(); overlap=pd.DataFrame(); union_metrics=pd.DataFrame()
+    feature_diff=pd.DataFrame(); cand_metrics=pd.DataFrame(); overlap=pd.DataFrame()
     if not blockers:
         x=raw.copy(); x['entry_dt']=pd.to_datetime(x.entry_dt, errors='coerce'); x=x[x.entry_dt.notna()].sort_values('entry_dt').reset_index(drop=True)
         x['policy_norm']=x[pc].astype(str); x[rc]=pd.to_numeric(x[rc], errors='coerce').fillna(0); x['month']=x.entry_dt.dt.to_period('M').astype(str)
@@ -173,7 +173,8 @@ def main() -> int:
                 diff_rows.append({'feature':orig,'rows':int(len(d)),'mean_abs_diff':float(d.mean()) if len(d) else math.nan,'median_abs_diff':float(d.median()) if len(d) else math.nan,'max_abs_diff':float(d.max()) if len(d) else math.nan,'p95_abs_diff':float(d.quantile(0.95)) if len(d) else math.nan})
         if 'h1_up' in x.columns and 'h1_up_sma_live' in x.columns:
             oh=x.h1_up.astype(str).str.lower().isin(['true','1','yes','y']); nh=x.h1_up_sma_live.astype(str).str.lower().isin(['true','1','yes','y'])
-            diff_rows.append({'feature':'h1_up','rows':int(len(x)),'mean_abs_diff':float((oh!=nh).mean()),'median_abs_diff':0.0,'max_abs_diff':int((oh!=nh).max()),'p95_abs_diff':float((oh!=nh).quantile(0.95))})
+            h1_diff=(oh!=nh).astype(int)
+            diff_rows.append({'feature':'h1_up','rows':int(len(x)),'mean_abs_diff':float(h1_diff.mean()),'median_abs_diff':float(h1_diff.median()),'max_abs_diff':int(h1_diff.max()),'p95_abs_diff':float(h1_diff.quantile(0.95))})
         feature_diff=pd.DataFrame(diff_rows); save(feature_diff,out/'gold_v3_176_feature_diff_summary.csv')
         orig = later_candidates(x, 'original')
         sma = later_candidates(x, 'sma_live')
