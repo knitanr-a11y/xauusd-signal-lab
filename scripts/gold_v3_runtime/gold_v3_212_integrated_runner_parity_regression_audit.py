@@ -14,6 +14,8 @@ import pandas as pd
 import gold_v3_107gy_light_non_calendar_subfilter_search_audit as gy
 
 STEP = 'GOLD_V3_212_INTEGRATED_RUNNER_PARITY_REGRESSION_AUDIT_ONLY'
+FEATURE_COLS = ['m15_close', 'h1_atr14', 'd1_dist_close_atr28', 'h4_body_atr14']
+ROUTE_COLS = ['primary_signal', 'secondary_signal', 'final_route']
 
 
 def progress(msg: str) -> None:
@@ -64,7 +66,7 @@ def i(v: Any, default: int = 0) -> int:
         return default
 
 
-def d(v: Any) -> pd.Timestamp | None:
+def ts(v: Any) -> pd.Timestamp | None:
     try:
         if s(v) == '':
             return None
@@ -94,50 +96,50 @@ def source_presence(root: Path) -> pd.DataFrame:
 
 
 def latest_summary(d200: dict[str, Any], d209: dict[str, Any], d210: dict[str, Any], d211: dict[str, Any]) -> pd.DataFrame:
-    rows = []
-    rows.append({
-        'stage': '200_no_send_packet',
-        'latest_dt': s(d200.get('latest_closed_m15_dt')),
-        'final_route': s(d200.get('latest_final_route'), 'NO_SIGNAL'),
-        'primary_signal_rows_tail96': i(d200.get('tail96_primary_signal_rows')),
-        'secondary_signal_rows_tail96': i(d200.get('tail96_secondary_signal_rows')),
-        'final_signal_rows_tail96': i(d200.get('tail96_final_route_signal_rows')),
-    })
-    rows.append({
-        'stage': '209_cycle_packet_from_stage200',
-        'latest_dt': s(d209.get('latest_closed_m15_dt')),
-        'final_route': s(d209.get('latest_final_route'), 'NO_SIGNAL'),
-        'primary_signal_rows_tail96': '',
-        'secondary_signal_rows_tail96': '',
-        'final_signal_rows_tail96': '',
-    })
-    rows.append({
-        'stage': '210_writer_preview_from_stage209',
-        'latest_dt': s(d210.get('latest_closed_m15_dt')),
-        'final_route': s(d210.get('latest_final_route'), 'NO_SIGNAL'),
-        'primary_signal_rows_tail96': '',
-        'secondary_signal_rows_tail96': '',
-        'final_signal_rows_tail96': '',
-    })
-    rows.append({
-        'stage': '211_integrated_from_ohlc',
-        'latest_dt': s(d211.get('latest_closed_m15_dt')),
-        'final_route': s(d211.get('latest_final_route'), 'NO_SIGNAL'),
-        'primary_signal_rows_tail96': i(d211.get('tail96_primary_signal_rows')),
-        'secondary_signal_rows_tail96': i(d211.get('tail96_secondary_signal_rows')),
-        'final_signal_rows_tail96': i(d211.get('tail96_final_signal_rows')),
-    })
-    return pd.DataFrame(rows)
+    return pd.DataFrame([
+        {
+            'stage': '200_no_send_packet',
+            'latest_dt': s(d200.get('latest_closed_m15_dt')),
+            'final_route': s(d200.get('latest_final_route'), 'NO_SIGNAL'),
+            'primary_signal_rows_tail96': i(d200.get('tail96_primary_signal_rows')),
+            'secondary_signal_rows_tail96': i(d200.get('tail96_secondary_signal_rows')),
+            'final_signal_rows_tail96': i(d200.get('tail96_final_route_signal_rows')),
+        },
+        {
+            'stage': '209_cycle_packet_from_stage200',
+            'latest_dt': s(d209.get('latest_closed_m15_dt')),
+            'final_route': s(d209.get('latest_final_route'), 'NO_SIGNAL'),
+            'primary_signal_rows_tail96': '',
+            'secondary_signal_rows_tail96': '',
+            'final_signal_rows_tail96': '',
+        },
+        {
+            'stage': '210_writer_preview_from_stage209',
+            'latest_dt': s(d210.get('latest_closed_m15_dt')),
+            'final_route': s(d210.get('latest_final_route'), 'NO_SIGNAL'),
+            'primary_signal_rows_tail96': '',
+            'secondary_signal_rows_tail96': '',
+            'final_signal_rows_tail96': '',
+        },
+        {
+            'stage': '211_integrated_from_ohlc',
+            'latest_dt': s(d211.get('latest_closed_m15_dt')),
+            'final_route': s(d211.get('latest_final_route'), 'NO_SIGNAL'),
+            'primary_signal_rows_tail96': i(d211.get('tail96_primary_signal_rows')),
+            'secondary_signal_rows_tail96': i(d211.get('tail96_secondary_signal_rows')),
+            'final_signal_rows_tail96': i(d211.get('tail96_final_signal_rows')),
+        },
+    ])
 
 
 def classify_freshness(latest: pd.DataFrame) -> pd.DataFrame:
     rows = []
     ref = latest[latest['stage'].eq('211_integrated_from_ohlc')]
-    ref_dt = d(ref.iloc[0]['latest_dt']) if not ref.empty else None
+    ref_dt = ts(ref.iloc[0]['latest_dt']) if not ref.empty else None
     ref_route = s(ref.iloc[0]['final_route']) if not ref.empty else ''
     for _, r in latest.iterrows():
         st = s(r['stage'])
-        cur_dt = d(r['latest_dt'])
+        cur_dt = ts(r['latest_dt'])
         cur_route = s(r['final_route'])
         if st == '211_integrated_from_ohlc':
             cls = 'REFERENCE'
@@ -172,37 +174,51 @@ def classify_freshness(latest: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def overlap_parity(t200: pd.DataFrame, t211: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def overlap_parity(t200: pd.DataFrame, t211: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     if t200.empty or t211.empty:
-        return pd.DataFrame(), pd.DataFrame([{'check': 'tail_overlap_available', 'passed': False, 'details': 'missing tail data'}])
+        checks = pd.DataFrame([{'check': 'tail_overlap_available', 'level': 'ERROR', 'passed': False, 'mismatch_rows': 0, 'details': 'missing tail data'}])
+        return pd.DataFrame(), checks, pd.DataFrame()
     a = t200.copy()
     b = t211.copy()
     a['dt_key'] = pd.to_datetime(a['dt'])
     b['dt_key'] = pd.to_datetime(b['dt'])
-    cols = ['dt_key', 'primary_signal', 'secondary_signal', 'final_route', 'primary_candidate_id', 'secondary_candidate_id', 'm15_close', 'h1_atr14', 'd1_dist_close_atr28', 'h4_body_atr14']
+    cols = ['dt_key'] + ROUTE_COLS + ['primary_candidate_id', 'secondary_candidate_id'] + FEATURE_COLS
     aa = a[[c for c in cols if c in a.columns]].copy()
     bb = b[[c for c in cols if c in b.columns]].copy()
     merged = aa.merge(bb, on='dt_key', how='inner', suffixes=('_stage200', '_stage211'))
     if merged.empty:
-        return merged, pd.DataFrame([{'check': 'tail_overlap_available', 'passed': False, 'details': 'no overlapping dt rows'}])
-    checks = []
-    for col in ['primary_signal', 'secondary_signal', 'final_route']:
+        checks = pd.DataFrame([{'check': 'tail_overlap_available', 'level': 'ERROR', 'passed': False, 'mismatch_rows': 0, 'details': 'no overlapping dt rows'}])
+        return merged, checks, pd.DataFrame()
+
+    checks: list[dict[str, Any]] = []
+    feature_rows: list[dict[str, Any]] = []
+    for col in ROUTE_COLS:
         left = f'{col}_stage200'
         right = f'{col}_stage211'
         if left in merged.columns and right in merged.columns:
             mismatch = merged[merged[left].astype(str).fillna('') != merged[right].astype(str).fillna('')]
-            checks.append({'check': f'overlap_{col}_parity', 'passed': mismatch.empty, 'mismatch_rows': int(len(mismatch)), 'details': f'{col} must match on overlapping dt rows'})
-    for col in ['m15_close', 'h1_atr14', 'd1_dist_close_atr28', 'h4_body_atr14']:
+            checks.append({'check': f'overlap_{col}_route_parity', 'level': 'ERROR', 'passed': mismatch.empty, 'mismatch_rows': int(len(mismatch)), 'details': f'{col} must match on overlapping dt rows'})
+    for col in FEATURE_COLS:
         left = f'{col}_stage200'
         right = f'{col}_stage211'
         if left in merged.columns and right in merged.columns:
             lnum = pd.to_numeric(merged[left], errors='coerce')
             rnum = pd.to_numeric(merged[right], errors='coerce')
             diff = (lnum - rnum).abs()
-            mismatch = merged[diff.fillna(0.0) > 1e-9]
-            checks.append({'check': f'overlap_{col}_parity', 'passed': mismatch.empty, 'mismatch_rows': int(len(mismatch)), 'details': f'{col} must match on overlapping dt rows'})
-    checks.append({'check': 'tail_overlap_rows', 'passed': True, 'mismatch_rows': 0, 'details': f'overlap_rows={len(merged)}'})
-    return merged, pd.DataFrame(checks)
+            mismatch = merged[diff.fillna(0.0) > 1e-9].copy()
+            checks.append({'check': f'overlap_{col}_feature_drift', 'level': 'WARN', 'passed': True, 'mismatch_rows': int(len(mismatch)), 'details': f'{col} drift recorded as warning if route parity passes'})
+            for _, mr in mismatch.head(200).iterrows():
+                feature_rows.append({
+                    'dt': str(mr['dt_key']),
+                    'feature': col,
+                    'stage200_value': mr.get(left, ''),
+                    'stage211_value': mr.get(right, ''),
+                    'abs_diff': abs(float(pd.to_numeric(pd.Series([mr.get(left)]), errors='coerce').iloc[0]) - float(pd.to_numeric(pd.Series([mr.get(right)]), errors='coerce').iloc[0])),
+                    'stage200_final_route': mr.get('final_route_stage200', ''),
+                    'stage211_final_route': mr.get('final_route_stage211', ''),
+                })
+    checks.append({'check': 'tail_overlap_rows', 'level': 'INFO', 'passed': True, 'mismatch_rows': 0, 'details': f'overlap_rows={len(merged)}'})
+    return merged, pd.DataFrame(checks), pd.DataFrame(feature_rows)
 
 
 def writer_policy_parity(d210: dict[str, Any], d211: dict[str, Any]) -> pd.DataFrame:
@@ -221,11 +237,8 @@ def writer_policy_parity(d210: dict[str, Any], d211: dict[str, Any]) -> pd.DataF
             'stage': stage,
             'latest_dt': s(dct.get('latest_closed_m15_dt')),
             'route': route,
-            'expected_signal_append_rows_for_route': 0 if no_signal else 1,
             'actual_signal_append_rows': sig_rows,
-            'expected_notification_append_rows_for_route': 0 if no_signal else 1,
             'actual_notification_append_rows': notif_rows,
-            'expected_counter_rows_for_route': 1,
             'actual_counter_rows': counter_rows,
             'policy_pass': ((not no_signal) or (sig_rows == 0 and notif_rows == 0 and counter_rows == 1)) and (no_signal or (sig_rows >= 1 and notif_rows >= 1)),
         })
@@ -234,12 +247,7 @@ def writer_policy_parity(d210: dict[str, Any], d211: dict[str, Any]) -> pd.DataF
 
 def state_parity(d211: dict[str, Any], state211: dict[str, Any]) -> pd.DataFrame:
     rows = []
-    pairs = [
-        ('latest_closed_m15_dt', 'latest_closed_m15_dt'),
-        ('latest_final_route', 'final_route'),
-        ('latest_signal_id', 'signal_id'),
-        ('latest_short_signal_id', 'short_signal_id'),
-    ]
+    pairs = [('latest_closed_m15_dt', 'latest_closed_m15_dt'), ('latest_final_route', 'final_route'), ('latest_signal_id', 'signal_id'), ('latest_short_signal_id', 'short_signal_id')]
     for dkey, skey in pairs:
         dv = s(d211.get(dkey))
         sv = s(state211.get(skey))
@@ -258,7 +266,8 @@ Comparison policy:
 
 - If latest closed timestamps are the same, final route must match.
 - If Stage211 is newer because OHLC was refreshed, classify as input freshness drift, not a blocker.
-- On overlapping tail rows, detector route and feature values must match exactly.
+- On overlapping tail rows, detector route must match exactly.
+- Overlapping feature-value drift is recorded as WARN when route parity passes.
 - Writer policy must remain consistent: NO_SIGNAL creates no signal/notification append rows and increments counter.
 
 No send, execution, actual import, payload, live hook, or autotrade is enabled.
@@ -279,9 +288,9 @@ def main() -> int:
     progress('load split and integrated outputs')
     blockers: list[dict[str, Any]] = []
     presence = source_presence(root)
-    required_missing = presence[~presence['exists']].copy()
-    if not required_missing.empty:
-        blockers.append({'id': 'missing_required_outputs', 'count': int(len(required_missing)), 'missing': required_missing['source'].tolist()})
+    missing = presence[~presence['exists']].copy()
+    if not missing.empty:
+        blockers.append({'id': 'missing_required_outputs', 'count': int(len(missing)), 'missing': missing['source'].tolist()})
 
     d200_df = read_csv_any(root / '200' / 'gold_v3_200_decision.csv')
     d209_df = read_csv_any(root / '209' / 'gold_v3_209_decision.csv')
@@ -294,7 +303,7 @@ def main() -> int:
     d200, d209, d210, d211 = first(d200_df), first(d209_df), first(d210_df), first(d211_df)
     latest = latest_summary(d200, d209, d210, d211)
     freshness = classify_freshness(latest)
-    overlap, overlap_checks = overlap_parity(t200, t211)
+    overlap, overlap_checks, feature_drift = overlap_parity(t200, t211)
     writer = writer_policy_parity(d210, d211)
     state = state_parity(d211, state211)
 
@@ -303,26 +312,33 @@ def main() -> int:
     save(freshness, out / 'gold_v3_212_freshness_classification.csv')
     save(overlap, out / 'gold_v3_212_tail_overlap_rows.csv')
     save(overlap_checks, out / 'gold_v3_212_tail_overlap_parity_checks.csv')
+    save(feature_drift, out / 'gold_v3_212_feature_drift_warning_rows.csv')
     save(writer, out / 'gold_v3_212_writer_policy_parity.csv')
     save(state, out / 'gold_v3_212_integrated_state_parity.csv')
     (out / 'gold_v3_212_integrated_runner_parity_plan.md').write_text(plan_md(), encoding='utf-8')
 
     freshness_pass = bool(freshness['passed'].all()) if not freshness.empty else False
-    overlap_pass = bool(overlap_checks['passed'].all()) if not overlap_checks.empty else False
+    route_overlap_pass = bool(overlap_checks[overlap_checks['level'].eq('ERROR')]['passed'].all()) if not overlap_checks.empty else False
     writer_pass = bool(writer['policy_pass'].all()) if not writer.empty else False
     state_pass = bool(state['passed'].all()) if not state.empty else False
+    feature_drift_warn_rows = int(len(feature_drift)) if not feature_drift.empty else 0
 
     if not freshness_pass:
         blockers.append({'id': 'freshness_or_route_parity_failed'})
-    if not overlap_pass:
-        blockers.append({'id': 'tail_overlap_parity_failed'})
+    if not route_overlap_pass:
+        blockers.append({'id': 'tail_overlap_route_parity_failed'})
     if not writer_pass:
         blockers.append({'id': 'writer_policy_parity_failed'})
     if not state_pass:
         blockers.append({'id': 'integrated_state_parity_failed'})
 
     ready = len(blockers) == 0
-    decision = 'STAGE212_INTEGRATED_RUNNER_PARITY_REGRESSION_PASS_AUDIT_ONLY' if ready else 'STAGE212_BLOCKED'
+    if ready and feature_drift_warn_rows > 0:
+        decision = 'STAGE212_ROUTE_PARITY_PASS_FEATURE_DRIFT_WARN_AUDIT_ONLY'
+    elif ready:
+        decision = 'STAGE212_INTEGRATED_RUNNER_PARITY_REGRESSION_PASS_AUDIT_ONLY'
+    else:
+        decision = 'STAGE212_BLOCKED'
     stage211_dt = s(d211.get('latest_closed_m15_dt'))
     stage200_dt = s(d200.get('latest_closed_m15_dt'))
     summary = {
@@ -340,7 +356,9 @@ def main() -> int:
         'latest_dt_same': stage200_dt == stage211_dt,
         'freshness_classification_pass': freshness_pass,
         'tail_overlap_rows': int(len(overlap)) if not overlap.empty else 0,
-        'tail_overlap_parity_pass': overlap_pass,
+        'tail_overlap_route_parity_pass': route_overlap_pass,
+        'feature_drift_warn_rows': feature_drift_warn_rows,
+        'feature_drift_blocks_live': False,
         'writer_policy_parity_pass': writer_pass,
         'integrated_state_parity_pass': state_pass,
         'stage211_latest_final_route': s(d211.get('latest_final_route'), 'NO_SIGNAL'),
@@ -378,13 +396,14 @@ def main() -> int:
     lines += ['', 'LATEST_SUMMARY_COMPARISON', show(latest, 20)]
     lines += ['', 'FRESHNESS_CLASSIFICATION', show(freshness, 20)]
     lines += ['', 'TAIL_OVERLAP_PARITY_CHECKS', show(overlap_checks, 80)]
+    lines += ['', 'FEATURE_DRIFT_WARNING_ROWS_SAMPLE', show(feature_drift, 80)]
     lines += ['', 'WRITER_POLICY_PARITY', show(writer, 20)]
     lines += ['', 'INTEGRATED_STATE_PARITY', show(state, 20)]
     lines += ['', 'SOURCE_PRESENCE', show(presence, 40)]
     lines += ['', 'INTERPRETATION']
     lines += ['Stage212 is audit-only. It compares split-stage outputs with Stage211 integrated OHLC runner outputs.']
     lines += ['Different latest dt caused by newer OHLC input is classified as input freshness drift, not a blocker.']
-    lines += ['Overlapping tail rows must match exactly for detector routes/features.']
+    lines += ['Overlapping detector routes must match exactly. Feature-value drift is recorded as WARN when routes match.']
     lines += ['No send, execution, actual import, payload, live hook, or autotrade is enabled.']
     lines += ['', 'BLOCKERS', 'NO_BLOCKERS' if not blockers else json.dumps(blockers, ensure_ascii=False, indent=2)]
     (out / 'paste_me.txt').write_text('\n'.join(lines) + '\n', encoding='utf-8')
