@@ -138,13 +138,13 @@ def enrich_signal_rows(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def first_signal_events(signal_rows: pd.DataFrame, all_recent_rows: pd.DataFrame) -> pd.DataFrame:
-    if signal_rows.empty or all_recent_rows.empty:
-        return pd.DataFrame()
-    x = all_recent_rows.sort_values('dt').copy()
+def add_event_flags(all_rows: pd.DataFrame) -> pd.DataFrame:
+    if all_rows.empty:
+        return all_rows.copy()
+    x = all_rows.sort_values('dt').copy()
     prev_pri = x['priority_signal'].shift(1).fillna('NO_SIGNAL')
     x['is_new_signal_event'] = x['priority_signal'].ne('NO_SIGNAL') & (x['priority_signal'].ne(prev_pri) | prev_pri.eq('NO_SIGNAL'))
-    return enrich_signal_rows(x[x['is_new_signal_event']].copy())
+    return x
 
 
 def make_daily_summary(recent: pd.DataFrame, signal_rows: pd.DataFrame, events: pd.DataFrame, dates: list[str]) -> pd.DataFrame:
@@ -166,8 +166,30 @@ def make_daily_summary(recent: pd.DataFrame, signal_rows: pd.DataFrame, events: 
     return pd.DataFrame(rows)
 
 
+def df_to_md_table(df: pd.DataFrame) -> str:
+    """Small markdown table writer with no optional dependencies such as tabulate."""
+    if df.empty:
+        return 'NO_DAILY_ROWS'
+    cols = list(df.columns)
+    lines = []
+    lines.append('| ' + ' | '.join(str(c) for c in cols) + ' |')
+    lines.append('| ' + ' | '.join('---' for _ in cols) + ' |')
+    for _, row in df.iterrows():
+        vals = []
+        for c in cols:
+            v = row[c]
+            if pd.isna(v) if not isinstance(v, (bool, str, int, float)) else False:
+                s = ''
+            else:
+                s = str(v)
+            s = s.replace('|', '\\|').replace('\n', ' ')
+            vals.append(s)
+        lines.append('| ' + ' | '.join(vals) + ' |')
+    return '\n'.join(lines)
+
+
 def write_handoff_md(path: Path, summary: dict[str, Any], daily_summary: pd.DataFrame) -> None:
-    daily_md = daily_summary.to_markdown(index=False) if not daily_summary.empty else 'NO_DAILY_ROWS'
+    daily_md = df_to_md_table(daily_summary)
     lines = [
         '# GOLD V3 Stage190 Handoff - Primary ABC CAP Audit-only',
         '',
@@ -239,7 +261,6 @@ def main() -> int:
     if not source_diag.empty:
         save(source_diag, out / 'gold_v3_190_source_coverage.csv')
 
-    data = pd.DataFrame()
     recent = pd.DataFrame()
     signal_rows = pd.DataFrame()
     events = pd.DataFrame()
@@ -258,6 +279,8 @@ def main() -> int:
             blockers.append({'id': 'feature_data_empty'})
         else:
             data = data.sort_values('dt').reset_index(drop=True)
+            data['mt5_date'] = pd.to_datetime(data['dt']).dt.date.astype(str)
+            data = add_event_flags(data)
             latest_ts = pd.to_datetime(data['dt'].iloc[-1])
             latest_dt = str(latest_ts)
             today_date = latest_ts.date()
@@ -266,30 +289,34 @@ def main() -> int:
             yesterday = str(yesterday_date)
             latest_date = today
             dates = [yesterday, today]
-            x = data.copy()
-            x['mt5_date'] = pd.to_datetime(x['dt']).dt.date.astype(str)
-            recent = x[x['mt5_date'].isin(dates)].copy()
+            recent = data[data['mt5_date'].isin(dates)].copy()
             if recent.empty:
                 blockers.append({'id': 'recent_yesterday_today_rows_empty', 'dates': dates})
             else:
                 recent = enrich_signal_rows(recent)
                 signal_rows = recent[recent['is_signal']].copy()
-                events = first_signal_events(signal_rows, recent)
+                events = recent[recent['is_new_signal_event']].copy()
                 daily_summary = make_daily_summary(recent, signal_rows, events, dates)
                 core_cols = [
                     'dt', 'mt5_date', 'priority_signal', 'fired_candidates',
                     'signal_A_PRECISION_BASE', 'signal_C_BALANCED_CAP60', 'signal_B_HIGH_FREQUENCY_CAP40',
-                    'selected_direction', 'entry_reference_price', 'tp_reference_price', 'sl_reference_price',
+                    'is_new_signal_event', 'selected_direction', 'entry_reference_price', 'tp_reference_price', 'sl_reference_price',
                     'd1_dist_close_atr28', 'h4_body_atr14', 'h1_atr14', 'm15_close',
                 ]
                 save(recent[[c for c in core_cols if c in recent.columns]], out / 'gold_v3_190_yesterday_today_detector_rows.csv')
                 save(signal_rows[[c for c in core_cols if c in signal_rows.columns]], out / 'gold_v3_190_yesterday_today_signal_rows.csv')
-                save(events[[c for c in core_cols if c in events.columns] + ['is_new_signal_event'] if 'is_new_signal_event' in events.columns else [c for c in core_cols if c in events.columns]], out / 'gold_v3_190_yesterday_today_new_signal_events.csv')
+                save(events[[c for c in core_cols if c in events.columns]], out / 'gold_v3_190_yesterday_today_new_signal_events.csv')
                 save(daily_summary, out / 'gold_v3_190_yesterday_today_daily_summary.csv')
 
     ready = len(blockers) == 0
-    yesterday_had = bool(daily_summary[daily_summary['mt5_date'].eq(yesterday)]['had_trade_signal'].iloc[0]) if not daily_summary.empty and yesterday else False
-    today_had = bool(daily_summary[daily_summary['mt5_date'].eq(today)]['had_trade_signal'].iloc[0]) if not daily_summary.empty and today else False
+    def val_for(day: str, col: str, default: Any = 0) -> Any:
+        if daily_summary.empty or not day:
+            return default
+        hit = daily_summary[daily_summary['mt5_date'].eq(day)]
+        if hit.empty:
+            return default
+        return hit[col].iloc[0]
+
     summary = {
         'step': STEP,
         'status': 'READY' if ready else 'BLOCKED',
@@ -303,12 +330,12 @@ def main() -> int:
         'latest_mt5_date': latest_date,
         'yesterday_mt5_date': yesterday,
         'today_mt5_date': today,
-        'yesterday_had_trade_signal_event': yesterday_had,
-        'today_had_trade_signal_event': today_had,
-        'yesterday_raw_signal_rows': int(daily_summary[daily_summary['mt5_date'].eq(yesterday)]['raw_signal_rows'].iloc[0]) if not daily_summary.empty and yesterday else 0,
-        'today_raw_signal_rows': int(daily_summary[daily_summary['mt5_date'].eq(today)]['raw_signal_rows'].iloc[0]) if not daily_summary.empty and today else 0,
-        'yesterday_new_signal_events': int(daily_summary[daily_summary['mt5_date'].eq(yesterday)]['new_signal_events'].iloc[0]) if not daily_summary.empty and yesterday else 0,
-        'today_new_signal_events': int(daily_summary[daily_summary['mt5_date'].eq(today)]['new_signal_events'].iloc[0]) if not daily_summary.empty and today else 0,
+        'yesterday_had_trade_signal_event': bool(val_for(yesterday, 'had_trade_signal', False)),
+        'today_had_trade_signal_event': bool(val_for(today, 'had_trade_signal', False)),
+        'yesterday_raw_signal_rows': int(val_for(yesterday, 'raw_signal_rows', 0)),
+        'today_raw_signal_rows': int(val_for(today, 'raw_signal_rows', 0)),
+        'yesterday_new_signal_events': int(val_for(yesterday, 'new_signal_events', 0)),
+        'today_new_signal_events': int(val_for(today, 'new_signal_events', 0)),
         'primary_candidate_ids_priority_order': [c['candidate_id'] for c in PRIMARY_CANDIDATES],
         'time_basis': 'CSV/MT5 timestamp. No JST conversion is applied.',
         'recent_trade_definition': 'audit-only entry-signal event on closed M15. This is not a real executed order.',
