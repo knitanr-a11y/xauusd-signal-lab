@@ -26,6 +26,26 @@ def ok_bool(v):
     if isinstance(v,str): return v.lower()=='true'
     return bool(v)
 
+def jsonable(v):
+    """Convert pandas/numpy scalar containers into JSON-serializable Python types."""
+    try:
+        if pd.isna(v):
+            return None
+    except Exception:
+        pass
+    if hasattr(v,'item'):
+        try:
+            return jsonable(v.item())
+        except Exception:
+            pass
+    if isinstance(v,dict):
+        return {str(k):jsonable(val) for k,val in v.items()}
+    if isinstance(v,(list,tuple,set)):
+        return [jsonable(x) for x in v]
+    if isinstance(v,Path):
+        return str(v)
+    return v
+
 def main()->int:
     t0=time.time()
     ap=argparse.ArgumentParser()
@@ -42,9 +62,10 @@ def main()->int:
     later_orders=read_csv(root/'169'/'gold_v3_169_later_cap5_internal_mixed_skipped_orders.csv')
     blockers=[]; checks=[]
     def add(name,passed,detail,blocker=False):
-        checks.append({'check':name,'passed':bool(passed),'blocker':bool(blocker and not passed),'detail':detail})
+        safe_detail=jsonable(detail)
+        checks.append({'check':name,'passed':bool(passed),'blocker':bool(blocker and not passed),'detail':safe_detail})
         if blocker and not passed:
-            blockers.append({'id':name,'detail':detail})
+            blockers.append({'id':name,'detail':safe_detail})
     add('stage170_contract_exists',bool(contract),str(root/'170'/'gold_v3_170_parallel_execution_contract_packet.json'),True)
     add('stage169_metrics_exists',not metrics.empty,str(root/'169'/'gold_v3_169_parallel_bucket_variant_metrics.csv'),True)
     add('current_orders_exists',not current_orders.empty,str(root/'169'/'gold_v3_169_current_cap10_orders.csv'),True)
@@ -102,7 +123,8 @@ def main()->int:
         'final_live_enabled':False,'mt5_order_enabled':False,'discord_enabled':False,'ai_api_enabled':False,'live_hook_enabled':False,'live_evaluator_enabled':False,
         'check_count':len(checks),'passed_count':sum(1 for c in checks if c['passed']),'blocker_count':len(blockers),'elapsed_seconds':round(time.time()-t0,2)
     }
-    (out/'gold_v3_171_summary.json').write_text(json.dumps(summary|{'blockers':blockers,'checks':checks,'runtime_items':runtime_items},ensure_ascii=False,indent=2),encoding='utf-8')
+    payload=jsonable(summary|{'blockers':blockers,'checks':checks,'runtime_items':runtime_items})
+    (out/'gold_v3_171_summary.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding='utf-8')
     save_csv(pd.DataFrame([summary]),out/'gold_v3_171_decision.csv')
     lines=[]
     lines.append('GOLD V3 171 PASTE_ME_PARALLEL_CONTRACT_PREFLIGHT_AUDIT')
@@ -118,8 +140,8 @@ def main()->int:
     lines.append('The Stage170 parallel execution contract is preflight-checked for a future audit-only dry-run specification. This does not enable live trading, MT5 orders, Discord, AI API, live hook, live evaluator, or final signal.')
     lines.append('')
     lines.append('BLOCKERS')
-    lines.append('NO_BLOCKERS' if not blockers else json.dumps(blockers,ensure_ascii=False,indent=2))
+    lines.append('NO_BLOCKERS' if not blockers else json.dumps(jsonable(blockers),ensure_ascii=False,indent=2))
     (out/'paste_me.txt').write_text('\n'.join(lines)+'\n',encoding='utf-8')
-    print(json.dumps({'ready':not blockers,'decision':decision,'paste_me':str(out/'paste_me.txt')},ensure_ascii=False))
+    print(json.dumps(jsonable({'ready':not blockers,'decision':decision,'paste_me':str(out/'paste_me.txt')}),ensure_ascii=False))
     return 0 if not blockers else 2
 if __name__=='__main__': raise SystemExit(main())
