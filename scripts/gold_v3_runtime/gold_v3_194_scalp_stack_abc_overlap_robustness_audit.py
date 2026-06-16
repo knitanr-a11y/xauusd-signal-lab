@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import shutil
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +22,7 @@ STEP = 'GOLD_V3_194_SCALP_STACK_ABC_OVERLAP_ROBUSTNESS_AUDIT_ONLY'
 PRIMARY_COST = 3.0
 STRESS_COST = 5.0
 WEAK_MONTHS = ['2025-05', '2025-08', '2025-12']
+DAILY_FOCUS_MONTHS = ['2026-05', '2026-06']
 
 ABC_CANDIDATES = [
     {
@@ -88,32 +88,35 @@ def num(x: Any, default: float = 0.0) -> float:
         return default
 
 
-def add_month(tr: pd.DataFrame) -> pd.DataFrame:
+def add_time_cols(tr: pd.DataFrame) -> pd.DataFrame:
     x = tr.copy()
+    if x.empty:
+        return x
     x['entry_dt'] = pd.to_datetime(x['entry_dt'])
     x['exit_dt'] = pd.to_datetime(x['exit_dt'])
     if 'month' not in x.columns or x['month'].isna().all():
         x['month'] = x['entry_dt'].dt.to_period('M').astype(str)
+    x['entry_date'] = x['entry_dt'].dt.date.astype(str)
     return x
 
 
 def pf_sum_wr(pnl: pd.Series | np.ndarray) -> tuple[int, float, float, float, float]:
-    x = pd.to_numeric(pd.Series(pnl), errors='coerce').replace([np.inf, -np.inf], np.nan).dropna()
-    n = int(len(x))
+    s = pd.to_numeric(pd.Series(pnl), errors='coerce').replace([np.inf, -np.inf], np.nan).dropna()
+    n = int(len(s))
     if n == 0:
         return 0, 0.0, math.nan, math.nan, math.nan
-    gp = float(x[x > 0].sum())
-    gl = float(-x[x < 0].sum())
-    pf = gp / gl if gl > 0 else (math.inf if gp > 0 else 0.0)
-    wr = float((x > 0).mean())
-    avg = float(x.mean())
-    return n, float(x.sum()), pf, wr, avg
+    gross_profit = float(s[s > 0].sum())
+    gross_loss = float(-s[s < 0].sum())
+    pf = gross_profit / gross_loss if gross_loss > 0 else (math.inf if gross_profit > 0 else 0.0)
+    wr = float((s > 0).mean())
+    avg = float(s.mean())
+    return n, float(s.sum()), pf, wr, avg
 
 
 def split_trades(tr: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     if tr.empty:
         return tr.copy(), tr.copy(), tr.copy(), tr.copy()
-    x = add_month(tr)
+    x = add_time_cols(tr)
     dt = pd.to_datetime(x['entry_dt'])
     train = x[(dt >= pd.Timestamp('2025-01-02')) & (dt < pd.Timestamp('2026-01-01'))].copy()
     test = x[dt >= pd.Timestamp('2026-01-01')].copy()
@@ -138,9 +141,10 @@ def metric(prefix: str, tr: pd.DataFrame, pnl_col: str) -> dict[str, Any]:
 
 
 def monthly_stats(tr: pd.DataFrame, pnl_col: str) -> tuple[int, int, float, str]:
-    if tr.empty:
+    if tr.empty or pnl_col not in tr.columns:
         return 0, 0, math.nan, ''
-    m = tr.groupby('month')[pnl_col].sum().sort_index()
+    x = add_time_cols(tr)
+    m = x.groupby('month')[pnl_col].sum().sort_index()
     if m.empty:
         return 0, 0, math.nan, ''
     return int(len(m)), int((m < 0).sum()), float(m.min()), str(m.idxmin())
@@ -161,7 +165,7 @@ def evaluate(tr: pd.DataFrame, pnl_col: str = 'pnl_net_cost3') -> dict[str, Any]
 def monthly_table(tr: pd.DataFrame, portfolio_id: str, pnl_col: str = 'pnl_net_cost3') -> pd.DataFrame:
     if tr.empty:
         return pd.DataFrame()
-    x = add_month(tr)
+    x = add_time_cols(tr)
     rows = []
     for month, g in x.groupby('month', sort=True):
         n, s, pf, wr, avg = pf_sum_wr(g[pnl_col])
@@ -179,10 +183,37 @@ def monthly_table(tr: pd.DataFrame, portfolio_id: str, pnl_col: str = 'pnl_net_c
     return pd.DataFrame(rows)
 
 
+def daily_count_table(tr: pd.DataFrame, portfolio_id: str, pnl_col: str = 'pnl_net_cost3') -> pd.DataFrame:
+    if tr.empty:
+        return pd.DataFrame()
+    x = add_time_cols(tr)
+    x = x[x['month'].astype(str).isin(DAILY_FOCUS_MONTHS)].copy()
+    if x.empty:
+        return pd.DataFrame()
+    rows = []
+    for day, g in x.groupby('entry_date', sort=True):
+        n, s, pf, wr, avg = pf_sum_wr(g[pnl_col])
+        rows.append({
+            'portfolio_id': portfolio_id,
+            'entry_date': day,
+            'month': str(pd.Timestamp(day).to_period('M')),
+            'trade_rows': n,
+            'unique_entry_times': int(g['entry_dt'].nunique()),
+            'max_same_timestamp_fires': int(g.groupby('entry_dt').size().max()) if len(g) else 0,
+            'pnl_sum': s,
+            'pf': pf,
+            'win_rate_pct': wr * 100.0 if math.isfinite(wr) else math.nan,
+            'avg_net': avg,
+            'candidate_counts': json.dumps(g['candidate_id'].astype(str).value_counts().to_dict(), ensure_ascii=False) if 'candidate_id' in g.columns else '{}',
+            'direction_counts': json.dumps(g['direction'].astype(str).value_counts().to_dict(), ensure_ascii=False) if 'direction' in g.columns else '{}',
+        })
+    return pd.DataFrame(rows)
+
+
 def resolved_priority(trades: pd.DataFrame, priority: dict[str, float]) -> pd.DataFrame:
     if trades.empty:
         return trades.copy()
-    x = add_month(trades)
+    x = add_time_cols(trades)
     x['priority_score'] = x['candidate_id'].astype(str).map(priority).fillna(0.0)
     x = x.sort_values(['entry_dt', 'priority_score'], ascending=[True, False]).reset_index(drop=True)
     kept = []
@@ -238,44 +269,73 @@ def build_abc(data_dir: Path, out: Path) -> tuple[pd.DataFrame, pd.DataFrame, li
         blockers.append({'id': 'abc_trades_empty'})
         return pd.DataFrame(), source_diag, blockers
     abc_all = pd.concat(rows, ignore_index=True)
-    priority = {c['candidate_id']: 1000.0 - c['priority'] for c in ABC_CANDIDATES}
+    priority = {c['candidate_id']: 1000.0 - float(c['priority']) for c in ABC_CANDIDATES}
     abc_port = resolved_priority(abc_all, priority)
     return abc_port, source_diag, blockers
 
 
-def load_scalp_stack(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict[str, Any]]]:
+def load_scalp_stack(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[dict[str, Any]]]:
     blockers: list[dict[str, Any]] = []
-    src = root / '193'
-    selected = read_csv_any(src / 'gold_v3_193_scalping_selected_profit_stack_watchlist.csv')
-    trades = read_csv_any(src / 'gold_v3_193_scalping_profit_stack_portfolio_trades.csv')
+    selected = read_csv_any(root / '193' / 'gold_v3_193_scalping_selected_profit_stack_watchlist.csv')
+    resolved = read_csv_any(root / '193' / 'gold_v3_193_scalping_profit_stack_portfolio_trades.csv')
+    raw = read_csv_any(root / '191' / 'gold_v3_191_scalping_top_trades_cost3.csv')
     if selected.empty:
         blockers.append({'id': 'missing_stage193_selected_stack'})
-    if trades.empty:
+    if resolved.empty:
         blockers.append({'id': 'missing_stage193_portfolio_trades'})
+    if raw.empty:
+        blockers.append({'id': 'missing_stage191_top_trades_for_lot_stack_comparison'})
     if blockers:
-        return selected, trades, blockers
+        return selected, resolved, raw, blockers
     ids = selected['candidate_id'].astype(str).tolist()
-    trades = trades[trades['candidate_id'].astype(str).isin(ids)].copy()
-    trades = add_month(trades)
-    trades['family'] = 'SCALP_STACK'
-    if 'pnl_net_cost3' not in trades.columns:
-        if 'pnl_raw' in trades.columns:
-            trades['pnl_net_cost3'] = pd.to_numeric(trades['pnl_raw'], errors='coerce') - PRIMARY_COST
-        else:
-            blockers.append({'id': 'scalp_trades_missing_pnl'})
-    if 'pnl_net_cost5' not in trades.columns:
-        if 'pnl_raw' in trades.columns:
-            trades['pnl_net_cost5'] = pd.to_numeric(trades['pnl_raw'], errors='coerce') - STRESS_COST
-        else:
-            trades['pnl_net_cost5'] = pd.to_numeric(trades['pnl_net_cost3'], errors='coerce') - (STRESS_COST - PRIMARY_COST)
-    return selected, trades, blockers
+    resolved = resolved[resolved['candidate_id'].astype(str).isin(ids)].copy()
+    raw = raw[raw['candidate_id'].astype(str).isin(ids)].copy()
+    for name, df in [('resolved', resolved), ('raw', raw)]:
+        if df.empty:
+            blockers.append({'id': f'scalp_{name}_empty_after_selected_filter'})
+            continue
+        df['family'] = 'SCALP_STACK'
+        if 'pnl_net_cost3' not in df.columns:
+            if 'pnl_raw' in df.columns:
+                df['pnl_net_cost3'] = pd.to_numeric(df['pnl_raw'], errors='coerce') - PRIMARY_COST
+            else:
+                blockers.append({'id': f'scalp_{name}_missing_pnl'})
+        if 'pnl_net_cost5' not in df.columns:
+            if 'pnl_raw' in df.columns:
+                df['pnl_net_cost5'] = pd.to_numeric(df['pnl_raw'], errors='coerce') - STRESS_COST
+            else:
+                df['pnl_net_cost5'] = pd.to_numeric(df['pnl_net_cost3'], errors='coerce') - (STRESS_COST - PRIMARY_COST)
+    return selected, add_time_cols(resolved), add_time_cols(raw), blockers
+
+
+def same_entry_clusters(tr: pd.DataFrame, label: str) -> pd.DataFrame:
+    if tr.empty:
+        return pd.DataFrame()
+    x = add_time_cols(tr)
+    rows = []
+    for entry_dt, g in x.groupby('entry_dt', sort=True):
+        if len(g) <= 1:
+            continue
+        n, s, pf, wr, avg = pf_sum_wr(g['pnl_net_cost3'])
+        rows.append({
+            'cluster_type': label,
+            'entry_dt': entry_dt,
+            'month': str(pd.Timestamp(entry_dt).to_period('M')),
+            'fire_count': int(len(g)),
+            'candidate_ids': '|'.join(g['candidate_id'].astype(str).tolist()),
+            'direction_counts': json.dumps(g['direction'].astype(str).value_counts().to_dict(), ensure_ascii=False) if 'direction' in g.columns else '{}',
+            'pnl_sum_cost3_if_lot_stack': s,
+            'pf_cost3_if_lot_stack': pf,
+            'win_rate_pct': wr * 100.0 if math.isfinite(wr) else math.nan,
+        })
+    return pd.DataFrame(rows)
 
 
 def overlap_report(abc: pd.DataFrame, scalp: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     if abc.empty or scalp.empty:
         return pd.DataFrame(), pd.DataFrame()
-    a = add_month(abc).copy()
-    s = add_month(scalp).copy()
+    a = add_time_cols(abc).copy()
+    s = add_time_cols(scalp).copy()
     exact = s.merge(
         a[['entry_dt', 'exit_dt', 'candidate_id', 'direction']].rename(columns={'exit_dt': 'abc_exit_dt', 'candidate_id': 'abc_candidate_id', 'direction': 'abc_direction'}),
         on='entry_dt', how='inner', suffixes=('_scalp', '_abc')
@@ -299,11 +359,28 @@ def overlap_report(abc: pd.DataFrame, scalp: pd.DataFrame) -> tuple[pd.DataFrame
                 'same_direction': str(sr.get('direction', '')) == str(ar.get('direction', '')),
                 'month': str(st.to_period('M')),
             })
-    active = pd.DataFrame(active_rows)
-    return exact, active
+    return exact, pd.DataFrame(active_rows)
 
 
-def family_summary_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
+def weak_month_detail(portfolios: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    rows = []
+    for name, tr in portfolios.items():
+        x = add_time_cols(tr)
+        for m in WEAK_MONTHS:
+            g = x[x['month'].astype(str).eq(m)]
+            if g.empty:
+                continue
+            ev = evaluate(g, 'pnl_net_cost3')
+            rows.append({
+                'portfolio_id': name,
+                'month': m,
+                'trades': ev['full_n'],
+                'sum': ev['full_sum'],
+                'pf': ev['full_pf'],
+                'wr_pct': ev['full_wr_pct'],
+                'candidate_counts': json.dumps(g['candidate_id'].astype(str).value_counts().to_dict(), ensure_ascii=False),
+                'direction_counts': json.dumps(g['direction'].astype(str).value_counts().to_dict(), ensure_ascii=False) if 'direction' in g.columns else '{}',
+            })
     return pd.DataFrame(rows)
 
 
@@ -319,103 +396,91 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     blockers: list[dict[str, Any]] = []
-    progress('load Stage193 SCALP_STACK')
-    selected_stack, scalp_trades, b = load_scalp_stack(root)
+    progress('load Stage193 SCALP_STACK and Stage191 raw selected scalp trades')
+    selected_stack, scalp_one_position, scalp_lot_stack_raw, b = load_scalp_stack(root)
     blockers.extend(b)
     progress('rebuild ABC portfolio from closed OHLC')
     abc_trades, source_diag, b = build_abc(data_dir, out)
     blockers.extend(b)
 
     family_summary = pd.DataFrame()
+    monthly_all = pd.DataFrame()
+    daily_all = pd.DataFrame()
+    weak_detail = pd.DataFrame()
+    exact_overlap = pd.DataFrame()
+    active_overlap = pd.DataFrame()
+    same_scalp_clusters = pd.DataFrame()
     combined_independent = pd.DataFrame()
     combined_abc_first = pd.DataFrame()
     combined_scalp_first = pd.DataFrame()
-    exact_overlap = pd.DataFrame()
-    active_overlap = pd.DataFrame()
-    monthly_all = pd.DataFrame()
-    weak_detail = pd.DataFrame()
 
     if not blockers:
+        progress('compute overlaps, daily counts, and combined portfolios')
         save(selected_stack, out / 'gold_v3_194_scalp_stack_selected_reference.csv')
-        save(scalp_trades, out / 'gold_v3_194_scalp_stack_portfolio_trades_reference.csv')
+        save(scalp_one_position, out / 'gold_v3_194_scalp_stack_one_position_trades_reference.csv')
+        save(scalp_lot_stack_raw, out / 'gold_v3_194_scalp_stack_raw_selected_trades_lot_stack.csv')
         save(abc_trades, out / 'gold_v3_194_abc_portfolio_trades_rebuilt.csv')
-        exact_overlap, active_overlap = overlap_report(abc_trades, scalp_trades)
-        save(exact_overlap, out / 'gold_v3_194_exact_entry_overlap_abc_scalp.csv')
-        save(active_overlap, out / 'gold_v3_194_active_window_overlap_abc_scalp.csv')
 
-        combined_independent = pd.concat([abc_trades, scalp_trades], ignore_index=True)
-        abc_priority = {cid: 2000.0 - i for i, cid in enumerate(ABC_CANDIDATES)}
-        scalp_priority = {cid: 1000.0 - i for i, cid in enumerate(selected_stack['candidate_id'].astype(str).tolist())}
-        priority_abc_first = {**scalp_priority, **abc_priority}
-        priority_scalp_first = {**{k: v + 2000.0 for k, v in scalp_priority.items()}, **{k: v for k, v in abc_priority.items()}}
-        combined_abc_first = resolved_priority(combined_independent, priority_abc_first)
-        combined_scalp_first = resolved_priority(combined_independent, priority_scalp_first)
-        save(combined_independent, out / 'gold_v3_194_combined_independent_no_overlap_control.csv')
+        same_scalp_clusters = same_entry_clusters(scalp_lot_stack_raw, 'SCALP_SAME_ENTRY_RAW_SELECTED')
+        save(same_scalp_clusters, out / 'gold_v3_194_scalp_same_entry_clusters_lot_stack.csv')
+
+        exact_overlap, active_overlap = overlap_report(abc_trades, scalp_lot_stack_raw)
+        save(exact_overlap, out / 'gold_v3_194_exact_entry_overlap_abc_scalp_raw.csv')
+        save(active_overlap, out / 'gold_v3_194_active_window_overlap_abc_scalp_raw.csv')
+
+        combined_independent = pd.concat([abc_trades, scalp_lot_stack_raw], ignore_index=True)
+        abc_priority = {c['candidate_id']: 3000.0 - float(c['priority']) for c in ABC_CANDIDATES}
+        selected_ids = selected_stack['candidate_id'].astype(str).tolist()
+        scalp_priority = {cid: 2000.0 - float(i) for i, cid in enumerate(selected_ids)}
+        combined_abc_first = resolved_priority(combined_independent, {**scalp_priority, **abc_priority})
+        combined_scalp_first = resolved_priority(combined_independent, {**abc_priority, **{k: v + 2000.0 for k, v in scalp_priority.items()}})
+        save(combined_independent, out / 'gold_v3_194_combined_independent_lot_stack_no_overlap_control.csv')
         save(combined_abc_first, out / 'gold_v3_194_combined_resolved_abc_priority_first.csv')
         save(combined_scalp_first, out / 'gold_v3_194_combined_resolved_scalp_priority_first.csv')
 
-        summaries: list[dict[str, Any]] = []
-        for name, tr in [
-            ('ABC_ONLY_COST3', abc_trades),
-            ('SCALP_STACK_ONLY_COST3', scalp_trades),
-            ('COMBINED_INDEPENDENT_COST3', combined_independent),
-            ('COMBINED_ABC_PRIORITY_FIRST_COST3', combined_abc_first),
-            ('COMBINED_SCALP_PRIORITY_FIRST_COST3', combined_scalp_first),
-        ]:
+        portfolios_cost3 = {
+            'ABC_ONLY_COST3': abc_trades,
+            'SCALP_ONE_POSITION_COST3': scalp_one_position,
+            'SCALP_LOT_STACK_RAW_COST3': scalp_lot_stack_raw,
+            'COMBINED_INDEPENDENT_LOT_STACK_COST3': combined_independent,
+            'COMBINED_ABC_PRIORITY_FIRST_COST3': combined_abc_first,
+            'COMBINED_SCALP_PRIORITY_FIRST_COST3': combined_scalp_first,
+        }
+        portfolios_cost5 = {
+            'ABC_ONLY_COST5': abc_trades,
+            'SCALP_ONE_POSITION_COST5': scalp_one_position,
+            'SCALP_LOT_STACK_RAW_COST5': scalp_lot_stack_raw,
+            'COMBINED_ABC_PRIORITY_FIRST_COST5': combined_abc_first,
+            'COMBINED_SCALP_PRIORITY_FIRST_COST5': combined_scalp_first,
+        }
+        summary_rows = []
+        for name, tr in portfolios_cost3.items():
             row = {'portfolio_id': name, 'pnl_col': 'pnl_net_cost3'}
             row.update(evaluate(tr, 'pnl_net_cost3'))
-            summaries.append(row)
-        for name, tr in [
-            ('ABC_ONLY_COST5', abc_trades),
-            ('SCALP_STACK_ONLY_COST5', scalp_trades),
-            ('COMBINED_ABC_PRIORITY_FIRST_COST5', combined_abc_first),
-            ('COMBINED_SCALP_PRIORITY_FIRST_COST5', combined_scalp_first),
-        ]:
+            summary_rows.append(row)
+        for name, tr in portfolios_cost5.items():
             row = {'portfolio_id': name, 'pnl_col': 'pnl_net_cost5'}
             row.update(evaluate(tr, 'pnl_net_cost5'))
-            summaries.append(row)
-        family_summary = family_summary_table(summaries)
+            summary_rows.append(row)
+        family_summary = pd.DataFrame(summary_rows)
         save(family_summary, out / 'gold_v3_194_portfolio_summary_cost3_cost5.csv')
 
-        monthly_frames = []
-        for name, tr in [
-            ('ABC_ONLY_COST3', abc_trades),
-            ('SCALP_STACK_ONLY_COST3', scalp_trades),
-            ('COMBINED_ABC_PRIORITY_FIRST_COST3', combined_abc_first),
-            ('COMBINED_SCALP_PRIORITY_FIRST_COST3', combined_scalp_first),
-        ]:
-            monthly_frames.append(monthly_table(tr, name, 'pnl_net_cost3'))
-        monthly_all = pd.concat(monthly_frames, ignore_index=True) if monthly_frames else pd.DataFrame()
+        monthly_frames = [monthly_table(tr, name, 'pnl_net_cost3') for name, tr in portfolios_cost3.items()]
+        monthly_all = pd.concat([m for m in monthly_frames if not m.empty], ignore_index=True) if monthly_frames else pd.DataFrame()
         save(monthly_all, out / 'gold_v3_194_monthly_summary_cost3.csv')
 
-        weak_rows = []
-        for name, tr in [('SCALP_STACK', scalp_trades), ('ABC', abc_trades), ('COMBINED_ABC_FIRST', combined_abc_first)]:
-            x = add_month(tr)
-            for m in WEAK_MONTHS:
-                g = x[x['month'].astype(str).eq(m)]
-                if g.empty:
-                    continue
-                ev = evaluate(g, 'pnl_net_cost3')
-                weak_rows.append({
-                    'portfolio_id': name,
-                    'month': m,
-                    'trades': ev['full_n'],
-                    'sum': ev['full_sum'],
-                    'pf': ev['full_pf'],
-                    'wr_pct': ev['full_wr_pct'],
-                    'candidate_counts': json.dumps(g['candidate_id'].astype(str).value_counts().to_dict(), ensure_ascii=False),
-                    'direction_counts': json.dumps(g['direction'].astype(str).value_counts().to_dict(), ensure_ascii=False) if 'direction' in g.columns else '{}',
-                })
-        weak_detail = pd.DataFrame(weak_rows)
+        daily_frames = [daily_count_table(tr, name, 'pnl_net_cost3') for name, tr in portfolios_cost3.items()]
+        daily_all = pd.concat([d for d in daily_frames if not d.empty], ignore_index=True) if daily_frames else pd.DataFrame()
+        save(daily_all, out / 'gold_v3_194_daily_counts_2026_05_06_cost3.csv')
+
+        weak_detail = weak_month_detail({
+            'SCALP_ONE_POSITION': scalp_one_position,
+            'SCALP_LOT_STACK_RAW': scalp_lot_stack_raw,
+            'ABC': abc_trades,
+            'COMBINED_ABC_FIRST': combined_abc_first,
+        })
         save(weak_detail, out / 'gold_v3_194_weak_month_detail.csv')
 
-        if (root / '193' / 'gold_v3_193_scalping_profit_stack_monthly.csv').exists():
-            try:
-                shutil.copyfile(root / '193' / 'gold_v3_193_scalping_profit_stack_monthly.csv', out / 'gold_v3_194_stage193_scalp_monthly_reference.csv')
-            except Exception:
-                pass
-
-    ready = len(blockers) == 0
     def get_summary(portfolio_id: str, col: str, default: Any = math.nan) -> Any:
         if family_summary.empty:
             return default
@@ -424,6 +489,7 @@ def main() -> int:
             return default
         return hit[col].iloc[0]
 
+    ready = len(blockers) == 0
     decision = 'STAGE194_SCALP_STACK_ABC_OVERLAP_ROBUSTNESS_READY_AUDIT_ONLY' if ready else 'STAGE194_BLOCKED'
     summary = {
         'step': STEP,
@@ -437,30 +503,34 @@ def main() -> int:
         'primary_cost_points': PRIMARY_COST,
         'stress_cost_points': STRESS_COST,
         'abc_rebuilt_trade_count': int(len(abc_trades)) if not abc_trades.empty else 0,
-        'scalp_stack_trade_count': int(len(scalp_trades)) if not scalp_trades.empty else 0,
-        'exact_entry_overlap_count': int(len(exact_overlap)) if not exact_overlap.empty else 0,
-        'active_window_overlap_count': int(len(active_overlap)) if not active_overlap.empty else 0,
-        'active_window_direction_conflict_count': int(active_overlap['direction_conflict'].sum()) if not active_overlap.empty and 'direction_conflict' in active_overlap.columns else 0,
+        'scalp_one_position_trade_count': int(len(scalp_one_position)) if not scalp_one_position.empty else 0,
+        'scalp_lot_stack_raw_trade_rows': int(len(scalp_lot_stack_raw)) if not scalp_lot_stack_raw.empty else 0,
+        'scalp_lot_stack_unique_entry_times': int(scalp_lot_stack_raw['entry_dt'].nunique()) if not scalp_lot_stack_raw.empty else 0,
+        'scalp_same_entry_cluster_count': int(len(same_scalp_clusters)) if not same_scalp_clusters.empty else 0,
+        'scalp_same_entry_total_extra_lots': int((same_scalp_clusters['fire_count'] - 1).sum()) if not same_scalp_clusters.empty else 0,
+        'exact_entry_overlap_count_raw_scap_vs_abc': int(len(exact_overlap)) if not exact_overlap.empty else 0,
+        'active_window_overlap_count_raw_scalp_vs_abc': int(len(active_overlap)) if not active_overlap.empty else 0,
+        'active_window_direction_conflict_count_raw_scalp_vs_abc': int(active_overlap['direction_conflict'].sum()) if not active_overlap.empty and 'direction_conflict' in active_overlap.columns else 0,
+        'scalp_one_position_cost3_full_n': int(num(get_summary('SCALP_ONE_POSITION_COST3', 'full_n', 0))),
+        'scalp_one_position_cost3_full_sum': num(get_summary('SCALP_ONE_POSITION_COST3', 'full_sum')),
+        'scalp_one_position_cost3_full_pf': num(get_summary('SCALP_ONE_POSITION_COST3', 'full_pf')),
+        'scalp_lot_stack_raw_cost3_full_n': int(num(get_summary('SCALP_LOT_STACK_RAW_COST3', 'full_n', 0))),
+        'scalp_lot_stack_raw_cost3_full_sum': num(get_summary('SCALP_LOT_STACK_RAW_COST3', 'full_sum')),
+        'scalp_lot_stack_raw_cost3_full_pf': num(get_summary('SCALP_LOT_STACK_RAW_COST3', 'full_pf')),
         'abc_cost3_full_n': int(num(get_summary('ABC_ONLY_COST3', 'full_n', 0))),
         'abc_cost3_full_sum': num(get_summary('ABC_ONLY_COST3', 'full_sum')),
         'abc_cost3_full_pf': num(get_summary('ABC_ONLY_COST3', 'full_pf')),
-        'abc_cost3_neg_months': int(num(get_summary('ABC_ONLY_COST3', 'full_neg_months', 0))),
-        'scalp_cost3_full_n': int(num(get_summary('SCALP_STACK_ONLY_COST3', 'full_n', 0))),
-        'scalp_cost3_full_sum': num(get_summary('SCALP_STACK_ONLY_COST3', 'full_sum')),
-        'scalp_cost3_full_pf': num(get_summary('SCALP_STACK_ONLY_COST3', 'full_pf')),
-        'scalp_cost3_neg_months': int(num(get_summary('SCALP_STACK_ONLY_COST3', 'full_neg_months', 0))),
         'combined_abc_first_cost3_full_n': int(num(get_summary('COMBINED_ABC_PRIORITY_FIRST_COST3', 'full_n', 0))),
         'combined_abc_first_cost3_full_sum': num(get_summary('COMBINED_ABC_PRIORITY_FIRST_COST3', 'full_sum')),
         'combined_abc_first_cost3_full_pf': num(get_summary('COMBINED_ABC_PRIORITY_FIRST_COST3', 'full_pf')),
         'combined_abc_first_cost3_neg_months': int(num(get_summary('COMBINED_ABC_PRIORITY_FIRST_COST3', 'full_neg_months', 0))),
-        'combined_scalp_first_cost3_full_n': int(num(get_summary('COMBINED_SCALP_PRIORITY_FIRST_COST3', 'full_n', 0))),
-        'combined_scalp_first_cost3_full_sum': num(get_summary('COMBINED_SCALP_PRIORITY_FIRST_COST3', 'full_sum')),
-        'combined_scalp_first_cost3_full_pf': num(get_summary('COMBINED_SCALP_PRIORITY_FIRST_COST3', 'full_pf')),
-        'combined_scalp_first_cost3_neg_months': int(num(get_summary('COMBINED_SCALP_PRIORITY_FIRST_COST3', 'full_neg_months', 0))),
-        'scalp_cost5_full_sum': num(get_summary('SCALP_STACK_ONLY_COST5', 'full_sum')),
-        'scalp_cost5_full_pf': num(get_summary('SCALP_STACK_ONLY_COST5', 'full_pf')),
-        'scalp_cost5_neg_months': int(num(get_summary('SCALP_STACK_ONLY_COST5', 'full_neg_months', 0))),
+        'scalp_one_position_cost5_full_sum': num(get_summary('SCALP_ONE_POSITION_COST5', 'full_sum')),
+        'scalp_one_position_cost5_full_pf': num(get_summary('SCALP_ONE_POSITION_COST5', 'full_pf')),
+        'scalp_lot_stack_raw_cost5_full_sum': num(get_summary('SCALP_LOT_STACK_RAW_COST5', 'full_sum')),
+        'scalp_lot_stack_raw_cost5_full_pf': num(get_summary('SCALP_LOT_STACK_RAW_COST5', 'full_pf')),
+        'daily_focus_months': DAILY_FOCUS_MONTHS,
         'weak_months_checked': WEAK_MONTHS,
+        'lot_stack_policy_note': 'lot-stack means every selected SCALP candidate firing at the same time is counted as a separate trade row. one-position means resolved priority keeps only one active SCALP trade.',
         'time_basis': 'CSV/MT5 timestamp. No JST conversion is applied.',
         'csv_latest_row_contract': 'CSV latest row is treated as CLOSED; open/as-of interpretation is prohibited.',
         'future_info_policy': 'M5 future TP/SL/horizon is used only for post-entry audit scoring. Entry rules use closed OHLC-derived features only.',
@@ -491,16 +561,19 @@ def main() -> int:
     lines = ['GOLD V3 194 PASTE_ME_SCALP_STACK_ABC_OVERLAP_ROBUSTNESS_AUDIT']
     lines += [f'{k}: {v}' for k, v in summary.items()]
     lines += ['', 'PORTFOLIO_SUMMARY_COST3_COST5', show(family_summary, 20)]
-    lines += ['', 'MONTHLY_SUMMARY_COST3', show(monthly_all, 120)]
+    lines += ['', 'DAILY_COUNTS_2026_05_06_COST3', show(daily_all, 160)]
+    lines += ['', 'SCALP_SAME_ENTRY_CLUSTERS_LOT_STACK', show(same_scalp_clusters, 80)]
+    lines += ['', 'MONTHLY_SUMMARY_COST3', show(monthly_all, 140)]
     lines += ['', 'WEAK_MONTH_DETAIL', show(weak_detail, 80)]
-    lines += ['', 'EXACT_ENTRY_OVERLAP_SAMPLE', show(exact_overlap, 40)]
-    lines += ['', 'ACTIVE_WINDOW_OVERLAP_SAMPLE', show(active_overlap, 60)]
+    lines += ['', 'EXACT_ENTRY_OVERLAP_SAMPLE_RAW_SCALP_VS_ABC', show(exact_overlap, 40)]
+    lines += ['', 'ACTIVE_WINDOW_OVERLAP_SAMPLE_RAW_SCALP_VS_ABC', show(active_overlap, 60)]
     lines += ['', 'SCALP_STACK_SELECTED_REFERENCE', show(selected_stack, 20)]
     lines += [
         '',
         'INTERPRETATION',
-        'Stage194 is audit-only. It checks SCALP_STACK against ABC PRIMARY candidates for exact same-entry overlap, active-window overlap, direction conflicts, cost5 stress, weak month details, and combined portfolio behavior.',
-        'ABC and SCALP_STACK remain separate audit families. No scalping candidate is promoted to PRIMARY in this stage.',
+        'Stage194 is audit-only. It compares SCALP_STACK one-position counting versus lot-stack counting, where simultaneous selected SCALP candidate fires are counted as separate trade rows.',
+        'For safety, one-position counting is the conservative base view. Lot-stack is a risk-sizing hypothesis only and should not be used live without additional drawdown and margin-risk audit.',
+        'The daily table reports 2026-05 and 2026-06 trade rows and unique entry times, so it can answer how many days and how many trades occurred under each counting policy.',
         'No Discord, MT5 order, payload, AI API, live hook, or autotrade is enabled.',
     ]
     lines += ['', 'BLOCKERS', 'NO_BLOCKERS' if not blockers else json.dumps(blockers, ensure_ascii=False, indent=2)]
