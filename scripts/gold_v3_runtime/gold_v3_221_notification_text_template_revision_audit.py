@@ -3,8 +3,11 @@
 """
 GOLD V3 Stage221 - Notification Text Template Revision Audit
 
-Revises the user-visible alert text for practical reading while keeping IDs and technical
-fields in history metadata only.
+Revises the user-visible alert text for practical reading.
+
+Revision:
+- Full signal_id is displayed at the very bottom of the user-visible body.
+- Other technical fields remain in history metadata.
 
 Audit-only / no-send / no-webhook / no-payload / no-order / no-live-hook.
 """
@@ -26,7 +29,7 @@ STAGE = "GOLD_V3_221_NOTIFICATION_TEXT_TEMPLATE_REVISION_AUDIT_ONLY"
 DECISION_READY = "STAGE221_NOTIFICATION_TEXT_TEMPLATE_REVISION_READY_AUDIT_ONLY"
 DECISION_BLOCKED = "STAGE221_NOTIFICATION_TEXT_TEMPLATE_REVISION_BLOCKED_AUDIT_ONLY"
 TERMINAL_HASH = "2FA8A7E69CED7DC259B1AD86A247F675"
-TEMPLATE_VERSION = "GOLD_V3_NOTIFY_TEMPLATE_V2_SCALP_COMPACT_20260617"
+TEMPLATE_VERSION = "GOLD_V3_NOTIFY_TEMPLATE_V3_SCALP_COMPACT_SIGNAL_ID_BOTTOM_20260617"
 
 DISABLED_FLAGS: Dict[str, bool] = {
     "send_enabled": False,
@@ -58,6 +61,7 @@ PREVIEW_COLUMNS = [
     "tp_usd",
     "sl_usd",
     "horizon_m5_bars",
+    "signal_id_visible_bottom",
     "message_text",
     "audit_only",
     "created_stage",
@@ -202,18 +206,20 @@ def build_message(f: SignalFixture) -> str:
             f"Horizon: {f.horizon_m5_bars} M5 bars",
             "",
             "[AUDIT_ONLY / NO_SEND]",
+            f"Signal ID: {f.signal_id}",
         ]
     )
 
 
 def forbidden_visible_hits(message_text: str) -> List[str]:
+    # Full signal_id is allowed only on the final line. Do not block fragments that appear inside it.
+    body_without_last = "\n".join(message_text.splitlines()[:-1])
     patterns = [
         r"^symbol\s*:",
-        r"\broute\b",
-        r"strategy_role",
-        r"candidate_id",
-        r"signal_id",
-        r"short_signal_id",
+        r"^route\s*:",
+        r"^strategy_role\s*:",
+        r"^candidate_id\s*:",
+        r"^short_signal_id\s*:",
         r"\bactual\b",
         r"\bfill\b",
         r"slippage",
@@ -230,7 +236,7 @@ def forbidden_visible_hits(message_text: str) -> List[str]:
     ]
     hits: List[str] = []
     for pattern in patterns:
-        if re.search(pattern, message_text, flags=re.IGNORECASE | re.MULTILINE):
+        if re.search(pattern, body_without_last, flags=re.IGNORECASE | re.MULTILINE):
             hits.append(pattern)
     return hits
 
@@ -243,6 +249,7 @@ def validate(template_dir: Path, message_text: str, metadata_row: Dict[str, Any]
 
     lines = message_text.splitlines()
     title = lines[0] if lines else ""
+    final_line = lines[-1] if lines else ""
     forbidden = forbidden_visible_hits(message_text)
     buy_title_sample = direction_to_title("BUY", is_scalp=True)
 
@@ -274,6 +281,11 @@ def validate(template_dir: Path, message_text: str, metadata_row: Dict[str, Any]
     )
     add("TR011", policy.get("csv_latest_row_contract") == "CLOSED" and policy.get("open_asof_allowed") is False, "CSV latest row CLOSED; open/as-of not introduced")
     add("TR012", policy.get("timestamp_basis") == "MT5_CSV" and policy.get("jst_conversion_used_for_detector_logic") is False, "MT5/CSV timestamp basis; no JST detector conversion")
+    add(
+        "TR013",
+        final_line == f"Signal ID: {SIGNAL_FIXTURE.signal_id}",
+        f"final_line={final_line}",
+    )
 
     blockers = [f"{check['check_id']}: {check['details']}" for check in checks if not check["passed"]]
     return checks, blockers
@@ -286,7 +298,7 @@ def write_paste_me(path: Path, summary: Dict[str, Any], checks: List[Dict[str, A
         "step", "status", "ready", "decision", "created_at_utc", "output_dir", "template_dir",
         "audit_only", "review_only", "dry_run_only", "text_template_preview_only", "live_release_ready",
         "stage220_decision", "stage220_validation_pass", "message_template_version",
-        "title", "buy_title_sample", "visible_message_lines", "history_metadata_rows",
+        "title", "buy_title_sample", "visible_message_lines", "signal_id_visible_bottom", "history_metadata_rows",
         "source_csv_mutated", "contract_mutated", "production_live_retention_mutated",
         "open_asof_allowed", "candidate_pool_removed", "f002_exclusion_bypassed",
         "final_live_enabled", "send_enabled", "execution_enabled", "actual_order_import_enabled",
@@ -301,7 +313,7 @@ def write_paste_me(path: Path, summary: Dict[str, Any], checks: List[Dict[str, A
     lines.append(summary["message_text_preview"])
     lines.append("")
     lines.append("HISTORY_METADATA_POLICY")
-    lines.append("User-visible Discord body hides IDs and route details. signal_id, short_signal_id, route, strategy_role, and candidate_id remain in metadata CSV/JSON only.")
+    lines.append("User-visible Discord body shows the full signal_id only as the final line. short_signal_id, route, strategy_role, and candidate_id remain in metadata CSV/JSON only.")
     lines.append("")
     lines.append("OUTPUT_FILES")
     for file_key, file_path in summary["output_files"].items():
@@ -335,7 +347,7 @@ def main() -> int:
     buy_title_sample = direction_to_title("BUY", is_scalp=True)
 
     preview_row = {
-        "preview_id": f"{SIGNAL_FIXTURE.short_signal_id}_TEMPLATE_V2_PREVIEW",
+        "preview_id": f"{SIGNAL_FIXTURE.short_signal_id}_TEMPLATE_V3_PREVIEW",
         "message_template_version": TEMPLATE_VERSION,
         "message_action": "TEXT_TEMPLATE_PREVIEW_ONLY",
         "send_action": "NO_SEND_AUDIT_ONLY",
@@ -348,6 +360,7 @@ def main() -> int:
         "tp_usd": SIGNAL_FIXTURE.tp_usd,
         "sl_usd": SIGNAL_FIXTURE.sl_usd,
         "horizon_m5_bars": SIGNAL_FIXTURE.horizon_m5_bars,
+        "signal_id_visible_bottom": True,
         "message_text": message_text,
         "audit_only": True,
         "created_stage": STAGE,
@@ -381,10 +394,11 @@ def main() -> int:
         "stage220_decision": "STAGE220_NOTIFICATION_NO_SEND_APPROVAL_GATE_READY_AUDIT_ONLY",
         "stage220_validation_pass": True,
         "message_template_version": TEMPLATE_VERSION,
-        "user_visible_template": "compact_scalp_alert",
+        "user_visible_template": "compact_scalp_alert_with_signal_id_bottom",
         "sell_title_rule": "🔴 GOLD SELL SCALP",
         "buy_title_rule": "🟢 GOLD BUY SCALP",
-        "hide_from_visible_body": ["symbol line", "route", "strategy_role", "candidate_id", "signal_id", "short_signal_id"],
+        "visible_signal_id_rule": "full signal_id appears only as the final line",
+        "hide_from_visible_body_as_separate_fields": ["symbol line", "route", "strategy_role", "candidate_id", "short_signal_id"],
         "retain_in_history_metadata": ["signal_id", "short_signal_id", "final_route", "strategy_role", "candidate_id"],
         "audit_only": True,
         "text_template_preview_only": True,
@@ -435,6 +449,7 @@ def main() -> int:
         "title": title,
         "buy_title_sample": buy_title_sample,
         "visible_message_lines": len(message_text.splitlines()),
+        "signal_id_visible_bottom": True,
         "history_metadata_rows": 1,
         "source_csv_mutated": False,
         "contract_mutated": False,
