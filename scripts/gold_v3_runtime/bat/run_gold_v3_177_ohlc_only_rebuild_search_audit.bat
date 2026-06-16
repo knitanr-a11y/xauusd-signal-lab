@@ -9,7 +9,7 @@ if errorlevel 1 (
 )
 
 py -3 scripts\gold_v3_runtime\gold_v3_progress_marker.py --stage 177 --message "RUN_STAGE177_SCRIPT"
-py -3 scripts\gold_v3_runtime\gold_v3_177_ohlc_only_rebuild_search_audit.py %*
+py -3 scripts\gold_v3_runtime\gold_v3_177_ohlc_only_rebuild_search_audit_entry.py %*
 set EXITCODE=%ERRORLEVEL%
 
 py -3 scripts\gold_v3_runtime\gold_v3_progress_marker.py --stage 177 --message "BAT_END exitcode=%EXITCODE%"
