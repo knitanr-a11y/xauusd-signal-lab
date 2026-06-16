@@ -5,7 +5,7 @@ Status: AUDIT_ONLY
 
 ## Purpose
 
-Stage199 makes the Stage198 OHLC-recomputed route the audit comparison basis for the scalping watchlist candidate.
+Stage199 makes the Stage198 OHLC-recomputed route the audit comparison basis for the scalping secondary audit candidate.
 
 Candidate name:
 
@@ -69,6 +69,25 @@ Therefore Stage199 no longer treats the Stage191 artifact as the scoring source 
 - `gold_v3_199_decision.csv`
 - `paste_me.txt`
 
+## Terminology
+
+Do not classify this scalping candidate as a watchlist.
+
+Use one of the following terms instead:
+
+- `SECONDARY_AUDIT_CANDIDATE`
+- `SCALP_SECONDARY_CANDIDATE`
+- `補助戦略候補`
+
+ABC remains the PRIMARY portfolio. The scalping candidate remains audit-only and secondary until explicit later approval.
+
+## Cost interpretation
+
+- `cost3` means a 3.0 price-point per-trade friction assumption.
+- `cost5` means a 5.0 price-point per-trade stress assumption.
+- The cost value is not spread-only. It is an all-in execution friction proxy that can include wider spread, slippage, commission conversion, and other execution drag.
+- In practice, cost5 should be read as a wider-spread / worse-execution stress test.
+
 ## Guardrails
 
 - audit-only
@@ -87,4 +106,4 @@ Therefore Stage199 no longer treats the Stage191 artifact as the scoring source 
 - no autotrade
 - NO_SIGNAL must not notify Discord
 
-ABC remains PRIMARY. The scalping candidate remains SECONDARY/WATCHLIST until explicit later approval.
+ABC remains PRIMARY. The scalping candidate remains SECONDARY_AUDIT_CANDIDATE until explicit later approval.
