@@ -1,0 +1,116 @@
+{
+  "status": "GOLD_V3_260_E6_LIVE_REPRODUCIBLE_PERFORMANCE_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "definition_commit": "35dedc5d2c675b1d659af52e93a558bf3c994dac",
+  "live_contract_commit": "6d3f11718bd7fa8660ef2d62807a1cde2eeff40c",
+  "live_reproducibility": {
+    "status": "PASS",
+    "context_rows": 34528,
+    "batch_anchors": 545,
+    "streaming_anchors": 545,
+    "batch_failures": 113,
+    "streaming_failures": 113,
+    "batch_events": 56,
+    "streaming_events": 56,
+    "entry_m1_available": 54,
+    "entry_m1_missing": 2,
+    "batch_streaming_parity": {
+      "status": "PASS",
+      "events": 56,
+      "candidate_key_duplicates": 0,
+      "tolerance": 1e-09
+    },
+    "extra_parity_columns": [
+      "original_direction",
+      "failure_time",
+      "failure_type"
+    ],
+    "prefix_checkpoints": 40,
+    "restart_splits": 11,
+    "candidate_key_duplicates": 0,
+    "source_close_violation_h1": 0,
+    "source_close_violation_h4": 0,
+    "entry_before_decision": 0
+  },
+  "outcome": {
+    "events_live_reproducible": 54,
+    "complete_paths": {
+      "h60": 53,
+      "h120": 53,
+      "h180": 53,
+      "h240": 52
+    },
+    "best_full_grid_cost0": {
+      "horizon": 60,
+      "tp": 5.0,
+      "sl": 15.0,
+      "count": 53,
+      "expectancy": 1.032075471698101,
+      "pf": 1.4676812585499242
+    },
+    "discovery_cell": {
+      "horizon": 240,
+      "tp": 10.0,
+      "sl": 15.0
+    },
+    "frozen_by_half": [
+      {
+        "half": "2025H1",
+        "count": 20,
+        "cost0_expectancy": 1.1935000000000173,
+        "cost2_expectancy": -0.8064999999999827,
+        "cost2_pf": 0.8208175960897617,
+        "cost2_pnl": -16.129999999999654
+      },
+      {
+        "half": "2025H2",
+        "count": 20,
+        "cost0_expectancy": -2.0595000000000026,
+        "cost2_expectancy": -4.0595000000000026,
+        "cost2_pf": 0.47000456948886987,
+        "cost2_pnl": -81.19000000000005
+      },
+      {
+        "half": "2026H1",
+        "count": 12,
+        "cost0_expectancy": -2.5,
+        "cost2_expectancy": -4.5,
+        "cost2_pf": 0.47058823529411764,
+        "cost2_pnl": -54.0
+      }
+    ],
+    "criteria": {
+      "best_cost0_expectancy_ge_3": false,
+      "discovery_cost2_positive_pf_ge_1_10": false,
+      "selection_same_cell_positive_pf_ge_1_10": false,
+      "fixed_2026_positive": false
+    }
+  },
+  "failure_type_diagnostic_posthoc": [
+    {
+      "failure_type": "DEEP_CLOSE_50",
+      "count": 16,
+      "cost2_expectancy": 0.023125,
+      "cost2_pf": 1.004984,
+      "promotion_allowed": false
+    },
+    {
+      "failure_type": "INVALID_CLOSE_65",
+      "count": 36,
+      "cost2_expectancy": -4.213611,
+      "cost2_pf": 0.440196,
+      "promotion_allowed": false
+    }
+  ],
+  "failure_type_filter_prohibition": "All periods were already seen; retaining only DEEP_CLOSE_50 would be post-hoc and is prohibited.",
+  "matched_control_executed": false,
+  "placebos_executed": false,
+  "early_stop_reason": "Pre-registered absolute performance gates failed.",
+  "verdict": "LIVE_REPRODUCIBILITY_PASS_PERFORMANCE_REJECT",
+  "next": "Stage260 E7 causal tick-volume impulse plus price acceptance, definition and volume parity before outcomes",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
