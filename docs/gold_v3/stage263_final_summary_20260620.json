@@ -1,0 +1,91 @@
+{
+  "status": "GOLD_V3_263_JUNE_PSEUDO_HOLDOUT_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "10ac0ae8b8d8b649d373fce123c9e1b3094bf078",
+  "data": {
+    "m15_rows": 34528,
+    "m1_rows": 507996,
+    "feature_rows": 34479,
+    "development_labeled_safe_rows": 14199,
+    "oof_rows": 9159,
+    "june_eligible_rows": 600,
+    "m15_min": "2025-01-02 08:00:00",
+    "m15_max": "2026-06-19 19:30:00"
+  },
+  "frozen_threshold": {
+    "oof_abs_ensemble_q85_usd": 3.3618025196808436,
+    "frozen_edge_threshold_usd": 3.3618025196808436
+  },
+  "oof_prediction_metrics": {
+    "period": "OOF_2025-07_TO_2026-05",
+    "rows": 9159,
+    "mae_usd": 10.503782817320662,
+    "rmse_usd": 18.912966889715438,
+    "pearson": -0.04768432049389801,
+    "spearman": 0.005911917648807805
+  },
+  "oof_model_metrics": {
+    "name": "MODEL_OOF",
+    "count": 304,
+    "pnl": -655.320000000002,
+    "expectancy": -2.1556578947368488,
+    "pf": 0.8069232106396703,
+    "win_rate": 0.46381578947368424,
+    "max_dd": 1322.900000000005,
+    "max_losing_streak": 12,
+    "gross_profit": 2738.7700000000013,
+    "gross_loss": 3394.0900000000033
+  },
+  "june_prediction_metrics": {
+    "period": "JUNE_PSEUDO_HOLDOUT",
+    "rows": 600,
+    "mae_usd": 10.181071989583895,
+    "rmse_usd": 14.317060376846467,
+    "pearson": -0.1034471018613365,
+    "spearman": -0.049702627542936285
+  },
+  "june_model_metrics": {
+    "name": "MODEL_JUNE",
+    "count": 8,
+    "pnl": -65.56000000000085,
+    "expectancy": -8.195000000000107,
+    "pf": 0.185387673956252,
+    "win_rate": 0.25,
+    "max_dd": 65.56000000000085,
+    "max_losing_streak": 4,
+    "gross_profit": 14.919999999999163,
+    "gross_loss": 80.48000000000002
+  },
+  "june_baselines": [
+    {"name":"ALWAYS_LONG","count":150,"pnl":-522.6599999999976,"expectancy":-3.484399999999984,"pf":0.48799482763687596},
+    {"name":"ALWAYS_SHORT","count":150,"pnl":-77.34000000000242,"expectancy":-0.5156000000000162,"pf":0.9043413729127983},
+    {"name":"PREV_BAR_DIRECTION","count":150,"pnl":-221.30000000000064,"expectancy":-1.4753333333333376,"pf":0.7450637052738268},
+    {"name":"EMA_TREND","count":150,"pnl":-252.82000000000016,"expectancy":-1.6854666666666678,"pf":0.7172952845273883}
+  ],
+  "june_direction_diagnostic": [
+    {"direction":"LONG","count":6,"pnl":-49.82,"expectancy":-8.303333333333333},
+    {"direction":"SHORT","count":2,"pnl":-15.74,"expectancy":-7.87}
+  ],
+  "june_confidence_halves": [
+    {"bucket":"LOWER_HALF","count":4,"pnl":-44.44,"expectancy":-11.11,"pf":0.22847222222221825},
+    {"bucket":"UPPER_HALF","count":4,"pnl":-21.12,"expectancy":-5.28,"pf":0.07692307692304788}
+  ],
+  "single_trade_positive_pnl_share": 0.882037533512104,
+  "prefix_parity_checkpoints": 12,
+  "prefix_parity_pass": true,
+  "criteria": {
+    "trade_count_ge_15": false,
+    "cost2_expectancy_positive": false,
+    "pf_ge_1_10": false,
+    "pnl_above_all_baselines": true,
+    "max_dd_le_gross_profit": false,
+    "confidence_upper_ge_lower": true,
+    "single_trade_positive_share_le_50pct": false,
+    "prefix_prediction_parity": true
+  },
+  "verdict": "REJECTED",
+  "research_decision": "STOP_DIRECTIONAL_AUTOTRADE_RESEARCH_ON_CURRENT_BAR_DATA",
+  "allowed_next_routes": ["VOLATILITY_ONLY_PIVOT", "NEW_INFORMATION_RESTART_WITH_NEW_FUTURE_HOLDOUT"],
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
