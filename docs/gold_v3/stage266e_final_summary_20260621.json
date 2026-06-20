@@ -1,0 +1,46 @@
+{
+  "status": "GOLD_V3_266E_C1_ONLY_COMPONENT_STACK_INSUFFICIENT_FREQUENCY_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "54856aa9a824bc9c30991e4abf092049d245ab70",
+  "qualified_components": ["C1_CHANNEL6"],
+  "c1": {
+    "resolved_oof": 74,
+    "accepted": 52,
+    "retention": 0.7027027027,
+    "cost2_win_rate": 0.6153846154,
+    "cost5_win_rate": 0.5769230769,
+    "cost5_expectancy_usd_per_oz": 8.2253832226,
+    "cost5_pf": 2.0752280967,
+    "rejected_cost5_expectancy": -14.9940413864,
+    "stage266d_gate_decision_parity": "74/74 PASS"
+  },
+  "rejected_or_unready_components": {
+    "C2_PULLBACK": "specialized cost5 gate reduced win rate and expectancy",
+    "C3_COMPRESSION": "raw monitoring only; source/direction imbalance and cost5 win rate below target",
+    "C4_PREV_BAR": "high activity but LONG losses; family and gate rejected",
+    "C5_INSIDE_BAR": "34 resolved trades with negative expectancy and PF"
+  },
+  "c1_only_stacked_portfolio": {
+    "resolved": 42,
+    "cost2_pnl_usd_per_oz": 398.9247810477,
+    "cost2_expectancy": 9.4982090726,
+    "cost2_win_rate": 0.5952380952,
+    "cost2_pf": 2.2857566886,
+    "cost5_pnl_usd_per_oz": 272.9247810477,
+    "cost5_expectancy": 6.4982090726,
+    "cost5_win_rate": 0.5714285714,
+    "cost5_pf": 1.7502373195,
+    "max_drawdown": 118.2449357019,
+    "top5_profit_share": 0.4440335682,
+    "months_with_trades": 10,
+    "monthly_median_trade_count": 4.0
+  },
+  "correctness": {
+    "causal_contract": "3/3 PASS",
+    "regression_tests": "4/4 PASS",
+    "c1_frozen_gate_decisions": "74/74 PASS"
+  },
+  "next": "Stage266F: freeze C1, split C2 structures, monitor C3 raw, add C6 false-break reclaim and C7 pullback subfamilies",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
