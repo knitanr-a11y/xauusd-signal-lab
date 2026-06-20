@@ -1,0 +1,11 @@
+{
+  "full_runner_artifact": "stage263_architecture_reset.py",
+  "full_runner_sha256": "2ac0fa6656ba8ed80ff12e4e8420374b1fc61b5e3197f3ceee37a9cbe5fc90d8",
+  "regression_test_artifact": "test_stage263_architecture_reset.py",
+  "regression_test_sha256": "589ccf79f948d63992544c564895b6bf2e555cf333738038be0f66a2139d7526",
+  "final_summary_sha256": "b6d1f17065201d6f364b27e9a2dfeaad0aeec3f0f3c4058aab6ed42a9f500c15",
+  "python_tests": "3 passed",
+  "prefix_prediction_parity": "12/12 PASS",
+  "definition_commit": "10ac0ae8b8d8b649d373fce123c9e1b3094bf078",
+  "note": "The complete runner and fitted audit-only model artifacts are preserved as generated task artifacts. GitHub stores the definition, results, trade ledger, parity audit, regression tests, and hashes."
+}
