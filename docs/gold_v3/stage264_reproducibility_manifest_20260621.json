@@ -1,0 +1,20 @@
+{
+  "definition_commit": "25fd11048275e46928a9724f10a1af1ebe2a6715",
+  "full_runner_artifact": "stage264_h1_h4_audit.py",
+  "full_runner_sha256": "68c1c72bcd1ff7665e6ea1a33a17b7579b06ee3ad9075f5e05668da929502bed",
+  "regression_test_artifact": "test_stage264_h1_h4_audit.py",
+  "regression_test_sha256": "1e06402e208925e4df4f595ce2388ed58878765c45772686b4b96527ec33ac25",
+  "final_summary_sha256": "22acdec6197826c8bb557d71761cf164f24bc7b0ab2c6d58bc268bbd33d84f55",
+  "runner_reexecution": {
+    "h1_count": 224,
+    "h1_pnl": -645.6449225593474,
+    "h1_pf": 0.5450477619202837,
+    "h4_count": 223,
+    "h4_pnl": -475.3661925749302,
+    "h4_pf": 0.7012457422617011
+  },
+  "tests": "3/3 PASS",
+  "prefix_signal_parity": "12/12 PASS",
+  "m1_path_parity": "H1 35/35; H4 15/15 exact entry, exit reason and PnL",
+  "note": "The complete runner is preserved as a generated artifact because the GitHub connector rejected the long single-file payload. Definition and all result summaries are committed to GitHub."
+}
