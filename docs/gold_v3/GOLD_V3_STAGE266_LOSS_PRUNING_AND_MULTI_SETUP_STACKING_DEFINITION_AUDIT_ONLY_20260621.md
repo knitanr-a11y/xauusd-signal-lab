@@ -15,7 +15,7 @@
 - M1=time+1分、H1=time+1時間、H4=time+4時間、D1=time+1日から利用。
 - source_close_time <= decision_timeのみ。
 - 負けtradeの個別削除は禁止。
-- gateは注文作成時またはfill瞬間に既知の特徴だけを使う。
+- gateはpending注文作成時点で既知の特徴だけを使う。
 - M1 bar確定後のhigh/low/closeを同じbarのentry判断に使わない。
 - future outcome、exit理由、MFE/MAEをfeatureに使わない。
 - candidate台帳は全件保持し、`GATE_ACCEPTED` / `GATE_REJECTED` / 各execution状態を残す。
@@ -62,7 +62,7 @@ Stage265と同一。
 
 ## entry-known feature universe
 
-注文作成時:
+pending注文作成時のみ:
 
 - family
 - direction
@@ -78,11 +78,11 @@ Stage265と同一。
 - weekday
 - decision hour
 
-fill瞬間:
+診断のみでgateには使わない:
 
-- trigger delay minutes / 240
+- trigger delay
 - gap fill flag
-- gap distance / ATR14
+- gap distance
 
 禁止feature:
 
@@ -97,11 +97,15 @@ fill瞬間:
 - penalty=L2、C=0.25、class_weight=balanced、max_iter=2000、random_state=266
 - familyはone-hot
 - 月初に再学習
-- 当月より前にexit済みのtradeだけをtrainingへ使用
+- 当月より前にexit済みの独立評価tradeだけをtrainingへ使用
 - training最低60trade
 - gate thresholdはtraining scoreの30 percentile
 - 予測下位30%をrejectし、上位70%をaccept
 - warm-up期間は正式OOF成績から除外
+
+## 独立outcome ledger
+
+各candidateは重複を無視して独立にM1約定・exitを評価し、gate学習用labelを作る。これは学習台帳であり、portfolio損益ではない。
 
 ## setup別評価
 
@@ -118,14 +122,16 @@ fill瞬間:
 
 ## stacking
 
-OOF accepted候補だけを時系列に統合。
+OOF gate scoreはdecision_timeで確定する。
 
+- OOF accepted候補だけを時系列に統合
 - one active position
 - one pending order
+- pending中・保有中の候補もsuppressedとして台帳へ残す
 - first come
 - 同時刻はgate probability降順
 - 同scoreはC2 > C3 > C1
-- suppressed候補も台帳へ残す
+- 選択されたpending注文だけをM1で執行
 
 ## 合格基準
 
