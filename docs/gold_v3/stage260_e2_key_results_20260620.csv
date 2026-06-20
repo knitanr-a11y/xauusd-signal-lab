@@ -1,0 +1,27 @@
+category,metric,value,note
+population,raw_events,273,first valid E2 per side/session before 120m active dedup
+population,dedup120_events,268,"one active setup at a time, fixed 120m audit"
+population,complete_event_paths_120,262,full contiguous M1 horizon available
+population,matched_controls_no_exact_regime,262,"same weekday/hour/direction/H1 band/H4 band, near month/quarter; 256 complete 120m paths"
+path120,event_mfe_mean,14.943168,USD
+path120,control_mfe_mean,14.811797,USD
+path120,event_mae_mean,15.581565,USD
+path120,control_mae_mean,15.254883,USD
+path120,event_reach10_rate,0.484733,
+path120,control_reach10_rate,0.464844,
+path120,event_reach15_rate,0.316794,
+path120,control_reach15_rate,0.328125,
+fixed_grid_upper_bound,best_cost0_expectancy,0.654397,"H180 TP15 SL15; post-hoc ceiling only, not selected candidate"
+fixed_grid_upper_bound,best_cost0_pf,1.121142,same cell
+fixed_grid_upper_bound,same_cell_cost1_expectancy,-0.345603,PF 0.941545
+fixed_grid_upper_bound,same_cell_cost2_expectancy,-1.345603,PF 0.790635
+fixed_grid_upper_bound,same_cell_cost3_expectancy,-2.345603,PF 0.662843
+selection_contract,2025H1_best_cost2_expectancy,-2.242472,"H60 TP15 SL5, PF 0.416330"
+selection_contract,same_fixed_cell_2025H2_cost2_expectancy,-2.438835,PF 0.448736
+selection_contract,same_fixed_cell_2026H1_cost2_expectancy,-2.149867,PF 0.576041; 2026 M1 begins 2026-01-13
+monthly,discovery_cell_cost2_positive_months,1,18 months evaluated
+monthly,discovery_cell_cost2_negative_months,17,18 months evaluated
+placebo,time_plus10_best_cost0_expectancy,1.547625,exceeds real event upper-bound gross expectancy
+placebo,time_minus5_best_cost0_expectancy,1.443346,exceeds real event upper-bound gross expectancy
+placebo,level_minus0_5atr_best_cost0_expectancy,1.442453,exceeds real event upper-bound gross expectancy
+decision,e2_status,REJECTED,"weak gross population, cost2 failure, no clear matched-control edge, placebos outperform"
