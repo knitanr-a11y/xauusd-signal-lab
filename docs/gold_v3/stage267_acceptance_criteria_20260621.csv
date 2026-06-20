@@ -1,0 +1,8 @@
+criterion,value,pass
+GOLD_HASH_2025_monotonic_unique,True,True
+GOLDSHARP_2026_monotonic_unique,True,True
+all_observed_gaps_classified,0,True
+covered_decision_activation_coverage_ge_99pct,1.0,True
+activation_not_before_decision,True,True
+horizon_source_crossing_zero,0,True
+reference_candidates_downgraded,True,True
