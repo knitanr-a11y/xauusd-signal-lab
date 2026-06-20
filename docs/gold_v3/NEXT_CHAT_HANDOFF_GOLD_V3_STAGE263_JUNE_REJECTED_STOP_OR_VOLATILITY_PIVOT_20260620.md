@@ -46,7 +46,10 @@
 - `docs/gold_v3/GOLD_V3_STAGE263_JUNE_PSEUDO_HOLDOUT_REJECTED_AUDIT_ONLY_20260620.md`
 - `docs/gold_v3/stage263_final_summary_20260620.json`
 - `docs/gold_v3/stage263_key_results_20260620.csv`
-- `scripts/gold_v3/stage263_architecture_reset.py`
+- `docs/gold_v3/stage263_reproducibility_manifest_20260620.json`
+- `tests/gold_v3/test_stage263_architecture_reset.py`
+
+完全runnerは生成artifact `stage263_architecture_reset.py`として保存し、SHA256をreproducibility manifestへ固定済み。
 
 運用状態:
 
