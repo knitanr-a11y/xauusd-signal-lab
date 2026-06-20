@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "definition_commit": "90e74d958a42bb586bf74f80784a54555e8f960f",
+  "level_context_after_breakout_open": 0,
+  "latest_confirm_later_than_breakout_open_minus_4h": 0,
+  "retest_not_after_breakout": 0,
+  "entry_before_retest": 0,
+  "entry_decision_mismatch": 0,
+  "csv_latest_row_contract": "closed",
+  "csv_time_contract": "OPEN_TIME",
+  "htf_contract": "source_close_time<=decision_time",
+  "same_m1_tp_sl": "SL_PRIORITY",
+  "mfe_mae": "FULL_HORIZON",
+  "year_dependent_direction": false,
+  "live_output": false
+}
