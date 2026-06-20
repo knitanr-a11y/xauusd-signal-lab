@@ -1,0 +1,28 @@
+category,metric,value,note
+status,formal,GOLD_V3_260_E5_LIVE_REPRODUCIBLE_PERFORMANCE_REJECTED_AUDIT_ONLY,
+live_parity,batch_events,180,
+live_parity,streaming_events,180,
+live_parity,exact_matches,180,
+live_parity,entry_m1_available,178,
+live_parity,entry_m1_missing_fail_closed,2,no fallback
+live_parity,prefix_checkpoints_passed,40,
+live_parity,restart_splits_passed,11,
+live_parity,candidate_key_duplicates,0,
+live_parity,h1_source_close_violations,0,
+live_parity,h4_source_close_violations,0,
+path,h60_complete,171,
+path,h120_complete,163,MFE 12.47 / MAE 10.50
+path,h180_complete,156,
+path,h240_complete,150,MFE 17.76 / MAE 14.16
+full_grid,best_cost0_expectancy,2.3832,H240 TP25 SL5 PF1.74063
+criterion,best_cost0_expectancy_ge_3,False,
+discovery,cell,H240 TP25 SL10,selected from 2025H1 cost2 only
+discovery,2025H1_cost2_expectancy,0.405781,PF1.078431
+selection,2025H2_same_cell_cost2_expectancy,1.107885,PF1.215019
+fixed_test,2026H1_same_cell_cost2_expectancy,-1.508235,PF0.817691
+month_stability,cost2_positive_months,11,of 18
+month_stability,cost2_negative_months,7,of 18
+posthoc_direction,LONG_cost2_expectancy,1.400636,PF1.269452; promotion prohibited
+posthoc_direction,SHORT_cost2_expectancy,-3.04425,PF0.605335
+decision,verdict,LIVE_REPRODUCIBILITY_PASS_PERFORMANCE_REJECT,
+operation,live_ready,False,audit-only
