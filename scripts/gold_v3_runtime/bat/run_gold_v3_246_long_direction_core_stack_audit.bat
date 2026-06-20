@@ -11,7 +11,7 @@ echo snapshot_dir = %SNAPSHOT_DIR%
 echo output_dir   = %OUTPUT_DIR%
 echo.
 
-python scripts\gold_v3_runtime\gold_v3_246_long_direction_core_stack_audit.py --snapshot-dir "%SNAPSHOT_DIR%" --output-dir "%OUTPUT_DIR%"
+python scripts\gold_v3_runtime\gold_v3_246_long_direction_core_stack_audit_runner.py --snapshot-dir "%SNAPSHOT_DIR%" --output-dir "%OUTPUT_DIR%"
 set EXITCODE=%ERRORLEVEL%
 echo.
 echo Stage246 exited with code %EXITCODE%.
