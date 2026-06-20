@@ -1,0 +1,23 @@
+category,metric,value,note
+status,formal,GOLD_V3_260_E3_MULTI_REACTION_BREAKOUT_RETEST_REJECTED_AUDIT_ONLY,
+population,confirmed_h1_reactions,5343,
+population,raw_breakouts,262,
+population,first_retests,129,
+population,dedup120_events,90,
+population,complete_event_paths_120,82,
+control,matched_controls,8,strict match; insufficient for robust inference
+control,paired_mfe_difference,3.4575000000000387,n=8; CI includes zero
+control,paired_mae_difference,-2.998749999999802,n=8; CI includes zero
+full_grid,best_cost0_expectancy,1.8087179487179537,H240 TP20 SL15 PF 1.3913
+discovery,2025H1_best_cost2_expectancy,-1.6870967741935543,PF 0.5159
+selection,2025H2_same_cell_cost2_expectancy,-2.892352941176515,PF 0.3232
+fixed_test,2026H1_same_cell_cost2_expectancy,-4.69380952380951,PF 0.1958
+placebo,breakout_only_best_cost0,0.8669907407407259,
+placebo,retest_only_best_cost0,0.838495575221235,
+placebo,weak_t2_best_cost0,-0.0064197530864279,
+placebo,random_flag_best_cost0,2.764000000000013,exceeds true E3 gross upper bound
+causal,level_context_after_breakout_open,0,must be 0
+causal,latest_confirm_too_recent,0,must be 0
+causal,entry_before_retest,0,must be 0
+decision,verdict,EARLY_REJECT_BEFORE_FEATURE_MINING,
+operation,live_ready,False,audit-only
