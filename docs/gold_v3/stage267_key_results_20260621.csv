@@ -1,0 +1,25 @@
+category,metric,value,note
+root_cause,daily_maintenance_misclassified_as_data_gap,285.0,observed gaps; severity=CRITICAL
+root_cause,h4_old_hour_coverage,0.4986462093862815,fraction of all source-covered H4 decisions; severity=CRITICAL
+root_cause,h4_effective_04_08_coverage,0.3330324909747292,fraction of all source-covered H4 decisions; severity=CRITICAL
+root_cause,fixed_8h_label_used_for_medium_term_setups,8.0,trading hours; severity=CRITICAL
+root_cause,m1_history_length,17.51129363449692,calendar months incl source gap; severity=HIGH
+root_cause,legacy_families_shared_common_context_exit,1.0,architecture-level issue; severity=HIGH
+H1,source_covered_decisions,8479,
+H1,activation_coverage,1.0,
+H1,after_closure_activation,369,
+H4,source_covered_decisions,2216,
+H4,activation_coverage,1.0,
+H4,after_closure_activation,341,
+C1_CHANNEL6_REFERENCE_ONLY,legacy_loss_positive_after_24h,0.4705882352941176,n=34; mean=2.915000
+C1_CHANNEL6_REFERENCE_ONLY,legacy_loss_positive_after_48h,0.6470588235294118,n=34; mean=18.410882
+C1_CHANNEL6_REFERENCE_ONLY,legacy_loss_positive_after_72h,0.7352941176470589,n=34; mean=54.766471
+C1_CHANNEL6_REFERENCE_ONLY,legacy_loss_positive_after_120h,0.6363636363636364,n=33; mean=47.474545
+F12_H1_FALSE_BREAK_RECLAIM_REFERENCE_ONLY,legacy_loss_positive_after_24h,0.5263157894736842,n=19; mean=-5.150000
+F12_H1_FALSE_BREAK_RECLAIM_REFERENCE_ONLY,legacy_loss_positive_after_48h,0.7894736842105263,n=19; mean=11.768947
+F12_H1_FALSE_BREAK_RECLAIM_REFERENCE_ONLY,legacy_loss_positive_after_72h,0.7368421052631579,n=19; mean=51.986316
+F12_H1_FALSE_BREAK_RECLAIM_REFERENCE_ONLY,legacy_loss_positive_after_120h,0.631578947368421,n=19; mean=52.274211
+correctness,regression_tests,4/4 PASS,
+correctness,acceptance_pass_all,True,
+status,formal,GOLD_V3_267_RESEARCH_ARCHITECTURE_RESET_COMPLETE_AUDIT_ONLY,
+operation,live_ready,False,NO_LIVE_PROMOTION_AUDIT_ONLY
