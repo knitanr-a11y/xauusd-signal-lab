@@ -1,0 +1,26 @@
+category,metric,value,note
+status,formal,GOLD_V3_260_E4A_COMPRESSION_FIRST_EXPANSION_REJECTED_AUDIT_ONLY,
+population,raw_events,224,
+population,dedup120_events,203,
+population,matched_controls,95,exact same weekday/hour/H1 band/H4 band/compression-width band; no replacement
+population,complete_event_paths_120,193,
+population,complete_control_paths_120,89,
+paired120,event_mfe_mean,11.31606741573037,USD
+paired120,control_mfe_mean,16.301123595505626,USD
+paired120,mfe_difference,-4.985056179775256,event-control USD
+paired120,event_mae_mean,13.418988764044927,USD
+paired120,control_mae_mean,6.935842696629183,USD
+paired120,mae_difference,6.483146067415745,event-control USD
+full_grid,best_cost0_expectancy,-0.22802197802197552,H240 TP10 SL15
+discovery,2025H1_fixed_cell,H240 TP25 SL15,selected only from 2025H1 cost2
+discovery,2025H1_cost2_expectancy,0.98463,PF 1.175815
+selection,2025H2_same_cell_cost2_expectancy,-1.65619,PF 0.755306
+fixed_test,2026H1_same_cell_cost2_expectancy,-6.278615,PF 0.451118
+placebo,time_minus15_best_cost0,9.449011,not live-usable: future breakout direction leakage
+placebo,not_first_expansion_best_cost0,3.499091,exploratory only
+placebo,not_first_2025H1_cost2,4.6288,PF 2.02598
+placebo,not_first_2025H2_cost2,1.98697,PF 1.42222
+placebo,not_first_2026H1_cost2,-2.667,PF 0.74191; fixed rule failed
+decision,E4B_executed,False,E4A preregistered core criteria failed
+decision,verdict,EARLY_REJECT_BEFORE_E4B,
+operation,live_ready,False,audit-only
