@@ -1,0 +1,59 @@
+{
+  "status": "GOLD_V3_260_E2_PRIOR_DAY_SWEEP_RECLAIM_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "data_contract": {
+    "csv_latest_row": "closed",
+    "csv_time": "open_time",
+    "htf": "source_close_time<=decision_time",
+    "same_m1_tp_sl": "SL_PRIORITY",
+    "mfe_mae": "FULL_HORIZON"
+  },
+  "data_periods": {
+    "gold#_m1": "2025-01-02 08:00 to 2025-12-31 19:59",
+    "goldsharp_m1": "2026-01-13 03:52 to 2026-06-19 19:53",
+    "sessions": 371
+  },
+  "source_parity": {
+    "m5_m15_h1_h4_d1": "zero OHLC differences on exact timestamp overlap",
+    "m1_direct": "no overlap",
+    "m1_internal_aggregation": "M1->M5 zero OHLC differences for both sources"
+  },
+  "counts": {
+    "raw": 273,
+    "dedup120": 268,
+    "complete_path120": 262,
+    "matched_controls_without_exact_stage258_regime": 262,
+    "complete_control_path120": 256
+  },
+  "primary_failure": {
+    "best_full_grid_cost0_expectancy_usd": 0.654397,
+    "target_minimum_usd": 3.0,
+    "best_full_grid_cost2_pf": 0.790635,
+    "target_cost2_pf": 1.3
+  },
+  "selection_contract": {
+    "2025H1_best_cost2": {
+      "horizon": 60,
+      "tp": 15,
+      "sl": 5,
+      "expectancy": -2.242472,
+      "pf": 0.41633
+    },
+    "2025H2_same_fixed": {
+      "expectancy": -2.438835,
+      "pf": 0.448736
+    },
+    "2026H1_same_fixed": {
+      "expectancy": -2.149867,
+      "pf": 0.576041
+    }
+  },
+  "matched_control_limitation": "Exact Stage258 regime timeline unavailable; no proxy regime was invented. Continuous H1/H4 ATR-band matching showed no material event edge.",
+  "placebo_finding": "Several shifted-time/shifted-level placebos had higher gross expectancy than the real event; event timing specificity failed.",
+  "verdict": "EARLY_REJECT_BEFORE_FEATURE_MINING",
+  "next": "Stage260 E4 long-compression then first expansion, definition before outcomes"
+}
