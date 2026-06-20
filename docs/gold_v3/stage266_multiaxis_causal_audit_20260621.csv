@@ -1,0 +1,9 @@
+stage,check,violations
+266F,H4_decision_equals_time_plus_4h,0
+266F,H1_decision_equals_time_plus_1h,0
+266F,D1_source_close_le_decision,0
+266F,H4_source_close_le_decision,0
+266H,H4_decision_equals_time_plus_4h,0
+266H,H1_decision_equals_time_plus_1h,0
+266H,D1_source_close_le_decision,0
+266H,H4_source_close_le_decision,0
