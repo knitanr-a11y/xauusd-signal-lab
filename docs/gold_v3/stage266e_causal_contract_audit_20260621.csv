@@ -1,0 +1,4 @@
+check,violations,max_abs_seconds,status
+D1_source_close_le_decision,0,,PASS
+H1_source_close_le_decision,0,,PASS
+H4_decision_time_equals_open_plus_4h,0,0.0,PASS
