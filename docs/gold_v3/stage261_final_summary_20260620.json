@@ -1,0 +1,44 @@
+{
+  "status": "GOLD_V3_261_INSUFFICIENT_COMMON_LEDGER_BLOCKED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "46f37132bb91c5f4aa9d40848a253be2202d37bd",
+  "candidate_coverage": [
+    {"candidate_id":"E5","full_events":178,"fixed_outcomes":150,"missing":28,"coverage":0.842697},
+    {"candidate_id":"E6","full_events":54,"fixed_outcomes":52,"missing":2,"coverage":0.962963},
+    {"candidate_id":"E7","full_events":204,"fixed_outcomes":167,"missing":37,"coverage":0.818627},
+    {"candidate_id":"E8","full_events":205,"fixed_outcomes":201,"missing":4,"coverage":0.980488}
+  ],
+  "portfolio_summary": [
+    {"portfolio":"P1_PARALLEL_EQUAL_UNIT","evaluated_trades":570,"full_events":641,"coverage":0.889236,"pnl":-327.24,"expectancy":-0.574105,"pf":0.905538,"max_dd":582.55,"positive_months":9},
+    {"portfolio":"P2_ONE_ACTIVE_FIRST_COME","evaluated_trades":470,"accepted_events":529,"accepted_outcome_unavailable":59,"coverage":0.888469,"pnl":-288.57,"expectancy":-0.613979,"pf":0.900327,"max_dd":443.52,"positive_months":9},
+    {"portfolio":"P3_ONE_ACTIVE_120M","evaluated_trades":436,"accepted_events":487,"accepted_outcome_unavailable":51,"coverage":0.895277,"pnl":-215.53,"expectancy":-0.494335,"pf":0.916755,"max_dd":401.08,"positive_months":8},
+    {"portfolio":"P4_E5_E7_PREDECLARED_COMPLEMENT","evaluated_trades":317,"full_events":382,"coverage":0.829843,"pnl":194.50,"expectancy":0.613565,"pf":1.100028,"max_dd":203.97,"positive_months":11,"e7_abs_pnl_share":0.833933}
+  ],
+  "p4_by_half": [
+    {"half":"2025H1","count":127,"pnl":178.14,"expectancy":1.402677,"pf":1.254471,"coverage":0.869863},
+    {"half":"2025H2","count":126,"pnl":84.53,"expectancy":0.670873,"pf":1.116895,"coverage":0.834437},
+    {"half":"2026H1","count":64,"pnl":-68.17,"expectancy":-1.065156,"pf":0.869226,"coverage":0.752941}
+  ],
+  "independence": {
+    "e5_e7_daily_pnl_correlation": 0.105648,
+    "e5_e7_monthly_pnl_correlation": 0.066880,
+    "e5_e7_120m_jaccard_like": 0.091429,
+    "e7_e8_120m_jaccard_like": 0.310897
+  },
+  "period_decay": {
+    "all_e5_e8_declined_2026_vs_2025h2": true,
+    "all_e5_e8_negative_2026": true
+  },
+  "portfolio_route_worth_new_holdout": false,
+  "route_failures": [
+    "P2 and P4 did not maintain non-negative expectancy in every half",
+    "P4 depended on E7 for more than 80 percent of absolute candidate PnL",
+    "P2 and P4 lacked 100 percent outcome coverage",
+    "P1 P2 P3 were negative on the evaluated subset"
+  ],
+  "formal_verdict": "INSUFFICIENT_COMMON_LEDGER_BLOCKED",
+  "diagnostic_secondary_verdict": "NEW_INFORMATION_REQUIRED",
+  "next": "GOLD_V3_262_LIVE_RESOLVABLE_EXIT_AND_INFORMATION_READINESS_NEXT_AUDIT_ONLY",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
