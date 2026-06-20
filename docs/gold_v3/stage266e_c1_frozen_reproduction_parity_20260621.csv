@@ -1,0 +1,2 @@
+check,compared,accepted_mismatch,max_probability_diff,max_threshold_diff,status
+C1_resolved_OOF_gate_decision_parity,74,0,0.03430103565498077,0.003263586279310393,PASS
