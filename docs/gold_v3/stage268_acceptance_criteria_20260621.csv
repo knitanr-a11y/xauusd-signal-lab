@@ -1,0 +1,12 @@
+criterion,value,pass
+H1_own_feature_merge_coverage_ge_99pct,1.0,True
+H1_d1_feature_merge_coverage_ge_99pct,1.0,True
+H1_d1_asof_violations_zero,0,True
+H1_normalized_finite_rate_ge_99pct,0.9993931302342517,True
+H4_own_feature_merge_coverage_ge_99pct,1.0,True
+H4_d1_feature_merge_coverage_ge_99pct,1.0,True
+H4_d1_asof_violations_zero,0,True
+H4_normalized_finite_rate_ge_99pct,0.999535747446611,True
+H1_h4_feature_merge_coverage_ge_99pct,1.0,True
+H1_h4_asof_violations_zero,0,True
+legacy_status_remains_reference_only,True,True
