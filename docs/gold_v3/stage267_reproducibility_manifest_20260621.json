@@ -1,0 +1,19 @@
+{
+  "definition_commit": "fbf4e56606b00ec8a20d14c4f9bdc4e5419585ab",
+  "audit_commit": "e31bea6b79ffc03eab1597c7c7ad5e695b39583b",
+  "runner_artifact": "stage267_architecture_reset.py",
+  "runner_sha256": "bc2dedc1dca36ccf160a3ba46ea56867638423cb6cf2b7853f857bff5c856a8a",
+  "test_artifact": "test_stage267_architecture_reset.py",
+  "test_sha256": "7af7a5f7ae5099ef93dbc5e07ff05077d86024897051ff8327ad3a5456fb805d",
+  "audit_sha256": "4f0492330861d03b4598ec0022818b03676c1e5c249bcaf598725f6d81757af7",
+  "final_summary_sha256": "0c939413badb4e111ddd4f40cead958b6dc9f72cae6186f2cd6a619d9f3c012b",
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "activation_coverage": {
+    "H1": 1.0,
+    "H4": 1.0
+  },
+  "source_crossing_violations": 0,
+  "legacy_reference_status": "REFERENCE_ONLY_NOT_VALIDATED",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
