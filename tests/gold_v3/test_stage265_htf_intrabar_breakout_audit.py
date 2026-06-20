@@ -1,10 +1,11 @@
 from pathlib import Path
 import sys
-import pandas as pd
-import numpy as np
 
-sys.path.insert(0, '/mnt/data')
-import stage265_htf_intrabar_breakout_audit as s
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "gold_v3"))
+import stage265_intrabar_engine as s
 
 
 def candidate(decision='2025-01-06 08:00', direction='LONG', stop=100.0, hold=60, sl=1.0, tp=2.0):
@@ -15,14 +16,6 @@ def candidate(decision='2025-01-06 08:00', direction='LONG', stop=100.0, hold=60
         'direction':direction,'context_state':direction,'candidate':True,
         'order_stop':stop,'atr14':10.0,'hold_minutes':hold,'sl_mult':sl,'tp_mult':tp,
     }])
-
-
-def m1_frame(rows, source='GOLD_HASH_2025'):
-    df=pd.DataFrame(rows, columns=['time','open','high','low','close'])
-    df['time']=pd.to_datetime(df['time'])
-    df['source_id']=source
-    df['tick_volume']=1; df['spread']=0; df['real_volume']=0
-    return df
 
 
 def full_minutes(start, end, price=99.0):
