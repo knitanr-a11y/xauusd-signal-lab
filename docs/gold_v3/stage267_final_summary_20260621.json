@@ -1,0 +1,63 @@
+{
+  "status": "GOLD_V3_267_RESEARCH_ARCHITECTURE_RESET_COMPLETE_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "fbf4e56606b00ec8a20d14c4f9bdc4e5419585ab",
+  "sources": {
+    "GOLD_HASH_2025": {
+      "rows": 353074,
+      "start": "2025-01-02 08:00:00",
+      "end": "2025-12-31 19:59:00",
+      "duplicates": 0
+    },
+    "GOLDSHARP_2026": {
+      "rows": 154922,
+      "start": "2026-01-13 03:52:00",
+      "end": "2026-06-19 19:53:00",
+      "duplicates": 0
+    }
+  },
+  "observed_session": {
+    "daily_maintenance_gaps": 285,
+    "median_daily_maintenance_gap_minutes": 62,
+    "weekend_closures": 74,
+    "holiday_or_early_close_gaps": 10,
+    "rare_data_gaps": 12
+  },
+  "activation": {
+    "H1": {
+      "source_covered": 8479,
+      "activated": 8479,
+      "coverage": 1.0,
+      "after_closure": 369
+    },
+    "H4": {
+      "source_covered": 2216,
+      "activated": 2216,
+      "coverage": 1.0,
+      "after_closure": 341
+    }
+  },
+  "root_causes": {
+    "old_h4_hour_coverage": 0.4986462093862815,
+    "effective_04_08_coverage": 0.3330324909747292,
+    "legacy_c1_hour00_total": 161,
+    "legacy_c1_hour00_gap_invalidated": 144,
+    "fixed_medium_term_label_trading_hours": 8,
+    "m1_history_calendar_months": 17.51129363449692
+  },
+  "legacy_label_flip": {
+    "C1_48h_positive_rate_after_legacy_loss": 0.6470588235294118,
+    "C1_72h_positive_rate_after_legacy_loss": 0.7352941176470589,
+    "F12_48h_positive_rate_after_legacy_loss": 0.7894736842105263,
+    "F12_72h_positive_rate_after_legacy_loss": 0.7368421052631579
+  },
+  "legacy_status": "REFERENCE_ONLY_NOT_VALIDATED",
+  "correctness": {
+    "regression_tests": "4/4 PASS",
+    "acceptance_criteria": "ALL PASS",
+    "source_crossing_violations": 0
+  },
+  "next_stage": "GOLD_V3_268_FORWARD_DISTRIBUTION_AND_REGIME_DIAGNOSTIC_AUDIT_ONLY",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
