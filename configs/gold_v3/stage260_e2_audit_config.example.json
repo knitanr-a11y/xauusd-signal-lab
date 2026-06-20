@@ -1,0 +1,37 @@
+{
+  "authoritative_source": "gold#",
+  "sources": {
+    "gold#": {
+      "m1": "C:/path/to/gold#_m1.csv",
+      "m5": "C:/path/to/gold#_m5.csv",
+      "m15": "C:/path/to/gold#_m15.csv",
+      "h1": "C:/path/to/gold#_h1.csv",
+      "h4": "C:/path/to/gold#_h4.csv",
+      "d1": "C:/path/to/gold#_d1.csv"
+    },
+    "goldsharp": {
+      "m1": "C:/path/to/goldsharp_m1.csv",
+      "m5": "C:/path/to/goldsharp_m5.csv",
+      "m15": "C:/path/to/goldsharp_m15.csv",
+      "h1": "C:/path/to/goldsharp_h1.csv",
+      "h4": "C:/path/to/goldsharp_h4.csv",
+      "d1": "C:/path/to/goldsharp_d1.csv"
+    }
+  },
+  "regime_timeline": "C:/path/to/stage258_locked_causal_regime_timeline.csv",
+  "e2": {
+    "min_penetration_atr": 0.05,
+    "reclaim_buffer_atr": 0.02,
+    "max_reclaim_minutes": 15,
+    "opening_ban_minutes": 60,
+    "closing_ban_minutes": 60,
+    "base_horizon_minutes": 120,
+    "control_near_level_atr": 0.25,
+    "session_gap_minutes": 15,
+    "atr_window": 14,
+    "atr_slow_window": 50,
+    "atr_rank_window": 1000,
+    "atr_rank_min_periods": 200,
+    "random_seed": 260
+  }
+}
