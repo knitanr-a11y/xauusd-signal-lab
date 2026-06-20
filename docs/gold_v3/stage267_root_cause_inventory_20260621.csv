@@ -1,0 +1,7 @@
+issue,evidence_value,unit,severity
+daily_maintenance_misclassified_as_data_gap,285.0,observed gaps,CRITICAL
+h4_old_hour_coverage,0.49864620938628157,fraction of all source-covered H4 decisions,CRITICAL
+h4_effective_04_08_coverage,0.33303249097472926,fraction of all source-covered H4 decisions,CRITICAL
+fixed_8h_label_used_for_medium_term_setups,8.0,trading hours,CRITICAL
+m1_history_length,17.51129363449692,calendar months incl source gap,HIGH
+legacy_families_shared_common_context_exit,1.0,architecture-level issue,HIGH
