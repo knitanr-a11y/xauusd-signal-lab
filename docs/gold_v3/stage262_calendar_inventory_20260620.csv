@@ -1,0 +1,2 @@
+path,rows,preknown_schema_complete,observed_posthoc,admissible_for_live
+stage260_e2_real/stage260_e2_mt5_session_calendar_observed.csv,371,False,True,False
