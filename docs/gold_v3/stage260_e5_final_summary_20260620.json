@@ -1,0 +1,70 @@
+{
+  "status": "GOLD_V3_260_E5_LIVE_REPRODUCIBLE_PERFORMANCE_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "definition_commit": "1ef6ec742626fffce44006b3f51434f484c50930",
+  "live_contract_commit": "6d3f11718bd7fa8660ef2d62807a1cde2eeff40c",
+  "live_reproducibility": {
+    "status": "PASS",
+    "batch_events": 180,
+    "streaming_events": 180,
+    "exact_matches": 180,
+    "entry_m1_available": 178,
+    "entry_m1_missing_fail_closed": 2,
+    "prefix_checkpoints_passed": 40,
+    "restart_splits_passed": 11,
+    "candidate_key_duplicates": 0,
+    "h1_source_close_violations": 0,
+    "h4_source_close_violations": 0
+  },
+  "path_counts": {
+    "h60": 171,
+    "h120": 163,
+    "h180": 156,
+    "h240": 150
+  },
+  "best_full_grid_cost0": {
+    "horizon": 240,
+    "tp": 25.0,
+    "sl": 5.0,
+    "count": 150,
+    "expectancy": 2.3832,
+    "pf": 1.74063
+  },
+  "discovery_cell": {
+    "horizon": 240,
+    "tp": 25.0,
+    "sl": 10.0
+  },
+  "frozen_by_half": [
+    {"half": "2025H1", "count": 64, "cost2_expectancy": 0.405781, "cost2_pf": 1.078431},
+    {"half": "2025H2", "count": 52, "cost2_expectancy": 1.107885, "cost2_pf": 1.215019},
+    {"half": "2026H1", "count": 34, "cost2_expectancy": -1.508235, "cost2_pf": 0.817691}
+  ],
+  "direction_diagnostic_posthoc": {
+    "promotion_allowed": false,
+    "long_cost2_expectancy": 1.400636,
+    "long_cost2_pf": 1.269452,
+    "short_cost2_expectancy": -3.04425,
+    "short_cost2_pf": 0.605335,
+    "reason": "All periods were already seen; direction filtering would be post-hoc and LONG failed fixed 2026."
+  },
+  "criteria": {
+    "batch_streaming_parity": true,
+    "prefix_invariance": true,
+    "restart_invariance": true,
+    "source_timing_zero_violations": true,
+    "best_cost0_expectancy_ge_3": false,
+    "discovery_cost2_positive_pf_ge_1_10": false,
+    "selection_same_cell_positive_pf_ge_1_10": true,
+    "fixed_2026_stable": false
+  },
+  "matched_control_executed": false,
+  "placebos_executed": false,
+  "early_stop_reason": "Pre-registered absolute performance gate failed before control/placebo feature mining.",
+  "verdict": "LIVE_REPRODUCIBILITY_PASS_PERFORMANCE_REJECT",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
