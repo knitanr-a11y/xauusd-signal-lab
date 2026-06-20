@@ -1,0 +1,23 @@
+category,metric,value,note
+status,formal,GOLD_V3_261_INSUFFICIENT_COMMON_LEDGER_BLOCKED_AUDIT_ONLY,
+ledger,live_events,641,E5-E8
+ledger,fixed_outcomes,570,coverage 88.9%
+ledger,P2_accepted_outcome_unavailable,59,cannot discard or zero-fill for live
+portfolio,P1_expectancy,-0.574105,all live candidates parallel
+portfolio,P1_pf,0.905538,
+portfolio,P2_expectancy,-0.613979,one active first come evaluated subset
+portfolio,P2_pf,0.900327,
+portfolio,P4_expectancy,0.613565,E5+E7 evaluated subset
+portfolio,P4_pf,1.100028,
+portfolio,P4_positive_months,11,of 18
+portfolio,P4_2026_expectancy,-1.065156,
+portfolio,P4_2026_pf,0.869226,
+portfolio,P4_E7_abs_pnl_share,0.833933,fails <=80%
+independence,E5_E7_daily_corr,0.105648,low
+independence,E5_E7_monthly_corr,0.06688,low
+overlap,E5_E7_120m_jaccard,0.091429,
+overlap,E7_E8_120m_jaccard,0.310897,high shared activity windows
+decay,all_E5_E8_negative_2026,True,
+decision,portfolio_route_worth_new_holdout,False,
+decision,secondary,NEW_INFORMATION_REQUIRED,
+operation,live_ready,False,audit-only
