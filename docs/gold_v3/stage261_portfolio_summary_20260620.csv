@@ -1,0 +1,5 @@
+portfolio,evaluated_trade_count,full_event_stream_count,outcome_coverage,suppressed_event_count,pnl,expectancy,pf,win_rate,max_dd,max_losing_streak,positive_months,negative_months,months_observed,max_abs_candidate_pnl_share,accepted_outcome_unavailable
+P1_PARALLEL_EQUAL_UNIT,570,641,0.889236,0,-327.24,-0.574105,0.905538,0.426316,582.55,9,9,9,18,0.517173,
+P2_ONE_ACTIVE_FIRST_COME,470,529,0.888469,112,-288.57,-0.613979,0.900327,0.414894,443.52,9,9,9,18,0.521188,59
+P3_ONE_ACTIVE_120M,436,487,0.895277,154,-215.53,-0.494335,0.916755,0.422018,401.08,9,8,10,18,0.607264,51
+P4_E5_E7_PREDECLARED_COMPLEMENT,317,382,0.829843,0,194.50,0.613565,1.100028,0.419558,203.97,12,11,7,18,0.833933,
