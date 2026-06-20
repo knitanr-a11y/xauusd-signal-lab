@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "context_rows": 103577,
+  "batch_anchors": 674,
+  "streaming_anchors": 674,
+  "batch_events": 205,
+  "streaming_events": 205,
+  "entry_m1_available": 204,
+  "entry_m1_missing": 1,
+  "prefix_checkpoints": 40,
+  "restart_splits": 11,
+  "candidate_key_duplicates": 0,
+  "source_close_violation_h1": 0,
+  "source_close_violation_h4": 0,
+  "entry_before_decision": 0
+}
