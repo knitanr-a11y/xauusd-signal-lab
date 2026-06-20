@@ -1,0 +1,3 @@
+strategy,target_trades,resolved_m1,entry_price_parity,exit_reason_match,pnl_exact_match,data_missing
+H1,35,35,1.0,1.0,1.0,0
+H4,15,15,1.0,1.0,1.0,0
