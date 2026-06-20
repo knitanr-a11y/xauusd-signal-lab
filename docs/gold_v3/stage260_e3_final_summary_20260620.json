@@ -1,0 +1,99 @@
+{
+  "status": "GOLD_V3_260_E3_MULTI_REACTION_BREAKOUT_RETEST_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "definition_commit": "90e74d958a42bb586bf74f80784a54555e8f960f",
+  "counts": {
+    "confirmed_reactions": 5343,
+    "raw_breakouts": 262,
+    "first_retests": 129,
+    "dedup120_events": 90,
+    "matched_controls": 8,
+    "unmatched_events": 82,
+    "complete_event_paths_120": 82,
+    "complete_control_paths_120": 8
+  },
+  "core_metrics": {
+    "paired_event120_mfe_mean": 11.92124999999993,
+    "paired_control120_mfe_mean": 8.46374999999989,
+    "paired_mfe_difference": 3.4575000000000387,
+    "paired_event120_mae_mean": 10.262500000000216,
+    "paired_control120_mae_mean": 13.261250000000018,
+    "paired_mae_difference": -2.998749999999802,
+    "best_full_grid_cost0_expectancy": 1.8087179487179537
+  },
+  "discovery_cell": {
+    "horizon": 60,
+    "tp": 10.0,
+    "sl": 5.0
+  },
+  "frozen_by_half": [
+    {
+      "half": "2025H1",
+      "horizon": 60,
+      "tp": 10.0,
+      "sl": 5.0,
+      "count": 31,
+      "cost2_expectancy": -1.6870967741935543,
+      "cost2_pf": 0.5159200296186599,
+      "cost2_pnl": -52.30000000000018
+    },
+    {
+      "half": "2025H2",
+      "horizon": 60,
+      "tp": 10.0,
+      "sl": 5.0,
+      "count": 34,
+      "cost2_expectancy": -2.892352941176515,
+      "cost2_pf": 0.32319339298003386,
+      "cost2_pnl": -98.34000000000151
+    },
+    {
+      "half": "2026H1",
+      "horizon": 60,
+      "tp": 10.0,
+      "sl": 5.0,
+      "count": 21,
+      "cost2_expectancy": -4.69380952380951,
+      "cost2_pf": 0.1958064779309787,
+      "cost2_pnl": -98.56999999999971
+    }
+  ],
+  "criteria": {
+    "criterion_1_mfe_diff_ge_2": true,
+    "criterion_2_mae_not_worse_gt_1": true,
+    "criterion_3_best_cost0_expectancy_ge_3": false,
+    "criterion_4_2025H1_cost2_positive_pf_ge_1_10": false,
+    "criterion_5_2025H2_frozen_positive_pf_ge_1_10": false
+  },
+  "early_core_pass": false,
+  "placebo_best_cost0": [
+    {"population_name":"TIME_-15","best_cost0_expectancy":3.7810256410256184,"horizon":240,"tp":15.0,"sl":15.0,"pf":2.079857932701101},
+    {"population_name":"TIME_-30","best_cost0_expectancy":3.375897435897432,"horizon":240,"tp":20.0,"sl":15.0,"pf":1.8363082004700477},
+    {"population_name":"RANDOM_FLAG","best_cost0_expectancy":2.764000000000013,"horizon":240,"tp":15.0,"sl":15.0,"pf":1.64609630668537},
+    {"population_name":"WEEKDAY_SHIFT","best_cost0_expectancy":2.5995454545454364,"horizon":180,"tp":25.0,"sl":10.0,"pf":1.7255158998646756},
+    {"population_name":"BREAKOUT_ONLY","best_cost0_expectancy":0.8669907407407259,"horizon":180,"tp":20.0,"sl":15.0,"pf":1.1701711980226777},
+    {"population_name":"RETEST_ONLY","best_cost0_expectancy":0.838495575221235,"horizon":240,"tp":25.0,"sl":15.0,"pf":1.1565442950137121},
+    {"population_name":"WEAK_T2","best_cost0_expectancy":-0.00641975308642795,"horizon":240,"tp":5.0,"sl":10.0,"pf":0.9979391249207329}
+  ],
+  "exact_stage258_regime_available": false,
+  "regime_proxy_invented": false,
+  "preknown_holiday_short_session_calendar_available": false,
+  "verdict": "EARLY_REJECT_BEFORE_FEATURE_MINING",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY",
+  "matched_control_limitation": "Only 8 exact matches; paired differences are descriptive and bootstrap intervals include zero.",
+  "primary_rejection_basis": "Absolute event population: best cost0 expectancy below 3 USD and all 2025H1 cost2 cells negative.",
+  "monthly_fixed_cell": {
+    "cost0_positive": 4,
+    "cost0_negative": 11,
+    "cost0_zero": 1,
+    "cost2_positive": 1,
+    "cost2_negative": 15,
+    "cost3_positive": 1,
+    "cost3_negative": 15
+  },
+  "next": "Stage260 E5 directional displacement then first pullback, definition before outcomes"
+}
