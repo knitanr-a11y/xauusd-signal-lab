@@ -1,0 +1,29 @@
+strategy,metric,value,note
+H1,raw_candidates,308,
+H1,resolved_trades,224,
+H1,coverage,1.0,
+H1,cost2_pnl,-645.644923,
+H1,cost2_expectancy,-2.882343,
+H1,cost2_pf,0.545048,
+H1,cost5_expectancy,-5.882343,
+H1,pre_2025_cost2_pnl,-308.989876,2023+2024
+H1,long_cost2_pnl,-617.282831,
+H1,short_cost2_pnl,-28.362092,
+H1,m1_path_trades,35,35/35 exact match
+H1,prefix_signal_parity,1.0,6/6
+H1,pass_all,False,
+H4,raw_candidates,256,
+H4,resolved_trades,223,
+H4,coverage,0.995536,
+H4,cost2_pnl,-475.366193,
+H4,cost2_expectancy,-2.131687,
+H4,cost2_pf,0.701246,
+H4,cost5_expectancy,-5.131687,
+H4,pre_2025_cost2_pnl,-484.492688,2020-2024
+H4,long_cost2_pnl,-258.459745,
+H4,short_cost2_pnl,-216.906448,
+H4,m1_path_trades,15,15/15 exact match
+H4,prefix_signal_parity,1.0,6/6
+H4,pass_all,False,
+FINAL,formal_status,GOLD_V3_264_H1_H4_MEDIUM_TERM_AUTOTRADE_REJECTED_AUDIT_ONLY,
+FINAL,live_ready,False,audit-only
