@@ -1,0 +1,18 @@
+category,metric,value,note
+status,formal,GOLD_V3_262_PREKNOWN_CALENDAR_AND_NEW_DATA_REQUIRED_BLOCKED_AUDIT_ONLY,
+exit_engine,synthetic_tests_passed,5,SL priority forced exit calendar guards restart
+calendar,preknown_broker_calendar_present,False,only observed post-hoc calendar exists
+observed_diagnostic,candidates,641,promotion prohibited
+observed_diagnostic,resolved_exact_m1,641,100 percent with observed close minus 5m
+observed_diagnostic,P1_expectancy,-0.642715,PF0.893301
+observed_diagnostic,P2_expectancy,-0.685672,PF0.888167
+observed_diagnostic,P4_E5_E7_expectancy,0.269712,PF1.044562
+observed_diagnostic,P4_2026_expectancy,-1.154941,PF0.852953
+readiness,M1_exit_price_data,READY_IF_CALENDAR_SUPPLIED,
+readiness,tick_arrival_timing,MISSING_EXTERNAL_DATA,
+readiness,bid_ask_spread_path,PARTIAL_NOT_DIRECTIONAL,
+readiness,external_DXY_rates_GC,MISSING_EXTERNAL_DATA,
+readiness,preknown_macro_calendar,MISSING_EXTERNAL_DATA,
+readiness,multi_broker_robustness,SOURCE_IDENTITY_UNPROVEN,
+decision,verdict,PREKNOWN_CALENDAR_AND_NEW_DATA_REQUIRED_BLOCKED,
+operation,live_ready,False,audit-only
