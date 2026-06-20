@@ -1,0 +1,67 @@
+{
+  "status": "GOLD_V3_260_E8_LIVE_REPRODUCIBLE_PERFORMANCE_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "definition_commit": "d63b9c87e1b497d2dfab4651ad2cd2a3a5d01f8c",
+  "live_reproducibility": {
+    "status": "PASS",
+    "context_rows": 103577,
+    "batch_anchors": 533,
+    "streaming_anchors": 533,
+    "batch_events": 205,
+    "streaming_events": 205,
+    "entry_m1_available": 205,
+    "entry_m1_missing": 0,
+    "prefix_checkpoints": 40,
+    "restart_splits": 11,
+    "candidate_key_duplicates": 0,
+    "source_close_violation_h1": 0,
+    "source_close_violation_h4": 0,
+    "entry_before_decision": 0
+  },
+  "outcome": {
+    "events_live_reproducible": 205,
+    "complete_paths": {"h60": 201, "h120": 192, "h180": 183, "h240": 172},
+    "best_full_grid_cost0": {
+      "horizon": 120,
+      "tp": 20.0,
+      "sl": 5.0,
+      "count": 192,
+      "expectancy": 0.4775520833333265,
+      "pf": 1.1424133699889703,
+      "max_dd": 102.98000000000093,
+      "max_losing_streak": 10
+    },
+    "discovery_cell": {"horizon": 60, "tp": 20.0, "sl": 15.0},
+    "frozen_by_half": [
+      {"half": "2025H1", "count": 72, "cost0_expectancy": 1.521944444444475, "cost2_expectancy": -0.478055555555525, "cost2_pf": 0.8901512733771689},
+      {"half": "2025H2", "count": 90, "cost0_expectancy": -0.40855555555555534, "cost2_expectancy": -2.4085555555555556, "cost2_pf": 0.5577837165180832},
+      {"half": "2026H1", "count": 39, "cost0_expectancy": -1.057179487179476, "cost2_expectancy": -3.057179487179476, "cost2_pf": 0.6786859622173731}
+    ],
+    "criteria": {
+      "batch_streaming_parity": true,
+      "prefix_invariance": true,
+      "restart_invariance": true,
+      "source_timing_zero_violations": true,
+      "best_cost0_expectancy_ge_3": false,
+      "discovery_cost2_positive_pf_ge_1_10": false,
+      "selection_same_cell_positive_pf_ge_1_10": false,
+      "fixed_2026_positive": false
+    },
+    "monthly_cost2_positive": 6,
+    "monthly_cost2_negative": 12
+  },
+  "direction_diagnostic_posthoc": [
+    {"direction": "LONG", "count": 141, "cost2_expectancy": -2.1667375886524645, "cost2_pf": 0.619856408724976, "promotion_allowed": false},
+    {"direction": "SHORT", "count": 60, "cost2_expectancy": -1.081833333333331, "cost2_pf": 0.8250074137977523, "promotion_allowed": false}
+  ],
+  "matched_control_executed": false,
+  "placebos_executed": false,
+  "early_stop_reason": "Pre-registered absolute performance gates failed.",
+  "verdict": "LIVE_REPRODUCIBILITY_PASS_PERFORMANCE_REJECT",
+  "next": "Stage260 E9 causal tick-volume drought-to-ignition transition, definition before outcomes",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
