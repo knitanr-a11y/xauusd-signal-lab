@@ -1,0 +1,29 @@
+{
+  "definition_commit": "e9240e5ce9995436588f0ed620f10c5c277b31b2",
+  "audit_commit": "50fc9d0da6302a2bafce62e55423fb3d05880446",
+  "full_runner_artifact": "stage265_htf_intrabar_breakout_audit.py",
+  "full_runner_sha256": "7f5144c985ca410bd52220cec1a0e1ec4a39020dbd6ced2c8d6be44f56f64650",
+  "regression_test_artifact": "test_stage265_htf_intrabar_breakout_audit.py",
+  "regression_test_sha256": "8a5e76d4d7711b185522c47f26b39fe2665c74304fb7338c7250b418200283d2",
+  "final_summary_sha256": "a288ec6a6fa8c52a12f57c192d8b6682ab8678b79be9e9993efd0f96df821d71",
+  "tests": "4/4 PASS",
+  "candidate_prefix_parity": "12/12 PASS",
+  "prefix_streaming_replay": "16/16 PASS",
+  "max_replay_numeric_diff": 4.547473508864641e-13,
+  "h1_result": {
+    "count": 104,
+    "cost2_pnl": -217.3418428467303,
+    "cost2_expectancy": -2.0898254119877913,
+    "cost2_pf": 0.7382127915753005
+  },
+  "h4_result": {
+    "count": 67,
+    "cost2_pnl": 247.39374593604725,
+    "cost2_expectancy": 3.692443969194735,
+    "cost2_pf": 1.4182585341407805,
+    "cost5_pnl": 46.39374593604725,
+    "cost5_expectancy": 0.6924439691947352,
+    "cost5_pf": 1.0674058048377228
+  },
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
