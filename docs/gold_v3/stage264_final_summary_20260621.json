@@ -1,0 +1,46 @@
+{
+  "status": "GOLD_V3_264_H1_H4_MEDIUM_TERM_AUTOTRADE_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "25fd11048275e46928a9724f10a1af1ebe2a6715",
+  "h1": {
+    "raw_candidates": 308,
+    "resolved_trades": 224,
+    "coverage": 1.0,
+    "cost2_pnl": -645.6449225593474,
+    "cost2_expectancy": -2.8823434042828007,
+    "cost2_pf": 0.5450477619202837,
+    "cost2_win_rate": 0.3125,
+    "cost2_max_dd": 752.5422821127952,
+    "cost5_expectancy": -5.882343404282801,
+    "pre_2025_cost2_pnl": -308.9898762136113,
+    "long_cost2_pnl": -617.282831,
+    "short_cost2_pnl": -28.362092,
+    "criteria_pass": false
+  },
+  "h4": {
+    "raw_candidates": 256,
+    "resolved_trades": 223,
+    "coverage": 0.9955357142857143,
+    "cost2_pnl": -475.3661925749302,
+    "cost2_expectancy": -2.131686962219418,
+    "cost2_pf": 0.7012457422617011,
+    "cost2_win_rate": 0.4125560538116592,
+    "cost2_max_dd": 552.8706884792675,
+    "cost5_expectancy": -5.131686962219418,
+    "pre_2025_cost2_pnl": -484.49268806900545,
+    "long_cost2_pnl": -258.459745,
+    "short_cost2_pnl": -216.906448,
+    "criteria_pass": false
+  },
+  "correctness": {
+    "prefix_signal_parity": "12/12 PASS",
+    "h1_m1_path": "35/35 entry, exit reason and PnL match",
+    "h4_m1_path": "15/15 entry, exit reason and PnL match",
+    "tests": "3/3 PASS"
+  },
+  "verdict": "H1_H4_MEDIUM_TERM_AUTOTRADE_REJECTED",
+  "interpretation": "The preliminary multi-day result was mainly broad 2025-2026 trend exposure, not confirmed H1/H4 entry timing edge under a same-day ATR-managed EA contract.",
+  "allowed_next_route": "MULTI_DAY_CHANNEL_TREND_FOLLOWING_WITH_SWAP_AND_PREKNOWN_BROKER_CALENDAR",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
