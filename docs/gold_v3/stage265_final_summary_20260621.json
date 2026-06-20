@@ -1,0 +1,156 @@
+{
+  "status": "GOLD_V3_265_H4_INTRABAR_BREAKOUT_PROMISING_NOT_VALIDATED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "definition_commit": "e9240e5ce9995436588f0ed620f10c5c277b31b2",
+  "h1": {
+    "cost2": {
+      "count": 104,
+      "pnl": -217.3418428467303,
+      "expectancy": -2.0898254119877913,
+      "pf": 0.7382127915753005,
+      "win_rate": 0.38461538461538464,
+      "gross_profit": 612.8814677366304,
+      "gross_loss": 830.2233105833607,
+      "max_dd": 293.52759325663374,
+      "gap_fill_rate": 0.009615384615384616
+    },
+    "cost5": {
+      "count": 104,
+      "pnl": -529.3418428467303,
+      "expectancy": -5.089825411987791,
+      "pf": 0.4838676916236526,
+      "win_rate": 0.3557692307692308,
+      "gross_profit": 496.25146773663073,
+      "gross_loss": 1025.593310583361,
+      "max_dd": 537.921770179154,
+      "gap_fill_rate": 0.009615384615384616
+    },
+    "status_counts": {
+      "ONE_ACTIVE_SUPPRESSED": 163,
+      "EXPIRED": 137,
+      "RESOLVED": 104,
+      "SESSION_WINDOW_BLOCKED_AT_TRIGGER": 10,
+      "NO_EXECUTION_SOURCE": 6
+    },
+    "pass_all": false
+  },
+  "h4": {
+    "cost2": {
+      "count": 67,
+      "pnl": 247.39374593604725,
+      "expectancy": 3.692443969194735,
+      "pf": 1.4182585341407805,
+      "win_rate": 0.5522388059701493,
+      "gross_profit": 838.878977538704,
+      "gross_loss": 591.4852316026568,
+      "max_dd": 157.7698614636929,
+      "gap_fill_rate": 0.014925373134328358
+    },
+    "cost5": {
+      "count": 67,
+      "pnl": 46.39374593604725,
+      "expectancy": 0.6924439691947352,
+      "pf": 1.0674058048377228,
+      "win_rate": 0.4925373134328358,
+      "gross_profit": 734.6689775387044,
+      "gross_loss": 688.2752316026572,
+      "max_dd": 193.18613650555017,
+      "gap_fill_rate": 0.014925373134328358
+    },
+    "status_counts": {
+      "EXPIRED": 226,
+      "RESOLVED": 67,
+      "ONE_ACTIVE_SUPPRESSED": 63,
+      "SESSION_WINDOW_BLOCKED_AT_TRIGGER": 27,
+      "NO_EXECUTION_SOURCE": 8,
+      "ORDER_STREAM_GAP_BEFORE_TRIGGER": 1
+    },
+    "pass_all": true
+  },
+  "h4_by_source": [
+    {
+      "count": 15,
+      "pnl": 49.09779857113608,
+      "expectancy": 3.273186571409072,
+      "pf": 1.185814723207894,
+      "win_rate": 0.4666666666666667,
+      "gross_profit": 313.3276600348281,
+      "gross_loss": 264.22986146369203,
+      "max_dd": 157.7698614636929,
+      "gap_fill_rate": 0.0,
+      "execution_source_id": "GOLDSHARP_2026"
+    },
+    {
+      "count": 52,
+      "pnl": 198.2959473649112,
+      "expectancy": 3.813383603171369,
+      "pf": 1.6059364198690074,
+      "win_rate": 0.5769230769230769,
+      "gross_profit": 525.5513175038759,
+      "gross_loss": 327.25537013896474,
+      "max_dd": 80.77409863872799,
+      "gap_fill_rate": 0.0192307692307692,
+      "execution_source_id": "GOLD_HASH_2025"
+    }
+  ],
+  "h4_by_direction": [
+    {
+      "count": 57,
+      "pnl": 124.68306029847872,
+      "expectancy": 2.1874221104996265,
+      "pf": 1.2889136245610908,
+      "win_rate": 0.5614035087719298,
+      "gross_profit": 556.2413175038755,
+      "gross_loss": 431.5582572053968,
+      "max_dd": 92.16288706643265,
+      "gap_fill_rate": 0.0175438596491228,
+      "direction": "LONG"
+    },
+    {
+      "count": 10,
+      "pnl": 122.71068563756852,
+      "expectancy": 12.271068563756852,
+      "pf": 1.7672919849828093,
+      "win_rate": 0.5,
+      "gross_profit": 282.6376600348285,
+      "gross_loss": 159.92697439725998,
+      "max_dd": 55.92999999999938,
+      "gap_fill_rate": 0.0,
+      "direction": "SHORT"
+    }
+  ],
+  "h4_exit_summary": [
+    {
+      "exit_reason": "SL_EXIT",
+      "count": 9,
+      "cost2_pnl": -309.8352316026567,
+      "cost2_expectancy": -34.42613684473963
+    },
+    {
+      "exit_reason": "TIME_EXIT",
+      "count": 54,
+      "cost2_pnl": 306.31000000000176,
+      "cost2_expectancy": 5.67240740740744
+    },
+    {
+      "exit_reason": "TP_EXIT",
+      "count": 4,
+      "cost2_pnl": 250.91897753870217,
+      "cost2_expectancy": 62.72974438467554
+    }
+  ],
+  "parity": {
+    "candidate_prefix": "12/12 PASS",
+    "prefix_streaming_replay": "16/16 PASS",
+    "tests": "4/4 PASS"
+  },
+  "cautions": [
+    "2025 and 2026 are previously observed periods, not a clean holdout",
+    "M1 execution source changes between 2025 and 2026 and broker identity continuity is unproven",
+    "cost5 total expectancy is only +0.692 USD and cost5 LONG is negative",
+    "only 15 resolved trades are in the 2026 source segment",
+    "official broker calendar, spread path, slippage and swap are not fully available"
+  ],
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
