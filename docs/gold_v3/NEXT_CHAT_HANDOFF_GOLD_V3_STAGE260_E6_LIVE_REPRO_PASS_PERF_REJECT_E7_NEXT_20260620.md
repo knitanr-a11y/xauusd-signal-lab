@@ -48,7 +48,7 @@ E7で結果前に固定すること:
 
 注意:
 
-- real_volumeは全0のため使わない。
+- E7対象のM5/M15ではreal_volumeが全行0のため使わない。
 - tick_volumeを実出来高と呼ばない。broker tick count proxyとして扱う。
 - source間parityが崩れる時間足は使用しない。
 - 全期間を見てLONGだけ、特定failure_typeだけを残さない。
@@ -73,6 +73,7 @@ E7で結果前に固定すること:
 - `docs/gold_v3/stage260_e6_final_summary_20260620.json`
 - `docs/gold_v3/stage260_e6_key_results_20260620.csv`
 - `docs/gold_v3/stage260_e6_live_parity_20260620.json`
+- `docs/gold_v3/stage260_tick_volume_source_parity_20260620.csv`
 - `scripts/gold_v3/stage260_e6_detector.py`
 
 運用状態:
