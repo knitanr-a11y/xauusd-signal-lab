@@ -1,0 +1,37 @@
+{
+  "status": "GOLD_V3_268_FORWARD_DISTRIBUTION_AND_REGIME_DIAGNOSTIC_COMPLETE_AUDIT_ONLY",
+  "rows": {
+    "H1": 8636,
+    "H4": 2257
+  },
+  "researchable_cells_total": 573,
+  "direction_biased_leads_total": 415,
+  "strict_cross_source_direction_cells_total": 12,
+  "by_timeframe": {
+    "H1": 344,
+    "H4": 229
+  },
+  "by_hypothesis": {
+    "BAR_CONTINUATION": 17,
+    "D1_TREND": 445,
+    "MEAN_REVERSION": 13,
+    "TIMEFRAME_TREND": 98
+  },
+  "acceptance_pass_all": true,
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY",
+  "strict_unique_configurations": 11,
+  "strict_single_axis_cells": 0,
+  "strict_families": [
+    "H1_LOW_VOL_TIMEFRAME_TREND_MULTI_DAY",
+    "H1_HIGH_VOL_UTC08_11_BAR_CONTINUATION",
+    "H4_CANDLE_TREND_INTERACTION_CONTINUATION"
+  ],
+  "important_cautions": [
+    "D1_TREND had zero SHORT observations in 2025 source",
+    "all strict cells are interactions discovered on 2025-2026 data",
+    "no strategy, exit, or PnL has been validated",
+    "pre-2025 coarse validation is required before entry design"
+  ],
+  "next_stage": "GOLD_V3_269_PRE2025_COARSE_PATH_VALIDATION_AUDIT_ONLY"
+}
