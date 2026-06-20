@@ -1,0 +1,103 @@
+{
+  "status": "GOLD_V3_260_E7_LIVE_REPRODUCIBLE_PERFORMANCE_REJECTED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_orders": 0,
+  "discord_notifications": 0,
+  "definition_commit": "63a49898cf02edc9556ec09f499a7275fdd0e34a",
+  "live_reproducibility": {
+    "status": "PASS",
+    "context_rows": 103577,
+    "batch_anchors": 674,
+    "streaming_anchors": 674,
+    "batch_events": 205,
+    "streaming_events": 205,
+    "entry_m1_available": 204,
+    "entry_m1_missing": 1,
+    "prefix_checkpoints": 40,
+    "restart_splits": 11,
+    "candidate_key_duplicates": 0,
+    "source_close_violation_h1": 0,
+    "source_close_violation_h4": 0,
+    "entry_before_decision": 0
+  },
+  "outcome": {
+    "events_live_reproducible": 204,
+    "complete_paths": {
+      "h60": 201,
+      "h120": 189,
+      "h180": 176,
+      "h240": 167
+    },
+    "best_full_grid_cost0": {
+      "population_name": "E7_TRUE",
+      "horizon": 240,
+      "tp": 25.0,
+      "sl": 10.0,
+      "cost": 0.0,
+      "count": 167,
+      "pnl": 496.2000000000012,
+      "expectancy": 2.9712574850299474,
+      "pf": 1.5689192597858255,
+      "max_dd": 83.59999999999991,
+      "max_losing_streak": 9,
+      "win_rate": 0.437125748502994
+    },
+    "discovery_cell": {
+      "horizon": 240,
+      "tp": 25.0,
+      "sl": 10.0
+    },
+    "frozen_by_half": [
+      {
+        "half": "2025H1",
+        "horizon": 240,
+        "tp": 25.0,
+        "sl": 10.0,
+        "count": 63,
+        "cost0_expectancy": 4.415396825396841,
+        "cost2_expectancy": 2.415396825396841,
+        "cost2_pf": 1.412474249159712,
+        "cost2_pnl": 152.17000000000098
+      },
+      {
+        "half": "2025H2",
+        "horizon": 240,
+        "tp": 25.0,
+        "sl": 10.0,
+        "count": 74,
+        "cost0_expectancy": 2.363783783783791,
+        "cost2_expectancy": 0.3637837837837909,
+        "cost2_pf": 1.0591388400703,
+        "cost2_pnl": 26.920000000000528
+      },
+      {
+        "half": "2026H1",
+        "horizon": 240,
+        "tp": 25.0,
+        "sl": 10.0,
+        "count": 30,
+        "cost0_expectancy": 1.4369999999999892,
+        "cost2_expectancy": -0.5630000000000109,
+        "cost2_pf": 0.9296249999999986,
+        "cost2_pnl": -16.890000000000327
+      }
+    ],
+    "criteria": {
+      "batch_streaming_parity": true,
+      "prefix_invariance": true,
+      "restart_invariance": true,
+      "source_timing_zero_violations": true,
+      "best_cost0_expectancy_ge_3": false,
+      "discovery_cost2_positive_pf_ge_1_10": true,
+      "selection_same_cell_positive_pf_ge_1_10": false,
+      "fixed_2026_positive": false
+    }
+  },
+  "matched_control_executed": false,
+  "placebos_executed": false,
+  "early_stop_reason": "Pre-registered absolute performance gates failed.",
+  "verdict": "LIVE_REPRODUCIBILITY_PASS_PERFORMANCE_REJECT",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
