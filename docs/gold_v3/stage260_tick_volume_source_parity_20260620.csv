@@ -1,0 +1,6 @@
+timeframe,exact_overlap,tick_volume_diff,spread_diff,real_volume_diff,goldsharp_nonzero_real_volume,gold_hash_nonzero_real_volume,e7_use_allowed
+m5,58092,0,0,0,0,0,True
+m15,19363,0,0,0,0,0,True
+h1,5894,0,0,0,0,0,Reference_only
+h4,1541,0,0,0,0,0,Reference_only
+d1,258,0,0,0,131,0,False_for_E7
