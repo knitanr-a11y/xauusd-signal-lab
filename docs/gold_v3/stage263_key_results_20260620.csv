@@ -1,0 +1,37 @@
+category,metric,value,note
+status,formal,GOLD_V3_263_JUNE_PSEUDO_HOLDOUT_REJECTED_AUDIT_ONLY,
+data,development_labeled_safe_rows,14199,
+data,oof_prediction_rows,9159,
+data,june_eligible_rows,600,
+threshold,oof_abs_ensemble_q85_usd,3.361803,frozen before June
+parity,prefix_prediction_checkpoints_passed,12,of 12
+oof,prediction_pearson,-0.047684,
+oof,prediction_spearman,0.005912,
+oof,model_trade_count,304,
+oof,model_expectancy,-2.155658,PF0.806923
+oof,LONG_expectancy,-6.802458,posthoc only
+oof,SHORT_expectancy,0.792312,posthoc only; June short negative
+june,prediction_pearson,-0.103447,
+june,prediction_spearman,-0.049703,
+june,raw_signals,20,
+june,accepted_trades,8,
+june,LONG_trades,6,PnL -49.82
+june,SHORT_trades,2,PnL -15.74
+june,cost2_pnl,-65.56,
+june,cost2_expectancy,-8.195,
+june,pf,0.185388,
+june,win_rate,0.25,
+june,max_dd,65.56,
+june,best_baseline_pnl,-77.34,ALWAYS_SHORT
+june,single_positive_trade_share,0.882038,
+criterion,trade_count_ge_15,False,
+criterion,cost2_expectancy_positive,False,
+criterion,pf_ge_1_10,False,
+criterion,pnl_above_all_baselines,True,
+criterion,max_dd_le_gross_profit,False,
+criterion,confidence_upper_ge_lower,True,both negative
+criterion,single_trade_positive_share_le_50pct,False,
+criterion,prefix_prediction_parity,True,
+decision,verdict,JUNE_PSEUDO_HOLDOUT_REJECTED,
+decision,research_decision,STOP_DIRECTIONAL_AUTOTRADE_RESEARCH_ON_CURRENT_BAR_DATA,
+operation,live_ready,False,audit-only
