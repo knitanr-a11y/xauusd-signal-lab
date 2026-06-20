@@ -1,0 +1,23 @@
+category,metric,value,note
+status,formal,GOLD_V3_268_FORWARD_DISTRIBUTION_AND_REGIME_DIAGNOSTIC_COMPLETE_AUDIT_ONLY,
+coverage,H1_decisions,8636,all Stage267 activated decisions
+coverage,H4_decisions,2257,all Stage267 activated decisions
+diagnostic,base_researchable_cells,573,"overlapping distribution cells, not strategies"
+diagnostic,direction_biased_leads,415,failed overall LONG/SHORT stability
+diagnostic,strict_source_direction_cells,12,11 unique two-axis configurations
+diagnostic,strict_single_axis_cells,0,all strict cells require interactions
+overall,H1_D1_TREND_48h_positive_rate,0.5925644916540213,direction source coverage incomplete
+overall,H1_D1_TREND_48h_median_ATR,1.0161914554659166,
+overall,H1_D1_TREND_120h_positive_rate,0.6321483771251932,
+overall,H1_D1_TREND_120h_median_ATR,2.895463877885936,
+overall,H4_D1_TREND_48h_positive_rate,0.5940067665538907,direction source coverage incomplete
+overall,H4_D1_TREND_120h_positive_rate,0.6410635155096012,
+overall,H4_D1_TREND_120h_median_ATR,1.4571063137883884,
+overall,H1_TIMEFRAME_TREND_48h_positive_rate,0.5477047057130522,SHORT 2025 negative
+overall,H4_TIMEFRAME_TREND_48h_positive_rate,0.5473741201949107,SHORT 2025 negative
+overall,H1_BAR_CONTINUATION_48h_positive_rate,0.5090713774170447,no unconditional edge
+overall,H4_BAR_CONTINUATION_48h_positive_rate,0.5152898219990871,no unconditional edge
+overall,H1_MEAN_REVERSION_48h_positive_rate,0.4569288389513108,overall negative
+overall,H4_MEAN_REVERSION_48h_positive_rate,0.4508393285371702,overall negative
+correctness,acceptance_pass_all,True,
+operation,live_ready,False,NO_LIVE_PROMOTION_AUDIT_ONLY
