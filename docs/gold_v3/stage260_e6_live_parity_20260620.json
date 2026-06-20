@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "context_rows": 34528,
+  "batch_anchors": 545,
+  "streaming_anchors": 545,
+  "batch_failures": 113,
+  "streaming_failures": 113,
+  "batch_events": 56,
+  "streaming_events": 56,
+  "entry_m1_available": 54,
+  "entry_m1_missing": 2,
+  "batch_streaming_parity": {
+    "status": "PASS",
+    "events": 56,
+    "candidate_key_duplicates": 0,
+    "tolerance": 1e-09
+  },
+  "extra_parity_columns": [
+    "original_direction",
+    "failure_time",
+    "failure_type"
+  ],
+  "prefix_checkpoints": 40,
+  "restart_splits": 11,
+  "candidate_key_duplicates": 0,
+  "source_close_violation_h1": 0,
+  "source_close_violation_h4": 0,
+  "entry_before_decision": 0,
+  "entry_missing_policy": "FAIL_CLOSED_NO_FALLBACK",
+  "audit_only": true
+}
