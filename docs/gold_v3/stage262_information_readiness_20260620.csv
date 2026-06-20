@@ -1,0 +1,8 @@
+category,status,available_now,evidence,next_required
+PREKNOWN_BROKER_SESSION_CALENDAR,MISSING_EXTERNAL_DATA,False,Only observed post-hoc session calendar exists; required broker/server/published_at schema absent.,Broker/server-specific published holiday and short-session calendar.
+M1_EXIT_PRICE_DATA,READY_IF_CALENDAR_SUPPLIED,True,Observed-calendar diagnostic resolved exact entry and forced-exit M1 timestamps for all 641 candidates.,Admissible pre-known calendar only.
+TICK_ARRIVAL_TIMING_SUBBAR_PATH,MISSING_EXTERNAL_DATA,False,Files contain bar OHLC and aggregate tick_volume not individual tick timestamps or sequence.,Tick timestamp bid ask or mid for each tick.
+BID_ASK_SPREAD_PATH,PARTIAL_NOT_DIRECTIONAL,False,One spread value per bar exists; no intra-bar bid/ask path or max mean end spread.,Tick or second-level bid ask and spread series.
+EXTERNAL_DXY_US_RATES_GC,MISSING_EXTERNAL_DATA,False,No synchronized external-market files are present.,Timestamped DXY US2Y US10Y and COMEX GC with availability-time contract.
+PREKNOWN_MACRO_CALENDAR,MISSING_EXTERNAL_DATA,False,No scheduled macro-event calendar or publication metadata is present.,Scheduled UTC time importance publication timestamp and revision history.
+MULTI_BROKER_ROBUSTNESS,SOURCE_IDENTITY_UNPROVEN,False,M5 M15 H1 H4 D1 overlaps are exactly identical and M1 has no overlap.,Independent broker/server dataset with symbol and timezone mapping.
