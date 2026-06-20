@@ -1,0 +1,36 @@
+{
+  "status": "GOLD_V3_262_PREKNOWN_CALENDAR_AND_NEW_DATA_REQUIRED_BLOCKED_AUDIT_ONLY",
+  "audit_only": true,
+  "live_ready": false,
+  "stage262a": {
+    "exit_state_machine_synthetic_tests_passed": 5,
+    "preknown_broker_calendar_present": false,
+    "only_calendar_file": "stage260_e2_mt5_session_calendar_observed.csv",
+    "observed_calendar_admissible": false,
+    "observed_diagnostic_candidates": 641,
+    "observed_diagnostic_resolved": 641,
+    "observed_diagnostic_exact_m1_coverage": 1.0,
+    "formal_status": "PREKNOWN_BROKER_CALENDAR_BLOCKED"
+  },
+  "observed_posthoc_diagnostic": {
+    "p1_expectancy": -0.6427145085803375,
+    "p1_pf": 0.893300665867247,
+    "p2_expectancy": -0.6856721915285379,
+    "p2_pf": 0.8881670045806124,
+    "p4_expectancy": 0.2697120418848173,
+    "p4_pf": 1.0445616068648145,
+    "p4_2026_expectancy": -1.1549411764705784,
+    "p4_2026_pf": 0.8529530714039644,
+    "promotion_allowed": false
+  },
+  "stage262b": {
+    "tick_arrival_timing": "MISSING_EXTERNAL_DATA",
+    "bid_ask_spread_path": "PARTIAL_NOT_DIRECTIONAL",
+    "external_dxy_rates_gc": "MISSING_EXTERNAL_DATA",
+    "preknown_macro_calendar": "MISSING_EXTERNAL_DATA",
+    "multi_broker_robustness": "SOURCE_IDENTITY_UNPROVEN",
+    "formal_status": "NEW_INFORMATION_REQUIRED"
+  },
+  "verdict": "PREKNOWN_CALENDAR_AND_NEW_DATA_REQUIRED_BLOCKED",
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
