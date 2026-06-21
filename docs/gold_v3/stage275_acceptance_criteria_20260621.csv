@@ -1,0 +1,11 @@
+criterion,pass
+prefix_feature_parity_256,True
+prefix_numeric_max_diff_zero,True
+model_score_chunk_parity,True
+model_score_one_row_sample_parity,True
+candidate_parity_81_cells,True
+fixed_cells_evaluated,True
+future_labels_excluded_from_features,True
+selection_uses_2024_only,True
+2025_2026_not_used_for_selection,True
+live_promotion,False
