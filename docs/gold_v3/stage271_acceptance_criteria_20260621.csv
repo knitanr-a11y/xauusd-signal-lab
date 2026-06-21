@@ -1,0 +1,10 @@
+criterion,value,pass
+outcome_decomposition_generated,30,True
+numeric_diagnostics_generated,384,True
+categorical_diagnostics_generated,260,True
+pairwise_diagnostics_generated,116,True
+model_benchmark_generated,16,True
+matched_diagnostics_generated,26,True
+forbidden_model_features_present,0,True
+stable_entry_known_cause_features,0,True
+regression_tests,4/4 PASS,True
