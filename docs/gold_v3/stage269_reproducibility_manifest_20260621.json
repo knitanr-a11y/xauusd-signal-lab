@@ -1,0 +1,19 @@
+{
+  "status": "GOLD_V3_269_2026_APPLICABLE_REGIMES_FOUND_NO_STRICT_SHORT_ENTRY_LEAD_AUDIT_ONLY",
+  "definition_commit": "6d1da1de589f7221da5c8ac97ed56733b4714223",
+  "source_direction_addendum_commit": "3dc256fbd9e4f5a7b2f7884ce412c23814981643",
+  "formal_audit_commit": "48dbe5f0ac0cd1ebcb0ed220f8a854e3e3cf4241",
+  "runner_artifact": "stage269_entry_resolution.py",
+  "runner_sha256": "a5196fc026c242dc78e8b77db1aef73aab350be0187893cf6d9f593b38dd1374",
+  "test_artifact": "test_stage269_entry_resolution.py",
+  "test_sha256": "cb93754ff3e4b7aabd73eedafce9c339eea97ced8daf247e7822d04702dd89f6",
+  "formal_report_sha256": "7d5b08edc15e0583a342a6238ffc25d917f0f7bd186d38700eaeb2220839518d",
+  "final_summary_sha256": "24007b64cb90fae39a72740ed20babbc41881b5b35b3cde7c89c8393d0743086",
+  "regression_tests": "4/4 PASS",
+  "trigger_before_activation_violations": 0,
+  "entry_before_trigger_violations": 0,
+  "strict_entry_resolution_leads": 0,
+  "near_leads": 1,
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
