@@ -1,0 +1,39 @@
+{
+  "status": "GOLD_V3_274_NO_STRONG_MULTI_PERIOD_RESEARCH_LEAD_AUDIT_ONLY",
+  "all_candidates": 618,
+  "independent_candidates": 328,
+  "suppressed_candidates": 290,
+  "family_selection": [
+    {
+      "family": "A",
+      "status": "INSUFFICIENT_SAMPLE",
+      "selected_variant": "",
+      "selected_tp_r": null,
+      "discovery_cells": 6,
+      "passing_cells": 0,
+      "max_discovery_n": 11
+    },
+    {
+      "family": "B",
+      "status": "NO_DISCOVERY_LEAD",
+      "selected_variant": "",
+      "selected_tp_r": null,
+      "discovery_cells": 6,
+      "passing_cells": 0,
+      "max_discovery_n": 106
+    }
+  ],
+  "discovery_cells": 12,
+  "passing_discovery_cells": 0,
+  "formal_conclusion": [
+    "Family A was sample-insufficient under the pre-registered trend/sweep definition.",
+    "Family B had adequate counts but all discovery cells failed cost, PF and median criteria.",
+    "No cell was promoted to 2025 confirmation or 2026 final selection.",
+    "Positive-looking 2026 cells were not selected post hoc."
+  ],
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY",
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "next_stage": "GOLD_V3_275_OUTCOME_FIRST_OPPORTUNITY_MAP_AUDIT_ONLY"
+}
