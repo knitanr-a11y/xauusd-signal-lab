@@ -1,0 +1,11 @@
+criterion,value,pass
+all_candidate_ledger_generated,618,True
+independent_candidate_ledger_generated,328,True
+suppressed_candidate_ledger_generated,290,True
+fixed_cells_evaluated,12,True
+discovery_period_is_2023_2024,True,True
+confirmation_period_is_2025,True,True
+final_period_is_2026,True,True
+same_bar_sl_priority,True,True
+source_crossing,0,True
+live_promotion,False,True
