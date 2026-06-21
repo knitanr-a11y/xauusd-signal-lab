@@ -1,0 +1,10 @@
+criterion,value,pass
+numeric_drift_generated,78,True
+categorical_drift_generated,180,True
+matched_calendar_window_generated,True,True
+regime_monthly_generated,68,True
+regime_rolling_generated,48,True
+latest30_latest60_status_generated,3,True
+source_identity_preserved,True,True
+legacy_status_unchanged,REFERENCE_ONLY_NOT_VALIDATED,True
+regression_tests,4/4 PASS,True
