@@ -1,0 +1,46 @@
+{
+  "status": "GOLD_V3_273_R2_EXTERNAL_2023_2024_BASE_REJECTED_AUDIT_ONLY",
+  "tick_history": {
+    "2023_rows": 0,
+    "2024_rows": 0,
+    "2025_rows": 0,
+    "2026_rows": 10146463,
+    "2026_first_tick": "2026-05-13 01:00:02.024",
+    "full_2026_tick_upload_required": false
+  },
+  "parity_2025": {
+    "old_candidates": 193,
+    "new_candidates": 193,
+    "matched": 193,
+    "activation_exact": 193,
+    "direction_exact": 193,
+    "atr_max_abs_diff": 3.552713678800501e-15
+  },
+  "external_candidates": {
+    "total": 182,
+    "2023": 74,
+    "2024": 108,
+    "long": 92,
+    "short": 90
+  },
+  "fixed48": {
+    "mean_gross_atr": 0.11331721471161275,
+    "median_gross_atr": -0.39602540426947863,
+    "cost2_expectancy_usd": -1.34906593406594,
+    "pf_cost2": 0.9061246649767344,
+    "external_pass": false
+  },
+  "fixed72": {
+    "mean_gross_atr": 0.08716087098977511,
+    "median_gross_atr": -0.18793960260672213,
+    "cost2_expectancy_usd": -1.4375824175824143,
+    "pf_cost2": 0.9211176903317617,
+    "external_pass": false
+  },
+  "formal_classification": "RECENT_REGIME_DEPENDENT_PATH_EDGE_NOT_GENERALIZABLE",
+  "full_exit_grid_run": false,
+  "full_exit_grid_skip_reason": "External 48h and 72h base edge rejected; no external-period rescue optimization.",
+  "regression_tests": "4/4 PASS",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
