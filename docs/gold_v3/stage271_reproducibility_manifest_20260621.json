@@ -1,0 +1,22 @@
+{
+  "status": "GOLD_V3_271_NO_STABLE_DIRECTION_GATE_R2_RECENT_ASSOCIATION_R3_LONG_INSUFFICIENT_AUDIT_ONLY",
+  "definition_commit": "fbfd58fbd2442413ddcef220065049c75b7a392d",
+  "formal_audit_commit": "d9e6be2d19ab8773ec4e18aa6571f8483ff31737",
+  "runner_artifact": "stage271_direction_stability.py",
+  "runner_sha256": "0323e21687f2b7be352cc6b998ef8dc60405b575797bf7147a022ea5e9d03ff8",
+  "test_artifact": "test_stage271_direction_stability.py",
+  "test_sha256": "c76ecb43b1b6f4f5c248082a8a456f95341a84977ac40508be700e4a88fc1afe",
+  "formal_report_sha256": "fe75b3aa7cf97f89cfc608fa98849d3102e12329a2aa17ed7f06e9551baa8663",
+  "final_summary_sha256": "13912bee33cf264b0c81c0694983f6fc076ac8d01e81fc6f73bcfa2009978c58",
+  "key_results_sha256": "8c6b5eba60ec5c3b452c2bd0ad9f37578f538d06799525184dbd8cbc2e7bff54",
+  "cause_classification_sha256": "7f827881d2450ff9a301a33818fb5223219744b3a390fca2a978a10fdb42b7e4",
+  "model_benchmark_sha256": "f30898c6da31d8730dfa04a4c5ba72d3611eb20a2f0947a071f2f1b98f28243b",
+  "stable_feature_audit_sha256": "56b34cebce09c3b790737d6cda1a601b98b362a3db584c13e7ade4b6ecc9b0a2",
+  "matched_loss_summary_sha256": "ae75fb7b01204eb0aaf2b644c832232ef6963e8eb9ab903392a5bf208cc3a45f",
+  "acceptance_criteria_sha256": "824fae9712292b0a2e8734c82aecd247c3439fd6a45b997d98689caa3d1d6c5e",
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "stable_entry_known_cause_features": 0,
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
