@@ -1,0 +1,15 @@
+{
+  "status": "GOLD_V3_272_R2_BASE_48_72H_ROBUST_NO_EXIT_MANAGEMENT_LEAD_AUDIT_ONLY",
+  "definition_commit": "30050a3d34c6b844e5622d6ec000af58b6b2a81f",
+  "robustness_addendum_commit": "0445d43b9341cc1399664d93231695e8e0da42e3",
+  "formal_audit_commit": "cef49f98356746ca8f24d526721d2715b59ee44b",
+  "sample_n": 300,
+  "exit_specs": 22,
+  "strict_leads": 0,
+  "robust_base_horizons": ["FIXED_48H", "FIXED_72H"],
+  "regression_tests": "4/4 PASS",
+  "acceptance": "ALL PASS",
+  "runner_sha256": "a4f9deb3b4f11bd6b5aabc92c0148c32871917baf7deec9d2bb05d6d81ba2b6c",
+  "test_sha256": "c3a9867a505a437090197a1617e74b0b901f15e9e8c8072d7033c714b134d911",
+  "live_ready": false
+}
