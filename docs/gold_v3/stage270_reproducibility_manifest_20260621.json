@@ -1,0 +1,20 @@
+{
+  "status": "GOLD_V3_270_2025_2026_REGIME_DIFFERENCE_AND_RECENCY_DECAY_COMPLETE_AUDIT_ONLY",
+  "definition_commit": "68c0d5f0ff3ffb8329b7da33d121d546c6724e5a",
+  "seasonal_addendum_commit": "8a54b9345401599615cfd3843f751f94562f5da5",
+  "formal_audit_commit": "7ee5ab66e795cbedfbcb38f5169082386d03811b",
+  "runner_artifact": "stage270_regime_decay.py",
+  "runner_sha256": "5d7c5f942d59d6054239d3e3683b27937a794621d4d90ea848adb5251c2ee48e",
+  "test_artifact": "test_stage270_regime_decay.py",
+  "test_sha256": "202e22188a71a35a4d50b1d1c945fa01afc311d662b2b766c6fc31f879c26f04",
+  "formal_report_sha256": "9840b13d5f80ea3dce03d5178004f80c796fcbc6a24a407a3161441740c2e8fe",
+  "final_summary_sha256": "2381ca2ed9744b8b8ff8a0b352abae20a76bc76644da7e036bc7a5df04ede881",
+  "key_results_sha256": "52bb1452378ab475365f7e8b6e462f5ff22900daf63d792d4cd52044d4cbae91",
+  "regime_recency_sha256": "f5d0e0c675db3ac11a2c18395544cc20989999bc07337b0e43df802f2268e845",
+  "numeric_drift_sha256": "0a506929d092a1e852a6b0b1e33744340e47ba9f26d3e97b3a0904ddacc95198",
+  "categorical_drift_sha256": "5c2331c9ac24431e30d6d49dff72ce487e0423926eab9c7553deac0cb155e7af",
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
