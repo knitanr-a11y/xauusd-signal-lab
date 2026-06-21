@@ -1,0 +1,11 @@
+issue,evidence,severity,implication
+LIVE_FEATURE_PARITY_PASS,256/256 prefix checkpoints; 96 numeric features max diff 0.0,POSITIVE,Feature engine is live-causal and prefix invariant.
+LIVE_SCORE_PARITY_PASS,All potential candidate rows chunk replay diff 0; 1000 one-row checks per model <=3.33e-16,POSITIVE,Model scoring can be reproduced live.
+CANDIDATE_REPLAY_PARITY_PASS,81/81 cells exact candidate time/direction/cooldown parity,POSITIVE,Candidate engine is not the source of failure.
+NONLINEAR_MODEL_OVERFIT,HGB_GLOBAL direction AUC 0.878 in 2023 -> 0.538 in 2024; HGB_ROUTED 0.962 -> 0.511,CRITICAL,2023 nonlinear relationships did not persist into discovery validation.
+QUALITY_MODEL_NO_OOS_EDGE,"2024 FF1 AUC: LR 0.533, HGB 0.516, routed 0.503",CRITICAL,Entry-known features barely rank clean +1ATR-before--1ATR paths.
+ALL_FIXED_CELLS_COST_NEGATIVE,Best 2024 cost2 expectancy -1.345 USD; best PF 0.512 among top candidates,CRITICAL,No executable discovery cell survives transaction cost.
+TYPICAL_TRADE_IS_LOSS,Top cells median gross R = -1.0,HIGH,"Positive gross means are produced by minority TP hits, not a robust median path."
+DIRECTION_CONCENTRATION,Best LR cell 250 LONG / 38 SHORT,HIGH,Linear score largely selected one direction and failed direction balance.
+NEAR_LEADS_DO_NOT_RECOVER,Top ten cells remain cost-negative in 2025; mostly negative in 2026,HIGH,No missed multi-period lead near the fixed threshold boundary.
+REGIME_RELATION_DECAYS,Regime 3 LONG positive in 2023-2025 but 2026 mean return negative; no both-direction stable cluster,HIGH,Router alone does not create a stable signal.
