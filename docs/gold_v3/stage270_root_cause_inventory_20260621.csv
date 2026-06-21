@@ -1,0 +1,9 @@
+issue,evidence,severity,implication
+2025_MATCHED_UNIDIRECTIONAL_D1,"D1 long share 97.38%, short 0.00%",CRITICAL,2025 trend results were dominated by one-way bull regime
+2026_DIRECTIONAL_REVERSAL,"D1 long 44.24%, short 45.98%, range 9.78%",CRITICAL,2026 requires direction-robust evaluation and exposes long/short asymmetry
+HIGHER_BASE_VOLATILITY_2026,"H1 ATR/price 0.301% -> 0.469%; H4 0.616% -> 0.951%",HIGH,absolute stop/target and path speed differ materially
+MORE_COMPRESSION_AND_RANGE_2026,"H4 compression 9.45% -> 17.60%; H4 range 14.62% -> 17.90%",HIGH,more stop-start movement and delayed/false continuation
+WEAKER_TREND_PERSISTENCE_2026,"D1 slope 0.404ATR -> 0.008ATR; H4 all-aligned 70.01% -> 50.89%",CRITICAL,R1 loses symmetric trend persistence
+RECENT_SHORT_DOMINANCE,"R1 latest60 SHORT mean +5.17ATR vs LONG -4.49ATR",CRITICAL,overall positive result hides current direction collapse
+R2_RELATIVE_RESILIENCE,"R2 latest90 both directions positive; 2026 median +0.861ATR at 48h",POSITIVE,local high-vol momentum is less dependent on D1 persistence
+R3_RECENT_DIRECTION_SKEW,"R3 latest60 SHORT +0.81ATR vs LONG -0.21ATR",HIGH,range/indecision edge is currently short-heavy
