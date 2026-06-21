@@ -1,0 +1,3 @@
+family,status,selected_variant,selected_tp_r,discovery_cells,passing_cells,max_discovery_n
+A,INSUFFICIENT_SAMPLE,NOT_SELECTED,NOT_SELECTED,6,0,11
+B,NO_DISCOVERY_LEAD,NOT_SELECTED,NOT_SELECTED,6,0,106
