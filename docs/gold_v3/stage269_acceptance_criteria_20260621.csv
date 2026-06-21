@@ -1,0 +1,11 @@
+criterion,value,pass
+2026_R1_provisional_applicable,True,True
+2026_R2_48h_provisional_applicable,True,True
+2026_R2_72h_provisional_applicable,True,True
+2026_R3_provisional_applicable,True,True
+trigger_before_activation_violations,0,True
+entry_before_trigger_violations,0,True
+source_crossing_violations,0,True
+regression_tests,4/4 PASS,True
+strict_entry_resolution_leads,0,False
+near_leads_source_direction_unstable,1,True
