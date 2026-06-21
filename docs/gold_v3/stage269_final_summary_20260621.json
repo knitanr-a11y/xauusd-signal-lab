@@ -1,0 +1,21 @@
+{
+  "status": "GOLD_V3_269_2026_APPLICABLE_REGIMES_FOUND_NO_STRICT_SHORT_ENTRY_LEAD_AUDIT_ONLY",
+  "2026_regimes_provisionally_applicable": 4,
+  "strict_entry_resolution_leads": 0,
+  "near_leads": 1,
+  "near_lead": "R3_H1_INDECISION_RANGE__M15_T3_FALSE_BREAK_RECLAIM",
+  "near_lead_stats": {
+    "n": 178,
+    "coverage": 0.770563,
+    "positive_rate": 0.589888,
+    "median_return_atr": 0.321428,
+    "median_paired_return_improvement_atr": 0.118506,
+    "median_mae_improvement_atr": 0.231082,
+    "2026_long_mean": 0.461405,
+    "2026_short_mean": -0.054096
+  },
+  "m5_entry_timing_leads": 0,
+  "regression_tests": "4/4 PASS",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
