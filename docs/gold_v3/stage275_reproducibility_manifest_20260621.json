@@ -1,0 +1,16 @@
+{
+  "status": "GOLD_V3_275_NO_DISCOVERY_LEAD_LIVE_REPRODUCIBLE_AUDIT_ONLY",
+  "definition_commit": "99b3ff4cdd524b2245f372a107c486059a426252",
+  "formal_report_commit": "08a87d50821b7b71599de33df95c1705d4acf682",
+  "regression_tests": "4/4 PASS",
+  "prefix_parity": "256/256 PASS",
+  "model_score_parity": "PASS",
+  "candidate_parity": "81/81 PASS",
+  "discovery_leads": 0,
+  "live_ready": false,
+  "runner_sha256": "83e568a4e6ca44ebc99658465b5392980db4ad76ad3e8bb125f58cd7eeb5226c",
+  "core_sha256": "4c506a87845f16a93fb5b7cbb3a5422c35034e952e193d85cbf2aff2ddfc63c0",
+  "test_sha256": "270c00b9bcde87b23fc688091145e74f466dc80461bc573108b987320cab57a7",
+  "report_sha256": "1ccd909a7576682c374bdd80f0466b1b2a8062de265485ec73cf2e294310a039",
+  "final_summary_sha256": "243732139586175b8486f442253df1bf8dea469381e32ab44a4c19f6c8ca706f"
+}
