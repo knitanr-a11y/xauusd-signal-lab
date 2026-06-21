@@ -1,0 +1,12 @@
+criterion,value,pass
+common_complete_sample,300,True
+all_specs_same_n,300,True
+source_crossing_violations,0,True
+entry_before_decision_violations,0,True
+latest60_sample,34,True
+current_robustness_table_generated,22,True
+latest60_direction_metrics_generated,True,True
+strict_current_leads,0,True
+baseline_fixed48_current_robust,True,True
+baseline_fixed72_current_robust,True,True
+regression_tests,4/4 PASS,True
