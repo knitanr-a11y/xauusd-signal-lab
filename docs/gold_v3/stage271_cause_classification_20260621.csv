@@ -1,0 +1,5 @@
+regime,direction,latest60_n,best_test_auc,stable_feature_count,recent_large_effect_feature_count,cause_classification,reason,top_recent_features
+R2,LONG,16,0.7936507936507937,0,24,RECENT_REGIME_ASSOCIATION_ONLY,recent separation exists but not stable; best AUC=0.794,h4_atr_ratio|d1_ema_spread_abs_atr|d1_macd_aligned|d1_macd_hist_atr|h1_atr14|h4_ema_spread_abs_atr|d1_ema_slope3_atr|d1_slope_aligned
+R2,SHORT,18,0.5277777777777779,0,23,PATH_TIMING_SHIFT_NOT_ENTRY_SEPARABLE,entry-known model AUC=0.528,h4_ema_spread_abs_atr|d1_macd_hist_atr|d1_macd_aligned|d1_ema_slope3_atr|d1_slope_aligned|d1_ema_spread_abs_atr|h4_atr_ratio|d1_rsi14
+R3,LONG,6,,0,0,INSUFFICIENT_SAMPLE,latest60 LONG n=6<15,
+R3,SHORT,27,0.6071428571428572,0,11,RECENT_REGIME_ASSOCIATION_ONLY,recent separation exists but not stable; best AUC=0.607,h1_range_atr|h1_macd_aligned|h1_macd_hist_atr|h1_range_pos20|h1_rsi14|h1_rsi_center_aligned|h1_slope_aligned|h1_ema_slope3_atr
