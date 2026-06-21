@@ -1,0 +1,55 @@
+{
+  "status": "GOLD_V3_271_NO_STABLE_DIRECTION_GATE_R2_RECENT_ASSOCIATION_R3_LONG_INSUFFICIENT_AUDIT_ONLY",
+  "data_end": "2026-06-19 19:00:00",
+  "latest60_start": "2026-04-20 19:00:00",
+  "stable_entry_known_cause_features": 0,
+  "cause_classification": [
+    {
+      "regime": "R2",
+      "direction": "LONG",
+      "latest60_n": 16,
+      "best_test_auc": 0.7936507936507937,
+      "stable_feature_count": 0,
+      "cause_classification": "RECENT_REGIME_ASSOCIATION_ONLY"
+    },
+    {
+      "regime": "R2",
+      "direction": "SHORT",
+      "latest60_n": 18,
+      "best_test_auc": 0.5277777777777779,
+      "stable_feature_count": 0,
+      "cause_classification": "PATH_TIMING_SHIFT_NOT_ENTRY_SEPARABLE"
+    },
+    {
+      "regime": "R3",
+      "direction": "LONG",
+      "latest60_n": 6,
+      "best_test_auc": null,
+      "stable_feature_count": 0,
+      "cause_classification": "INSUFFICIENT_SAMPLE"
+    },
+    {
+      "regime": "R3",
+      "direction": "SHORT",
+      "latest60_n": 27,
+      "best_test_auc": 0.6071428571428572,
+      "stable_feature_count": 0,
+      "cause_classification": "RECENT_REGIME_ASSOCIATION_ONLY"
+    }
+  ],
+  "matched_control_summary": {
+    "R2_LONG_recent_loss_vs_matched_gap": -3.2469856882914665,
+    "R2_SHORT_recent_loss_vs_matched_gap": -4.448532941840578,
+    "R3_LONG_recent_loss_vs_matched_gap": -2.4368720172860012
+  },
+  "formal_decision": {
+    "R2": "maintain research regime; no quality gate; prioritize exit/horizon diagnostic",
+    "R3": "monitor only; recent LONG sample insufficient and current direction skew not stable historically",
+    "R1": "research-only unchanged"
+  },
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "next_stage": "GOLD_V3_272_R2_EXIT_HORIZON_AND_PATH_MANAGEMENT_AUDIT_ONLY",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
