@@ -1,0 +1,7 @@
+issue,evidence,severity,implication
+NO_STABLE_ENTRY_KNOWN_CAUSE,"Across R2/R3 LONG/SHORT, zero feature met same-sign SMD>=0.35 in 2025, 2026 pre-recent and latest60 plus model consensus",CRITICAL,Do not create a fixed quality gate
+R2_LONG_RECENT_ASSOCIATION,"Latest60 expansion/all-aligned candidates were better, but effects were not stable historically; best model AUC 0.794",HIGH,Monitor only; no gate
+R2_SHORT_PATH_TIMING_SHIFT,Latest60 delayed share 44.44%; entry-known best AUC 0.528,HIGH,Prioritize exit/horizon research
+R3_LONG_SAMPLE_AND_REGIME_SKEW,"Latest60 LONG n=6, all opposed to D1 downtrend; matched historical controls +1.462ATR versus recent losses -0.975ATR",CRITICAL,Insufficient sample; no conclusion/filter
+R3_SHORT_CURRENT_DOWNTREND_DEPENDENCE,"Latest60 SHORT n=27, positive 74.07%; all aligned with current D1 decline, but historical alignment effect was inconsistent",HIGH,Do not promote SHORT only
+MATCHED_OUTCOME_MAPPING_SHIFT,R2 recent losses under similar historical entry-known context underperformed matched controls by 3.25-4.45ATR,CRITICAL,Current regime mapping changed; static entry shape is not enough
