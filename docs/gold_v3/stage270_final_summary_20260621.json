@@ -1,0 +1,63 @@
+{
+  "status": "GOLD_V3_270_2025_2026_REGIME_DIFFERENCE_AND_RECENCY_DECAY_COMPLETE_AUDIT_ONLY",
+  "data_end": "2026-06-19 19:00:00",
+  "matched_window": {
+    "2025": "2025-01-13 to 2025-06-19",
+    "2026": "2026-01-13 to 2026-06-19"
+  },
+  "market_shift": {
+    "H1_price_change_pct_2025": 25.229935673753335,
+    "H1_price_change_pct_2026": -9.321965402519549,
+    "H1_atr_pct_price_2025": 0.3013340768860217,
+    "H1_atr_pct_price_2026": 0.46897682791093853,
+    "H4_atr_pct_price_2025": 0.6159617297677455,
+    "H4_atr_pct_price_2026": 0.9514516548463593,
+    "H4_compression_share_2025": 0.09453471196454949,
+    "H4_compression_share_2026": 0.1760355029585799,
+    "H4_strong_trend_share_2025": 0.5317577548005908,
+    "H4_strong_trend_share_2026": 0.4156804733727811,
+    "D1_long_share_2025": 0.9737553068313393,
+    "D1_short_share_2025": 0.0,
+    "D1_long_share_2026": 0.4423820572312452,
+    "D1_short_share_2026": 0.45978344934261406,
+    "H1_all_aligned_share_2025": 0.466615206483983,
+    "H1_all_aligned_share_2026": 0.3252126836813612
+  },
+  "recency_status": {
+    "R1_H1_WEAK_TREND_LOW_VOL": {
+      "status": "CURRENTLY_UNSTABLE",
+      "mean_latest60": 2.504158435826839,
+      "median_latest60": 2.1496155586471506,
+      "mean_long_latest60": -4.4881337919570505,
+      "mean_short_latest60": 5.16788880831594,
+      "mean_latest30": -0.4343952793197898,
+      "median_latest30": 0.19900329696578314
+    },
+    "R2_H1_UTC08_11_HIGH_VOL_48H": {
+      "status": "CURRENTLY_MAINTAINED_WITH_DIRECTION_DIVERGENCE_WARNING",
+      "mean_latest60": 1.086072839687433,
+      "median_latest60": 0.5667391271076359,
+      "mean_long_latest60": 1.1327932357397792,
+      "mean_short_latest60": 1.0445435987520144,
+      "mean_latest30": 1.7760950175495716,
+      "median_latest30": 4.876521036555172
+    },
+    "R3_H1_INDECISION_RANGE": {
+      "status": "WEAKENED_BUT_POSITIVE",
+      "mean_latest60": 0.6238904433257161,
+      "median_latest60": 0.747779536130116,
+      "mean_long_latest60": -0.21495517166975653,
+      "mean_short_latest60": 0.8103005799913767,
+      "mean_latest30": 0.2978966176925765,
+      "median_latest30": 0.17962431025275238
+    }
+  },
+  "formal_conclusion": {
+    "R1": "research-only; symmetric trend regime currently unstable",
+    "R2": "primary maintained research regime, not live validated",
+    "R3": "secondary weakened-positive regime with recent short skew"
+  },
+  "regression_tests": "4/4 PASS",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
