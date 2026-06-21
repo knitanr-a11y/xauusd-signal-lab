@@ -1,0 +1,38 @@
+{
+  "status": "GOLD_V3_272_R2_BASE_48_72H_ROBUST_NO_EXIT_MANAGEMENT_LEAD_AUDIT_ONLY",
+  "sample_n": 300,
+  "latest60_n": 34,
+  "exit_specs": 22,
+  "strict_exit_management_leads": [],
+  "base_horizon_status": {
+    "FIXED_24H": "BASE_HORIZON_CURRENTLY_WEAK",
+    "FIXED_48H": "BASE_HORIZON_CURRENTLY_ROBUST",
+    "FIXED_72H": "BASE_HORIZON_CURRENTLY_ROBUST"
+  },
+  "fixed48_latest60": {
+    "mean_gross_atr": 1.0860728396874328,
+    "median_gross_atr": 0.5667391271076359,
+    "cost2_expectancy_atr": 0.9983236237084836,
+    "pf_cost2": 1.8032861348171332,
+    "long_cost2_expectancy_atr": 1.0458030411327583,
+    "short_cost2_expectancy_atr": 0.9561196971091286
+  },
+  "fixed72_latest60": {
+    "mean_gross_atr": 1.0129902758577014,
+    "median_gross_atr": 0.7160783236341662,
+    "cost2_expectancy_atr": 0.9252410598787515,
+    "pf_cost2": 1.5699828780250988,
+    "long_cost2_expectancy_atr": 1.3173413269906011,
+    "short_cost2_expectancy_atr": 0.5767074891126636
+  },
+  "formal_conclusion": [
+    "R2 base path remains positive at 48h and 72h in 2025, 2026 and latest60 for both directions.",
+    "No pre-registered stop, breakeven, trail, partial or H1 structure exit improved R2 while preserving latest60 LONG and SHORT robustness.",
+    "Stops protect early failures but destroy delayed SHORT recoveries; longer holds improve persistent/delayed but worsen fades.",
+    "R2 is a path edge, not yet a complete trade strategy."
+  ],
+  "regression_tests": "4/4 PASS",
+  "acceptance_criteria": "ALL PASS",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
