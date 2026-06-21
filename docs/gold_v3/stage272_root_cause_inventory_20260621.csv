@@ -1,0 +1,9 @@
+issue,evidence,severity,implication
+BASE_PATH_EDGE_REMAINS,"FIXED48 and FIXED72 latest60 LONG/SHORT cost2 expectancy ATR all positive",POSITIVE,R2 48-72h distribution remains worth preserving
+TAIL_RISK_UNRESOLVED,"FIXED48 q10 -6.62ATR worst -19.45ATR; FIXED72 q10 -8.00ATR worst -16.94ATR",CRITICAL,Base horizon is not directly tradable without risk management
+STOP_DESTROYS_DELAYED_SHORT,"Latest60 SL1.5/2.0 SHORT cost2 expectancy approximately -1.3 to -1.56ATR",CRITICAL,Conventional fixed stops cut current delayed recovery path
+BREAKEVEN_DESTROYS_CURRENT_SHORT,"Latest60 breakeven SHORT cost2 expectancy -1.17ATR",CRITICAL,Moving to breakeven after +1ATR is not direction robust
+STRUCTURE_EXIT_PATH_CONFLICT,"3-bar structure exit improves Fade/Early-fail but changes Delayed from +4.11ATR to -0.56ATR",HIGH,Single structure exit cannot handle all R2 path classes
+LONGER_HORIZON_TRADEOFF,"72h improves Persistent/Delayed but worsens Fade from -2.75ATR to -4.15ATR",HIGH,Horizon choice is path-class dependent
+NO_STRICT_MANAGEMENT_LEAD,"0 of 22 rules passed latest60 LONG/SHORT robustness addendum",CRITICAL,Do not promote an exit rule on current data
+MONTHLY_INSTABILITY,"FIXED48 cost2 positive in 11/18 months; FIXED72 in 10/18",HIGH,Path edge remains uneven across months
