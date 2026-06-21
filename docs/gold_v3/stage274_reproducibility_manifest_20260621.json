@@ -1,0 +1,14 @@
+{
+  "status": "GOLD_V3_274_NO_STRONG_MULTI_PERIOD_RESEARCH_LEAD_AUDIT_ONLY",
+  "definition_commit": "f39bc49af141650ea1ca6db9a4a8ed3b47c80927",
+  "independent_stream_addendum_commit": "4e39ee11907a68d104f786199d516cc690951f27",
+  "regression_tests": "4/4 PASS",
+  "acceptance": "ALL PASS",
+  "passing_cells": 0,
+  "live_ready": false,
+  "runner_sha256": "5b56993e2b42e2daf3df8245fc6936750d1260bce2d411a28b0c57d6de5c8406",
+  "tests_sha256": "cc6848577a90869484bec42e6c517bbc9f3ee2b403ea4b607b1a61c296480a33",
+  "report_sha256": "633522e2415d8245bdb930603bc08e7842b3c199ac1f982352726547ed45dee9",
+  "grid_sha256": "cf2debb97b4de259981b702f1e1df5ebb58bd5a9e04ea23d563d4e9bde47dbca",
+  "final_sha256": "7f86ec337c9c1c0e8ed89a56399bebbd6ee7a177d164e6873d4fbf4984c4e2a6"
+}
