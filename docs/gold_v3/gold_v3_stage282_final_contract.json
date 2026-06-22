@@ -1,0 +1,55 @@
+{
+  "status": "GOLD_V3_282_DD_CAUSE_CONFIRMED_RISK_NORMALIZATION_SHADOW_ONLY_AUDIT_ONLY",
+  "preserved": {
+    "stage280_candidate": "UNCHANGED_SHADOW_RESEARCH_ONLY",
+    "stage281_candidate": "UNCHANGED_SHADOW_NEAR_MISS_ONLY",
+    "base_459": "UNCHANGED_SHADOW"
+  },
+  "confirmed_causes": {
+    "primary": "ATR-scaled stop distance was evaluated at fixed 1 oz exposure; absolute H1 ATR and full-stop USD loss increased sharply by 2026.",
+    "secondary": "Five Stage281 entries were linked to the same resolved base-loss episode during 2026-03-11 through 2026-03-12.",
+    "not_primary": [
+      "H4/D1 direction conflict",
+      "entry spread abnormality",
+      "severe spread/gap/range proxy"
+    ]
+  },
+  "risk_normalized_observation": {
+    "candidate_dollar_dd": {
+      "2024": 26.99373148910854,
+      "2025": 33.53937262532518,
+      "2026": 58.868417759437946
+    },
+    "candidate_r_dd": {
+      "2024": 5.628087,
+      "2025": 5.788774,
+      "2026": 2.041728
+    },
+    "interpretation": "2026 had the largest dollar DD but the smallest R-normalized DD; two full ATR stops caused most of the dollar drawdown."
+  },
+  "diagnostic_risk_cap": {
+    "name": "STAGE281_FULL_SL_USD_CAP_7P5_SHADOW_DIAGNOSTIC",
+    "formula": "size_multiplier = min(1, 7.5 / (1.25*closed_H1_ATR14 + 0.60))",
+    "anchor": "7.5 USD is the rounded 2024 median full-stop loss of 7.4867 USD",
+    "entry_known": true,
+    "activation": "SHADOW_DIAGNOSTIC_ONLY",
+    "limitations": [
+      "tested after observing the 2026 dollar DD",
+      "true MT5 symbol contract and executable lot increments are not yet verified",
+      "linear scaling assumes trading friction scales approximately with position size"
+    ]
+  },
+  "concentration_guards": {
+    "decision": "NO_GUARD_PROMOTION",
+    "reason": "daily/anchor/loss-lockout guards reduced the 2026 cluster, but did not independently resolve the 2025 integrated DD contract as consistently as dollar-risk normalization."
+  },
+  "selected_active_addition": "NONE",
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
