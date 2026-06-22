@@ -6,8 +6,8 @@ import pandas as pd
 from pathlib import Path
 from gold_v3_289_feature_core import add_indicators,decision_times as _decision_times,load_gold,m1_arrays as _m1_arrays,merge_closed
 
-def build_stage281_context(candle_dir: Path, include_next: bool = True) -> pd.DataFrame:
-    raw = load_gold(candle_dir, tail_only=True)
+def build_stage281_context(candle_dir: Path, include_next: bool = True, tail_only: bool = True) -> pd.DataFrame:
+    raw = load_gold(candle_dir, tail_only=tail_only)
     m1 = raw["M1"]
     m5 = add_indicators(raw["M5"], [1, 3, 6, 12, 24])
     m15 = add_indicators(raw["M15"], [1, 2, 4, 8, 16])
@@ -49,13 +49,16 @@ def build_stage281_context(candle_dir: Path, include_next: bool = True) -> pd.Da
         rows.append(rec)
     return pd.concat([ctx.reset_index(drop=True), pd.DataFrame(rows)], axis=1)
 
+
 def stage281_model_frame(ctx: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     x = ctx.copy()
     base_features = [c for c in features if c in x.columns]
     out = x[base_features].copy()
     for c in base_features:
-        if any(k in c for k in ["ret", "dist_ema", "ema20_slope", "ema50_slope", "body_signed"]): out[c] = pd.to_numeric(out[c], errors="coerce")
-        elif "_pos" in c: out[c] = 2 * pd.to_numeric(out[c], errors="coerce") - 1
+        if any(k in c for k in ["ret", "dist_ema", "ema20_slope", "ema50_slope", "body_signed"]):
+            out[c] = pd.to_numeric(out[c], errors="coerce")
+        elif "_pos" in c:
+            out[c] = 2 * pd.to_numeric(out[c], errors="coerce") - 1
     out["countermove_30"] = -pd.to_numeric(out.get("m1_ret30", np.nan), errors="coerce")
     out["countermove_60"] = -pd.to_numeric(out.get("m1_ret60", np.nan), errors="coerce")
     out["countermove_120"] = -pd.to_numeric(out.get("m1_ret120", np.nan), errors="coerce")
