@@ -6,8 +6,8 @@ import pandas as pd
 from pathlib import Path
 from gold_v3_289_feature_core import add_indicators,decision_times as _decision_times,load_gold,m1_arrays as _m1_arrays,merge_closed
 
-def build_stage280_context(candle_dir: Path, include_next: bool = True) -> pd.DataFrame:
-    raw = load_gold(candle_dir, tail_only=True)
+def build_stage280_context(candle_dir: Path, include_next: bool = True, tail_only: bool = True) -> pd.DataFrame:
+    raw = load_gold(candle_dir, tail_only=tail_only)
     m1 = raw["M1"]
     m5 = add_indicators(raw["M5"], [1, 3, 6, 12, 24, 48])
     m15 = add_indicators(raw["M15"], [1, 2, 4, 8, 16])
@@ -68,21 +68,29 @@ def build_stage280_context(candle_dir: Path, include_next: bool = True) -> pd.Da
     ctx["d1_trend"] = np.where(pos, 1, np.where(neg, -1, 0)).astype("int8")
     return ctx
 
+
 def stage280_model_frame(ctx: pd.DataFrame, features: list[str]) -> pd.DataFrame:
     x = ctx.copy()
     raw = [c for c in ctx.columns if c not in {"time", "atr_prev", "h4_trend", "d1_trend"}]
     for c in raw:
-        if any(p in c for p in ["ret", "dist_ema", "ema20_slope", "ema50_slope", "body_signed"]): x[c] = pd.to_numeric(x[c], errors="coerce")
-        elif "_pos" in c: x[c] = 2 * pd.to_numeric(x[c], errors="coerce") - 1
-    def g(c: str): return pd.to_numeric(x.get(c, np.nan), errors="coerce")
-    x["countermove_60"]=-g("m1_ret60_atr"); x["countermove_120"]=-g("m1_ret120_atr")
-    x["turn_5"]=g("m1_ret5_atr"); x["turn_15"]=g("m1_ret15_atr"); x["turn_30"]=g("m1_ret30_atr")
-    x["turn_accel_5v30"]=g("m1_ret5_atr")-(g("m1_ret30_atr")-g("m1_ret5_atr"))/5
-    x["turn_accel_15v60"]=g("m1_ret15_atr")-(g("m1_ret60_atr")-g("m1_ret15_atr"))/3
-    x["m5_turn_accel"]=g("m5_ret3_atr")-(g("m5_ret12_atr")-g("m5_ret3_atr"))/3
-    x["m15_turn_accel"]=g("m15_ret1_atr")-(g("m15_ret4_atr")-g("m15_ret1_atr"))/3
-    x["m1_reject_wick"]=g("m1_lower_wick_ratio")-g("m1_upper_wick_ratio")
-    x["m5_reject_wick"]=g("m5_lower_wick_ratio")-g("m5_upper_wick_ratio")
-    x["m15_reject_wick"]=g("m15_lower_wick_ratio")-g("m15_upper_wick_ratio")
-    x["h4_align"]=x.h4_trend; x["d1_align"]=x.d1_trend
-    return x.reindex(columns=features).replace([np.inf,-np.inf],np.nan).fillna(0).astype("float32")
+        if any(p in c for p in ["ret", "dist_ema", "ema20_slope", "ema50_slope", "body_signed"]):
+            x[c] = pd.to_numeric(x[c], errors="coerce")
+        elif "_pos" in c:
+            x[c] = 2 * pd.to_numeric(x[c], errors="coerce") - 1
+    def g(c: str):
+        return pd.to_numeric(x.get(c, np.nan), errors="coerce")
+    x["countermove_60"] = -g("m1_ret60_atr")
+    x["countermove_120"] = -g("m1_ret120_atr")
+    x["turn_5"] = g("m1_ret5_atr")
+    x["turn_15"] = g("m1_ret15_atr")
+    x["turn_30"] = g("m1_ret30_atr")
+    x["turn_accel_5v30"] = g("m1_ret5_atr") - (g("m1_ret30_atr") - g("m1_ret5_atr")) / 5
+    x["turn_accel_15v60"] = g("m1_ret15_atr") - (g("m1_ret60_atr") - g("m1_ret15_atr")) / 3
+    x["m5_turn_accel"] = g("m5_ret3_atr") - (g("m5_ret12_atr") - g("m5_ret3_atr")) / 3
+    x["m15_turn_accel"] = g("m15_ret1_atr") - (g("m15_ret4_atr") - g("m15_ret1_atr")) / 3
+    x["m1_reject_wick"] = g("m1_lower_wick_ratio") - g("m1_upper_wick_ratio")
+    x["m5_reject_wick"] = g("m5_lower_wick_ratio") - g("m5_upper_wick_ratio")
+    x["m15_reject_wick"] = g("m15_lower_wick_ratio") - g("m15_upper_wick_ratio")
+    x["h4_align"] = x.h4_trend
+    x["d1_align"] = x.d1_trend
+    return x.reindex(columns=features).replace([np.inf, -np.inf], np.nan).fillna(0).astype("float32")
