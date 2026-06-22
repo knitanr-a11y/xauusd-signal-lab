@@ -1,0 +1,38 @@
+{
+  "status": "GOLD_V3_287_ACTUAL_ORDERED_MOCHIPOYO_B_BUY_STANDALONE_EDGE_NOT_CURRENT_INTEGRATION_READY_AUDIT_ONLY",
+  "candidate": {
+    "pair_name": "GOLD_H4_M15_DAYTRADE",
+    "candidate_rank": "B",
+    "direction": "BUY",
+    "actual_order_match": {
+      "signal_close_time": "2026-05-06 08:00:00",
+      "entry": 4648.77,
+      "sl": 4546.23,
+      "tp": 4771.818,
+      "rr": 1.2,
+      "match_status": "EXACT_REPRODUCTION_PASS"
+    }
+  },
+  "decision": {
+    "standalone_historical_edge": true,
+    "actual_order_test_is_performance_evidence": false,
+    "current_portfolio_integration": "REJECT_UNCHANGED",
+    "active": false,
+    "retention": "ARCHIVED_RESEARCH_CANDIDATE"
+  },
+  "reasons": [
+    "2026 raw stream PF below 1 and negative profit",
+    "minimum-lot stop size expanded sharply",
+    "actual matched order risk was 102.54 USD",
+    "long holding periods block current portfolio signals",
+    "current integration increases DD and barely increases total trade count"
+  ],
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
