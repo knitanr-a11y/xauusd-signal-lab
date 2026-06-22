@@ -13,20 +13,32 @@
     "us500cashsharp_m15.csv",
     "us100cashsharp_m15.csv"
   ],
+  "model_generation": {
+    "mode": "LOCAL_TRAIN_FROM_EXISTING_CLOSED_CANDLE_HISTORY",
+    "automatic_on_first_run": true,
+    "fit_start": "2024-01-01",
+    "fit_end_exclusive": "2025-07-01",
+    "calibration_start": "2025-07-01",
+    "calibration_end_exclusive": "2026-01-01",
+    "uses_2026_for_fit_or_calibration": false,
+    "required_training_report_status": "PASS",
+    "failure_behavior": "BLOCK_SHADOW_RUNTIME",
+    "download_or_model_fallback": false
+  },
   "models": {
     "stage280": {
       "name": "STAGE280_REV_LONG_2026",
-      "threshold": 0.5927349103795366,
-      "quantile": "q95",
-      "feature_count": 278,
-      "model_sha256": "b900b81646b8b5228f687ce65a3491bc80f638c8aa95898f76a689b736b020d9"
+      "expected_threshold": 0.5927349103795366,
+      "expected_fixture_time": "2026-06-19 08:00:00",
+      "expected_fixture_score": 0.5949591748604749,
+      "quantile": "q95"
     },
     "stage281": {
       "name": "STAGE281_MED4H_CONT_LONG_2026",
-      "threshold": 0.5525199124029727,
-      "quantile": "q85",
-      "feature_count": 138,
-      "model_sha256": "3fcf56ae274f04c81e4d786c027efdbb96beb1ddeb8671ea7300123e15c98376"
+      "expected_threshold": 0.5525199124029727,
+      "expected_fixture_time": "2026-06-17 10:00:00",
+      "expected_fixture_score": 0.6586538142862226,
+      "quantile": "q85"
     }
   },
   "safe_admission": {
@@ -35,7 +47,8 @@
     "stage281_requires_last_resolved_base_loss_within_hours": 72,
     "stage286_dd_limit": 10.0,
     "stage286_after_candidate_loss_lockout_hours": 24,
-    "max_unresolved_candidates": 1
+    "max_unresolved_candidates": 1,
+    "resolved_only_rule": "exit_dt <= current entry_dt"
   },
   "base_state": {
     "adapter_required": true,
