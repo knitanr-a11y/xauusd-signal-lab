@@ -1,0 +1,19 @@
+{
+  "status": "GOLD_V3_276_NO_DISCOVERY_LEAD_AUDIT_ONLY",
+  "definition_locked": true,
+  "decision_times": 81781,
+  "direction_expanded_rows": 163562,
+  "sequence_features": 48,
+  "fixed_cells": 112,
+  "prefix_feature_parity": "64/64 PASS; max_abs_diff=0.0",
+  "model_score_parity": "4/4 PASS; max_one_row_diff<=2.22e-16",
+  "candidate_replay_parity": "16/16 PASS",
+  "discovery_leads_2024": 0,
+  "confirmed_2025": 0,
+  "final_2026": 0,
+  "regression_tests": "4/4 PASS",
+  "source_bundle_sha256": "06c9a0547a177e539a60fb2232387cc58db67ea7ecfc33f593d2e89b83ff91e6",
+  "core_source_sha256": "c2d4b1d382cd382eea9a2be80bd9e6d38525aa7a7198644dc87532c24f3ac922",
+  "live_ready": false,
+  "operating_state": "NO_LIVE_PROMOTION_AUDIT_ONLY"
+}
