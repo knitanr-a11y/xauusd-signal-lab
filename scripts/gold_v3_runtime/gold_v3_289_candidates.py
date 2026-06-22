@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 import pandas as pd
-from gold_v3_289_live_features import (EXTERNAL_FILES,GOLD_FILES,add_external_short_features,build_stage280_context,build_stage281_context,find_trigger,load_booster,m5_trigger_frame,read_candles,stage280_model_frame,stage281_model_frame)
+from gold_v3_289_live_features import (EXTERNAL_FILES,GOLD_FILES,add_external_short_features,build_stage280_context,build_stage281_context,find_trigger,m5_trigger_frame,read_candles,stage280_model_frame,stage281_model_frame)
+from gold_v3_289_artifacts import load_frozen_booster
 STAGE286_Q90_LOWER=2.162461836828524
 STAGE286_SCORE_UPPER=2.992581130893
 STAGE286_RISK_UPPER=0.410970621210
@@ -21,8 +22,11 @@ def load_model_contracts() -> tuple[Path, dict[str, Any], Path, dict[str, Any]]:
     p280c = mdir / 'stage280_rev_long_2026_contract.json'
     p281m = mdir / 'stage281_med4h_cont_long_2026_model.txt.gz.b64'
     p281c = mdir / 'stage281_med4h_cont_long_2026_contract.json'
-    for p in [p280m, p280c, p281m, p281c]:
+    for p in [p280c, p281c]:
         if not p.exists():
+            raise FileNotFoundError(p)
+    for p in [p280m, p281m]:
+        if not p.exists() and not list(p.parent.glob(p.name + '.part*')):
             raise FileNotFoundError(p)
     return (p280m, read_json(p280c), p281m, read_json(p281c))
 
@@ -49,7 +53,7 @@ def dedupe_source_candidates(df: pd.DataFrame, source: str, cooldown_minutes: in
 
 def detect_candidates(cdir: Path, lookback_hours: int) -> tuple[pd.DataFrame, dict[str, Any]]:
     p280m, c280, p281m, c281 = load_model_contracts()
-    b280, b281 = (load_booster(p280m), load_booster(p281m))
+    b280, b281 = (load_frozen_booster(p280m), load_frozen_booster(p281m))
     m5 = m5_trigger_frame(cdir)
     latest_time = max(pd.Timestamp(m5.time.max()), pd.Timestamp(read_candles(cdir / GOLD_FILES['M15'], 4).time.max()))
     cutoff = latest_time - pd.Timedelta(hours=lookback_hours)
