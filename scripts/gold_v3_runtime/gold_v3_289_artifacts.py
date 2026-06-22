@@ -1,36 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Frozen model artifact loader for GOLD V3 Stage289.
+"""Stage289 local LightGBM artifact loader.
 
-Large base64 model artifacts may be stored either as one file or split into
-`.partNNN` files. Parts are concatenated in lexical order and decoded without
-writing temporary files. Both gzip and bz2 packages are supported.
+Normal operation uses raw model text produced locally from the existing closed
+`goldsharp_*.csv` history. Legacy gzip/bz2 split packages remain readable only
+for audit reproduction; no model download or fallback is performed.
 """
 from __future__ import annotations
-
-import base64
-import bz2
-import gzip
+import base64,bz2,gzip
 from pathlib import Path
-
 import lightgbm as lgb
 
+def read_joined_text(path:Path)->str:
+ if path.exists(): return path.read_text(encoding='ascii').strip()
+ parts=sorted(path.parent.glob(path.name+'.part*'))
+ if not parts: raise FileNotFoundError(path)
+ return ''.join(p.read_text(encoding='ascii').strip() for p in parts)
 
-def read_joined_text(path: Path) -> str:
-    if path.exists():
-        return path.read_text(encoding="ascii").strip()
-    parts = sorted(path.parent.glob(path.name + ".part*"))
-    if not parts:
-        raise FileNotFoundError(path)
-    return "".join(p.read_text(encoding="ascii").strip() for p in parts)
+def decoded_model_bytes(path:Path)->bytes:
+ packed=base64.b64decode(read_joined_text(path))
+ return bz2.decompress(packed) if '.bz2.b64' in path.name else gzip.decompress(packed)
 
-
-def decoded_model_bytes(path: Path) -> bytes:
-    packed = base64.b64decode(read_joined_text(path))
-    if ".bz2.b64" in path.name:
-        return bz2.decompress(packed)
-    return gzip.decompress(packed)
-
-
-def load_frozen_booster(path: Path) -> lgb.Booster:
-    return lgb.Booster(model_str=decoded_model_bytes(path).decode("utf-8"))
+def load_frozen_booster(path:Path)->lgb.Booster:
+ if path.suffix=='.txt': return lgb.Booster(model_file=str(path))
+ return lgb.Booster(model_str=decoded_model_bytes(path).decode('utf-8'))
