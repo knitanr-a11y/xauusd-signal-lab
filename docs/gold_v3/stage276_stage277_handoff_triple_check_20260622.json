@@ -1,0 +1,16 @@
+{
+  "check1_contract_completeness": {
+    "status": "PASS",
+    "missing": []
+  },
+  "check2_fact_path_numeric_parity": {
+    "status": "PASS",
+    "missing": []
+  },
+  "check3_restart_consistency": {
+    "status": "PASS",
+    "forbidden_found": [],
+    "next_stage_occurrences": 4,
+    "prompt_path_present": true
+  }
+}
