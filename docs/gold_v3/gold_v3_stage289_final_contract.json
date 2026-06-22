@@ -1,0 +1,39 @@
+{
+  "status": "GOLD_V3_289_LIVE_CANDLE_ML_SAFE_SHADOW_PARTIAL_AUDIT_ONLY",
+  "runtime_source": "existing closed MT5 live candle CSVs",
+  "gold_files": ["goldsharp_m1.csv", "goldsharp_m5.csv", "goldsharp_m15.csv", "goldsharp_h1.csv", "goldsharp_h4.csv", "goldsharp_d1.csv"],
+  "latest_valid_row": "closed and retained",
+  "model_bundle_validation": "PASS report + fixed parity + feature contract + SHA256 required every run",
+  "stage286_external_files": ["us500cashsharp_m15.csv", "us100cashsharp_m15.csv"],
+  "stage286_missing_behavior": "PARTIAL; Stage280 and Stage281 continue; no fallback",
+  "base_state": {
+    "path_priority": ["--base-resolved-csv", "GOLD_V3_BASE_RESOLVED_CSV", "gold_v3_289_base_resolved_import.csv"],
+    "required_columns": ["entry_dt", "exit_dt", "pnl"],
+    "missing_behavior": "PARTIAL_AND_REJECT_ADMISSION",
+    "candidate_only_fallback": false
+  },
+  "safe_admission": {
+    "stage280_stage281_dd_limit": 30.0,
+    "shared_candidate_cooldown_hours": 12,
+    "stage281_last_resolved_base_loss_hours": 72,
+    "stage286_dd_limit": 10.0,
+    "stage286_resolved_candidate_loss_lockout_hours": 24,
+    "max_unresolved_candidates": 1,
+    "resolved_only_rule": "exit_dt <= current entry_dt",
+    "future_entry_state_leakage": false
+  },
+  "verification": {
+    "local_hardening_tests_passed": 10,
+    "user_environment_full_training": "PENDING",
+    "runtime_blocks_on_parity_failure": true
+  },
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "mt5_execution_enabled": false,
+    "discord_live_enabled": false,
+    "final_signal_enabled": false,
+    "partial_close_enabled": false,
+    "source_csv_mutated": false
+  }
+}
