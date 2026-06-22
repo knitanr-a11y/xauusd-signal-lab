@@ -1,0 +1,176 @@
+{
+  "status": "GOLD_V3_285_CROSS_ASSET_LONG_SHADOW_LEAD_OTHER_FAMILIES_NO_DISCOVERY_AUDIT_ONLY",
+  "data": {
+    "external_sources": [
+      "SILVER#",
+      "USDJPY#",
+      "EURUSD#",
+      "US500Cash#",
+      "US100Cash#"
+    ],
+    "timeframes": [
+      "M5",
+      "M15",
+      "H1",
+      "H4",
+      "D1"
+    ],
+    "coverage_status": "PASS",
+    "gold_parity": "EXACT_ON_OVERLAP",
+    "usd_index": "UNAVAILABLE_NO_FALLBACK",
+    "yield_proxy": "UNAVAILABLE_NO_FALLBACK"
+  },
+  "protocol": {
+    "development_year": 2024,
+    "confirmation_year": 2025,
+    "display_only_year": 2026,
+    "decision_grid": "closed M15",
+    "trigger_search": "next 60 minutes closed M5",
+    "execution": "M1 first touch; same M1 SL; rollover overlay; base priority",
+    "costs_usd_per_oz": [
+      0.6,
+      1.0
+    ]
+  },
+  "four_tracks": {
+    "cross_asset": {
+      "decision": "SHADOW_LEAD",
+      "raw_candidate": "CROSS_LONG_Q95_EMA20_E175_CD120",
+      "risk_gated_candidate": "CROSS_LONG_Q95_EMA20_E175_FULL_SL_CAP10_SHADOW",
+      "portfolio_synergy_diagnostic": "FULL_SL_CAP8P5_WITH_BALANCED_CONTROL"
+    },
+    "shape_cluster": {
+      "decision": "NO_DISCOVERY",
+      "best": "SHAPE_LONG_C6_EMA20_E175_CD120",
+      "reason": "2024 edge too thin; cost1 PF below 1; DD too large"
+    },
+    "failed_breakout_squeeze": {
+      "decision": "NO_DISCOVERY",
+      "squeeze_near_miss": "SQ_Q20_D0P35_LONG_EMA20_E175_CD120",
+      "reason": "positive 2024/2025 but fails 2026 severely; failed breakout lacks edge"
+    },
+    "short": {
+      "decision": "NO_DISCOVERY",
+      "near_miss": "SHORT_EXHAUST_Q90_EMA20_E225_CD120",
+      "fast_exit_test": "E125_100_4H_NO_PASS",
+      "reason": "2026 negative and 4h exit did not rescue 2024/2025 stability"
+    }
+  },
+  "raw_cross_yearly": {
+    "2024": {
+      "n": 90,
+      "pf": 1.4275539307175449,
+      "pf_cost100": 1.2497733533301918,
+      "sum": 96.72401523230953,
+      "dd": 39.70727188455366
+    },
+    "2025": {
+      "n": 87,
+      "pf": 1.1233814369470092,
+      "pf_cost100": 1.0392434297349005,
+      "sum": 52.09019453637962,
+      "dd": 149.35885835094345
+    },
+    "2026": {
+      "n": 64,
+      "pf": 1.1172898648452128,
+      "pf_cost100": 1.0772169437057575,
+      "sum": 77.821806895227,
+      "dd": 218.1389728971111
+    }
+  },
+  "cap10_cross_yearly": {
+    "2024": {
+      "n": 89,
+      "pf": 1.3543484552357947,
+      "sum": 80.16299914317676,
+      "dd": 39.70727188455366
+    },
+    "2025": {
+      "n": 44,
+      "pf": 1.2520460173197885,
+      "sum": 38.07407207526658,
+      "dd": 38.61240202420876
+    },
+    "2026": {
+      "n": 0,
+      "pf": null,
+      "sum": 0.0,
+      "dd": 0.0
+    }
+  },
+  "portfolio_balanced_existing": {
+    "2024": {
+      "n": 228,
+      "pf": 1.6750014393799024,
+      "sum": 260.8562726601765,
+      "dd": 28.941120803812023
+    },
+    "2025": {
+      "n": 215,
+      "pf": 1.8467592068173104,
+      "sum": 478.9081121624621,
+      "dd": 42.922985328270784
+    },
+    "2026": {
+      "n": 99,
+      "pf": 2.6876234353811914,
+      "sum": 851.174435943764,
+      "dd": 66.06159660301586
+    }
+  },
+  "portfolio_balanced_plus_cap10": {
+    "2024": {
+      "n": 282,
+      "pf": 1.559505340766107,
+      "sum": 295.58204792062253,
+      "dd": 41.88258557195832
+    },
+    "2025": {
+      "n": 236,
+      "pf": 1.797932171529904,
+      "sum": 507.75052260011256,
+      "dd": 61.015373892608295
+    },
+    "2026": {
+      "n": 99,
+      "pf": 2.6876234353811914,
+      "sum": 851.174435943764,
+      "dd": 66.06159660301586
+    }
+  },
+  "portfolio_balanced_plus_cap8p5_diagnostic": {
+    "2024": {
+      "n": 286,
+      "pf": 1.6061335751671175,
+      "sum": 318.6090683111155,
+      "dd": 29.78155408573285
+    },
+    "2025": {
+      "n": 231,
+      "pf": 1.8080765548995357,
+      "sum": 496.27618261417575,
+      "dd": 42.922985328270784
+    },
+    "2026": {
+      "n": 99,
+      "pf": 2.6876234353811914,
+      "sum": 851.174435943764,
+      "dd": 66.06159660301586
+    }
+  },
+  "selected_active_addition": "NONE",
+  "preserve_stages": [
+    "Stage280 unchanged",
+    "Stage281 unchanged",
+    "Stage284 unchanged"
+  ],
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
