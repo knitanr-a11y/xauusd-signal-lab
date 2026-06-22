@@ -18,15 +18,12 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def load_model_contracts() -> tuple[Path, dict[str, Any], Path, dict[str, Any]]:
     mdir = Path(__file__).resolve().with_name('models') / 'gold_v3_289'
-    p280m = mdir / 'stage280_rev_long_2026_model.txt.bz2.b64'
+    p280m = mdir / 'stage280_rev_long_2026_model.txt'
     p280c = mdir / 'stage280_rev_long_2026_contract.json'
-    p281m = mdir / 'stage281_med4h_cont_long_2026_model.txt.bz2.b64'
+    p281m = mdir / 'stage281_med4h_cont_long_2026_model.txt'
     p281c = mdir / 'stage281_med4h_cont_long_2026_contract.json'
-    for p in [p280c, p281c]:
+    for p in [p280m,p280c,p281m,p281c]:
         if not p.exists():
-            raise FileNotFoundError(p)
-    for p in [p280m, p281m]:
-        if not p.exists() and not list(p.parent.glob(p.name + '.part*')):
             raise FileNotFoundError(p)
     return (p280m, read_json(p280c), p281m, read_json(p281c))
 
