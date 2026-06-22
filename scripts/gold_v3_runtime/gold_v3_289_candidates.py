@@ -18,9 +18,9 @@ def read_json(path: Path) -> dict[str, Any]:
 
 def load_model_contracts() -> tuple[Path, dict[str, Any], Path, dict[str, Any]]:
     mdir = Path(__file__).resolve().with_name('models') / 'gold_v3_289'
-    p280m = mdir / 'stage280_rev_long_2026_model.txt.gz.b64'
+    p280m = mdir / 'stage280_rev_long_2026_model.txt.bz2.b64'
     p280c = mdir / 'stage280_rev_long_2026_contract.json'
-    p281m = mdir / 'stage281_med4h_cont_long_2026_model.txt.gz.b64'
+    p281m = mdir / 'stage281_med4h_cont_long_2026_model.txt.bz2.b64'
     p281c = mdir / 'stage281_med4h_cont_long_2026_contract.json'
     for p in [p280c, p281c]:
         if not p.exists():
