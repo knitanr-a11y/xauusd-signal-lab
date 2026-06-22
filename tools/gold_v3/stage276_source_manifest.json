@@ -1,0 +1,12 @@
+{
+  "status": "GOLD_V3_276_NO_DISCOVERY_LEAD_AUDIT_ONLY",
+  "entrypoint": "tools/gold_v3/stage276_run_verified.py",
+  "materializer": "tools/gold_v3/stage276_materialize_source_bundle.py",
+  "bundle": "tools/gold_v3/stage276_source_bundle_20260622.zip.b64",
+  "bundle_encoding": "base64 of ZIP",
+  "zip_sha256": "06c9a0547a177e539a60fb2232387cc58db67ea7ecfc33f593d2e89b83ff91e6",
+  "core_source_sha256": "c2d4b1d382cd382eea9a2be80bd9e6d38525aa7a7198644dc87532c24f3ac922",
+  "local_regression_tests": "4/4 PASS",
+  "audit_only": true,
+  "live_ready": false
+}
