@@ -3,12 +3,13 @@
 """Frozen model artifact loader for GOLD V3 Stage289.
 
 Large base64 model artifacts may be stored either as one file or split into
-`.partNNN` files. Parts are concatenated in lexical order, decoded, gunzipped,
-and loaded into LightGBM without writing temporary files.
+`.partNNN` files. Parts are concatenated in lexical order and decoded without
+writing temporary files. Both gzip and bz2 packages are supported.
 """
 from __future__ import annotations
 
 import base64
+import bz2
 import gzip
 from pathlib import Path
 
@@ -25,7 +26,10 @@ def read_joined_text(path: Path) -> str:
 
 
 def decoded_model_bytes(path: Path) -> bytes:
-    return gzip.decompress(base64.b64decode(read_joined_text(path)))
+    packed = base64.b64decode(read_joined_text(path))
+    if ".bz2.b64" in path.name:
+        return bz2.decompress(packed)
+    return gzip.decompress(packed)
 
 
 def load_frozen_booster(path: Path) -> lgb.Booster:
