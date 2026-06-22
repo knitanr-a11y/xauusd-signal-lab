@@ -14,8 +14,8 @@ F=load('gold_v3_289_feature_core')
 S=load('gold_v3_289_state')
 
 def test_latest_csv_row_is_kept(tmp_path):
- p=tmp_path/'x.csv'; d=pd.DataFrame({'time':pd.date_range('2026-01-01',periods=5,freq='15min'),'open':[1]*5,'high':[2]*5,'low':[0]*5,'close':[1]*5})
- d.to_csv(p,index=False); got=F.read_candles(p,3)
+ p=tmp_path/'goldsharp_m15.csv'; d=pd.DataFrame({'time':pd.date_range('2026-01-01',periods=5,freq='15min'),'open':[1]*5,'high':[2]*5,'low':[0]*5,'close':[1]*5,'tick_volume':[10]*5,'spread':[20]*5})
+ d.to_csv(p,index=False); got=F.read_candles(p,3,timeframe='M15',require_spread=True)
  assert len(got)==3 and got.time.max()==d.time.max()
 
 def test_h4_is_available_only_after_nominal_close():
@@ -37,5 +37,5 @@ def test_entry_point_is_read_only():
 
 def test_training_contract_excludes_2026_fit():
  text=(RT/'gold_v3_289_train_live_models_audit.py').read_text(encoding='utf-8')
- assert "<'2025-07-01'" in text and "<'2026-01-01'" in text
- assert "uses_2026_for_fit_or_calibration" not in text
+ assert 'z.time<"2025-07-01"' in text and 'z.time<"2026-01-01"' in text
+ assert '"fit_uses_2026":False' in text
