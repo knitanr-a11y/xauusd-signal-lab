@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 """Shared closed-candle IO and indicator primitives for Stage289."""
 from __future__ import annotations
-import base64,gzip
 from collections import deque
 from io import StringIO
 from pathlib import Path
 from typing import Iterable
-import lightgbm as lgb
 import numpy as np
 import pandas as pd
 
@@ -67,10 +65,3 @@ def m1_arrays(m1:pd.DataFrame):
 
 def load_gold(candle_dir:Path,tail_only:bool=True)->dict[str,pd.DataFrame]:
  return {tf:read_candles(candle_dir/name,LIVE_TAIL_ROWS[tf] if tail_only else None) for tf,name in GOLD_FILES.items()}
-
-def load_booster(path:Path)->lgb.Booster:
- if path.name.endswith(".txt.gz.b64"):
-  if path.exists(): text=path.read_text(encoding="ascii")
-  else: text="".join(p.read_text(encoding="ascii") for p in sorted(path.parent.glob(path.name+".part*")))
-  return lgb.Booster(model_str=gzip.decompress(base64.b64decode(text)).decode("utf-8"))
- return lgb.Booster(model_file=str(path))
