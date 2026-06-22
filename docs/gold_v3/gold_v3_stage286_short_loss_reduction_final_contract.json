@@ -1,0 +1,58 @@
+{
+  "status": "GOLD_V3_286_SHORT_LOSS_REDUCTION_DISCOVERY_LEAD_SHADOW_ONLY_AUDIT_ONLY",
+  "base_short_candidate": "SHORT_EXHAUST_Q90_EMA20_E225_CD120",
+  "protocol": {
+    "development_year": 2024,
+    "confirmation_year": 2025,
+    "display_only_year": 2026,
+    "selection_basis": "maximize 2024 PF among predeclared one/two-gate rules with n>=25, cost1 PF>=1 and >=10 losses removed"
+  },
+  "selected_strict_gate": {
+    "name": "SHORT_EXHAUST_MODERATE_OVERHEAT_SUBDUED_US_EQUITY",
+    "conditions": [
+      "existing SHORT_EXHAUST_Q90 lower-bound remains unchanged",
+      "mean(SP500_M15_ret4_ATR, NAS100_M15_ret4_ATR) <= 0.410970621210",
+      "SHORT exhaustion score (GOLD M15 ret8/ATR) <= 2.992581130893"
+    ],
+    "threshold_source": "2024 candidate-distribution q55; 2025 not used in threshold selection",
+    "activation": "SHADOW_DISCOVERY_LEAD_ONLY"
+  },
+  "balanced_single_gate": {
+    "condition": "H1 closed candle body_signed <= 0.620164914981",
+    "activation": "SHADOW_DIAGNOSTIC_ONLY"
+  },
+  "safe_portfolio_admission": {
+    "base_control": "Stage284 balanced DD<=30 and shared cooldown12h",
+    "short_extra_conditions": [
+      "realized combined portfolio DD <= 10",
+      "at least 24h since last resolved accepted candidate loss"
+    ],
+    "activation": "SHADOW_DIAGNOSTIC_ONLY"
+  },
+  "growth_portfolio_admission": {
+    "short_extra_conditions": [
+      "realized combined portfolio DD <= 20",
+      "at least 48h since last resolved accepted candidate loss"
+    ],
+    "activation": "SHADOW_DIAGNOSTIC_ONLY"
+  },
+  "active_addition": "NONE",
+  "preserve": [
+    "Stage280 unchanged",
+    "Stage281 unchanged",
+    "Stage284 unchanged"
+  ],
+  "limitations": [
+    "gate search began after Stage285 SHORT no-discovery result",
+    "requires untouched forward SHADOW accumulation",
+    "normalized features must be reproduced exactly live"
+  ],
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
