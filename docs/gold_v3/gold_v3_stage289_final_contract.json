@@ -1,0 +1,59 @@
+{
+  "status": "GOLD_V3_289_LIVE_CANDLE_ML_SAFE_SHADOW_PARTIAL_AUDIT_ONLY",
+  "runtime_source": "contractually closed live CSVs in MQL5/Files",
+  "gold_files": [
+    "goldsharp_m1.csv",
+    "goldsharp_m5.csv",
+    "goldsharp_m15.csv",
+    "goldsharp_h1.csv",
+    "goldsharp_h4.csv",
+    "goldsharp_d1.csv"
+  ],
+  "stage286_external_files": [
+    "us500cashsharp_m15.csv",
+    "us100cashsharp_m15.csv"
+  ],
+  "models": {
+    "stage280": {
+      "name": "STAGE280_REV_LONG_2026",
+      "threshold": 0.5927349103795366,
+      "quantile": "q95",
+      "feature_count": 278,
+      "model_sha256": "b900b81646b8b5228f687ce65a3491bc80f638c8aa95898f76a689b736b020d9"
+    },
+    "stage281": {
+      "name": "STAGE281_MED4H_CONT_LONG_2026",
+      "threshold": 0.5525199124029727,
+      "quantile": "q85",
+      "feature_count": 138,
+      "model_sha256": "3fcf56ae274f04c81e4d786c027efdbb96beb1ddeb8671ea7300123e15c98376"
+    }
+  },
+  "safe_admission": {
+    "stage280_stage281_dd_limit": 30.0,
+    "shared_candidate_cooldown_hours": 12,
+    "stage281_requires_last_resolved_base_loss_within_hours": 72,
+    "stage286_dd_limit": 10.0,
+    "stage286_after_candidate_loss_lockout_hours": 24,
+    "max_unresolved_candidates": 1
+  },
+  "base_state": {
+    "adapter_required": true,
+    "required_columns": ["entry_dt", "exit_dt", "pnl"],
+    "fallback_to_candidate_only_equity": false,
+    "missing_behavior": "PARTIAL_AND_REJECT_ADMISSION"
+  },
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "mt5_execution_enabled": false,
+    "discord_live_enabled": false,
+    "ai_api_called": false,
+    "final_signal_enabled": false,
+    "partial_close_enabled": false,
+    "source_csv_mutated": false,
+    "contract_mutated": false,
+    "manual_candidate_demotion_or_removal": false,
+    "open_asof_allowed": false
+  }
+}
