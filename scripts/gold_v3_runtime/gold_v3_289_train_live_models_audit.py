@@ -1,22 +1,77 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Reproduce Stage289 2026 live model artifacts from frozen historical feature matrices."""
+"""Train the frozen Stage280/281 2026 deployment models from closed live CSV history.
+
+The source is the existing MQL5/Files goldsharp_*.csv history. The CSV contract says
+its newest row is closed; no open-bar trimming or future fallback is performed.
+Training labels are created only for historical rows whose complete M1 horizon is
+already present. The 2026 display period is never used for fitting or calibration.
+"""
 from __future__ import annotations
-import argparse,base64,gzip,json
+import argparse, hashlib, json
 from pathlib import Path
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier
+from gold_v3_289_feature_core import GOLD_FILES, load_gold, m1_arrays
+from gold_v3_289_stage280_features import build_stage280_context, stage280_model_frame
+from gold_v3_289_stage281_features import build_stage281_context
 
-def parse_args():
- p=argparse.ArgumentParser(); p.add_argument("--artifact-dir",required=True); p.add_argument("--output-dir",default=""); return p.parse_args()
-def main():
- a=parse_args(); root=Path(a.artifact_dir).expanduser().resolve(); out=Path(a.output_dir).expanduser().resolve() if a.output_dir else Path(__file__).resolve().with_name("models")/"gold_v3_289"; out.mkdir(parents=True,exist_ok=True)
- src=pd.read_pickle(root/"gold_v3_stage280_oos_predictions.pkl"); features=pd.read_csv(root/"gold_v3_stage280_feature_importance.csv").feature.drop_duplicates().tolist(); z=src[(src.subtype=="REV")&(src.h4_align==-1)].copy(); test_start=pd.Timestamp("2026-01-01"); cal_start=test_start-pd.DateOffset(months=6); fit_start=max(z.time.min(),cal_start-pd.DateOffset(months=18)); fit=z[(z.time>=fit_start)&(z.time<cal_start)]; cal=z[(z.time>=cal_start)&(z.time<test_start)]; Xf=fit[features].replace([np.inf,-np.inf],np.nan).fillna(0).astype("float32"); yf=fit.target_rev.astype(int); Xc=cal[features].replace([np.inf,-np.inf],np.nan).fillna(0).astype("float32"); pos=max(int(yf.sum()),1); spw=min(max((len(yf)-pos)/pos,1),25)
- m280=LGBMClassifier(objective="binary",n_estimators=220,learning_rate=.03,num_leaves=15,max_depth=5,min_child_samples=60,subsample=.85,colsample_bytree=.8,reg_alpha=1,reg_lambda=6,random_state=281,n_jobs=1,verbosity=-1,scale_pos_weight=spw); m280.fit(Xf,yf); q95=float(np.quantile(m280.predict_proba(Xc)[:,1],.95)); (out/"stage280_rev_long_2026_model.txt.gz.b64").write_text(base64.b64encode(gzip.compress(m280.booster_.model_to_string().encode(),9)).decode(),encoding="ascii"); (out/"stage280_rev_long_2026_contract.json").write_text(json.dumps({"model":"STAGE280_REV_LONG_2026","features":features,"fit_start":str(fit_start),"fit_end_exclusive":str(cal_start),"cal_start":str(cal_start),"cal_end_exclusive":str(test_start),"score_quantile":"q95","score_threshold":q95,"params":m280.get_params()},ensure_ascii=False,indent=2,default=str),encoding="utf-8")
- ctx=pd.read_pickle(root/"gold_v3_stage281_m15_context.pkl"); wanted=Path(__file__).resolve().with_name("gold_v3_stage281_live_feature_list.txt").read_text().split(); base_features=[c for c in wanted if c in ctx.columns]; z=ctx[ctx.h4_trend==1].copy(); z["target"]=z.MED4H_long.astype("int8"); X=z[base_features].copy()
- for c in base_features:
-  if any(k in c for k in ["ret","dist_ema","ema20_slope","ema50_slope","body_signed"]): X[c]=pd.to_numeric(X[c],errors="coerce")
-  elif "_pos" in c: X[c]=2*pd.to_numeric(X[c],errors="coerce")-1
- X["countermove_30"]=-pd.to_numeric(X.get("m1_ret30",np.nan),errors="coerce"); X["countermove_60"]=-pd.to_numeric(X.get("m1_ret60",np.nan),errors="coerce"); X["countermove_120"]=-pd.to_numeric(X.get("m1_ret120",np.nan),errors="coerce"); X["turn_accel_m1"]=pd.to_numeric(X.get("m1_ret15",0),errors="coerce")-(pd.to_numeric(X.get("m1_ret60",0),errors="coerce")-pd.to_numeric(X.get("m1_ret15",0),errors="coerce"))/3; X["turn_accel_m5"]=pd.to_numeric(X.get("m5_ret3_atr",0),errors="coerce")-(pd.to_numeric(X.get("m5_ret12_atr",0),errors="coerce")-pd.to_numeric(X.get("m5_ret3_atr",0),errors="coerce"))/3; X["turn_accel_m15"]=pd.to_numeric(X.get("m15_ret1_atr",0),errors="coerce")-(pd.to_numeric(X.get("m15_ret4_atr",0),errors="coerce")-pd.to_numeric(X.get("m15_ret1_atr",0),errors="coerce"))/3; X["h4_align"]=z.h4_trend; X["d1_align"]=z.d1_trend; features281=list(X.columns); fm=(z.time>="2024-01-01")&(z.time<"2025-07-01"); cm=(z.time>="2025-07-01")&(z.time<"2026-01-01"); Xf=X.loc[fm].replace([np.inf,-np.inf],np.nan).fillna(0).astype("float32"); yf=z.loc[fm,"target"]; Xc=X.loc[cm].replace([np.inf,-np.inf],np.nan).fillna(0).astype("float32"); pos=max(int(yf.sum()),1); spw=min(max((len(yf)-pos)/pos,1),30); m281=LGBMClassifier(objective="binary",n_estimators=110,learning_rate=.045,num_leaves=15,max_depth=5,min_child_samples=120,subsample=.85,colsample_bytree=.75,reg_alpha=1.5,reg_lambda=8,random_state=281,n_jobs=1,verbosity=-1,scale_pos_weight=spw); m281.fit(Xf,yf); q85=float(np.quantile(m281.predict_proba(Xc)[:,1],.85)); (out/"stage281_med4h_cont_long_2026_model.txt.gz.b64").write_text(base64.b64encode(gzip.compress(m281.booster_.model_to_string().encode(),9)).decode(),encoding="ascii"); (out/"stage281_med4h_cont_long_2026_contract.json").write_text(json.dumps({"model":"STAGE281_MED4H_CONT_LONG_2026","features":features281,"fit_start":"2024-01-01","fit_end_exclusive":"2025-07-01","cal_start":"2025-07-01","cal_end_exclusive":"2026-01-01","score_quantile":"q85","score_threshold":q85,"params":m281.get_params()},ensure_ascii=False,indent=2,default=str),encoding="utf-8"); print(f"stage280_q95={q95:.12f}"); print(f"stage281_q85={q85:.12f}"); return 0
-if __name__=="__main__": raise SystemExit(main())
+EXP280=.5927349103795366
+EXP281=.5525199124029727
+SCORE280=.5949591748604749
+SCORE281=.6586538142862226
+
+def args():
+ p=argparse.ArgumentParser(); p.add_argument('--candle-dir',required=True); p.add_argument('--output-dir',default=''); p.add_argument('--force',action='store_true'); return p.parse_args()
+
+def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
+
+def stage280(cdir:Path):
+ ctx=build_stage280_context(cdir,include_next=False,tail_only=False).sort_values('time').reset_index(drop=True)
+ raw=load_gold(cdir,tail_only=False); m1=raw['M1']; mt,mo,mh,ml,mc,mv,ms=m1_arrays(m1)
+ dirs=[]
+ for r in ctx.itertuples(index=False):
+  a=float(r.atr_prev) if pd.notna(r.atr_prev) else np.nan; t=np.datetime64(r.time); s=np.searchsorted(mt,t,'left'); e=np.searchsorted(mt,t+np.timedelta64(240,'m'),'left')
+  if not np.isfinite(a) or a<=0 or s>=len(mt) or mt[s]!=t or e<=s or e-s<180: dirs.append(0); continue
+  ep=float(mo[s]); hi=float(mh[s:e].max()); lo=float(ml[s:e].min()); fin=float(mc[e-1]); lmfe=(hi-ep)/a; lmae=(ep-lo)/a; lfin=(fin-ep)/a; smfe=(ep-lo)/a; smae=(hi-ep)/a; sfin=(ep-fin)/a
+  lq=lmfe>=2 and lfin>=.75 and lmae<=1.25 and lmfe>=1.5*max(lmae,.05); sq=smfe>=2 and sfin>=.75 and smae<=1.25 and smfe>=1.5*max(smae,.05)
+  dirs.append(1 if lq and not sq else (-1 if sq and not lq else (1 if lq and sq and lmfe-lmae>smfe-smae else (-1 if lq and sq else 0))))
+ ctx['event_dir']=np.asarray(dirs,dtype='int8'); ctx['event_onset']=False
+ for d in [1,-1]:
+  m=ctx.event_dir.eq(d); prev=m.shift(1,fill_value=False)|m.shift(2,fill_value=False)|m.shift(3,fill_value=False); ctx.loc[m&~prev,'event_onset']=True
+ meta={'time','atr_prev','event_dir','event_onset','h4_trend','d1_trend'}; rawf=[c for c in ctx.columns if c not in meta]; bad=('_open','_high','_low','_close','_ema20','_ema50','_atr14'); rawf=[c for c in rawf if not c.endswith(bad)]
+ engineered=['countermove_60','countermove_120','turn_5','turn_15','turn_30','turn_accel_5v30','turn_accel_15v60','m5_turn_accel','m15_turn_accel','m1_reject_wick','m5_reject_wick','m15_reject_wick','h4_align','d1_align']; features=list(dict.fromkeys(rawf+engineered))
+ z=ctx[ctx.h4_trend.eq(-1)].copy(); y=((z.event_onset)&z.event_dir.eq(1)&z.h4_trend.eq(-1)).astype(int); X=stage280_model_frame(z,features)
+ fm=(z.time>='2024-01-01')&(z.time<'2025-07-01'); cm=(z.time>='2025-07-01')&(z.time<'2026-01-01'); pos=max(int(y[fm].sum()),1); spw=min(max((int(fm.sum())-pos)/pos,1),25)
+ model=LGBMClassifier(objective='binary',n_estimators=220,learning_rate=.03,num_leaves=15,max_depth=5,min_child_samples=60,subsample=.85,colsample_bytree=.8,reg_alpha=1,reg_lambda=6,random_state=281,n_jobs=1,verbosity=-1,scale_pos_weight=spw); model.fit(X.loc[fm],y.loc[fm]); q=float(np.quantile(model.predict_proba(X.loc[cm])[:,1],.95))
+ fixture=z.time.eq(pd.Timestamp('2026-06-19 08:00:00')); score=float(model.predict_proba(X.loc[fixture])[:,1][0]) if fixture.any() else np.nan
+ return model,features,q,score,{'fit_n':int(fm.sum()),'cal_n':int(cm.sum()),'positive_fit':int(y[fm].sum())}
+
+def stage281(cdir:Path, feature_list_path:Path):
+ ctx=build_stage281_context(cdir,include_next=False,tail_only=False).sort_values('time').reset_index(drop=True); raw=load_gold(cdir,tail_only=False); m1=raw['M1']; mt,mo,mh,ml,mc,mv,ms=m1_arrays(m1); target=[]
+ for r in ctx.itertuples(index=False):
+  t=np.datetime64(r.time); s=np.searchsorted(mt,t,'left'); a=float(r.h1_atr14) if pd.notna(r.h1_atr14) else np.nan; e=np.searchsorted(mt,t+np.timedelta64(240,'m'),'left')
+  if not np.isfinite(a) or a<=0 or s>=len(mt) or mt[s]!=t or e<=s+120 or e>len(mt): target.append(0); continue
+  ep=mo[s]; hi=mh[s:e].max(); lo=ml[s:e].min(); fin=mc[e-1]; lmfe=(hi-ep)/a; lmae=(ep-lo)/a; lfin=(fin-ep)/a; target.append(int(lmfe>=1.75 and lfin>=.55 and lmae<=1.25 and lmfe>=1.4*max(lmae,.05)))
+ ctx['target']=np.asarray(target,dtype='int8'); z=ctx[ctx.h4_trend.eq(1)].copy(); wanted=feature_list_path.read_text(encoding='utf-8').split(); base=[c for c in wanted if c in z.columns]; X=z[base].copy()
+ for c in base:
+  if any(k in c for k in ['ret','dist_ema','ema20_slope','ema50_slope','body_signed']): X[c]=pd.to_numeric(X[c],errors='coerce')
+  elif '_pos' in c:X[c]=2*pd.to_numeric(X[c],errors='coerce')-1
+ X['countermove_30']=-pd.to_numeric(X.get('m1_ret30',np.nan),errors='coerce'); X['countermove_60']=-pd.to_numeric(X.get('m1_ret60',np.nan),errors='coerce'); X['countermove_120']=-pd.to_numeric(X.get('m1_ret120',np.nan),errors='coerce'); X['turn_accel_m1']=pd.to_numeric(X.get('m1_ret15',0),errors='coerce')-(pd.to_numeric(X.get('m1_ret60',0),errors='coerce')-pd.to_numeric(X.get('m1_ret15',0),errors='coerce'))/3; X['turn_accel_m5']=pd.to_numeric(X.get('m5_ret3_atr',0),errors='coerce')-(pd.to_numeric(X.get('m5_ret12_atr',0),errors='coerce')-pd.to_numeric(X.get('m5_ret3_atr',0),errors='coerce'))/3; X['turn_accel_m15']=pd.to_numeric(X.get('m15_ret1_atr',0),errors='coerce')-(pd.to_numeric(X.get('m15_ret4_atr',0),errors='coerce')-pd.to_numeric(X.get('m15_ret1_atr',0),errors='coerce'))/3; X['h4_align']=z.h4_trend; X['d1_align']=z.d1_trend; features=list(X.columns); X=X.replace([np.inf,-np.inf],np.nan).fillna(0).astype('float32'); y=z.target.astype(int)
+ fm=(z.time>='2024-01-01')&(z.time<'2025-07-01'); cm=(z.time>='2025-07-01')&(z.time<'2026-01-01'); pos=max(int(y[fm].sum()),1); spw=min(max((int(fm.sum())-pos)/pos,1),30)
+ model=LGBMClassifier(objective='binary',n_estimators=110,learning_rate=.045,num_leaves=15,max_depth=5,min_child_samples=120,subsample=.85,colsample_bytree=.75,reg_alpha=1.5,reg_lambda=8,random_state=281,n_jobs=1,verbosity=-1,scale_pos_weight=spw); model.fit(X.loc[fm],y.loc[fm]); q=float(np.quantile(model.predict_proba(X.loc[cm])[:,1],.85)); fixture=z.time.eq(pd.Timestamp('2026-06-17 10:00:00')); score=float(model.predict_proba(X.loc[fixture])[:,1][0]) if fixture.any() else np.nan
+ return model,features,q,score,{'fit_n':int(fm.sum()),'cal_n':int(cm.sum()),'positive_fit':int(y[fm].sum())}
+
+def main()->int:
+ a=args(); cdir=Path(a.candle_dir).expanduser().resolve(); out=Path(a.output_dir).expanduser().resolve() if a.output_dir else Path(__file__).resolve().with_name('models')/'gold_v3_289'; out.mkdir(parents=True,exist_ok=True)
+ required=[cdir/n for n in GOLD_FILES.values()]; missing=[str(p) for p in required if not p.exists()]
+ if missing: raise FileNotFoundError(f'missing closed candle CSVs: {missing}')
+ m280,f280,q280,s280,n280=stage280(cdir); m281,f281,q281,s281,n281=stage281(cdir,Path(__file__).resolve().with_name('gold_v3_stage281_live_feature_list.txt'))
+ checks={'stage280_threshold':q280,'stage281_threshold':q281,'stage280_fixture_score':s280,'stage281_fixture_score':s281}; ok=abs(q280-EXP280)<1e-12 and abs(q281-EXP281)<1e-12 and abs(s280-SCORE280)<1e-12 and abs(s281-SCORE281)<1e-12
+ report={'status':'PASS' if ok else 'BLOCKED_PARITY_MISMATCH','checks':checks,'counts':{'stage280':n280,'stage281':n281},'closed_csv_contract':True,'fit_uses_2026':False}; (out/'stage289_model_training_report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+ if not ok: print(json.dumps(report,indent=2)); return 2
+ for stem,model,features,q,name,quant in [('stage280_rev_long_2026',m280,f280,q280,'STAGE280_REV_LONG_2026','q95'),('stage281_med4h_cont_long_2026',m281,f281,q281,'STAGE281_MED4H_CONT_LONG_2026','q85')]:
+  text=model.booster_.model_to_string(); (out/f'{stem}_model.txt').write_text(text,encoding='utf-8'); contract={'model':name,'features':features,'fit_start':'2024-01-01','fit_end_exclusive':'2025-07-01','cal_start':'2025-07-01','cal_end_exclusive':'2026-01-01','score_quantile':quant,'score_threshold':q,'model_sha256':sha(text.encode())}; (out/f'{stem}_contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8')
+ print(json.dumps(report,indent=2)); return 0
+if __name__=='__main__': raise SystemExit(main())
