@@ -1,6 +1,6 @@
 {
   "status": "GOLD_V3_289_LIVE_CANDLE_ML_SAFE_SHADOW_PARTIAL_AUDIT_ONLY",
-  "runtime_source": "contractually closed live CSVs in MQL5/Files",
+  "runtime_source": "existing contractually closed MT5 live CSVs in MQL5/Files",
   "gold_files": [
     "goldsharp_m1.csv",
     "goldsharp_m5.csv",
@@ -9,19 +9,35 @@
     "goldsharp_h4.csv",
     "goldsharp_d1.csv"
   ],
+  "candle_contract": {
+    "time_column": "broker/MT5 server bar-open time",
+    "latest_valid_row": "closed and retained",
+    "open_bar_guess_or_trim": false,
+    "separator_detection": [",", ";", "tab"],
+    "partial_append_row": "discard incomplete row only",
+    "time_order_violation": "BLOCKED",
+    "higher_timeframe_availability": "bar open time plus nominal timeframe"
+  },
   "stage286_external_files": [
     "us500cashsharp_m15.csv",
     "us100cashsharp_m15.csv"
   ],
+  "external_missing_behavior": "Stage286 unavailable; Stage280/281 continue; overall PARTIAL; no fallback",
   "model_generation": {
     "mode": "LOCAL_TRAIN_FROM_EXISTING_CLOSED_CANDLE_HISTORY",
-    "automatic_on_first_run": true,
     "fit_start": "2024-01-01",
     "fit_end_exclusive": "2025-07-01",
     "calibration_start": "2025-07-01",
     "calibration_end_exclusive": "2026-01-01",
     "uses_2026_for_fit_or_calibration": false,
     "required_training_report_status": "PASS",
+    "required_runtime_checks": [
+      "exact threshold parity",
+      "exact fixed fixture-score parity",
+      "model SHA256 matches contract",
+      "model and contract SHA256 match training report",
+      "feature contract non-empty and unique"
+    ],
     "failure_behavior": "BLOCK_SHADOW_RUNTIME",
     "download_or_model_fallback": false
   },
@@ -48,13 +64,23 @@
     "stage286_dd_limit": 10.0,
     "stage286_after_candidate_loss_lockout_hours": 24,
     "max_unresolved_candidates": 1,
-    "resolved_only_rule": "exit_dt <= current entry_dt"
+    "resolved_only_rule": "exit_dt <= current entry_dt",
+    "future_candidate_entry_must_not_affect_prior_state": true
   },
   "base_state": {
-    "adapter_required": true,
+    "path_priority": [
+      "--base-resolved-csv",
+      "GOLD_V3_BASE_RESOLVED_CSV",
+      "FX_OUTPUTS/gold_v3/289c/gold_v3_289_base_resolved_import.csv"
+    ],
     "required_columns": ["entry_dt", "exit_dt", "pnl"],
     "fallback_to_candidate_only_equity": false,
     "missing_behavior": "PARTIAL_AND_REJECT_ADMISSION"
+  },
+  "local_verification": {
+    "hardening_tests_passed": 10,
+    "full_first_run_training_on_user_live_history": "PENDING_USER_RUNTIME",
+    "no_claim_of_completed_user_environment_training": true
   },
   "flags": {
     "audit_only": true,
