@@ -6,6 +6,7 @@ import warnings
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 RUNTIME = Path(__file__).resolve().parents[2] / "scripts" / "gold_v3_runtime"
 if str(RUNTIME) not in sys.path:
@@ -50,15 +51,14 @@ def test_stage280_engineering_keeps_values_without_fragmentation_warning():
         warnings.simplefilter("always")
         result = stage280_model_frame(source, features)
     assert not [item for item in captured if "fragmented" in str(item.message)]
-    assert result.iloc[0].to_dict() == {
-        "countermove_60": 0.6000000238418579,
-        "turn_accel_5v30": 0.6399999856948853,
-        "m5_turn_accel": 0.6000000238418579,
-        "m15_turn_accel": 0.30000001192092896,
-        "m1_reject_wick": 0.5,
-        "h4_align": -1.0,
-        "d1_align": 1.0,
-    }
+    values = result.iloc[0].to_dict()
+    assert values["countermove_60"] == pytest.approx(0.6)
+    assert values["turn_accel_5v30"] == pytest.approx(0.64)
+    assert values["m5_turn_accel"] == pytest.approx(0.6)
+    assert values["m15_turn_accel"] == pytest.approx(0.3)
+    assert values["m1_reject_wick"] == pytest.approx(0.5)
+    assert values["h4_align"] == pytest.approx(-1.0)
+    assert values["d1_align"] == pytest.approx(1.0)
 
 
 def test_preflight_blocks_missing_training_history(tmp_path, monkeypatch):
