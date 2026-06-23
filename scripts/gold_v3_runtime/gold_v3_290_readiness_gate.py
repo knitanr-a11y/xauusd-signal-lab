@@ -30,19 +30,29 @@ def historical_parity(path: Path):
         passed &= ok; rows.append({"year":year,"passed":ok,"observed_n":observed[0],"observed_pf":observed[1],"observed_sum":observed[2],"observed_dd":observed[3],"expected_n":target[0],"expected_pf":target[1],"expected_sum":target[2],"expected_dd":target[3]})
     return passed,rows
 
-def check_readiness(candle_dir: Path,bootstrap_path: Path,authorization: str,max_file_age_seconds=180):
-    checks=[]; blockers=[]
+def check_readiness(candle_dir: Path,bootstrap_path: Path,authorization: str):
+    checks=[]; blockers=[]; latest={}
+    freshness={"M1":180,"M5":180,"M15":1200}
     for tf,name in GOLD_FILES.items():
         path=candle_dir/name
         try:
-            data=read_candles(path,4,timeframe=tf,require_spread=True)
-            age=max(0.0,time.time()-path.stat().st_mtime); ok=age<=max_file_age_seconds
-            checks.append({"check":f"{tf}_closed_csv","passed":ok,"latest":str(data.time.max()),"file_age_seconds":age})
+            data=read_candles(path,4,timeframe=tf,require_spread=True); latest[tf]=pd.Timestamp(data.time.max())
+            age=max(0.0,time.time()-path.stat().st_mtime); limit=freshness.get(tf)
+            ok=limit is None or age<=limit
+            checks.append({"check":f"{tf}_closed_csv","passed":ok,"latest":str(latest[tf]),"file_age_seconds":age,"freshness_limit":limit})
             if not ok: blockers.append(f"STALE_{name}")
         except Exception as exc:
             checks.append({"check":f"{tf}_closed_csv","passed":False,"detail":repr(exc)}); blockers.append(f"INVALID_{name}")
+    if "M1" in latest and "M5" in latest:
+        lag=(latest["M1"]+pd.Timedelta(minutes=1))-(latest["M5"]+pd.Timedelta(minutes=5)); ok=pd.Timedelta(0)<=lag<pd.Timedelta(minutes=5)
+        checks.append({"check":"m1_m5_closed_alignment","passed":ok,"lag_seconds":lag.total_seconds()})
+        if not ok: blockers.append("M1_M5_CLOSED_ALIGNMENT_FAILED")
     for key,name in EXTERNAL_FILES.items():
-        try: read_candles(candle_dir/name,4,timeframe="M15",require_spread=False); checks.append({"check":key,"passed":True})
+        path=candle_dir/name
+        try:
+            data=read_candles(path,4,timeframe="M15",require_spread=False); age=max(0.0,time.time()-path.stat().st_mtime); ok=age<=1200
+            checks.append({"check":key,"passed":ok,"latest":str(data.time.max()),"file_age_seconds":age})
+            if not ok: blockers.append(f"STALE_{name}")
         except Exception as exc: checks.append({"check":key,"passed":False,"detail":repr(exc)}); blockers.append(f"INVALID_{name}")
     try: validate_model_bundle(model_dir()); checks.append({"check":"stage289_model_bundle","passed":True})
     except Exception as exc: checks.append({"check":"stage289_model_bundle","passed":False,"detail":repr(exc)}); blockers.append("MODEL_BUNDLE_NOT_PASS")
