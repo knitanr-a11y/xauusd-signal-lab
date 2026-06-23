@@ -70,53 +70,25 @@ def build_stage280_context(candle_dir: Path, include_next: bool = True, tail_onl
     return ctx
 
 
-def _direction_series(ctx: pd.DataFrame, direction=None) -> pd.Series:
-    if direction is None:
-        values = -pd.to_numeric(ctx.get("h4_trend", 0), errors="coerce")
-        values = values.where(values.isin([-1, 1]), 1)
-        return values.astype("float64")
-    if np.isscalar(direction):
-        return pd.Series(float(direction), index=ctx.index, dtype="float64")
-    values = pd.Series(direction, index=ctx.index)
-    values = pd.to_numeric(values, errors="coerce")
-    if not values.isin([-1, 1]).all():
-        raise ValueError("Stage280 direction must contain only -1 or 1")
-    return values.astype("float64")
+def stage280_model_frame(ctx: pd.DataFrame, features: list[str]) -> pd.DataFrame:
+    """Build the original Stage280 REV_LONG feature frame.
 
-
-def stage280_model_frame(ctx: pd.DataFrame, features: list[str], direction=None) -> pd.DataFrame:
-    """Build the pooled REV model frame in the predicted REV direction.
-
-    Stage280's audited REV model pools both directions. For an H4 uptrend the
-    predicted REV direction is SHORT (-1); for an H4 downtrend it is LONG (+1).
-    All signed returns, slopes, EMA distances, candle bodies and positions are
-    normalized into that predicted direction. Wick sides are swapped for SHORT.
+    Signed inputs keep their market direction. H4-up rows remain available as
+    negative examples; only the target definition selects H4-down LONG REV
+    onsets as positive examples.
     """
     x = ctx.copy()
-    d = _direction_series(ctx, direction)
     raw = [c for c in ctx.columns if c not in {"time", "atr_prev", "h4_trend", "d1_trend"}]
     converted: dict[str, pd.Series] = {}
     for c in raw:
         values = pd.to_numeric(x[c], errors="coerce")
         if any(p in c for p in ["ret", "dist_ema", "ema20_slope", "ema50_slope", "body_signed"]):
-            converted[c] = values * d
+            converted[c] = values
         elif "_pos" in c:
-            converted[c] = (2 * values - 1) * d
+            converted[c] = 2 * values - 1
     if converted:
         converted_frame = pd.DataFrame(converted, index=x.index)
         x = pd.concat([x.drop(columns=list(converted_frame.columns)), converted_frame], axis=1)
-
-    # In predicted-direction coordinates, lower wick is the rejection wick for
-    # LONG and the original upper wick is the rejection wick for SHORT.
-    lower_columns = [c for c in raw if c.endswith("lower_wick_ratio")]
-    for lower in lower_columns:
-        upper = lower.replace("lower_wick_ratio", "upper_wick_ratio")
-        if upper not in ctx.columns:
-            continue
-        original_lower = pd.to_numeric(ctx[lower], errors="coerce")
-        original_upper = pd.to_numeric(ctx[upper], errors="coerce")
-        x[lower] = original_lower.where(d.eq(1), original_upper)
-        x[upper] = original_upper.where(d.eq(1), original_lower)
 
     def g(c: str) -> pd.Series:
         value = x[c] if c in x.columns else pd.Series(np.nan, index=x.index)
@@ -136,8 +108,8 @@ def stage280_model_frame(ctx: pd.DataFrame, features: list[str], direction=None)
             "m1_reject_wick": g("m1_lower_wick_ratio") - g("m1_upper_wick_ratio"),
             "m5_reject_wick": g("m5_lower_wick_ratio") - g("m5_upper_wick_ratio"),
             "m15_reject_wick": g("m15_lower_wick_ratio") - g("m15_upper_wick_ratio"),
-            "h4_align": pd.to_numeric(x.h4_trend, errors="coerce") * d,
-            "d1_align": pd.to_numeric(x.d1_trend, errors="coerce") * d,
+            "h4_align": pd.to_numeric(x.h4_trend, errors="coerce"),
+            "d1_align": pd.to_numeric(x.d1_trend, errors="coerce"),
         },
         index=x.index,
     )
