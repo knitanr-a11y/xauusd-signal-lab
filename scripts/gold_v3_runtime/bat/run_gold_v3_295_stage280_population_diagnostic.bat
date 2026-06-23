@@ -20,12 +20,12 @@ if not defined FILES_DIR (
 where python >nul 2>&1
 if not errorlevel 1 (set "PYTHON_CMD=python") else (set "PYTHON_CMD=py -3")
 set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
-echo [INFO] Running Stage280 model-variant parity diagnostic...
-%PYTHON_CMD% "%RUNTIME%\gold_v3_298_stage280_model_variant_diagnostic.py" --candle-dir "%TRAIN_DIR%"
+echo [INFO] Running Stage280 wick and weight diagnostic...
+%PYTHON_CMD% "%RUNTIME%\gold_v3_299_stage280_wick_weight_diagnostic.py" --candle-dir "%TRAIN_DIR%"
 set "RC=%ERRORLEVEL%"
 echo.
 echo Diagnostic file:
-echo %TRAIN_DIR%\stage298_stage280_model_variant_diagnostic.json
+echo %TRAIN_DIR%\stage299_stage280_wick_weight_diagnostic.json
 echo.
 pause
 exit /b %RC%
