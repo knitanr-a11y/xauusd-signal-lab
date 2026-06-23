@@ -28,10 +28,7 @@ set "MODEL_DIR=%RUNTIME%\models\gold_v3_289"
 set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
 if not exist "%TRAIN_DIR%" mkdir "%TRAIN_DIR%"
 for %%F in (h1 h4 d1) do copy /Y "%FILES_DIR%\goldsharp_%%F.csv" "%TRAIN_DIR%\goldsharp_%%F.csv" >nul
-set "NEED_MODELS=0"
-if not exist "%MODEL_DIR%\stage280_rev_long_2026_model.txt" set "NEED_MODELS=1"
-if not exist "%MODEL_DIR%\stage281_med4h_cont_long_2026_model.txt" set "NEED_MODELS=1"
-if "%NEED_MODELS%"=="1" (
+if not exist "%MODEL_DIR%\stage281_med4h_cont_long_2026_model.txt" (
   if not exist "%TRAIN_DIR%\goldsharp_m1.csv" (
     echo [BLOCKED] Historical GOLD M1 training file is missing.
     echo Run install_gold_v3_289_training_m1_exporter.bat, compile the script in MetaEditor,
@@ -39,7 +36,7 @@ if "%NEED_MODELS%"=="1" (
     pause
     exit /b 4
   )
-  echo [INFO] Checking Stage289 training-history coverage...
+  echo [INFO] Checking Stage289 training-history coverage for Stage281...
   %PYTHON_CMD% "%RUNTIME%\gold_v3_289_training_history_preflight.py" --candle-dir "%TRAIN_DIR%"
   if errorlevel 1 (
     echo [BLOCKED] Training history is incomplete.
@@ -47,16 +44,16 @@ if "%NEED_MODELS%"=="1" (
     pause
     exit /b 5
   )
-  echo [INFO] Preparing only verifiably exact Stage289 models...
-  %PYTHON_CMD% "%RUNTIME%\gold_v3_301_prepare_exact_models.py" --candle-dir "%TRAIN_DIR%" --model-dir "%MODEL_DIR%"
-  if errorlevel 1 (
-    echo [BLOCKED] Stage280 exact source is unavailable or unverified.
-    echo Stage281 exact artifact may have been saved successfully.
-    echo Report: %MODEL_DIR%\stage301_exact_model_source_report.json
-    echo Approximate Stage280 models are not accepted.
-    pause
-    exit /b 6
-  )
+)
+echo [INFO] Verifying exact Stage289 model sources...
+%PYTHON_CMD% "%RUNTIME%\gold_v3_301_prepare_exact_models.py" --candle-dir "%TRAIN_DIR%" --model-dir "%MODEL_DIR%"
+if errorlevel 1 (
+  echo [BLOCKED] Stage280 exact source is unavailable or unverified.
+  echo Stage281 exact artifact may have been saved successfully.
+  echo Report: %MODEL_DIR%\stage301_exact_model_source_report.json
+  echo Approximate Stage280 models are not accepted.
+  pause
+  exit /b 6
 )
 echo [1/2] Refreshing BASE conditions...
 %PYTHON_CMD% "%RUNTIME%\gold_v3_69_live_csv_condition_detector_audit.py" --candle-dir "%FILES_DIR%"
