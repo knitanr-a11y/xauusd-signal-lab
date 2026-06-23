@@ -20,13 +20,13 @@ if not defined FILES_DIR (
 where python >nul 2>&1
 if not errorlevel 1 (set "PYTHON_CMD=python") else (set "PYTHON_CMD=py -3")
 set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
-set "READINESS_JSON=%TRAIN_DIR%\stage303_stage280_block_stage281_readiness.json"
-echo [INFO] Running Stage280-block / Stage281-readiness diagnostic...
-%PYTHON_CMD% "%RUNTIME%\gold_v3_303_stage280_block_stage281_readiness.py" --repo-root "%CD%" --output "%READINESS_JSON%"
+set "BACKTEST_JSON=%TRAIN_DIR%\stage304_stage280_approximate_walkforward_backtest.json"
+echo [INFO] Running Stage280 approximate walk-forward backtest...
+%PYTHON_CMD% "%RUNTIME%\gold_v3_304_stage280_approximate_walkforward_backtest.py" --candle-dir "%TRAIN_DIR%" --output "%BACKTEST_JSON%" --top 100
 set "RC=%ERRORLEVEL%"
 echo.
-echo Readiness file:
-echo %READINESS_JSON%
+echo Backtest file:
+echo %BACKTEST_JSON%
 echo.
 pause
 exit /b %RC%
