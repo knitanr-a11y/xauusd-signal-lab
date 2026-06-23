@@ -8,6 +8,8 @@ on:
       - 'tests/gold_v3/test_stage292_safe_portfolio_live.py'
       - 'docs/gold_v3/gold_v3_stage292_safe_portfolio_bootstrap.json'
       - '.github/workflows/stage292-ci.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
