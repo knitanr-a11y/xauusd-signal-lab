@@ -24,23 +24,25 @@ def sha(path):
   for b in iter(lambda:f.read(1048576),b""): h.update(b)
  return h.hexdigest()
 def stage280(cdir):
- ctx=build_stage280_context(cdir,include_next=False,tail_only=False).sort_values("time").reset_index(drop=True); raw=load_gold(cdir,tail_only=False); mt,mo,mh,ml,mc,mv,ms=m1_arrays(raw["M1"]); dirs=[]
+ ctx=build_stage280_context(cdir,include_next=False,tail_only=False).sort_values("time").reset_index(drop=True); raw=load_gold(cdir,tail_only=False); mt,mo,mh,ml,mc,mv,ms=m1_arrays(raw["M1"]); dirs=[]; future_valid=[]
  for r in ctx.itertuples(index=False):
   a=float(r.atr_prev) if pd.notna(r.atr_prev) else np.nan; t=np.datetime64(r.time); s=np.searchsorted(mt,t,"left"); e=np.searchsorted(mt,t+np.timedelta64(240,"m"),"left")
-  if not np.isfinite(a) or a<=0 or s>=len(mt) or mt[s]!=t or e<=s or e-s<180: dirs.append(0); continue
+  valid=bool(np.isfinite(a) and a>0 and s<len(mt) and mt[s]==t and e>s and e-s>=180)
+  future_valid.append(valid)
+  if not valid: dirs.append(0); continue
   ep=float(mo[s]); hi=float(mh[s:e].max()); lo=float(ml[s:e].min()); fin=float(mc[e-1]); lmfe=(hi-ep)/a; lmae=(ep-lo)/a; lfin=(fin-ep)/a; smfe=(ep-lo)/a; smae=(hi-ep)/a; sfin=(ep-fin)/a
   lq=lmfe>=2 and lfin>=.75 and lmae<=1.25 and lmfe>=1.5*max(lmae,.05); sq=smfe>=2 and sfin>=.75 and smae<=1.25 and smfe>=1.5*max(smae,.05)
   dirs.append(1 if lq and not sq else (-1 if sq and not lq else (1 if lq and sq and lmfe-lmae>smfe-smae else (-1 if lq and sq else 0))))
- ctx["event_dir"]=np.asarray(dirs,dtype="int8"); ctx["event_onset"]=False
+ ctx["future_valid"]=np.asarray(future_valid,dtype=bool); ctx["event_dir"]=np.asarray(dirs,dtype="int8"); ctx["event_onset"]=False
  for d in [1,-1]:
   m=ctx.event_dir.eq(d); prev=m.shift(1,fill_value=False)|m.shift(2,fill_value=False)|m.shift(3,fill_value=False); ctx.loc[m&~prev,"event_onset"]=True
- meta={"time","atr_prev","event_dir","event_onset","h4_trend","d1_trend"}; rawf=[c for c in ctx.columns if c not in meta]; bad=("_open","_high","_low","_close","_ema20","_ema50","_atr14"); rawf=[c for c in rawf if not c.endswith(bad)]; eng=["countermove_60","countermove_120","turn_5","turn_15","turn_30","turn_accel_5v30","turn_accel_15v60","m5_turn_accel","m15_turn_accel","m1_reject_wick","m5_reject_wick","m15_reject_wick","h4_align","d1_align"]; features=list(dict.fromkeys(rawf+eng))
- # The audited Stage280 REV model pools both directions. H4 up predicts a
- # SHORT reversal; H4 down predicts a LONG reversal. All signed features are
- # normalized into that predicted reversal direction before fitting.
- z=ctx[ctx.h4_trend.ne(0)].copy(); rev_direction=(-z.h4_trend).astype("int8"); y=((z.event_onset)&z.event_dir.eq(rev_direction)).astype(int); X=stage280_model_frame(z,features,direction=rev_direction); fm=(z.time>="2024-01-01")&(z.time<"2025-07-01"); cm=(z.time>="2025-07-01")&(z.time<"2026-01-01"); pos=max(int(y[fm].sum()),1); spw=min(max((int(fm.sum())-pos)/pos,1),25)
+ meta={"time","atr_prev","future_valid","event_dir","event_onset","h4_trend","d1_trend"}; rawf=[c for c in ctx.columns if c not in meta]; bad=("_open","_high","_low","_close","_ema20","_ema50","_atr14"); rawf=[c for c in rawf if not c.endswith(bad)]; eng=["countermove_60","countermove_120","turn_5","turn_15","turn_30","turn_accel_5v30","turn_accel_15v60","m5_turn_accel","m15_turn_accel","m1_reject_wick","m5_reject_wick","m15_reject_wick","h4_align","d1_align"]; features=list(dict.fromkeys(rawf+eng))
+ # Stage280 REV_LONG trains on every future-valid H4 non-neutral row. Only a
+ # LONG reversal onset while H4 is down is positive; H4-up rows remain as
+ # negative examples with their original, non-normalized feature direction.
+ z=ctx[ctx.h4_trend.ne(0)&ctx.future_valid].copy(); y=((z.event_onset)&z.event_dir.eq(1)&z.h4_trend.eq(-1)).astype(int); X=stage280_model_frame(z,features); fm=(z.time>="2024-01-01")&(z.time<"2025-07-01"); cm=(z.time>="2025-07-01")&(z.time<"2026-01-01"); pos=max(int(y[fm].sum()),1); spw=min(max((int(fm.sum())-pos)/pos,1),25)
  model=LGBMClassifier(objective="binary",n_estimators=220,learning_rate=.03,num_leaves=15,max_depth=5,min_child_samples=60,subsample=.85,colsample_bytree=.8,reg_alpha=1,reg_lambda=6,random_state=281,n_jobs=1,verbosity=-1,scale_pos_weight=spw); model.fit(X.loc[fm],y.loc[fm]); q=float(np.quantile(model.predict_proba(X.loc[cm])[:,1],.95)); fixture=z.time.eq(pd.Timestamp(TIME280)); score=float(model.predict_proba(X.loc[fixture])[:,1][0]) if fixture.any() else np.nan
- return model,features,q,score,{"fit_n":int(fm.sum()),"cal_n":int(cm.sum()),"positive_fit":int(y[fm].sum()),"fit_h4_up_n":int((fm&z.h4_trend.eq(1)).sum()),"fit_h4_down_n":int((fm&z.h4_trend.eq(-1)).sum())}
+ return model,features,q,score,{"fit_n":int(fm.sum()),"cal_n":int(cm.sum()),"positive_fit":int(y[fm].sum()),"future_valid_rows":int(z.future_valid.sum()),"fit_h4_up_n":int((fm&z.h4_trend.eq(1)).sum()),"fit_h4_down_n":int((fm&z.h4_trend.eq(-1)).sum())}
 def stage281(cdir,feature_list_path):
  ctx=build_stage281_context(cdir,include_next=False,tail_only=False).sort_values("time").reset_index(drop=True); raw=load_gold(cdir,tail_only=False); mt,mo,mh,ml,mc,mv,ms=m1_arrays(raw["M1"]); target=[]
  for r in ctx.itertuples(index=False):
