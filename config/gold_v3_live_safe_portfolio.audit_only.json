@@ -1,0 +1,40 @@
+{
+  "status": "GOLD_V3_286_SAFE_PORTFOLIO_LIVE_SHADOW_AUDIT_ONLY",
+  "time_basis": "MT5_SERVER_NAIVE",
+  "strict_short": {
+    "base_candidate_name": "SHORT_EXHAUST_Q90_EMA20_E225_CD120",
+    "score_max": 2.992581130893,
+    "risk_m15_ret4_mean_max": 0.410970621210
+  },
+  "admission": {
+    "common_realized_dd_max": 30.0,
+    "shared_candidate_cooldown_hours": 12.0,
+    "strict_short_realized_dd_max": 10.0,
+    "candidate_loss_lockout_hours": 24.0,
+    "priorities": {
+      "BASE": 0,
+      "STAGE280": 10,
+      "STAGE281": 20,
+      "SHORT_STRICT": 60
+    }
+  },
+  "rollover": {
+    "enabled": true,
+    "sources": ["BASE"],
+    "blocked_server_hours": [0, 1]
+  },
+  "runtime_guards": {
+    "entry_spread_cap_usd": 0.30,
+    "quote_age_seconds_max": 2.0,
+    "max_adverse_fill_slippage_usd": 0.20,
+    "enforcement": "DIAGNOSTIC_ONLY"
+  },
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord_notify": false,
+    "partial_close": false
+  }
+}
