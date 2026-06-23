@@ -55,7 +55,7 @@ def test_stage280_engineering_keeps_values_without_fragmentation_warning():
     assert values["d1_align"] == pytest.approx(1.0)
 
 
-def test_stage280_rev_long_features_keep_market_direction():
+def test_stage280_mirrored_rev_directions_normalize_to_same_features():
     source = pd.DataFrame({
         "m1_ret60_atr": [-0.6, 0.6],
         "m1_ret5_atr": [0.5, -0.5],
@@ -73,22 +73,19 @@ def test_stage280_rev_long_features_keep_market_direction():
         "h4_align", "d1_align",
     ]
     result = stage280_model_frame(source, features)
-    assert result.iloc[0]["m1_ret60_atr"] == pytest.approx(-0.6)
-    assert result.iloc[1]["m1_ret60_atr"] == pytest.approx(0.6)
-    assert result.iloc[0]["m1_pos60"] == pytest.approx(0.6)
-    assert result.iloc[1]["m1_pos60"] == pytest.approx(-0.6)
+    assert result.iloc[0].to_dict() == pytest.approx(result.iloc[1].to_dict())
     assert result.iloc[0]["h4_align"] == pytest.approx(-1.0)
-    assert result.iloc[1]["h4_align"] == pytest.approx(1.0)
     assert result.iloc[0]["m1_reject_wick"] == pytest.approx(0.5)
-    assert result.iloc[1]["m1_reject_wick"] == pytest.approx(-0.5)
 
 
-def test_stage280_training_uses_future_valid_long_rev_contract():
+def test_stage280_training_uses_future_valid_pooled_rev_contract():
     source = (RUNTIME / "gold_v3_289_train_live_models_audit.py").read_text(encoding="utf-8")
     assert 'ctx["future_valid"]' in source
     assert 'ctx.h4_trend.ne(0)&ctx.future_valid' in source
-    assert 'z.event_dir.eq(1)&z.h4_trend.eq(-1)' in source
-    assert 'stage280_model_frame(z,features)' in source
+    assert 'rev_direction=(-z.h4_trend)' in source
+    assert 'z.event_dir.eq(rev_direction)' in source
+    assert 'stage280_model_frame(z,features,direction=rev_direction)' in source
+    assert 'EXPECTED_STAGE280_POSITIVE_FIT=245' in source
 
 
 def test_preflight_blocks_missing_training_history(tmp_path, monkeypatch):
