@@ -34,11 +34,12 @@ echo.
 echo Exporter installed:
 echo %MQL5_DIR%\Scripts\ExportGoldStage289TrainingM1.mq5
 echo.
+echo This updated exporter writes historical GOLD M1, M5 and M15 files.
 echo Next steps in MT5:
 echo 1. Open MetaEditor and compile ExportGoldStage289TrainingM1.mq5 with F7.
 echo 2. In MT5 Navigator, refresh Scripts.
 echo 3. Run ExportGoldStage289TrainingM1 once on a GOLD chart.
-echo 4. Wait for STAGE289_TRAINING_M1_EXPORT_COMPLETE in the Experts log.
+echo 4. Wait for STAGE289_TRAINING_HISTORY_EXPORT_ALL_COMPLETE in the Experts log.
 echo 5. Run run_gold_v3_292_safe_portfolio_live.bat again.
 echo.
 start "" explorer.exe "%MQL5_DIR%\Scripts"
