@@ -1,62 +1,16 @@
 {
   "status": "GOLD_V3_290_LIVE_SAFE_PORTFOLIO_SIGNAL_BLOCKED_PENDING_LOCAL_PROMOTION",
-  "purpose": "Produce the Stage284 balanced plus Stage286 strict SHORT safe portfolio as a real-time final signal from existing MT5 Files closed-candle CSVs.",
   "base_branch": "stage289_live_candle_ml_safe_shadow_audit_v2",
-  "runtime_inputs": {
-    "files_root": "MQL5/Files",
-    "gold_closed_csv": [
-      "goldsharp_m1.csv",
-      "goldsharp_m5.csv",
-      "goldsharp_m15.csv",
-      "goldsharp_h1.csv",
-      "goldsharp_h4.csv",
-      "goldsharp_d1.csv"
-    ],
-    "stage286_external_closed_csv": [
-      "us500cashsharp_m15.csv",
-      "us100cashsharp_m15.csv"
-    ],
-    "base_signal_source": "FX_OUTPUTS/gold_v3/70_live_csv_signal_decision_preview_audit_only/gold_v3_70_latest_closed_signal_decision.csv",
-    "bootstrap_resolved_ledger": "required before promotion",
-    "actual_execution_updates": "FX_OUTPUTS/gold_v3/290_live_safe_portfolio/gold_v3_290_execution_updates.csv"
-  },
-  "live_time_contract": {
-    "latest_csv_row": "closed by exporter contract",
-    "time_basis": "MT5 server bar-open time",
-    "htf_available_after_nominal_close": true,
-    "future_outcome_fields_forbidden": true,
-    "resolved_only_rule": "exit_dt <= current entry_dt",
-    "production_entry": "emit intent at trigger-bar close; actual entry price comes only from a FILLED execution update"
-  },
-  "safe_admission": {
-    "priority": {"BASE": 0, "STAGE280": 10, "STAGE281": 20, "STAGE286": 60},
-    "max_pending_or_open_positions": 1,
-    "stage280_stage281_resolved_dd_max": 30.0,
-    "shared_candidate_cooldown_hours": 12,
-    "stage281_latest_resolved_base_loss_hours": 72,
-    "stage286_resolved_dd_max": 10.0,
-    "stage286_resolved_candidate_loss_lockout_hours": 24,
-    "base_rollover_blocked_server_hours": [0, 1]
-  },
-  "promotion_requirements": {
-    "stage289_model_bundle": "PASS",
-    "local_files_full_training": "PASS",
-    "historical_safe_portfolio_parity": {
-      "2024": {"n": 242, "pf": 1.645, "sum": 279.45, "dd": 28.94},
-      "2025": {"n": 229, "pf": 1.941, "sum": 600.16, "dd": 42.92},
-      "2026": {"n": 102, "pf": 2.843, "sum": 965.60, "dd": 66.06}
-    },
-    "base_signal_source_ready": true,
-    "bootstrap_state_ready": true,
-    "source_files_fresh": true,
-    "authorization_token": "USER_APPROVED_SAFE_PORTFOLIO_LIVE_SIGNAL_2026_06_23"
-  },
-  "execution_scope": {
-    "final_signal_runtime": "implemented but blocked until local promotion PASS",
-    "mt5_order_send": false,
-    "discord_notify": false,
-    "partial_close": false,
-    "shadow_exit_simulation_used_in_production": false,
-    "actual_fill_and_close_required": true
-  }
+  "files_root": "MQL5/Files",
+  "closed_candles": ["goldsharp_m1.csv", "goldsharp_m5.csv", "goldsharp_m15.csv", "goldsharp_h1.csv", "goldsharp_h4.csv", "goldsharp_d1.csv", "us500cashsharp_m15.csv", "us100cashsharp_m15.csv"],
+  "base_condition_source": "Stage69 latest closed condition candidates",
+  "base_health_history": "resolved candidate key, exit time, pnl required",
+  "resolved_only": "exit_dt <= current entry_dt",
+  "base_health_gate": {"window": 30, "min_history": 20, "pf_min": 1.10, "loss_streak_lt": 3},
+  "safe_admission": {"priority": {"BASE": 0, "STAGE280": 10, "STAGE281": 20, "STAGE286": 60}, "one_position": true, "candidate_dd_max": 30.0, "candidate_cooldown_hours": 12, "stage281_after_resolved_base_loss_hours": 72, "stage286_dd_max": 10.0, "stage286_loss_lockout_hours": 24, "base_rollover_hours": [0, 1]},
+  "parity_targets": {"2024": {"n": 242, "pf": 1.645, "sum": 279.45, "dd": 28.94}, "2025": {"n": 229, "pf": 1.941, "sum": 600.16, "dd": 42.92}, "2026": {"n": 102, "pf": 2.843, "sum": 965.60, "dd": 66.06}},
+  "activation_requirements": ["fresh closed files", "M1/M5 alignment", "Stage289 model bundle PASS", "historical parity PASS", "resolved BASE health history PASS", "Stage69 current", "user authorization"],
+  "outputs": {"final_signal": true, "mt5_order": false, "discord": false, "partial_close": false},
+  "actual_fill_close_updates_required": true,
+  "shadow_exit_simulation_in_production": false
 }
