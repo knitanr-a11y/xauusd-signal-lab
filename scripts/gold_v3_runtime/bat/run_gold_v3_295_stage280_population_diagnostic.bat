@@ -22,7 +22,7 @@ if not errorlevel 1 (set "PYTHON_CMD=python") else (set "PYTHON_CMD=py -3")
 set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
 set "BACKTEST_JSON=%TRAIN_DIR%\stage306_stage280_candidate_pool_expansion.json"
 echo [INFO] Running Stage280 candidate-pool expansion backtest...
-%PYTHON_CMD% "%RUNTIME%\gold_v3_306_stage280_candidate_pool_expansion.py" --candle-dir "%TRAIN_DIR%" --output "%BACKTEST_JSON%" --point-size 0.01 --top 200
+%PYTHON_CMD% "%RUNTIME%\gold_v3_306_stage280_candidate_pool_expansion_runner.py" --candle-dir "%TRAIN_DIR%" --output "%BACKTEST_JSON%" --point-size 0.01 --top 200
 set "RC=%ERRORLEVEL%"
 echo.
 echo Backtest file:
