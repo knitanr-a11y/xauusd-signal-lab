@@ -60,9 +60,12 @@ def main():
         for name in list(GOLD_FILES.values()) + ["us500cashsharp_m15.csv", "us100cashsharp_m15.csv"]:
             if not (candle_dir / name).exists():
                 raise FileNotFoundError(name)
-        stage70 = candle_dir / "FX_OUTPUTS" / "gold_v3" / "70_live_csv_signal_decision_preview_audit_only" / "gold_v3_70_latest_closed_signal_decision.csv"
-        if not stage70.exists():
-            raise FileNotFoundError("Stage70 latest decision is missing")
+        stage69 = candle_dir / "FX_OUTPUTS" / "gold_v3" / "69_live_csv_condition_detector_audit_only" / "gold_v3_69_latest_closed_condition_candidates.csv"
+        stage67 = candle_dir / "FX_OUTPUTS" / "gold_v3" / "67_health_gate_rehydration_audit_only" / "gold_v3_67_health_gate_event_ledger.csv"
+        if not stage69.exists():
+            raise FileNotFoundError("Stage69 latest conditions are missing")
+        if not stage67.exists() or stage67.stat().st_size == 0:
+            raise FileNotFoundError("Stage67 closed-outcome history is missing")
     except Exception as exc:
         write_csv(final_path, pd.DataFrame())
         write_json(summary_path, {"status":BLOCKED, "created_at_utc":utc_now(), "error":repr(exc)})
@@ -113,7 +116,10 @@ def main():
         return 0
 
     try:
-        candidates, meta = detect_all_candidates(candle_dir, args.lookback_hours)
+        candidates, meta, base_screen = detect_all_candidates(
+            candle_dir, ledger, bootstrap, args.lookback_hours
+        )
+        write_csv(output / "gold_v3_292_latest_base_health_screen.csv", base_screen)
     except Exception as exc:
         write_csv(final_path, pd.DataFrame())
         write_json(summary_path, {"status":BLOCKED, "created_at_utc":utc_now(), "error":repr(exc)})
@@ -148,6 +154,7 @@ def main():
         "final_signal_count":int(len(final)),
         "state":current_state,
         "candidate_meta":meta,
+        "base_health_mode":"CUTOVER_CLOSED_HISTORY_PLUS_ACTUAL_LIVE_CLOSED",
         "final_signal_enabled":True,
         "actual_fill_close_updates_required":True,
         "mt5_order_enabled":False,
