@@ -282,11 +282,15 @@ def baseline_summary(
     result: dict[str, Any] = {}
     combined: list[dict[str, Any]] = []
     for year in YEARS:
-        rows = [
-            dict(value)
-            for value in outcomes.values()
-            if pd.Timestamp(value["decision_dt"]).year == year
-        ]
+        rows = []
+        for context_index, value in outcomes.items():
+            if pd.Timestamp(value["decision_dt"]).year != year:
+                continue
+            row = dict(value)
+            row["ml_score"] = 0.0
+            row["context_index"] = int(context_index)
+            row["year"] = year
+            rows.append(row)
         rows = base.non_overlapping(base.deduplicate(rows))
         result[str(year)] = base.summarize_trades(rows)
         combined.extend(rows)
