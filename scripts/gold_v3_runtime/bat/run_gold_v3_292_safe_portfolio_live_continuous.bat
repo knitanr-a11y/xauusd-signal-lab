@@ -19,8 +19,10 @@ if not errorlevel 1 (set "PYTHON_CMD=python") else (set "PYTHON_CMD=py -3")
 if errorlevel 1 %PYTHON_CMD% -m pip install numpy pandas lightgbm
 set "MODEL_DIR=%RUNTIME%\models\gold_v3_289"
 if not exist "%MODEL_DIR%\stage280_rev_long_2026_model.txt" (
-  %PYTHON_CMD% "%RUNTIME%\gold_v3_289_train_live_models_audit.py" --candle-dir "%FILES_DIR%"
-  if errorlevel 1 (echo [BLOCKED] Model training parity failed.& pause& exit /b 3)
+  echo [BLOCKED] Stage280/281 models are not ready.
+  echo Run run_gold_v3_292_safe_portfolio_live.bat once after exporting historical M1, M5 and M15.
+  pause
+  exit /b 3
 )
 set "OUT_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\292_safe_portfolio_live"
 echo Stage292 continuous live monitor
