@@ -8,9 +8,11 @@ import math
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 import gold_v3_304_stage280_approximate_walkforward_backtest as metrics_base
+import gold_v3_306_stage280_candidate_pool_expansion as stage306
 import gold_v3_307_stage280_multimodel_candidate_expansion as stage307
 from gold_v3_298_stage280_model_variant_diagnostic import prepare
 from gold_v3_299_stage280_wick_weight_diagnostic import target_series
@@ -44,6 +46,99 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def build_frozen_market(
+    candle_dir: Path,
+    *,
+    latest_m1_time: pd.Timestamp,
+    latest_m5_time: pd.Timestamp,
+) -> dict[str, Any]:
+    market = stage306.build_market(candle_dir)
+    m5 = market["m5"].loc[
+        market["m5"].time.le(latest_m5_time)
+    ].copy().reset_index(drop=True)
+    m1 = market["m1"].loc[
+        market["m1"].time.le(latest_m1_time)
+    ].copy().reset_index(drop=True)
+    if m5.empty or m1.empty:
+        raise ValueError("FROZEN_MARKET_EMPTY")
+    if pd.Timestamp(m5.time.max()) != latest_m5_time:
+        raise ValueError(
+            f"FROZEN_M5_CUTOFF_MISSING: expected={latest_m5_time} actual={m5.time.max()}"
+        )
+    if pd.Timestamp(m1.time.max()) != latest_m1_time:
+        raise ValueError(
+            f"FROZEN_M1_CUTOFF_MISSING: expected={latest_m1_time} actual={m1.time.max()}"
+        )
+
+    m5_range = (m5.high - m5.low).to_numpy(float)
+    m5_body = np.divide(
+        (m5.close - m5.open).to_numpy(float),
+        m5_range,
+        out=np.zeros(len(m5), dtype=float),
+        where=m5_range > 0,
+    )
+    frozen = {
+        "m5": m5,
+        "m5_time": m5.time.to_numpy("datetime64[ns]"),
+        "m5_open": m5.open.to_numpy(float),
+        "m5_high": m5.high.to_numpy(float),
+        "m5_low": m5.low.to_numpy(float),
+        "m5_close": m5.close.to_numpy(float),
+        "m5_spread": m5.spread.to_numpy(float),
+        "m5_body": m5_body,
+        "m5_ema20": m5.close.ewm(span=20, adjust=False).mean().to_numpy(float),
+        "m1": m1,
+        "m1_time": m1.time.to_numpy("datetime64[ns]"),
+        "m1_high": m1.high.to_numpy(float),
+        "m1_low": m1.low.to_numpy(float),
+        "m1_close": m1.close.to_numpy(float),
+    }
+    return frozen
+
+
+def precompute_frozen_outcomes(
+    ctx: pd.DataFrame,
+    candle_dir: Path,
+    point_size: float,
+    source_snapshot: dict[str, Any],
+) -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
+    latest_m1_time = pd.Timestamp(source_snapshot["latest_m1_time_inclusive"])
+    latest_m5_time = pd.Timestamp(source_snapshot["latest_m5_time_inclusive"])
+    context_time_max = pd.Timestamp(source_snapshot["context_time_max_inclusive"])
+    market = build_frozen_market(
+        candle_dir,
+        latest_m1_time=latest_m1_time,
+        latest_m5_time=latest_m5_time,
+    )
+    rows = ctx[
+        ctx.h4_trend.eq(-1)
+        & ctx.time.ge("2025-01-01")
+        & ctx.time.lt("2027-01-01")
+        & ctx.time.le(context_time_max)
+    ]
+    outcomes: dict[int, dict[str, Any]] = {}
+    for context_index, row in rows.iterrows():
+        result = stage306.simulate(
+            pd.Timestamp(row.time),
+            float(row.atr_prev),
+            stage307.ANCHOR_FAMILY,
+            market,
+            point_size,
+        )
+        if result is not None:
+            outcomes[int(context_index)] = result
+    metadata = {
+        "frozen_source_snapshot": True,
+        "h4_down_test_rows": int(len(rows)),
+        "triggered_and_resolved_rows": int(len(outcomes)),
+        "latest_m1_time": str(market["m1"].time.max()),
+        "latest_m5_time": str(market["m5"].time.max()),
+        "context_time_max_inclusive": str(context_time_max),
+        "point_size": float(point_size),
+    }
+    return outcomes, metadata
 
 
 def reconstruct_candidate_trades(
@@ -211,15 +306,33 @@ def main() -> int:
             "CONTRACT_ENSEMBLE_KEY_MISMATCH: "
             f"derived={expected_key} contract={contract['source_ensemble_key']}"
         )
+    expected_point_size = float(
+        contract["execution_contract"]["spread_point_size"]
+    )
+    if not math.isclose(
+        float(args.point_size),
+        expected_point_size,
+        rel_tol=0.0,
+        abs_tol=1e-15,
+    ):
+        raise ValueError(
+            f"POINT_SIZE_MISMATCH: expected={expected_point_size} actual={args.point_size}"
+        )
 
+    context_time_max = pd.Timestamp(
+        contract["source_snapshot"]["context_time_max_inclusive"]
+    )
     ctx, features = prepare(candle_dir)
-    eligible = ctx[ctx.h4_trend.ne(0)].copy()
+    eligible = ctx[
+        ctx.h4_trend.ne(0) & ctx.time.le(context_time_max)
+    ].copy()
     target = target_series(eligible)
     models, model_contracts = stage307.fit_models(eligible, features, target)
-    outcomes, outcome_meta = stage307.precompute_outcomes(
+    outcomes, outcome_meta = precompute_frozen_outcomes(
         eligible,
         candle_dir,
         float(args.point_size),
+        contract["source_snapshot"],
     )
 
     candidate_trades, yearly = reconstruct_candidate_trades(
@@ -264,6 +377,7 @@ def main() -> int:
                     "models": list(selected_models),
                     "rule": rule,
                     "execution_contract": contract["execution_contract"],
+                    "source_snapshot": contract["source_snapshot"],
                     "aggregate": aggregate,
                     "yearly": yearly,
                     "source_robust_score": contract["source_robust_score"],
@@ -285,8 +399,9 @@ def main() -> int:
         },
         "stage308_review": {
             "uploaded_result_decision": "NO_MOCHIPOYO_CANDIDATE_PASSED",
+            "uploaded_pass_count": 0,
             "registered_from_stage308": False,
-            "reason": "Stage308 reported pass_count=0; retain its results for later rule refinement only.",
+            "reason": "Retain Stage308 for rule refinement; none of its 96 families or 40 pools passed the declared gates.",
         },
         "next_stage": {
             "stage": 310,
