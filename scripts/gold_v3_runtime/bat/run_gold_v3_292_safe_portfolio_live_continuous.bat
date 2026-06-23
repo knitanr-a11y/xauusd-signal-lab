@@ -28,7 +28,6 @@ echo MT5 Files: %FILES_DIR%
 echo Stop: Ctrl+C
 :LOOP
 %PYTHON_CMD% "%RUNTIME%\gold_v3_69_live_csv_condition_detector_audit.py" --candle-dir "%FILES_DIR%" >nul 2>&1
-if not errorlevel 1 %PYTHON_CMD% "%RUNTIME%\gold_v3_70_live_csv_signal_decision_preview_audit.py" --candle-dir "%FILES_DIR%" >nul 2>&1
 if not errorlevel 1 %PYTHON_CMD% "%RUNTIME%\gold_v3_292_safe_portfolio_live.py" --candle-dir "%FILES_DIR%" --output-dir "%OUT_DIR%"
 if exist "%OUT_DIR%\gold_v3_292_summary.json" (
   cls
