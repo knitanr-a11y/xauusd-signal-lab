@@ -1,0 +1,15 @@
+{
+  "status": "GOLD_V3_292_SAFE_PORTFOLIO_BOOTSTRAP_READY",
+  "portfolio": "PLUS_STRICT_SAFE",
+  "asof": "2026-06-19 15:51:00",
+  "equity": 965.6008808154019,
+  "peak": 985.2064859116765,
+  "realized_drawdown": 19.605605096274644,
+  "last_candidate_entry_dt": "2026-06-19 08:30:00",
+  "last_candidate_loss_exit_dt": "2026-04-29 21:45:00",
+  "last_base_exit_dt": "2026-06-19 15:51:00",
+  "last_base_pnl": -19.605605096274644,
+  "open_position": false,
+  "source": "gold_v3_stage286_short_selected_portfolio_trades.csv",
+  "notes": "2026 cutover state; future live state must not reset by calendar year"
+}
