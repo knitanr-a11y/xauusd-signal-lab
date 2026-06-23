@@ -25,14 +25,32 @@ if errorlevel 1 (
   if errorlevel 1 (echo [BLOCKED] Python package installation failed.& pause& exit /b 3)
 )
 set "MODEL_DIR=%RUNTIME%\models\gold_v3_289"
+set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
+if not exist "%TRAIN_DIR%" mkdir "%TRAIN_DIR%"
+for %%F in (m5 m15 h1 h4 d1) do copy /Y "%FILES_DIR%\goldsharp_%%F.csv" "%TRAIN_DIR%\goldsharp_%%F.csv" >nul
 if not exist "%MODEL_DIR%\stage280_rev_long_2026_model.txt" (
-  echo [INFO] Training Stage280/281 models once from the closed CSV history.
-  %PYTHON_CMD% "%RUNTIME%\gold_v3_289_train_live_models_audit.py" --candle-dir "%FILES_DIR%"
-  if errorlevel 1 (echo [BLOCKED] Model training parity failed.& pause& exit /b 4)
+  if not exist "%TRAIN_DIR%\goldsharp_m1.csv" (
+    echo [BLOCKED] Historical GOLD M1 training file is missing.
+    echo Run install_gold_v3_289_training_m1_exporter.bat, compile the script in MetaEditor,
+    echo and run ExportGoldStage289TrainingM1 once on a GOLD chart.
+    pause
+    exit /b 4
+  )
+  echo [INFO] Checking Stage289 training-history coverage...
+  %PYTHON_CMD% "%RUNTIME%\gold_v3_289_training_history_preflight.py" --candle-dir "%TRAIN_DIR%"
+  if errorlevel 1 (
+    echo [BLOCKED] Training history is incomplete. Do not train from the short live M1 file.
+    echo Run ExportGoldStage289TrainingM1 again after MT5 finishes downloading M1 history.
+    pause
+    exit /b 5
+  )
+  echo [INFO] Training Stage280/281 once from the audited historical staging folder.
+  %PYTHON_CMD% "%RUNTIME%\gold_v3_289_train_live_models_audit.py" --candle-dir "%TRAIN_DIR%"
+  if errorlevel 1 (echo [BLOCKED] Model training parity failed.& pause& exit /b 6)
 )
 echo [1/2] Refreshing BASE conditions...
 %PYTHON_CMD% "%RUNTIME%\gold_v3_69_live_csv_condition_detector_audit.py" --candle-dir "%FILES_DIR%"
-if errorlevel 1 (echo [BLOCKED] Stage69 failed.& pause& exit /b 5)
+if errorlevel 1 (echo [BLOCKED] Stage69 failed.& pause& exit /b 7)
 echo [2/2] Running resolved-only safe portfolio controller...
 set "OUT_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\292_safe_portfolio_live"
 %PYTHON_CMD% "%RUNTIME%\gold_v3_292_safe_portfolio_live.py" --candle-dir "%FILES_DIR%" --output-dir "%OUT_DIR%"
