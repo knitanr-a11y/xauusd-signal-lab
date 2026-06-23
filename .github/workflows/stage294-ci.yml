@@ -1,7 +1,19 @@
 name: Stage294 CI
-on: [workflow_dispatch]
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
 jobs:
-  test:
+  training-history:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install numpy pandas pytest lightgbm
+      - run: python -m compileall -q scripts/gold_v3_runtime/gold_v3_289_training_history_preflight.py scripts/gold_v3_runtime/gold_v3_289_stage280_features.py
+      - run: python -m pytest -q tests/gold_v3/test_stage294_training_history.py
