@@ -8,7 +8,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-RUNTIME = Path(__file__).resolve().parents[2] / "scripts" / "gold_v3_runtime"
+ROOT = Path(__file__).resolve().parents[2]
+RUNTIME = ROOT / "scripts" / "gold_v3_runtime"
 if str(RUNTIME) not in sys.path:
     sys.path.insert(0, str(RUNTIME))
 
@@ -78,3 +79,25 @@ def test_preflight_blocks_missing_training_history(tmp_path, monkeypatch):
     payload = json.loads(report.read_text(encoding="utf-8"))
     assert payload["status"] == "BLOCKED_TRAINING_HISTORY_INCOMPLETE"
     assert any(item.startswith("MISSING_M1") for item in payload["blockers"])
+
+
+def test_history_exporter_writes_m1_m5_m15_and_bat_preserves_them():
+    exporter = (RUNTIME / "mt5" / "ExportGoldStage289TrainingM1.mq5").read_text(
+        encoding="utf-8"
+    )
+    assert 'ExportTimeframe(PERIOD_M1,"goldsharp_m1.csv")' in exporter
+    assert 'ExportTimeframe(PERIOD_M5,"goldsharp_m5.csv")' in exporter
+    assert 'ExportTimeframe(PERIOD_M15,"goldsharp_m15.csv")' in exporter
+    assert "STAGE289_TRAINING_HISTORY_EXPORT_ALL_COMPLETE" in exporter
+
+    one_shot = (
+        RUNTIME / "bat" / "run_gold_v3_292_safe_portfolio_live.bat"
+    ).read_text(encoding="utf-8")
+    assert "for %%F in (h1 h4 d1)" in one_shot
+    assert "for %%F in (m5 m15 h1 h4 d1)" not in one_shot
+
+    continuous = (
+        RUNTIME / "bat" / "run_gold_v3_292_safe_portfolio_live_continuous.bat"
+    ).read_text(encoding="utf-8")
+    assert "gold_v3_289_train_live_models_audit.py" not in continuous
+    assert "Stage280/281 models are not ready" in continuous
