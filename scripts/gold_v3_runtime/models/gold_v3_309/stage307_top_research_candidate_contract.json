@@ -1,0 +1,83 @@
+{
+  "status": "GOLD_V3_309_STAGE307_TOP_RESEARCH_CANDIDATE_CONTRACT",
+  "candidate_id": "GOLD_V3_STAGE307_TOP_REV_LONG_ANY_P90",
+  "candidate_state": "APPROVED_FOR_INTEGRATED_REPLAY",
+  "source_stage": 307,
+  "source_ensemble_key": "DROP_H4+DROP_D1+ALL_TF+LTF_ONLY|ANY_P90",
+  "models": [
+    "DROP_H4",
+    "DROP_D1",
+    "ALL_TF",
+    "LTF_ONLY"
+  ],
+  "rule": "ANY_P90",
+  "walkforward_years": [
+    2025,
+    2026
+  ],
+  "execution_contract": {
+    "family": "L_BRK6_60_B20",
+    "direction": "LONG",
+    "context": "closed H4 DOWN",
+    "trigger": "within 60 minutes, M5 close breaks prior six M5 highs and bullish body ratio is at least 0.20",
+    "entry": "next exact M5 open",
+    "tp_atr": 1.75,
+    "sl_atr": 1.0,
+    "max_holding_minutes": 360,
+    "outcome": "M1 first touch, same-M1 SL priority, otherwise time exit",
+    "spread_point_size": 0.01
+  },
+  "expected_aggregate": {
+    "trades": 92,
+    "wins": 60,
+    "losses": 32,
+    "win_rate": 0.6521739130434783,
+    "tp": 33,
+    "sl": 28,
+    "time": 31,
+    "spread_adjusted_total_usd": 1021.2137402198136,
+    "spread_adjusted_profit_factor": 3.3978543279816584,
+    "spread_adjusted_total_r": 48.621989738102094,
+    "spread_adjusted_max_drawdown_r": 4.046036473430361,
+    "largest_win_share_of_positive_pnl": 0.07985167419942577,
+    "first_entry_dt": "2025-02-28 07:55:00",
+    "last_exit_dt": "2026-06-22 14:00:00"
+  },
+  "expected_yearly": {
+    "2025": {
+      "trades": 66,
+      "wins": 42,
+      "losses": 24,
+      "win_rate": 0.6363636363636364,
+      "spread_adjusted_profit_factor": 2.9173525272122736,
+      "spread_adjusted_total_r": 32.25759474856628,
+      "spread_adjusted_max_drawdown_r": 4.046036473430361
+    },
+    "2026": {
+      "trades": 26,
+      "wins": 18,
+      "losses": 8,
+      "win_rate": 0.6923076923076923,
+      "spread_adjusted_profit_factor": 3.98344955843328,
+      "spread_adjusted_total_r": 16.364394989535818,
+      "spread_adjusted_max_drawdown_r": 2.0301615221903777
+    }
+  },
+  "source_robust_score": 54.045979176046515,
+  "parity_tolerance": 1e-12,
+  "selection_reason": "Stage307 leaderboard rank 1; positive in both walk-forward test years with high PF and low drawdown. It missed the original Stage307 frequency gate only because the minimum yearly trade count was 26 rather than 40.",
+  "limitations": [
+    "Research selection was made after comparing 748 Stage307 ensembles.",
+    "The candidate has only two walk-forward test years and 2026 is partial.",
+    "It must pass integrated overlap, priority and drawdown replay before any shadow/live wiring.",
+    "This is a new research ensemble and is not recovered exact Stage280."
+  ],
+  "promotion": {
+    "production_enabled": false,
+    "shadow_enabled": false,
+    "stage292_candidate_pool_changed": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false
+  }
+}
