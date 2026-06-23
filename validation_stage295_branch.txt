@@ -1,1 +1,1 @@
-validate pooled Stage280 REV normalization and population diagnostic
+Stage295 validation passed.
