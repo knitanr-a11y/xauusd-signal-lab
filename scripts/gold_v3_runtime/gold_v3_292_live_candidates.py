@@ -5,14 +5,13 @@ import numpy as np
 import pandas as pd
 
 from gold_v3_289_artifacts import load_frozen_booster
-from gold_v3_289_candidates import (
-    candidate_id, dedupe_source_candidates, load_model_contracts,
-)
+from gold_v3_289_candidates import candidate_id, dedupe_source_candidates, load_model_contracts
 from gold_v3_289_live_features import (
     GOLD_FILES, build_stage280_context, build_stage281_context,
     m5_trigger_frame, read_candles, stage280_model_frame, stage281_model_frame,
 )
 from gold_v3_291_stage286_external_live import detect_stage286_candidates
+from gold_v3_293_base_health_live import evaluate_latest_base
 
 COMMON_COLUMNS = [
     "candidate_id","source","priority","decision_dt","trigger_dt","entry_dt",
@@ -42,18 +41,13 @@ def find_live_trigger(m5, decision_time, direction, kind, max_wait_minutes):
     return pd.NaT, pd.NaT, np.nan
 
 
-def load_base_candidate(candle_dir: Path) -> pd.DataFrame:
-    root = Path(candle_dir) / "FX_OUTPUTS" / "gold_v3" / "70_live_csv_signal_decision_preview_audit_only"
-    path = root / "gold_v3_70_latest_closed_signal_decision.csv"
-    if not path.exists() or path.stat().st_size == 0:
-        return pd.DataFrame(columns=COMMON_COLUMNS)
-    data = pd.read_csv(path, encoding="utf-8-sig")
-    if data.empty or str(data.iloc[-1].get("decision", "")) != "SIGNAL":
-        return pd.DataFrame(columns=COMMON_COLUMNS)
-    row = data.iloc[-1]
-    bar_time = pd.Timestamp(row["entry_dt"])
-    entry_time = bar_time + pd.Timedelta(minutes=15)
-    candidate_key = str(row.get("candidate_key", row.get("candidate_label", "BASE")))
+def load_base_candidate(candle_dir: Path, ledger: pd.DataFrame, bootstrap: dict):
+    eligible, screen, metadata = evaluate_latest_base(candle_dir, ledger, bootstrap)
+    if eligible.empty:
+        return pd.DataFrame(columns=COMMON_COLUMNS), screen, metadata
+    row = eligible.iloc[0]
+    entry_time = pd.Timestamp(row["planned_entry_dt"])
+    candidate_key = str(row["candidate_key"])
     record = {
         "candidate_id":f"BASE|{candidate_key}|{entry_time.isoformat()}",
         "source":"BASE","priority":0,"decision_dt":entry_time,"trigger_dt":entry_time,
@@ -63,7 +57,7 @@ def load_base_candidate(candle_dir: Path) -> pd.DataFrame:
         "max_holding_minutes":int(row["horizon_m15"])*15,
         "candidate_contract":str(row.get("candidate_label","BASE")),"candidate_key":candidate_key,
     }
-    return pd.DataFrame([record], columns=COMMON_COLUMNS)
+    return pd.DataFrame([record], columns=COMMON_COLUMNS), screen, metadata
 
 
 def detect_addition_candidates(candle_dir: Path, lookback_hours: int = 96):
@@ -136,8 +130,8 @@ def detect_addition_candidates(candle_dir: Path, lookback_hours: int = 96):
     }
 
 
-def detect_all_candidates(candle_dir: Path, lookback_hours: int = 96):
-    base = load_base_candidate(candle_dir)
+def detect_all_candidates(candle_dir: Path, ledger: pd.DataFrame, bootstrap: dict, lookback_hours: int = 96):
+    base, base_screen, base_meta = load_base_candidate(candle_dir, ledger, bootstrap)
     additions, meta = detect_addition_candidates(candle_dir, lookback_hours)
     result = pd.concat([base, additions], ignore_index=True, sort=False)
     if len(result):
@@ -145,4 +139,5 @@ def detect_all_candidates(candle_dir: Path, lookback_hours: int = 96):
         result["decision_dt"] = pd.to_datetime(result.decision_dt)
         result["trigger_dt"] = pd.to_datetime(result.trigger_dt)
         result = result.sort_values(["entry_dt","priority","candidate_id"], kind="mergesort")
-    return result, meta
+    meta["base_health"] = base_meta
+    return result, meta, base_screen
