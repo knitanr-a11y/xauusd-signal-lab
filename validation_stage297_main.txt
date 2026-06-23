@@ -1,1 +1,1 @@
-Stage297 pooled REV parity correction is applied directly to main.
+Stage297 pooled REV parity correction is applied directly to main. Local log marker: expected.stage280_positive_fit must equal 245.
