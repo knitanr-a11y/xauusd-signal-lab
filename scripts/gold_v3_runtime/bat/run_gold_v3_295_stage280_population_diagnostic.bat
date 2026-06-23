@@ -35,13 +35,13 @@ if errorlevel 1 (
   exit /b 3
 )
 set "TRAIN_DIR=%FILES_DIR%\FX_OUTPUTS\gold_v3\289_training_history"
-set "RECOVERY_JSON=%TRAIN_DIR%\stage301_stage280_artifact_recovery.json"
-echo [INFO] Running Stage280 artifact recovery diagnostic...
-%PYTHON_CMD% "%RUNTIME%\gold_v3_301_stage280_artifact_recovery_runner.py" --repo-root "%CD%" --scan-root "%FILES_DIR%" --output "%RECOVERY_JSON%"
+set "LOCATOR_JSON=%TRAIN_DIR%\stage302_stage280_original_artifact_locator.json"
+echo [INFO] Running Stage280 original artifact locator...
+%PYTHON_CMD% "%RUNTIME%\gold_v3_302_stage280_original_artifact_locator.py" --repo-root "%CD%" --scan-root "%FILES_DIR%" --output "%LOCATOR_JSON%"
 set "RC=%ERRORLEVEL%"
 echo.
-echo Recovery file:
-echo %RECOVERY_JSON%
+echo Locator file:
+echo %LOCATOR_JSON%
 echo.
 pause
 exit /b %RC%
