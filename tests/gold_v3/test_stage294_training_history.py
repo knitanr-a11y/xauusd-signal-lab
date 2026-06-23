@@ -62,6 +62,37 @@ def test_stage280_engineering_keeps_values_without_fragmentation_warning():
     assert values["d1_align"] == pytest.approx(1.0)
 
 
+def test_stage280_mirrored_rev_directions_normalize_to_same_features():
+    source = pd.DataFrame(
+        {
+            "m1_ret60_atr": [-0.6, 0.6],
+            "m1_ret5_atr": [0.5, -0.5],
+            "m1_ret30_atr": [-0.2, 0.2],
+            "m1_pos60": [0.8, 0.2],
+            "m1_lower_wick_ratio": [0.7, 0.2],
+            "m1_upper_wick_ratio": [0.2, 0.7],
+            "h4_trend": [-1, 1],
+            "d1_trend": [-1, 1],
+        }
+    )
+    features = [
+        "m1_ret60_atr",
+        "m1_ret5_atr",
+        "m1_pos60",
+        "m1_lower_wick_ratio",
+        "m1_upper_wick_ratio",
+        "countermove_60",
+        "turn_accel_5v30",
+        "m1_reject_wick",
+        "h4_align",
+        "d1_align",
+    ]
+    result = stage280_model_frame(source, features)
+    assert result.iloc[0].to_dict() == pytest.approx(result.iloc[1].to_dict())
+    assert result.iloc[0]["h4_align"] == pytest.approx(-1.0)
+    assert result.iloc[0]["m1_reject_wick"] == pytest.approx(0.5)
+
+
 def test_preflight_blocks_missing_training_history(tmp_path, monkeypatch):
     report = tmp_path / "report.json"
     monkeypatch.setattr(
@@ -82,13 +113,19 @@ def test_preflight_blocks_missing_training_history(tmp_path, monkeypatch):
 
 
 def test_history_exporter_writes_m1_m5_m15_and_bat_preserves_them():
-    exporter = (RUNTIME / "mt5" / "ExportGoldStage289TrainingM1.mq5").read_text(
-        encoding="utf-8"
-    )
+    exporter = (
+        RUNTIME / "mt5" / "ExportGoldStage289TrainingHistory_v110.mq5"
+    ).read_text(encoding="utf-8")
+    assert '#property version "1.10"' in exporter
     assert 'ExportTimeframe(PERIOD_M1,"goldsharp_m1.csv")' in exporter
     assert 'ExportTimeframe(PERIOD_M5,"goldsharp_m5.csv")' in exporter
     assert 'ExportTimeframe(PERIOD_M15,"goldsharp_m15.csv")' in exporter
     assert "STAGE289_TRAINING_HISTORY_EXPORT_ALL_COMPLETE" in exporter
+
+    installer = (
+        RUNTIME / "bat" / "install_gold_v3_289_training_m1_exporter.bat"
+    ).read_text(encoding="utf-8")
+    assert "ExportGoldStage289TrainingHistory_v110.mq5" in installer
 
     one_shot = (
         RUNTIME / "bat" / "run_gold_v3_292_safe_portfolio_live.bat"
