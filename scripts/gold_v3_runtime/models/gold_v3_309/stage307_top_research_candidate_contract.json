@@ -15,6 +15,12 @@
     2025,
     2026
   ],
+  "source_snapshot": {
+    "latest_m1_time_inclusive": "2026-06-23 13:56:00",
+    "latest_m5_time_inclusive": "2026-06-23 13:50:00",
+    "context_time_max_inclusive": "2026-06-23 13:50:00",
+    "purpose": "keep the Stage307 leaderboard result immutable when later CSV rows are appended"
+  },
   "execution_contract": {
     "family": "L_BRK6_60_B20",
     "direction": "LONG",
