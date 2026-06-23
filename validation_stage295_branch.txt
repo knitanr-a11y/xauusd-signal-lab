@@ -1,1 +1,1 @@
-Stage295 validation passed.
+Stage295 validation passed; temporary PR can close without merge.
