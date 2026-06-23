@@ -1,1 +1,1 @@
-validate pooled Stage280 REV normalization
+validate pooled Stage280 REV normalization and population diagnostic
