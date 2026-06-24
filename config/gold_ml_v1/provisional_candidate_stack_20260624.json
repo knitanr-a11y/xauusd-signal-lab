@@ -2,14 +2,23 @@
   "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260624",
   "status": "STRICT_GATE_ACTIVE",
   "active_provisional_ids": [
-    "GML1-PROV-002",
     "GML1-PROV-007",
     "GML1-PROV-008",
     "GML1-PROV-010",
-    "GML1-PROV-013",
     "GML1-PROV-015"
   ],
+  "reference_only": [
+    {
+      "provisional_id": "GML1-PROV-002",
+      "reason": "Retained as the immutable parent lineage for PROV-007 and PROV-008; aggregate PF 1.3372 is below the new 1.35 active-stack gate."
+    }
+  ],
   "demoted_from_active_stack": [
+    {
+      "provisional_id": "GML1-PROV-013",
+      "new_status": "WATCH_ONLY",
+      "reason": "Aggregate PF 1.1865, 2026 PF 1.1466, and +2.05R are below the strict gate."
+    },
     {
       "provisional_id": "GML1-PROV-016",
       "new_status": "WATCH_ONLY",
@@ -29,6 +38,7 @@
   "watch_only": [
     "GML1-PROV-004",
     "GML1-PROV-009",
+    "GML1-PROV-013",
     "GML1-PROV-014",
     "GML1-PROV-016",
     "GML1-PROV-018",
