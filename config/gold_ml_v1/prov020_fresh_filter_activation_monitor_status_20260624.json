@@ -1,0 +1,27 @@
+{
+  "result_id": "GML1-PROV-020-FRESH-FILTER-ACTIVATION-MONITOR-IMPLEMENTATION-20260624",
+  "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_PROSPECTIVE_PARENT_EVENTS_PENDING",
+  "audit_only": true,
+  "candidate_logic_changed": false,
+  "fresh_filter_activation_observed_on_real_data": null,
+  "reason_real_status_unknown": "No exact prospective GML1-PROV-015 parent-event CSV body covering post-cutoff closed H1 decisions is committed in the repository.",
+  "implementation": {
+    "script": "scripts/gold_ml_v1/prospective/prov020_fresh_filter_activation_monitor.py",
+    "windows_runner": "scripts/gold_ml_v1/prospective/run_prov020_fresh_filter_activation_monitor.bat",
+    "config": "config/gold_ml_v1/prov020_fresh_filter_activation_monitor_20260624.json",
+    "tests": "tests/gold_ml_v1/test_prov020_fresh_filter_activation_monitor.py",
+    "documentation": "docs/gold_ml_v1/GOLD_ML_V1_PROV020_FRESH_FILTER_ACTIVATION_MONITOR_20260624.md",
+    "synthetic_tests_passed": 3
+  },
+  "fresh_cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "future_outcome_fields_used": [],
+  "boundaries": {
+    "live_signal": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "portfolio_activation": false,
+    "candidate_promotion": false,
+    "threshold_retuning": false
+  }
+}
