@@ -1,0 +1,169 @@
+{
+  "policy_id": "FROZEN_GOLD_V2_MEDIUM_REFINED_RULES_20260603",
+  "created_utc": "2026-06-03T14:43:08.230806+00:00",
+  "status": "FROZEN_RULE_SOURCE_READY",
+  "component": "MEDIUM_REFined_FEATURE_GATES",
+  "source_of_truth_type": "feature_threshold_manifest",
+  "approximation_allowed": false,
+  "external_actions_allowed": false,
+  "definition": {
+    "priority": "MEDIUM",
+    "default_lot_multiplier_candidate": 0.5,
+    "arbitration": "HIGH_A > HIGH_B > MEDIUM; MEDIUM cannot override HIGH or direction conflict rules",
+    "rules": [
+      {
+        "name": "RANGE96_REFINED",
+        "direction": "SELL",
+        "conditions": {
+          "range96_min": 129.6835,
+          "trend_eff96_max": 0.355591
+        }
+      },
+      {
+        "name": "VOL_TRMEAN32_REFINED",
+        "direction": "PROBE",
+        "conditions": {
+          "tr_mean_32_min": 10.867578,
+          "ret96_max": -2.725,
+          "range96_min": 176.453
+        }
+      },
+      {
+        "name": "TIER2_HVT",
+        "direction": "PROBE",
+        "conditions": {
+          "trend_eff96_max": 0.4,
+          "ret96_max": -25.0,
+          "tr_mean_32_min": 10.867578
+        }
+      }
+    ],
+    "live_evaluator_requirement": "MEDIUM gates may be evaluated from features, but final signal eligibility requires CoreA/CoreB arbitration."
+  },
+  "source_files": [
+    {
+      "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\FX_OUTPUTS\\gold_v2_coreb_refined_probe_outputs\\coreb_refined_rule_ledgers.csv",
+      "exists": true,
+      "status": "OK",
+      "sha256": "14f23825d83f0b79800a6991867b3ca15a4205b952fec4c94be05abd634a88aa",
+      "row_count": 495,
+      "columns": [
+        "ruleset",
+        "cluster_id",
+        "cluster_start",
+        "cluster_end",
+        "top_entry_time",
+        "top_exit_time",
+        "top_candidate_id",
+        "top_variant",
+        "top_direction",
+        "top_profit_r",
+        "top_score",
+        "same_direction_count",
+        "opposite_direction_count",
+        "same_direction_score_sum",
+        "opposite_direction_score_sum",
+        "unique_same_direction_origins",
+        "unique_same_direction_variants",
+        "stacked_same_direction_profit_r",
+        "stacked_capped3_profit_r",
+        "has_opposite_conflict",
+        "entry_month",
+        "close_time",
+        "atr14",
+        "tr_mean_32",
+        "range96",
+        "range192",
+        "trend_eff96",
+        "adx14",
+        "ret96",
+        "regime",
+        "is_A",
+        "rr",
+        "is_B_rr15_fixed",
+        "is_C_fixed",
+        "signal_ABC",
+        "profit_cap1_from_members",
+        "profit_cap3_from_members",
+        "profit_cap5_from_members",
+        "profit_uncap_from_members",
+        "profit_origin1_from_members",
+        "profit_origin1_cap5_from_members",
+        "same_direction_count_from_members",
+        "unique_origins_from_members",
+        "dataset",
+        "component",
+        "component_desc",
+        "selected_profit_r",
+        "scenario",
+        "period",
+        "fold_id",
+        "test_month",
+        "no_opposite",
+        "signal_fixed_ABC",
+        "profit_fixed_ABC",
+        "profit_A_only",
+        "profit_A_Brr",
+        "view",
+        "profit",
+        "signal",
+        "is_C_train_selected",
+        "signal_trainC_ABC",
+        "profit_trainC_ABC"
+      ],
+      "unique_dataset": 2,
+      "sample_dataset": [
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4",
+        "2025_fold4"
+      ],
+      "unique_cluster_id": 394,
+      "sample_cluster_id": [
+        "38",
+        "55",
+        "249",
+        "287",
+        "355",
+        "356",
+        "408",
+        "409",
+        "411",
+        "534"
+      ],
+      "unique_component": 5,
+      "sample_component": [
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A",
+        "CORE_A"
+      ],
+      "unique_top_variant": 10,
+      "sample_top_variant": [
+        "SELL_TP225_SL150_RR1p5",
+        "SELL_TP225_SL150_RR1p5",
+        "BUY_TP50_SL25_RR2p0",
+        "SELL_TP225_SL150_RR1p5",
+        "SELL_TP225_SL150_RR1p5",
+        "SELL_TP225_SL150_RR1p5",
+        "BUY_TP200_SL100_RR2p0",
+        "BUY_TP200_SL100_RR2p0",
+        "BUY_TP200_SL100_RR2p0",
+        "SELL_TP150_SL150_RR1p0"
+      ]
+    }
+  ],
+  "blocked_until_core_arbitration_exists": true
+}

@@ -1,0 +1,223 @@
+{
+  "mapping_id": "LIVE_EVALUATOR_MAPPING_GOLD_V2_MEDIUM_20260603",
+  "component": "MEDIUM_REFINED_FEATURE_GATES",
+  "policy_id": "GOLD_V2_COREA_COREB_MEDIUM_POLICY_20260603",
+  "frozen_policy_id": "FROZEN_GOLD_V2_MEDIUM_REFINED_RULES_20260603",
+  "created_utc": "2026-06-03T14:48:45.292463+00:00",
+  "status": "MAPPED_FEATURE_GATES_ONLY_BLOCKED_FOR_FINAL_SIGNAL",
+  "audit_only": true,
+  "approximation_allowed": false,
+  "external_actions_allowed": false,
+  "historical_entry_time_match_allowed": false,
+  "source_of_truth": {
+    "type": "feature_threshold_manifest",
+    "frozen_manifest_required": true,
+    "source_files": [
+      {
+        "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\FX_OUTPUTS\\gold_v2_coreb_refined_probe_outputs\\coreb_refined_rule_ledgers.csv",
+        "resolved_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\FX_OUTPUTS\\gold_v2_coreb_refined_probe_outputs\\coreb_refined_rule_ledgers.csv",
+        "manifest_status": "OK",
+        "sha256": "14f23825d83f0b79800a6991867b3ca15a4205b952fec4c94be05abd634a88aa",
+        "row_count": 495,
+        "columns": [
+          "ruleset",
+          "cluster_id",
+          "cluster_start",
+          "cluster_end",
+          "top_entry_time",
+          "top_exit_time",
+          "top_candidate_id",
+          "top_variant",
+          "top_direction",
+          "top_profit_r",
+          "top_score",
+          "same_direction_count",
+          "opposite_direction_count",
+          "same_direction_score_sum",
+          "opposite_direction_score_sum",
+          "unique_same_direction_origins",
+          "unique_same_direction_variants",
+          "stacked_same_direction_profit_r",
+          "stacked_capped3_profit_r",
+          "has_opposite_conflict",
+          "entry_month",
+          "close_time",
+          "atr14",
+          "tr_mean_32",
+          "range96",
+          "range192",
+          "trend_eff96",
+          "adx14",
+          "ret96",
+          "regime",
+          "is_A",
+          "rr",
+          "is_B_rr15_fixed",
+          "is_C_fixed",
+          "signal_ABC",
+          "profit_cap1_from_members",
+          "profit_cap3_from_members",
+          "profit_cap5_from_members",
+          "profit_uncap_from_members",
+          "profit_origin1_from_members",
+          "profit_origin1_cap5_from_members",
+          "same_direction_count_from_members",
+          "unique_origins_from_members",
+          "dataset",
+          "component",
+          "component_desc",
+          "selected_profit_r",
+          "scenario",
+          "period",
+          "fold_id",
+          "test_month",
+          "no_opposite",
+          "signal_fixed_ABC",
+          "profit_fixed_ABC",
+          "profit_A_only",
+          "profit_A_Brr",
+          "view",
+          "profit",
+          "signal",
+          "is_C_train_selected",
+          "signal_trainC_ABC",
+          "profit_trainC_ABC"
+        ],
+        "disk_status": "ACCESSIBLE_SHA_VERIFIED",
+        "actual_sha256": "14f23825d83f0b79800a6991867b3ca15a4205b952fec4c94be05abd634a88aa",
+        "sha_verify_error": null
+      }
+    ]
+  },
+  "policy_snapshot": {
+    "priority": "MEDIUM",
+    "default_lot_multiplier": 0.5,
+    "precedence_rule": "CoreA/CoreB > MEDIUM. Skip MEDIUM when it shares entry_time with any CoreA/CoreB signal. If multiple MEDIUM signals share entry_time + direction, keep the first by priority.",
+    "priority_order": [
+      "RANGE96_REFINED",
+      "VOL_TRMEAN32_REFINED",
+      "TIER2_HVT"
+    ]
+  },
+  "required_features": [
+    "range96",
+    "ret96",
+    "tr_mean_32",
+    "trend_eff96"
+  ],
+  "mapped_rules": [
+    {
+      "rule_name": "RANGE96_REFINED",
+      "priority_index": 0,
+      "direction": "SELL",
+      "lot_multiplier_candidate": 0.5,
+      "conditions": [
+        {
+          "condition_id": "RANGE96_REFINED.range96_min",
+          "rule_name": "RANGE96_REFINED",
+          "field": "range96",
+          "operator": ">=",
+          "value": 129.6835,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        },
+        {
+          "condition_id": "RANGE96_REFINED.trend_eff96_max",
+          "rule_name": "RANGE96_REFINED",
+          "field": "trend_eff96",
+          "operator": "<=",
+          "value": 0.355591,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        }
+      ],
+      "unmapped_conditions": [],
+      "feature_gate_evaluable": true,
+      "signal_eligible_without_core_arbitration": false,
+      "blocked_reason": "MEDIUM feature gates are mappable, but final signal eligibility remains blocked until CoreA/CoreB arbitration is mapped."
+    },
+    {
+      "rule_name": "VOL_TRMEAN32_REFINED",
+      "priority_index": 1,
+      "direction": "PROBE",
+      "lot_multiplier_candidate": 0.5,
+      "conditions": [
+        {
+          "condition_id": "VOL_TRMEAN32_REFINED.tr_mean_32_min",
+          "rule_name": "VOL_TRMEAN32_REFINED",
+          "field": "tr_mean_32",
+          "operator": ">=",
+          "value": 10.867578,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        },
+        {
+          "condition_id": "VOL_TRMEAN32_REFINED.ret96_max",
+          "rule_name": "VOL_TRMEAN32_REFINED",
+          "field": "ret96",
+          "operator": "<=",
+          "value": -2.725,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        },
+        {
+          "condition_id": "VOL_TRMEAN32_REFINED.range96_min",
+          "rule_name": "VOL_TRMEAN32_REFINED",
+          "field": "range96",
+          "operator": ">=",
+          "value": 176.453,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        }
+      ],
+      "unmapped_conditions": [],
+      "feature_gate_evaluable": true,
+      "signal_eligible_without_core_arbitration": false,
+      "blocked_reason": "MEDIUM feature gates are mappable, but final signal eligibility remains blocked until CoreA/CoreB arbitration is mapped."
+    },
+    {
+      "rule_name": "TIER2_HVT",
+      "priority_index": 2,
+      "direction": "PROBE",
+      "lot_multiplier_candidate": 0.5,
+      "conditions": [
+        {
+          "condition_id": "TIER2_HVT.trend_eff96_max",
+          "rule_name": "TIER2_HVT",
+          "field": "trend_eff96",
+          "operator": "<=",
+          "value": 0.4,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        },
+        {
+          "condition_id": "TIER2_HVT.ret96_max",
+          "rule_name": "TIER2_HVT",
+          "field": "ret96",
+          "operator": "<=",
+          "value": -25.0,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        },
+        {
+          "condition_id": "TIER2_HVT.tr_mean_32_min",
+          "rule_name": "TIER2_HVT",
+          "field": "tr_mean_32",
+          "operator": ">=",
+          "value": 10.867578,
+          "source": "frozen_medium_manifest.definition.rules",
+          "mapping_status": "MAPPED_EXPLICIT_THRESHOLD"
+        }
+      ],
+      "unmapped_conditions": [],
+      "feature_gate_evaluable": true,
+      "signal_eligible_without_core_arbitration": false,
+      "blocked_reason": "MEDIUM feature gates are mappable, but final signal eligibility remains blocked until CoreA/CoreB arbitration is mapped."
+    }
+  ],
+  "unmapped_conditions": [],
+  "live_evaluator_ready": false,
+  "feature_gate_ready": true,
+  "final_signal_allowed": false,
+  "blocked_reason": "MEDIUM cannot become a final signal until CoreA/CoreB mapping and arbitration are explicitly implemented."
+}

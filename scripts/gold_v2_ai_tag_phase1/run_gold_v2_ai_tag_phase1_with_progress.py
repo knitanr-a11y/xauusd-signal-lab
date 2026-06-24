@@ -170,8 +170,8 @@ def call_openai(prompt_text: str, schema_obj: Dict[str, Any], model: str, timeou
                 "strict": bool(schema_obj.get("strict", True)),
             }
         },
-        max_output_tokens=280,
-        temperature=0,
+        max_output_tokens=1200,
+        reasoning={"effort": "minimal"},
     )
     txt = response_to_text(resp)
     return json.loads(txt)
