@@ -1,0 +1,30 @@
+{
+  "locator_id": "GML1-EXACT-ARTIFACT-LOCATOR-20260625",
+  "status": "ARTIFACTS_GENERATED_EXTERNALLY_REPOSITORY_PATHS_RESERVED",
+  "bundle": {
+    "filename": "GOLD_ML_V1_EXACT_HANDOFF_ARTIFACTS_20260625.zip",
+    "sha256": "1c4cb9677ff54db177005fcec4225aa59c31140f4e2356e9dad9c5becba10bdb"
+  },
+  "repository_target_directory": "config/gold_ml_v1/registries/",
+  "trade_registries": {
+    "GML1-PROV-007": ["GML1-PROV-007_exact_trade_registry.csv", "16b3f8bb1b6abe53e9e1e58026d0a329697cce29a137361e8404be7a1a99ed49"],
+    "GML1-PROV-008": ["GML1-PROV-008_exact_trade_registry.csv", "3568b3133073898ed2cd7eda1c764d33f8e9181483e777f2a8c10e55a8b4ecb1"],
+    "GML1-PROV-010": ["GML1-PROV-010_exact_trade_registry.csv", "d8016e6067c147103b6c98ab4399623b3409c59579487136757118206e28f9d8"],
+    "GML1-PROV-015": ["GML1-PROV-015_exact_trade_registry.csv", "b41f5c40bd340e69a8df08cf0649fd5e1723889a4af7f80aaf4ed80977560b7b"],
+    "GML1-PROV-020": ["GML1-PROV-020_exact_trade_registry.csv", "211679ad00273be7b52ba8a77a041c5b9aea29f76fbfcd176e2e621ebb275f6e"],
+    "GML1-WATCH-014-A": ["GML1-WATCH-014-A_exact_trade_registry.csv", "c2707dadb78343e3cb25791b9453d5d41f2052ac395161139cb5708db47b97d5"]
+  },
+  "prov015_parent_events": {
+    "all_available": ["GML1-PROV-015_parent_event_registry_all_available.csv", "1b16b9200eaccab701c32614fb9240ed30e753d40b61b6c9e25e69a765e7b180"],
+    "post_cutoff": ["GML1-PROV-015_parent_event_registry_post_cutoff.csv", "aaacaa86207ad79ed7f2f0915afff42a5a10f1e75533eb195ebd4506ea1d7a26", 0]
+  },
+  "watch014": {
+    "features54": ["GML1-WATCH-014-A_54_feature_registry.csv", "81695541d57e8aef16ebd6732d3b7829516524e2a7539ef995abca17f1cc0f65"],
+    "assignments6seeds": ["GML1-WATCH-014-A_cluster_assignments_6seeds.csv", "ae805e3f6652baa1b981e6bb303a2534384748a94f73d8f54212a276e5caa77f"],
+    "models6seeds": ["GML1-WATCH-014-A_cluster_models_6seeds.json", "27b54e3c70e8b13ef04b6b47dfdb006d02707e3128a2d5719db645061af53eb2"]
+  },
+  "fresh_cutoff": "2026-06-23 18:15:00",
+  "latest_available_h1_close": "2026-06-23 18:00:00",
+  "latest_available_m15_close": "2026-06-23 18:15:00",
+  "post_cutoff_rows": 0
+}
