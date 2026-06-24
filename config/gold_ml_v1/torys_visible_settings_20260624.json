@@ -1,0 +1,40 @@
+{
+  "settings_id": "GOLD_ML_V1_TORYS_VISIBLE_SETTINGS_20260624",
+  "status": "SCREENSHOT_CONFIRMED",
+  "indicator_name": "MACD [TORYS]",
+  "display_label": true,
+  "hidden_trend_only": true,
+  "trend_strength": 4,
+  "length_to_finalize_or_offset": 2,
+  "period_to_recognize_vertices": 10,
+  "number_of_vertices": 6,
+  "number_of_candlesticks": 150,
+  "price_source": "CLOSE",
+  "macd_source": "CLOSE",
+  "fast_ema_length": 6,
+  "slow_ema_length": 13,
+  "signal_length": 4,
+  "judge_trend": "EMA",
+  "ma_source": "CLOSE",
+  "ma_lengths": [10, 15, 30, 40, 60],
+  "highest_lowest_plot": true,
+  "previous_highest_lowest_plot": true,
+  "connect_highest_lowest": false,
+  "display_trend_zone": false,
+  "divergence_ll_alert_source_ui_value": "HIGH",
+  "divergence_hh_alert_source_ui_value": "LOW",
+  "display_bgcolor_for_alert_no5": false,
+  "formula_boundary": {
+    "exact_source_code_available": false,
+    "exact_torys_replication_claim_allowed": false,
+    "judge_trend_ema_is_not_assumed_to_be_macd_signal_smoothing": true,
+    "display_options_are_not_entry_rules": true
+  },
+  "research_implementation": {
+    "macd_line": "EMA(close,6)-EMA(close,13)",
+    "primary_signal_proxy": "EMA(MACD_LINE,4)",
+    "alternative_signal_proxy": "SMA(MACD_LINE,4)",
+    "each_proxy_requires_a_distinct_feature_set_id": true,
+    "confirmed_vertex_parameters_may_be_used_for_torys_inspired_divergence_features": true
+  }
+}
