@@ -1,0 +1,116 @@
+{
+  "shortlist_id": "GML1-PROVISIONAL-EVENT-SHORTLIST-BATCH006-PRE-DIAGNOSTIC",
+  "status": "FROZEN_BEFORE_2026_DIAGNOSTIC_READ",
+  "created_date": "2026-06-24",
+  "research_window": {
+    "discovery": "2023",
+    "validation": "2024",
+    "test": "2025",
+    "2026": "UNREAD_FOR_THIS_BATCH_AT_FREEZE"
+  },
+  "common_execution": {
+    "target_r": 1.0,
+    "stop_atr_multiple": 1.0,
+    "entry": "next exact M1 open at decision-bar close",
+    "same_m1_priority": "SL",
+    "dynamic_spread_included": true,
+    "one_position_per_event_lineage": true,
+    "horizon_hours": 48,
+    "time_basis": "raw MT5 server time"
+  },
+  "provisional_rules": [
+    {
+      "provisional_id": "GML1-PROV-009",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "event": "CAUSAL_CONFIRMED_HIGH_TRENDLINE_BREAK",
+      "context": "NONE",
+      "definition": "H1 close crosses above the line projected from the last two confirmed H1 high pivots. Each pivot uses left=3 and right=3 closed bars and becomes available only after right-side confirmation.",
+      "metrics": {
+        "2023": {"trades": 249, "win_rate": 0.5100401606, "profit_factor": 1.054, "total_r": 6.50},
+        "2024": {"trades": 267, "win_rate": 0.5280898876, "profit_factor": 1.125, "total_r": 15.70},
+        "2025": {"trades": 256, "win_rate": 0.578125, "profit_factor": 1.374, "total_r": 40.14}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-010",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "event": "H1_BB60_UPPER_BREAK",
+      "context": "LAST_CLOSED_D1_RCI18_NONNEGATIVE",
+      "definition": "Previous H1 close is at or below its previous 60-period upper Bollinger band and current H1 close is above the current upper band; last closed D1 RCI18 is nonnegative.",
+      "metrics": {
+        "2023": {"trades": 56, "win_rate": 0.5535714286, "profit_factor": 1.290, "total_r": 6.97},
+        "2024": {"trades": 70, "win_rate": 0.5571428571, "profit_factor": 1.245, "total_r": 7.60},
+        "2025": {"trades": 101, "win_rate": 0.6534653465, "profit_factor": 1.901, "total_r": 31.29}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-011",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "event": "H1_REGRESSION80_LOW_REENTRY",
+      "context": "NONE",
+      "definition": "H1 rolling 80-bar regression residual z-score crosses upward through -1.5 after being at or below -1.5.",
+      "metrics": {
+        "2023": {"trades": 143, "win_rate": 0.4965034965, "profit_factor": 1.013, "total_r": 0.86},
+        "2024": {"trades": 143, "win_rate": 0.5664335664, "profit_factor": 1.308, "total_r": 18.58},
+        "2025": {"trades": 164, "win_rate": 0.5243902439, "profit_factor": 1.101, "total_r": 7.72}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-012",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "event": "H1_BB20_LOWER_REENTRY",
+      "context": "NONE",
+      "definition": "Previous H1 close is below its previous 20-period lower Bollinger band and current H1 close returns to or above the current lower band.",
+      "metrics": {
+        "2023": {"trades": 156, "win_rate": 0.5512820513, "profit_factor": 1.179, "total_r": 12.18},
+        "2024": {"trades": 146, "win_rate": 0.5479452055, "profit_factor": 1.208, "total_r": 13.22},
+        "2025": {"trades": 159, "win_rate": 0.5283018868, "profit_factor": 1.133, "total_r": 9.59}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-013",
+      "lane": "H1-D1",
+      "direction": "SHORT",
+      "event": "H1_BB60_MIDDLE_REJECTION",
+      "context": "LAST_CLOSED_D1_ATR14_ABOVE_50_BAR_MEDIAN",
+      "definition": "Previous H1 close is above the previous 60-period Bollinger middle band and current H1 close crosses to or below the current middle band while D1 ATR14 is at least its trailing 50-bar median.",
+      "metrics": {
+        "2023": {"trades": 62, "win_rate": 0.5322580645, "profit_factor": 1.117, "total_r": 3.32},
+        "2024": {"trades": 85, "win_rate": 0.5294117647, "profit_factor": 1.189, "total_r": 7.17},
+        "2025": {"trades": 70, "win_rate": 0.5571428571, "profit_factor": 1.267, "total_r": 8.02}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-014",
+      "lane": "H1-D1",
+      "direction": "SHORT",
+      "event": "H1_BB40_LOWER_BREAK",
+      "context": "LAST_CLOSED_D1_ATR14_ABOVE_50_BAR_MEDIAN",
+      "definition": "Previous H1 close is at or above its previous 40-period lower Bollinger band and current H1 close closes below the current lower band while D1 ATR14 is at least its trailing 50-bar median.",
+      "metrics": {
+        "2023": {"trades": 39, "win_rate": 0.6410256410, "profit_factor": 1.715, "total_r": 10.01},
+        "2024": {"trades": 45, "win_rate": 0.5777777778, "profit_factor": 1.368, "total_r": 7.00},
+        "2025": {"trades": 42, "win_rate": 0.5476190476, "profit_factor": 1.211, "total_r": 4.00}
+      }
+    }
+  ],
+  "selection_notes": {
+    "all_six_are_independent_event_lineages": true,
+    "no_2026_metric_used_for_selection": true,
+    "existing_stack_PROV_002_007_008_unchanged": true,
+    "not_registered_candidates": true,
+    "local_replay_not_yet_requested": true
+  },
+  "next_tests": [
+    "2026 recorded diagnostic",
+    "event parameter neighborhood",
+    "spread stress",
+    "1.5R and 2.0R labels as separate lineages",
+    "composite loser subtraction",
+    "fresh post-2026-06-23 18:15 prospective confirmation"
+  ]
+}
