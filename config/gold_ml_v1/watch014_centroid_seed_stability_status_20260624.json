@@ -1,0 +1,31 @@
+{
+  "result_id": "GML1-BATCH-016-WATCH014-CENTROID-SEED-STABILITY-IMPLEMENTATION",
+  "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_REGISTRIES_PENDING",
+  "audit_only": true,
+  "candidate_logic_changed": false,
+  "watch_id": "GML1-WATCH-014-A",
+  "real_centroid_result_generated": false,
+  "real_seed_stability_result_generated": false,
+  "blocking_inputs": [
+    "exact 54-feature path-shape registry used by Batch014",
+    "exact cluster assignment registry for seed 7307",
+    "exact cluster assignment registries for seeds 7001, 7021, 7041, 7061, 7081"
+  ],
+  "implementation": {
+    "script": "scripts/gold_ml_v1/audit/watch014_centroid_seed_stability_audit.py",
+    "config": "config/gold_ml_v1/watch014_centroid_seed_stability_audit_20260624.json",
+    "tests": "tests/gold_ml_v1/test_watch014_centroid_seed_stability_audit.py",
+    "documentation": "docs/gold_ml_v1/GOLD_ML_V1_WATCH014_CENTROID_SEED_STABILITY_AUDIT_20260624.md",
+    "synthetic_tests_passed": 2
+  },
+  "boundaries": {
+    "alignment_fit_period": "2023 only",
+    "2026_diagnostic_only": true,
+    "no_reclustering": true,
+    "no_watch_promotion": true,
+    "no_live_signal": true,
+    "no_mt5_order": true,
+    "no_discord": true,
+    "no_portfolio_activation": true
+  }
+}
