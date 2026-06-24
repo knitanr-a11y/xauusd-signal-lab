@@ -30,12 +30,13 @@ When a task concerns `GOLD_ML_V1`, the new machine-learning rebuild, obey these 
 8. Candidate records are append-only and immutable. Changed logic requires a new candidate ID.
 9. Portfolio results are separate from candidate results. Never overwrite candidate trades or metrics with portfolio trades or metrics.
 10. Preserve MT5 server timestamps as raw values. For authorized candle CSVs, `time` is the bar-open time, the latest row is closed, and `bar_close_time = bar_open_time + timeframe duration`. Never discard the latest row as open and never make higher-timeframe data available at its open time.
-11. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
-12. Never claim a phase or result is complete until generated outputs are inspected.
+11. Use the broad search plan in `docs/gold_ml_v1/GOLD_ML_V1_001_BROAD_CANDIDATE_EXPLORATION_PLAN_20260624.md` and `config/gold_ml_v1/candidate_exploration_plan_v1.json`. Search widely, but keep every lane, direction, label, feature set, model, and candidate lineage separate.
+12. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
+13. Never claim a phase or result is complete until generated outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_DATA_SOURCE_AUTHORIZED_INTAKE_IN_PROGRESS`
+`GOLD_ML_V1_001_BROAD_SEARCH_PLAN_DEFINED`
 
 Next phase:
 
