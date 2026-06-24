@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 chcp 65001 >nul
 
-set "SCRIPT=%~dp0archive_legacy_gold_local.ps1"
+set "SCRIPT=%~dp0archive_legacy_gold_local_v2.ps1"
 if not exist "%SCRIPT%" (
   echo [ERROR] PowerShell script not found:
   echo %SCRIPT%
