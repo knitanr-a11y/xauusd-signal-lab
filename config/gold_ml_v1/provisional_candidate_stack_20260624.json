@@ -1,29 +1,23 @@
 {
   "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260624",
-  "status": "STRICT_GATE_AND_PF2_REFINEMENT_ACTIVE",
-  "active_provisional_ids": [
+  "status": "SIX_ACCUMULATED_CANDIDATES_WITH_CAVEATS",
+  "core_accumulated_ids": [
     "GML1-PROV-007",
     "GML1-PROV-008",
     "GML1-PROV-010",
     "GML1-PROV-015"
   ],
-  "pf2_refinement_watch": [
-    {
-      "provisional_id": "GML1-PROV-020",
-      "reason": "Pre-2026 PF 2.0713 and all-period diagnostic PF 2.1602, but the second-stage filter fired zero times in 2026; fresh filter activations are required."
-    },
-    {
-      "watch_id": "GML1-WATCH-014-A",
-      "reason": "Path-shape clustering reached PF near 2, but seed stability and interpretability are insufficient."
-    }
+  "user_authorized_accumulated_ids": [
+    "GML1-PROV-020",
+    "GML1-WATCH-014-A"
   ],
-  "reference_only": [
-    {
-      "provisional_id": "GML1-PROV-002",
-      "reason": "Immutable parent lineage for PROV-007 and PROV-008."
-    }
-  ],
-  "watch_only": [
+  "accumulated_candidate_total": 6,
+  "caveats": {
+    "GML1-PROV-020": "Second-stage exclusion fired zero times in 2026; fresh activations are required.",
+    "GML1-WATCH-014-A": "Seed stability and human-auditable path-pattern interpretation remain unresolved."
+  },
+  "reference_only": ["GML1-PROV-002"],
+  "watch_only_not_accumulated": [
     "GML1-PROV-004",
     "GML1-PROV-009",
     "GML1-PROV-013",
@@ -31,12 +25,11 @@
     "GML1-PROV-016",
     "GML1-PROV-018",
     "GML1-PROV-019",
-    "GML1-PROV-020",
     "GML1-WATCH-012-A",
-    "GML1-WATCH-012-B",
-    "GML1-WATCH-014-A"
+    "GML1-WATCH-012-B"
   ],
   "rejected": ["GML1-PROV-017"],
+  "authorization_record": "config/gold_ml_v1/user_authorized_accumulation_override_20260624.json",
   "policies": [
     "config/gold_ml_v1/provisional_stack_admission_gate_20260624.json",
     "config/gold_ml_v1/watch_pool_policy_20260624.json",
