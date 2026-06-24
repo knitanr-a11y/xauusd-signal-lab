@@ -10,6 +10,7 @@
    - `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_20260624.md`
    - `docs/gold_ml_v1/GOLD_ML_V1_RESEARCH_AND_CANDIDATE_IMPLEMENTATION_PLAYBOOK_20260624.md`
+   - `docs/gold_ml_v1/OPEN_RESEARCH_INVENTORY_GOLD_ML_V1_20260624.md`
 4. Preserve MT5 server timestamps and bar-close availability.
 5. Candidate logic is immutable. Changed logic requires a new ID. Portfolio records are separate.
 6. Apply the broad-search, coverage-first loss-subtraction, causal structural-feature, watch-pool, and PF2-refinement policies under `config/gold_ml_v1/`.
@@ -36,4 +37,4 @@ Current status:
 
 Next phase:
 
-`META_LABEL_MAE_MFE_TIME_TO_TARGET_STABLE_REGIME_TRANSITIONS_AND_PF2_REFINEMENT`
+`OVERLAP_FRESH_ACTIVATION_PATH_MOTIF_MAE_MFE_SHORT_AND_PF2_REFINEMENT`
