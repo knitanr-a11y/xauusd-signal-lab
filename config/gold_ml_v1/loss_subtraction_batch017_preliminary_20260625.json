@@ -1,0 +1,38 @@
+{
+  "result_id": "GML1-BATCH-017-PRELIMINARY-LOSS-SUBTRACTION-20260625",
+  "status": "PROMISING_RESEARCH_VARIANT_NOT_ADMITTED",
+  "audit_only": true,
+  "base_candidate_id": "GML1-PROV-015",
+  "candidate_logic_changed": false,
+  "selection_contract": {
+    "threshold_source": "2023 only",
+    "confirmation_years": [2024, 2025],
+    "diagnostic_only_year": 2026,
+    "future_or_holdout_threshold_selection": false,
+    "minimum_retained_fraction": 0.65,
+    "preferred_retained_fraction": [0.75, 0.95]
+  },
+  "entry_time_known_exclusion": {
+    "all_conditions_required": true,
+    "conditions": [
+      {"feature": "range_atr_lag1", "operator": "<=", "threshold": 0.65719709355},
+      {"feature": "span_atr_12", "operator": ">=", "threshold": 5.058013327711}
+    ],
+    "interpretation": "large prior 12-bar span followed by recent range compression/stagnation"
+  },
+  "pre_2026_base": {"trades": 200, "wins": 128, "win_rate": 0.64, "profit_factor": 1.8037790571, "total_r": 56.8617113390, "max_drawdown_r": 4.0},
+  "pre_2026_filtered": {"trades": 186, "wins": 126, "win_rate": 0.6774193548, "profit_factor": 2.1189891947, "total_r": 66.3289235678, "max_drawdown_r": 3.0, "retained_fraction": 0.93},
+  "excluded_pre_2026": {"trades": 14, "wins": 2, "win_rate": 0.1428571429, "profit_factor": 0.1744103065, "total_r": -9.4672122288},
+  "year_confirmation": {
+    "2023": {"base_trades": 46, "filtered_trades": 39, "filtered_profit_factor": 2.3345231577, "filtered_total_r": 15.4344689790},
+    "2024": {"base_trades": 64, "filtered_trades": 63, "filtered_profit_factor": 1.4078720538, "filtered_total_r": 10.6046733993},
+    "2025": {"base_trades": 90, "filtered_trades": 84, "filtered_profit_factor": 2.8557980249, "filtered_total_r": 40.2897811895},
+    "2026_diagnostic": {"base_trades": 25, "filtered_trades": 24, "filtered_profit_factor": 2.8488611738, "filtered_total_r": 11.0931670428, "note": "diagnostic only; one winning trade would be excluded"}
+  },
+  "limitations": [
+    "This result refines the existing PROV-015 pool and does not increase opportunity count.",
+    "A new immutable candidate ID requires raw-candle exact replay and a frozen feature/entry config.",
+    "True high-count exploration must be run on broad M5/M15/H1 state and cooldown-reentry pools from authorized raw candles."
+  ],
+  "execution_switches": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
