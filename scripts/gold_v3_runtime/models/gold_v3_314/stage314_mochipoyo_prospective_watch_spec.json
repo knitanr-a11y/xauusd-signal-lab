@@ -1,0 +1,75 @@
+{
+  "spec_id": "GOLD_V3_STAGE314_MOCHIPOYO_PROSPECTIVE_WATCH_V1",
+  "mode": "AUDIT_ONLY_PROSPECTIVE_RESEARCH_WATCH",
+  "source_stage": 313,
+  "timeframe_pair": {
+    "name": "M5_H4",
+    "main_tf": "M5",
+    "higher_tf": "H4",
+    "entry": "next exact M5 open after the closed M5 decision bar"
+  },
+  "candidates": [
+    {
+      "candidate_id": "MOCHI_HIDDEN_PULLBACK_LONG_Q8_RR1_5",
+      "track": "MOCHI_HIDDEN_PULLBACK",
+      "direction": "LONG",
+      "quality_min": 8.0,
+      "atr_ratio_min": null,
+      "exclude_round_number": false,
+      "exit_profile": "RR1_5",
+      "priority": 10
+    },
+    {
+      "candidate_id": "MOCHI_EARLY_PULLBACK_SHORT_ATR1_NO_ROUND_RR1_5",
+      "track": "MOCHI_EARLY_PULLBACK",
+      "direction": "SHORT",
+      "quality_min": null,
+      "atr_ratio_min": 1.0,
+      "exclude_round_number": true,
+      "exit_profile": "RR1_5",
+      "priority": 20
+    }
+  ],
+  "portfolio_policy": {
+    "one_position": true,
+    "preemption": false,
+    "same_entry_priority": "lower numeric priority first",
+    "same_m1_tp_sl_priority": "SL",
+    "maximum_hold_minutes": 720
+  },
+  "risk_contract": {
+    "stop_source": "confirmed ZigZag structural level with 0.10 ATR buffer",
+    "minimum_stop_distance_atr": 0.75,
+    "maximum_stop_distance_atr": 2.0,
+    "take_profit_r": 1.5,
+    "spread": "entry spread points multiplied by point size 0.01"
+  },
+  "prospective_contract": {
+    "freeze_on_first_run": true,
+    "decision_time_filter": "decision_dt strictly greater than frozen latest closed M5 close_time",
+    "closed_candles_only": true,
+    "resolved_metrics_only": true,
+    "pending_trades_have_no_as_of_pnl": true,
+    "contract_cutoff_must_never_move": true
+  },
+  "future_review_gate": {
+    "automatic_promotion": false,
+    "minimum_resolved_accepted_trades": 30,
+    "minimum_long_trades": 8,
+    "minimum_short_trades": 8,
+    "minimum_profit_factor": 1.25,
+    "minimum_total_r_exclusive": 0.0,
+    "maximum_drawdown_r": 8.0,
+    "minimum_largest_winner_independence": "largest winner share <= 0.35"
+  },
+  "preserved_state": {
+    "gold_v3_audit_only": true,
+    "stage280_exact_recovery": "BLOCKED_UNCHANGED",
+    "stage307_candidate": "UNCHANGED_RETAINED",
+    "stage292_candidate_pool_changed": false,
+    "final_signal_changed": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false
+  }
+}
