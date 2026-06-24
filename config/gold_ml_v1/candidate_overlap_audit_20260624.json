@@ -1,0 +1,137 @@
+{
+  "audit_id": "GML1-BATCH-015-SIX-CANDIDATE-OVERLAP-INDEPENDENCE-AUDIT",
+  "status": "IMPLEMENTATION_READY_EXACT_REGISTRIES_REQUIRED",
+  "audit_only": true,
+  "candidate_logic_changed": false,
+  "purpose": "Measure overlap, parent-child retention, concurrent exposure, monthly R correlation, and concentration without changing any immutable candidate.",
+  "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "2026_policy": "Diagnostic only. No threshold, candidate rule, redundancy threshold, or admission decision may be tuned from 2026 results.",
+  "fuzzy_overlap_contract": "For each pair, one-to-one nearest matching of decision_close_time within plus/minus one bar of the slower decision timeframe. Exact entry overlap remains the primary identity check.",
+  "candidates": [
+    {
+      "candidate_id": "GML1-PROV-007",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "decision_bar_minutes": 15,
+      "parent_id": "GML1-PROV-002",
+      "lineage_root": "GML1-PROV-002",
+      "expected_registry_sha256": null
+    },
+    {
+      "candidate_id": "GML1-PROV-008",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "decision_bar_minutes": 15,
+      "parent_id": "GML1-PROV-002",
+      "lineage_root": "GML1-PROV-002",
+      "expected_registry_sha256": null
+    },
+    {
+      "candidate_id": "GML1-PROV-010",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "decision_bar_minutes": 60,
+      "parent_id": null,
+      "lineage_root": "GML1-PROV-010",
+      "expected_registry_sha256": "beadac7e15d144e98adb2ef616598924dff81d3b5b9b99ebb2f75523ad3addaf"
+    },
+    {
+      "candidate_id": "GML1-PROV-015",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "decision_bar_minutes": 60,
+      "parent_id": "GML1-PROV-010",
+      "lineage_root": "GML1-PROV-010",
+      "expected_registry_sha256": null
+    },
+    {
+      "candidate_id": "GML1-PROV-020",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "decision_bar_minutes": 60,
+      "parent_id": "GML1-PROV-015",
+      "lineage_root": "GML1-PROV-010",
+      "expected_registry_sha256": "da350c6b600c8f4c5dba923336f72653f71a0ab1a0d7ead686c64ae113e408ef"
+    },
+    {
+      "candidate_id": "GML1-WATCH-014-A",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "decision_bar_minutes": 60,
+      "parent_id": "GML1-PROV-015",
+      "lineage_root": "GML1-PROV-010",
+      "expected_registry_sha256": null
+    }
+  ],
+  "column_aliases": {
+    "decision_close_time": ["decision_time", "signal_time"],
+    "entry_time": ["entry_dt"],
+    "exit_time": ["exit_dt"],
+    "r_value": ["r", "realized_r"],
+    "direction": ["side"],
+    "session": ["server_session"],
+    "regime": ["regime_signature"]
+  },
+  "reporting_windows": {
+    "all": {
+      "timestamp_column": "decision_close_time"
+    },
+    "pre_2026": {
+      "timestamp_column": "decision_close_time",
+      "end_exclusive": "2026-01-01 00:00:00"
+    },
+    "diagnostic_2026_to_cutoff": {
+      "timestamp_column": "decision_close_time",
+      "start_inclusive": "2026-01-01 00:00:00",
+      "end_inclusive": "2026-06-23 18:15:00"
+    },
+    "fresh_post_cutoff": {
+      "timestamp_column": "decision_close_time",
+      "start_exclusive": "2026-06-23 18:15:00"
+    }
+  },
+  "session_buckets": [
+    {
+      "name": "SERVER_00_07",
+      "start_hour_inclusive": 0,
+      "end_hour_inclusive": 7
+    },
+    {
+      "name": "SERVER_08_15",
+      "start_hour_inclusive": 8,
+      "end_hour_inclusive": 15
+    },
+    {
+      "name": "SERVER_16_23",
+      "start_hour_inclusive": 16,
+      "end_hour_inclusive": 23
+    }
+  ],
+  "redundancy_diagnostic_thresholds": {
+    "exact_entry_jaccard_gte": 0.8,
+    "fuzzy_entry_jaccard_gte": 0.85,
+    "monthly_r_correlation_gte": 0.8,
+    "note": "Fixed reporting flags only. They do not remove, merge, promote, or retune candidates."
+  },
+  "required_outputs": [
+    "candidate_window_metrics.csv",
+    "exact_entry_overlap.csv",
+    "plus_minus_one_decision_bar_overlap.csv",
+    "parent_derivative_retention.csv",
+    "concurrent_exposure.csv",
+    "monthly_r_correlation_long.csv",
+    "concentration_breakdown.csv",
+    "independence_summary.json",
+    "manifest.json"
+  ],
+  "boundaries": {
+    "no_old_gold_assets": true,
+    "no_candidate_rule_changes": true,
+    "no_2026_retuning": true,
+    "no_live_signal": true,
+    "no_mt5_order": true,
+    "no_discord": true,
+    "no_portfolio_activation": true,
+    "actual_matrix_not_claimed_until_exact_outputs_are_inspected": true
+  }
+}
