@@ -1,0 +1,40 @@
+{
+  "audit_id": "GML1-BATCH-016-WATCH014-CENTROID-SEED-STABILITY-AUDIT",
+  "status": "IMPLEMENTATION_READY_EXACT_FEATURE_AND_ASSIGNMENT_REGISTRIES_REQUIRED",
+  "audit_only": true,
+  "watch_id": "GML1-WATCH-014-A",
+  "parent_candidate_id": "GML1-PROV-015",
+  "k": 7,
+  "reference_seed": 7307,
+  "reference_excluded_cluster_ids": [1, 2],
+  "seeds": [7307, 7001, 7021, 7041, 7061, 7081],
+  "training_end_exclusive": "2024-01-01 00:00:00",
+  "standardization": "fit 2023 rows only; transform all periods without refit",
+  "feature_columns": [
+    "return_atr_lag01", "body_atr_lag01", "range_atr_lag01", "close_location_lag01",
+    "return_atr_lag02", "body_atr_lag02", "range_atr_lag02", "close_location_lag02",
+    "return_atr_lag03", "body_atr_lag03", "range_atr_lag03", "close_location_lag03",
+    "return_atr_lag04", "body_atr_lag04", "range_atr_lag04", "close_location_lag04",
+    "return_atr_lag05", "body_atr_lag05", "range_atr_lag05", "close_location_lag05",
+    "return_atr_lag06", "body_atr_lag06", "range_atr_lag06", "close_location_lag06",
+    "return_atr_lag07", "body_atr_lag07", "range_atr_lag07", "close_location_lag07",
+    "return_atr_lag08", "body_atr_lag08", "range_atr_lag08", "close_location_lag08",
+    "return_atr_lag09", "body_atr_lag09", "range_atr_lag09", "close_location_lag09",
+    "return_atr_lag10", "body_atr_lag10", "range_atr_lag10", "close_location_lag10",
+    "return_atr_lag11", "body_atr_lag11", "range_atr_lag11", "close_location_lag11",
+    "return_atr_lag12", "body_atr_lag12", "range_atr_lag12", "close_location_lag12",
+    "net_move_12_atr", "span_12_atr", "rising_close_fraction_12", "sign_change_count_12",
+    "mean_range_atr_12", "std_range_atr_12"
+  ],
+  "fresh_cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "2026_policy": "diagnostic only; no cluster selection, threshold selection, or watch promotion from 2026",
+  "boundaries": {
+    "no_refit_or_reclustering": true,
+    "exact_precomputed_assignments_required": true,
+    "no_candidate_logic_change": true,
+    "no_live_signal": true,
+    "no_mt5_order": true,
+    "no_discord": true,
+    "no_portfolio_activation": true
+  }
+}
