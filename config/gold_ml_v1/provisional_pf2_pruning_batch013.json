@@ -1,0 +1,76 @@
+{
+  "result_id": "GML1-PROVISIONAL-PF2-PRUNING-BATCH013",
+  "status": "REMOTE_DIAGNOSTIC_PF2_WATCH_NOT_ACTIVE",
+  "date": "2026-06-24",
+  "parent_provisional_id": "GML1-PROV-015",
+  "watch_id": "GML1-PROV-020",
+  "direction": "LONG",
+  "lane": "H1-D1",
+  "base_event": "PROV-015 H1 BB60 upper breakout with D1 alignment and first-stage false-breakout exclusion",
+  "second_stage_composite_loser_exclusion": {
+    "all_conditions_required": true,
+    "conditions": [
+      {
+        "feature": "H1_DECISION_CLOSE_SERVER_HOUR",
+        "operator": "BETWEEN_INCLUSIVE",
+        "lower": 8,
+        "upper": 16
+      },
+      {
+        "feature": "H1_SPREAD_PRICE_DIV_ATR14",
+        "operator": ">=",
+        "threshold": 0.0308778597897866,
+        "source_2023_quantile": 0.75
+      }
+    ],
+    "interpretation": "exclude H1 breakout trades during server hours 08:00-16:00 only when spread is unusually large relative to H1 ATR"
+  },
+  "excluded_subset_from_parent_trade_registry": {
+    "trades": 21,
+    "wins": 8,
+    "win_rate": 0.3809523810,
+    "profit_factor": 0.6153846154,
+    "total_r": -5.0,
+    "max_drawdown_r": 7.0,
+    "2023_trades": 5,
+    "2024_trades": 14,
+    "2025_trades": 2,
+    "2026_trades": 0
+  },
+  "filtered_metrics": {
+    "2023": {"trades":41,"wins":27,"win_rate":0.6585365854,"profit_factor":2.0717050495,"total_r":13.9672567502,"max_drawdown_r":3.0},
+    "2024": {"trades":50,"wins":31,"win_rate":0.62,"profit_factor":1.6107722842,"total_r":11.6046733993,"max_drawdown_r":3.0},
+    "2025": {"trades":88,"wins":62,"win_rate":0.7045454545,"profit_factor":2.4114925064,"total_r":36.2897811895,"max_drawdown_r":4.0},
+    "pre_2026": {"trades":179,"wins":120,"win_rate":0.6703910615,"profit_factor":2.0713290266,"total_r":61.8617113390,"max_drawdown_r":4.0},
+    "2026_diagnostic": {"trades":25,"wins":19,"win_rate":0.76,"profit_factor":3.0155278405,"total_r":12.0931670428,"max_drawdown_r":2.0},
+    "all_period_diagnostic": {"trades":204,"wins":139,"win_rate":0.6813725490,"profit_factor":2.1602046091,"total_r":73.9548783819,"max_drawdown_r":4.0}
+  },
+  "spread_1_5x": {
+    "pre_2026": {"trades":179,"wins":118,"win_rate":0.6592178771,"profit_factor":1.9672491667,"total_r":57.8168294893,"max_drawdown_r":4.0},
+    "all_period_diagnostic": {"trades":204,"wins":137,"win_rate":0.6715686275,"profit_factor":2.0627926039,"total_r":69.9046457223,"max_drawdown_r":4.0}
+  },
+  "neighborhood": {
+    "server_hour_windows": [[7,17],[8,16],[9,15]],
+    "spread_quantiles_from_2023": [0.65,0.70,0.75,0.80,0.85],
+    "cells": 15,
+    "positive_total_r_pre_2026_and_2026_diagnostic": 15,
+    "pre_2026_profit_factor_at_least_2": 6
+  },
+  "classification": "WATCH_PF2_FILTER_DORMANT_IN_2026",
+  "reason_not_active": [
+    "The aggregate PF target was reached, but the second-stage exclusion fired only twice in 2025 and zero times in the 2026 diagnostic.",
+    "The strong 2026 result is therefore inherited from PROV-015 rather than evidence that the new filter added value in 2026.",
+    "Fresh prospective filter activations are required before active-stack admission."
+  ],
+  "artifacts": {
+    "trade_registry_sha256": "da350c6b600c8f4c5dba923336f72653f71a0ab1a0d7ead686c64ae113e408ef",
+    "spread_stress_registry_sha256": "436ab094980d13c7e33acc75fd31339e3c0a7f43cd6372fe93d200162e2ffdc9"
+  },
+  "boundaries": {
+    "not_active_candidate": true,
+    "no_2026_retuning": true,
+    "local_replay_pending": true,
+    "fresh_prospective_confirmation_pending": true,
+    "portfolio_use_forbidden": true
+  }
+}
