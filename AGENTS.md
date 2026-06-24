@@ -36,18 +36,20 @@ When a task concerns `GOLD_ML_V1`, the new machine-learning rebuild, obey these 
 13. Use `config/gold_ml_v1/structural_lines_channels_bbands_feature_plan_20260624.json` for causal trendline, confirmed-pivot channel, regression-channel, Donchian, and Bollinger research. Repainting lines and future-confirmed pivots are forbidden.
 14. Any result found outside the user's PC is provisional until the same code, configuration, seeds, input hashes, predictions or trade registry, and metrics are reproduced locally under `config/gold_ml_v1/reproducibility_contract_20260624.json`. Commit a one-click Windows runner and exact replay artifacts before asking the user to run it.
 15. No candidate may be registered or added to a portfolio before local replay parity passes.
-16. The current append-only provisional stack is `config/gold_ml_v1/provisional_candidate_stack_20260624.json` and contains GML1-PROV-002, GML1-PROV-007, GML1-PROV-008, GML1-PROV-010, GML1-PROV-013, and GML1-PROV-015 as separate lineages.
-17. GML1-PROV-015 is the loss-filtered derivative of GML1-PROV-010 recorded in `config/gold_ml_v1/provisional_loss_subtraction_batch007.json`; it excludes low D1 tick-volume participation plus weak three-day D1 progress.
-18. Exact trade-registry metrics supersede earlier manual summaries. The Batch007 audit corrected GML1-PROV-010 to 254 trades, 155 wins, PF 1.5724696408, and GML1-PROV-013 maximum drawdown to 9.3841792907.
-19. M15 structural event diagnostics are recorded in `config/gold_ml_v1/m15_structural_event_batches008_009_diagnostic.json`; no lower-timeframe candidate was added retrospectively from 2026-favorable lower-ranked filters.
-20. The 2026 sample has been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
-21. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
-22. Never claim a phase or result is complete until generated outputs are inspected.
+16. The current append-only provisional stack is `config/gold_ml_v1/provisional_candidate_stack_20260624.json` and contains GML1-PROV-002, GML1-PROV-007, GML1-PROV-008, GML1-PROV-010, GML1-PROV-013, GML1-PROV-015, GML1-PROV-016, GML1-PROV-018, and GML1-PROV-019 as separate lineages.
+17. GML1-PROV-016 is the causal M15 confirmed-high-trendline breakout-retest 1.5R LONG lineage; it remained positive under 1.5x spread and all recorded 2026 parameter-neighborhood cells.
+18. GML1-PROV-018 is the M15 BB40 post-squeeze upper-breakout LONG lineage; its 2026 diagnostic was positive but only eight trades, so fresh prospective confirmation is especially important.
+19. GML1-PROV-019 is the repaired M15 Donchian20 break then EMA20-retest 2R SHORT lineage; it is kept as diversification rather than a high-win-rate core lineage.
+20. GML1-PROV-017 failed decisively in 2026 and is not in the stack.
+21. Batch010-011 diagnostics are recorded in `config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json`.
+22. The 2026 sample has been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
+23. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
+24. Never claim a phase or result is complete until generated outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_SIX_PROVISIONAL_STACK_ENTRIES_EXACT_REGISTRY_AUDITED`
+`GOLD_ML_V1_001_NINE_PROVISIONAL_STACK_ENTRIES_RETEST_BATCH_AUDITED`
 
 Next phase:
 
-`M5_M15_WALK_FORWARD_FAILED_BREAK_RETEST_SEARCH_AND_SHORT_DIVERSIFICATION`
+`REDUCED_UNIVERSE_M5_SEARCH_OVERLAP_AUDIT_AND_FINAL_REMOTE_NARROWING`
