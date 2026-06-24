@@ -1,0 +1,148 @@
+{
+  "settings_id": "GOLD_ML_V1_METHOD_AND_RESEARCH_SETTINGS_20260624",
+  "status": "USER_CONFIRMED_WITH_ONE_EXPLICIT_ASSUMPTION",
+  "project": "GOLD_ML_V1",
+  "symbol": "GOLD#",
+  "mochipoyo_role": "FEATURE_AND_SETUP_DISCOVERY_SOURCE_NOT_ALERT_REPLICATION_TARGET",
+  "indicator_settings": {
+    "rci": {
+      "periods": {
+        "short": 9,
+        "medium": 14,
+        "long": 18
+      },
+      "note": "The user wrote RSI, but the Mochipoyo guide and surrounding discussion refer to RCI. This contract therefore records RCI 9/14/18. If RSI was intended, this file must be superseded, not edited silently."
+    },
+    "macd_torys": {
+      "name": "TORYS",
+      "fast_ema_length": 6,
+      "slow_ema_length": 13,
+      "signal_length": 4,
+      "other_settings": "USER_REPORTED_DEFAULTS_UNCHANGED",
+      "exact_custom_formula_verified": false,
+      "replication_required": false,
+      "implementation_policy": {
+        "macd_line": "EMA(close,6)-EMA(close,13)",
+        "signal_and_histogram": "KEEP_AS_EXPLICIT_IMPLEMENTATION_VARIANTS_UNTIL_TORYS_DEFAULT_SMOOTHING_IS_CONFIRMED",
+        "do_not_claim_exact_torys_replication": true,
+        "raw_macd_line_is_allowed_as_a_feature": true,
+        "ema4_signal_proxy_may_be_tested_as_a_separate_feature_variant": true,
+        "sma4_signal_proxy_may_be_tested_as_a_separate_feature_variant": true,
+        "each_formula_variant_requires_a_distinct_feature_set_id": true
+      }
+    },
+    "ema": {
+      "periods": [20, 30, 40],
+      "uses": [
+        "ordering",
+        "slope",
+        "separation",
+        "compression",
+        "distance_from_price"
+      ]
+    }
+  },
+  "timeframe_lanes": [
+    {
+      "lane_id": "GML1-LANE-M1-H1",
+      "decision_timeframe": "M1",
+      "context_timeframe": "H1",
+      "enabled_for_research": true
+    },
+    {
+      "lane_id": "GML1-LANE-M5-H4",
+      "decision_timeframe": "M5",
+      "context_timeframe": "H4",
+      "enabled_for_research": true
+    },
+    {
+      "lane_id": "GML1-LANE-M15-H4",
+      "decision_timeframe": "M15",
+      "context_timeframe": "H4",
+      "enabled_for_research": true
+    },
+    {
+      "lane_id": "GML1-LANE-H1-D1",
+      "decision_timeframe": "H1",
+      "context_timeframe": "D1",
+      "enabled_for_research": true
+    }
+  ],
+  "candidate_accumulation_policy": {
+    "goal": "ACCUMULATE_MULTIPLE_INDEPENDENT_HIGH_WIN_RATE_CANDIDATES",
+    "single_main_candidate_required": false,
+    "long_and_short_are_separate_candidates": true,
+    "timeframe_lane_changes_require_new_candidate_id": true,
+    "setup_family_changes_require_new_candidate_id": true,
+    "label_changes_require_new_candidate_id": true,
+    "exit_changes_require_new_candidate_id": true,
+    "mochipoyo_is_not_the_only_allowed_candidate_source": true,
+    "non_mochipoyo_candidate_families_may_be_added_later": true,
+    "portfolio_combination_never_redefines_source_candidate": true
+  },
+  "initial_setup_families": [
+    "HTF_TREND_LTF_PULLBACK_CONTINUATION",
+    "HTF_RCI_REVERSAL_LTF_TREND_FORMATION",
+    "HIDDEN_DIVERGENCE_CONTINUATION",
+    "REGULAR_DIVERGENCE_REVERSAL",
+    "EMA_ORDERED_PULLBACK",
+    "ROLL_REVERSAL_RETEST",
+    "HIGH_VOLATILITY_TREND_CONTINUATION",
+    "ROUND_NUMBER_CONTEXT",
+    "DATA_DRIVEN_NON_MOCHIPOYO_DISCOVERY"
+  ],
+  "label_strategy": {
+    "owner_decision": "DELEGATED_TO_SYSTEM_DESIGN",
+    "principle": "MULTIPLE_PREDECLARED_LABEL_FAMILIES_WITH_SEPARATE_IDS",
+    "initial_primary_family": {
+      "name": "ATR_NORMALIZED_TRIPLE_BARRIER",
+      "entry_timing": "NEXT_AVAILABLE_M1_OPEN_AT_OR_AFTER_DECISION_BAR_CLOSE",
+      "directions": ["LONG", "SHORT"],
+      "stop_distance_atr_multiples": [1.0],
+      "reward_r_multiples": [1.0, 1.5, 2.0],
+      "same_m1_tp_sl_priority": "SL",
+      "spread_and_cost_included": true,
+      "decision_features_must_be_past_only": true,
+      "each_reward_multiple_gets_a_distinct_label_id": true
+    },
+    "secondary_families_after_primary_audit": [
+      "PAST_ONLY_STRUCTURAL_SWING_STOP_WITH_FIXED_R_TARGET",
+      "RCI_OPPOSITE_SIDE_EXIT",
+      "FIXED_TIME_HORIZON_DIRECTIONAL_RETURN"
+    ],
+    "anti_data_snooping": {
+      "do_not_select_label_using_final_holdout": true,
+      "label_family_comparisons_use_validation_only": true,
+      "each_registered_candidate_freezes_one_label_id": true
+    }
+  },
+  "model_discovery_policy": {
+    "alert_formula_replication": false,
+    "learn_good_shapes_from_market_data": true,
+    "specialist_models_allowed": true,
+    "candidate_sources": [
+      "MOCHIPOYO_INSPIRED_FEATURE_MODELS",
+      "PURE_PRICE_AND_VOLATILITY_MODELS",
+      "TREND_CONTINUATION_MODELS",
+      "REVERSAL_MODELS",
+      "SESSION_OR_REGIME_SPECIALISTS"
+    ],
+    "models_from_different_families_must_not_be_silently_merged": true
+  },
+  "safety": {
+    "audit_only": true,
+    "training_not_started_yet": true,
+    "candidate_registration_not_started_yet": true,
+    "live_signal_enabled": false,
+    "mt5_order_enabled": false,
+    "automatic_promotion": false
+  },
+  "next_required_artifacts": [
+    "PHASE001_DATASET_SPLIT_CONTRACT",
+    "PHASE001_FEATURE_FAMILY_CONTRACT",
+    "PHASE001_LABEL_ID_REGISTRY",
+    "PHASE001_CANDIDATE_REGISTRY_SCHEMA",
+    "PHASE001_PORTFOLIO_REGISTRY_SCHEMA",
+    "PHASE001_LOCAL_DATASET_AUDIT_RUNNER"
+  ]
+}
