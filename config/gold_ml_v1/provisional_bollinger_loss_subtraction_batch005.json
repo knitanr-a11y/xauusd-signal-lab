@@ -1,0 +1,101 @@
+{
+  "result_id": "GML1-PROVISIONAL-BOLLINGER-LOSS-SUBTRACTION-BATCH005",
+  "status": "REMOTE_DIAGNOSTIC_NOT_REGISTERED",
+  "base_provisional_id": "GML1-PROV-002",
+  "derivative_provisional_id": "GML1-PROV-008",
+  "selection_window": {
+    "threshold_values_from": "2023 base-trade feature distribution",
+    "selection_and_confirmation": ["2024", "2025"],
+    "2026_role": "diagnostic_only_because_no_longer_untouched"
+  },
+  "base_rule": {
+    "lane": "M15-H4",
+    "direction": "LONG",
+    "conditions": [
+      "closed H4 RCI18 >= 73.993808",
+      "closed H4 spread-price / H4 ATR14 <= 0.012772"
+    ]
+  },
+  "composite_loser_signature_to_exclude": {
+    "all_conditions_required": true,
+    "conditions": [
+      {
+        "feature": "M15_BB_WIDTH20_ATR",
+        "formula": "4 * population_std(M15 close,20) / M15 ATR14",
+        "operator": "<=",
+        "threshold": 3.3719018700718184,
+        "source_train_quantile": 0.2
+      },
+      {
+        "feature": "M15_BB_WIDTH60_TRAILING100_PERCENTILE",
+        "formula": "percentile rank of current M15 60-period Bollinger full width normalized by ATR within the trailing 100 closed M15 bars",
+        "operator": "<=",
+        "threshold": 0.536,
+        "source_train_quantile": 0.4
+      }
+    ],
+    "interpretation": "exclude low-bandwidth M15 compression states that repeatedly failed inside the otherwise strong H4 continuation setup"
+  },
+  "base_all_period_metrics": {
+    "trades": 193,
+    "wins": 111,
+    "win_rate": 0.5751295337,
+    "profit_factor": 1.3372021510,
+    "total_r": 27.3654253218,
+    "max_drawdown_r": 6.9816100582
+  },
+  "excluded_subset_metrics": {
+    "trades": 24,
+    "wins": 6,
+    "win_rate": 0.25,
+    "profit_factor": 0.3333333333,
+    "total_r": -12.0
+  },
+  "filtered_all_period_metrics": {
+    "trades": 169,
+    "wins": 105,
+    "retained_fraction_vs_parent": 0.8756476684,
+    "win_rate": 0.6213017751,
+    "profit_factor": 1.6233207694,
+    "total_r": 39.3654253218,
+    "max_drawdown_r": 4.0
+  },
+  "year_metrics": {
+    "2023": {"trades": 28, "wins": 16, "win_rate": 0.5714285714, "profit_factor": 1.2544083018, "total_r": 3.0528996221, "max_drawdown_r": 3.0},
+    "2024": {"trades": 28, "wins": 17, "win_rate": 0.6071428571, "profit_factor": 1.4953179499, "total_r": 5.4484974485, "max_drawdown_r": 3.0},
+    "2025": {"trades": 82, "wins": 52, "win_rate": 0.6341463415, "profit_factor": 1.7499402142, "total_r": 21.8640282512, "max_drawdown_r": 4.0},
+    "2026_diagnostic": {"trades": 31, "wins": 20, "win_rate": 0.6451612903, "profit_factor": 1.8181818182, "total_r": 9.0, "max_drawdown_r": 2.0}
+  },
+  "neighborhood": {
+    "bb20_train_quantiles_tested": [0.1,0.2,0.3,0.4],
+    "bb60_percentile_train_quantiles_tested": [0.2,0.3,0.4,0.5,0.6],
+    "cells": 20,
+    "positive_in_2024_2025_and_2026_diagnostic": 20,
+    "retained_fraction_range": [0.7098445596,0.9378238342]
+  },
+  "trendline_channel_parallel_screen": {
+    "features_tested": [
+      "confirmed-pivot high and low line slopes",
+      "confirmed-pivot projected-line distances",
+      "confirmed-pivot channel position and width",
+      "rolling regression-channel slopes and residual z-scores",
+      "Donchian position and break states"
+    ],
+    "new_stack_entry": false,
+    "reason": "Several filters improved 2024 and 2025 but did not remain sufficiently stable in the 2026 diagnostic, so they remain research features rather than provisional candidates."
+  },
+  "boundaries": {
+    "not_registered": true,
+    "local_replay_pending": true,
+    "fresh_prospective_confirmation_pending": true,
+    "base_GML1_PROV_002_unchanged": true,
+    "portfolio_use_forbidden": true
+  },
+  "next": [
+    "search Bollinger squeeze-release and band-reentry event pools directly",
+    "search confirmed trendline break and retest events",
+    "search regression-channel and Donchian failed-break events",
+    "apply composite loser subtraction with annual-count constraints",
+    "confirm on post-2026-06-23 18:15 MT5-server-time prospective data"
+  ]
+}
