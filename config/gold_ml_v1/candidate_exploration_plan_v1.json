@@ -1,0 +1,33 @@
+{
+  "plan_id": "GML1-CANDIDATE-EXPLORATION-PLAN-V1",
+  "status": "DEFINED_NOT_EXECUTED",
+  "lanes": ["M1-H1", "M5-H4", "M15-H4", "H1-D1"],
+  "directions": ["LONG", "SHORT"],
+  "families": [
+    "trend_pullback",
+    "breakout",
+    "roll_reversal",
+    "failed_break",
+    "regular_divergence",
+    "hidden_divergence",
+    "rci_reversal",
+    "ema_structure",
+    "dual_zigzag",
+    "volatility_regime",
+    "range_edge",
+    "time_specialist",
+    "price_level_context",
+    "candle_volume_spread",
+    "data_driven"
+  ],
+  "controls": {
+    "walk_forward": true,
+    "embargo": true,
+    "final_holdout_for_search": false,
+    "log_all_attempts": true,
+    "cost_stress": true,
+    "parameter_neighborhood_test": true,
+    "standalone_before_portfolio": true
+  },
+  "next_gate": "PHASE001_DATASET_AND_EVALUATION_CONTRACT"
+}
