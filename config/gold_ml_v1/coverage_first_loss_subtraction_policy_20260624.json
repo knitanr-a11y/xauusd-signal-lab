@@ -1,0 +1,58 @@
+{
+  "policy_id": "GML1-COVERAGE-FIRST-LOSS-SUBTRACTION-20260624",
+  "status": "ACTIVE_FOR_REMOTE_DISCOVERY",
+  "objective": "Preserve broad GOLD opportunity coverage, then remove only reproducible composite loser signatures instead of building candidates from rare positive-condition intersections.",
+  "method_change": {
+    "previous_problem": [
+      "high-quantile positive conditions were intersected too early",
+      "false-to-true onset only reduced repeated valid opportunities",
+      "candidate count was treated as a consequence instead of a search constraint"
+    ],
+    "new_order": [
+      "start from broad opportunity states",
+      "label every causally available opportunity",
+      "compare winners and losers by feature distributions and interactions",
+      "learn composite loser-risk regions",
+      "subtract only loser-risk regions within a fixed coverage budget",
+      "evaluate state, onset, event, and cooldown re-entry variants separately",
+      "freeze each surviving variant as a separate lineage"
+    ]
+  },
+  "important_interpretation": {
+    "do_not_delete_negative_features_from_model": true,
+    "use_negative_features_as_exclusion_information": true,
+    "remove_trade_opportunities_matching_composite_loser_signatures": true
+  },
+  "coverage_constraints": {
+    "default_minimum_retained_fraction": 0.65,
+    "preferred_retained_fraction": [0.75, 0.95],
+    "minimum_annual_trade_count_is_a_gate": true,
+    "search_objective_includes_total_r_pf_win_rate_drawdown_and_count": true,
+    "win_rate_only_optimization_forbidden": true
+  },
+  "entry_modes_to_test_separately": [
+    "STATE_WITH_COOLDOWN_REENTRY",
+    "FALSE_TO_TRUE_ONSET",
+    "EVENT_TRIGGER",
+    "TOP_SCORE_COVERAGE_BUCKET"
+  ],
+  "loss_analysis": {
+    "single_feature_loss_lift": true,
+    "two_and_three_feature_loss_interactions": true,
+    "shallow_loss_tree_leaves": true,
+    "permutation_and_shap_diagnostics_when_model_supported": true,
+    "year_and_regime_consistency_required": true,
+    "future_or_holdout_data_for_filter_selection_forbidden": true
+  },
+  "lineage": {
+    "base_candidate_is_immutable": true,
+    "loss_filtered_derivative_gets_new_provisional_id": true,
+    "different_coverage_budget_gets_new_feature_or_entry_policy_id": true,
+    "portfolio_results_never_replace_standalone_results": true
+  },
+  "safety": {
+    "audit_only": true,
+    "local_replay_required_before_registration": true,
+    "automatic_promotion": false
+  }
+}
