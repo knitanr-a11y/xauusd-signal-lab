@@ -1,0 +1,9 @@
+{
+  "status": "P0_EXACT_AUDITS_COMPLETED_AUDIT_ONLY",
+  "batch015_completed": true,
+  "prov020_monitor_completed": true,
+  "batch016_completed": true,
+  "post_cutoff_source_coverage_available": false,
+  "tests": "9 passed",
+  "candidate_logic_changed": false
+}
