@@ -32,18 +32,20 @@ When a task concerns `GOLD_ML_V1`, the new machine-learning rebuild, obey these 
 9. Portfolio results are separate from candidate results. Never overwrite candidate trades or metrics with portfolio trades or metrics.
 10. Preserve MT5 server timestamps as raw values. For authorized candle CSVs, `time` is the bar-open time, the latest row is closed, and `bar_close_time = bar_open_time + timeframe duration`. Never discard the latest row as open and never make higher-timeframe data available at its open time.
 11. Use the broad search plan in `docs/gold_ml_v1/GOLD_ML_V1_001_BROAD_CANDIDATE_EXPLORATION_PLAN_20260624.md` and `config/gold_ml_v1/candidate_exploration_plan_v1.json`. Search widely, but keep every lane, direction, label, feature set, model, and candidate lineage separate.
-12. Any result found outside the user's PC is provisional until the same code, configuration, seeds, input hashes, predictions or trade registry, and metrics are reproduced locally under `config/gold_ml_v1/reproducibility_contract_20260624.json`. Commit a one-click Windows runner and exact replay artifacts before asking the user to run it.
-13. No candidate may be registered or added to a portfolio before local replay parity passes.
-14. Batch001 status is recorded in `config/gold_ml_v1/provisional_shortlist_batch001_holdout_result.json`: GML1-PROV-002 is the only current remote replay shortlist survivor.
-15. Batch002 status is recorded in `config/gold_ml_v1/provisional_shortlist_batch002_holdout_result.json`: no new local-replay candidate was accepted; GML1-PROV-004 remains watch-only, while GML1-PROV-003, GML1-PROV-005, and GML1-PROV-006 failed or were too weak.
-16. The 2026 sample has now been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
-17. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
-18. Never claim a phase or result is complete until generated outputs are inspected.
+12. Use `config/gold_ml_v1/coverage_first_loss_subtraction_policy_20260624.json`: start from broad opportunity coverage, retain negative features as exclusion information, and subtract only composite loser-risk regions. Do not create scarcity by intersecting rare positive conditions too early. Test state-with-cooldown, onset, event, and score-coverage entry modes separately.
+13. Any result found outside the user's PC is provisional until the same code, configuration, seeds, input hashes, predictions or trade registry, and metrics are reproduced locally under `config/gold_ml_v1/reproducibility_contract_20260624.json`. Commit a one-click Windows runner and exact replay artifacts before asking the user to run it.
+14. No candidate may be registered or added to a portfolio before local replay parity passes.
+15. Batch001 status is recorded in `config/gold_ml_v1/provisional_shortlist_batch001_holdout_result.json`: GML1-PROV-002 is the original remote replay shortlist survivor.
+16. Batch002 status is recorded in `config/gold_ml_v1/provisional_shortlist_batch002_holdout_result.json`: no new local-replay candidate was accepted.
+17. Loss-subtraction Batch003 is recorded in `config/gold_ml_v1/provisional_loss_subtraction_batch003.json`: GML1-PROV-007 is an unregistered derivative of GML1-PROV-002 that removes a composite H4 overextension and upper-wick-rejection loser signature while preserving the base lineage unchanged.
+18. The 2026 sample has been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
+19. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
+20. Never claim a phase or result is complete until generated outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_BATCH002_REMOTE_HOLDOUT_AUDITED_ONE_REMOTE_REPLAY_SURVIVOR`
+`GOLD_ML_V1_001_COVERAGE_FIRST_LOSS_SUBTRACTION_ACTIVE`
 
 Next phase:
 
-`CONTINUE_REMOTE_DISCOVERY_WITH_WALK_FORWARD_AND_POST_CUTOFF_PROSPECTIVE_CONFIRMATION`
+`EXPAND_HIGH_COVERAGE_OPPORTUNITY_POOLS_AND_LEARN_COMPOSITE_LOSER_EXCLUSIONS`
