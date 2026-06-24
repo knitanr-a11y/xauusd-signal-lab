@@ -1,0 +1,105 @@
+{
+  "result_id": "GML1-PROVISIONAL-LOSS-SUBTRACTION-BATCH007",
+  "status": "REMOTE_DIAGNOSTIC_ONE_NEW_STACK_ENTRY",
+  "date": "2026-06-24",
+  "source_lineages": ["GML1-PROV-010", "GML1-PROV-013"],
+  "method": {
+    "threshold_values_from": "2023 source-trade feature distributions",
+    "selection_and_confirmation": ["2024", "2025"],
+    "2026_role": "diagnostic only because the period is no longer untouched",
+    "coverage_floor": 0.72,
+    "future_data_used_for_filter_selection": false
+  },
+  "audited_source_metrics": {
+    "GML1-PROV-010": {
+      "trades": 254,
+      "wins": 155,
+      "win_rate": 0.6102362205,
+      "profit_factor": 1.5724696408,
+      "total_r": 55.9548783819,
+      "max_drawdown_r": 5.0,
+      "trade_registry_sha256": "beadac7e15d144e98adb2ef616598924dff81d3b5b9b99ebb2f75523ad3addaf"
+    },
+    "GML1-PROV-013": {
+      "trades": 248,
+      "wins": 133,
+      "win_rate": 0.5362903226,
+      "profit_factor": 1.1865300130,
+      "total_r": 20.5533632983,
+      "max_drawdown_r": 9.3841792907,
+      "trade_registry_sha256": "4bab673155c85ec5e68990c99663e437e0e6603b5c42b9f8a19a51e4c3ef3a73"
+    }
+  },
+  "new_derivative": {
+    "provisional_id": "GML1-PROV-015",
+    "parent_provisional_id": "GML1-PROV-010",
+    "lane": "H1-D1",
+    "direction": "LONG",
+    "role": "D1_LOW_PARTICIPATION_FALSE_BREAKOUT_LOSS_FILTER_DERIVATIVE",
+    "base_event": "H1 60-period upper Bollinger breakout with last-closed D1 RCI18 nonnegative",
+    "composite_loser_signature_to_exclude": {
+      "all_conditions_required": true,
+      "conditions": [
+        {
+          "feature": "D1_TICK_VOLUME_RATIO50",
+          "formula": "last closed D1 tick_volume divided by its trailing 50-bar mean",
+          "operator": "<=",
+          "threshold": 0.876789995391398,
+          "source_2023_quantile": 0.3
+        },
+        {
+          "feature": "D1_DELTA_ATR_3",
+          "formula": "(last closed D1 close - D1 close[3]) / D1 ATR14",
+          "operator": "<=",
+          "threshold": 0.2256991669382677,
+          "source_2023_quantile": 0.4
+        }
+      ],
+      "interpretation": "exclude H1 upper-band breakouts occurring while D1 participation is weak and the prior three-day advance is small relative to D1 ATR"
+    },
+    "excluded_subset_all_period": {
+      "trades": 29,
+      "wins": 8,
+      "win_rate": 0.2758620690,
+      "profit_factor": 0.3809523810,
+      "total_r": -13.0,
+      "max_drawdown_r": 13.0
+    },
+    "filtered_all_period": {
+      "trades": 225,
+      "wins": 147,
+      "retained_fraction_vs_parent": 0.8858267717,
+      "win_rate": 0.6533333333,
+      "profit_factor": 1.8985172911,
+      "total_r": 68.9548783819,
+      "max_drawdown_r": 4.0
+    },
+    "year_metrics": {
+      "2023": {"trades": 46, "wins": 28, "win_rate": 0.6086956522, "profit_factor": 1.6438925656, "total_r": 10.9672567502, "max_drawdown_r": 3.0, "coverage": 0.8214285714},
+      "2024": {"trades": 64, "wins": 37, "win_rate": 0.578125, "profit_factor": 1.3557286444, "total_r": 9.6046733993, "max_drawdown_r": 3.0, "coverage": 0.9142857143},
+      "2025": {"trades": 90, "wins": 63, "win_rate": 0.7, "profit_factor": 2.3586478436, "total_r": 36.2897811895, "max_drawdown_r": 4.0, "coverage": 0.8910891089},
+      "2026_diagnostic": {"trades": 25, "wins": 19, "win_rate": 0.76, "profit_factor": 3.0155278405, "total_r": 12.0931670428, "max_drawdown_r": 2.0, "coverage": 0.9259259259}
+    },
+    "neighborhood": {
+      "d1_tick_volume_ratio50_quantiles": [0.2, 0.25, 0.3, 0.35, 0.4],
+      "d1_delta_atr_3_quantiles": [0.3, 0.35, 0.4, 0.45, 0.5],
+      "cells": 25,
+      "positive_in_2023_2024_2025": 25,
+      "positive_in_2023_2024_2025_and_2026_diagnostic": 25
+    },
+    "feature_registry_sha256": "822cd8085e3852831099c0b8b3993cb261188b5612ea5ddc72331d000f17f923"
+  },
+  "GML1_PROV_013_filter_search": {
+    "decision": "NO_NEW_DERIVATIVE_STACK_ENTRY",
+    "reason": "The highest-ranked pre-2026 composite exclusions improved 2024 and 2025 but the top frozen variants did not remain reliably positive in the 2026 diagnostic. The parent GML1-PROV-013 remains unchanged in the provisional stack.",
+    "feature_registry_sha256": "00dbf589ca95cfa3610f9851ade0f1bddbc9d0cd151603b24027f482895ed3da"
+  },
+  "boundaries": {
+    "GML1_PROV_015_not_registered": true,
+    "local_replay_pending": true,
+    "fresh_prospective_confirmation_pending": true,
+    "parent_lineages_unchanged": true,
+    "portfolio_use_forbidden": true,
+    "automatic_promotion": false
+  }
+}
