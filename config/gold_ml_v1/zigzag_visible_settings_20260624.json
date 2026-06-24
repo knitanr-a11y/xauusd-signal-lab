@@ -1,0 +1,81 @@
+{
+  "settings_id": "GOLD_ML_V1_ZIGZAG_VISIBLE_SETTINGS_20260624",
+  "status": "SCREENSHOT_CONFIRMED_WITH_ALGORITHM_BOUNDARY",
+  "source": "USER_SCREENSHOT",
+  "zigzags": [
+    {
+      "zigzag_id": "ZZ_FAST_UI_5_3_2",
+      "display": true,
+      "depth": 5,
+      "deviation": 3,
+      "backstep": 2,
+      "line_width": 2,
+      "label": false,
+      "label_size": "tiny",
+      "repaint_levels": true,
+      "extend_zigzag": false,
+      "intended_role": "SHORT_SWING_STRUCTURE"
+    },
+    {
+      "zigzag_id": "ZZ_SLOW_UI_12_5_3",
+      "display": false,
+      "depth": 12,
+      "deviation": 5,
+      "backstep": 3,
+      "line_width": 2,
+      "label": true,
+      "repaint_levels": true,
+      "extend_zigzag": false,
+      "intended_role": "MEDIUM_SWING_STRUCTURE"
+    }
+  ],
+  "algorithm_boundary": {
+    "exact_indicator_source_code_available": false,
+    "exact_deviation_unit_confirmed": false,
+    "exact_tradingview_or_custom_zigzag_algorithm_confirmed": false,
+    "exact_visual_reproduction_claim_allowed": false
+  },
+  "causality_contract": {
+    "repainting_display_must_not_be_used_as_historical_truth": true,
+    "current_unconfirmed_endpoint_forbidden": true,
+    "pivot_available_only_after_causal_confirmation": true,
+    "availability_timestamp_must_be_recorded": true,
+    "historical_pivot_timestamp_must_not_be_confused_with_detection_timestamp": true,
+    "feature_generation_must_use_closed_bars_only": true,
+    "future_backfill_of_pivot_labels_forbidden": true
+  },
+  "research_implementation": {
+    "use_as_inspiration_not_exact_replication": true,
+    "fast_and_slow_scales_require_separate_feature_ids": true,
+    "preferred_causal_variants": [
+      "CONFIRMED_PIVOT_DEPTH_BACKSTEP_PROXY",
+      "ATR_THRESHOLD_SWING_PROXY",
+      "PERCENT_THRESHOLD_SWING_PROXY"
+    ],
+    "each_algorithm_variant_requires_a_distinct_feature_set_id": true,
+    "candidate_features": [
+      "last_confirmed_pivot_direction",
+      "last_confirmed_pivot_price",
+      "bars_since_confirmation",
+      "swing_size_price",
+      "swing_size_atr_normalized",
+      "swing_duration_bars",
+      "pullback_ratio",
+      "extension_ratio",
+      "higher_high_lower_low_state",
+      "fast_slow_zigzag_alignment",
+      "nested_pullback_state",
+      "roll_reversal_distance",
+      "round_number_distance_at_confirmed_pivot",
+      "rci_divergence_on_confirmed_pivots",
+      "macd_divergence_on_confirmed_pivots"
+    ]
+  },
+  "candidate_policy": {
+    "zigzag_features_are_inputs_not_candidates": true,
+    "fast_only_slow_only_and_combined_models_are_separate_lineages": true,
+    "long_and_short_remain_separate_candidates": true,
+    "timeframe_lane_changes_require_new_candidate_ids": true,
+    "no_existing_candidate_may_be_overwritten": true
+  }
+}
