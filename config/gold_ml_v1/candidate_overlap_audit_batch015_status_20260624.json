@@ -1,0 +1,38 @@
+{
+  "result_id": "GML1-BATCH-015-SIX-CANDIDATE-OVERLAP-INDEPENDENCE-AUDIT-IMPLEMENTATION",
+  "date": "2026-06-24",
+  "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_REGISTRY_RUN_PENDING",
+  "audit_only": true,
+  "candidate_logic_changed": false,
+  "candidate_ids": [
+    "GML1-PROV-007",
+    "GML1-PROV-008",
+    "GML1-PROV-010",
+    "GML1-PROV-015",
+    "GML1-PROV-020",
+    "GML1-WATCH-014-A"
+  ],
+  "implementation": {
+    "script": "scripts/gold_ml_v1/audit/candidate_overlap_audit.py",
+    "windows_runner": "scripts/gold_ml_v1/audit/run_candidate_overlap_audit.bat",
+    "config": "config/gold_ml_v1/candidate_overlap_audit_20260624.json",
+    "tests": "tests/gold_ml_v1/test_candidate_overlap_audit.py",
+    "documentation": "docs/gold_ml_v1/GOLD_ML_V1_BATCH015_OVERLAP_AUDIT_IMPLEMENTATION_20260624.md",
+    "synthetic_tests_passed": 2
+  },
+  "actual_result_status": {
+    "real_six_candidate_matrix_generated": false,
+    "reason": "The repository does not contain all six exact trade-registry CSV bodies. Metrics summaries and partial SHA records are insufficient to reconstruct entry timestamps.",
+    "next_required_action": "Run Batch015 with all six exact registries, inspect every output, then freeze a separate immutable result JSON."
+  },
+  "boundaries": {
+    "no_legacy_gold_assets_used": true,
+    "no_2026_retuning": true,
+    "fresh_cutoff_mt5_server_close": "2026-06-23 18:15:00",
+    "no_live_signal": true,
+    "no_mt5_order": true,
+    "no_discord": true,
+    "no_portfolio_activation": true,
+    "no_automatic_candidate_promotion": true
+  }
+}
