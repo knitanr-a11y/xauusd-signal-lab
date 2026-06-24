@@ -1,0 +1,90 @@
+{
+  "result_id": "GML1-PROVISIONAL-EVENT-BATCH006-DIAGNOSTIC-RESULT",
+  "status": "REMOTE_DIAGNOSTIC_AUDITED_TWO_NEW_STACK_ENTRIES",
+  "date": "2026-06-24",
+  "selection_source": "config/gold_ml_v1/provisional_event_shortlist_batch006_pre_diagnostic.json",
+  "common_execution": {
+    "stop_atr_multiple": 1.0,
+    "target_r": 1.0,
+    "horizon_hours": 48,
+    "entry": "next exact M1 open at H1 close",
+    "same_m1_priority": "SL",
+    "dynamic_spread_included": true,
+    "one_position_per_event_lineage": true
+  },
+  "results": [
+    {
+      "provisional_id": "GML1-PROV-009",
+      "event": "CAUSAL_CONFIRMED_HIGH_TRENDLINE_BREAK",
+      "direction": "LONG",
+      "decision": "WATCH_ONLY_1R_DIAGNOSTIC_WEAK",
+      "2026_diagnostic": {"trades": 117, "wins": 57, "win_rate": 0.4871794872, "profit_factor": 0.933, "total_r": -3.94, "max_drawdown_r": 10.94},
+      "note": "High-count pre-2026 trendline breakout edge weakened in 2026 at the frozen 1R label. Alternative R labels are research-only and require separate preselection lineages."
+    },
+    {
+      "provisional_id": "GML1-PROV-010",
+      "event": "H1_BB60_UPPER_BREAK",
+      "direction": "LONG",
+      "context": "LAST_CLOSED_D1_RCI18_NONNEGATIVE",
+      "decision": "ADD_TO_PROVISIONAL_STACK",
+      "2026_diagnostic": {"trades": 27, "wins": 19, "win_rate": 0.7037037037, "profit_factor": 2.262, "total_r": 10.09, "max_drawdown_r": 2.91},
+      "all_period": {"trades": 254, "wins": 151, "win_rate": 0.5944881890, "profit_factor": 1.518, "total_r": 55.95},
+      "note": "The 60-period H1 upper-band breakout with aligned closed D1 RCI remained positive across every year and strengthened in the 2026 diagnostic."
+    },
+    {
+      "provisional_id": "GML1-PROV-011",
+      "event": "H1_REGRESSION80_LOW_REENTRY",
+      "direction": "LONG",
+      "decision": "DO_NOT_STACK",
+      "2026_diagnostic": {"trades": 79, "wins": 39, "win_rate": 0.4936708861, "profit_factor": 0.955, "total_r": -1.77, "max_drawdown_r": 8.02}
+    },
+    {
+      "provisional_id": "GML1-PROV-012",
+      "event": "H1_BB20_LOWER_REENTRY",
+      "direction": "LONG",
+      "decision": "DO_NOT_STACK",
+      "2026_diagnostic": {"trades": 79, "wins": 37, "win_rate": 0.4683544304, "profit_factor": 0.848, "total_r": -6.36, "max_drawdown_r": 14.69}
+    },
+    {
+      "provisional_id": "GML1-PROV-013",
+      "event": "H1_BB60_MIDDLE_REJECTION",
+      "direction": "SHORT",
+      "context": "LAST_CLOSED_D1_ATR14_ABOVE_50_BAR_MEDIAN",
+      "decision": "ADD_TO_PROVISIONAL_STACK",
+      "2026_diagnostic": {"trades": 31, "wins": 16, "win_rate": 0.5161290323, "profit_factor": 1.147, "total_r": 2.05, "max_drawdown_r": 4.59},
+      "all_period": {"trades": 248, "wins": 133, "win_rate": 0.5362903226, "profit_factor": 1.187, "total_r": 20.56},
+      "note": "The high-volatility D1 context plus H1 60-period middle-band rejection remained positive in every year and provides SHORT-direction diversification."
+    },
+    {
+      "provisional_id": "GML1-PROV-014",
+      "event": "H1_BB40_LOWER_BREAK",
+      "direction": "SHORT",
+      "decision": "WATCH_ONLY",
+      "2026_diagnostic": {"trades": 20, "wins": 10, "win_rate": 0.5, "profit_factor": 1.0, "total_r": 0.0, "max_drawdown_r": 4.0},
+      "note": "Positive before 2026 but exactly break-even in the diagnostic and too small for stacking."
+    }
+  ],
+  "label_diagnostics_not_used_for_registration": {
+    "tested_targets_r": [1.5, 2.0],
+    "rule": "These are diagnostics only. Any target change creates a new label lineage and must be frozen without using 2026 for selection."
+  },
+  "batch_conclusion": {
+    "new_stack_entries": ["GML1-PROV-010", "GML1-PROV-013"],
+    "watch_only": ["GML1-PROV-009", "GML1-PROV-014"],
+    "rejected": ["GML1-PROV-011", "GML1-PROV-012"],
+    "existing_stack_unchanged": ["GML1-PROV-002", "GML1-PROV-007", "GML1-PROV-008"]
+  },
+  "boundaries": {
+    "none_are_registered_candidates": true,
+    "local_replay_required": true,
+    "fresh_prospective_confirmation_required": true,
+    "portfolio_use_forbidden": true,
+    "automatic_promotion": false
+  },
+  "next": [
+    "perform composite loser-subtraction on PROV-010 and PROV-013 using 2023 discovery and 2024-2025 validation only",
+    "search M5 and M15 event lineages with annual-count constraints",
+    "search separately frozen 1.5R and 2.0R label lineages without using 2026 for selection",
+    "continue post-cutoff prospective observation"
+  ]
+}
