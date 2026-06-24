@@ -10,4 +10,8 @@ Machine-readable foundation contract:
 
 `config/gold_ml_v1/project_contract.json`
 
-Do not use old GOLD documents, scripts, outputs, models, candidates, metrics, stages, or handoffs as context, baseline, fallback, parity source, or implementation source.
+Local legacy archive guide:
+
+`docs/gold_ml_v1/LOCAL_LEGACY_ARCHIVE_GUIDE_20260624.md`
+
+Do not use old GOLD documents, scripts, outputs, models, candidates, metrics, stages, or handoffs as context, baseline, fallback, parity source, or implementation source. The local archive tool is a maintenance-only exception that performs opaque compression and SHA256 recording; archived content remains forbidden as GOLD_ML_V1 research input.
