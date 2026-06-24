@@ -9,6 +9,9 @@
    - `config/gold_ml_v1/current_state_snapshot_20260624.json`
    - `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_20260624.md`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH016_ADDENDUM_20260624.md`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXACT_INPUTS_ADDENDUM_20260625.md`
+   - `config/gold_ml_v1/exact_artifact_locator_20260625.json`
    - `docs/gold_ml_v1/GOLD_ML_V1_RESEARCH_AND_CANDIDATE_IMPLEMENTATION_PLAYBOOK_20260624.md`
    - `docs/gold_ml_v1/OPEN_RESEARCH_INVENTORY_GOLD_ML_V1_20260624.md`
 4. Preserve MT5 server timestamps and bar-close availability.
@@ -25,16 +28,17 @@
    - GML1-WATCH-014-A
 10. GML1-PROV-020 is accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
 11. GML1-WATCH-014-A is accumulated with the caveat that seed stability and human-auditable interpretation remain unresolved.
-12. Historical audit files remain available after demotion.
-13. Local replay and fresh prospective confirmation are required before registration.
-14. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
-15. Remain audit-only. No live activation or automatic promotion.
-16. Never claim completion until outputs are inspected.
+12. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
+13. Historical audit files remain available after demotion.
+14. Local replay and fresh prospective confirmation are required before registration.
+15. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
+16. Remain audit-only. No live activation or automatic promotion.
+17. Never claim completion until outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_SIX_ACCUMULATED_PROVISIONAL_CANDIDATES_DOCUMENTED`
+`GOLD_ML_V1_001_EXACT_INPUT_BUNDLE_LOCATED_AUDIT_RUNS_PENDING`
 
 Next phase:
 
-`OVERLAP_FRESH_ACTIVATION_PATH_MOTIF_MAE_MFE_SHORT_AND_PF2_REFINEMENT`
+`INSTALL_EXACT_BUNDLE_RUN_BATCH015_PROV020_BATCH016_THEN_MAE_MFE_SHORT_AND_PF2_REFINEMENT`
