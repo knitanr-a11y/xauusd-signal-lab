@@ -1,0 +1,93 @@
+{
+  "result_id": "GML1-PROVISIONAL-SHORTLIST-BATCH001-HOLDOUT-RESULT",
+  "status": "REMOTE_HOLDOUT_AUDITED_LOCAL_REPLAY_PENDING",
+  "date": "2026-06-24",
+  "evaluator_audit": {
+    "eligibility_order": "exact M1 entry and complete label availability are applied before false-to-true onset detection",
+    "historical_reproduction": "PASS",
+    "note": "An earlier diagnostic holdout calculation applied entry eligibility after onset detection and was discarded. The corrected evaluator first reproduced the frozen 2023-2025 counts and metrics exactly, then the 2026 results below were accepted."
+  },
+  "results": [
+    {
+      "provisional_id": "GML1-PROV-001",
+      "lane": "H1-D1",
+      "decision": "REMOTE_HOLDOUT_FAIL_NO_REGISTRATION",
+      "2026_complete_horizon": {
+        "trades": 21,
+        "wins": 11,
+        "win_rate": 0.5238095238,
+        "profit_factor": 1.0090909091,
+        "total_r": 0.0909090909,
+        "max_drawdown_r": 3.0,
+        "wilson_lower_95": 0.3236921790,
+        "tp": 10,
+        "sl": 10,
+        "time_positive": 1,
+        "time_negative": 0
+      },
+      "spread_stress_1_5x_total_r": 0.085688,
+      "neighborhood_positive_cells": 16,
+      "neighborhood_total_cells": 27,
+      "reason": "The exact frozen rule was approximately break-even on the untouched 2026 holdout and does not qualify as a robust independent candidate."
+    },
+    {
+      "provisional_id": "GML1-PROV-002",
+      "lane": "M15-H4",
+      "decision": "REMOTE_HOLDOUT_PASS_AWAIT_LOCAL_REPLAY_AND_FURTHER_AUDIT",
+      "2026_complete_horizon": {
+        "trades": 37,
+        "wins": 22,
+        "win_rate": 0.5945945946,
+        "profit_factor": 1.4666666667,
+        "total_r": 7.0,
+        "max_drawdown_r": 4.0,
+        "wilson_lower_95": 0.4348568313,
+        "tp": 22,
+        "sl": 15,
+        "time_positive": 0,
+        "time_negative": 0
+      },
+      "spread_stress_1_5x": {
+        "trades": 37,
+        "win_rate": 0.5945945946,
+        "profit_factor": 1.4666666667,
+        "total_r": 7.0
+      },
+      "neighborhood_positive_cells": 27,
+      "neighborhood_total_cells": 27,
+      "horizon_hours_tested": [4, 6, 8],
+      "threshold_factors_tested": [0.9, 1.0, 1.1],
+      "reason": "The exact frozen rule remained positive on the untouched holdout, under spread stress, and across every reported threshold and horizon neighborhood cell."
+    }
+  ],
+  "full_period_diagnostic": {
+    "GML1-PROV-001": {
+      "trades": 302,
+      "wins": 171,
+      "win_rate": 0.5662251656,
+      "profit_factor": 1.2864999133,
+      "total_r": 37.4319919715,
+      "max_drawdown_r": 8.0
+    },
+    "GML1-PROV-002": {
+      "trades": 193,
+      "wins": 111,
+      "win_rate": 0.5751295337,
+      "profit_factor": 1.3372021510,
+      "total_r": 27.3654253218,
+      "max_drawdown_r": 6.9816100582
+    }
+  },
+  "boundaries": {
+    "GML1_PROV_002_is_not_registered": true,
+    "local_replay_required": true,
+    "portfolio_use_forbidden": true,
+    "automatic_promotion": false,
+    "holdout_threshold_retuning_forbidden": true
+  },
+  "next": [
+    "continue independent candidate search in other lanes and directions",
+    "audit GML1-PROV-002 event concentration and exact source lineage",
+    "build shortlist-only local replay package after further remote narrowing"
+  ]
+}
