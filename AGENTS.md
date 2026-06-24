@@ -36,17 +36,20 @@ When a task concerns `GOLD_ML_V1`, the new machine-learning rebuild, obey these 
 13. Use `config/gold_ml_v1/structural_lines_channels_bbands_feature_plan_20260624.json` for causal trendline, confirmed-pivot channel, regression-channel, Donchian, and Bollinger research. Repainting lines and future-confirmed pivots are forbidden.
 14. Any result found outside the user's PC is provisional until the same code, configuration, seeds, input hashes, predictions or trade registry, and metrics are reproduced locally under `config/gold_ml_v1/reproducibility_contract_20260624.json`. Commit a one-click Windows runner and exact replay artifacts before asking the user to run it.
 15. No candidate may be registered or added to a portfolio before local replay parity passes.
-16. The current append-only provisional stack is `config/gold_ml_v1/provisional_candidate_stack_20260624.json` and contains GML1-PROV-002, GML1-PROV-007, and GML1-PROV-008 as separate lineages.
+16. The current append-only provisional stack is `config/gold_ml_v1/provisional_candidate_stack_20260624.json` and contains GML1-PROV-002, GML1-PROV-007, GML1-PROV-008, GML1-PROV-010, and GML1-PROV-013 as separate lineages.
 17. GML1-PROV-007 is the H4 overextension and upper-wick loser-filter derivative of GML1-PROV-002.
-18. GML1-PROV-008 is the M15 Bollinger-compression loser-filter derivative of GML1-PROV-002, recorded in `config/gold_ml_v1/provisional_bollinger_loss_subtraction_batch005.json`.
-19. The 2026 sample has been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
-20. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
-21. Never claim a phase or result is complete until generated outputs are inspected.
+18. GML1-PROV-008 is the M15 Bollinger-compression loser-filter derivative of GML1-PROV-002.
+19. GML1-PROV-010 is an independent H1 60-period upper-Bollinger breakout LONG lineage with aligned closed D1 RCI18.
+20. GML1-PROV-013 is an independent H1 60-period Bollinger middle-band rejection SHORT lineage in a closed D1 high-volatility regime.
+21. Batch006 event diagnostics are recorded in `config/gold_ml_v1/provisional_event_batch006_diagnostic_result.json`. GML1-PROV-009 and GML1-PROV-014 remain watch-only; GML1-PROV-011 and GML1-PROV-012 were not stacked.
+22. The 2026 sample has been used for multiple provisional audits and is no longer an untouched final holdout for future candidate selection. Do not retune thresholds on it. Fresh prospective confirmation starts strictly after MT5 server close time `2026-06-23 18:15:00`.
+23. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
+24. Never claim a phase or result is complete until generated outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_STRUCTURAL_LINES_CHANNELS_BBANDS_ACTIVE_THREE_PROVISIONAL_STACK_ENTRIES`
+`GOLD_ML_V1_001_FIVE_PROVISIONAL_STACK_ENTRIES_STRUCTURAL_EVENT_SEARCH_ACTIVE`
 
 Next phase:
 
-`SEARCH_CAUSAL_BBANDS_TRENDLINE_CHANNEL_EVENTS_AND_COMPOSITE_LOSER_EXCLUSIONS`
+`LOSS_SUBTRACTION_FOR_PROV_010_AND_PROV_013_PLUS_M5_M15_EVENT_SEARCH`
