@@ -1,0 +1,107 @@
+{
+  "authorization_id": "GOLD_ML_V1_RAW_DATA_SOURCE_AUTHORIZATION_20260624",
+  "status": "USER_AUTHORIZED_RAW_SOURCE",
+  "authorized_date": "2026-06-24",
+  "project": "GOLD_ML_V1",
+  "purpose": "Authorize existing raw OHLCV candle files as the primary historical source and live extension source for the clean rebuild.",
+  "scope": {
+    "historical_root_relative_to_active_mql5_files": "gold_v3_2023_2026/",
+    "historical_is_primary": true,
+    "live_root_relative_to_active_mql5_files": "./",
+    "logical_market": "GOLD",
+    "exact_symbol_name_pending_confirmation": true,
+    "timeframes": ["M1", "M5", "M15", "H1", "H4", "D1"]
+  },
+  "historical_files": {
+    "M1": "gold_v3_2023_2026_m1.csv",
+    "M5": "gold_v3_2023_2026_m5.csv",
+    "M15": "gold_v3_2023_2026_m15.csv",
+    "H1": "gold_v3_2023_2026_h1.csv",
+    "H4": "gold_v3_2023_2026_h4.csv",
+    "D1": "gold_v3_2023_2026_d1.csv"
+  },
+  "live_files": {
+    "M1": "goldsharp_m1.csv",
+    "M5": "goldsharp_m5.csv",
+    "M15": "goldsharp_m15.csv",
+    "H1": "goldsharp_h1.csv",
+    "H4": "goldsharp_h4.csv",
+    "D1": "goldsharp_d1.csv"
+  },
+  "schema": [
+    "time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "tick_volume",
+    "spread",
+    "real_volume"
+  ],
+  "timestamp_contract": {
+    "time_column_meaning": "BAR_OPEN_TIME",
+    "latest_row_is_closed": true,
+    "bar_close_time_formula": "bar_open_time + timeframe_duration",
+    "availability_time": "BAR_CLOSE_TIME",
+    "drop_latest_row_as_open_bar": false,
+    "timezone_conversion": false,
+    "raw_mt5_server_time_preserved": true,
+    "asof_join_rule": "source_bar_close_time <= decision_time",
+    "using_higher_timeframe_open_time_as_availability_is_forbidden": true
+  },
+  "merge_contract": {
+    "historical_source_priority": "PRIMARY_BASE",
+    "live_source_role": "APPEND_AND_REFRESH_EXTENSION",
+    "key": ["timeframe", "bar_open_time"],
+    "overlap_rows_must_match_exactly": true,
+    "overlap_comparison_columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "tick_volume",
+      "spread",
+      "real_volume"
+    ],
+    "overlap_mismatch_action": "FAIL_CLOSED",
+    "duplicate_action": "FAIL_CLOSED",
+    "out_of_order_action": "FAIL_CLOSED",
+    "latest_closed_live_row_must_be_retained": true
+  },
+  "research_boundary": {
+    "authorized_as_raw_market_data": true,
+    "folder_name_does_not_import_old_gold_v3_logic": true,
+    "old_models_features_labels_thresholds_candidates_metrics_are_still_forbidden": true,
+    "old_fx_outputs_gold_v3_is_still_forbidden": true,
+    "no_training_before_phase001_contract_freeze": true
+  },
+  "uploaded_reference_audit": {
+    "audit_date": "2026-06-24",
+    "schema_match_all_12_files": true,
+    "duplicate_timestamps_all_files": 0,
+    "out_of_order_rows_all_files": 0,
+    "invalid_ohlc_rows_all_files": 0,
+    "historical_live_overlap_exact_match": true,
+    "historical_live_overlap_rows": {
+      "M1": 147845,
+      "M5": 89569,
+      "M15": 29857,
+      "H1": 19965,
+      "H4": 5352,
+      "D1": 894
+    },
+    "historical_m1_aggregation_exact_match": {
+      "M5": true,
+      "M15": true,
+      "H1": true,
+      "H4": true,
+      "D1": true
+    },
+    "note": "Uploaded hashes and row counts are reference observations only. Runtime must hash and audit the current local files on every dataset freeze."
+  },
+  "supersedes_foundation_clause_only_for_this_exact_raw_source": {
+    "fresh_export_required": false,
+    "existing_user_authorized_raw_history_allowed": true,
+    "all_other_old_source_prohibitions_unchanged": true
+  }
+}
