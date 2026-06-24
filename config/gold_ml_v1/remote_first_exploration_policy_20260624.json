@@ -1,0 +1,49 @@
+{
+  "policy_id": "GOLD_ML_V1_REMOTE_FIRST_EXPLORATION_POLICY_20260624",
+  "status": "USER_CONFIRMED",
+  "project": "GOLD_ML_V1",
+  "execution_order": [
+    "assistant_side_data_audit",
+    "assistant_side_broad_feature_and_model_screen",
+    "assistant_side_provisional_candidate_shortlist",
+    "commit_replay_code_and_frozen_configs",
+    "user_local_shortlist_replay_only",
+    "register_candidate_only_after_parity_pass"
+  ],
+  "local_workload_policy": {
+    "full_broad_search_on_user_pc_required": false,
+    "user_pc_runs_only_shortlisted_replays": true,
+    "failed_and_low_value_search_branches_need_not_be_recomputed_locally": true,
+    "local_replay_must_recompute_exact_trade_registry_and_metrics": true
+  },
+  "assistant_side_search_scope": {
+    "all_timeframe_lanes": true,
+    "long_and_short_separate": true,
+    "multiple_label_families": true,
+    "mochipoyo_and_non_mochipoyo_families": true,
+    "simple_models_before_sequence_models": true,
+    "final_holdout_untouched": true
+  },
+  "provisional_result_rule": {
+    "assistant_side_findings_are_provisional": true,
+    "no_candidate_registration_before_local_replay": true,
+    "no_portfolio_inclusion_before_local_replay": true
+  },
+  "replay_package_requirements": [
+    "one_click_bat",
+    "python_entrypoint",
+    "frozen_json_config",
+    "dependency_versions",
+    "input_hash_manifest",
+    "random_seed_manifest",
+    "prediction_or_trade_registry_hash",
+    "metrics_recalculation",
+    "parity_report"
+  ],
+  "safety": {
+    "audit_only": true,
+    "live_signal_enabled": false,
+    "mt5_order_enabled": false,
+    "automatic_promotion": false
+  }
+}
