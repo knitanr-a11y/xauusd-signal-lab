@@ -1,0 +1,98 @@
+{
+  "shortlist_id": "GML1-PROVISIONAL-SHORTLIST-BATCH001-PRE-HOLDOUT",
+  "status": "FROZEN_BEFORE_2026_HOLDOUT_READ",
+  "created_date": "2026-06-24",
+  "research_window": {
+    "train": "2023",
+    "validation": "2024",
+    "test": "2025",
+    "final_holdout": "2026_UNREAD_AT_FREEZE"
+  },
+  "common_execution": {
+    "direction": "LONG",
+    "target_r": 1.0,
+    "stop_atr_multiple": 1.0,
+    "atr_period": 14,
+    "entry": "next exact M1 open at decision-bar close",
+    "same_m1_priority": "SL",
+    "spread_point": 0.01,
+    "dynamic_spread_included": true,
+    "signal": "false-to-true condition onset",
+    "one_position": true,
+    "time_basis": "raw MT5 server time",
+    "bar_availability": "bar open time plus timeframe duration"
+  },
+  "provisional_rules": [
+    {
+      "provisional_id": "GML1-PROV-001",
+      "lane": "H1-D1",
+      "horizon_hours": 48,
+      "conditions": [
+        {
+          "feature": "H1_DELTA_ATR_24",
+          "formula": "(H1 close - H1 close[24]) / H1 ATR14",
+          "operator": ">=",
+          "threshold": 3.095182,
+          "source_train_quantile": 0.8
+        },
+        {
+          "feature": "D1_EMA10_SLOPE3_ATR",
+          "formula": "(D1 EMA10 - D1 EMA10[3]) / D1 ATR14",
+          "operator": ">=",
+          "threshold": 0.349160,
+          "source_train_quantile": 0.7,
+          "asof_rule": "D1 close time <= H1 decision time"
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 67, "wins": 37, "win_rate": 0.552239, "profit_factor": 1.202694, "total_r": 6.080806, "max_drawdown_r": 8.0},
+        "2024": {"trades": 94, "wins": 52, "win_rate": 0.553191, "profit_factor": 1.212214, "total_r": 8.912994, "max_drawdown_r": 4.0},
+        "2025": {"trades": 120, "wins": 71, "win_rate": 0.591667, "profit_factor": 1.459322, "total_r": 22.347283, "max_drawdown_r": 4.0}
+      },
+      "interpretation": "strong H1 24-hour continuation while the last closed D1 EMA10 slope is positive"
+    },
+    {
+      "provisional_id": "GML1-PROV-002",
+      "lane": "M15-H4",
+      "horizon_hours": 6,
+      "conditions": [
+        {
+          "feature": "H4_RCI18",
+          "operator": ">=",
+          "threshold": 73.993808,
+          "source_train_quantile": 0.8,
+          "asof_rule": "H4 close time <= M15 decision time"
+        },
+        {
+          "feature": "H4_SPREAD_ATR",
+          "formula": "H4 spread price / H4 ATR14",
+          "operator": "<=",
+          "threshold": 0.012772,
+          "source_train_quantile": 0.3,
+          "asof_rule": "H4 close time <= M15 decision time"
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 30, "wins": 18, "win_rate": 0.6, "profit_factor": 1.421075, "total_r": 5.0529, "max_drawdown_r": 3.0},
+        "2024": {"trades": 31, "wins": 18, "win_rate": 0.580645, "profit_factor": 1.342192, "total_r": 4.448497, "max_drawdown_r": 4.551503},
+        "2025": {"trades": 95, "wins": 53, "win_rate": 0.557895, "profit_factor": 1.263982, "total_r": 10.864028, "max_drawdown_r": 6.98161}
+      },
+      "interpretation": "closed H4 RCI18 strength during a high-volatility, low-spread-to-ATR regime"
+    }
+  ],
+  "selection_notes": {
+    "many H1-D1 alternatives_were_highly_overlapping": true,
+    "only_one_primary_H1_D1_rule_frozen": true,
+    "M15_H4_rule_selected_for_lane_diversity": true,
+    "not_registered_candidates": true,
+    "local_replay_not_yet_run": true
+  },
+  "next_tests": [
+    "2026 untouched holdout",
+    "threshold neighborhood",
+    "spread cost stress",
+    "horizon neighborhood",
+    "trade overlap and concentration",
+    "local replay parity"
+  ]
+}
