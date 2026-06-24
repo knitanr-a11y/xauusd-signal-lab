@@ -1,0 +1,53 @@
+{
+  "result_id": "GML1-M15-STRUCTURAL-EVENT-BATCHES008-009-DIAGNOSTIC",
+  "status": "REMOTE_DIAGNOSTIC_NO_NEW_STACK_ENTRY",
+  "date": "2026-06-24",
+  "tested_lineages": [
+    {
+      "event": "M15 BB20 squeeze release Q3 LONG with closed H4 EMA40 alignment",
+      "base_metrics": {
+        "2023": {"trades": 210, "win_rate": 0.4714285714, "profit_factor": 0.9130832284, "total_r": -9.4238511060},
+        "2024": {"trades": 268, "win_rate": 0.5634328358, "profit_factor": 1.2610174862, "total_r": 30.5390458878},
+        "2025": {"trades": 311, "win_rate": 0.5530546624, "profit_factor": 1.2258275147, "total_r": 31.3900245499},
+        "2026_diagnostic": {"trades": 107, "win_rate": 0.4485981308, "profit_factor": 0.8135593220, "total_r": -11.0}
+      },
+      "loss_subtraction_result": "DO_NOT_STACK",
+      "reason": "Several pre-2026 composite exclusions repaired 2023 and improved 2024-2025, but the highest-ranked frozen variants remained negative in the 2026 diagnostic."
+    },
+    {
+      "event": "M15 confirmed low-trendline bounce LONG",
+      "2026_diagnostic": {"trades": 125, "win_rate": 0.464, "profit_factor": 0.856, "total_r": -9.66},
+      "decision": "DO_NOT_STACK"
+    },
+    {
+      "event": "M15 Donchian20 failed-low LONG with opposite H4 RCI extreme",
+      "2026_diagnostic": {"trades": 91, "win_rate": 0.3736263736, "profit_factor": 0.581, "total_r": -23.91},
+      "decision": "DO_NOT_STACK"
+    },
+    {
+      "event": "M15 BB40 squeeze release Q2 LONG in closed H4 high-volatility context",
+      "base_metrics": {
+        "2023": {"trades": 81, "win_rate": 0.5061728395, "profit_factor": 1.0138413089, "total_r": 0.5274541931},
+        "2024": {"trades": 105, "win_rate": 0.5238095238, "profit_factor": 1.0957044021, "total_r": 4.6898232229},
+        "2025": {"trades": 124, "win_rate": 0.5806451613, "profit_factor": 1.3234444643, "total_r": 16.8191121417},
+        "2026_diagnostic": {"trades": 41, "win_rate": 0.5121951220, "profit_factor": 1.0212851130, "total_r": 0.4257022601}
+      },
+      "loss_subtraction_result": "WATCH_ONLY_NO_STACK_ENTRY",
+      "reason": "The base event was positive in every year but weak. Its highest-ranked pre-2026 loser exclusions were not consistently improved in the 2026 diagnostic. Some lower-ranked variants remained positive, but they were not pre-frozen as separate lineages and are not promoted by retrospective choice."
+    }
+  ],
+  "methodological_boundary": {
+    "do_not_select_lower_ranked_filter_because_2026_looks_better": true,
+    "2026_is_diagnostic_not_selection_data": true,
+    "new_lineage_requires_pre_freeze_before_fresh_prospective_data": true
+  },
+  "conclusion": {
+    "new_stack_entries": 0,
+    "existing_stack_preserved": ["GML1-PROV-002", "GML1-PROV-007", "GML1-PROV-008", "GML1-PROV-010", "GML1-PROV-013", "GML1-PROV-015"],
+    "next": [
+      "search M5 and M15 event-score coverage pools with walk-forward folds",
+      "focus on failed-break, break-retest, and volatility-transition events rather than raw squeeze state",
+      "freeze promising lower-timeframe variants before post-cutoff prospective observation"
+    ]
+  }
+}
