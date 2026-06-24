@@ -1,0 +1,79 @@
+{
+  "result_id": "GML1-PROVISIONAL-RETEST-BATCH010-011-DIAGNOSTIC-RESULT",
+  "status": "REMOTE_DIAGNOSTIC_THREE_NEW_STACK_ENTRIES",
+  "date": "2026-06-24",
+  "selection_source": "config/gold_ml_v1/provisional_retest_shortlist_batch010_011_pre_diagnostic.json",
+  "results": [
+    {
+      "provisional_id": "GML1-PROV-016",
+      "event": "M15 causal confirmed-high-trendline break then frozen-level retest",
+      "direction": "LONG",
+      "target_r": 1.5,
+      "horizon_minutes": 360,
+      "decision": "ADD_TO_PROVISIONAL_STACK",
+      "2026_diagnostic": {"trades":36,"wins":16,"win_rate":0.4444444444,"profit_factor":1.0776028106,"total_r":1.5520562126,"max_drawdown_r":6.0},
+      "spread_1_5x_2026": {"trades":36,"wins":16,"win_rate":0.4444444444,"profit_factor":1.0770009442,"total_r":1.5400188849,"max_drawdown_r":6.0},
+      "neighborhood": {"cells":12,"positive_2026_cells":12,"ages_tested":[12,24,30],"retest_tolerances_atr":[0.08,0.10,0.15,0.20]},
+      "trade_registry_sha256": "7a548d1ca516f2fa66fbf93e4f2755c807a9e3d6caf87425453d12b62b270652",
+      "reason": "The frozen rule remained slightly positive in 2026, under 1.5x spread stress, and in every recorded event-parameter neighborhood cell."
+    },
+    {
+      "provisional_id": "GML1-PROV-017",
+      "event": "M15 Donchian60 break then frozen-level retest",
+      "direction": "LONG",
+      "target_r": 2.0,
+      "horizon_minutes": 360,
+      "decision": "DO_NOT_STACK",
+      "2026_diagnostic": {"trades":54,"wins":14,"win_rate":0.2592592593,"profit_factor":0.6690212178,"total_r":-13.0587844980,"max_drawdown_r":13.0587844980},
+      "spread_1_5x_2026": {"trades":54,"wins":14,"win_rate":0.2592592593,"profit_factor":0.6686440536,"total_r":-13.0766105255,"max_drawdown_r":13.0766105255},
+      "neighborhood": {"cells":12,"positive_2026_cells":0,"ages_tested":[12,24,30],"retest_tolerances_atr":[0.10,0.15,0.20,0.25]},
+      "trade_registry_sha256": "cb7bcf230050bfd388ea82f2569969e86e2b0a43ffd2cbd3502dd0601c71bf07",
+      "reason": "The pre-2026 edge did not survive 2026 and every recorded neighborhood cell was non-positive."
+    },
+    {
+      "provisional_id": "GML1-PROV-018",
+      "event": "M15 BB40 post-squeeze upper-band breakout",
+      "direction": "LONG",
+      "target_r": 1.0,
+      "horizon_minutes": 720,
+      "decision": "ADD_TO_PROVISIONAL_STACK_SMALL_2026_SAMPLE",
+      "2026_diagnostic": {"trades":8,"wins":7,"win_rate":0.875,"profit_factor":7.0,"total_r":6.0,"max_drawdown_r":1.0},
+      "spread_1_5x_2026": {"trades":8,"wins":7,"win_rate":0.875,"profit_factor":7.0,"total_r":6.0,"max_drawdown_r":1.0},
+      "neighborhood": {"cells":5,"positive_2026_cells":5,"squeeze_percentile_thresholds":[0.20,0.25,0.30,0.35,0.40]},
+      "trade_registry_sha256": "f8780b68aa1be2cc446c32651c54f4b89bbcd75b73c39d43379b48f0e265e787",
+      "reason": "Every year before 2026 was positive, the frozen 2026 diagnostic was strongly positive, and every squeeze-threshold neighborhood cell was positive, but the 2026 sample is only eight trades."
+    },
+    {
+      "provisional_id": "GML1-PROV-019",
+      "event": "M15 Donchian20 downside break then EMA20 retest with composite loser exclusion",
+      "direction": "SHORT",
+      "target_r": 2.0,
+      "horizon_minutes": 360,
+      "decision": "ADD_TO_PROVISIONAL_STACK_DIVERSIFICATION",
+      "2026_diagnostic": {"trades":57,"wins":22,"win_rate":0.3859649123,"profit_factor":1.1058324154,"total_r":3.5671813913,"max_drawdown_r":7.0},
+      "spread_1_5x_2026": {"trades":57,"wins":22,"win_rate":0.3859649123,"profit_factor":1.1028225027,"total_r":3.4696524582,"max_drawdown_r":7.0},
+      "neighborhood": {"cells":9,"positive_2026_cells":5,"retest_ages":[12,24,30],"loss_filter_threshold_factors":[0.9,1.0,1.1]},
+      "trade_registry_sha256": "35c60ef1fe38ae57ce0f44656b57328cf42b766590d3bb3cec198164a81cb5ba",
+      "reason": "The separately frozen 2R SHORT lineage remained positive in 2026 and under spread stress. Its win rate is lower by design because the target is 2R, so it is retained as a diversification lineage rather than a high-win-rate core lineage."
+    }
+  ],
+  "batch_conclusion": {
+    "new_stack_entries": ["GML1-PROV-016","GML1-PROV-018","GML1-PROV-019"],
+    "rejected": ["GML1-PROV-017"],
+    "existing_stack_unchanged": ["GML1-PROV-002","GML1-PROV-007","GML1-PROV-008","GML1-PROV-010","GML1-PROV-013","GML1-PROV-015"]
+  },
+  "boundaries": {
+    "none_are_registered_candidates": true,
+    "local_replay_required": true,
+    "fresh_prospective_confirmation_required": true,
+    "portfolio_use_forbidden": true,
+    "automatic_promotion": false,
+    "2026_not_used_for_retuning": true
+  },
+  "next": [
+    "search M5 failed-break and break-retest lineages with reduced event universe and walk-forward folds",
+    "search higher-win-rate SHORT derivatives without selecting on 2026",
+    "audit overlap among the nine provisional stack lineages",
+    "prepare shortlist-only local replay after one more narrowing batch"
+  ]
+}
