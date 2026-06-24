@@ -1,0 +1,41 @@
+{
+  "policy_id": "GML1-PF2-REFINEMENT-POLICY-20260624",
+  "status": "ACTIVE",
+  "objective": "Refine viable lineages toward profit factor 2.0 or higher without retrospective holdout tuning or destructive scarcity.",
+  "target": {
+    "baseline_profit_factor": 2.0,
+    "higher_is_preferred": true,
+    "profit_factor_alone_is_insufficient": true
+  },
+  "minimum_evidence_for_pf2_refinement": {
+    "pre_2026_trades": 150,
+    "all_pre_2026_years_positive_total_r": true,
+    "heldout_2025_profit_factor": 1.8,
+    "retained_fraction_preferred_minimum": 0.7,
+    "maximum_drawdown_must_not_worsen": true
+  },
+  "cost_stress": {
+    "spread_multiplier": 1.5,
+    "preferred_profit_factor": 1.8,
+    "target_profit_factor": 2.0
+  },
+  "filter_validation": {
+    "filter_thresholds_from_early_data_only": true,
+    "2026_not_used_for_selection": true,
+    "fresh_filter_activations_required_before_final_promotion": true,
+    "dormant_filter_in_diagnostic_period": "WATCH_ONLY_UNTIL_FRESH_ACTIVATIONS",
+    "neighborhood_tests_required": true
+  },
+  "pruning_rules": {
+    "remove_composite_loser_regions_not_single_features": true,
+    "do_not_reduce_count_only_to_manufacture_pf": true,
+    "do_not_promote_if_later_period_improvement_is_inherited_from_parent": true,
+    "opaque_model_filters_require_seed_and_parameter_stability": true
+  },
+  "safety": {
+    "audit_only": true,
+    "local_replay_required": true,
+    "fresh_prospective_confirmation_required": true,
+    "automatic_promotion": false
+  }
+}
