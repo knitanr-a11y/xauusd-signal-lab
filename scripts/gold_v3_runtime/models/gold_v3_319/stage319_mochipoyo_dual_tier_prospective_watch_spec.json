@@ -1,0 +1,122 @@
+{
+  "spec_id": "GOLD_V3_STAGE319_MOCHIPOYO_DUAL_TIER_PROSPECTIVE_WATCH_V1",
+  "mode": "AUDIT_ONLY_FUTURE_ONLY_PROSPECTIVE_RESEARCH_WATCH",
+  "source_stage": 318,
+  "source_candidate": "M5_H4|MOCHI_UNION|SHORT|RR1_5|ATR_GE_1_AND_NO_ROUND",
+  "timeframe_pair": {
+    "name": "M5_H4",
+    "main_tf": "M5",
+    "higher_tf": "H4",
+    "entry": "next exact M5 open after the closed M5 decision bar"
+  },
+  "pooled_tracks": [
+    "MOCHI_EARLY_PULLBACK",
+    "MOCHI_HIDDEN_PULLBACK",
+    "MOCHI_HTF_RCI_RESUME",
+    "MOCHI_ROLL_RETEST"
+  ],
+  "base_filter": {
+    "direction": "SHORT",
+    "atr_ratio_min_inclusive": 1.0,
+    "exclude_round_number_near": true,
+    "exit_profile": "RR1_5"
+  },
+  "watch_tiers": {
+    "PRIMARY": {
+      "rule": "ATR_STEADY_1_10_TO_1_45",
+      "atr_ratio_min_inclusive": 1.10,
+      "atr_ratio_max_inclusive": 1.45,
+      "historical_selection_reference": {
+        "years": [2024, 2025],
+        "trades": 24,
+        "win_rate": 0.625,
+        "profit_factor": 1.98111750782644,
+        "total_r": 10.74834542403852,
+        "max_drawdown_r": 3.1727186307766555
+      }
+    },
+    "PREMIUM": {
+      "rule": "TREND_FLOW_COMPRESSION_GE_0_95",
+      "compression_ratio_min_inclusive": 0.95,
+      "historical_selection_reference": {
+        "years": [2024, 2025],
+        "trades": 14,
+        "win_rate": 0.7857142857142857,
+        "profit_factor": 4.079163906660978,
+        "total_r": 12.684030092957032,
+        "max_drawdown_r": 2.0980011263743172
+      }
+    }
+  },
+  "pooling_contract": {
+    "dedup_key": ["pair", "direction", "exit_profile", "decision_dt"],
+    "same_decision_tracks_are_one_trade": true,
+    "pooled_quality": "maximum quality score across matching tracks",
+    "track_names_are_recorded": true,
+    "duplicate_numeric_tolerance": 1e-12,
+    "primary_and_premium_overlap_is_one_unique_trade": true
+  },
+  "portfolio_policy": {
+    "one_position": true,
+    "preemption": false,
+    "same_m1_tp_sl_priority": "SL",
+    "maximum_hold_minutes": 720
+  },
+  "risk_contract": {
+    "stop_source": "confirmed ZigZag structural level with 0.10 ATR buffer",
+    "minimum_stop_distance_atr": 0.75,
+    "maximum_stop_distance_atr": 2.0,
+    "take_profit_r": 1.5,
+    "spread": "entry spread points multiplied by point size 0.01"
+  },
+  "prospective_contract": {
+    "freeze_on_first_run": true,
+    "decision_time_filter": "decision_dt strictly greater than frozen latest closed M5 close_time",
+    "closed_candles_only": true,
+    "resolved_metrics_only": true,
+    "pending_trades_have_no_as_of_pnl": true,
+    "contract_cutoff_must_never_move": true,
+    "automatic_rule_change": false,
+    "automatic_promotion": false
+  },
+  "future_review_gates": {
+    "PRIMARY": {
+      "minimum_resolved_accepted_trades": 30,
+      "minimum_win_rate": 0.60,
+      "minimum_profit_factor": 1.35,
+      "minimum_total_r_exclusive": 0.0,
+      "maximum_drawdown_r": 6.0,
+      "maximum_largest_winner_share": 0.35
+    },
+    "PREMIUM": {
+      "minimum_resolved_accepted_trades": 15,
+      "minimum_win_rate": 0.68,
+      "minimum_profit_factor": 1.50,
+      "minimum_total_r_exclusive": 0.0,
+      "maximum_drawdown_r": 6.0,
+      "maximum_largest_winner_share": 0.35
+    },
+    "COMBINED_UNIQUE": {
+      "minimum_resolved_accepted_trades": 30,
+      "minimum_win_rate": 0.58,
+      "minimum_profit_factor": 1.25,
+      "minimum_total_r_exclusive": 0.0,
+      "maximum_drawdown_r": 8.0,
+      "maximum_largest_winner_share": 0.35
+    }
+  },
+  "preserved_state": {
+    "gold_v3_audit_only": true,
+    "stage280_exact_recovery": "BLOCKED_UNCHANGED",
+    "stage314_prospective_watch": "UNCHANGED_ACTIVE",
+    "stage317_research_watch": "UNCHANGED_RETAINED",
+    "stage318_research_result": "UNCHANGED_RETAINED",
+    "stage315_independent_research": "UNCHANGED",
+    "stage307_candidate": "UNCHANGED_RETAINED",
+    "stage292_candidate_pool_changed": false,
+    "final_signal_changed": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false
+  }
+}
