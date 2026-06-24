@@ -1,0 +1,67 @@
+{
+  "result_id": "GML1-ALTERNATIVE-PATH-SHAPE-BATCH014",
+  "status": "REMOTE_RESEARCH_WATCH_NO_ACTIVE_PROMOTION",
+  "date": "2026-06-24",
+  "perspective": "Cluster the causal shape of the previous twelve closed H1 bars instead of using a hand-written indicator threshold.",
+  "parent_provisional_id": "GML1-PROV-015",
+  "feature_contract": {
+    "bars": 12,
+    "per_bar_features": [
+      "close-to-close return divided by H1 ATR14",
+      "signed candle body divided by H1 ATR14",
+      "H1 range divided by H1 ATR14",
+      "close location inside the H1 range"
+    ],
+    "aggregate_features": [
+      "twelve-bar net move divided by H1 ATR14",
+      "twelve-bar high-low span divided by H1 ATR14",
+      "fraction of rising closes",
+      "sign-change count",
+      "mean and standard deviation of normalized range"
+    ],
+    "training_window": "2023 only",
+    "standardization": "fit on 2023 only",
+    "clustering": "deterministic KMeans"
+  },
+  "best_frozen_research_variant": {
+    "watch_id": "GML1-WATCH-014-A",
+    "k": 7,
+    "random_seed": 7307,
+    "excluded_cluster_ids": [1,2],
+    "pre_2026": {"trades":178,"wins":120,"win_rate":0.6741573034,"profit_factor":2.0882253615,"total_r":62.3289235678,"max_drawdown_r":3.0},
+    "2023": {"trades":37,"profit_factor":2.162,"total_r":13.43,"coverage":0.804},
+    "2024": {"trades":57,"profit_factor":1.461,"total_r":10.60,"coverage":0.891},
+    "2025": {"trades":84,"profit_factor":2.686,"total_r":38.29,"coverage":0.933},
+    "2026_diagnostic": {"trades":23,"profit_factor":3.419,"total_r":12.09,"coverage":0.92}
+  },
+  "seed_stability": {
+    "additional_seeds_tested": [7001,7021,7041,7061,7081],
+    "seeds_with_a_pre_2026_candidate_near_pf2": 3,
+    "seeds_without_a_qualifying_candidate": 2,
+    "observed_pre_2026_pf_range_when_qualified": [1.9519,2.0187],
+    "observed_2026_pf_range_when_qualified": [2.8489,4.0233]
+  },
+  "classification": "RESEARCH_WATCH_MODEL_INSTABILITY",
+  "reason_not_active": [
+    "The path-shape result supports the existence of a useful pre-entry shape effect.",
+    "Cluster selection is not stable enough across seeds to define an immutable production-grade rule yet.",
+    "The excluded clusters are opaque until centroid and attribution analysis produces a human-auditable pattern description."
+  ],
+  "opening_range_pf2_repair": {
+    "source_watch_id": "GML1-WATCH-012-B",
+    "result": "NO_ROBUST_PF2_COMPOSITE_FILTER_FOUND",
+    "note": "The opening-range structure remains in the watch pool without retrospective repair."
+  },
+  "next": [
+    "analyze cluster centroids and convert stable path motifs into causal human-auditable features",
+    "test hidden-Markov or regime-transition persistence with fixed seeds",
+    "apply MAE and MFE meta-labeling to distinguish fast continuation from stagnant breakouts",
+    "continue monitoring PF2 filter activations prospectively"
+  ],
+  "boundaries": {
+    "not_active_candidate": true,
+    "no_2026_selection": true,
+    "local_replay_not_requested": true,
+    "portfolio_use_forbidden": true
+  }
+}
