@@ -1,0 +1,78 @@
+{
+  "result_id": "GML1-ALTERNATIVE-PERSPECTIVE-BATCH012",
+  "status": "REMOTE_DIAGNOSTIC_NO_NEW_ACTIVE_STACK_ENTRY_TWO_WATCH_PATTERNS",
+  "date": "2026-06-24",
+  "perspectives_tested": [
+    "previous closed D1 high and low breakout or liquidity sweep",
+    "MT5 server-time opening range 00:00-06:00 breakout and failure",
+    "H1 tick-volume impulse and climax rejection",
+    "Bollinger compression-to-expansion with candle-location confirmation",
+    "price-path efficiency-ratio transition",
+    "lag-1 return autocorrelation and regression-channel mean reversion",
+    "D1 trend efficiency, volatility regime, and session specialization"
+  ],
+  "selection_rule": {
+    "selection_data": [2023, 2024, 2025],
+    "2026_used_for_selection": false,
+    "minimum_pre_2026_trades": 150,
+    "each_pre_2026_year_min_trades": 30,
+    "each_pre_2026_year_positive_total_r": true,
+    "each_pre_2026_year_min_pf_for_screen": 1.12,
+    "active_stack_gate_remains_separate_and_stricter": true
+  },
+  "watch_patterns": [
+    {
+      "watch_id": "GML1-WATCH-012-A",
+      "event": "SERVER_OPENING_RANGE_00_06_HIGH_BREAK",
+      "direction": "LONG",
+      "context": "US_HOURS",
+      "label": {"target_r": 1.5, "stop_atr_multiple": 1.0, "horizon_hours": 48},
+      "year_metrics": {
+        "2023": {"trades":108,"win_rate":0.4259259259,"profit_factor":1.127,"total_r":7.57},
+        "2024": {"trades":114,"win_rate":0.4649122807,"profit_factor":1.255,"total_r":15.31},
+        "2025": {"trades":102,"win_rate":0.4509803922,"profit_factor":1.205,"total_r":11.02},
+        "2026_diagnostic": {"trades":47,"win_rate":0.4255319149,"profit_factor":1.083,"total_r":2.12}
+      },
+      "classification": "WATCH_BORDERLINE_EDGE",
+      "reason": "High count and positive in every year, but 2026 PF 1.083 is below the active-stack gate."
+    },
+    {
+      "watch_id": "GML1-WATCH-012-B",
+      "event": "SERVER_OPENING_RANGE_00_06_HIGH_BREAK",
+      "direction": "LONG",
+      "context": "LAST_CLOSED_D1_EFFICIENCY_RATIO20_AT_LEAST_0_35",
+      "label": {"target_r": 1.0, "stop_atr_multiple": 1.0, "horizon_hours": 48},
+      "year_metrics": {
+        "2023": {"trades":49,"win_rate":0.5306122449,"profit_factor":1.149,"total_r":3.29},
+        "2024": {"trades":47,"win_rate":0.5744680851,"profit_factor":1.350,"total_r":7.00},
+        "2025": {"trades":88,"win_rate":0.5454545455,"profit_factor":1.219,"total_r":8.53},
+        "2026_diagnostic": {"trades":19,"win_rate":0.6315789474,"profit_factor":1.618,"total_r":4.32}
+      },
+      "classification": "WATCH_LOW_COUNT",
+      "reason": "The 2026 diagnostic is promising but contains only 19 trades, so it remains in the watch pool without promotion."
+    }
+  ],
+  "no_edge_found_yet": [
+    "previous-day high or low sweeps as standalone events",
+    "raw H1 volume-climax rejection",
+    "efficiency-ratio transition without stronger event structure",
+    "negative-autocorrelation regression mean reversion",
+    "alternative Bollinger release definitions"
+  ],
+  "active_stack_change": "NONE",
+  "next_perspectives": [
+    "unsupervised regime clustering using volatility, efficiency, autocorrelation, spread, and tick volume",
+    "market-path shape sequences rather than single-bar indicators",
+    "session transition events and opening-range retests",
+    "previous-day and previous-week level acceptance versus rejection",
+    "MAE and MFE path-based meta-labeling",
+    "time-to-target and survival-hazard modeling",
+    "candidate overlap and regime specialization"
+  ],
+  "boundaries": {
+    "watch_patterns_are_not_active_candidates": true,
+    "no_2026_retuning": true,
+    "local_replay_not_requested": true,
+    "portfolio_use_forbidden": true
+  }
+}
