@@ -1,0 +1,162 @@
+{
+  "shortlist_id": "GML1-PROVISIONAL-SHORTLIST-BATCH002-PRE-HOLDOUT",
+  "status": "FROZEN_BEFORE_2026_HOLDOUT_READ",
+  "created_date": "2026-06-24",
+  "research_window": {
+    "train": "2023",
+    "validation": "2024",
+    "test": "2025",
+    "final_holdout": "2026_UNREAD_AT_FREEZE"
+  },
+  "common_execution": {
+    "target_r": 1.0,
+    "stop_atr_multiple": 1.0,
+    "atr_period": 14,
+    "entry": "next exact M1 open at decision-bar close",
+    "same_m1_priority": "SL",
+    "spread_point": 0.01,
+    "dynamic_spread_included": true,
+    "signal": "false-to-true condition onset with decision-timeframe gap reset",
+    "one_position": true,
+    "time_basis": "raw MT5 server time",
+    "bar_availability": "bar open time plus timeframe duration"
+  },
+  "provisional_rules": [
+    {
+      "provisional_id": "GML1-PROV-003",
+      "lane": "H1-D1",
+      "direction": "SHORT",
+      "horizon_hours": 48,
+      "conditions": [
+        {
+          "feature": "D1_DELTA_ATR_6",
+          "formula": "(D1 close - D1 close[6]) / D1 ATR14",
+          "operator": "<=",
+          "threshold": -0.756924348904504,
+          "source_train_quantile": 0.3,
+          "asof_rule": "D1 close time <= H1 decision time"
+        },
+        {
+          "feature": "D1_ATR_RATIO50",
+          "formula": "D1 ATR14 / rolling median(D1 ATR14,50)",
+          "operator": ">=",
+          "threshold": 1.084564403521197,
+          "source_train_quantile": 0.7,
+          "asof_rule": "D1 close time <= H1 decision time"
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 15, "wins": 11, "win_rate": 0.7333333333, "profit_factor": 2.75, "total_r": 7.0, "max_drawdown_r": 3.0},
+        "2024": {"trades": 18, "wins": 13, "win_rate": 0.7222222222, "profit_factor": 2.6, "total_r": 8.0, "max_drawdown_r": 2.0},
+        "2025": {"trades": 20, "wins": 13, "win_rate": 0.65, "profit_factor": 1.8571428571, "total_r": 6.0, "max_drawdown_r": 4.0},
+        "all_pre_holdout": {"trades": 53, "wins": 37, "win_rate": 0.6981132075, "profit_factor": 2.3125, "total_r": 21.0, "max_drawdown_r": 4.0}
+      },
+      "interpretation": "short after a strong six-day D1 decline while D1 volatility is above its 50-bar median regime"
+    },
+    {
+      "provisional_id": "GML1-PROV-004",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "horizon_hours": 6,
+      "conditions": [
+        {
+          "feature": "H4_CAUSAL_SLOW_ZIGZAG_SWING_ATR",
+          "formula": "absolute distance between the last two confirmed alternating H4 slow-pivot states divided by H4 ATR14",
+          "operator": ">=",
+          "threshold": 7.670981818181782,
+          "source_train_quantile": 0.7,
+          "asof_rule": "H4 close time <= M15 decision time"
+        },
+        {
+          "feature": "H4_RCI14",
+          "operator": ">=",
+          "threshold": 85.93406593406593,
+          "source_train_quantile": 0.9,
+          "asof_rule": "H4 close time <= M15 decision time"
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 15, "wins": 10, "win_rate": 0.6666666667, "profit_factor": 2.0, "total_r": 5.0, "max_drawdown_r": 3.0},
+        "2024": {"trades": 26, "wins": 16, "win_rate": 0.6153846154, "profit_factor": 1.6649472976, "total_r": 6.3900862069, "max_drawdown_r": 5.0},
+        "2025": {"trades": 29, "wins": 21, "win_rate": 0.7241379310, "profit_factor": 2.625, "total_r": 13.0, "max_drawdown_r": 2.0},
+        "all_pre_holdout": {"trades": 70, "wins": 47, "win_rate": 0.6714285714, "profit_factor": 2.0787341531, "total_r": 24.3900862069, "max_drawdown_r": 5.0}
+      },
+      "interpretation": "long continuation after a large confirmed H4 structural swing while H4 RCI14 is strongly positive"
+    },
+    {
+      "provisional_id": "GML1-PROV-005",
+      "lane": "M5-H4",
+      "direction": "SHORT",
+      "horizon_hours": 3,
+      "conditions": [
+        {
+          "feature": "H4_RANGE_ATR",
+          "formula": "(H4 high - H4 low) / H4 ATR14",
+          "operator": ">=",
+          "threshold": 1.741191275167764,
+          "source_train_quantile": 0.9,
+          "asof_rule": "H4 close time <= M5 decision time"
+        },
+        {
+          "feature": "H4_DELTA_ATR_6",
+          "formula": "(H4 close - H4 close[6]) / H4 ATR14",
+          "operator": "<=",
+          "threshold": -1.3120557086899836,
+          "source_train_quantile": 0.2,
+          "asof_rule": "H4 close time <= M5 decision time"
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 31, "wins": 20, "win_rate": 0.6451612903, "profit_factor": 1.8181818182, "total_r": 9.0, "max_drawdown_r": 2.0},
+        "2024": {"trades": 33, "wins": 19, "win_rate": 0.5757575758, "profit_factor": 1.3571428571, "total_r": 5.0, "max_drawdown_r": 5.0},
+        "2025": {"trades": 32, "wins": 18, "win_rate": 0.5625, "profit_factor": 1.2857142857, "total_r": 4.0, "max_drawdown_r": 8.0},
+        "all_pre_holdout": {"trades": 96, "wins": 57, "win_rate": 0.59375, "profit_factor": 1.4615384615, "total_r": 18.0, "max_drawdown_r": 8.0}
+      },
+      "interpretation": "short continuation during an unusually wide H4 bar after a large six-H4-bar decline"
+    },
+    {
+      "provisional_id": "GML1-PROV-006",
+      "lane": "M15-H4",
+      "direction": "SHORT",
+      "horizon_hours": 6,
+      "conditions": [
+        {
+          "feature": "H4_RCI18",
+          "operator": "<=",
+          "threshold": -69.6594427244582,
+          "source_train_quantile": 0.2,
+          "asof_rule": "H4 close time <= M15 decision time"
+        },
+        {
+          "feature": "M15_EMA20_SLOPE3_ATR",
+          "formula": "(M15 EMA20 - M15 EMA20[3]) / M15 ATR14",
+          "operator": ">=",
+          "threshold": 0.529968299473579,
+          "source_train_quantile": 0.9
+        }
+      ],
+      "metrics": {
+        "2023": {"trades": 69, "wins": 39, "win_rate": 0.5652173913, "profit_factor": 1.3, "total_r": 9.0, "max_drawdown_r": 5.0},
+        "2024": {"trades": 66, "wins": 38, "win_rate": 0.5757575758, "profit_factor": 1.3571428571, "total_r": 10.0, "max_drawdown_r": 5.0},
+        "2025": {"trades": 44, "wins": 24, "win_rate": 0.5454545455, "profit_factor": 1.2, "total_r": 4.0, "max_drawdown_r": 4.0},
+        "all_pre_holdout": {"trades": 179, "wins": 101, "win_rate": 0.5642458101, "profit_factor": 1.2948717949, "total_r": 23.0, "max_drawdown_r": 5.0}
+      },
+      "interpretation": "short a strong M15 rebound while the last closed H4 RCI18 remains deeply negative"
+    }
+  ],
+  "selection_notes": {
+    "all_rules_were_selected_without_reading_2026_metrics": true,
+    "four_distinct_lane_direction_or_structure_lineages": true,
+    "not_registered_candidates": true,
+    "local_replay_not_yet_run": true,
+    "portfolio_use_forbidden": true
+  },
+  "next_tests": [
+    "2026 untouched holdout",
+    "threshold neighborhood",
+    "spread cost stress",
+    "horizon neighborhood",
+    "trade overlap and concentration",
+    "local replay parity after further narrowing"
+  ]
+}
