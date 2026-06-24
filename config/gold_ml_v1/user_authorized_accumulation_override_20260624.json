@@ -1,0 +1,26 @@
+{
+  "override_id": "GML1-USER-AUTHORIZED-ACCUMULATION-OVERRIDE-20260624",
+  "status": "ACTIVE",
+  "date": "2026-06-24",
+  "user_instruction": "Treat GML1-PROV-020 and GML1-WATCH-014-A as accumulated candidates.",
+  "accumulation_entries": [
+    {
+      "id": "GML1-PROV-020",
+      "classification": "ACCUMULATED_PF2_FILTER_WATCH",
+      "reason": "Pre-2026 PF 2.0713 and all-period diagnostic PF 2.1602 justify preserving it as an accumulated candidate, while fresh activations of the second-stage filter remain required."
+    },
+    {
+      "id": "GML1-WATCH-014-A",
+      "classification": "ACCUMULATED_PATH_SHAPE_RESEARCH_CANDIDATE",
+      "reason": "Pre-2026 PF 2.0882 and 2026 diagnostic PF 3.419 justify preserving it as an accumulated candidate, while seed stability and human-auditable interpretation remain unresolved."
+    }
+  ],
+  "boundaries": {
+    "counted_in_accumulated_candidate_total": true,
+    "not_registered_for_live_use": true,
+    "local_replay_required": true,
+    "fresh_prospective_confirmation_required": true,
+    "no_automatic_promotion": true,
+    "known_caveats_must_remain_visible": true
+  }
+}
