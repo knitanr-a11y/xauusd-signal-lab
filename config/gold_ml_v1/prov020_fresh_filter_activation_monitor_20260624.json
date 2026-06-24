@@ -1,0 +1,40 @@
+{
+  "monitor_id": "GML1-PROV-020-FRESH-FILTER-ACTIVATION-MONITOR-V1",
+  "status": "AUDIT_ONLY_IMPLEMENTATION_READY",
+  "audit_only": true,
+  "candidate_id": "GML1-PROV-020",
+  "parent_candidate_id": "GML1-PROV-015",
+  "fresh_cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "input_contract": "Already-detected PROV-015 parent events at closed H1 decision time. No exit or horizon result is required or read.",
+  "filter_conditions": [
+    {
+      "feature": "H1_DECISION_CLOSE_SERVER_HOUR",
+      "operator": "BETWEEN_INCLUSIVE",
+      "lower": 8,
+      "upper": 16
+    },
+    {
+      "feature": "H1_SPREAD_PRICE_DIV_ATR14",
+      "operator": ">=",
+      "threshold": 0.0308778597897866,
+      "threshold_provenance": "frozen 2023 q0.75 from GML1-PROVISIONAL-PF2-PRUNING-BATCH013"
+    }
+  ],
+  "all_conditions_required": true,
+  "column_aliases": {
+    "decision_close_time": ["decision_time", "signal_time"],
+    "h1_decision_close_server_hour": ["server_hour"],
+    "h1_spread_price_div_atr14": ["spread_price_div_atr14"]
+  },
+  "boundaries": {
+    "live_signal": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "portfolio_activation": false,
+    "candidate_promotion": false,
+    "threshold_retuning": false,
+    "2026_diagnostic_only": true,
+    "future_outcomes_forbidden": true
+  }
+}
