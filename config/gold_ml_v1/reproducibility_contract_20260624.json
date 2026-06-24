@@ -1,0 +1,76 @@
+{
+  "contract_id": "GOLD_ML_V1_REPRODUCIBILITY_CONTRACT_20260624",
+  "status": "FROZEN_REQUIRED_FOR_ALL_SEARCH_AND_RESULTS",
+  "project": "GOLD_ML_V1",
+  "objective": "Any exploration performed outside the user's PC must be reproducible on the user's local Windows environment from the same data, code, configuration, and seeds.",
+  "required_local_artifacts": [
+    "one-click Windows BAT runner",
+    "Python entrypoint",
+    "frozen JSON configuration",
+    "dependency lock file",
+    "input data SHA256 manifest",
+    "code commit SHA",
+    "random seed manifest",
+    "environment report",
+    "candidate attempt log",
+    "exact trade registry",
+    "metrics JSON and CSV",
+    "output SHA256 manifest"
+  ],
+  "determinism": {
+    "python_seed_required": true,
+    "numpy_seed_required": true,
+    "pytorch_seed_required_when_used": true,
+    "cuda_deterministic_mode_required_when_supported": true,
+    "stable_sorting_required": true,
+    "explicit_tie_break_rules_required": true,
+    "unordered_set_or_dict_iteration_for_decisions_forbidden": true,
+    "parallel_nondeterminism_must_be_disabled_or_recorded": true
+  },
+  "data_identity": {
+    "all_input_files_hashed": true,
+    "schema_and_row_count_recorded": true,
+    "first_and_last_bar_open_and_close_times_recorded": true,
+    "historical_live_overlap_audited": true,
+    "latest_closed_row_retained": true,
+    "bar_availability_uses_close_time": true,
+    "input_hash_mismatch_action": "FAIL_CLOSED"
+  },
+  "result_identity": {
+    "candidate_id": "IMMUTABLE",
+    "trade_registry_is_primary_result": true,
+    "metrics_must_be_recomputed_from_trade_registry": true,
+    "local_and_remote_trade_ids_must_match_exactly": true,
+    "local_and_remote_trade_count_must_match_exactly": true,
+    "local_and_remote_metrics_must_match_with_documented_numeric_tolerance": true,
+    "model_artifact_hash_must_match_when_binary_determinism_is_supported": true,
+    "otherwise_prediction_vector_hash_and_trade_registry_hash_must_match": true
+  },
+  "search_boundary": {
+    "no_manual_hidden_filters": true,
+    "no_unrecorded_parameter_changes": true,
+    "all_attempts_logged_including_failures": true,
+    "threshold_selection_code_must_be_in_repo": true,
+    "candidate_selection_rules_must_be_in_repo": true,
+    "final_holdout_selection_forbidden": true
+  },
+  "platform": {
+    "target_os": "Windows 11",
+    "target_python": "3.12.x",
+    "target_runtime": "local user environment",
+    "gpu_optional": true,
+    "cpu_replay_required_for_final candidate trade registry when practical": true
+  },
+  "acceptance_gate": {
+    "remote_result_is_provisional_until_local_replay": true,
+    "candidate_cannot_be_registered_before_local_replay_pass": true,
+    "portfolio_cannot_include_candidate_before_local_replay_pass": true,
+    "local_replay_report_required": true
+  },
+  "safety": {
+    "audit_only": true,
+    "live_signal_enabled": false,
+    "mt5_order_enabled": false,
+    "automatic_promotion": false
+  }
+}
