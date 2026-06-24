@@ -1,0 +1,120 @@
+{
+  "spec_id": "GOLD_V3_330_CANDIDATE_SCARCITY_DECOMPOSITION_AUDIT_ONLY_20260624",
+  "status": "FROZEN_RESEARCH_SPEC_AUDIT_ONLY",
+  "anchor": {
+    "source_candidate": "M5_H4|MOCHI_UNION|SHORT|RR1_5|ATR_GE_1_AND_NO_ROUND",
+    "policy": "RELATIVE_TRAILING_MEAN_R_N2",
+    "lane": "BALANCED_OR_PREMIUM",
+    "cost_view": "1p0x",
+    "candidate_pool_preserved": true,
+    "anchor_precedence_in_combined_portfolio": true,
+    "router_retraining_or_application": false
+  },
+  "development_window": {
+    "start_inclusive": "2024-01-01 00:00:00",
+    "end_exclusive": "2026-01-01 00:00:00",
+    "selection_years": [2024, 2025],
+    "year_2026_outcomes_used_for_selection": false,
+    "time_basis": "MT5 server time",
+    "closed_candles_only": true
+  },
+  "execution_contract": {
+    "pair": "M5_H4",
+    "pooled_tracks": [
+      "MOCHI_EARLY_PULLBACK",
+      "MOCHI_HIDDEN_PULLBACK",
+      "MOCHI_HTF_RCI_RESUME",
+      "MOCHI_ROLL_RETEST"
+    ],
+    "exit_profile": "RR1_5",
+    "rr": 1.5,
+    "same_m1_tp_sl_priority": "SL",
+    "maximum_hold_minutes": 720,
+    "one_position_before_incremental_measurement": true,
+    "numeric_tolerance": 1e-12
+  },
+  "variants": [
+    {
+      "variant_id": "ANCHOR_STAGE329_EXACT",
+      "axis_changed": "NONE_ANCHOR",
+      "direction": "SHORT",
+      "atr_min": 1.0,
+      "exclude_round_number": true,
+      "lane_mode": "BALANCED_OR_PREMIUM",
+      "diagnostic_only": false
+    },
+    {
+      "variant_id": "RELAX_ATR_MIN_TO_0P90_ONLY",
+      "axis_changed": "ATR_MIN_ONLY",
+      "direction": "SHORT",
+      "atr_min": 0.9,
+      "exclude_round_number": true,
+      "lane_mode": "BALANCED_OR_PREMIUM",
+      "diagnostic_only": false
+    },
+    {
+      "variant_id": "ALLOW_ROUND_NUMBER_ONLY",
+      "axis_changed": "ROUND_EXCLUSION_ONLY",
+      "direction": "SHORT",
+      "atr_min": 1.0,
+      "exclude_round_number": false,
+      "lane_mode": "BALANCED_OR_PREMIUM",
+      "diagnostic_only": false
+    },
+    {
+      "variant_id": "ALLOW_OUTSIDE_FIXED_LANE_ONLY",
+      "axis_changed": "LANE_MEMBERSHIP_ONLY",
+      "direction": "SHORT",
+      "atr_min": 1.0,
+      "exclude_round_number": true,
+      "lane_mode": "ALL_CANONICAL",
+      "diagnostic_only": false
+    },
+    {
+      "variant_id": "LONG_MIRROR_DIAGNOSTIC_ONLY",
+      "axis_changed": "DIRECTION_MIRROR",
+      "direction": "LONG",
+      "atr_min": 1.0,
+      "exclude_round_number": true,
+      "lane_mode": "BALANCED_OR_PREMIUM",
+      "diagnostic_only": true
+    }
+  ],
+  "human_review_buckets": {
+    "A_PROMISING_HUMAN_REVIEW_ONLY": {
+      "minimum_pure_incremental_resolved_trades": 20,
+      "minimum_pure_incremental_trades_each_development_year": 5,
+      "maximum_combined_win_rate_drop_percentage_points": 2.0,
+      "combined_profit_factor_must_not_drop": true,
+      "combined_total_r_must_increase": true,
+      "maximum_added_drawdown_r": 2.0,
+      "automatic_promotion": false
+    },
+    "B_MORE_SAMPLE_OR_MIXED_HUMAN_REVIEW_ONLY": {
+      "minimum_pure_incremental_resolved_trades": 10,
+      "maximum_combined_win_rate_drop_percentage_points": 3.0,
+      "minimum_combined_profit_factor_ratio_to_anchor": 0.95,
+      "combined_total_r_must_increase": true,
+      "automatic_promotion": false
+    }
+  },
+  "reported_context_dimensions": [
+    "ATR_RATIO_BAND",
+    "DECISION_HOUR_MT5",
+    "POOLED_TRACK_COUNT",
+    "POOLED_TRACK_COMBINATION",
+    "ROUTER_GROUP"
+  ],
+  "safety": {
+    "gold_v3_audit_only": true,
+    "candidate_pool_removal": false,
+    "stage329_state_or_journal_mutation": false,
+    "year_2026_result_selection": false,
+    "open_or_asof_candle_use": false,
+    "jst_conversion": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false,
+    "automatic_promotion": false
+  }
+}
