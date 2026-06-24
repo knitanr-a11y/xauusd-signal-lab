@@ -44,8 +44,7 @@
       "summary": "H1 close breaks above the 60-period upper Bollinger band while the last closed D1 RCI18 is nonnegative.",
       "metrics_all_period_diagnostic": {"trades":254,"wins":155,"win_rate":0.6102362205,"profit_factor":1.5724696408,"total_r":55.9548783819,"max_drawdown_r":5.0},
       "2026_diagnostic": {"trades":27,"wins":19,"win_rate":0.7037037037,"profit_factor":2.2616458804,"total_r":10.0931670428,"max_drawdown_r":2.9068329572},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json",
-      "audit_note": "The exact trade-registry audit corrected an earlier manually summarized win count and profit factor; the exact registry contains 155 wins and PF 1.5724696408."
+      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
     },
     {
       "provisional_id": "GML1-PROV-013",
@@ -56,8 +55,7 @@
       "summary": "H1 close rejects the 60-period Bollinger middle band during a last-closed D1 high-volatility regime.",
       "metrics_all_period_diagnostic": {"trades":248,"wins":133,"win_rate":0.5362903226,"profit_factor":1.1865300130,"total_r":20.5533632983,"max_drawdown_r":9.3841792907},
       "2026_diagnostic": {"trades":31,"wins":16,"win_rate":0.5161290323,"profit_factor":1.146637,"total_r":2.046154,"max_drawdown_r":4.586416},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json",
-      "audit_note": "Exact trade-registry metrics supersede earlier rounded manual summary values."
+      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
     },
     {
       "provisional_id": "GML1-PROV-015",
@@ -70,13 +68,62 @@
       "metrics_all_period_diagnostic": {"trades":225,"wins":147,"retained_fraction_vs_parent":0.8858267717,"win_rate":0.6533333333,"profit_factor":1.8985172911,"total_r":68.9548783819,"max_drawdown_r":4.0},
       "2026_diagnostic": {"trades":25,"wins":19,"win_rate":0.76,"profit_factor":3.0155278405,"total_r":12.0931670428,"max_drawdown_r":2.0},
       "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
+    },
+    {
+      "provisional_id": "GML1-PROV-016",
+      "role": "CAUSAL_TRENDLINE_BREAK_RETEST_1_5R_LINEAGE",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
+      "summary": "Confirmed M15 high-trendline breakout followed by a bullish frozen-level retest in a closed H4 high-volatility uptrend.",
+      "label": {"target_r":1.5,"stop_atr_multiple":1.0,"horizon_minutes":360},
+      "pre_2026_metrics": {
+        "2023":{"trades":140,"wins":63,"win_rate":0.45,"profit_factor":1.2206519793,"total_r":15.8745364477,"max_drawdown_r":9.4346919465},
+        "2024":{"trades":164,"wins":91,"win_rate":0.5548780488,"profit_factor":1.8102660237,"total_r":57.9249837040,"max_drawdown_r":6.5},
+        "2025":{"trades":200,"wins":95,"win_rate":0.475,"profit_factor":1.2333777315,"total_r":24.4702956790,"max_drawdown_r":9.4208277650}
+      },
+      "2026_diagnostic": {"trades":36,"wins":16,"win_rate":0.4444444444,"profit_factor":1.0776028106,"total_r":1.5520562126,"max_drawdown_r":6.0},
+      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
+    },
+    {
+      "provisional_id": "GML1-PROV-018",
+      "role": "BB40_POST_SQUEEZE_BREAKOUT_LINEAGE",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "status": "REMOTE_DIAGNOSTIC_STACKED_SMALL_2026_SAMPLE_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
+      "summary": "M15 BB40 upper-band breakout after recent compression, with expanding band width and a closed H4 high-volatility uptrend.",
+      "label": {"target_r":1.0,"stop_atr_multiple":1.0,"horizon_minutes":720},
+      "pre_2026_metrics": {
+        "2023":{"trades":44,"wins":26,"win_rate":0.5909090909,"profit_factor":1.4444444444,"total_r":8.0,"max_drawdown_r":3.0},
+        "2024":{"trades":55,"wins":37,"win_rate":0.6727272727,"profit_factor":2.0555555556,"total_r":19.0,"max_drawdown_r":4.0},
+        "2025":{"trades":86,"wins":46,"win_rate":0.5348837209,"profit_factor":1.15,"total_r":6.0,"max_drawdown_r":4.0}
+      },
+      "2026_diagnostic": {"trades":8,"wins":7,"win_rate":0.875,"profit_factor":7.0,"total_r":6.0,"max_drawdown_r":1.0},
+      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
+    },
+    {
+      "provisional_id": "GML1-PROV-019",
+      "role": "REPAIRED_DONCHIAN_EMA_RETEST_SHORT_2R_LINEAGE",
+      "lane": "M15-H4",
+      "direction": "SHORT",
+      "status": "REMOTE_DIAGNOSTIC_STACKED_DIVERSIFICATION_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
+      "summary": "M15 Donchian20 downside break followed by a bearish EMA20 retest in a closed H4 downtrend, excluding overly deep Bollinger-position rebounds.",
+      "label": {"target_r":2.0,"stop_atr_multiple":1.0,"horizon_minutes":360},
+      "pre_2026_filtered_metrics": {
+        "trades":235,"wins":95,"win_rate":0.4042553191,"profit_factor":1.2684008084,"total_r":36.4846087872,"max_drawdown_r":12.3206184890
+      },
+      "2026_diagnostic": {"trades":57,"wins":22,"win_rate":0.3859649123,"profit_factor":1.1058324154,"total_r":3.5671813913,"max_drawdown_r":7.0},
+      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
     }
   ],
   "watch_only_not_in_stack": [
     {"provisional_id":"GML1-PROV-004","reason":"Positive but too few 2026 diagnostic trades and insufficient neighborhood robustness."},
     {"provisional_id":"GML1-PROV-009","reason":"High-count trendline breakout weakened at the frozen 1R label in the 2026 diagnostic."},
     {"provisional_id":"GML1-PROV-014","reason":"Positive before 2026 but exactly break-even in the 2026 diagnostic."},
-    {"research_id":"M15_BB40_SQUEEZE_Q2_HIGHVOL","reason":"Positive in each year but weak; pre-2026 top loss filters did not improve the 2026 diagnostic and lower-ranked variants were not retrospectively promoted."}
+    {"research_id":"M15_BB40_SQUEEZE_Q2_HIGHVOL","reason":"Positive in each year but weak; pre-2026 top loss filters did not improve the 2026 diagnostic."}
+  ],
+  "rejected": [
+    {"provisional_id":"GML1-PROV-017","reason":"Donchian60 2R retest failed 2026 with -13.06R and zero positive neighborhood cells."}
   ],
   "rules": {
     "entries_are_append_only": true,
@@ -88,14 +135,13 @@
     "portfolio_use_forbidden_until_registration": true
   },
   "next_search": {
-    "method": "COVERAGE_FIRST_COMPOSITE_LOSER_SUBTRACTION_AND_CAUSAL_EVENT_SEARCH",
+    "method": "WALK_FORWARD_EVENT_SCORE_AND_COMPOSITE_LOSER_SUBTRACTION",
     "targets": [
-      "M5 and M15 failed-break and break-retest events with walk-forward score coverage",
-      "independent SHORT event lineages",
-      "separately frozen 1.5R and 2.0R label lineages",
-      "loss-risk models constrained by retained coverage",
+      "reduced-universe M5 failed-break and break-retest events",
+      "higher-win-rate SHORT derivatives selected without 2026",
+      "overlap and correlation audit across nine provisional lineages",
       "fresh post-cutoff prospective confirmation",
-      "shortlist-only local replay package after further narrowing"
+      "shortlist-only local replay package after one more narrowing batch"
     ]
   }
 }
