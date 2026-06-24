@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260624-A",
-  "status": "SIX_ACCUMULATED_PROVISIONAL_CANDIDATES_WITH_CAVEATS",
+  "snapshot_id": "GML1-CURRENT-STATE-20260624-B",
+  "status": "SIX_ACCUMULATED_PROVISIONAL_CANDIDATES_WITH_P0_AUDIT_TOOLING_READY",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
@@ -92,6 +92,37 @@
     "2026": "diagnostic only; never retune on it",
     "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00"
   },
+  "p0_audit_tooling": {
+    "batch015_overlap_independence": {
+      "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_REGISTRY_RUN_PENDING",
+      "config": "config/gold_ml_v1/candidate_overlap_audit_20260624.json",
+      "script": "scripts/gold_ml_v1/audit/candidate_overlap_audit.py",
+      "result_status": "config/gold_ml_v1/candidate_overlap_audit_batch015_status_20260624.json",
+      "actual_six_candidate_matrix_generated": false,
+      "blocking_input": "all six exact trade-registry CSV bodies"
+    },
+    "prov020_fresh_activation": {
+      "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_PROSPECTIVE_PARENT_EVENTS_PENDING",
+      "config": "config/gold_ml_v1/prov020_fresh_filter_activation_monitor_20260624.json",
+      "script": "scripts/gold_ml_v1/prospective/prov020_fresh_filter_activation_monitor.py",
+      "result_status": "config/gold_ml_v1/prov020_fresh_filter_activation_monitor_status_20260624.json",
+      "real_fresh_filter_activation_observed": null,
+      "blocking_input": "exact prospective GML1-PROV-015 parent-event CSV after the cutoff"
+    },
+    "batch016_watch014_centroid_seed_stability": {
+      "status": "IMPLEMENTED_SYNTHETIC_TEST_PASS_EXACT_REGISTRIES_PENDING",
+      "config": "config/gold_ml_v1/watch014_centroid_seed_stability_audit_20260624.json",
+      "script": "scripts/gold_ml_v1/audit/watch014_centroid_seed_stability_audit.py",
+      "result_status": "config/gold_ml_v1/watch014_centroid_seed_stability_status_20260624.json",
+      "actual_centroid_and_seed_stability_result_generated": false,
+      "blocking_inputs": [
+        "exact 54-feature Batch014 registry",
+        "exact assignment registries for seeds 7307, 7001, 7021, 7041, 7061, 7081"
+      ]
+    },
+    "local_synthetic_test_status": "7 passed",
+    "isolated_requirements": "scripts/gold_ml_v1/requirements-audit.txt"
+  },
   "policies": [
     "config/gold_ml_v1/reproducibility_contract_20260624.json",
     "config/gold_ml_v1/coverage_first_loss_subtraction_policy_20260624.json",
@@ -102,19 +133,29 @@
     "config/gold_ml_v1/user_authorized_accumulation_override_20260624.json"
   ],
   "next_research": [
+    "run and inspect Batch015 with all six exact trade registries",
+    "run the PROV-020 fresh activation monitor on exact prospective PROV-015 parent events",
+    "run and inspect Batch016 with the exact feature and six seed-assignment registries",
     "MAE and MFE meta-labeling",
     "time-to-target and stagnation modeling",
-    "stable regime transitions",
-    "human-auditable path-shape motifs",
     "independent SHORT discovery",
-    "candidate overlap and concentration audit",
-    "fresh prospective monitoring after the cutoff",
-    "shortlist-only local replay package"
+    "stable regime transitions",
+    "previous-week and previous-month levels plus opening-range acceptance and rejection",
+    "shortlist-only local replay package",
+    "GOLD_ML_V1 prospective runtime"
   ],
   "registration_blockers": [
+    "actual six-candidate overlap and concentration outputs not yet generated",
     "exact local replay parity not yet completed",
     "fresh prospective confirmation not yet completed",
+    "WATCH-014-A real centroid and seed-stability audit not yet completed",
     "no portfolio activation authorization",
     "audit-only remains active"
-  ]
+  ],
+  "execution_switches": {
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
 }
