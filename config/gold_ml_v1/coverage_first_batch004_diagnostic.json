@@ -1,0 +1,66 @@
+{
+  "result_id": "GML1-COVERAGE-FIRST-BATCH004-DIAGNOSTIC",
+  "status": "REMOTE_DIAGNOSTIC_NO_NEW_STACK_ENTRY",
+  "date": "2026-06-24",
+  "purpose": "Test whether much broader M15-H4 state opportunity pools can be converted into robust high-count candidates through composite loser subtraction or score-based coverage selection.",
+  "broad_pools": [
+    {
+      "pool_id": "M15_H4_LONG_H4_RCI18_NONNEGATIVE_STATE",
+      "entry_mode": "STATE_REENTRY_AFTER_PREVIOUS_TRADE_EXIT",
+      "trades_total": 14361,
+      "year_metrics": {
+        "2023": {"trades": 3729, "win_rate": 0.4692947171, "profit_factor": 0.8783044327, "total_r": -238.5596502714},
+        "2024": {"trades": 4388, "win_rate": 0.4728805834, "profit_factor": 0.8930799550, "total_r": -245.4564441288},
+        "2025": {"trades": 4618, "win_rate": 0.4980511044, "profit_factor": 0.9945770758, "total_r": -12.4441373049},
+        "2026_diagnostic": {"trades": 1626, "win_rate": 0.4889298893, "profit_factor": 0.9523970992, "total_r": -39.4646617462}
+      },
+      "result": "REJECT_RAW_POOL",
+      "note": "Composite loser leaves improved the pool but did not make it independently profitable in both 2024 and 2025."
+    },
+    {
+      "pool_id": "M15_H4_SHORT_H4_RCI18_NONPOSITIVE_STATE",
+      "entry_mode": "STATE_REENTRY_AFTER_PREVIOUS_TRADE_EXIT",
+      "trades_total": 11007,
+      "year_metrics": {
+        "2023": {"trades": 3550, "total_r": -240.4611141604},
+        "2024": {"trades": 2990, "total_r": -346.1756473139},
+        "2025": {"trades": 2744, "total_r": -122.2430362739},
+        "2026_diagnostic": {"trades": 1723, "total_r": 51.9230973925}
+      },
+      "result": "REJECT_RAW_POOL",
+      "note": "The broad state had strong regime dependence and failed the multi-year robustness gate."
+    }
+  ],
+  "loss_model_screen": {
+    "models": [
+      "shallow decision-tree composite loser leaves",
+      "regularized LightGBM score coverage variants"
+    ],
+    "selection_rule": "2024 and 2025 must each have at least 100 trades, PF above 1.05, and positive total R",
+    "accepted_configurations": 0,
+    "result": "NO_NEW_CANDIDATE",
+    "interpretation": "High trade count alone does not create edge. A broad directional state must be combined with a meaningful event or regime structure before loser subtraction."
+  },
+  "additional_rule_audit": {
+    "rule": "H1-D1 LONG using D1 MACD histogram SMA4 normalized by D1 ATR and H1 24-hour delta normalized by H1 ATR",
+    "pre_2026": {
+      "2023": {"trades": 83, "win_rate": 0.5903614458, "total_r": 15.0},
+      "2024": {"trades": 90, "win_rate": 0.6444444444, "total_r": 25.1846566374},
+      "2025": {"trades": 100, "win_rate": 0.57, "total_r": 14.6384909143}
+    },
+    "2026_diagnostic": {"trades": 30, "win_rate": 0.4333333333, "profit_factor": 0.7647058824, "total_r": -4.0},
+    "result": "DO_NOT_STACK",
+    "note": "Pre-2026 strength did not persist, and pre-2026 loser filters did not repair the 2026 diagnostic."
+  },
+  "conclusion": {
+    "new_stack_entries": 0,
+    "existing_stack_preserved": ["GML1-PROV-002", "GML1-PROV-007"],
+    "next_search_adjustment": [
+      "start from broad event-trigger pools rather than direction-sign states",
+      "include breakout, failed-break, pullback-completion, volatility-transition, and session events",
+      "apply composite loser subtraction after event generation",
+      "keep annual count as an explicit optimization constraint",
+      "test 1.0R, 1.5R, 2.0R and multiple horizons as separate lineages"
+    ]
+  }
+}
