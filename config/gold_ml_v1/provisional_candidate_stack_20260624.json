@@ -1,147 +1,44 @@
 {
   "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260624",
-  "status": "REMOTE_PROVISIONAL_STACK_LOCAL_REPLAY_PENDING",
-  "project": "GOLD_ML_V1",
-  "entries": [
-    {
-      "provisional_id": "GML1-PROV-002",
-      "role": "BASE_LINEAGE",
-      "lane": "M15-H4",
-      "direction": "LONG",
-      "status": "REMOTE_HOLDOUT_PASS_LOCAL_REPLAY_PENDING",
-      "summary": "Closed H4 RCI18 strength with low H4 spread-to-ATR ratio.",
-      "metrics_all_period": {"trades":193,"wins":111,"win_rate":0.5751295337,"profit_factor":1.3372021510,"total_r":27.3654253218,"max_drawdown_r":6.9816100582},
-      "source": "config/gold_ml_v1/provisional_shortlist_batch001_holdout_result.json"
-    },
-    {
-      "provisional_id": "GML1-PROV-007",
-      "parent_provisional_id": "GML1-PROV-002",
-      "role": "LOSS_FILTERED_DERIVATIVE_LINEAGE",
-      "lane": "M15-H4",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "Preserves the PROV-002 base rule but excludes the composite loser signature of strong H4 EMA40 extension plus upper-wick rejection.",
-      "metrics_all_period_diagnostic": {"trades":154,"wins":99,"retained_fraction_vs_parent":0.7979274611,"win_rate":0.6428571429,"profit_factor":1.7924925442,"total_r":42.9169278733,"max_drawdown_r":5.9816100582},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch003.json"
-    },
-    {
-      "provisional_id": "GML1-PROV-008",
-      "parent_provisional_id": "GML1-PROV-002",
-      "role": "BOLLINGER_COMPRESSION_LOSS_FILTERED_DERIVATIVE",
-      "lane": "M15-H4",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "Preserves the PROV-002 base rule but excludes low-bandwidth M15 Bollinger compression states that were strongly loss-concentrated.",
-      "metrics_all_period_diagnostic": {"trades":169,"wins":105,"retained_fraction_vs_parent":0.8756476684,"win_rate":0.6213017751,"profit_factor":1.6233207694,"total_r":39.3654253218,"max_drawdown_r":4.0},
-      "source": "config/gold_ml_v1/provisional_bollinger_loss_subtraction_batch005.json"
-    },
-    {
-      "provisional_id": "GML1-PROV-010",
-      "role": "INDEPENDENT_BOLLINGER_BREAKOUT_EVENT_LINEAGE",
-      "lane": "H1-D1",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "H1 close breaks above the 60-period upper Bollinger band while the last closed D1 RCI18 is nonnegative.",
-      "metrics_all_period_diagnostic": {"trades":254,"wins":155,"win_rate":0.6102362205,"profit_factor":1.5724696408,"total_r":55.9548783819,"max_drawdown_r":5.0},
-      "2026_diagnostic": {"trades":27,"wins":19,"win_rate":0.7037037037,"profit_factor":2.2616458804,"total_r":10.0931670428,"max_drawdown_r":2.9068329572},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
-    },
-    {
-      "provisional_id": "GML1-PROV-013",
-      "role": "INDEPENDENT_BOLLINGER_MIDDLE_REJECTION_EVENT_LINEAGE",
-      "lane": "H1-D1",
-      "direction": "SHORT",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "H1 close rejects the 60-period Bollinger middle band during a last-closed D1 high-volatility regime.",
-      "metrics_all_period_diagnostic": {"trades":248,"wins":133,"win_rate":0.5362903226,"profit_factor":1.1865300130,"total_r":20.5533632983,"max_drawdown_r":9.3841792907},
-      "2026_diagnostic": {"trades":31,"wins":16,"win_rate":0.5161290323,"profit_factor":1.146637,"total_r":2.046154,"max_drawdown_r":4.586416},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
-    },
-    {
-      "provisional_id": "GML1-PROV-015",
-      "parent_provisional_id": "GML1-PROV-010",
-      "role": "D1_LOW_PARTICIPATION_FALSE_BREAKOUT_LOSS_FILTER_DERIVATIVE",
-      "lane": "H1-D1",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "Preserves the PROV-010 breakout event but excludes breakouts occurring with both weak D1 tick-volume participation and weak three-day D1 progress relative to ATR.",
-      "metrics_all_period_diagnostic": {"trades":225,"wins":147,"retained_fraction_vs_parent":0.8858267717,"win_rate":0.6533333333,"profit_factor":1.8985172911,"total_r":68.9548783819,"max_drawdown_r":4.0},
-      "2026_diagnostic": {"trades":25,"wins":19,"win_rate":0.76,"profit_factor":3.0155278405,"total_r":12.0931670428,"max_drawdown_r":2.0},
-      "source": "config/gold_ml_v1/provisional_loss_subtraction_batch007.json"
-    },
+  "status": "STRICT_GATE_ACTIVE",
+  "active_provisional_ids": [
+    "GML1-PROV-002",
+    "GML1-PROV-007",
+    "GML1-PROV-008",
+    "GML1-PROV-010",
+    "GML1-PROV-013",
+    "GML1-PROV-015"
+  ],
+  "demoted_from_active_stack": [
     {
       "provisional_id": "GML1-PROV-016",
-      "role": "CAUSAL_TRENDLINE_BREAK_RETEST_1_5R_LINEAGE",
-      "lane": "M15-H4",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "Confirmed M15 high-trendline breakout followed by a bullish frozen-level retest in a closed H4 high-volatility uptrend.",
-      "label": {"target_r":1.5,"stop_atr_multiple":1.0,"horizon_minutes":360},
-      "pre_2026_metrics": {
-        "2023":{"trades":140,"wins":63,"win_rate":0.45,"profit_factor":1.2206519793,"total_r":15.8745364477,"max_drawdown_r":9.4346919465},
-        "2024":{"trades":164,"wins":91,"win_rate":0.5548780488,"profit_factor":1.8102660237,"total_r":57.9249837040,"max_drawdown_r":6.5},
-        "2025":{"trades":200,"wins":95,"win_rate":0.475,"profit_factor":1.2333777315,"total_r":24.4702956790,"max_drawdown_r":9.4208277650}
-      },
-      "2026_diagnostic": {"trades":36,"wins":16,"win_rate":0.4444444444,"profit_factor":1.0776028106,"total_r":1.5520562126,"max_drawdown_r":6.0},
-      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
+      "new_status": "WATCH_ONLY",
+      "reason": "2026 PF 1.0776 and +1.55R are too weak."
     },
     {
       "provisional_id": "GML1-PROV-018",
-      "role": "BB40_POST_SQUEEZE_BREAKOUT_LINEAGE",
-      "lane": "M15-H4",
-      "direction": "LONG",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_SMALL_2026_SAMPLE_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "M15 BB40 upper-band breakout after recent compression, with expanding band width and a closed H4 high-volatility uptrend.",
-      "label": {"target_r":1.0,"stop_atr_multiple":1.0,"horizon_minutes":720},
-      "pre_2026_metrics": {
-        "2023":{"trades":44,"wins":26,"win_rate":0.5909090909,"profit_factor":1.4444444444,"total_r":8.0,"max_drawdown_r":3.0},
-        "2024":{"trades":55,"wins":37,"win_rate":0.6727272727,"profit_factor":2.0555555556,"total_r":19.0,"max_drawdown_r":4.0},
-        "2025":{"trades":86,"wins":46,"win_rate":0.5348837209,"profit_factor":1.15,"total_r":6.0,"max_drawdown_r":4.0}
-      },
-      "2026_diagnostic": {"trades":8,"wins":7,"win_rate":0.875,"profit_factor":7.0,"total_r":6.0,"max_drawdown_r":1.0},
-      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
+      "new_status": "WATCH_ONLY_SMALL_SAMPLE",
+      "reason": "Only eight 2026 diagnostic trades."
     },
     {
       "provisional_id": "GML1-PROV-019",
-      "role": "REPAIRED_DONCHIAN_EMA_RETEST_SHORT_2R_LINEAGE",
-      "lane": "M15-H4",
-      "direction": "SHORT",
-      "status": "REMOTE_DIAGNOSTIC_STACKED_DIVERSIFICATION_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
-      "summary": "M15 Donchian20 downside break followed by a bearish EMA20 retest in a closed H4 downtrend, excluding overly deep Bollinger-position rebounds.",
-      "label": {"target_r":2.0,"stop_atr_multiple":1.0,"horizon_minutes":360},
-      "pre_2026_filtered_metrics": {
-        "trades":235,"wins":95,"win_rate":0.4042553191,"profit_factor":1.2684008084,"total_r":36.4846087872,"max_drawdown_r":12.3206184890
-      },
-      "2026_diagnostic": {"trades":57,"wins":22,"win_rate":0.3859649123,"profit_factor":1.1058324154,"total_r":3.5671813913,"max_drawdown_r":7.0},
-      "source": "config/gold_ml_v1/provisional_retest_batch010_011_diagnostic_result.json"
+      "new_status": "RESEARCH_ONLY",
+      "reason": "Pre-2026 PF 1.2684 and 2026 PF 1.1058 are below the strict gate."
     }
   ],
-  "watch_only_not_in_stack": [
-    {"provisional_id":"GML1-PROV-004","reason":"Positive but too few 2026 diagnostic trades and insufficient neighborhood robustness."},
-    {"provisional_id":"GML1-PROV-009","reason":"High-count trendline breakout weakened at the frozen 1R label in the 2026 diagnostic."},
-    {"provisional_id":"GML1-PROV-014","reason":"Positive before 2026 but exactly break-even in the 2026 diagnostic."},
-    {"research_id":"M15_BB40_SQUEEZE_Q2_HIGHVOL","reason":"Positive in each year but weak; pre-2026 top loss filters did not improve the 2026 diagnostic."}
+  "watch_only": [
+    "GML1-PROV-004",
+    "GML1-PROV-009",
+    "GML1-PROV-014",
+    "GML1-PROV-016",
+    "GML1-PROV-018",
+    "GML1-PROV-019"
   ],
-  "rejected": [
-    {"provisional_id":"GML1-PROV-017","reason":"Donchian60 2R retest failed 2026 with -13.06R and zero positive neighborhood cells."}
-  ],
-  "rules": {
-    "entries_are_append_only": true,
-    "parent_and_derivative_are_kept_separately": true,
-    "exact_trade_registry_supersedes_manual_summary": true,
-    "no_entry_is_registered_candidate_yet": true,
-    "local_replay_required_before_registration": true,
-    "fresh_prospective_confirmation_required": true,
-    "portfolio_use_forbidden_until_registration": true
-  },
-  "next_search": {
-    "method": "WALK_FORWARD_EVENT_SCORE_AND_COMPOSITE_LOSER_SUBTRACTION",
-    "targets": [
-      "reduced-universe M5 failed-break and break-retest events",
-      "higher-win-rate SHORT derivatives selected without 2026",
-      "overlap and correlation audit across nine provisional lineages",
-      "fresh post-cutoff prospective confirmation",
-      "shortlist-only local replay package after one more narrowing batch"
-    ]
-  }
+  "rejected": ["GML1-PROV-017"],
+  "admission_gate": "config/gold_ml_v1/provisional_stack_admission_gate_20260624.json",
+  "correction_record": "config/gold_ml_v1/provisional_stack_correction_batch010_011_20260624.json",
+  "historical_result_files_remain_authoritative_for_metrics": true,
+  "local_replay_required_before_registration": true,
+  "fresh_prospective_confirmation_required": true,
+  "portfolio_use_forbidden_before_registration": true
 }
