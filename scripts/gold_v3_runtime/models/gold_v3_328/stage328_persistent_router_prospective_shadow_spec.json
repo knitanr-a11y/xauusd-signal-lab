@@ -1,0 +1,78 @@
+{
+  "spec_id": "GOLD_V3_328_PERSISTENT_ROUTER_PROSPECTIVE_SHADOW_V1",
+  "mode": "AUDIT_ONLY_FUTURE_ONLY_PERSISTENT_ROUTER_SHADOW",
+  "source_candidate": "M5_H4|MOCHI_UNION|SHORT|RR1_5|ATR_GE_1_AND_NO_ROUND",
+  "selected_lane": "BALANCED_OR_PREMIUM",
+  "router_policy": "RELATIVE_TRAILING_MEAN_R_N2",
+  "router_cost_view": "1p0x",
+  "balanced_membership": {
+    "rule": "CONSENSUS_OR_ATR_STEADY_AND_RANGE",
+    "expression": "pooled_track_count >= 2 OR (1.10 <= atr_ratio_signal <= 1.45 AND 0.70 <= range_atr_signal <= 1.05)"
+  },
+  "premium_membership": {
+    "rule": "TREND_FLOW_COMPRESSION_GE_0_95",
+    "expression": "compression_ratio_signal >= 0.95"
+  },
+  "router_group_assignment": {
+    "premium_precedence": true,
+    "premium_group": "PREMIUM_INVOLVED",
+    "balanced_only_group": "BALANCED_WITHOUT_PREMIUM"
+  },
+  "state_contract": {
+    "schema_version": 1,
+    "persist_fields": [
+      "processed_candidates",
+      "last_entry_dt",
+      "last_exit_dt",
+      "groups.PREMIUM_INVOLVED.resolved_count",
+      "groups.PREMIUM_INVOLVED.last_two_r",
+      "groups.BALANCED_WITHOUT_PREMIUM.resolved_count",
+      "groups.BALANCED_WITHOUT_PREMIUM.last_two_r"
+    ],
+    "update_after_resolution_only": true,
+    "skipped_candidates_update_after_resolution": true,
+    "pending_candidates_do_not_update_state": true,
+    "state_reset_forbidden": true,
+    "append_only_processing": true
+  },
+  "prospective_contract": {
+    "reuse_stage319_frozen_data_cutoff": true,
+    "decision_dt_strictly_after_cutoff": true,
+    "closed_candles_only": true,
+    "resolved_metrics_only": true,
+    "pending_trades_have_no_as_of_pnl": true,
+    "freeze_on_first_run": true,
+    "contract_cutoff_must_never_move": true,
+    "automatic_rule_change": false,
+    "automatic_promotion": false
+  },
+  "portfolio_policy": {
+    "one_position": true,
+    "preemption": false,
+    "same_m1_tp_sl_priority": "SL",
+    "maximum_hold_minutes": 720
+  },
+  "future_review_gate": {
+    "minimum_resolved_source_candidates": 20,
+    "minimum_resolved_selected_trades": 10,
+    "minimum_selected_win_rate": 0.6,
+    "minimum_selected_profit_factor": 1.25,
+    "minimum_selected_total_r_exclusive": 0.0,
+    "maximum_selected_drawdown_r": 4.0,
+    "maximum_largest_winner_share": 0.35,
+    "state_integrity_required": true,
+    "automatic_promotion": false
+  },
+  "preserved_state": {
+    "gold_v3_audit_only": true,
+    "stage319_contract": "UNCHANGED_FROZEN",
+    "stage314_contract": "UNCHANGED_ACTIVE",
+    "stage280_exact_recovery": "BLOCKED_UNCHANGED",
+    "stage307_candidate": "UNCHANGED_RETAINED",
+    "stage292_candidate_pool_changed": false,
+    "final_signal_changed": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false
+  }
+}
