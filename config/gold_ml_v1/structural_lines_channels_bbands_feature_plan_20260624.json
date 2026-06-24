@@ -1,0 +1,61 @@
+{
+  "plan_id": "GML1-STRUCTURAL-LINES-CHANNELS-BBANDS-20260624",
+  "status": "ACTIVE_FOR_REMOTE_DISCOVERY",
+  "causality": {
+    "closed_bars_only": true,
+    "future_pivots_forbidden": true,
+    "trendline_pivots_available_only_after_confirmation": true,
+    "repainting_visual_lines_forbidden": true,
+    "higher_timeframe_availability_uses_close_time": true
+  },
+  "trendline_features": [
+    "last_two_confirmed_high-pivot line slope normalized by ATR",
+    "last_two_confirmed_low-pivot line slope normalized by ATR",
+    "current close distance to projected high line normalized by ATR",
+    "current close distance to projected low line normalized by ATR",
+    "causal line break",
+    "causal line retest",
+    "touch count before decision time"
+  ],
+  "channel_features": [
+    "confirmed-pivot channel width normalized by ATR",
+    "position inside confirmed-pivot channel",
+    "rolling regression-channel slope",
+    "rolling regression residual z-score",
+    "rolling regression channel width normalized by ATR",
+    "Donchian 20/40/60 position",
+    "Donchian breakout and failed breakout",
+    "channel compression and expansion transition"
+  ],
+  "bollinger_features": {
+    "periods": [20, 40, 60],
+    "standard_deviations": 2.0,
+    "features": [
+      "percent-b",
+      "z-score from middle band",
+      "full band width normalized by ATR",
+      "band-width trailing percentile",
+      "squeeze",
+      "squeeze release",
+      "upper-band breakout",
+      "lower-band breakout",
+      "band re-entry",
+      "band-walk persistence",
+      "middle-band reclaim and rejection"
+    ]
+  },
+  "timeframes": ["M5", "M15", "H1", "H4", "D1"],
+  "lineage": {
+    "bollinger_only": "separate feature-set ID",
+    "trendline_only": "separate feature-set ID",
+    "channel_only": "separate feature-set ID",
+    "combined_structural_features": "separate feature-set ID",
+    "different pivot confirmation rules": "separate feature-set ID"
+  },
+  "search_method": "Generate broad causal events first, then subtract composite loser signatures under retained-coverage constraints.",
+  "safety": {
+    "audit_only": true,
+    "local_replay_required_before_registration": true,
+    "automatic_promotion": false
+  }
+}
