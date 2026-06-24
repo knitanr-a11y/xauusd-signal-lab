@@ -10,14 +10,7 @@
       "direction": "LONG",
       "status": "REMOTE_HOLDOUT_PASS_LOCAL_REPLAY_PENDING",
       "summary": "Closed H4 RCI18 strength with low H4 spread-to-ATR ratio.",
-      "metrics_all_period": {
-        "trades": 193,
-        "wins": 111,
-        "win_rate": 0.5751295337,
-        "profit_factor": 1.3372021510,
-        "total_r": 27.3654253218,
-        "max_drawdown_r": 6.9816100582
-      },
+      "metrics_all_period": {"trades":193,"wins":111,"win_rate":0.5751295337,"profit_factor":1.3372021510,"total_r":27.3654253218,"max_drawdown_r":6.9816100582},
       "source": "config/gold_ml_v1/provisional_shortlist_batch001_holdout_result.json"
     },
     {
@@ -28,20 +21,8 @@
       "direction": "LONG",
       "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
       "summary": "Preserves the PROV-002 base rule but excludes the composite loser signature of strong H4 EMA40 extension plus upper-wick rejection.",
-      "excluded_signature": {
-        "h4_upper_wick_fraction_gte": 0.27488556398168634,
-        "h4_ema40_slope6_atr_gte": 0.6863028800058267,
-        "all_conditions_required": true
-      },
-      "metrics_all_period_diagnostic": {
-        "trades": 154,
-        "wins": 99,
-        "retained_fraction_vs_parent": 0.7979274611,
-        "win_rate": 0.6428571429,
-        "profit_factor": 1.7924925442,
-        "total_r": 42.9169278733,
-        "max_drawdown_r": 5.9816100582
-      },
+      "excluded_signature": {"h4_upper_wick_fraction_gte":0.27488556398168634,"h4_ema40_slope6_atr_gte":0.6863028800058267,"all_conditions_required":true},
+      "metrics_all_period_diagnostic": {"trades":154,"wins":99,"retained_fraction_vs_parent":0.7979274611,"win_rate":0.6428571429,"profit_factor":1.7924925442,"total_r":42.9169278733,"max_drawdown_r":5.9816100582},
       "source": "config/gold_ml_v1/provisional_loss_subtraction_batch003.json"
     },
     {
@@ -52,28 +33,37 @@
       "direction": "LONG",
       "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
       "summary": "Preserves the PROV-002 base rule but excludes low-bandwidth M15 Bollinger compression states that were strongly loss-concentrated.",
-      "excluded_signature": {
-        "m15_bb_width20_atr_lte": 3.3719018700718184,
-        "m15_bb_width60_trailing100_percentile_lte": 0.536,
-        "all_conditions_required": true
-      },
-      "metrics_all_period_diagnostic": {
-        "trades": 169,
-        "wins": 105,
-        "retained_fraction_vs_parent": 0.8756476684,
-        "win_rate": 0.6213017751,
-        "profit_factor": 1.6233207694,
-        "total_r": 39.3654253218,
-        "max_drawdown_r": 4.0
-      },
+      "excluded_signature": {"m15_bb_width20_atr_lte":3.3719018700718184,"m15_bb_width60_trailing100_percentile_lte":0.536,"all_conditions_required":true},
+      "metrics_all_period_diagnostic": {"trades":169,"wins":105,"retained_fraction_vs_parent":0.8756476684,"win_rate":0.6213017751,"profit_factor":1.6233207694,"total_r":39.3654253218,"max_drawdown_r":4.0},
       "source": "config/gold_ml_v1/provisional_bollinger_loss_subtraction_batch005.json"
+    },
+    {
+      "provisional_id": "GML1-PROV-010",
+      "role": "INDEPENDENT_BOLLINGER_BREAKOUT_EVENT_LINEAGE",
+      "lane": "H1-D1",
+      "direction": "LONG",
+      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
+      "summary": "H1 close breaks above the 60-period upper Bollinger band while the last closed D1 RCI18 is nonnegative.",
+      "metrics_all_period_diagnostic": {"trades":254,"wins":151,"win_rate":0.5944881890,"profit_factor":1.518,"total_r":55.95,"max_drawdown_r":5.0},
+      "2026_diagnostic": {"trades":27,"wins":19,"win_rate":0.7037037037,"profit_factor":2.262,"total_r":10.09,"max_drawdown_r":2.91},
+      "source": "config/gold_ml_v1/provisional_event_batch006_diagnostic_result.json"
+    },
+    {
+      "provisional_id": "GML1-PROV-013",
+      "role": "INDEPENDENT_BOLLINGER_MIDDLE_REJECTION_EVENT_LINEAGE",
+      "lane": "H1-D1",
+      "direction": "SHORT",
+      "status": "REMOTE_DIAGNOSTIC_STACKED_LOCAL_REPLAY_AND_FRESH_PROSPECTIVE_PENDING",
+      "summary": "H1 close rejects the 60-period Bollinger middle band during a last-closed D1 high-volatility regime.",
+      "metrics_all_period_diagnostic": {"trades":248,"wins":133,"win_rate":0.5362903226,"profit_factor":1.187,"total_r":20.56,"max_drawdown_r":8.0},
+      "2026_diagnostic": {"trades":31,"wins":16,"win_rate":0.5161290323,"profit_factor":1.147,"total_r":2.05,"max_drawdown_r":4.59},
+      "source": "config/gold_ml_v1/provisional_event_batch006_diagnostic_result.json"
     }
   ],
   "watch_only_not_in_stack": [
-    {
-      "provisional_id": "GML1-PROV-004",
-      "reason": "Positive but too few 2026 diagnostic trades and insufficient neighborhood robustness."
-    }
+    {"provisional_id":"GML1-PROV-004","reason":"Positive but too few 2026 diagnostic trades and insufficient neighborhood robustness."},
+    {"provisional_id":"GML1-PROV-009","reason":"High-count trendline breakout weakened at the frozen 1R label in the 2026 diagnostic."},
+    {"provisional_id":"GML1-PROV-014","reason":"Positive before 2026 but exactly break-even in the 2026 diagnostic."}
   ],
   "rules": {
     "entries_are_append_only": true,
@@ -86,15 +76,13 @@
   "next_search": {
     "method": "COVERAGE_FIRST_COMPOSITE_LOSER_SUBTRACTION_AND_CAUSAL_EVENT_SEARCH",
     "targets": [
-      "Bollinger squeeze-release and band-reentry events",
-      "confirmed trendline break and retest events",
+      "composite loser subtraction for PROV-010 and PROV-013",
+      "M5 and M15 Bollinger squeeze-release events",
+      "confirmed trendline break-retest events",
       "regression-channel and Donchian failed-break events",
-      "higher-count M5-H4 LONG and SHORT opportunity pools",
-      "higher-count M15-H4 LONG and SHORT opportunity pools",
-      "H1-D1 directional pools",
-      "state-with-cooldown re-entry variants",
-      "multiple TP and horizon label families",
-      "loss-risk models constrained by retained coverage"
+      "separately frozen 1.5R and 2.0R label lineages",
+      "loss-risk models constrained by retained coverage",
+      "fresh post-cutoff prospective confirmation"
     ]
   }
 }
