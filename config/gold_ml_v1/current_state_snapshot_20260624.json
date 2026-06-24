@@ -4,6 +4,7 @@
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
+  "latest_handoff_addendum": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH016_ADDENDUM_20260624.md",
   "active_accumulated_candidates": [
     {
       "id": "GML1-PROV-007",
