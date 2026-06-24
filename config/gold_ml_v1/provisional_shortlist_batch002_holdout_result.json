@@ -1,0 +1,60 @@
+{
+  "result_id": "GML1-PROVISIONAL-SHORTLIST-BATCH002-HOLDOUT-RESULT",
+  "status": "REMOTE_HOLDOUT_AUDITED_NO_NEW_LOCAL_REPLAY_CANDIDATE",
+  "date": "2026-06-24",
+  "results": [
+    {
+      "provisional_id": "GML1-PROV-003",
+      "decision": "REMOTE_HOLDOUT_FAIL",
+      "2026": {"trades": 14, "wins": 7, "win_rate": 0.5, "profit_factor": 1.0, "total_r": 0.0, "max_drawdown_r": 2.0},
+      "neighborhood": {"positive_cells": 0, "nonnegative_cells": 36, "total_cells": 54},
+      "reason": "The high-win-rate pre-holdout D1 downtrend short rule was exactly break-even in 2026 and produced no positive neighborhood cell."
+    },
+    {
+      "provisional_id": "GML1-PROV-004",
+      "decision": "REMOTE_HOLDOUT_WEAK_WATCH_ONLY",
+      "2026": {"trades": 11, "wins": 6, "win_rate": 0.5454545455, "profit_factor": 1.2, "total_r": 1.0, "max_drawdown_r": 3.0},
+      "neighborhood": {"positive_cells": 18, "nonnegative_cells": 40, "total_cells": 54},
+      "reason": "The causal slow-ZigZag and H4 RCI14 long rule remained slightly positive, but the holdout sample is too small and neighborhood positivity is insufficient for local replay promotion."
+    },
+    {
+      "provisional_id": "GML1-PROV-005",
+      "decision": "REMOTE_HOLDOUT_FAIL",
+      "2026": {"trades": 21, "wins": 6, "win_rate": 0.2857142857, "profit_factor": 0.4, "total_r": -9.0, "max_drawdown_r": 9.0},
+      "neighborhood": {"positive_cells": 0, "nonnegative_cells": 0, "total_cells": 54},
+      "reason": "The M5-H4 high-range downtrend short rule failed decisively on 2026."
+    },
+    {
+      "provisional_id": "GML1-PROV-006",
+      "decision": "REMOTE_HOLDOUT_FAIL_WEAK",
+      "2026": {"trades": 29, "wins": 15, "win_rate": 0.5172413793, "profit_factor": 1.0714285714, "total_r": 1.0, "max_drawdown_r": 6.0},
+      "neighborhood": {"positive_cells": 6, "nonnegative_cells": 21, "total_cells": 54},
+      "reason": "The M15 rebound-in-H4-downtrend short rule was only marginally positive and fragile in the neighborhood test."
+    }
+  ],
+  "batch_conclusion": {
+    "new_candidates_for_local_replay": 0,
+    "watch_only": ["GML1-PROV-004"],
+    "failed": ["GML1-PROV-003", "GML1-PROV-005", "GML1-PROV-006"],
+    "existing_remote_survivor_unchanged": "GML1-PROV-002"
+  },
+  "holdout_reuse_policy": {
+    "2026_is_no_longer_untouched_for_future_candidate_selection": true,
+    "2026_may_be_used_only_as_a_recorded_diagnostic_without_threshold_retuning": true,
+    "fresh_prospective_cutoff_mt5_server_time": "2026-06-23 18:15:00",
+    "fresh_final_confirmation_rule": "use only bars whose close time is strictly after the cutoff",
+    "candidate_conditions_must_be_frozen_before_prospective_observation": true
+  },
+  "boundaries": {
+    "no_batch002_candidate_registered": true,
+    "no_batch002_candidate_portfolio_use": true,
+    "automatic_promotion": false,
+    "local_replay_not_requested_for_batch002": true
+  },
+  "next": [
+    "continue remote discovery with walk-forward and multiple-testing records",
+    "expand to additional label families and model families",
+    "preserve GML1-PROV-002 as the only current remote replay shortlist item",
+    "use post-cutoff prospective data as the next fresh final confirmation source"
+  ]
+}
