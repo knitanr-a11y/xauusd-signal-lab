@@ -1,0 +1,90 @@
+{
+  "contract_id": "GOLD_ML_V1_CLEAN_REBUILD_CONTRACT_20260624",
+  "status": "FROZEN_FOUNDATION_CONTRACT",
+  "project": "GOLD_ML_V1",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "main",
+  "purpose": "Build multiple independently validated high-win-rate candidates and combine them only in a separate portfolio layer.",
+  "sole_start_document": "docs/gold_ml_v1/START_HERE_GOLD_ML_V1_CLEAN_REBUILD_20260624.md",
+  "allowed_project_roots": [
+    "docs/gold_ml_v1/",
+    "config/gold_ml_v1/",
+    "scripts/gold_ml_v1/",
+    "models/gold_ml_v1/",
+    "tests/gold_ml_v1/"
+  ],
+  "local_output_root": "FX_OUTPUTS/gold_ml_v1/",
+  "forbidden_old_sources": [
+    "docs/gold_v3/**",
+    "scripts/gold_v3_runtime/**",
+    "models/gold_v3/**",
+    "tests/gold_v3/**",
+    "FX_OUTPUTS/gold_v3/**",
+    "all files whose purpose is an old GOLD stage, old GOLD model, old GOLD candidate, old GOLD portfolio, old GOLD metric, old GOLD threshold, old GOLD feature contract, or old GOLD handoff"
+  ],
+  "old_source_policy": {
+    "read": false,
+    "import": false,
+    "compare": false,
+    "inherit": false,
+    "fallback": false,
+    "copy_derived_artifacts": false,
+    "delete_or_rewrite_old_files": false
+  },
+  "raw_data_policy": {
+    "fresh_export_required": true,
+    "old_output_namespace_as_source": false,
+    "new_raw_namespace": "FX_OUTPUTS/gold_ml_v1/raw/",
+    "schema_validation_required": true,
+    "hash_manifest_required": true,
+    "closed_candles_only": true,
+    "time_basis_must_be_frozen_before_training": true
+  },
+  "candidate_policy": {
+    "append_only_registry": true,
+    "candidate_id_format": "GML1-CAND-0001",
+    "model_id_format": "GML1-MODEL-0001",
+    "dataset_id_format": "GML1-DATA-0001",
+    "feature_set_id_format": "GML1-FEAT-0001",
+    "label_id_format": "GML1-LABEL-0001",
+    "portfolio_id_format": "GML1-PORT-0001",
+    "candidate_contract_immutable_after_registration": true,
+    "candidate_metrics_never_overwritten_by_portfolio_metrics": true,
+    "candidate_replacement_forbidden": true,
+    "changed_logic_requires_new_candidate_id": true,
+    "retired_candidates_remain_in_registry": true,
+    "standalone_evaluation_before_portfolio": true,
+    "other_candidates_must_not_change_standalone_trade_set": true
+  },
+  "portfolio_policy": {
+    "separate_from_candidate_layer": true,
+    "portfolio_is_never_renamed_as_a_candidate": true,
+    "portfolio_one_position_rules_apply_only_in_portfolio_evaluation": true,
+    "source_candidate_trade_sets_and_metrics_remain_unchanged": true,
+    "portfolio_combinations_get_new_portfolio_ids": true
+  },
+  "machine_learning_policy": {
+    "start_from_zero": true,
+    "old_models_scalers_features_labels_thresholds_forbidden": true,
+    "dataset_contract_before_training": true,
+    "feature_contract_before_training": true,
+    "label_contract_before_training": true,
+    "split_contract_before_training": true,
+    "leakage_audit_required": true,
+    "train_validation_test_roles_must_be_distinct": true,
+    "final_holdout_must_not_be_repeatedly_tuned_on": true,
+    "candidate_specialization_allowed": true,
+    "single_main_candidate_required": false
+  },
+  "safety": {
+    "audit_only_until_explicit_future_authorization": true,
+    "live_signal_enabled": false,
+    "mt5_order_enabled": false,
+    "discord_enabled": false,
+    "partial_close_enabled": false,
+    "automatic_promotion": false
+  },
+  "current_status": "GOLD_ML_V1_000_CLEAN_REBUILD_CONTRACT_FROZEN",
+  "current_decision": "START_NEW_SYSTEM_WITH_APPEND_ONLY_INDEPENDENT_CANDIDATES",
+  "next_phase": "GOLD_ML_V1_001_DATASET_AND_EVALUATION_CONTRACT"
+}
