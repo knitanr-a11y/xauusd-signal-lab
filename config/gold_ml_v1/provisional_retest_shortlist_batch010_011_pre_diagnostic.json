@@ -1,0 +1,123 @@
+{
+  "shortlist_id": "GML1-PROVISIONAL-RETEST-SHORTLIST-BATCH010-011-PRE-DIAGNOSTIC",
+  "status": "FROZEN_BEFORE_2026_DIAGNOSTIC_READ",
+  "created_date": "2026-06-24",
+  "research_window": {
+    "discovery": "2023",
+    "validation": "2024",
+    "test": "2025",
+    "2026": "UNREAD_FOR_THESE_FROZEN_LINEAGES_AT_FREEZE"
+  },
+  "common_execution": {
+    "entry": "next exact M1 open at M15 close",
+    "same_m1_priority": "SL",
+    "dynamic_spread_included": true,
+    "one_position_per_lineage": true,
+    "time_basis": "raw MT5 server time",
+    "year_metrics_require_label_horizon_to_finish_before_next_year": true
+  },
+  "provisional_rules": [
+    {
+      "provisional_id": "GML1-PROV-016",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "event": "CAUSAL_HIGH_TRENDLINE_BREAK_RETEST",
+      "context": "CLOSED_H4_HIGHVOL_TREND_ALIGN",
+      "horizon_minutes": 360,
+      "target_r": 1.5,
+      "stop_atr_multiple": 1.0,
+      "definition": {
+        "pivot_rule": "M15 high pivots require left=3 and right=3 closed bars and become available only after right-side confirmation",
+        "break": "M15 close crosses above the currently projected confirmed-high-pivot trendline",
+        "retest": "within 24 M15 bars, low touches the frozen breakout line within +0.10 M15 ATR14 and the same bar closes bullish above that frozen line",
+        "invalidation": "close below frozen breakout line minus 0.50 M15 ATR14",
+        "htf_context": "last closed H4 ATR14 ratio to trailing 50-bar median >= 1 and H4 EMA40 six-bar slope is aligned LONG"
+      },
+      "metrics": {
+        "2023": {"trades":140,"wins":63,"win_rate":0.45,"profit_factor":1.2206519793,"total_r":15.8745364477,"max_drawdown_r":9.4346919465},
+        "2024": {"trades":164,"wins":91,"win_rate":0.5548780488,"profit_factor":1.8102660237,"total_r":57.9249837040,"max_drawdown_r":6.5},
+        "2025": {"trades":200,"wins":95,"win_rate":0.475,"profit_factor":1.2333777315,"total_r":24.4702956790,"max_drawdown_r":9.4208277650}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-017",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "event": "DONCHIAN60_BREAK_RETEST",
+      "context": "CLOSED_H4_TREND_ALIGN",
+      "horizon_minutes": 360,
+      "target_r": 2.0,
+      "stop_atr_multiple": 1.0,
+      "definition": {
+        "break": "M15 close crosses above the previous 60-bar Donchian high",
+        "retest": "within 24 M15 bars, low touches the frozen breakout level within +0.20 M15 ATR14 and the bar closes bullish above it",
+        "invalidation": "close below frozen breakout level minus 0.50 M15 ATR14",
+        "htf_context": "last closed H4 RCI18 and H4 EMA40 six-bar slope are both aligned LONG"
+      },
+      "metrics": {
+        "2023": {"trades":109,"wins":41,"win_rate":0.3761467890,"profit_factor":1.1517421793,"total_r":10.1998695154,"max_drawdown_r":11.4971423311},
+        "2024": {"trades":133,"wins":57,"win_rate":0.4285714286,"profit_factor":1.4239537289,"total_r":31.4549963303,"max_drawdown_r":10.1525618781},
+        "2025": {"trades":203,"wins":89,"win_rate":0.4384236453,"profit_factor":1.5060719188,"total_r":56.6823653155,"max_drawdown_r":10.7349694947}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-018",
+      "lane": "M15-H4",
+      "direction": "LONG",
+      "event": "BB40_POST_SQUEEZE_UPPER_BREAK",
+      "context": "CLOSED_H4_HIGHVOL_TREND_ALIGN",
+      "horizon_minutes": 720,
+      "target_r": 1.0,
+      "stop_atr_multiple": 1.0,
+      "definition": {
+        "squeeze": "minimum M15 BB40 full-width trailing-100 percentile during the previous 12 bars <= 0.30",
+        "break": "previous close is at or below the previous BB40 upper band and current close is above the current upper band while BB40 width expands",
+        "htf_context": "last closed H4 ATR14 ratio to trailing 50-bar median >= 1 and H4 EMA40 six-bar slope is aligned LONG"
+      },
+      "metrics": {
+        "2023": {"trades":44,"wins":26,"win_rate":0.5909090909,"profit_factor":1.4444444444,"total_r":8.0,"max_drawdown_r":3.0},
+        "2024": {"trades":55,"wins":37,"win_rate":0.6727272727,"profit_factor":2.0555555556,"total_r":19.0,"max_drawdown_r":4.0},
+        "2025": {"trades":86,"wins":46,"win_rate":0.5348837209,"profit_factor":1.15,"total_r":6.0,"max_drawdown_r":4.0}
+      }
+    },
+    {
+      "provisional_id": "GML1-PROV-019",
+      "lane": "M15-H4",
+      "direction": "SHORT",
+      "event": "DONCHIAN20_BREAK_THEN_EMA20_RETEST",
+      "context": "CLOSED_H4_TREND_ALIGN",
+      "horizon_minutes": 360,
+      "target_r": 2.0,
+      "stop_atr_multiple": 1.0,
+      "definition": {
+        "break": "M15 close crosses below the previous 20-bar Donchian low",
+        "retest": "within 24 M15 bars, high reaches the current M15 EMA20 within 0.10 ATR and the bar closes bearish below EMA20",
+        "base_invalidation": "close above EMA20 plus 0.60 M15 ATR14",
+        "htf_context": "last closed H4 RCI18 and H4 EMA40 six-bar slope are both aligned SHORT",
+        "composite_loser_exclusion": "exclude only when M15 BB40 percent-B >= 0.2834353304983317 and M15 BB60 percent-B >= 0.2779747188942476 simultaneously"
+      },
+      "base_metrics_pre_filter": {"trades":302,"wins":109,"win_rate":0.3609271523,"profit_factor":1.0559507023,"total_r":10.4524983517,"max_drawdown_r":22.3206184890},
+      "excluded_subset": {"trades":67,"wins":14,"win_rate":0.2089552239,"profit_factor":0.4883918637,"total_r":-26.0321104355,"max_drawdown_r":30.0321104355},
+      "filtered_metrics": {
+        "all_pre_2026": {"trades":235,"wins":95,"win_rate":0.4042553191,"profit_factor":1.2684008084,"total_r":36.4846087872,"max_drawdown_r":12.3206184890,"trade_registry_sha256":"0bfb74e6517713e1127ae16f436254c3a5fec97795c0301aa9ba7b70be628832"},
+        "2023": {"trades":106,"wins":40,"win_rate":0.3773584906,"profit_factor":1.1448566184,"total_r":9.1014557694,"max_drawdown_r":12.3206184890},
+        "2024": {"trades":69,"wins":27,"win_rate":0.3913043478,"profit_factor":1.1423820675,"total_r":5.8522609769,"max_drawdown_r":10.1025143683},
+        "2025": {"trades":60,"wins":28,"win_rate":0.4666666667,"profit_factor":1.6728403763,"total_r":21.5308920409,"max_drawdown_r":5.0}
+      }
+    }
+  ],
+  "selection_notes": {
+    "2026_not_used_for_rule_or_filter_selection": true,
+    "target_1_5R_and_2R_are_separate_label_lineages": true,
+    "existing_stack_unchanged_at_freeze": true,
+    "none_are_registered_candidates": true,
+    "local_replay_not_yet_requested": true
+  },
+  "next_tests": [
+    "2026 recorded diagnostic",
+    "parameter neighborhood without threshold retuning",
+    "spread stress",
+    "trade overlap and event concentration",
+    "fresh post-2026-06-23 18:15 prospective confirmation"
+  ]
+}
