@@ -1,0 +1,42 @@
+{
+  "policy_id": "GML1-WATCH-POOL-POLICY-20260624",
+  "status": "ACTIVE",
+  "purpose": "Preserve low-count or borderline structures for prospective observation without counting them as accumulated candidates.",
+  "classification": {
+    "ACTIVE_PROVISIONAL": "passes strict admission gate",
+    "WATCH_LOW_COUNT": "promising structure but insufficient sample",
+    "WATCH_BORDERLINE_EDGE": "adequate sample but PF or total-R below active threshold",
+    "RESEARCH_ONLY": "requires a new frozen lineage before reconsideration",
+    "REJECTED": "decisive failure"
+  },
+  "low_count_rule": {
+    "do_not_discard": true,
+    "do_not_count_as_active_candidate": true,
+    "append_new_closed_trades_prospectively": true,
+    "recalculate_after_each_10_new_trades": true,
+    "minimum_fresh_trades_before_reconsideration": 20,
+    "no_threshold_changes_during_watch": true
+  },
+  "watch_updates": [
+    "trade count",
+    "win rate",
+    "profit factor",
+    "total R",
+    "maximum drawdown",
+    "spread stress",
+    "year or quarter concentration",
+    "overlap with active candidates"
+  ],
+  "promotion": {
+    "must_pass_strict_admission_gate": true,
+    "must_use_original_frozen_rule": true,
+    "local_replay_required": true,
+    "fresh_prospective_confirmation_required": true,
+    "automatic_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "portfolio_use_forbidden": true,
+    "live_order_use_forbidden": true
+  }
+}
