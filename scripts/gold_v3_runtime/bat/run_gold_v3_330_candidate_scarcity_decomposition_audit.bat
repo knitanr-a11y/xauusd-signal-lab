@@ -33,7 +33,7 @@ if not exist "%STAGE329_WATCH%" (
   exit /b 2
 )
 echo Running Stage330 candidate scarcity decomposition audit-only...
-%PYTHON_CMD% "%RUNTIME%\gold_v3_330_candidate_scarcity_decomposition_audit.py" --candle-dir "%TRAIN_DIR%" --stage329-watch "%STAGE329_WATCH%" --output "%OUTPUT_JSON%" --flow-csv "%FLOW_CSV%" --variant-summary-csv "%SUMMARY_CSV%" --near-miss-csv "%NEAR_MISS_CSV%" --incremental-trades-csv "%INCREMENTAL_CSV%" --context-summary-csv "%CONTEXT_CSV%"
+%PYTHON_CMD% "%RUNTIME%\gold_v3_330_candidate_scarcity_decomposition_audit_entry.py" --candle-dir "%TRAIN_DIR%" --stage329-watch "%STAGE329_WATCH%" --output "%OUTPUT_JSON%" --flow-csv "%FLOW_CSV%" --variant-summary-csv "%SUMMARY_CSV%" --near-miss-csv "%NEAR_MISS_CSV%" --incremental-trades-csv "%INCREMENTAL_CSV%" --context-summary-csv "%CONTEXT_CSV%"
 set "RC=%ERRORLEVEL%"
 echo.
 echo Result JSON:
