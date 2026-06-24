@@ -16,19 +16,20 @@ When a task concerns `GOLD_ML_V1`, the new machine-learning rebuild, obey these 
    - `tests/gold_v3/**`
    - `FX_OUTPUTS/gold_v3/**`
    - any old GOLD stage, model, scaler, feature list, label, threshold, candidate, portfolio, metric, output, runtime state, bootstrap, journal, watch, or handoff.
-3. Do not delete, rewrite, move, or rename the old files. They are quarantined by policy.
-4. Put new repository work only under:
+3. Do not delete, rewrite, move, or rename Git-tracked old source files. They are quarantined by policy.
+4. A narrow user-authorized maintenance exception exists for local non-Git legacy artifacts only: `scripts/gold_ml_v1/tools/run_archive_legacy_gold_local.bat` may perform opaque ZIP compression, SHA256 recording, ZIP verification, and optional removal after an explicit local confirmation. This exception never permits parsing or using archived content for research, training, comparison, inheritance, fallback, or parity.
+5. Put new repository work only under:
    - `docs/gold_ml_v1/`
    - `config/gold_ml_v1/`
    - `scripts/gold_ml_v1/`
    - `models/gold_ml_v1/`
    - `tests/gold_ml_v1/`
-5. The user objective is to accumulate multiple independently validated high-win-rate candidates.
-6. Candidate records are append-only and immutable. Changed logic requires a new candidate ID.
-7. Portfolio results are separate from candidate results. Never overwrite candidate trades or metrics with portfolio trades or metrics.
-8. Start from fresh raw data under `FX_OUTPUTS/gold_ml_v1/`; do not use an old output namespace as a data source.
-9. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
-10. Never claim a phase or result is complete until generated outputs are inspected.
+6. The user objective is to accumulate multiple independently validated high-win-rate candidates.
+7. Candidate records are append-only and immutable. Changed logic requires a new candidate ID.
+8. Portfolio results are separate from candidate results. Never overwrite candidate trades or metrics with portfolio trades or metrics.
+9. Start from fresh raw data under `FX_OUTPUTS/gold_ml_v1/`; do not use an old output namespace as a data source.
+10. Remain audit-only until explicit later authorization. Live signals, MT5 orders, Discord, partial close, and automatic promotion remain disabled.
+11. Never claim a phase or result is complete until generated outputs are inspected.
 
 Current status:
 
