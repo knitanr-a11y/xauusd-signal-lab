@@ -1,0 +1,86 @@
+{
+  "result_id": "GML1-PROVISIONAL-LOSS-SUBTRACTION-BATCH003",
+  "status": "REMOTE_DIAGNOSTIC_NOT_REGISTERED",
+  "base_provisional_id": "GML1-PROV-002",
+  "derivative_provisional_id": "GML1-PROV-007",
+  "selection_window": {
+    "threshold_candidates_from": "2023",
+    "selection_and_confirmation": ["2024", "2025"],
+    "2026_role": "diagnostic_only_because_no_longer_untouched"
+  },
+  "base_rule": {
+    "lane": "M15-H4",
+    "direction": "LONG",
+    "conditions": [
+      "closed H4 RCI18 >= 73.993808",
+      "closed H4 spread-price / H4 ATR14 <= 0.012772"
+    ]
+  },
+  "composite_loser_signature_to_exclude": {
+    "all_conditions_required": true,
+    "conditions": [
+      {
+        "feature": "H4_UPPER_WICK_FRACTION",
+        "formula": "(H4 high - max(H4 open,H4 close)) / (H4 high-H4 low)",
+        "operator": ">=",
+        "threshold": 0.27488556398168634
+      },
+      {
+        "feature": "H4_EMA40_SLOPE6_ATR",
+        "formula": "(H4 EMA40 - H4 EMA40[6]) / H4 ATR14",
+        "operator": ">=",
+        "threshold": 0.6863028800058267
+      }
+    ],
+    "interpretation": "exclude overextended H4 uptrends that simultaneously show strong upper-wick rejection"
+  },
+  "base_all_period_metrics": {
+    "trades": 193,
+    "wins": 111,
+    "win_rate": 0.5751295337,
+    "profit_factor": 1.3372021510,
+    "total_r": 27.3654253218,
+    "max_drawdown_r": 6.9816100582
+  },
+  "excluded_subset_metrics": {
+    "trades": 39,
+    "wins": 12,
+    "win_rate": 0.3076923077,
+    "profit_factor": 0.4240184240,
+    "total_r": -15.5515025515
+  },
+  "filtered_all_period_metrics": {
+    "trades": 154,
+    "wins": 99,
+    "retained_fraction": 0.7979274611,
+    "win_rate": 0.6428571429,
+    "profit_factor": 1.7924925442,
+    "total_r": 42.9169278733,
+    "max_drawdown_r": 5.9816100582
+  },
+  "year_metrics": {
+    "2023": {"trades": 20, "wins": 17, "win_rate": 0.85, "profit_factor": 5.3509665407, "total_r": 13.0528996221, "max_drawdown_r": 1.0},
+    "2024": {"trades": 24, "wins": 16, "win_rate": 0.6666666667, "profit_factor": 2.0, "total_r": 8.0, "max_drawdown_r": 2.0},
+    "2025": {"trades": 77, "wins": 46, "win_rate": 0.5974025974, "profit_factor": 1.4929312848, "total_r": 14.8640282512, "max_drawdown_r": 5.9816100582},
+    "2026_diagnostic": {"trades": 33, "wins": 20, "win_rate": 0.6060606061, "profit_factor": 1.5384615385, "total_r": 7.0, "max_drawdown_r": 3.0}
+  },
+  "neighborhood": {
+    "slope_train_quantiles_tested": [0.4,0.5,0.6,0.7,0.8],
+    "wick_train_quantiles_tested": [0.4,0.5,0.6,0.7,0.8],
+    "cells": 25,
+    "positive_in_2023_2024_2025_and_2026_diagnostic": 25
+  },
+  "boundaries": {
+    "not_registered": true,
+    "local_replay_pending": true,
+    "fresh_prospective_confirmation_pending": true,
+    "base_GML1_PROV_002_unchanged": true,
+    "portfolio_use_forbidden": true
+  },
+  "next": [
+    "repeat loss-subtraction analysis on higher-coverage opportunity pools",
+    "test cooldown re-entry instead of onset-only",
+    "build loss-risk models with minimum coverage constraints",
+    "confirm on post-2026-06-23 18:15 MT5-server-time prospective data"
+  ]
+}
