@@ -1,11 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-O",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-P",
   "status": "BATCH023_WARMUP_BRIDGE_9_OF_9_PASS_ONE_CLICK_WORKFLOW_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
+  "exploration_triple_check": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md",
+  "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
   "evaluation_period_contract": {
     "2023": "EXPLORATION_ONLY",
     "2024": "VALIDATION_ONLY_NO_RETUNE",
@@ -31,11 +33,12 @@
     {"id": "GML1-WATCH-023-A", "reason": "deterministic parity passed but 2023 training-sample bootstrap stability failed"}
   ],
   "candidate_pool_contract": {
-    "silent_removal": "forbidden",
+    "silent_add_remove_replace_or_relabel": "forbidden",
     "every_attempted_rule_must_be_recorded": true,
     "search_multiplicity_must_be_reported": true,
     "same_lineage_candidates_are_independent_edges": false,
-    "simple_metric_sum_across_same_lineage": "forbidden"
+    "simple_metric_sum_across_same_lineage": "forbidden",
+    "new_exploration_allowed_now": false
   },
   "verified_uploaded_run": {
     "status": "PASS",
@@ -52,6 +55,7 @@
     "audit_class": "SEPARATELY_VERSIONED_WARMUP_BRIDGE_NOT_RAW_ONLY_PARITY",
     "row_sources": ["RAW_RECONSTRUCTED", "WARMUP_BRIDGE_EXACT"],
     "bridge_rows_live_forbidden": true,
+    "bridge_rows_exploration_or_tuning_forbidden": true,
     "raw_only_parity": false,
     "raw_only_parity_blocker": "pre-2023 D1/H1/H4 history or serialized indicator seed state is absent"
   },
@@ -60,11 +64,10 @@
     "dispatcher": "scripts/gold_ml_v1/run_next_local.py",
     "action_config": "config/gold_ml_v1/next_local_action.json",
     "current_action_mode": "status_only",
-    "current_action_reason": "Batch023 verification is already complete; next chat must implement cost stress before enabling a BAT action",
+    "current_action_reason": "Batch023 verification is complete; next chat must implement predeclared cost stress before enabling BAT mode",
     "latest_dispatch_summary": "outputs/gold_ml_v1/next_action/LATEST_NEXT_ACTION.txt",
     "user_instruction_for_future_phases": "Pull and double-click RUN_GOLD_ML_V1_NEXT.bat"
   },
-  "mandatory_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md",
   "next": "IMPLEMENT_COST_STRESS_UPDATE_NEXT_ACTION_THEN_USER_RUNS_RUN_GOLD_ML_V1_NEXT_BAT",
   "registration_blockers": [
     "spread 1.5x and 2.0x plus predeclared fixed-slippage stress on RAW_RECONSTRUCTED rows",
@@ -73,6 +76,7 @@
     "no registration or live activation authorization"
   ],
   "execution_switches": {
+    "new_exploration": false,
     "live_ready": false,
     "final_signal": false,
     "mt5_order": false,
