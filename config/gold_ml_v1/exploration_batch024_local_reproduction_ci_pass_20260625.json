@@ -1,0 +1,27 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-LOCAL-REPRODUCTION-CI-PASS-20260625",
+  "status": "PASS",
+  "validated_main_commit": "923794093228707ebb3100560a0fc6acb5cf187d",
+  "validation_pr": 37,
+  "validation_head_commit": "4bfe98ad16553ed09cf7735386739806a063a329",
+  "workflow_run_id": 28170899676,
+  "job_id": 83434501855,
+  "validation_pr_merged": false,
+  "validated_steps": {
+    "compile_tools": "PASS",
+    "governance_guardrails": "PASS",
+    "cost_stress_contract": "PASS",
+    "cost_stress_core_registry": "PASS",
+    "fresh_prospective_engine": "PASS",
+    "stateful_prospective_monitor": "PASS",
+    "batch024_exploration": "PASS",
+    "batch024_raw_package_transfer": "PASS",
+    "batch024_local_reproduction": "PASS"
+  },
+  "time_column_semantics": "BAR_OPEN_TIME",
+  "local_reproduction_role": "PARITY_CHECK_ONLY",
+  "assistant_survivor_count": 0,
+  "existing_frozen_nine_modified": false,
+  "audit_only": true,
+  "live_ready": false
+}
