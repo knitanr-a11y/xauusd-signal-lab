@@ -13,7 +13,7 @@ AGENTS = ROOT / "AGENTS.md"
 START_HERE = ROOT / "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
 ONE_CLICK_HANDOFF_V2 = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
 TRIPLE_CHECK = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md"
-COST_STRESS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md"
+COST_STRESS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md"
 
 
 class ExplorationGuardrailTests(unittest.TestCase):
@@ -67,12 +67,15 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(population["secondary_separate_only"], "WARMUP_BRIDGE_EXACT")
         self.assertEqual(population["bridge_primary_population_use"], "forbidden")
         self.assertTrue(population["fixed_trade_population"])
+        self.assertEqual(self.cost_stress["registry_contract"]["authoritative_input"], "*_warmup_bridge_core_registry.csv")
+        self.assertFalse(self.cost_stress["registry_contract"]["entry_price_or_exit_price_required"])
+        self.assertEqual(self.cost_stress["time_and_execution_contract"]["bridge_execution"]["synthetic_stress_result"], "forbidden")
 
     def test_guardrails_are_referenced_by_governance_files(self) -> None:
         guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
         v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
         cost_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
-        cost_handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md"
+        cost_handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md"
         self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
         self.assertEqual(self.state["authoritative_handoff"], v2_path)
         self.assertEqual(self.state["latest_phase_handoff"], cost_handoff_path)
@@ -88,7 +91,10 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertTrue(self.action["audit_only"])
         self.assertFalse(self.action["live_ready"])
         self.assertEqual(self.action["mode"], "bat")
-        self.assertIn("cost_stress", self.action["runner"])
+        self.assertEqual(
+            self.action["runner"],
+            "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
+        )
 
     def test_one_click_and_cost_stress_are_fail_closed(self) -> None:
         self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.handoff)
@@ -104,8 +110,9 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(self.cost_stress["scenario_grid"]["fixed_slippage_points_per_side"], [0, 5, 10, 20])
         self.assertTrue(self.cost_stress["scenario_grid"]["grid_frozen_before_execution"])
         self.assertEqual(self.cost_stress["scenario_grid"]["post_result_grid_change"], "forbidden")
-        self.assertIn("Baseline", self.cost_handoff)
-        self.assertIn("nonzero exit code", self.cost_handoff)
+        self.assertIn("INPUT_SCHEMA_ASSUMPTION_BUG", self.cost_handoff)
+        self.assertIn("warmup_bridge_core_registry.csv", self.cost_handoff)
+        self.assertIn("windows/run_cost_stress_raw_reconstructed.bat", self.cost_handoff)
         self.assertFalse(self.action["automatic_next_phase"])
         self.assertFalse(self.action["automatic_promotion"])
         self.assertFalse(self.action["automatic_registration"])
