@@ -38,6 +38,7 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v3.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v4.py
           python -m py_compile scripts/gold_ml_v1/replay/replay_v4_entry.py
+          python -m py_compile scripts/gold_ml_v1/replay/replay_v5_entry.py
           python -m py_compile scripts/gold_ml_v1/replay/goldsharp_live_source_preflight.py
           python -m py_compile scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py
 
