@@ -1,0 +1,31 @@
+{
+  "record_id": "GML1-BATCH023-WARMUP-BRIDGE-PASS-20260625",
+  "status": "WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_AUDIT_ONLY",
+  "audit_class": "SEPARATELY_VERSIONED_WARMUP_BRIDGE_NOT_RAW_ONLY_PARITY",
+  "raw_time_contract": "CSV time is bar-open time in MT5 server time",
+  "raw_hashes": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "reports": [
+    {"candidate_id":"GML1-PROV-007","expected_rows":154,"raw_reconstructed_rows":153,"warmup_bridge_rows":1,"bridge_rows":154,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-PROV-008","expected_rows":169,"raw_reconstructed_rows":168,"warmup_bridge_rows":1,"bridge_rows":169,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-WATCH-022-B","expected_rows":135,"raw_reconstructed_rows":134,"warmup_bridge_rows":1,"bridge_rows":135,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-PROV-010","expected_rows":254,"raw_reconstructed_rows":242,"warmup_bridge_rows":12,"bridge_rows":254,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-PROV-015","expected_rows":225,"raw_reconstructed_rows":213,"warmup_bridge_rows":12,"bridge_rows":225,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-PROV-020","expected_rows":204,"raw_reconstructed_rows":193,"warmup_bridge_rows":11,"bridge_rows":204,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-WATCH-021-A","expected_rows":210,"raw_reconstructed_rows":200,"warmup_bridge_rows":10,"bridge_rows":210,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-WATCH-021-B","expected_rows":207,"raw_reconstructed_rows":197,"warmup_bridge_rows":10,"bridge_rows":207,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true},
+    {"candidate_id":"GML1-WATCH-021-C","expected_rows":196,"raw_reconstructed_rows":187,"warmup_bridge_rows":9,"bridge_rows":196,"missing_or_extra":0,"entry_mismatches":0,"exit_mismatches":0,"r_value_mismatches":0,"direction_mismatches":0,"pass":true}
+  ],
+  "bridge_policy": {
+    "RAW_RECONSTRUCTED": "Rows reproduced from the uploaded 2023-2026 candles under the recovered lineage-specific calculation contracts.",
+    "WARMUP_BRIDGE_EXACT": "January 2023 rows that require pre-2023 indicator state absent from the supplied raw set.",
+    "live_use": "WARMUP_BRIDGE_EXACT rows are historical audit rows only and must never emit live signals."
+  },
+  "next": "COST_STRESS_ON_RAW_RECONSTRUCTED_ROWS_WITH_BRIDGE_ROWS_REPORTED_SEPARATELY",
+  "execution_switches": {"audit_only":true,"live_ready":false,"final_signal":false,"mt5_order":false,"discord":false,"ai_api":false,"live_hook":false}
+}
