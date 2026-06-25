@@ -1,10 +1,21 @@
 {
   "record_id": "GML1-EXPLORATION-BATCH024-CI-PASS-20260625",
   "status": "PASS",
-  "validation_pr": 32,
-  "validation_head_commit": "9015989c600ea1b693fa5226c726930b3c553b03",
-  "workflow_run_id": 28167936911,
-  "job_id": 83424511552,
+  "implementation_validation": {
+    "validation_pr": 32,
+    "validation_head_commit": "9015989c600ea1b693fa5226c726930b3c553b03",
+    "workflow_run_id": 28167936911,
+    "job_id": 83424511552,
+    "validation_pr_merged": false
+  },
+  "final_action_state_validation": {
+    "validated_main_commit": "7901b4ea15aeea2f363b42fd7f24a0c2892b63ef",
+    "validation_pr": 34,
+    "validation_head_commit": "2ff603c6be11aff97624b9c1df06429cd9b62de5",
+    "workflow_run_id": 28168305988,
+    "job_id": 83425751893,
+    "validation_pr_merged": false
+  },
   "validated_steps": {
     "compile_tools": "PASS",
     "governance_guardrails": "PASS",
@@ -14,8 +25,7 @@
     "stateful_prospective_monitor": "PASS",
     "batch024_exploration": "PASS"
   },
-  "validation_pr_merged": false,
-  "production_changes_from_validation_branch": false,
+  "production_changes_from_validation_branches": false,
   "attempted_cells": 36,
   "existing_frozen_nine_modified": false,
   "audit_only": true,
