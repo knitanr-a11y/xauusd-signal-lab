@@ -4,7 +4,7 @@ Repository: `knitanr-a11y/xauusd-signal-lab`
 
 Current status:
 
-`GOLD_ML_V1_023_FRESH_PROSPECTIVE_CI_PASS_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
+`GOLD_ML_V1_024_STATEFUL_PROSPECTIVE_MONITOR_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
 Read `AGENTS.md` first, then follow its mandatory read order exactly.
 
@@ -19,31 +19,32 @@ Authoritative workflow governance:
 
 Latest operational continuation:
 
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_CI_PASS_USER_RUN_NEXT_20260625.md`
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_STATEFUL_PROSPECTIVE_MONITOR_CI_PASS_USER_RUN_NEXT_20260625.md`
 
 Verified records:
 
 - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
-- `config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json`
+- `config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json`
+- `config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json`
 
 Completed results:
 
 - Batch023 warmup bridge: PASS 9/9 with zero core mismatch
-- cost stress: RAW baseline parity 1687
-- frozen cost-stress gate: PASS=9, FAIL=0
-- fresh prospective implementation CI: all audit steps PASS
+- cost stress: RAW baseline parity 1687; PASS=9, FAIL=0
+- first fresh prospective run: PASS, `NO_CANDIDATE_YET`, candidate rows 0
+- stateful monitoring implementation and tests: PASS
 
-Fresh prospective contract:
+Current monitoring contract:
 
-- `config/gold_ml_v1/fresh_prospective_confirmation_20260625.json`
-- decisions strictly after `2026-06-23 18:15:00` MT5 server close
-- closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, `goldsharp_d1.csv`
-- candidate rules and nine IDs frozen
-- no future exit information in candidate generation
-- unresolved candidates preserved
-- suppressed parent events recorded
-- `NO_CANDIDATE_YET` is valid
-- no retuning or prospective performance gate
+- `config/gold_ml_v1/prospective_monitoring_20260625.json`
+- fixed cutoff: strictly after `2026-06-23 18:15:00` MT5 server close
+- frozen nine candidate IDs and rules
+- closed goldsharp M1/M15/H1/H4/D1 files only
+- cumulative candidate key: `candidate_id + decision_close_time`
+- unresolved candidates may only remain unresolved or become resolved
+- resolved result rewrites, candidate disappearance, duplicate keys, source-history mutation and truncation fail closed
+- transactional ledger update with backups and per-run snapshots
+- no retuning, candidate exploration, notification or order
 
 User action:
 
@@ -51,12 +52,14 @@ User action:
 2. Double-click repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
 3. Drag the selected file into ChatGPT:
 
-`outputs/gold_ml_v1/fresh_prospective_confirmation/UPLOAD_THIS_GOLD_ML_V1.txt`
+`outputs/gold_ml_v1/prospective_monitoring/UPLOAD_THIS_GOLD_ML_V1.txt`
 
 The internal phase BAT is:
 
-`scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat`
+`scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat`
 
 Do not run the internal BAT directly. The root launcher supplies its required paths.
+
+This currently performs one monitoring cycle per root-BAT execution. No background scheduled task is installed.
 
 Audit-only remains active. All exploration, registration, promotion and execution switches remain off.
