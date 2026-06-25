@@ -16,8 +16,9 @@ OUTPUT_DIR = Path("outputs/gold_ml_v1/next_action")
 STATUS_FILE = OUTPUT_DIR / "LATEST_NEXT_ACTION.txt"
 CONSOLE_LOG_FILE = OUTPUT_DIR / "FULL_CONSOLE_LOG.txt"
 PASTE_ME_OUTPUT_FILE = OUTPUT_DIR / "PASTE_ME_GOLD_ML_V1.txt"
-COST_OUTPUT_DIR = Path("outputs/gold_ml_v1/cost_stress_raw_reconstructed")
-UPLOAD_FILE = COST_OUTPUT_DIR / "UPLOAD_THIS_GOLD_ML_V1.txt"
+CURRENT_UPLOAD_PATH_FILE = OUTPUT_DIR / "CURRENT_UPLOAD_PATH.txt"
+DEFAULT_UPLOAD_DIR = Path("outputs/gold_ml_v1/next_action")
+DEFAULT_UPLOAD_FILENAME = "UPLOAD_THIS_GOLD_ML_V1.txt"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -76,6 +77,11 @@ def resolve_existing_fallback(value: str, mapping: dict[str, str]) -> str:
     return options[0]
 
 
+def resolve_repo_path(repo_root: Path, value: str, mapping: dict[str, str]) -> Path:
+    path = Path(expand(value, mapping))
+    return path if path.is_absolute() else repo_root / path
+
+
 def write_status(repo_root: Path, lines: list[str]) -> Path:
     output_dir = repo_root / OUTPUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -105,27 +111,44 @@ def tail_text(path: Path, maximum_lines: int) -> list[str]:
     return lines
 
 
+def upload_contract(
+    repo_root: Path,
+    config: dict[str, Any] | None,
+    mapping: dict[str, str],
+) -> tuple[Path, list[tuple[str, Path, int]]]:
+    config = config or {}
+    output_dir_value = str(config.get("upload_output_dir", DEFAULT_UPLOAD_DIR))
+    upload_dir = resolve_repo_path(repo_root, output_dir_value, mapping)
+    upload_filename = str(config.get("upload_filename", DEFAULT_UPLOAD_FILENAME))
+    upload_path = upload_dir / upload_filename
+
+    sections: list[tuple[str, Path, int]] = [
+        ("NEXT ACTION STATUS", repo_root / STATUS_FILE, 80),
+        ("CAPTURED CONSOLE OUTPUT", repo_root / CONSOLE_LOG_FILE, 140),
+    ]
+    configured_sections = config.get("upload_sections", [])
+    if isinstance(configured_sections, list):
+        for item in configured_sections:
+            if not isinstance(item, dict) or "path" not in item:
+                continue
+            title = str(item.get("title", "PHASE OUTPUT"))
+            path = resolve_repo_path(repo_root, str(item["path"]), mapping)
+            maximum_lines = int(item.get("max_lines", 180))
+            sections.append((title, path, maximum_lines))
+    return upload_path, sections
+
+
 def write_upload_file(
     repo_root: Path,
     exit_code: int,
     action_id: str = "UNKNOWN",
     runner: str = "",
     error: str = "",
+    config: dict[str, Any] | None = None,
+    mapping: dict[str, str] | None = None,
 ) -> Path:
-    sections: list[tuple[str, Path, int]] = [
-        ("NEXT ACTION STATUS", repo_root / STATUS_FILE, 80),
-        ("CAPTURED CONSOLE OUTPUT", repo_root / CONSOLE_LOG_FILE, 140),
-        (
-            "COST STRESS LATEST SUMMARY",
-            repo_root / COST_OUTPUT_DIR / "LATEST_RUN_SUMMARY.txt",
-            180,
-        ),
-        (
-            "COST STRESS ERROR TRACE",
-            repo_root / COST_OUTPUT_DIR / "COST_STRESS_RUN_ERROR.txt",
-            140,
-        ),
-    ]
+    mapping = mapping or placeholders(repo_root, load_local_overrides(repo_root))
+    upload_path, sections = upload_contract(repo_root, config, mapping)
     lines = [
         "GOLD_ML_V1 UPLOAD FILE",
         "Upload this file directly to ChatGPT.",
@@ -135,6 +158,7 @@ def write_upload_file(
         f"runner={runner}",
         f"error={error}",
         f"repo_root={repo_root}",
+        f"upload_path={upload_path}",
         "",
     ]
     for title, path, limit in sections:
@@ -150,13 +174,14 @@ def write_upload_file(
         )
     text = "\n".join(lines).rstrip() + "\n"
     next_output_dir = repo_root / OUTPUT_DIR
-    cost_output_dir = repo_root / COST_OUTPUT_DIR
     next_output_dir.mkdir(parents=True, exist_ok=True)
-    cost_output_dir.mkdir(parents=True, exist_ok=True)
-    next_copy = repo_root / PASTE_ME_OUTPUT_FILE
-    upload_path = repo_root / UPLOAD_FILE
-    next_copy.write_text(text, encoding="utf-8")
+    upload_path.parent.mkdir(parents=True, exist_ok=True)
+    compatibility_copy = repo_root / PASTE_ME_OUTPUT_FILE
+    compatibility_copy.write_text(text, encoding="utf-8")
     upload_path.write_text(text, encoding="utf-8")
+    (repo_root / CURRENT_UPLOAD_PATH_FILE).write_text(
+        str(upload_path.resolve()) + "\n", encoding="utf-8"
+    )
     return upload_path
 
 
@@ -228,7 +253,13 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
         lines = header + ["status=PASS", "exit_code=0", f"message={message}"]
         write_status(repo_root, lines)
         write_console_log(repo_root, message + "\n")
-        upload_path = write_upload_file(repo_root, 0, action_id=action_id)
+        upload_path = write_upload_file(
+            repo_root,
+            0,
+            action_id=action_id,
+            config=config,
+            mapping=mapping,
+        )
         print(f"UPLOAD_FILE: {upload_path}")
         return 0
 
@@ -237,9 +268,7 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
 
     required = config.get("required_paths", [])
     resolved_paths = validate_required_paths(required, mapping)
-    runner = Path(expand(str(config["runner"]), mapping))
-    if not runner.is_absolute():
-        runner = repo_root / runner
+    runner = resolve_repo_path(repo_root, str(config["runner"]), mapping)
     if not runner.exists():
         raise FileNotFoundError(f"Runner BAT not found: {runner}")
 
@@ -266,6 +295,8 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
         completed_return_code,
         action_id=action_id,
         runner=str(runner),
+        config=config,
+        mapping=mapping,
     )
     print(f"UPLOAD_FILE: {upload_path}")
     return completed_return_code
@@ -277,6 +308,7 @@ def main() -> int:
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
     config: dict[str, Any] = {}
+    mapping: dict[str, str] | None = None
     try:
         config = load_json(repo_root / ACTION_CONFIG)
         return run_action(repo_root, config)
@@ -295,12 +327,24 @@ def main() -> int:
                 f"error={error}",
             ],
         )
+        try:
+            mapping = placeholders(repo_root, load_local_overrides(repo_root))
+        except Exception:
+            mapping = {
+                "REPO_ROOT": str(repo_root),
+                "USER_HOME": str(Path.home()),
+                "MQL5_FILES": "",
+                "RAW_HISTORY_DIR": "",
+                "BATCH023_ZIP": "",
+            }
         upload_path = write_upload_file(
             repo_root,
             4,
             action_id=str(config.get("action_id", "UNKNOWN")),
             runner=str(config.get("runner", "")),
             error=error,
+            config=config,
+            mapping=mapping,
         )
         print(f"UPLOAD_FILE: {upload_path}", file=sys.stderr)
         return 4
