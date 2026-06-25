@@ -1,0 +1,59 @@
+{
+  "correction_id": "GML1-BATCH023-REPLAY-CORRECTION-V2-20260625",
+  "status": "GITHUB_FIX_COMMITTED_LOCAL_RERUN_REQUIRED",
+  "trigger": {
+    "registry_parity": "PASS",
+    "historical_replay": "FAIL",
+    "reported_counts": {
+      "GML1-PROV-007": {"expected": 154, "actual": 65},
+      "GML1-PROV-008": {"expected": 169, "actual": 62},
+      "GML1-WATCH-022-B": {"expected": 135, "actual": 61},
+      "GML1-PROV-010": {"expected": 254, "actual": 236},
+      "GML1-PROV-015": {"expected": 225, "actual": 206},
+      "GML1-PROV-020": {"expected": 204, "actual": 186},
+      "GML1-WATCH-021-A": {"expected": 210, "actual": 194},
+      "GML1-WATCH-021-B": {"expected": 207, "actual": 191},
+      "GML1-WATCH-021-C": {"expected": 196, "actual": 181}
+    }
+  },
+  "root_causes": [
+    {
+      "id": "ATR_METHOD_MISMATCH",
+      "incorrect": "Wilder recursive ATR",
+      "correct": "simple arithmetic rolling mean of the latest 14 true ranges",
+      "evidence": "For all 151 TP/SL rows in the exact PROV-007 registry, stop_distance * 14 * 100 is integer within floating tolerance."
+    },
+    {
+      "id": "MISSING_PREHISTORY_WARMUP",
+      "incorrect": "historical 2023-2026 files only for all indicator history",
+      "correct": "historical rows are the decision/trade window; exact-overlap-verified goldsharp rows strictly before historical start may supply indicator warmup",
+      "impact": "D1 RCI18 and D1 tick-volume ratio50 cannot exist at early January 2023 from the historical D1 file alone."
+    },
+    {
+      "id": "EVENT_ELIGIBILITY_ORDER",
+      "incorrect": "detect H1 event before exact M1 entry and complete-horizon eligibility filtering",
+      "correct": "filter eligible decision rows first, then detect event/onset"
+    }
+  ],
+  "corrected_implementation": {
+    "python": "scripts/gold_ml_v1/replay/nine_candidate_local_replay_v2.py",
+    "one_command_runner": "scripts/gold_ml_v1/replay/run_batch023_all.bat",
+    "standalone_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "output_directory": "outputs/gold_ml_v1/batch023_historical_replay_v2",
+    "parent_diagnostic": "GML1-PROV-002 must reproduce 193 trades and frozen metrics before derivatives pass"
+  },
+  "source_boundary": {
+    "historical_decision_and_trade_rows": "gold_v3_2023_2026 only",
+    "goldsharp_prehistory": "indicator warmup only",
+    "goldsharp_overlap": "must match historical exactly",
+    "goldsharp_after_historical_max_in_historical_replay": "forbidden",
+    "live_new_decision_rows": "goldsharp rows strictly after the historical maximum only"
+  },
+  "candidate_logic_changed": false,
+  "candidate_count_changed": false,
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_order": false,
+  "discord": false
+}
