@@ -9,25 +9,29 @@
    - `AGENTS.md`
    - `config/gold_ml_v1/current_state_snapshot_20260624.json`
    - `config/gold_ml_v1/next_local_action.json`
+   - `config/gold_ml_v1/exploration_guardrails_20260625.json`
    - `config/gold_ml_v1/batch023_uploaded_raw_forensic_audit_20260625.json`
    - `config/gold_ml_v1/batch023_warmup_bridge_pass_20260625.json`
    - `config/gold_ml_v1/batch023_local_warmup_bridge_implementation_20260625.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH023_WARMUP_BRIDGE_PASS_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md`
 5. Do not ask the user to repeat paths, results, or decisions already recorded there.
-6. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
-7. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals.
-8. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
-9. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
-10. The only user-facing launcher from now on is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-11. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
-12. Do not give ordinary phase users Python, PowerShell, or long command lines.
-13. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
-14. Every runner must create outputs, preserve previous output safely, print PASS/FAIL, return 0 only for PASS, and write a latest summary and error trace.
-15. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
-16. 2026 is diagnostic only and cannot be used for retuning.
-17. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
-18. Before chat length runs out, update AGENTS, current state, next action, and a dated handoff.
+6. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
+7. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, or year is forbidden.
+8. Candidate-pool silent removal is forbidden. Every candidate must remain explicitly accumulated, research-only, demoted with reason, or rejected with reason.
+9. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
+10. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
+11. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals.
+12. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
+13. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
+14. The only user-facing launcher from now on is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
+15. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
+16. Do not give ordinary phase users Python, PowerShell, or long command lines.
+17. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
+18. Every runner must create outputs, preserve previous output safely, print PASS/FAIL, return 0 only for PASS, and write a latest summary and error trace.
+19. 2026 is diagnostic only and cannot be used for retuning.
+20. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
+21. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
 
 Current status:
 
