@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 .venv/
 .venv_batch023/
+.venv_batch023_bridge/
 venv/
 
 # Local environment
