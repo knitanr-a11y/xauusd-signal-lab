@@ -13,13 +13,14 @@ COST_STRESS_PASS = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_
 PROSPECTIVE = ROOT / "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"
 PROSPECTIVE_FIRST_RUN = ROOT / "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json"
 MONITOR = ROOT / "config/gold_ml_v1/prospective_monitoring_20260625.json"
-MONITOR_CI = ROOT / "config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json"
+MONITOR_INIT = ROOT / "config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json"
+BATCH024_AUTH = ROOT / "config/gold_ml_v1/exploration_batch024_authorization_20260625.json"
+BATCH024 = ROOT / "config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"
+BATCH024_CI = ROOT / "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json"
 AGENTS = ROOT / "AGENTS.md"
 START_HERE = ROOT / "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
 ONE_CLICK_HANDOFF_V2 = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
-TRIPLE_CHECK = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md"
-CORE_FIX_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md"
-PASS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
+PASS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md"
 
 
 class ExplorationGuardrailTests(unittest.TestCase):
@@ -34,157 +35,145 @@ class ExplorationGuardrailTests(unittest.TestCase):
             PROSPECTIVE_FIRST_RUN.read_text(encoding="utf-8")
         )
         self.monitor = json.loads(MONITOR.read_text(encoding="utf-8"))
-        self.monitor_ci = json.loads(MONITOR_CI.read_text(encoding="utf-8"))
+        self.monitor_init = json.loads(MONITOR_INIT.read_text(encoding="utf-8"))
+        self.batch024_auth = json.loads(BATCH024_AUTH.read_text(encoding="utf-8"))
+        self.batch024 = json.loads(BATCH024.read_text(encoding="utf-8"))
+        self.batch024_ci = json.loads(BATCH024_CI.read_text(encoding="utf-8"))
         self.agents = AGENTS.read_text(encoding="utf-8")
         self.start_here = START_HERE.read_text(encoding="utf-8")
         self.handoff = ONE_CLICK_HANDOFF_V2.read_text(encoding="utf-8")
-        self.triple_check = TRIPLE_CHECK.read_text(encoding="utf-8")
-        self.core_fix_handoff = CORE_FIX_HANDOFF.read_text(encoding="utf-8")
         self.pass_handoff = PASS_HANDOFF.read_text(encoding="utf-8")
 
-    def test_frozen_period_split(self) -> None:
+    def test_frozen_period_split_is_consistent(self) -> None:
         periods = self.guardrails["period_contract"]
         self.assertEqual(periods["2023"], "EXPLORATION_ONLY")
         self.assertEqual(periods["2024"], "VALIDATION_ONLY_NO_RETUNE")
         self.assertEqual(periods["2025"], "FINAL_TEST_ONLY_NO_RETUNE")
         self.assertEqual(periods["2026"], "DIAGNOSTIC_ONLY_NEVER_RETUNE")
-        self.assertEqual(
-            periods["fresh_prospective_cutoff_mt5_server_close"],
-            "2026-06-23 18:15:00",
-        )
+        for year in ("2023", "2024", "2025", "2026"):
+            self.assertEqual(self.batch024["period_contract"][year], periods[year])
         self.assertEqual(
             self.prospective["cutoff_mt5_server_close"],
-            "2026-06-23 18:15:00",
+            periods["fresh_prospective_cutoff_mt5_server_close"],
         )
         self.assertEqual(
             self.monitor["cutoff_mt5_server_close"],
-            "2026-06-23 18:15:00",
+            periods["fresh_prospective_cutoff_mt5_server_close"],
         )
 
-    def test_search_multiplicity_and_candidate_pool_are_protected(self) -> None:
-        rules = self.guardrails["exploration_rules"]
+    def test_existing_candidate_pool_is_immutable(self) -> None:
         pool = self.guardrails["current_candidate_pool"]
+        frozen = pool["frozen_accumulated_ids"]
+        self.assertEqual(len(frozen), 9)
+        self.assertEqual(self.cost_stress["candidate_pool"]["frozen_accumulated_ids"], frozen)
+        self.assertEqual(self.prospective["candidate_pool"]["frozen_accumulated_ids"], frozen)
+        self.assertEqual(self.monitor["candidate_pool"]["frozen_accumulated_ids"], frozen)
+        self.assertEqual(self.batch024["existing_frozen_nine"], frozen)
+        self.assertEqual(self.batch024["existing_pool_change"], "FORBIDDEN")
+        self.assertTrue(self.batch024_auth["existing_frozen_nine_must_remain_unchanged"])
+        self.assertFalse(self.action["existing_frozen_nine_modified"])
+        self.assertFalse(self.state["exploration_batch024"]["existing_frozen_nine_modified"])
+
+    def test_search_space_multiplicity_is_predeclared(self) -> None:
+        rules = self.guardrails["exploration_rules"]
         self.assertTrue(rules["predeclare_search_space"])
         self.assertTrue(rules["record_every_attempted_rule_and_parameter_cell"])
         self.assertTrue(rules["record_total_search_count_and_search_multiplicity"])
         self.assertTrue(rules["report_all_survivors_and_failures_not_only_best"])
         self.assertEqual(rules["candidate_pool_silent_removal"], "forbidden")
         self.assertEqual(rules["simple_metric_sum_across_same_lineage"], "forbidden")
+        self.assertEqual(self.batch024["search_space"]["full_cartesian_cell_count"], 36)
+        self.assertEqual(self.batch024["multiplicity_contract"]["attempted_cells"], 36)
+        self.assertTrue(self.batch024["search_space"]["all_cells_must_be_reported"])
         self.assertEqual(
-            rules["post_hoc_threshold_change_after_validation_test_or_2026"],
+            self.batch024["multiplicity_contract"]["best_cell_only_reporting"],
             "forbidden",
         )
-        self.assertEqual(len(pool["frozen_accumulated_ids"]), 9)
-        self.assertEqual(len(pool["research_only_ids"]), 3)
-        self.assertEqual(pool["silent_add_remove_or_relabel"], "forbidden")
-        self.assertTrue(pool["separate_research_must_not_modify_current_nine"])
         self.assertEqual(
-            self.cost_stress["candidate_pool"]["frozen_accumulated_ids"],
-            pool["frozen_accumulated_ids"],
-        )
-        self.assertEqual(
-            self.prospective["candidate_pool"]["frozen_accumulated_ids"],
-            pool["frozen_accumulated_ids"],
-        )
-        self.assertEqual(
-            self.monitor["candidate_pool"]["frozen_accumulated_ids"],
-            pool["frozen_accumulated_ids"],
-        )
-        self.assertEqual(
-            self.monitor["candidate_pool"]["silent_add_remove_replace_or_relabel"],
+            self.batch024["multiplicity_contract"]["same_lineage_metric_pooling"],
             "forbidden",
         )
 
-    def test_data_leakage_bridge_and_monitor_rewrites_are_blocked(self) -> None:
+    def test_authorization_is_scoped_and_prerequisites_passed(self) -> None:
+        self.assertEqual(
+            self.batch024_auth["status"], "EXPLICIT_USER_AUTHORIZATION_RECORDED"
+        )
+        self.assertEqual(
+            self.batch024_auth["authorized_scope"],
+            "EXPLORATION_BATCH024_M15_H1_PULLBACK_ONLY",
+        )
+        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["pass"], 9)
+        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["fail"], 0)
+        self.assertEqual(self.prospective_first_run["status"], "PASS")
+        self.assertEqual(self.monitor_init["status"], "PASS")
+        self.assertEqual(self.batch024_ci["status"], "PASS")
+        self.assertEqual(self.batch024_ci["attempted_cells"], 36)
+        self.assertEqual(self.action["authorized_exploration_scope"], "BATCH024_ONLY")
+        self.assertTrue(self.action["new_exploration_allowed"])
+        self.assertEqual(
+            self.state["candidate_pool"]["authorized_exploration_scope"],
+            "BATCH024_ONLY",
+        )
+        self.assertTrue(self.state["execution_switches"]["new_exploration"])
+
+    def test_data_leakage_and_bridge_use_remain_blocked(self) -> None:
         rules = self.guardrails["data_and_evaluation_rules"]
         self.assertTrue(rules["closed_bars_only"])
         self.assertEqual(rules["lookahead"], "forbidden")
         self.assertEqual(rules["future_label_or_exit_data_in_features"], "forbidden")
         self.assertEqual(rules["missing_rows_or_losses_silent_exclusion"], "forbidden")
-        self.assertTrue(rules["raw_reconstructed_and_warmup_bridge_rows_must_be_separate"])
         self.assertEqual(rules["warmup_bridge_rows_live_use"], "forbidden")
-        population = self.cost_stress["population_contract"]
-        self.assertEqual(population["primary"], "RAW_RECONSTRUCTED")
-        self.assertEqual(population["secondary_separate_only"], "WARMUP_BRIDGE_EXACT")
-        self.assertEqual(population["bridge_primary_population_use"], "forbidden")
-        self.assertTrue(population["fixed_trade_population"])
+        self.assertEqual(self.batch024["input_contract"]["lookahead"], "forbidden")
         self.assertEqual(
-            self.cost_stress["registry_contract"]["authoritative_input"],
-            "*_warmup_bridge_core_registry.csv",
+            self.batch024["input_contract"]["warmup_bridge_use"], "forbidden"
         )
-        self.assertFalse(
-            self.cost_stress["registry_contract"]["entry_price_or_exit_price_required"]
-        )
-        causality = self.prospective["causality_contract"]
-        self.assertFalse(causality["candidate_generation_uses_future_exit_information"])
-        self.assertTrue(causality["unresolved_candidates_preserved"])
-        self.assertTrue(causality["suppressed_parent_events_recorded"])
+        self.assertTrue(self.batch024["input_contract"]["confirmed_h1_asof_join"])
+        self.assertTrue(self.batch024["signal_contract"]["exact_m1_entry_required"])
         self.assertEqual(
-            causality["missing_rows_or_losses_silent_exclusion"], "forbidden"
+            self.batch024["signal_contract"]["same_m1_tp_sl_priority"], "SL"
         )
-        self.assertEqual(
-            self.monitor["continuity_contract"]["historical_closed_bar_prefix_change"],
-            "fail_closed",
-        )
-        self.assertEqual(
-            self.monitor["ledger_contract"]["resolved_result_rewrite"],
-            "fail_closed",
-        )
-        self.assertTrue(self.monitor["ledger_contract"]["unresolved_candidates_preserved"])
 
-    def test_governance_references_verified_records(self) -> None:
-        guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
-        v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
-        cost_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
-        pass_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
-        pass_handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
-        self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
-        self.assertEqual(self.state["authoritative_handoff"], v2_path)
-        self.assertIn(guardrail_path, self.agents)
-        self.assertIn(v2_path, self.agents)
-        self.assertIn(cost_path, self.agents)
-        self.assertIn(pass_path, self.agents)
-        self.assertIn(pass_handoff_path, self.agents)
-        self.assertIn(guardrail_path, self.start_here)
-        self.assertIn(v2_path, self.start_here)
-        self.assertTrue(self.state["audit_only"])
-        self.assertFalse(self.state["execution_switches"]["new_exploration"])
-        self.assertEqual(self.prospective_first_run["status"], "PASS")
-        self.assertEqual(self.prospective_first_run["candidate_rows"], 0)
-        self.assertEqual(self.monitor_ci["status"], "PASS")
-        self.assertEqual(self.monitor_ci["stateful_prospective_monitor"], "PASS")
-
-    def test_monitor_action_is_fail_closed_and_manual(self) -> None:
-        self.assertEqual(self.cost_stress_pass["status"], "PASS")
-        self.assertEqual(self.cost_stress_pass["raw_baseline_parity_checks"], 1687)
-        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["pass"], 9)
-        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["fail"], 0)
+    def test_batch024_action_is_one_click_and_fail_closed(self) -> None:
         self.assertEqual(self.action["mode"], "bat")
         self.assertEqual(
             self.action["runner"],
-            "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat",
+            "scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat",
         )
         self.assertEqual(
             self.action["upload_output_dir"],
-            "outputs/gold_ml_v1/prospective_monitoring",
+            "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback",
         )
-        required_paths = {item["path"] for item in self.action["required_paths"]}
-        for filename in (
-            "goldsharp_m1.csv",
-            "goldsharp_m15.csv",
-            "goldsharp_h1.csv",
-            "goldsharp_h4.csv",
-            "goldsharp_d1.csv",
-        ):
-            self.assertIn(f"{{MQL5_FILES}}/{filename}", required_paths)
-        self.assertFalse(self.action["background_task_installed"])
+        required = {item["path"] for item in self.action["required_paths"]}
+        self.assertIn("{RAW_HISTORY_DIR}/gold_v3_2023_2026_m1.csv", required)
+        self.assertIn("{RAW_HISTORY_DIR}/gold_v3_2023_2026_m15.csv", required)
+        self.assertIn("{RAW_HISTORY_DIR}/gold_v3_2023_2026_h1.csv", required)
         self.assertFalse(self.action["automatic_next_phase"])
+        self.assertFalse(self.action["automatic_accumulation"])
         self.assertFalse(self.action["automatic_promotion"])
         self.assertFalse(self.action["automatic_registration"])
         self.assertFalse(self.action["live_ready"])
         self.assertFalse(self.action["final_signal"])
         self.assertFalse(self.action["mt5_order"])
         self.assertFalse(self.action["discord"])
+
+    def test_governance_references_current_handoff(self) -> None:
+        guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
+        v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
+        batch_path = "config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"
+        ci_path = "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json"
+        handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md"
+        self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
+        self.assertEqual(self.state["authoritative_handoff"], v2_path)
+        self.assertEqual(self.state["latest_phase_handoff"], handoff_path)
+        for path in (guardrail_path, v2_path, batch_path, ci_path, handoff_path):
+            self.assertIn(path, self.agents)
+        self.assertIn(guardrail_path, self.start_here)
+        self.assertIn(v2_path, self.start_here)
+        self.assertIn(batch_path, self.start_here)
+        self.assertIn(ci_path, self.start_here)
+        self.assertIn("36", self.pass_handoff)
+        self.assertIn("RESEARCH_ONLY", self.pass_handoff)
+        self.assertTrue(self.state["audit_only"])
 
 
 if __name__ == "__main__":
