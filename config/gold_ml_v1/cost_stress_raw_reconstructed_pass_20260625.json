@@ -1,0 +1,51 @@
+{
+  "record_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-PASS-20260625",
+  "status": "PASS",
+  "verified_from_user_uploaded_local_output": true,
+  "uploaded_output_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
+  "generated_local": "2026-06-25T19:31:38",
+  "exit_code": 0,
+  "action_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-READY-V4-UPLOAD-FILE",
+  "runner": "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
+  "raw_baseline_parity_checks": 1687,
+  "candidate_stress_gate": {
+    "pass": 9,
+    "fail": 0,
+    "all_frozen_candidates_passed_all_12_scenarios": true
+  },
+  "frozen_scenario_grid": {
+    "spread_multipliers": [1.0, 1.5, 2.0],
+    "fixed_slippage_points_per_side": [0, 5, 10, 20],
+    "scenario_count": 12
+  },
+  "primary_population": "RAW_RECONSTRUCTED",
+  "warmup_bridge_exact": {
+    "status": "SEPARATE_EXACT_CORE_AUDIT_ONLY",
+    "stress_replay_status": "NOT_CALCULATED_AUDIT_ONLY",
+    "stress_gate_status": "NOT_ELIGIBLE_AUDIT_ONLY",
+    "blocker": "PRE_2023_INDICATOR_STATE_AND_PRICE_FIELDS_UNAVAILABLE_FOR_EXACT_COST_REPLAY",
+    "live_use": false,
+    "promotion_use": false
+  },
+  "run_error": "NONE",
+  "automatic_next_phase_performed": false,
+  "candidate_pool_changed": false,
+  "retuning_performed": false,
+  "same_lineage_metrics_pooled": false,
+  "authorization": {
+    "registration": false,
+    "promotion": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false
+  },
+  "next_required_phase": "FRESH_PROSPECTIVE_CONFIRMATION_AFTER_2026_06_23_18_15_00_MT5_SERVER_CLOSE",
+  "notes": [
+    "The uploaded summary intentionally contained a bounded tail; the authoritative top-level gate result was PASS=9 FAIL=0.",
+    "Candidate-level FAIL results were zero and no rescue or post-result grid change was performed.",
+    "This PASS does not authorize registration, promotion, prospective use or live execution."
+  ]
+}
