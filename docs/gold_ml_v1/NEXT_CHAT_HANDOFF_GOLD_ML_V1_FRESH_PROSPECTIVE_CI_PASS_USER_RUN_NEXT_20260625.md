@@ -23,7 +23,7 @@ Do not rerun cost stress.
 
 ## Fresh prospective implementation
 
-Production implementation already exists on main:
+Production implementation exists on main:
 
 - `scripts/gold_ml_v1/prospective/fresh_prospective_engine.py`
 - `scripts/gold_ml_v1/prospective/run_fresh_prospective_confirmation.py`
@@ -39,25 +39,28 @@ The root launcher calls the dedicated internal phase BAT with the MQL5 Files dir
 
 ## CI verification
 
-Machine-readable CI record:
+Machine-readable record:
 
 `config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json`
 
-Validated production main commit:
+Implementation validation:
 
-`8cdb858f56288a5cc6e3ad4a49fa25beaf8a6f3a`
-
-Temporary validation PR:
-
-- PR: 26
-- validation head: `3fb6638701da86d4145727d1fd5367cd4a91d4ee`
-- workflow: `GOLD_ML_V1 Audit Tests`
+- validated main commit: `8cdb858f56288a5cc6e3ad4a49fa25beaf8a6f3a`
+- temporary PR: 26
 - workflow run: `28165292690`
 - job: `83415630145`
 - PR merged: no
-- production changes from validation branch: none
 
-All relevant steps passed:
+Final current-state validation after status and governance updates:
+
+- validated main commit: `3ac2634dc76b6847583517e4afdf05fbbd866229`
+- temporary PR: 29
+- validation head: `8e7b126d76fd9088a58c58b2ceb4f2cf568c5f55`
+- workflow run: `28165730901`
+- job: `83417103397`
+- PR merged: no
+
+All relevant steps passed in the final validation:
 
 - prospective and cost-stress Python compilation
 - governance guardrails
@@ -65,7 +68,7 @@ All relevant steps passed:
 - cost-stress core-registry correction
 - fresh prospective reader, cutoff, SL priority, unresolved handling and frozen-nine tests
 
-The validation branch added only a temporary test-path trigger file. It was closed without merge.
+The validation branches added only temporary test-path trigger files. They were closed without merge and supplied no production changes.
 
 ## Prospective contract
 
