@@ -8,6 +8,11 @@ Current status:
 
 Read `AGENTS.md` first, then follow its mandatory read order exactly.
 
+Mandatory exploration controls:
+
+- `config/gold_ml_v1/exploration_guardrails_20260625.json`
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md`
+
 Authoritative workflow governance:
 
 - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md`
