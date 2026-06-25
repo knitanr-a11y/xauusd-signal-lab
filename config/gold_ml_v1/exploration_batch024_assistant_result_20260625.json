@@ -1,0 +1,55 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-ASSISTANT-RESULT-20260625",
+  "status": "PASS_ZERO_SURVIVORS_VALID_COMPLETED_EXPLORATION",
+  "assistant_side_execution": true,
+  "audit_only": true,
+  "time_contract": {
+    "csv_time": "MT5 server naive bar-open time",
+    "M1_close": "time + 1 minute",
+    "M15_close": "time + 15 minutes",
+    "H1_close": "time + 1 hour",
+    "decision_timestamp": "M15 bar close",
+    "entry_timestamp": "exact M1 bar open equal to decision timestamp"
+  },
+  "input_hashes": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"
+  },
+  "input_rows": {"M1": 1225431, "M15": 81781, "H1": 20459},
+  "attempted_cells": 36,
+  "year_metric_rows": 144,
+  "signal_audit_rows": 25327,
+  "survivor_count": 0,
+  "survivor_ids": [],
+  "gate_counts": {
+    "2023": {"PASS": 4, "FAIL": 32},
+    "2024": {"PASS": 17, "FAIL": 19},
+    "2025": {"PASS": 15, "FAIL": 21}
+  },
+  "canonical_output_hashes": {
+    "exploration_attempt_registry.csv": "52f7ac00fbdfcd1007e62a5f9c59760b8e854214c9330d340aa0fa317d318c0a",
+    "exploration_year_metrics.csv": "715d2d933e21b826957ac3e4e8dbd9958f70b61af3f7e6c0ba5d9efa21f9f81b",
+    "exploration_trade_registry.csv": "8b3e71e65f1dce3fa942ee13796ee2ed55a045142621fd38e796ad464fc8b558",
+    "exploration_survivors.csv": "1e58e761ff11687c9ae8fb782270721ccc1674b622f81d2b11ecfd24ad8bfe47"
+  },
+  "determinism_replay": {
+    "independent_replay_count": 2,
+    "all_outputs_equal": true
+  },
+  "2023_pass_ids": [
+    "GML1-EXP024-S-G000-R40-ER",
+    "GML1-EXP024-S-G015-R40-ER",
+    "GML1-EXP024-S-G030-R40-ER",
+    "GML1-EXP024-L-G030-R35-RC"
+  ],
+  "interpretation": {
+    "zero_survivors_is_valid": true,
+    "rescue_tuning_performed": false,
+    "post_result_grid_change": false,
+    "existing_frozen_nine_modified": false,
+    "automatic_accumulation": false,
+    "automatic_promotion": false
+  },
+  "assistant_result_archive_sha256": "06285b4bff3e5284d868e8ae5305319b8c9fdb52e48f7e225c38daffa3c48282"
+}
