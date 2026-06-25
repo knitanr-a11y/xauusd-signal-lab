@@ -1,0 +1,26 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-RAW-PACKAGE-CI-PASS-20260625",
+  "status": "PASS",
+  "validated_main_commit": "fb2088b1307b63deef30db2a9469152d90c9254e",
+  "validation_pr": 36,
+  "validation_head_commit": "6fbd6eaf8aa432c0812b136c10d79252a5673e21",
+  "workflow_run_id": 28169608726,
+  "job_id": 83430119734,
+  "validation_pr_merged": false,
+  "validated_steps": {
+    "compile_tools": "PASS",
+    "governance_guardrails": "PASS",
+    "cost_stress_contract": "PASS",
+    "cost_stress_core_registry": "PASS",
+    "fresh_prospective_engine": "PASS",
+    "stateful_prospective_monitor": "PASS",
+    "batch024_exploration_engine": "PASS",
+    "batch024_raw_package_transfer": "PASS"
+  },
+  "local_action_role": "PACKAGE_FROZEN_RAW_INPUT_ONLY",
+  "local_exploration_executed": false,
+  "assistant_exploration_required_before_local_reproduction": true,
+  "existing_frozen_nine_modified": false,
+  "audit_only": true,
+  "live_ready": false
+}
