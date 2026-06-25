@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "action_id": "GML1-BATCH023-WARMUP-BRIDGE-COMPLETE",
+  "mode": "status_only",
+  "title": "GOLD_ML_V1 Batch023 warmup bridge is complete",
+  "message": "9/9 candidate parity is PASS. Do not rerun V1-V5 or the old Batch023 replay BAT files. The next chat must implement the cost-stress step, update this next_local_action.json to mode=bat, and then instruct the user only to Pull and double-click RUN_GOLD_ML_V1_NEXT.bat.",
+  "current_status": "GOLD_ML_V1_016_BATCH023_WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_AUDIT_ONLY",
+  "next_phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_SEPARATELY_THEN_FRESH_PROSPECTIVE",
+  "audit_only": true,
+  "live_ready": false
+}
