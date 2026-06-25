@@ -1,6 +1,6 @@
 {
   "record_id": "GML1-EXPLORATION-GUARDRAILS-20260625",
-  "status": "FROZEN_AUDIT_ONLY",
+  "status": "FROZEN_AUDIT_ONLY_TRIPLE_REVIEWED",
   "time_contract": {
     "raw_csv_time": "bar-open time",
     "bar_availability": "bar-open time plus timeframe duration",
@@ -14,6 +14,27 @@
     "2025": "FINAL_TEST_ONLY_NO_RETUNE",
     "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE",
     "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00"
+  },
+  "current_candidate_pool": {
+    "frozen_accumulated_ids": [
+      "GML1-PROV-007",
+      "GML1-PROV-008",
+      "GML1-WATCH-022-B",
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ],
+    "research_only_ids": [
+      "GML1-WATCH-014-A",
+      "GML1-WATCH-022-A",
+      "GML1-WATCH-023-A"
+    ],
+    "silent_add_remove_or_relabel": "forbidden",
+    "new_exploration_before_cost_stress_and_fresh_confirmation": "forbidden_unless_user_explicitly_authorizes_a_separate_audit_only_branch",
+    "separate_research_must_not_modify_current_nine": true
   },
   "exploration_rules": {
     "predeclare_search_space": true,
