@@ -4,7 +4,7 @@ Repository: `knitanr-a11y/xauusd-signal-lab`
 
 Current status:
 
-`GOLD_ML_V1_025_STATEFUL_PROSPECTIVE_MONITOR_INITIALIZED_OPERATIONAL_AUDIT_ONLY`
+`GOLD_ML_V1_026_EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
 Read `AGENTS.md` first, then follow its mandatory read order exactly.
 
@@ -19,51 +19,47 @@ Authoritative workflow governance:
 
 Latest operational continuation:
 
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_MONITOR_INITIALIZED_CONTINUE_CYCLES_20260625.md`
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md`
 
-Verified records:
+Verified prerequisite records:
 
 - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
 - `config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json`
-- `config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json`
 - `config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json`
 
-Completed results:
+Batch024 records:
 
-- Batch023 warmup bridge: PASS 9/9 with zero core mismatch
-- cost stress: RAW baseline parity 1687; PASS=9, FAIL=0
-- first fresh prospective run: PASS, `NO_CANDIDATE_YET`, candidate rows 0
-- stateful monitoring implementation and tests: PASS
-- first cumulative monitoring cycle: PASS, `MONITOR_INITIALIZED`, run count 1
-- latest closed M1 baseline: `2026-06-25 14:36:00`
-- cumulative candidates: 0; parent events: 0; error: none
+- `config/gold_ml_v1/exploration_batch024_authorization_20260625.json`
+- `config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json`
+- `config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json`
 
-Current monitoring contract:
+Current exploration contract:
 
-- `config/gold_ml_v1/prospective_monitoring_20260625.json`
-- fixed cutoff: strictly after `2026-06-23 18:15:00` MT5 server close
-- frozen nine candidate IDs and rules
-- closed goldsharp M1/M15/H1/H4/D1 files only
-- cumulative candidate key: `candidate_id + decision_close_time`
-- unresolved candidates may only remain unresolved or become resolved
-- resolved result rewrites, candidate disappearance, duplicate keys, source-history mutation and truncation fail closed
-- transactional ledger update with backups and per-run snapshots
-- no retuning, candidate exploration, notification or order
+- new lineage: `M15_H1_TREND_PULLBACK_LINEAGE_EXP024`
+- existing frozen nine remain unchanged
+- 36 predeclared cells, all reported
+- 2023 exploration only
+- 2024 validation only with no retune
+- 2025 final test only with no retune
+- 2026 diagnostic only and never retune
+- all-gate-pass cells remain `RESEARCH_ONLY`
+- no automatic accumulation or promotion
+- no bridge rows, lookahead, best-cell-only reporting or same-lineage metric pooling
 
-Continuing operation:
+User action:
 
-1. Pull `main` in GitHub Desktop before the next cycle.
-2. After newer closed bars are available, double-click repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
+1. Pull `main` in GitHub Desktop.
+2. Double-click repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
 3. Drag the selected file into ChatGPT:
 
-`outputs/gold_ml_v1/prospective_monitoring/UPLOAD_THIS_GOLD_ML_V1.txt`
+`outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/UPLOAD_THIS_GOLD_ML_V1.txt`
 
 The internal phase BAT is:
 
-`scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat`
+`scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat`
 
-Do not run the internal BAT directly. The root launcher supplies its required paths.
+Do not run the internal BAT directly. The root launcher supplies the frozen raw-history path and config.
 
-This performs one monitoring cycle per root-BAT execution. No background scheduled task is installed.
+The existing stateful monitoring ledger remains preserved but is not the current root-BAT action.
 
-Audit-only remains active. All exploration, registration, promotion and execution switches remain off.
+Audit-only remains active. All live, order, notification, promotion and registration switches remain off.
