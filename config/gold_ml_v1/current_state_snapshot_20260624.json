@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-E",
-  "status": "TEN_ACCUMULATED_CANDIDATES_BATCH020_WATCH022_VALIDATED_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-F",
+  "status": "TEN_ACCUMULATED_CANDIDATES_BATCH021_HIGH_COUNT_WATCH_DISCOVERED_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -18,10 +18,23 @@
     {"id":"GML1-WATCH-021-C","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"combined A OR B loss exclusion","caveat":"All 81 local neighborhood cells passed PF2, but search multiplicity and rule complexity are higher."}
   ],
   "accumulated_candidate_total": 10,
-  "research_only_not_accumulated": ["GML1-WATCH-022-A"],
+  "research_only_not_accumulated": [
+    "GML1-WATCH-022-A",
+    "GML1-WATCH-023-A"
+  ],
+  "new_research_watch": {
+    "id": "GML1-WATCH-023-A",
+    "parent": "GML1-PROV-010",
+    "first_stage_parent": "GML1-PROV-015",
+    "lane": "H1-D1",
+    "direction": "LONG",
+    "class": "high-count deterministic logistic consensus loss-risk exclusion",
+    "pre_2026": {"trades":182,"retained_fraction_vs_PROV010":0.8017621145,"retained_fraction_vs_PROV015":0.91,"profit_factor":2.1038712287,"total_r":64.3289235678,"max_drawdown_r":4.0},
+    "caveat": "Model-family stability, deterministic regeneration, raw replay, cost stress and fresh confirmation remain pending."
+  },
   "lineage_interpretation": {
     "M15_H4_family": ["GML1-PROV-007","GML1-PROV-008","GML1-WATCH-022-B"],
-    "H1_D1_PROV015_family": ["GML1-PROV-010","GML1-PROV-015","GML1-PROV-020","GML1-WATCH-014-A","GML1-WATCH-021-A","GML1-WATCH-021-B","GML1-WATCH-021-C"],
+    "H1_D1_PROV015_family": ["GML1-PROV-010","GML1-PROV-015","GML1-PROV-020","GML1-WATCH-014-A","GML1-WATCH-021-A","GML1-WATCH-021-B","GML1-WATCH-021-C","GML1-WATCH-023-A"],
     "same_lineage_candidates_are_not_independent_edges": true,
     "simple_metric_sum_forbidden": true
   },
@@ -39,18 +52,19 @@
     "batch017_watch021_exploration":"COMPLETED",
     "batch018_watch021_registry_validation":"COMPLETED_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
     "batch019_watch022_exploration":"COMPLETED",
-    "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING"
+    "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
+    "batch021_high_count_consensus_exploration":"COMPLETED_WATCH023A_VALIDATION_PENDING"
   },
-  "watch022_validation": {
-    "GML1-WATCH-022-A": {"verdict":"DO_NOT_ACCUMULATE_KEEP_RESEARCH_ONLY","pre_2026_trades":112,"profit_factor":2.0210919554,"total_r":36.9169278733,"max_drawdown_r":5.0},
-    "GML1-WATCH-022-B": {"verdict":"PASS_AS_ACCUMULATED_WATCH_WITH_TEMPORAL_CONCENTRATION_CAVEAT","pre_2026_trades":104,"profit_factor":2.2926222440,"total_r":40.0712895640,"max_drawdown_r":3.0}
-  },
+  "research_records": [
+    "config/gold_ml_v1/h1_high_count_consensus_loss_risk_batch021_20260625.json"
+  ],
   "validation_records": [
     "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json",
     "config/gold_ml_v1/watch022_ab_validation_batch020_20260625.json"
   ],
   "registration_blockers": [
-    "authorized raw exact replay for accumulated WATCH candidates",
+    "WATCH-023-A deterministic model regeneration and stability validation",
+    "authorized raw exact replay for accumulated and research WATCH candidates",
     "spread 1.5x and 2.0x plus fixed-slippage stress",
     "fresh prospective confirmation after 2026-06-23 18:15 MT5 server close",
     "WATCH-014-A stable human-readable motif",
@@ -58,8 +72,9 @@
     "audit-only remains active"
   ],
   "next_research": [
-    "independent SHORT discovery",
-    "M5/M15 high-count state plus cooldown-reentry exploration",
+    "validate WATCH-023-A model and excluded-row stability",
+    "independent SHORT discovery when authorized raw M1 data are available",
+    "M5/M15 high-count state plus cooldown-reentry exploration when raw data are available",
     "MAE and MFE meta-labeling on broad parent pools",
     "time-to-target and stagnation modeling",
     "stable regime transitions",
