@@ -11,7 +11,6 @@ on:
       - "tests/gold_ml_v1/test_nine_candidate_local_replay_v3.py"
       - "tests/gold_ml_v1/test_goldsharp_live_source_preflight.py"
       - "config/gold_ml_v1/replay/**"
-      - "config/gold_ml_v1/batch023_replay_correction_v2_20260625.json"
       - ".github/workflows/gold_ml_v1_batch023_tests.yml"
 
 jobs:
@@ -37,6 +36,7 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v2.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v3.py
+          python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v4.py
           python -m py_compile scripts/gold_ml_v1/replay/goldsharp_live_source_preflight.py
           python -m py_compile scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py
 
@@ -46,3 +46,6 @@ jobs:
           python -m unittest tests/gold_ml_v1/test_nine_candidate_local_replay_v2.py -v
           python -m unittest tests/gold_ml_v1/test_nine_candidate_local_replay_v3.py -v
           python -m unittest tests/gold_ml_v1/test_goldsharp_live_source_preflight.py -v
+
+      - name: Import V4 resolver
+        run: python -c "import importlib.util, pathlib; p=pathlib.Path('scripts/gold_ml_v1/replay/nine_candidate_local_replay_v4.py'); s=importlib.util.spec_from_file_location('v4',p); m=importlib.util.module_from_spec(s); s.loader.exec_module(m); print('V4_IMPORT_PASS')"
