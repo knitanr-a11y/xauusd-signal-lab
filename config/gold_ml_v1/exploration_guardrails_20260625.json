@@ -1,0 +1,64 @@
+{
+  "record_id": "GML1-EXPLORATION-GUARDRAILS-20260625",
+  "status": "FROZEN_AUDIT_ONLY",
+  "time_contract": {
+    "raw_csv_time": "bar-open time",
+    "bar_availability": "bar-open time plus timeframe duration",
+    "timezone": "MT5 server naive time",
+    "latest_csv_row": "closed",
+    "open_or_asof_bar_use": "forbidden"
+  },
+  "period_contract": {
+    "2023": "EXPLORATION_ONLY",
+    "2024": "VALIDATION_ONLY_NO_RETUNE",
+    "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+    "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE",
+    "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00"
+  },
+  "exploration_rules": {
+    "predeclare_search_space": true,
+    "record_every_attempted_rule_and_parameter_cell": true,
+    "record_total_search_count_and_search_multiplicity": true,
+    "report_all_survivors_and_failures_not_only_best": true,
+    "post_hoc_threshold_change_after_validation_test_or_2026": "forbidden",
+    "cherry_pick_by_best_pf_wr_or_single_year": "forbidden",
+    "new_logic_requires_new_candidate_id": true,
+    "parent_lineage_and_change_reason_required": true,
+    "candidate_pool_silent_removal": "forbidden",
+    "candidate_status_must_be_explicit": [
+      "ACCUMULATED_AUDIT_ONLY",
+      "RESEARCH_ONLY",
+      "DEMOTED_WITH_REASON",
+      "REJECTED_WITH_REASON"
+    ],
+    "same_lineage_candidates_are_independent_edges": false,
+    "simple_metric_sum_across_same_lineage": "forbidden"
+  },
+  "data_and_evaluation_rules": {
+    "closed_bars_only": true,
+    "higher_timeframe_join": "asof using only bars available by decision time",
+    "lookahead": "forbidden",
+    "future_label_or_exit_data_in_features": "forbidden",
+    "missing_rows_or_losses_silent_exclusion": "forbidden",
+    "raw_reconstructed_and_warmup_bridge_rows_must_be_separate": true,
+    "warmup_bridge_rows_live_use": "forbidden",
+    "2026_use": "diagnosis and drift observation only",
+    "cost_stress_before_promotion": true,
+    "fresh_prospective_confirmation_before_registration": true
+  },
+  "promotion_rules": {
+    "automatic_promotion": "forbidden",
+    "registration_before_cost_stress": "forbidden",
+    "registration_before_fresh_prospective_confirmation": "forbidden",
+    "live_activation": "forbidden_without_explicit_user_authorization_after_all_gates",
+    "audit_only_default": true
+  },
+  "execution_switches": {
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false
+  }
+}
