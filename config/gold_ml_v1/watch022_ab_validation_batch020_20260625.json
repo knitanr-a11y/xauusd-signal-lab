@@ -1,0 +1,94 @@
+{
+  "result_id": "GML1-BATCH-020-WATCH022-VALIDATION-20260625",
+  "date": "2026-06-25",
+  "mode": "audit-only",
+  "status": "WATCH022_B_ACCUMULATED_WITH_CAVEAT_WATCH022_A_RESEARCH_ONLY",
+  "parent_candidate_id": "GML1-PROV-007",
+  "exact_registry_checks": {
+    "parent_rows": 154,
+    "GML1-WATCH-022-A": {
+      "derived_retained_rows": 136,
+      "derived_excluded_rows": 18,
+      "partition_complete": true,
+      "retained_registry_exact": true,
+      "excluded_registry_exact": true,
+      "thresholds_recomputed_from_2023_exact_within_1e_12": true
+    },
+    "GML1-WATCH-022-B": {
+      "derived_retained_rows": 135,
+      "derived_excluded_rows": 19,
+      "partition_complete": true,
+      "retained_registry_exact": true,
+      "excluded_registry_exact": true,
+      "thresholds_recomputed_from_2023_exact_within_1e_12": true
+    }
+  },
+  "pre_2026_metrics": {
+    "GML1-WATCH-022-A": {"trades":112,"retained_fraction":0.9256198347,"win_rate":0.6696428571,"profit_factor":2.0210919554,"total_r":36.9169278733,"max_drawdown_r":5.0},
+    "GML1-WATCH-022-B": {"trades":104,"retained_fraction":0.8595041322,"win_rate":0.7019230769,"profit_factor":2.2926222440,"total_r":40.0712895640,"max_drawdown_r":3.0}
+  },
+  "year_metrics": {
+    "GML1-WATCH-022-A": {
+      "2023": {"trades":18,"profit_factor":4.684300,"total_r":11.0529},
+      "2024": {"trades":22,"profit_factor":2.6666666667,"total_r":10.0},
+      "2025": {"trades":72,"profit_factor":1.584217,"total_r":15.864028},
+      "2026_diagnostic": {"trades":24,"profit_factor":2.0,"total_r":8.0}
+    },
+    "GML1-WATCH-022-B": {
+      "2023": {"trades":20,"profit_factor":5.350967,"total_r":13.0529},
+      "2024": {"trades":20,"profit_factor":1.8571428571,"total_r":6.0},
+      "2025": {"trades":64,"profit_factor":2.000876,"total_r":21.018390},
+      "2026_diagnostic": {"trades":31,"profit_factor":1.5833333333,"total_r":7.0}
+    }
+  },
+  "excluded_pre_2026": {
+    "GML1-WATCH-022-A": {"trades":9,"wins":4,"losses_or_nonwins":5,"profit_factor":0.8,"total_r":-1.0},
+    "GML1-WATCH-022-B": {"trades":17,"wins":6,"losses_or_nonwins":11,"profit_factor":0.5908790905,"total_r":-4.1543616906}
+  },
+  "local_neighborhood": {
+    "GML1-WATCH-022-A": {"cells":6,"pf_at_least_2_cells":4,"all_year_total_r_positive_cells":6,"pf_range":[1.8917761998,2.0217886151],"retained_fraction_range":[0.8677685950,0.9752066116]},
+    "GML1-WATCH-022-B": {"cells":9,"pf_at_least_2_cells":7,"all_year_total_r_positive_cells":9,"pf_range":[1.8702970938,2.3128030884],"retained_fraction_range":[0.7520661157,0.9173553719]}
+  },
+  "month_block_bootstrap_50000": {
+    "GML1-WATCH-022-A": {"prob_total_r_gt_parent":0.57700,"p05_difference":-3.0,"median_difference":1.0,"p95_difference":5.0},
+    "GML1-WATCH-022-B": {"prob_total_r_gt_parent":0.83916,"p05_difference":-2.8456383094,"median_difference":4.1543616906,"p95_difference":11.1543616906}
+  },
+  "overlap": {
+    "excluded_A_rows_all_period":18,
+    "excluded_B_rows_all_period":19,
+    "excluded_intersection_rows":0,
+    "excluded_jaccard":0.0,
+    "retained_jaccard":0.7597402597
+  },
+  "verdicts": {
+    "GML1-WATCH-022-A": {
+      "verdict": "DO_NOT_ACCUMULATE_KEEP_RESEARCH_ONLY",
+      "reasons": [
+        "PF is only marginally above 2.0",
+        "excluded pre-2026 subset totals only -1R",
+        "bootstrap probability of beating the parent is only 57.7% and interval crosses zero",
+        "only 4 of 6 local cells retain PF2"
+      ]
+    },
+    "GML1-WATCH-022-B": {
+      "verdict": "PASS_AS_ACCUMULATED_WATCH_WITH_TEMPORAL_CONCENTRATION_CAVEAT",
+      "reasons": [
+        "PF2.293 with 85.95% retention and DD reduced to 3R",
+        "7 of 9 local cells retain PF2 and all 9 keep every year profitable",
+        "excluded subset is materially negative overall",
+        "improvement is concentrated in 2025 and the 2024 excluded subset was profitable"
+      ]
+    }
+  },
+  "pending": [
+    "authorized raw M1/M15/H4 exact replay",
+    "spread 1.5x and 2.0x plus fixed-slippage stress",
+    "fresh post-cutoff confirmation"
+  ],
+  "lineage": {
+    "same_M15_H4_family_as_PROV_007": true,
+    "independent_edge_count_increment": 0,
+    "simple_performance_sum_forbidden": true
+  },
+  "execution_switches": {"live_ready":false,"final_signal":false,"mt5_order":false,"discord":false}
+}
