@@ -27,10 +27,11 @@
     "2024": {"PASS": 17, "FAIL": 19},
     "2025": {"PASS": 15, "FAIL": 21}
   },
+  "canonical_float_format": "%.12g",
   "canonical_output_hashes": {
     "exploration_attempt_registry.csv": "52f7ac00fbdfcd1007e62a5f9c59760b8e854214c9330d340aa0fa317d318c0a",
-    "exploration_year_metrics.csv": "715d2d933e21b826957ac3e4e8dbd9958f70b61af3f7e6c0ba5d9efa21f9f81b",
-    "exploration_trade_registry.csv": "8b3e71e65f1dce3fa942ee13796ee2ed55a045142621fd38e796ad464fc8b558",
+    "exploration_year_metrics.csv": "20be24a3531c441b11482130102b7cd9040dde36056ec554be8665e2c17bb17f",
+    "exploration_trade_registry.csv": "05480e2bf7113627106a0c3f5b895997b8bd540d1702b9d2ac942cff035999f7",
     "exploration_survivors.csv": "1e58e761ff11687c9ae8fb782270721ccc1674b622f81d2b11ecfd24ad8bfe47"
   },
   "determinism_replay": {
@@ -51,5 +52,5 @@
     "automatic_accumulation": false,
     "automatic_promotion": false
   },
-  "assistant_result_archive_sha256": "06285b4bff3e5284d868e8ae5305319b8c9fdb52e48f7e225c38daffa3c48282"
+  "assistant_result_archive_sha256": "ab08cd97c0759b698e1c8cf022febd9a58bccabeb31bfd3b8ed8886585049ae7"
 }
