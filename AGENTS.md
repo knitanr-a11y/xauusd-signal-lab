@@ -7,6 +7,7 @@
 3. At the start of every new chat or resumed task, read in this order:
    - `AGENTS.md`
    - `config/gold_ml_v1/current_state_snapshot_20260624.json`
+   - `config/gold_ml_v1/batch023_replay_correction_v2_20260625.json`
    - `config/gold_ml_v1/batch023_historical_live_source_split_addendum_20260625.json`
    - `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_20260624.md`
@@ -37,29 +38,30 @@
 13. GML1-WATCH-022-B remains accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
 14. GML1-PROV-020 remains accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
 15. GML1-WATCH-021-A/B/C remain accumulated after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
-16. Batch023 replay code, frozen config, expected metrics/hashes, artifact installer, Windows runners, tests, documentation and GitHub Actions workflow are committed to GitHub.
-17. Historical exact replay must use only `gold_v3_2023_2026_*.csv`. Never append or mix `goldsharp_*.csv` into exact reproduction.
-18. Live closed-bar observation must use `goldsharp_*.csv`. Historical files may be used only for indicator warmup and continuity, and historical rows must never emit new live signals.
-19. Goldsharp rows at or before the historical maximum are overlap/backfill audit rows only. New live decisions are allowed only on goldsharp rows strictly after the historical maximum bar-open time.
-20. CSV latest rows are closed by contract. Do not drop them as open bars. Keep MT5 server time unchanged.
-21. Local historical and live directories were provided out-of-band and must not be committed to the public repository.
-22. Registry SHA, row count, metrics and derivative-parent parity passed in local staging. Historical raw replay and goldsharp source preflight are not complete because this environment cannot access the local machine filesystem.
-23. Install only the verified Batch023 artifact ZIP through `scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat` before running registry parity.
-24. Use `scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat` for historical-only replay.
-25. Use `scripts/gold_ml_v1/replay/run_goldsharp_live_source_preflight.bat` to audit the historical/live split before any live-monitor implementation.
-26. Do not continue candidate exploration before Batch023 historical replay and all nine mismatch reports are inspected.
-27. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
-28. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
-29. Historical audit files remain available after demotion.
-30. Local replay and fresh prospective confirmation are required before registration.
-31. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
-32. Remain audit-only. No live activation or automatic promotion.
-33. Never claim completion until outputs are inspected.
+16. Batch023 registry parity passed, but the first raw replay implementation failed because its ATR method, warmup source, and event eligibility order did not match the frozen research evaluator.
+17. The corrected replay is `scripts/gold_ml_v1/replay/nine_candidate_local_replay_v2.py`. ATR14 is the simple arithmetic rolling mean of 14 true ranges, not Wilder recursive ATR.
+18. Historical decisions and trade evaluation must use only `gold_v3_2023_2026_*.csv` rows.
+19. Exact-overlap-verified `goldsharp_*.csv` rows strictly before the first historical timestamp may be used only as indicator warmup. This prehistory is required for early D1/H4 indicators. Goldsharp rows after the historical maximum must not enter historical replay.
+20. Live closed-bar observation must use `goldsharp_*.csv`. Historical files may be used only for indicator warmup and continuity, and historical rows must never emit new live signals.
+21. Goldsharp rows at or before the historical maximum are overlap/backfill audit rows only for live operation. New live decisions are allowed only on goldsharp rows strictly after the historical maximum bar-open time.
+22. Exact M1 entry and complete-horizon eligibility must be applied before false-to-true onset or H1 event detection.
+23. CSV latest rows are closed by contract. Do not drop them as open bars. Keep MT5 server time unchanged.
+24. Local historical and live directories were provided out-of-band and must not be committed to the public repository.
+25. Install only the verified Batch023 artifact ZIP through the one-command runner or installer before registry parity.
+26. Use `scripts/gold_ml_v1/replay/run_batch023_all.bat` for the corrected end-to-end rerun.
+27. Do not continue candidate exploration before corrected Batch023 replay and all nine mismatch reports are inspected.
+28. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
+29. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
+30. Historical audit files remain available after demotion.
+31. Local replay and fresh prospective confirmation are required before registration.
+32. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
+33. Remain audit-only. No live activation or automatic promotion.
+34. Never claim completion until outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_008_NINE_ACCUMULATED_CANDIDATES_BATCH023_SOURCE_SPLIT_IMPLEMENTED_LOCAL_EXECUTION_PENDING_AUDIT_ONLY`
+`GOLD_ML_V1_009_NINE_ACCUMULATED_CANDIDATES_BATCH023_REPLAY_V2_COMMITTED_LOCAL_RERUN_REQUIRED_AUDIT_ONLY`
 
 Next phase:
 
-`INSTALL_ARTIFACTS_RUN_REGISTRY_PARITY_RUN_HISTORICAL_ONLY_REPLAY_RUN_GOLDSHARP_PREFLIGHT_INSPECT_RESULTS`
+`PULL_REPLAY_V2_RERUN_BATCH023_INSPECT_PROV002_AND_ALL_NINE_PARITY_REPORTS`
