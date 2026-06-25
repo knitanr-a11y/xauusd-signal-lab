@@ -1,10 +1,11 @@
 {
   "record_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-20260625",
-  "status": "PREDECLARED_BEFORE_LOCAL_EXECUTION_AUDIT_ONLY",
+  "status": "PREDECLARED_GRID_UNCHANGED_SCHEMA_FIX_BEFORE_SUCCESSFUL_LOCAL_EXECUTION_AUDIT_ONLY",
   "created": "2026-06-25",
+  "schema_fix_recorded": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
-  "phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_SEPARATELY",
+  "phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_EXACT_CORE_SEPARATELY",
   "audit_only": true,
   "new_exploration": false,
   "candidate_pool": {
@@ -59,6 +60,22 @@
     "fixed_trade_population": true,
     "scenario_exit_replay_may_not_add_or_remove_candidate_rows": true
   },
+  "registry_contract": {
+    "authoritative_input": "*_warmup_bridge_core_registry.csv",
+    "required_columns": [
+      "candidate_id",
+      "decision_close_time",
+      "entry_time",
+      "exit_time",
+      "r_value",
+      "direction",
+      "trade_core_source"
+    ],
+    "entry_price_or_exit_price_required": false,
+    "schema_failure_found": "GML1-PROV-010 exact-schema registry does not contain entry_price and exit_price columns",
+    "correction": "Use verified core registries for every candidate; derive RAW execution prices from frozen M1 bars; keep bridge as separate exact-core audit",
+    "candidate_grid_gate_or_period_change": false
+  },
   "time_and_execution_contract": {
     "raw_csv_time": "MT5 server naive bar-open time",
     "latest_csv_row": "closed",
@@ -70,13 +87,24 @@
     "slippage_unit": "points per side",
     "slippage_application_long": "entry fill equals entry reference plus slippage; exit fill equals trigger or time-exit bid price minus slippage",
     "tp_sl_trigger_distance": "frozen one risk unit from scenario entry reference",
-    "risk_unit": "for nonzero R, recover from frozen registry entry_price, exit_price and r_value; for exact zero-R time exits, recover from the entry-time closed decision bar under the frozen lineage ATR contract; fail closed if unavailable or baseline parity fails",
-    "zero_r_risk_fallback": {
+    "raw_risk_unit": "recover from the entry-time closed decision bar under the frozen lineage ATR contract; fail closed if unavailable or RAW baseline R/exit-time parity fails",
+    "raw_risk_lookup": {
       "M15_H4_BREAKOUT_FILTER_LINEAGE": "M15 simple rolling mean of true range, period 14",
       "H1_D1_BREAKOUT_FILTER_LINEAGE": "H1 Wilder ATR, period 14",
       "availability": "entry-time closed decision bar only",
       "lookahead": "forbidden",
       "fail_closed_if_unavailable": true
+    },
+    "raw_baseline_parity": {
+      "always_required": ["r_value", "exit_time"],
+      "price_comparison": "only when source registry actually contains entry_price or exit_price",
+      "derived_price_output": "entry and exit prices are reconstructed from frozen M1 and written to the stress audit output"
+    },
+    "bridge_execution": {
+      "stress_replay": "NOT_CALCULATED_AUDIT_ONLY",
+      "report": "exact core baseline R metrics only",
+      "blocker": "pre-2023 indicator state and complete price fields are unavailable",
+      "synthetic_stress_result": "forbidden"
     },
     "same_trade_membership_across_scenarios": true,
     "lookahead_for_candidate_selection": "forbidden",
@@ -140,7 +168,8 @@
   ],
   "caveats": [
     "WARMUP_BRIDGE_EXACT remains a separately reported historical audit population and is not raw-only parity.",
-    "The stress run holds the frozen candidate trade membership fixed and replays execution outcomes independently per registered decision; it does not discover suppressed alternative entries.",
+    "WARMUP_BRIDGE_EXACT spread/slippage results are not calculated when exact risk and price state is unavailable; the blocker is reported instead of fabricating results.",
+    "The RAW stress run holds the frozen candidate trade membership fixed and replays execution outcomes independently per registered decision; it does not discover suppressed alternative entries.",
     "Same-lineage candidate metrics are summarized as candidate-level ranges and medians only; trades, profit and PF are not pooled or summed as independent edges.",
     "Passing a stress gate does not authorize registration, promotion, prospective use or live activation."
   ],
