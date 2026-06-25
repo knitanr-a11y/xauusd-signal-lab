@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-X",
-  "formal_status": "GOLD_ML_V1_025_STATEFUL_PROSPECTIVE_MONITOR_INITIALIZED_OPERATIONAL_AUDIT_ONLY",
-  "status": "STATEFUL_PROSPECTIVE_MONITOR_INITIALIZED_OPERATIONAL_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-Y",
+  "formal_status": "GOLD_ML_V1_026_EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "status": "EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_MONITOR_INITIALIZED_CONTINUE_CYCLES_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md",
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
@@ -34,7 +34,9 @@
       "GML1-WATCH-023-A"
     ],
     "silent_add_remove_replace_or_relabel": "forbidden",
-    "new_exploration_allowed_now": false
+    "existing_frozen_nine_modified": false,
+    "new_exploration_allowed_now": true,
+    "authorized_exploration_scope": "BATCH024_ONLY"
   },
   "completed": {
     "warmup_bridge": "PASS_9_OF_9_ZERO_CORE_MISMATCH",
@@ -42,41 +44,36 @@
     "fresh_prospective_first_run": "PASS_NO_CANDIDATE_YET",
     "stateful_monitor_initialization": "PASS_MONITOR_INITIALIZED_NO_CANDIDATE_YET"
   },
-  "records": {
-    "cost_stress": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
-    "fresh_prospective_first_run": "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json",
-    "monitoring_config": "config/gold_ml_v1/prospective_monitoring_20260625.json",
-    "monitoring_ci": "config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json",
-    "monitoring_initialization": "config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json"
-  },
   "stateful_monitoring": {
-    "status": "INITIALIZED_OPERATIONAL_AUDIT_ONLY",
-    "runner_bat": "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat",
-    "output_dir": "outputs/gold_ml_v1/prospective_monitoring",
+    "status": "INITIALIZED_PRESERVED_NOT_CURRENT_ROOT_ACTION",
     "run_count": 1,
     "latest_m1_close": "2026-06-25 14:36:00",
-    "observation_state": "NO_CANDIDATE_YET",
     "candidate_total": 0,
-    "unresolved_candidate_total": 0,
-    "parent_event_total": 0,
-    "historical_prefix_mutation": "FAIL_CLOSED",
-    "input_truncation": "FAIL_CLOSED",
-    "duplicate_candidate_registration": "FORBIDDEN",
-    "allowed_candidate_transition": "UNRESOLVED_TO_RESOLVED",
-    "resolved_result_rewrite": "FAIL_CLOSED",
-    "transactional_update": true,
     "background_task_installed": false,
-    "one_cycle_per_root_bat_run": true,
-    "upload_file": "outputs/gold_ml_v1/prospective_monitoring/UPLOAD_THIS_GOLD_ML_V1.txt"
+    "ledger_preserved": true
+  },
+  "exploration_batch024": {
+    "status": "IMPLEMENTED_CI_VERIFIED_USER_RUN_NEXT",
+    "authorization": "config/gold_ml_v1/exploration_batch024_authorization_20260625.json",
+    "config": "config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json",
+    "ci_record": "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json",
+    "lineage_id": "M15_H1_TREND_PULLBACK_LINEAGE_EXP024",
+    "attempted_cells": 36,
+    "existing_frozen_nine_modified": false,
+    "automatic_accumulation": false,
+    "automatic_promotion": false,
+    "result_available": false,
+    "output_dir": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback",
+    "upload_file": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/UPLOAD_THIS_GOLD_ML_V1.txt"
   },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "action_id": "GML1-STATEFUL-PROSPECTIVE-MONITOR-CYCLE-READY-V1-CI-PASS",
-    "active_phase_bat": "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat"
+    "action_id": "GML1-EXPLORATION-BATCH024-M15-H1-PULLBACK-READY-V1-CI-PASS",
+    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat"
   },
-  "next": "CONTINUE_ONE_AUDIT_ONLY_MONITOR_CYCLE_AFTER_NEW_CLOSED_BARS",
+  "next": "USER_PULLS_AND_RUNS_BATCH024_EXPLORATION_THEN_UPLOADS_PHASE_FILE",
   "execution_switches": {
-    "new_exploration": false,
+    "new_exploration": true,
     "live_ready": false,
     "final_signal": false,
     "mt5_order": false,
