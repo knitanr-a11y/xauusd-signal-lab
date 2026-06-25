@@ -11,6 +11,9 @@ NEXT_ACTION = ROOT / "config/gold_ml_v1/next_local_action.json"
 COST_STRESS = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
 COST_STRESS_PASS = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
 PROSPECTIVE = ROOT / "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"
+PROSPECTIVE_FIRST_RUN = ROOT / "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json"
+MONITOR = ROOT / "config/gold_ml_v1/prospective_monitoring_20260625.json"
+MONITOR_CI = ROOT / "config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json"
 AGENTS = ROOT / "AGENTS.md"
 START_HERE = ROOT / "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
 ONE_CLICK_HANDOFF_V2 = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
@@ -27,6 +30,11 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.cost_stress = json.loads(COST_STRESS.read_text(encoding="utf-8"))
         self.cost_stress_pass = json.loads(COST_STRESS_PASS.read_text(encoding="utf-8"))
         self.prospective = json.loads(PROSPECTIVE.read_text(encoding="utf-8"))
+        self.prospective_first_run = json.loads(
+            PROSPECTIVE_FIRST_RUN.read_text(encoding="utf-8")
+        )
+        self.monitor = json.loads(MONITOR.read_text(encoding="utf-8"))
+        self.monitor_ci = json.loads(MONITOR_CI.read_text(encoding="utf-8"))
         self.agents = AGENTS.read_text(encoding="utf-8")
         self.start_here = START_HERE.read_text(encoding="utf-8")
         self.handoff = ONE_CLICK_HANDOFF_V2.read_text(encoding="utf-8")
@@ -46,6 +54,10 @@ class ExplorationGuardrailTests(unittest.TestCase):
         )
         self.assertEqual(
             self.prospective["cutoff_mt5_server_close"],
+            "2026-06-23 18:15:00",
+        )
+        self.assertEqual(
+            self.monitor["cutoff_mt5_server_close"],
             "2026-06-23 18:15:00",
         )
 
@@ -75,11 +87,15 @@ class ExplorationGuardrailTests(unittest.TestCase):
             pool["frozen_accumulated_ids"],
         )
         self.assertEqual(
-            self.prospective["candidate_pool"]["silent_add_remove_replace_or_relabel"],
+            self.monitor["candidate_pool"]["frozen_accumulated_ids"],
+            pool["frozen_accumulated_ids"],
+        )
+        self.assertEqual(
+            self.monitor["candidate_pool"]["silent_add_remove_replace_or_relabel"],
             "forbidden",
         )
 
-    def test_data_leakage_and_bridge_use_are_blocked(self) -> None:
+    def test_data_leakage_bridge_and_monitor_rewrites_are_blocked(self) -> None:
         rules = self.guardrails["data_and_evaluation_rules"]
         self.assertTrue(rules["closed_bars_only"])
         self.assertEqual(rules["lookahead"], "forbidden")
@@ -106,13 +122,21 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(
             causality["missing_rows_or_losses_silent_exclusion"], "forbidden"
         )
+        self.assertEqual(
+            self.monitor["continuity_contract"]["historical_closed_bar_prefix_change"],
+            "fail_closed",
+        )
+        self.assertEqual(
+            self.monitor["ledger_contract"]["resolved_result_rewrite"],
+            "fail_closed",
+        )
+        self.assertTrue(self.monitor["ledger_contract"]["unresolved_candidates_preserved"])
 
-    def test_governance_references_verified_pass_and_prospective_contract(self) -> None:
+    def test_governance_references_verified_records(self) -> None:
         guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
         v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
         cost_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
         pass_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
-        prospective_path = "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"
         pass_handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
         self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
         self.assertEqual(self.state["authoritative_handoff"], v2_path)
@@ -125,10 +149,12 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertIn(v2_path, self.start_here)
         self.assertTrue(self.state["audit_only"])
         self.assertFalse(self.state["execution_switches"]["new_exploration"])
-        self.assertTrue(PROSPECTIVE.exists())
-        self.assertEqual(prospective_path, "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json")
+        self.assertEqual(self.prospective_first_run["status"], "PASS")
+        self.assertEqual(self.prospective_first_run["candidate_rows"], 0)
+        self.assertEqual(self.monitor_ci["status"], "PASS")
+        self.assertEqual(self.monitor_ci["stateful_prospective_monitor"], "PASS")
 
-    def test_cost_stress_pass_and_fresh_prospective_action_are_fail_closed(self) -> None:
+    def test_monitor_action_is_fail_closed_and_manual(self) -> None:
         self.assertEqual(self.cost_stress_pass["status"], "PASS")
         self.assertEqual(self.cost_stress_pass["raw_baseline_parity_checks"], 1687)
         self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["pass"], 9)
@@ -136,11 +162,11 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(self.action["mode"], "bat")
         self.assertEqual(
             self.action["runner"],
-            "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
+            "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat",
         )
         self.assertEqual(
             self.action["upload_output_dir"],
-            "outputs/gold_ml_v1/fresh_prospective_confirmation",
+            "outputs/gold_ml_v1/prospective_monitoring",
         )
         required_paths = {item["path"] for item in self.action["required_paths"]}
         for filename in (
@@ -151,12 +177,14 @@ class ExplorationGuardrailTests(unittest.TestCase):
             "goldsharp_d1.csv",
         ):
             self.assertIn(f"{{MQL5_FILES}}/{filename}", required_paths)
+        self.assertFalse(self.action["background_task_installed"])
         self.assertFalse(self.action["automatic_next_phase"])
         self.assertFalse(self.action["automatic_promotion"])
         self.assertFalse(self.action["automatic_registration"])
         self.assertFalse(self.action["live_ready"])
         self.assertFalse(self.action["final_signal"])
         self.assertFalse(self.action["mt5_order"])
+        self.assertFalse(self.action["discord"])
 
 
 if __name__ == "__main__":
