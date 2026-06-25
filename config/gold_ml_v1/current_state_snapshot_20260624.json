@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-F",
-  "status": "TEN_ACCUMULATED_CANDIDATES_BATCH021_HIGH_COUNT_WATCH_DISCOVERED_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-G",
+  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH022_ALL_WATCH_VALIDATED_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -12,29 +12,20 @@
     {"id":"GML1-PROV-010","parent":null,"lane":"H1-D1","direction":"LONG","class":"independent Bollinger breakout event"},
     {"id":"GML1-PROV-015","parent":"GML1-PROV-010","lane":"H1-D1","direction":"LONG","class":"D1 participation and progress loss-filtered derivative"},
     {"id":"GML1-PROV-020","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"PF2 second-stage loss-filter derivative","caveat":"Second-stage exclusion fired zero times in 2026; fresh activations are required."},
-    {"id":"GML1-WATCH-014-A","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"path-shape clustering accumulated research candidate","caveat":"Seed-stable human-readable motif remains unresolved; excluded cluster 1 was unstable."},
     {"id":"GML1-WATCH-021-A","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"range-compression after large-span loss exclusion","caveat":"Registry and neighborhood passed; raw replay, cost stress and fresh confirmation pending."},
     {"id":"GML1-WATCH-021-B","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"lagged path-state loss exclusion","caveat":"Registry and neighborhood passed; raw replay, cost stress and fresh confirmation pending."},
     {"id":"GML1-WATCH-021-C","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"combined A OR B loss exclusion","caveat":"All 81 local neighborhood cells passed PF2, but search multiplicity and rule complexity are higher."}
   ],
-  "accumulated_candidate_total": 10,
+  "accumulated_candidate_total": 9,
   "research_only_not_accumulated": [
-    "GML1-WATCH-022-A",
-    "GML1-WATCH-023-A"
+    {"id":"GML1-WATCH-014-A","reason":"Batch022 seed-stability validation failed; artifacts preserved."},
+    {"id":"GML1-WATCH-022-A","reason":"Batch020 accumulation validation failed."},
+    {"id":"GML1-WATCH-023-A","reason":"Deterministic parity passed but 2023 training-sample bootstrap stability failed."}
   ],
-  "new_research_watch": {
-    "id": "GML1-WATCH-023-A",
-    "parent": "GML1-PROV-010",
-    "first_stage_parent": "GML1-PROV-015",
-    "lane": "H1-D1",
-    "direction": "LONG",
-    "class": "high-count deterministic logistic consensus loss-risk exclusion",
-    "pre_2026": {"trades":182,"retained_fraction_vs_PROV010":0.8017621145,"retained_fraction_vs_PROV015":0.91,"profit_factor":2.1038712287,"total_r":64.3289235678,"max_drawdown_r":4.0},
-    "caveat": "Model-family stability, deterministic regeneration, raw replay, cost stress and fresh confirmation remain pending."
-  },
+  "historical_watch_only_not_accumulated": ["GML1-WATCH-012-A","GML1-WATCH-012-B"],
   "lineage_interpretation": {
     "M15_H4_family": ["GML1-PROV-007","GML1-PROV-008","GML1-WATCH-022-B"],
-    "H1_D1_PROV015_family": ["GML1-PROV-010","GML1-PROV-015","GML1-PROV-020","GML1-WATCH-014-A","GML1-WATCH-021-A","GML1-WATCH-021-B","GML1-WATCH-021-C","GML1-WATCH-023-A"],
+    "H1_D1_PROV015_family": ["GML1-PROV-010","GML1-PROV-015","GML1-PROV-020","GML1-WATCH-021-A","GML1-WATCH-021-B","GML1-WATCH-021-C","GML1-WATCH-014-A","GML1-WATCH-023-A"],
     "same_lineage_candidates_are_not_independent_edges": true,
     "simple_metric_sum_forbidden": true
   },
@@ -48,31 +39,24 @@
   "completed_exact_audits": {
     "batch015_overlap_independence":"COMPLETED",
     "prov020_fresh_activation":"COMPLETED_NO_POST_CUTOFF_SOURCE_COVERAGE",
-    "batch016_watch014_centroid_seed_stability":"COMPLETED",
+    "batch016_watch014_centroid_seed_stability":"COMPLETED_FAILED_ACCUMULATION_STABILITY_AFTER_BATCH022_REVIEW",
     "batch017_watch021_exploration":"COMPLETED",
     "batch018_watch021_registry_validation":"COMPLETED_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
     "batch019_watch022_exploration":"COMPLETED",
     "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
-    "batch021_high_count_consensus_exploration":"COMPLETED_WATCH023A_VALIDATION_PENDING"
+    "batch021_high_count_consensus_exploration":"COMPLETED_WATCH023A_VALIDATION_PENDING",
+    "batch022_all_watch_validation":"COMPLETED_WATCH014_DEMOTED_WATCH023_RESEARCH_ONLY_EXTERNAL_BLOCKERS_REMAIN"
   },
-  "research_records": [
-    "config/gold_ml_v1/h1_high_count_consensus_loss_risk_batch021_20260625.json"
-  ],
-  "validation_records": [
-    "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json",
-    "config/gold_ml_v1/watch022_ab_validation_batch020_20260625.json"
-  ],
+  "watch_validation_record": "config/gold_ml_v1/all_watch_validation_batch022_20260625.json",
   "registration_blockers": [
-    "WATCH-023-A deterministic model regeneration and stability validation",
-    "authorized raw exact replay for accumulated and research WATCH candidates",
+    "authorized raw exact replay for accumulated WATCH candidates",
     "spread 1.5x and 2.0x plus fixed-slippage stress",
     "fresh prospective confirmation after 2026-06-23 18:15 MT5 server close",
-    "WATCH-014-A stable human-readable motif",
+    "historical WATCH-012 exact source artifacts",
     "no portfolio activation authorization",
     "audit-only remains active"
   ],
   "next_research": [
-    "validate WATCH-023-A model and excluded-row stability",
     "independent SHORT discovery when authorized raw M1 data are available",
     "M5/M15 high-count state plus cooldown-reentry exploration when raw data are available",
     "MAE and MFE meta-labeling on broad parent pools",
