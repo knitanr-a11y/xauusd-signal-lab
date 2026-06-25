@@ -1,12 +1,55 @@
 {
   "schema_version": 1,
-  "action_id": "GML1-COST-STRESS-PASS-FRESH-PROSPECTIVE-IMPLEMENTATION-NEXT",
-  "mode": "status_only",
-  "title": "GOLD_ML_V1 cost stress complete",
-  "message": "Cost stress completed successfully: RAW baseline parity 1687, candidate gate PASS=9 FAIL=0. No automatic next phase was run. Fresh prospective confirmation must be implemented as a separate audit-only phase before another local BAT run is requested.",
-  "current_status": "GOLD_ML_V1_021_COST_STRESS_PASS_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT_AUDIT_ONLY",
-  "phase": "COST_STRESS_COMPLETE_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT",
-  "after_success": "NO_USER_ACTION_REQUIRED_UNTIL_NEXT_PHASE_IS_COMMITTED",
+  "action_id": "GML1-FRESH-PROSPECTIVE-CONFIRMATION-READY-V1",
+  "mode": "bat",
+  "title": "GOLD_ML_V1 fresh prospective confirmation",
+  "message": "Run the separately implemented audit-only fresh prospective confirmation using closed goldsharp bars strictly after the frozen cutoff. Candidate rules remain frozen and unresolved candidates are preserved.",
+  "runner": "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
+  "arguments": [
+    "{MQL5_FILES}",
+    "{REPO_ROOT}/config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"
+  ],
+  "required_paths": [
+    {"label": "MQL5 Files directory", "path": "{MQL5_FILES}"},
+    {"label": "closed GOLD M1 CSV", "path": "{MQL5_FILES}/goldsharp_m1.csv"},
+    {"label": "closed GOLD M15 CSV", "path": "{MQL5_FILES}/goldsharp_m15.csv"},
+    {"label": "closed GOLD H1 CSV", "path": "{MQL5_FILES}/goldsharp_h1.csv"},
+    {"label": "closed GOLD H4 CSV", "path": "{MQL5_FILES}/goldsharp_h4.csv"},
+    {"label": "closed GOLD D1 CSV", "path": "{MQL5_FILES}/goldsharp_d1.csv"},
+    {"label": "frozen fresh prospective config", "path": "{REPO_ROOT}/config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"}
+  ],
+  "upload_output_dir": "outputs/gold_ml_v1/fresh_prospective_confirmation",
+  "upload_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
+  "upload_sections": [
+    {
+      "title": "FRESH PROSPECTIVE LATEST SUMMARY",
+      "path": "outputs/gold_ml_v1/fresh_prospective_confirmation/LATEST_RUN_SUMMARY.txt",
+      "max_lines": 320
+    },
+    {
+      "title": "FRESH PROSPECTIVE ERROR TRACE",
+      "path": "outputs/gold_ml_v1/fresh_prospective_confirmation/FRESH_PROSPECTIVE_RUN_ERROR.txt",
+      "max_lines": 180
+    },
+    {
+      "title": "FRESH PROSPECTIVE CANDIDATE SUMMARY",
+      "path": "outputs/gold_ml_v1/fresh_prospective_confirmation/fresh_prospective_candidate_summary.csv",
+      "max_lines": 80
+    },
+    {
+      "title": "FRESH PROSPECTIVE CANDIDATE REGISTRY",
+      "path": "outputs/gold_ml_v1/fresh_prospective_confirmation/fresh_prospective_candidate_registry.csv",
+      "max_lines": 260
+    },
+    {
+      "title": "FRESH PROSPECTIVE PARENT EVENT AUDIT",
+      "path": "outputs/gold_ml_v1/fresh_prospective_confirmation/fresh_prospective_parent_event_audit.csv",
+      "max_lines": 260
+    }
+  ],
+  "current_status": "GOLD_ML_V1_022_FRESH_PROSPECTIVE_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "phase": "FRESH_PROSPECTIVE_CONFIRMATION_AFTER_FROZEN_CUTOFF",
+  "after_success": "STOP_AND_UPLOAD_FRESH_PROSPECTIVE_UPLOAD_THIS_GOLD_ML_V1_TXT",
   "automatic_next_phase": false,
   "new_exploration_allowed": false,
   "audit_only": true,
