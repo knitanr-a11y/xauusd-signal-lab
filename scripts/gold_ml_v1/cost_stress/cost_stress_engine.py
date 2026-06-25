@@ -6,6 +6,27 @@ import pandas as pd
 from cost_stress_contract import Lineage, POINT, Scenario
 TOL_R=1e-8; TOL_PRICE=1e-7
 RISK_COLS=('risk_price','risk_unit','trade_atr','atr14','atr')
+
+def _true_range(frame:pd.DataFrame)->pd.Series:
+    previous=frame['close'].shift(1)
+    return pd.concat([(frame['high']-frame['low']).abs(),(frame['high']-previous).abs(),(frame['low']-previous).abs()],axis=1).max(axis=1)
+def _wilder_atr(frame:pd.DataFrame,period:int=14)->pd.Series:
+    tr=_true_range(frame).to_numpy(float); values=np.full(len(tr),np.nan)
+    if len(tr)>=period:
+        values[period-1]=float(np.mean(tr[:period]))
+        for index in range(period,len(tr)): values[index]=(values[index-1]*(period-1)+tr[index])/period
+    return pd.Series(values,index=frame.index)
+def build_risk_lookup(raw_dir, candidate_to_lineage:dict[str,Lineage])->dict[tuple[str,pd.Timestamp],float]:
+    lookup={}
+    for timeframe,delta,mode in [('m15',pd.Timedelta(minutes=15),'simple'),('h1',pd.Timedelta(hours=1),'wilder')]:
+        frame=pd.read_csv(raw_dir/f'gold_v3_2023_2026_{timeframe}.csv'); frame['time']=pd.to_datetime(frame['time'],format='%Y.%m.%d %H:%M:%S'); frame=frame.sort_values('time',kind='mergesort').reset_index(drop=True); frame['decision_close_time']=frame['time']+delta; frame['risk']=_true_range(frame).rolling(14,min_periods=14).mean() if mode=='simple' else _wilder_atr(frame,14)
+        line_token='M15_H4' if timeframe=='m15' else 'H1_D1'
+        values=dict(zip(frame['decision_close_time'],frame['risk']))
+        for candidate,lineage in candidate_to_lineage.items():
+            if line_token in lineage.lineage_id:
+                for timestamp,risk in values.items():
+                    if pd.notna(risk) and float(risk)>0: lookup[(candidate,pd.Timestamp(timestamp))]=float(risk)
+    return lookup
 class M1Engine:
     def __init__(self,frame:pd.DataFrame)->None:
         required=['time','open','high','low','close','spread']; missing=[x for x in required if x not in frame.columns]
@@ -30,7 +51,7 @@ class M1Engine:
         exit_fill=float(raw_exit)-slip_price; stored_exit=pd.Timestamp(self.times[index])
         if lineage.stored_exit_time=='M1_BAR_CLOSE': stored_exit+=pd.Timedelta(minutes=1)
         return {'entry_reference':reference_entry,'entry_fill':entry_fill,'exit_reference':float(raw_exit),'exit_fill':exit_fill,'exit_time_stressed':stored_exit,'r_value_stressed':float((exit_fill-entry_fill)/risk),'outcome_stressed':outcome,'risk_price':float(risk),'baseline_spread_price':spread_price,'slippage_price_per_side':slip_price}
-def recover_risk(row:pd.Series)->float:
+def recover_risk(row:pd.Series,fallback:float|None=None)->float:
     entry=float(row['entry_price']); exit_price=float(row['exit_price']); r_value=float(row['r_value'])
     if abs(r_value)>TOL_R:
         risk=(exit_price-entry)/r_value
@@ -39,11 +60,12 @@ def recover_risk(row:pd.Series)->float:
         if column in row.index and pd.notna(row[column]):
             risk=float(row[column])
             if math.isfinite(risk) and risk>0: return risk
+    if fallback is not None and math.isfinite(float(fallback)) and float(fallback)>0: return float(fallback)
     raise RuntimeError(f"Cannot recover risk: candidate={row['candidate_id']} entry={row['entry_time']} r={r_value}")
-def replay(registry:pd.DataFrame,engine:M1Engine,config:dict[str,Any],lineage_by_candidate:dict[str,Lineage],scenarios:list[Scenario])->tuple[pd.DataFrame,int]:
+def replay(registry:pd.DataFrame,engine:M1Engine,config:dict[str,Any],lineage_by_candidate:dict[str,Lineage],scenarios:list[Scenario],risk_lookup:dict[tuple[str,pd.Timestamp],float]|None=None)->tuple[pd.DataFrame,int]:
     baseline_id=str(config['scenario_grid']['baseline_scenario_id']); output=[]; checks_done=0; ordered=registry.sort_values(['candidate_id','decision_close_time'],kind='mergesort')
     for _,row in ordered.iterrows():
-        candidate_id=str(row['candidate_id']); lineage=lineage_by_candidate[candidate_id]; risk=recover_risk(row)
+        candidate_id=str(row['candidate_id']); lineage=lineage_by_candidate[candidate_id]; fallback=(risk_lookup or {}).get((candidate_id,pd.Timestamp(row['entry_time']))); risk=recover_risk(row,fallback)
         for scenario in scenarios:
             result=engine.evaluate(pd.Timestamp(row['entry_time']),risk,lineage,scenario.spread_multiplier,scenario.slippage_points_per_side)
             if scenario.scenario_id==baseline_id:
