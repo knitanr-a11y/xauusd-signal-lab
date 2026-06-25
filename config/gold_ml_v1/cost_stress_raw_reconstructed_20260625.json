@@ -70,7 +70,14 @@
     "slippage_unit": "points per side",
     "slippage_application_long": "entry fill equals entry reference plus slippage; exit fill equals trigger or time-exit bid price minus slippage",
     "tp_sl_trigger_distance": "frozen one risk unit from scenario entry reference",
-    "risk_unit": "recovered from frozen registry entry_price, exit_price and r_value; fail closed when not recoverable",
+    "risk_unit": "for nonzero R, recover from frozen registry entry_price, exit_price and r_value; for exact zero-R time exits, recover from the entry-time closed decision bar under the frozen lineage ATR contract; fail closed if unavailable or baseline parity fails",
+    "zero_r_risk_fallback": {
+      "M15_H4_BREAKOUT_FILTER_LINEAGE": "M15 simple rolling mean of true range, period 14",
+      "H1_D1_BREAKOUT_FILTER_LINEAGE": "H1 Wilder ATR, period 14",
+      "availability": "entry-time closed decision bar only",
+      "lookahead": "forbidden",
+      "fail_closed_if_unavailable": true
+    },
     "same_trade_membership_across_scenarios": true,
     "lookahead_for_candidate_selection": "forbidden",
     "future_exit_information_in_candidate_conditions": "forbidden"
