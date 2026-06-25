@@ -10,8 +10,10 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 MODULE_DIR = ROOT / "scripts/gold_ml_v1/cost_stress"
 CONFIG = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
+PASS_RECORD = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
 NEXT_ACTION = ROOT / "config/gold_ml_v1/next_local_action.json"
 HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md"
+PASS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
 sys.path.insert(0, str(MODULE_DIR))
 
 from cost_stress_contract import BRIDGE, RAW, Lineage, scenarios_from, validate_config  # noqa: E402
@@ -80,20 +82,33 @@ class CostStressContractTests(unittest.TestCase):
         item = {"trade_count": 30, "profit_factor": 1.0, "mean_r": 0.0001}
         self.assertEqual(gate_status(item, self.config["stress_gate"]), "PASS")
 
-    def test_one_click_action_points_only_to_cost_stress(self) -> None:
+    def test_cost_stress_is_completed_and_next_action_advanced(self) -> None:
+        pass_record = json.loads(PASS_RECORD.read_text(encoding="utf-8"))
+        self.assertEqual(pass_record["status"], "PASS")
+        self.assertEqual(pass_record["raw_baseline_parity_checks"], 1687)
+        self.assertEqual(pass_record["candidate_stress_gate"]["pass"], 9)
+        self.assertEqual(pass_record["candidate_stress_gate"]["fail"], 0)
+
         action = json.loads(NEXT_ACTION.read_text(encoding="utf-8"))
         self.assertEqual(action["mode"], "bat")
-        self.assertIn("cost_stress", action["runner"])
+        self.assertIn("prospective", action["runner"])
+        self.assertNotIn("cost_stress", action["runner"])
         self.assertFalse(action["new_exploration_allowed"])
         self.assertTrue(action["audit_only"])
         self.assertFalse(action["live_ready"])
         self.assertFalse(action["automatic_promotion"])
         self.assertFalse(action["automatic_registration"])
-        text = HANDOFF.read_text(encoding="utf-8")
-        self.assertIn("RAW_RECONSTRUCTED", text)
-        self.assertIn("WARMUP_BRIDGE_EXACT", text)
-        self.assertIn("12", text)
-        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", text)
+
+        implementation_text = HANDOFF.read_text(encoding="utf-8")
+        self.assertIn("RAW_RECONSTRUCTED", implementation_text)
+        self.assertIn("WARMUP_BRIDGE_EXACT", implementation_text)
+        self.assertIn("12", implementation_text)
+        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", implementation_text)
+
+        pass_text = PASS_HANDOFF.read_text(encoding="utf-8")
+        self.assertIn("PASS=9", pass_text)
+        self.assertIn("FAIL=0", pass_text)
+        self.assertIn("Fresh prospective", pass_text)
 
 
 if __name__ == "__main__":
