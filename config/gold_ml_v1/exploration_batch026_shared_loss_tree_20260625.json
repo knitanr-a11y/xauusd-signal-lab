@@ -1,0 +1,67 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH026-SHARED-LOSS-TREE-20260625",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_EVALUATION",
+  "audit_only": true,
+  "purpose": "Learn one common composite loss exclusion for LONG and one for SHORT from deduplicated high-count parent events, then apply them unchanged to each eligible base candidate.",
+  "existing_frozen_nine_modified": false,
+  "local_implementation_before_survivor": "forbidden",
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "M5_close": "time + 5 minutes",
+    "M15_close": "time + 15 minutes",
+    "H1_close": "time + 1 hour",
+    "H4_close": "time + 4 hours",
+    "D1_close": "time + 1 day",
+    "join": "latest confirmed close not later than M15 decision close"
+  },
+  "population": {
+    "eligible_ids": "same 21 base IDs recorded in Batch025",
+    "parent_event_key": ["direction", "decision_close_time"],
+    "duplicate_rows_before_tree": "remove",
+    "fit_separate_tree_per_direction": true
+  },
+  "periods": {
+    "2023_H1": "TREE_TRAINING_ONLY",
+    "2023_H2": "LOSS_LEAF_INTERNAL_VALIDATION_ONLY",
+    "2024": "EXTERNAL_VALIDATION_ONLY_NO_RETUNE",
+    "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+    "2026": "DIAGNOSTIC_ONLY"
+  },
+  "features": {
+    "same_53_curated_decision_time_features_as_batch025": true,
+    "label": "r_value < 0",
+    "missing_values": "2023_H1 median by direction",
+    "future_data": "forbidden"
+  },
+  "tree": {
+    "type": "DecisionTreeClassifier",
+    "criterion": "entropy",
+    "max_depth": 3,
+    "min_samples_leaf": "max(20, floor(0.08 * training_count))",
+    "random_state": 0,
+    "hyperparameter_grid": "none"
+  },
+  "accepted_loss_leaf": {
+    "2023_H1_min_count": 20,
+    "2023_H1_min_loss_rate": 0.75,
+    "2023_H1_max_mean_R": -0.3,
+    "2023_H2_min_count": 15,
+    "2023_H2_min_loss_rate": 0.62,
+    "2023_H2_max_mean_R_exclusive": 0.0,
+    "selection": "exclude every terminal leaf passing all criteria"
+  },
+  "candidate_gates": {
+    "2023": {"minimum_count": 130, "minimum_profit_factor": 1.2, "minimum_mean_R_exclusive": 0.1},
+    "2024": {"minimum_count": 80, "minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+    "2025": {"minimum_count": 80, "minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+    "2026": "NO_GATE"
+  },
+  "status_contract": {
+    "all_gate_pass": "RESEARCH_ONLY_PENDING_CORRELATION_AND_COST_REVIEW",
+    "zero_survivors": "VALID_COMPLETED_RESULT",
+    "rescue_tuning": "forbidden",
+    "automatic_accumulation": false,
+    "automatic_promotion": false,
+    "automatic_local_implementation": false
+  }
+}
