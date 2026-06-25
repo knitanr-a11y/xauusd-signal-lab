@@ -1,0 +1,129 @@
+{
+  "candidate_id": "GML1-PROV-030-A",
+  "status": "PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+  "lineage": "M15_H1_H4_TREND_PULLBACK50_M5_STOP_CONFIRM_D1_STRENGTH",
+  "audit_only": true,
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "M1_close": "time + 1 minute",
+    "M5_close": "time + 5 minutes",
+    "M15_close": "time + 15 minutes",
+    "H1_close": "time + 1 hour",
+    "H4_close": "time + 4 hours",
+    "D1_close": "time + 1 day",
+    "M15_decision": "M15 close time",
+    "entry": "exact M1 open equal to confirming M5 close"
+  },
+  "base_event": {
+    "direction": "LONG",
+    "conditions": [
+      "H1 EMA20 > H1 EMA50",
+      "H4 EMA20 > H4 EMA50",
+      "M15 low <= M15 EMA50",
+      "M15 close > M15 EMA50",
+      "M15 close > M15 open",
+      "H1 EMA20 slope over 3 H1 bars divided by H1 Wilder ATR14 > 0"
+    ]
+  },
+  "entry": {
+    "mode": "M5_STOP3",
+    "conditions": [
+      "inspect no more than the next 3 closed M5 bars after the M15 decision",
+      "M5 high >= signal M15 high + 0.05 * signal M15 Wilder ATR14",
+      "confirming M5 close > confirming M5 open"
+    ],
+    "entry_time": "confirming M5 close / exact M1 open"
+  },
+  "risk_exit": {
+    "risk": "signal M15 Wilder ATR14",
+    "stop_R": 1.0,
+    "target_R": 2.5,
+    "breakeven_after_MFE_R": 1.0,
+    "horizon_minutes": 1440,
+    "one_open_position": true,
+    "same_M1_priority": "SL before breakeven activation or target",
+    "LONG_entry_reference": "M1 open plus recorded spread points times 0.01",
+    "LONG_exit_path": "M1 bid OHLC"
+  },
+  "regime_filter": {
+    "m15_ema20_slope3_over_m15_atr14_max": -0.04301765002310276,
+    "d1_adx14_min_exclusive": 22.1636323928833,
+    "missing_features": "reject"
+  },
+  "discovery": {
+    "research_batches": ["Batch030", "Batch031", "Batch032", "Batch033", "Batch034"],
+    "methods": [
+      "12 event concepts and 24 directional families",
+      "5 entry modes",
+      "4 exit-management profiles",
+      "414 exact-M1 variants",
+      "diversified portfolio selection",
+      "walk-forward logistic loss filtering",
+      "KMeans, depth-2 tree and fixed regime filters",
+      "25-cell threshold perturbation",
+      "12 cost scenarios",
+      "block bootstrap and leave-one-period-out tests"
+    ],
+    "selection_method": "predeclared Batch033 depth-2 regression tree fit on 2023 H1; terminal leaf required positive 2023 H2",
+    "methods_tested": 15,
+    "complete_case_audit": "reproduced a nearby local-pullback-slope and D1-trend-strength split"
+  },
+  "baseline_metrics": {
+    "2023": {"count": 56, "profit_factor": 1.4285714285714286, "mean_R": 0.21428571428571427, "total_R": 12.0, "max_DD_R": 9.0},
+    "2024": {"count": 75, "profit_factor": 1.705547196749316, "mean_R": 0.31984806252635656, "total_R": 23.98860468947674, "max_DD_R": 9.0},
+    "2025": {"count": 86, "profit_factor": 1.9053353283070396, "mean_R": 0.33774721498541604, "total_R": 29.04626048874578, "max_DD_R": 10.0},
+    "2026_diagnostic": {"count": 25, "profit_factor": 1.0416666666666667, "mean_R": 0.02, "total_R": 0.5, "max_DD_R": 7.0}
+  },
+  "cost_stress": {
+    "scenario_count": 12,
+    "pass": 12,
+    "fail": 0,
+    "worst_2024_profit_factor": 1.274442736014053,
+    "worst_2024_mean_R": 0.156635353118998,
+    "worst_2025_profit_factor": 1.5072577356486283,
+    "worst_2025_mean_R": 0.2280625888515159
+  },
+  "robustness": {
+    "threshold_cells": 25,
+    "threshold_cells_passing_2024_and_2025": 15,
+    "external_2024_2025_block_bootstrap_mean_R_95pct": [0.07869759861677555, 0.5361941909571795],
+    "external_2024_2025_block_bootstrap_PF_95pct_lower": 1.1652927194655585,
+    "leave_one_quarter_out_min_profit_factor": 1.461,
+    "leave_one_quarter_out_min_mean_R": 0.215,
+    "leave_one_month_out_min_profit_factor": 1.679,
+    "leave_one_month_out_min_mean_R": 0.288
+  },
+  "caveats": [
+    "The final non-missing 2023 H1 selected leaf has 11 trades.",
+    "The external monthly one-sided p-value does not survive conservative Bonferroni adjustment across 15 correlated regime attempts.",
+    "Several individual quarters are negative despite strong leave-one-period-out aggregate results.",
+    "2026 diagnostic baseline is near flat and becomes negative in higher-cost scenarios.",
+    "Prospective audit-only confirmation is required before any promotion or registration."
+  ],
+  "expected_input_sha256": {
+    "gold_v3_2023_2026_m1.csv": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "gold_v3_2023_2026_m5.csv": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "gold_v3_2023_2026_m15.csv": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "gold_v3_2023_2026_h1.csv": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "gold_v3_2023_2026_h4.csv": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "gold_v3_2023_2026_d1.csv": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "canonical_reproduction": {
+    "candidate_trades_sha256": "bd567f23465ff9013adf115ce82a2926051f99b003322cda63ce8e4ed14a3abf",
+    "candidate_trade_rows": 242,
+    "year_metrics_sha256": "743aee35157f624771323fe3f6229dc11dab9ad3c3997f872e1b95622ac48931",
+    "result_archive_sha256": "7e9e6ab1bb77a6b603773777e4ccd03206b4a2ab7a68458bcdab36b126e07516"
+  },
+  "execution_switches": {
+    "accumulated": false,
+    "registered": false,
+    "prospective_monitoring": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false
+  }
+}
