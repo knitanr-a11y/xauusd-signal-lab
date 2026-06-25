@@ -1,0 +1,1 @@
+Temporary validation trigger for assistant-first Batch024 RAW transfer workflow. Do not merge this file.
