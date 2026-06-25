@@ -19,7 +19,7 @@ if not exist "%HISTORICAL_DIR%" (
   exit /b 1
 )
 if not exist "%LIVE_DIR%" (
-  echo [ERROR] Live folder not found: %LIVE_DIR%
+  echo [ERROR] Live/warmup folder not found: %LIVE_DIR%
   exit /b 1
 )
 
@@ -38,9 +38,12 @@ py -3.12 scripts\gold_ml_v1\replay\nine_candidate_local_replay.py --repo-root "%
 if errorlevel 1 goto :failed
 
 echo ============================================================
-echo STEP 3/4 Historical exact replay using gold_v3_2023_2026 only
+echo STEP 3/4 Corrected historical replay
+echo   decisions/trades: gold_v3_2023_2026 only
+echo   pre-2023 warmup: older goldsharp H4/D1/etc only
+echo   ATR14: simple mean of 14 true ranges
 echo ============================================================
-py -3.12 scripts\gold_ml_v1\replay\nine_candidate_local_replay.py --repo-root "%CD%" --mode raw --raw-dir "%HISTORICAL_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay
+py -3.12 scripts\gold_ml_v1\replay\nine_candidate_local_replay_v2.py --repo-root "%CD%" --mode raw --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v2
 if errorlevel 1 goto :failed
 
 echo ============================================================
@@ -51,7 +54,8 @@ if errorlevel 1 goto :failed
 
 echo.
 echo [PASS] Batch023 completed.
-echo Historical replay used only gold_v3_2023_2026 files.
+echo Historical decisions used only gold_v3_2023_2026 rows.
+echo Older goldsharp rows were used only for indicator warmup.
 echo Live preflight treated only goldsharp rows after the historical maximum as new operational rows.
 pause
 exit /b 0
