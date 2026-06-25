@@ -1,12 +1,23 @@
 {
   "record_id": "GML1-FRESH-PROSPECTIVE-CI-PASS-20260625",
   "status": "PASS",
-  "validated_main_commit": "8cdb858f56288a5cc6e3ad4a49fa25beaf8a6f3a",
-  "validation_pr": 26,
-  "validation_head_commit": "3fb6638701da86d4145727d1fd5367cd4a91d4ee",
+  "implementation_validation": {
+    "validated_main_commit": "8cdb858f56288a5cc6e3ad4a49fa25beaf8a6f3a",
+    "validation_pr": 26,
+    "validation_head_commit": "3fb6638701da86d4145727d1fd5367cd4a91d4ee",
+    "workflow_run_id": 28165292690,
+    "job_id": 83415630145,
+    "validation_pr_merged": false
+  },
+  "final_current_state_validation": {
+    "validated_main_commit": "3ac2634dc76b6847583517e4afdf05fbbd866229",
+    "validation_pr": 29,
+    "validation_head_commit": "8e7b126d76fd9088a58c58b2ceb4f2cf568c5f55",
+    "workflow_run_id": 28165730901,
+    "job_id": 83417103397,
+    "validation_pr_merged": false
+  },
   "workflow_name": "GOLD_ML_V1 Audit Tests",
-  "workflow_run_id": 28165292690,
-  "job_id": 83415630145,
   "validated_steps": {
     "compile_tools": "PASS",
     "governance_guardrails": "PASS",
@@ -14,8 +25,7 @@
     "cost_stress_core_registry": "PASS",
     "fresh_prospective_engine": "PASS"
   },
-  "validation_pr_merged": false,
-  "production_changes_from_validation_branch": false,
+  "production_changes_from_validation_branches": false,
   "audit_only": true,
   "live_ready": false,
   "final_signal": false,
@@ -25,5 +35,5 @@
   "live_hook": false,
   "automatic_promotion": false,
   "automatic_registration": false,
-  "note": "The validation branch added only a temporary test-path trigger file. The production implementation already existed on main and the PR was closed without merge after all GOLD_ML_V1 audit steps passed."
+  "note": "Both validation PRs added only temporary test-path trigger files. Production implementation and governance files were already on main. The validation PRs were closed without merge after all GOLD_ML_V1 audit steps passed."
 }
