@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -13,6 +12,12 @@ from pathlib import Path
 EXPECTED_ZIP_SHA256 = "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9"
 PACKAGE_DIRNAME = "gold_ml_v1_batch023_local_replay_20260625"
 SCRIPT_NAME = "replay_nine_candidates.py"
+REQUIRED_PACKAGE_MEMBERS = [
+    f"{PACKAGE_DIRNAME}/BATCH023_STATUS.json",
+    f"{PACKAGE_DIRNAME}/PACKAGE_MANIFEST.json",
+    f"{PACKAGE_DIRNAME}/config/nine_candidate_replay_config.json",
+    f"{PACKAGE_DIRNAME}/{SCRIPT_NAME}",
+]
 
 
 def sha256_file(path: Path) -> str:
@@ -32,8 +37,7 @@ def locate_default_zip() -> Path:
         if candidate.exists():
             return candidate
     raise FileNotFoundError(
-        "Batch023 ZIP was not found in Downloads or Desktop. "
-        "Pass --zip explicitly."
+        "Batch023 ZIP was not found in Downloads or Desktop. Pass --zip explicitly."
     )
 
 
@@ -52,20 +56,11 @@ def verify_historical_inputs(historical_dir: Path) -> None:
         )
 
 
-def find_package_root(extract_root: Path) -> Path:
-    direct = extract_root / PACKAGE_DIRNAME
-    if direct.exists():
-        return direct
-    matches = [
-        path.parent
-        for path in extract_root.rglob(SCRIPT_NAME)
-        if path.is_file() and path.parent.name == PACKAGE_DIRNAME
-    ]
-    if len(matches) != 1:
-        raise RuntimeError(
-            f"Expected exactly one frozen package root, found {len(matches)}"
-        )
-    return matches[0]
+def verify_zip_members(archive: zipfile.ZipFile) -> None:
+    members = set(archive.namelist())
+    missing = [name for name in REQUIRED_PACKAGE_MEMBERS if name not in members]
+    if missing:
+        raise RuntimeError(f"Verified ZIP is missing required package members: {missing}")
 
 
 def run_frozen(
@@ -88,78 +83,84 @@ def run_frozen(
             f"Batch023 ZIP SHA mismatch: expected={EXPECTED_ZIP_SHA256} actual={actual_sha}"
         )
 
-    runtime_dir = output_dir / "frozen_runtime"
-    if runtime_dir.exists():
-        shutil.rmtree(runtime_dir)
-    runtime_dir.mkdir(parents=True)
+    # The repository path is very deep under MetaQuotes. Extracting below the
+    # repository exceeded the classic Windows MAX_PATH limit. Use the short
+    # system temporary directory and delete it automatically after execution.
+    with tempfile.TemporaryDirectory(prefix="gml1b23_") as temp_name:
+        runtime_dir = Path(temp_name)
+        with zipfile.ZipFile(zip_path) as archive:
+            corrupt_member = archive.testzip()
+            if corrupt_member is not None:
+                raise RuntimeError(f"Corrupt ZIP member: {corrupt_member}")
+            verify_zip_members(archive)
+            archive.extractall(runtime_dir)
 
-    with zipfile.ZipFile(zip_path) as archive:
-        corrupt_member = archive.testzip()
-        if corrupt_member is not None:
-            raise RuntimeError(f"Corrupt ZIP member: {corrupt_member}")
-        archive.extractall(runtime_dir)
+        package_root = runtime_dir / PACKAGE_DIRNAME
+        frozen_script = package_root / SCRIPT_NAME
+        status_file = package_root / "BATCH023_STATUS.json"
+        if not frozen_script.exists():
+            raise FileNotFoundError(frozen_script)
+        if not status_file.exists():
+            raise FileNotFoundError(status_file)
 
-    package_root = find_package_root(runtime_dir)
-    frozen_script = package_root / SCRIPT_NAME
-    if not frozen_script.exists():
-        raise FileNotFoundError(frozen_script)
+        command = [
+            sys.executable,
+            str(frozen_script),
+            "--package-root",
+            str(package_root),
+            "--raw-dir",
+            str(historical_dir),
+            "--output-dir",
+            str(output_dir / "results"),
+            "--mode",
+            "raw",
+        ]
 
-    command = [
-        sys.executable,
-        str(frozen_script),
-        "--package-root",
-        str(package_root),
-        "--raw-dir",
-        str(historical_dir),
-        "--output-dir",
-        str(output_dir / "results"),
-        "--mode",
-        "raw",
-    ]
+        metadata = {
+            "status": "STARTED",
+            "zip_path": str(zip_path),
+            "zip_sha256": actual_sha,
+            "historical_dir": str(historical_dir),
+            "temporary_package_root": str(package_root),
+            "frozen_script": str(frozen_script),
+            "command": command,
+            "policy": {
+                "evaluator": "verbatim script extracted from the verified Batch023 ZIP",
+                "raw_source": "gold_v3_2023_2026 directory only",
+                "goldsharp_in_historical_replay": False,
+                "time_contract": "raw CSV time is bar-open time",
+                "temporary_extraction": "system TEMP to avoid Windows MAX_PATH",
+            },
+        }
+        (output_dir / "frozen_run_metadata.json").write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
-    metadata = {
-        "status": "STARTED",
-        "zip_path": str(zip_path),
-        "zip_sha256": actual_sha,
-        "historical_dir": str(historical_dir),
-        "frozen_script": str(frozen_script),
-        "command": command,
-        "policy": {
-            "evaluator": "verbatim script extracted from the verified Batch023 ZIP",
-            "raw_source": "gold_v3_2023_2026 directory only",
-            "goldsharp_in_historical_replay": False,
-            "time_contract": "raw CSV time is bar-open time",
-        },
-    }
-    (output_dir / "frozen_run_metadata.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+        completed = subprocess.run(
+            command,
+            cwd=str(package_root),
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            check=False,
+        )
+        (output_dir / "frozen_stdout.txt").write_text(
+            completed.stdout, encoding="utf-8"
+        )
+        (output_dir / "frozen_stderr.txt").write_text(
+            completed.stderr, encoding="utf-8"
+        )
+        print(completed.stdout, end="")
+        if completed.stderr:
+            print(completed.stderr, file=sys.stderr, end="")
 
-    completed = subprocess.run(
-        command,
-        cwd=str(package_root),
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-        check=False,
-    )
-    (output_dir / "frozen_stdout.txt").write_text(
-        completed.stdout, encoding="utf-8"
-    )
-    (output_dir / "frozen_stderr.txt").write_text(
-        completed.stderr, encoding="utf-8"
-    )
-    print(completed.stdout, end="")
-    if completed.stderr:
-        print(completed.stderr, file=sys.stderr, end="")
-
-    metadata["status"] = "PASS" if completed.returncode == 0 else "FAIL"
-    metadata["exit_code"] = completed.returncode
-    (output_dir / "frozen_run_metadata.json").write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    return int(completed.returncode)
+        metadata["status"] = "PASS" if completed.returncode == 0 else "FAIL"
+        metadata["exit_code"] = completed.returncode
+        (output_dir / "frozen_run_metadata.json").write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        return int(completed.returncode)
 
 
 def main() -> int:
