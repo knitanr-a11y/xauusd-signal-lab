@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-AB",
-  "formal_status": "GOLD_ML_V1_028_NEW_BASE_FAMILY_RESEARCH_ASSISTANT_SIDE_AUDIT_ONLY",
-  "status": "NEW_BASE_FAMILY_RESEARCH_ASSISTANT_SIDE_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-AC",
+  "formal_status": "GOLD_ML_V1_029_M5_CONFIRMATION_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES_AUDIT_ONLY",
+  "status": "M5_CONFIRMATION_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH025_028_RESEARCH_RESET_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH029_M5_CONFIRMATION_COMPLETE_20260625.md",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
     "2024": "VALIDATION_ONLY_NO_RETUNE",
@@ -32,34 +32,30 @@
   },
   "completed_research": {
     "batch024": "ZERO_SURVIVORS",
-    "batch025_candidate_specific_composite_loss_filters": "FIVE_2023_INTERNAL_PASS_ZERO_2024_PASS",
-    "batch026_shared_directional_loss_tree": "ZERO_2023_GATE_PASS",
-    "batch027_independent_event_families": "ONE_2023_PASS_ZERO_2024_PASS",
-    "batch028_breakout_long_tp2": "REJECTED_2024_NEAR_MISS"
+    "batch025": "ZERO_EXTERNAL_SURVIVORS",
+    "batch026": "ZERO_SURVIVORS",
+    "batch027": "ZERO_SURVIVORS",
+    "batch028": "REJECTED_2024_NEAR_MISS",
+    "batch029_m5_confirmation": "COMPLETE_ZERO_ACCEPTED_CANDIDATES"
   },
-  "batch028_near_miss": {
-    "candidate_id": "GML1-EXP028-BREAKOUT-LONG-TP2-LF2",
-    "2023": {"count": 189, "profit_factor": 1.5369343135146272, "mean_R": 0.30113776313518764},
-    "2024": {"count": 259, "profit_factor": 1.0614380160969732, "mean_R": 0.03961797231507277},
-    "2025": {"count": 324, "profit_factor": 1.2248364100235192, "mean_R": 0.13878790742192543},
-    "survivor": false,
-    "rescue_tuning": false
-  },
-  "research_policy_now": {
-    "rescue_failed_batch024_lineage": false,
-    "new_independent_base_families_only": true,
-    "minimum_2023_count_before_loss_profile_analysis": 200,
-    "composite_loss_features": "2_OR_3_DECISION_TIME_FEATURES_MAXIMUM_TWO_SEQUENTIAL_RULES",
-    "2023_split": "H1_DISCOVERY_H2_INTERNAL_VALIDATION",
-    "local_implementation_before_survivor": false,
-    "implementation_trigger": "NON_DUPLICATE_CANDIDATE_PASSES_2023_2024_2025_AND_COST_REVIEW"
+  "batch029": {
+    "result_record": "config/gold_ml_v1/exploration_batch029_m5_confirmation_result_20260625.json",
+    "baseline_variants": 36,
+    "baseline_survivors": 0,
+    "composite_rule_survivors": 0,
+    "logistic_filter_survivors": 0,
+    "post_hoc_combined_long_valid_candidate": false,
+    "post_hoc_combined_long_cost_stress_pass": 6,
+    "post_hoc_combined_long_cost_stress_fail": 6,
+    "accepted_new_candidates": 0,
+    "local_implementation_created": false
   },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "action_id": "GML1-RESEARCH-NEW-BASE-FAMILIES-IN-PROGRESS-NO-LOCAL-RUN",
+    "action_id": "GML1-BATCH029-RESEARCH-COMPLETE-NO-LOCAL-RUN",
     "mode": "status_only"
   },
-  "next": "ASSISTANT_CONTINUES_NEW_BASE_FAMILY_RESEARCH_NO_USER_LOCAL_ACTION",
+  "next": "WAIT_FOR_NEXT_EXPLICIT_RESEARCH_DIRECTION_NO_LOCAL_ACTION",
   "execution_switches": {
     "local_exploration": false,
     "local_reproduction": false,
