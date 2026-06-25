@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-I",
-  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH023_GITHUB_IMPLEMENTED_RAW_DIRECTORY_PENDING_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-J",
+  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH023_SOURCE_SPLIT_IMPLEMENTED_LOCAL_EXECUTION_PENDING_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -35,6 +35,16 @@
     "2026":"diagnostic only; never retune on it",
     "fresh_prospective_cutoff_mt5_server_close":"2026-06-23 18:15:00"
   },
+  "source_contract": {
+    "record":"config/gold_ml_v1/replay/historical_live_source_contract_20260625.json",
+    "historical_exact_replay":"gold_v3_2023_2026 only; goldsharp excluded",
+    "live_new_closed_bars":"goldsharp only",
+    "historical_use_during_live":"indicator warmup and continuity only",
+    "historical_rows_may_trigger_new_live_signal":false,
+    "goldsharp_rows_at_or_before_historical_max":"overlap/backfill audit only",
+    "time_basis":"MT5 server naive time",
+    "latest_row":"closed by CSV contract"
+  },
   "completed_exact_audits": {
     "batch015_overlap_independence":"COMPLETED",
     "prov020_fresh_activation":"COMPLETED_NO_POST_CUTOFF_SOURCE_COVERAGE",
@@ -45,36 +55,40 @@
     "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
     "batch021_high_count_consensus_exploration":"COMPLETED_WATCH023A_RESEARCH_ONLY_AFTER_BATCH022",
     "batch022_all_watch_validation":"COMPLETED_WATCH014_DEMOTED_WATCH023_RESEARCH_ONLY_EXTERNAL_BLOCKERS_REMAIN",
-    "batch023_nine_candidate_local_replay":"GITHUB_IMPLEMENTATION_COMMITTED_REGISTRY_PARITY_PASS_RAW_DIRECTORY_PENDING"
+    "batch023_nine_candidate_local_replay":"GITHUB_IMPLEMENTATION_COMMITTED_REGISTRY_PARITY_PASS_SOURCE_SPLIT_IMPLEMENTED_LOCAL_EXECUTION_PENDING"
   },
   "batch023_local_replay": {
     "status_record":"config/gold_ml_v1/nine_candidate_local_replay_batch023_status_20260625.json",
     "documentation":"docs/gold_ml_v1/GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.md",
     "replay_python":"scripts/gold_ml_v1/replay/nine_candidate_local_replay.py",
+    "historical_runner":"scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "live_source_preflight":"scripts/gold_ml_v1/replay/goldsharp_live_source_preflight.py",
+    "live_source_preflight_runner":"scripts/gold_ml_v1/replay/run_goldsharp_live_source_preflight.bat",
     "artifact_installer":"scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat",
-    "raw_runner":"scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
     "registry_runner":"scripts/gold_ml_v1/replay/run_nine_candidate_registry_parity.bat",
     "workflow":".github/workflows/gold_ml_v1_batch023_tests.yml",
     "package_filename":"GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip",
     "package_sha256":"d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
     "registry_parity":"9/9 PASS",
     "derivative_parity":"PROV-020, WATCH-021-A/B/C, WATCH-022-B PASS",
-    "local_staging_tests":"4 PASS",
-    "raw_replay":"NOT_EXECUTED_LOCAL_RAW_DIRECTORY_UNKNOWN"
+    "local_staging_tests":"historical replay 4 PASS; live source separation 2 tests added",
+    "historical_raw_replay":"NOT_EXECUTED_USER_PC_ACCESS_UNAVAILABLE",
+    "goldsharp_live_preflight":"NOT_EXECUTED_USER_PC_ACCESS_UNAVAILABLE",
+    "local_source_paths_provided_by_user":true,
+    "local_source_paths_stored_in_public_repo":false
   },
-  "known_unknowns": [
-    "local filesystem directory containing authorized raw M1/M15/H1/H4/D1 candle CSV files"
-  ],
   "registration_blockers": [
     "install the verified Batch023 artifact ZIP into the repository worktree",
-    "run Batch023 against authorized raw M1/M15/H1/H4/D1 files and inspect all nine mismatch reports",
+    "run historical replay against gold_v3_2023_2026 only and inspect all nine mismatch reports",
+    "run goldsharp live-source preflight and confirm post-historical operational rows",
     "spread 1.5x and 2.0x plus fixed-slippage stress",
     "fresh prospective confirmation after 2026-06-23 18:15 MT5 server close",
     "no portfolio activation authorization",
     "audit-only remains active"
   ],
   "next_research": [
-    "complete Batch023 raw replay before further candidate exploration",
+    "complete Batch023 historical replay before further candidate exploration",
+    "validate goldsharp-only live source separation",
     "after parity, perform spread and slippage stress",
     "then continue independent SHORT discovery and M5/M15 high-count exploration",
     "MAE and MFE meta-labeling on broad parent pools",
