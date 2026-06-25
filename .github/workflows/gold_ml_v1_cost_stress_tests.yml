@@ -1,11 +1,16 @@
-name: GOLD_ML_V1 Cost Stress Tests
+name: GOLD_ML_V1 Audit Tests
 
 on:
   workflow_dispatch:
   push:
     paths:
       - "scripts/gold_ml_v1/cost_stress/**"
+      - "scripts/gold_ml_v1/prospective/**"
+      - "scripts/gold_ml_v1/run_next_local.py"
+      - "RUN_GOLD_ML_V1_NEXT.bat"
       - "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
+      - "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
+      - "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json"
       - "config/gold_ml_v1/current_state_snapshot_20260624.json"
       - "config/gold_ml_v1/next_local_action.json"
       - "docs/gold_ml_v1/**"
@@ -31,8 +36,12 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/cost_stress/cost_stress_engine.py
           python -m py_compile scripts/gold_ml_v1/cost_stress/cost_stress_reports.py
           python -m py_compile scripts/gold_ml_v1/cost_stress/run_cost_stress_raw_reconstructed.py
+          python -m py_compile scripts/gold_ml_v1/prospective/fresh_prospective_engine.py
+          python -m py_compile scripts/gold_ml_v1/prospective/run_fresh_prospective_confirmation.py
+          python -m py_compile scripts/gold_ml_v1/run_next_local.py
       - name: Run tests
         run: |
           python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
           python -m unittest tests/gold_ml_v1/test_cost_stress_contract.py -v
           python -m unittest tests/gold_ml_v1/test_cost_stress_core_registry_fix.py -v
+          python -m unittest tests/gold_ml_v1/test_fresh_prospective_engine.py -v
