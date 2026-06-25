@@ -1,0 +1,10 @@
+{
+  "record_id": "GML1-BATCH027-RESULT-20260625",
+  "status": "PASS_ZERO_SURVIVORS",
+  "families": 6,
+  "passed_2023": 1,
+  "passed_2024": 0,
+  "survivors": 0,
+  "rescue_tuning": false,
+  "local_implementation": false
+}
