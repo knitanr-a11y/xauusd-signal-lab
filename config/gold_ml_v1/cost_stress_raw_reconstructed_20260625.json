@@ -1,0 +1,150 @@
+{
+  "record_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-20260625",
+  "status": "PREDECLARED_BEFORE_LOCAL_EXECUTION_AUDIT_ONLY",
+  "created": "2026-06-25",
+  "repo": "knitanr-a11y/xauusd-signal-lab",
+  "namespace": "gold_ml_v1",
+  "phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_SEPARATELY",
+  "audit_only": true,
+  "new_exploration": false,
+  "candidate_pool": {
+    "frozen_accumulated_ids": [
+      "GML1-PROV-007",
+      "GML1-PROV-008",
+      "GML1-WATCH-022-B",
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ],
+    "research_only_ids": [
+      "GML1-WATCH-014-A",
+      "GML1-WATCH-022-A",
+      "GML1-WATCH-023-A"
+    ],
+    "silent_add_remove_replace_relabel": "forbidden"
+  },
+  "lineages": {
+    "M15_H4_BREAKOUT_FILTER_LINEAGE": {
+      "candidate_ids": [
+        "GML1-PROV-007",
+        "GML1-PROV-008",
+        "GML1-WATCH-022-B"
+      ],
+      "horizon_minutes": 360,
+      "stored_exit_time": "M1_BAR_CLOSE",
+      "direction": "LONG"
+    },
+    "H1_D1_BREAKOUT_FILTER_LINEAGE": {
+      "candidate_ids": [
+        "GML1-PROV-010",
+        "GML1-PROV-015",
+        "GML1-PROV-020",
+        "GML1-WATCH-021-A",
+        "GML1-WATCH-021-B",
+        "GML1-WATCH-021-C"
+      ],
+      "horizon_minutes": 2880,
+      "stored_exit_time": "M1_BAR_OPEN",
+      "direction": "LONG"
+    }
+  },
+  "population_contract": {
+    "primary": "RAW_RECONSTRUCTED",
+    "secondary_separate_only": "WARMUP_BRIDGE_EXACT",
+    "bridge_primary_population_use": "forbidden",
+    "bridge_promotion_or_live_use": "forbidden",
+    "fixed_trade_population": true,
+    "scenario_exit_replay_may_not_add_or_remove_candidate_rows": true
+  },
+  "time_and_execution_contract": {
+    "raw_csv_time": "MT5 server naive bar-open time",
+    "latest_csv_row": "closed",
+    "m1_bar_duration_minutes": 1,
+    "same_m1_tp_sl_priority": "SL",
+    "point_size": 0.01,
+    "baseline_entry_reference_long": "M1 open plus recorded spread points times point_size",
+    "spread_multiplier_application": "entry reference spread only; M1 OHLC are treated as bid-side path prices",
+    "slippage_unit": "points per side",
+    "slippage_application_long": "entry fill equals entry reference plus slippage; exit fill equals trigger or time-exit bid price minus slippage",
+    "tp_sl_trigger_distance": "frozen one risk unit from scenario entry reference",
+    "risk_unit": "recovered from frozen registry entry_price, exit_price and r_value; fail closed when not recoverable",
+    "same_trade_membership_across_scenarios": true,
+    "lookahead_for_candidate_selection": "forbidden",
+    "future_exit_information_in_candidate_conditions": "forbidden"
+  },
+  "scenario_grid": {
+    "grid_type": "FULL_CARTESIAN_PRODUCT",
+    "spread_multipliers": [1.0, 1.5, 2.0],
+    "fixed_slippage_points_per_side": [0, 5, 10, 20],
+    "baseline_scenario_id": "SPREAD_1_0X_SLIP_0PTS",
+    "scenario_id_format": "SPREAD_{multiplier_1_decimal}X_SLIP_{points}PTS",
+    "grid_frozen_before_execution": true,
+    "post_result_grid_change": "forbidden"
+  },
+  "stress_gate": {
+    "applies_to_population": "RAW_RECONSTRUCTED",
+    "bridge_gate_status": "NOT_ELIGIBLE_AUDIT_ONLY",
+    "minimum_trade_count": 30,
+    "minimum_profit_factor": 1.0,
+    "minimum_mean_r_exclusive": 0.0,
+    "scenario_pass_rule": "trade_count >= minimum_trade_count AND profit_factor >= minimum_profit_factor AND mean_r > minimum_mean_r_exclusive",
+    "candidate_overall_pass_rule": "all predeclared scenarios PASS",
+    "runner_exit_code_rule": "exit 0 means validation and report generation PASS; candidate stress-gate FAIL is preserved as a result and never auto-promotes",
+    "post_result_gate_change": "forbidden"
+  },
+  "expected_provenance": {
+    "batch023_zip_sha256": "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
+    "raw_sha256": {
+      "gold_v3_2023_2026_m1.csv": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "gold_v3_2023_2026_m5.csv": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+      "gold_v3_2023_2026_m15.csv": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "gold_v3_2023_2026_h1.csv": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+      "gold_v3_2023_2026_h4.csv": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+      "gold_v3_2023_2026_d1.csv": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+    },
+    "candidate_source_counts": {
+      "GML1-PROV-007": {"RAW_RECONSTRUCTED": 153, "WARMUP_BRIDGE_EXACT": 1, "TOTAL": 154},
+      "GML1-PROV-008": {"RAW_RECONSTRUCTED": 168, "WARMUP_BRIDGE_EXACT": 1, "TOTAL": 169},
+      "GML1-WATCH-022-B": {"RAW_RECONSTRUCTED": 134, "WARMUP_BRIDGE_EXACT": 1, "TOTAL": 135},
+      "GML1-PROV-010": {"RAW_RECONSTRUCTED": 242, "WARMUP_BRIDGE_EXACT": 12, "TOTAL": 254},
+      "GML1-PROV-015": {"RAW_RECONSTRUCTED": 213, "WARMUP_BRIDGE_EXACT": 12, "TOTAL": 225},
+      "GML1-PROV-020": {"RAW_RECONSTRUCTED": 193, "WARMUP_BRIDGE_EXACT": 11, "TOTAL": 204},
+      "GML1-WATCH-021-A": {"RAW_RECONSTRUCTED": 200, "WARMUP_BRIDGE_EXACT": 10, "TOTAL": 210},
+      "GML1-WATCH-021-B": {"RAW_RECONSTRUCTED": 197, "WARMUP_BRIDGE_EXACT": 10, "TOTAL": 207},
+      "GML1-WATCH-021-C": {"RAW_RECONSTRUCTED": 187, "WARMUP_BRIDGE_EXACT": 9, "TOTAL": 196}
+    }
+  },
+  "required_outputs": [
+    "candidate_cost_stress_raw_reconstructed.csv",
+    "candidate_cost_stress_warmup_bridge_exact.csv",
+    "year_cost_stress_raw_reconstructed.csv",
+    "year_cost_stress_warmup_bridge_exact.csv",
+    "lineage_cost_stress_raw_reconstructed.csv",
+    "lineage_cost_stress_warmup_bridge_exact.csv",
+    "candidate_overall_gate_raw_reconstructed.csv",
+    "cost_stress_trade_level.csv",
+    "input_provenance.json",
+    "cost_stress_summary.json",
+    "LATEST_RUN_SUMMARY.txt",
+    "COST_STRESS_RUN_ERROR.txt"
+  ],
+  "caveats": [
+    "WARMUP_BRIDGE_EXACT remains a separately reported historical audit population and is not raw-only parity.",
+    "The stress run holds the frozen candidate trade membership fixed and replays execution outcomes independently per registered decision; it does not discover suppressed alternative entries.",
+    "Same-lineage candidate metrics are summarized as candidate-level ranges and medians only; trades, profit and PF are not pooled or summed as independent edges.",
+    "Passing a stress gate does not authorize registration, promotion, prospective use or live activation."
+  ],
+  "execution_switches": {
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
