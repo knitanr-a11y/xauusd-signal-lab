@@ -8,15 +8,24 @@ Current status:
 
 Read `AGENTS.md` first, then follow its mandatory read order.
 
-The complete handoff is:
+Mandatory exploration controls:
 
-`docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md`
+- `config/gold_ml_v1/exploration_guardrails_20260625.json`
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md`
+
+Complete workflow handoff:
+
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md`
 
 Important:
 
 - Batch023 warmup bridge has already passed 9/9.
 - Do not rerun replay V1–V5 or the ZIP replay.
+- 2023 is exploration only; 2024 validation only; 2025 final test only; 2026 diagnostic only. No post-result retuning.
+- Every exploration cell, failure, survivor and total search multiplicity must be recorded.
+- The frozen nine-candidate pool cannot be silently changed or replaced.
+- No new exploration begins before current cost stress and fresh prospective confirmation unless the user explicitly authorizes a separate audit-only branch.
 - The next phase is cost stress on `RAW_RECONSTRUCTED` rows, with `WARMUP_BRIDGE_EXACT` reported separately.
 - The only user-facing launcher is `RUN_GOLD_ML_V1_NEXT.bat`.
-- A new chat must implement and commit the next phase, update `config/gold_ml_v1/next_local_action.json`, then tell the user only to Pull and double-click the common BAT.
+- A new chat must implement and commit the next phase, update `config/gold_ml_v1/next_local_action.json`, run governance tests, then tell the user only to Pull and double-click the common BAT.
 - Audit-only remains active. No live activation or registration.
