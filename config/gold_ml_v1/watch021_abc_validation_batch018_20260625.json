@@ -1,0 +1,75 @@
+{
+  "result_id": "GML1-BATCH-018-WATCH021-VALIDATION-20260625",
+  "status": "REGISTRY_VALIDATION_COMPLETED_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
+  "mode": "audit-only",
+  "parent_candidate_id": "GML1-PROV-015",
+  "cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "exact_registry_checks": {
+    "parent_rows": 225,
+    "feature_rows": 225,
+    "parent_feature_keys_exact": true,
+    "parent_feature_r_exact": true,
+    "A_rule_retention_and_exclusion_exact": true,
+    "B_rule_retention_and_exclusion_exact": true,
+    "retained_and_excluded_rows_equal_parent": true,
+    "thresholds_match_2023_quantiles_within_1e_10": true,
+    "2026_used_for_threshold_selection": false
+  },
+  "rules": {
+    "GML1-WATCH-021-A": {
+      "exclude_all": [
+        {"feature": "range_atr_lag1", "operator": "<=", "threshold": 0.65719709355},
+        {"feature": "span_atr_12", "operator": ">=", "threshold": 5.05801332771}
+      ]
+    },
+    "GML1-WATCH-021-B": {
+      "exclude_all": [
+        {"feature": "close_pos_lag5", "operator": "<=", "threshold": 0.424089068826},
+        {"feature": "range_atr_lag10", "operator": ">=", "threshold": 1.17215632583}
+      ]
+    },
+    "GML1-WATCH-021-C": {
+      "exclude_when": "WATCH-021-A condition OR WATCH-021-B condition"
+    }
+  },
+  "pre_2026_metrics": {
+    "GML1-PROV-015": {"trades": 200, "win_rate": 0.64, "profit_factor": 1.8037790571, "total_r": 56.8617113390, "max_drawdown_r": 4.0},
+    "GML1-WATCH-021-A": {"trades": 186, "retained_fraction": 0.93, "win_rate": 0.6774193548, "profit_factor": 2.1189891947, "total_r": 66.3289235678, "max_drawdown_r": 3.0},
+    "GML1-WATCH-021-B": {"trades": 182, "retained_fraction": 0.91, "win_rate": 0.6813186813, "profit_factor": 2.1783260674, "total_r": 66.8617113390, "max_drawdown_r": 2.0},
+    "GML1-WATCH-021-C": {"trades": 172, "retained_fraction": 0.86, "win_rate": 0.7093023256, "profit_factor": 2.4678401407, "total_r": 72.3289235678, "max_drawdown_r": 2.0}
+  },
+  "excluded_pre_2026": {
+    "A": {"trades": 14, "wins": 2, "losses": 12, "profit_factor": 0.1744103065, "total_r": -9.4672122288},
+    "B": {"trades": 18, "wins": 4, "losses": 14, "profit_factor": 0.2857142857, "total_r": -10.0},
+    "C": {"trades": 28, "wins": 6, "losses": 22, "profit_factor": 0.2794960024, "total_r": -15.4672122288},
+    "A_B_overlap_all_period_rows": 4
+  },
+  "threshold_neighborhood": {
+    "A": {"cells": 9, "pf_at_least_2_cells": 7, "all_year_total_positive_cells": 9},
+    "B": {"cells": 9, "pf_at_least_2_cells": 9, "all_year_total_positive_cells": 9},
+    "C": {"cells": 81, "pf_at_least_2_cells": 81, "pf_range": [2.1041614019, 2.4678401407], "retained_fraction_range": [0.82, 0.92], "all_year_total_positive_cells": 81}
+  },
+  "2026_diagnostic": {
+    "A_excluded_trades": 1,
+    "A_excluded_total_r": 1.0,
+    "B_excluded_trades": 0,
+    "C_excluded_trades": 1,
+    "retune_forbidden": true
+  },
+  "verdicts": {
+    "GML1-WATCH-021-A": "PASS_AS_ACCUMULATED_WATCH_PENDING_RAW_REPLAY_COST_STRESS_AND_FRESH",
+    "GML1-WATCH-021-B": "PASS_AS_ACCUMULATED_WATCH_PENDING_RAW_REPLAY_COST_STRESS_AND_FRESH",
+    "GML1-WATCH-021-C": "PASS_AS_ACCUMULATED_WATCH_WITH_HIGHER_COMPLEXITY_CAVEAT_PENDING_RAW_REPLAY_COST_STRESS_AND_FRESH"
+  },
+  "pending": [
+    "authorized raw M1/H1 candle exact replay",
+    "spread 1.5x and 2.0x plus fixed-slippage stress",
+    "fresh post-cutoff filter activation confirmation"
+  ],
+  "lineage": {
+    "same_parent_lineage": true,
+    "independent_edge_count_increment": 0,
+    "simple_performance_sum_forbidden": true
+  },
+  "execution_switches": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
