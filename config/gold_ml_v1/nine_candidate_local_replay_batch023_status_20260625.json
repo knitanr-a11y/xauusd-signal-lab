@@ -1,7 +1,7 @@
 {
   "result_id": "GML1-BATCH-023-NINE-CANDIDATE-LOCAL-REPLAY",
   "date": "2026-06-25",
-  "status": "PACKAGE_READY_REGISTRY_PARITY_PASS_RAW_INPUTS_NOT_MOUNTED",
+  "status": "GITHUB_IMPLEMENTATION_COMMITTED_REGISTRY_PARITY_PASS_RAW_INPUT_DIRECTORY_PENDING",
   "mode": "audit-only",
   "candidates": [
     "GML1-PROV-007",
@@ -17,7 +17,21 @@
   "package": {
     "filename": "GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip",
     "sha256": "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
-    "zip_integrity": "PASS"
+    "zip_integrity": "PASS",
+    "install_runner": "scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat"
+  },
+  "github_implementation": {
+    "replay_python": "scripts/gold_ml_v1/replay/nine_candidate_local_replay.py",
+    "raw_replay_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "registry_parity_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_registry_parity.bat",
+    "artifact_installer_python": "scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py",
+    "artifact_installer_runner": "scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat",
+    "config": "config/gold_ml_v1/replay/nine_candidate_replay_config_20260625.json",
+    "expected_metrics": "config/gold_ml_v1/replay/nine_candidate_expected_metrics_20260625.json",
+    "expected_hashes": "config/gold_ml_v1/replay/nine_candidate_expected_sha256_20260625.json",
+    "tests": "tests/gold_ml_v1/test_nine_candidate_local_replay.py",
+    "workflow": ".github/workflows/gold_ml_v1_batch023_tests.yml",
+    "documentation": "docs/gold_ml_v1/GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.md"
   },
   "completed": {
     "expected_registry_sha256_checks": "9/9 PASS",
@@ -28,10 +42,11 @@
     "GML1_WATCH_021_B_parent_derivation": "PASS",
     "GML1_WATCH_021_C_parent_derivation": "PASS",
     "GML1_WATCH_022_B_parent_derivation": "PASS",
-    "unit_tests": "2 passed"
+    "local_staging_unit_tests": "4 passed",
+    "github_actions_workflow_added": true
   },
   "raw_preflight": {
-    "executed": true,
+    "executed_in_current_environment": true,
     "exit_code": 1,
     "missing_historical_inputs": [
       "gold_v3_2023_2026_m1.csv",
@@ -41,19 +56,13 @@
       "gold_v3_2023_2026_d1.csv"
     ],
     "raw_replay_executed": false,
-    "reason": "Authorized raw candle files are not mounted in the current execution environment."
+    "reason": "Authorized raw candle files are not mounted in the current execution environment and their user-PC directory is unknown."
   },
-  "package_contents": [
-    "one-click Windows BAT",
-    "registry-only BAT",
-    "Python replay entrypoint",
-    "frozen nine-candidate JSON",
-    "dependency lock",
-    "nine expected exact trade registries",
-    "support feature/event registries",
-    "expected metrics",
-    "input and package SHA256 manifests",
-    "comparison and diagnostic outputs"
+  "next_required_steps": [
+    "install the verified Batch023 ZIP into the repository worktree",
+    "run registry-only parity from the repository",
+    "provide the local raw-candle directory to the raw replay BAT",
+    "inspect all nine candidate mismatch reports before any new exploration"
   ],
   "exit_codes": {
     "0": "exact parity",
