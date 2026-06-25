@@ -1,0 +1,44 @@
+{
+  "record_id": "GML1-BATCH023-PROVENANCE-FAILURE-20260625",
+  "status": "ORIGINAL_GENERATOR_NOT_PRESERVED_REPLAY_BLOCKED_AUDIT_ONLY",
+  "evidence": {
+    "verified_zip_sha256": "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
+    "zip_script": "gold_ml_v1_batch023_local_replay_20260625/replay_nine_candidates.py",
+    "zip_script_result": {
+      "GML1-PROV-007": {"expected": 154, "got": 65, "missing_or_extra": 209, "r_value_diffs": 1},
+      "GML1-PROV-008": {"expected": 169, "got": 62, "missing_or_extra": 219, "r_value_diffs": 1},
+      "GML1-WATCH-022-B": {"expected": 135, "got": 61, "missing_or_extra": 186, "r_value_diffs": 1},
+      "GML1-PROV-010": {"expected": 254, "got": 236, "missing_or_extra": 18, "r_value_diffs": 0},
+      "GML1-PROV-015": {"expected": 225, "got": 206, "missing_or_extra": 19, "r_value_diffs": 0},
+      "GML1-PROV-020": {"expected": 204, "got": 186, "missing_or_extra": 18, "r_value_diffs": 0},
+      "GML1-WATCH-021-A": {"expected": 210, "got": 194, "missing_or_extra": 16, "r_value_diffs": 0},
+      "GML1-WATCH-021-B": {"expected": 207, "got": 191, "missing_or_extra": 16, "r_value_diffs": 0},
+      "GML1-WATCH-021-C": {"expected": 196, "got": 181, "missing_or_extra": 15, "r_value_diffs": 0}
+    },
+    "conclusion": "The script bundled in Batch023 does not generate the bundled exact registries from the authorized historical CSVs. It is a reconstructed audit replay, not the original generator.",
+    "github_history_search": "Candidate commits preserve rules and summary metrics but no original registry-generation program was found."
+  },
+  "invalidated_claims": [
+    "The Batch023 ZIP script is the original generator.",
+    "Running the Batch023 ZIP script establishes exact raw replay parity.",
+    "The nine exact registries are currently reproducible from the preserved repository code."
+  ],
+  "preserved_facts": [
+    "Registry SHA and row-count parity passes for the supplied exact CSV bodies.",
+    "Derivative filters reproduce from their supplied parent/support registries.",
+    "Raw CSV time remains bar-open time in MT5 server time.",
+    "No candidate is live-ready or registered."
+  ],
+  "required_before_raw_parity_claim": [
+    "Recover the actual original generation script or execution notebook/environment.",
+    "Recover the exact raw data snapshot used to create the registries, with hashes.",
+    "Or perform a new independently versioned reconstruction and do not call it original parity."
+  ],
+  "execution_switches": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
