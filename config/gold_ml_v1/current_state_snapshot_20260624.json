@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-AC",
-  "formal_status": "GOLD_ML_V1_029_M5_CONFIRMATION_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES_AUDIT_ONLY",
-  "status": "M5_CONFIRMATION_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-AD",
+  "formal_status": "GOLD_ML_V1_030_PROV030A_PROVISIONAL_COST_PASS_LOCAL_REPRODUCTION_READY_AUDIT_ONLY",
+  "status": "PROV030A_PROVISIONAL_COST_PASS_LOCAL_REPRODUCTION_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH029_M5_CONFIRMATION_COMPLETE_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_PROV030A_LOCAL_AUDIT_REPRODUCTION_NEXT_20260625.md",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
     "2024": "VALIDATION_ONLY_NO_RETUNE",
@@ -16,50 +16,49 @@
   },
   "candidate_pool": {
     "frozen_accumulated_ids": [
-      "GML1-PROV-007",
-      "GML1-PROV-008",
-      "GML1-WATCH-022-B",
-      "GML1-PROV-010",
-      "GML1-PROV-015",
-      "GML1-PROV-020",
-      "GML1-WATCH-021-A",
-      "GML1-WATCH-021-B",
+      "GML1-PROV-007", "GML1-PROV-008", "GML1-WATCH-022-B", "GML1-PROV-010",
+      "GML1-PROV-015", "GML1-PROV-020", "GML1-WATCH-021-A", "GML1-WATCH-021-B",
       "GML1-WATCH-021-C"
     ],
+    "accumulated_total": 9,
     "existing_frozen_nine_modified": false,
-    "new_survivors_added": [],
+    "provisional_research_only_ids": ["GML1-PROV-030-A"],
+    "provisional_research_only_total": 1,
     "silent_add_remove_replace_or_relabel": "forbidden"
   },
   "completed_research": {
-    "batch024": "ZERO_SURVIVORS",
-    "batch025": "ZERO_EXTERNAL_SURVIVORS",
-    "batch026": "ZERO_SURVIVORS",
-    "batch027": "ZERO_SURVIVORS",
-    "batch028": "REJECTED_2024_NEAR_MISS",
-    "batch029_m5_confirmation": "COMPLETE_ZERO_ACCEPTED_CANDIDATES"
+    "batch029": "ZERO_ACCEPTED_CANDIDATES",
+    "batch030_034_multiview": "ONE_PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+    "batch035_pre_admission_audit": "PASS_CORRECTED_DEPLOYABLE_ORDERING"
   },
-  "batch029": {
-    "result_record": "config/gold_ml_v1/exploration_batch029_m5_confirmation_result_20260625.json",
-    "baseline_variants": 36,
-    "baseline_survivors": 0,
-    "composite_rule_survivors": 0,
-    "logistic_filter_survivors": 0,
-    "post_hoc_combined_long_valid_candidate": false,
-    "post_hoc_combined_long_cost_stress_pass": 6,
-    "post_hoc_combined_long_cost_stress_fail": 6,
-    "accepted_new_candidates": 0,
-    "local_implementation_created": false
+  "prov030a": {
+    "status": "PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+    "contract": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json",
+    "result": "config/gold_ml_v1/exploration_batch030_034_multiview_result_20260625.json",
+    "pre_admission_audit": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_pre_admission_audit_20260625.json",
+    "candidate_trade_rows": 247,
+    "candidate_trades_sha256": "47912c3131f6917ecae31c13a797568aacca1a08a8b655721d5527e295e579c3",
+    "cost_stress_pass": 12,
+    "cost_stress_fail": 0,
+    "local_reproduction_ready": true,
+    "prospective_confirmation_pending": true,
+    "accumulated": false,
+    "registered": false,
+    "live_ready": false
   },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "action_id": "GML1-BATCH029-RESEARCH-COMPLETE-NO-LOCAL-RUN",
-    "mode": "status_only"
+    "action_id": "GML1-PROV030A-LOCAL-AUDIT-REPRODUCTION-READY",
+    "mode": "bat",
+    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/reproduce_prov030a.bat",
+    "output_dir": "outputs/gold_ml_v1/prov030a_local_reproduction"
   },
-  "next": "WAIT_FOR_NEXT_EXPLICIT_RESEARCH_DIRECTION_NO_LOCAL_ACTION",
+  "next": "USER_RUNS_PROV030A_LOCAL_AUDIT_REPRODUCTION_AND_UPLOADS_RESULT",
   "execution_switches": {
     "local_exploration": false,
-    "local_reproduction": false,
-    "local_implementation": false,
+    "local_reproduction": true,
+    "local_implementation": true,
+    "prospective_monitoring": false,
     "live_ready": false,
     "final_signal": false,
     "mt5_order": false,
