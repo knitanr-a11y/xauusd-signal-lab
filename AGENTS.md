@@ -20,6 +20,7 @@
    - `docs/gold_ml_v1/GOLD_ML_V1_EXPLORATION_HANDOFF_FINAL_THREE_PASS_AUDIT_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md`
+   - `config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json`
    - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md`
    - `config/gold_ml_v1/fresh_prospective_confirmation_20260625.json`
@@ -46,7 +47,7 @@
 23. The dispatcher writes `outputs/gold_ml_v1/next_action/CURRENT_UPLOAD_PATH.txt`; root BAT opens the phase-selected upload file.
 24. Audit-only is mandatory. No live activation, registration, MT5 order, Discord, AI API or live hook.
 25. Cost stress is complete: RAW baseline parity 1687, candidate PASS=9 FAIL=0 across all twelve frozen scenarios. Do not rerun it.
-26. Cost-stress grid remains frozen: spread 1.0x/1.5x/2.0x crossed with slippage 0/5/10/20 points per side.
+26. Cost-stress grid remains frozen in `config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json`: spread 1.0x/1.5x/2.0x crossed with slippage 0/5/10/20 points per side.
 27. Cost stress used only `RAW_RECONSTRUCTED` as primary. `WARMUP_BRIDGE_EXACT` remains `NOT_ELIGIBLE_AUDIT_ONLY`.
 28. Fresh prospective implementation and CI are PASS. Record: `config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json`.
 29. Fresh prospective uses closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, `goldsharp_d1.csv`.
