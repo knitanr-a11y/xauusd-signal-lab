@@ -138,6 +138,21 @@ def upload_contract(
     return upload_path, sections
 
 
+def primary_upload_path(
+    repo_root: Path,
+    exit_code: int,
+    config: dict[str, Any] | None,
+    mapping: dict[str, str],
+    fallback: Path,
+) -> Path:
+    if exit_code != 0 or not config or not config.get("primary_upload_path"):
+        return fallback
+    path = resolve_repo_path(repo_root, str(config["primary_upload_path"]), mapping)
+    if not path.is_file():
+        raise FileNotFoundError(f"Configured primary upload artifact was not created: {path}")
+    return path
+
+
 def write_upload_file(
     repo_root: Path,
     exit_code: int,
@@ -179,10 +194,11 @@ def write_upload_file(
     compatibility_copy = repo_root / PASTE_ME_OUTPUT_FILE
     compatibility_copy.write_text(text, encoding="utf-8")
     upload_path.write_text(text, encoding="utf-8")
+    selected = primary_upload_path(repo_root, exit_code, config, mapping, upload_path)
     (repo_root / CURRENT_UPLOAD_PATH_FILE).write_text(
-        str(upload_path.resolve()) + "\n", encoding="utf-8"
+        str(selected.resolve()) + "\n", encoding="utf-8"
     )
-    return upload_path
+    return selected
 
 
 def validate_required_paths(
