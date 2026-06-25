@@ -3,7 +3,7 @@
 ## GOLD_ML_V1
 
 1. Use only GOLD_ML_V1. Do not use quarantined legacy GOLD logic or artifacts.
-2. Raw CSV `time` is bar-open time in MT5 server time. Latest CSV rows are closed.
+2. Raw CSV `time` is bar-open time in MT5 server time. Latest valid CSV rows are closed.
 3. Candidate rules are immutable. Changed logic requires a new candidate ID.
 4. New chats must read, in order:
    - `AGENTS.md`
@@ -23,42 +23,45 @@
    - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md`
    - `config/gold_ml_v1/fresh_prospective_confirmation_20260625.json`
-   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_IMPLEMENTED_USER_RUN_NEXT_20260625.md`
-5. The V2 one-click handoff remains the authoritative governance handoff; the latest dated handoff is the current operational continuation record.
-6. Do not ask the user to repeat paths, results, or decisions already recorded there.
-7. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
-8. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, seed, neighborhood cell, or year is forbidden.
-9. Candidate-pool silent addition, removal, replacement, or relabeling is forbidden. Every candidate must remain explicitly accumulated, research-only, demoted with reason, or rejected with reason.
-10. No new exploration may begin before fresh prospective confirmation. A separate branch requires explicit user authorization, remains audit-only, and must not modify the frozen nine.
-11. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
-12. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
-13. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals, exploration rows, tuning rows, primary cost-stress rows, or promotion rows.
-14. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
-15. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
+   - `config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_CI_PASS_USER_RUN_NEXT_20260625.md`
+5. The V2 one-click handoff remains authoritative governance; the latest dated handoff is the current operational continuation.
+6. Do not ask the user to repeat recorded paths, results or decisions.
+7. Periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
+8. Every exploration must predeclare its search space and record every attempted rule/cell, total search count, failures, survivors and multiplicity. Cherry-picking is forbidden.
+9. Silent candidate addition, removal, replacement or relabeling is forbidden.
+10. No new exploration may begin before fresh prospective confirmation is run and reviewed. Any separate branch requires explicit user authorization and cannot modify the frozen nine.
+11. Same-lineage candidates are not independent edges. Do not pool or sum their PF, profit or trades as a portfolio.
+12. Batch023 warmup bridge passed 9/9 with zero missing/extra, entry, exit, R or direction mismatch.
+13. `RAW_RECONSTRUCTED` and `WARMUP_BRIDGE_EXACT` remain separate. Bridge rows are historical audit only and never live, tuning, exploration, primary cost-stress or promotion rows.
+14. This is not raw-only parity because pre-2023 history or serialized seed state remains absent.
+15. Replay V1-V5 and ZIP replay are not original generators. Do not rerun them.
 16. The only user-facing launcher is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-17. Phase BAT files belong in dedicated phase subfolders. The current phase BAT is `scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat`.
-18. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat` after the phase is ready.
-19. Do not give ordinary phase users Python, PowerShell, or long command lines.
-20. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
-21. Every runner must create outputs, preserve previous output safely, validate provenance, print PASS/FAIL, return 0 only for validation/report PASS, and write a latest summary and error trace.
-22. The dispatcher must write `outputs/gold_ml_v1/next_action/CURRENT_UPLOAD_PATH.txt`; the root BAT must open the phase-selected upload file rather than hardcoding a phase directory.
-23. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
-24. The cost-stress grid is frozen in `config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json`: spread 1.0x/1.5x/2.0x crossed with fixed slippage 0/5/10/20 points per side. Do not change it after results.
-25. Cost stress completed successfully with RAW baseline parity 1687 and candidate gate PASS=9 FAIL=0. Do not rerun or reinterpret it as live authorization.
-26. Cost stress used `RAW_RECONSTRUCTED` as the only stressed primary population and wrote `WARMUP_BRIDGE_EXACT` separately with `NOT_ELIGIBLE_AUDIT_ONLY` gate status.
-27. `WARMUP_BRIDGE_EXACT` exact spread/slippage replay must not be fabricated when pre-2023 state or complete price/risk fields are absent.
-28. The cost-stress runner stopped after reporting and did not automatically begin fresh prospective confirmation.
-29. Fresh prospective confirmation uses closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, and `goldsharp_d1.csv` bars with decision close strictly after `2026-06-23 18:15:00` MT5 server close.
-30. Fresh prospective candidate generation must be causal and cannot use future exit information to decide the current candidate.
-31. Prospective unresolved candidates must remain explicit; no synthetic future exit/R is allowed. Parent events suppressed by the frozen non-overlap rule must be written to the audit output.
-32. `NO_CANDIDATE_YET` is a valid prospective observation, not a runner failure and not permission to change rules.
-33. Prospective results must not retune thresholds, filters, horizons, candidate IDs or lineage membership. There is no prospective performance gate.
-34. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
+17. Phase BATs belong in dedicated subfolders. Current phase BAT: `scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat`.
+18. Users must not run phase BATs directly. The root launcher supplies required arguments.
+19. For future phases, commit implementation first, then update `config/gold_ml_v1/next_local_action.json`.
+20. Do not give ordinary users Python, PowerShell or long command lines.
+21. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
+22. Every runner must preserve previous output, validate provenance, write summary/error files, print PASS/FAIL and fail closed on validation errors.
+23. The dispatcher writes `outputs/gold_ml_v1/next_action/CURRENT_UPLOAD_PATH.txt`; root BAT opens the phase-selected upload file.
+24. Audit-only is mandatory. No live activation, registration, MT5 order, Discord, AI API or live hook.
+25. Cost stress is complete: RAW baseline parity 1687, candidate PASS=9 FAIL=0 across all twelve frozen scenarios. Do not rerun it.
+26. Cost-stress grid remains frozen: spread 1.0x/1.5x/2.0x crossed with slippage 0/5/10/20 points per side.
+27. Cost stress used only `RAW_RECONSTRUCTED` as primary. `WARMUP_BRIDGE_EXACT` remains `NOT_ELIGIBLE_AUDIT_ONLY`.
+28. Fresh prospective implementation and CI are PASS. Record: `config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json`.
+29. Fresh prospective uses closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, `goldsharp_d1.csv`.
+30. Include only decisions strictly after `2026-06-23 18:15:00` MT5 server close. Decisions exactly at cutoff are excluded.
+31. Candidate generation must be causal and cannot use future exit information.
+32. Unresolved candidates remain explicit. Synthetic future exits/R are forbidden.
+33. Parent events suppressed by frozen non-overlap remain in the audit output.
+34. `NO_CANDIDATE_YET` is a valid observation, not a runner failure or permission to change rules.
+35. Prospective results cannot retune thresholds, filters, horizons, IDs or lineage membership. There is no prospective performance gate.
+36. Before chat length runs out, update AGENTS, current state, next action and a dated handoff.
 
 Current status:
 
-`GOLD_ML_V1_022_FRESH_PROSPECTIVE_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
+`GOLD_ML_V1_023_FRESH_PROSPECTIVE_CI_PASS_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
 Next action:
 
-`USER_PULLS_AND_RUNS_FRESH_PROSPECTIVE_ONE_CLICK_THEN_UPLOADS_PHASE_FILE`
+`USER_PULLS_AND_RUNS_CI_VERIFIED_FRESH_PROSPECTIVE_ONE_CLICK_THEN_UPLOADS_PHASE_FILE`
