@@ -17,6 +17,7 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.state = read_json("config/gold_ml_v1/current_state_snapshot_20260624.json")
         self.action = read_json("config/gold_ml_v1/next_local_action.json")
         self.batch = read_json("config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json")
+        self.result = read_json("config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json")
 
     def test_frozen_years_and_multiplicity(self) -> None:
         expected = {
@@ -29,33 +30,36 @@ class ExplorationGuardrailTests(unittest.TestCase):
             self.assertEqual(self.guardrails["period_contract"][year], value)
             self.assertEqual(self.batch["period_contract"][year], value)
         self.assertEqual(self.batch["search_space"]["full_cartesian_cell_count"], 36)
-        self.assertEqual(self.batch["multiplicity_contract"]["attempted_cells"], 36)
-        self.assertTrue(self.batch["search_space"]["all_cells_must_be_reported"])
+        self.assertEqual(self.result["attempted_cells"], 36)
+        self.assertEqual(self.result["survivor_count"], 0)
 
-    def test_frozen_nine_and_new_lineage_are_separate(self) -> None:
+    def test_open_time_contract_and_frozen_nine(self) -> None:
         frozen = self.guardrails["current_candidate_pool"]["frozen_accumulated_ids"]
         self.assertEqual(len(frozen), 9)
         self.assertEqual(self.batch["existing_frozen_nine"], frozen)
-        self.assertEqual(self.batch["existing_pool_change"], "FORBIDDEN")
-        self.assertEqual(
-            self.batch["new_lineage"]["lineage_id"],
-            "M15_H1_TREND_PULLBACK_LINEAGE_EXP024",
-        )
         self.assertFalse(self.action["existing_frozen_nine_modified"])
+        self.assertEqual(self.result["time_contract"]["csv_time"], "MT5 server naive bar-open time")
+        self.assertEqual(self.result["time_contract"]["M1_close"], "time + 1 minute")
+        self.assertEqual(self.result["time_contract"]["M15_close"], "time + 15 minutes")
+        self.assertEqual(self.result["time_contract"]["H1_close"], "time + 1 hour")
 
-    def test_current_local_action_is_input_packaging_only(self) -> None:
+    def test_current_action_is_reproduction_only(self) -> None:
         self.assertEqual(self.action["mode"], "bat")
-        self.assertTrue(self.action["runner"].endswith("package_batch024_raw_for_assistant.bat"))
-        self.assertEqual(self.action["phase"], "PACKAGE_INPUT_ONLY_NO_LOCAL_EXPLORATION")
-        self.assertFalse(self.action["local_exploration_executed"])
+        self.assertTrue(self.action["runner"].endswith("reproduce_batch024.bat"))
+        self.assertEqual(
+            self.action["phase"],
+            "LOCAL_REPRODUCTION_AGAINST_ASSISTANT_FROZEN_HASHES",
+        )
         self.assertFalse(self.action["local_exploration_allowed"])
-        self.assertTrue(self.action["assistant_exploration_authorized"])
-        self.assertTrue(self.action["assistant_exploration_required_before_local_reproduction"])
-        self.assertTrue(self.action["primary_upload_path"].endswith(".zip"))
+        self.assertTrue(self.action["local_reproduction_allowed"])
+        self.assertTrue(self.action["assistant_result_available"])
+        self.assertEqual(self.action["assistant_survivor_count"], 0)
+        self.assertFalse(self.action["candidate_selection_performed"])
         self.assertEqual(
             self.state["next"],
-            "USER_UPLOADS_HASH_VERIFIED_RAW_ZIP_THEN_ASSISTANT_EXECUTES_EXPLORATION",
+            "USER_RUNS_LOCAL_REPRODUCTION_AND_UPLOADS_PARITY_RESULT",
         )
+        self.assertTrue(self.state["exploration_batch024"]["local_reproduction_available"])
 
     def test_leakage_bridge_and_automatic_actions_are_blocked(self) -> None:
         evaluation = self.guardrails["data_and_evaluation_rules"]
@@ -65,6 +69,8 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(self.batch["input_contract"]["warmup_bridge_use"], "forbidden")
         self.assertTrue(self.batch["input_contract"]["confirmed_h1_asof_join"])
         self.assertEqual(self.batch["signal_contract"]["same_m1_tp_sl_priority"], "SL")
+        self.assertTrue(self.result["interpretation"]["zero_survivors_is_valid"])
+        self.assertFalse(self.result["interpretation"]["rescue_tuning_performed"])
         for key in (
             "automatic_next_phase",
             "automatic_accumulation",
