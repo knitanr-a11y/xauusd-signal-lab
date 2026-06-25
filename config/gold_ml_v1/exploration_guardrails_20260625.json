@@ -6,7 +6,9 @@
     "bar_availability": "bar-open time plus timeframe duration",
     "timezone": "MT5 server naive time",
     "latest_csv_row": "closed",
-    "open_or_asof_bar_use": "forbidden"
+    "incomplete_or_open_bar_use": "forbidden",
+    "latest_row_reinterpretation_as_open_or_provisional": "forbidden",
+    "confirmed_higher_timeframe_asof_join": "required_using_only_bars_available_by_decision_time"
   },
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
@@ -57,7 +59,7 @@
   },
   "data_and_evaluation_rules": {
     "closed_bars_only": true,
-    "higher_timeframe_join": "asof using only bars available by decision time",
+    "higher_timeframe_join": "asof using only confirmed bars available by decision time",
     "lookahead": "forbidden",
     "future_label_or_exit_data_in_features": "forbidden",
     "missing_rows_or_losses_silent_exclusion": "forbidden",
