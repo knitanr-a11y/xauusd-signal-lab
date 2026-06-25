@@ -63,14 +63,15 @@ The implementation reads the already verified nine exact-schema warmup-bridge re
 For every frozen registry row it:
 
 1. verifies the exact entry exists in the frozen M1 raw snapshot;
-2. recovers the frozen one-risk-unit price distance from registry entry price, exit price and R;
-3. replays the registered trade over its frozen lineage horizon;
-4. uses only M1 bars from the registered entry through the frozen horizon for outcome evaluation;
-5. preserves same-M1 SL priority;
-6. applies the scenario spread multiplier to the long entry reference;
-7. applies fixed adverse slippage per side to entry and exit fills;
-8. holds the registered candidate trade membership fixed;
-9. never uses stressed outcomes to alter candidate conditions or candidate membership.
+2. recovers the frozen one-risk-unit price distance from registry entry price, exit price and nonzero R;
+3. for an exact zero-R time exit, recovers the same frozen risk unit from the entry-time closed decision bar using the lineage ATR contract: M15 simple TR14 or H1 Wilder ATR14;
+4. replays the registered trade over its frozen lineage horizon;
+5. uses only M1 bars from the registered entry through the frozen horizon for outcome evaluation;
+6. preserves same-M1 SL priority;
+7. applies the scenario spread multiplier to the long entry reference;
+8. applies fixed adverse slippage per side to entry and exit fills;
+9. holds the registered candidate trade membership fixed;
+10. never uses stressed outcomes to alter candidate conditions or candidate membership.
 
 Baseline spread 1.0x / slippage 0 must reproduce every registry entry price, exit price, exit time and R. Any mismatch fails closed with a nonzero exit code.
 
@@ -110,6 +111,7 @@ Same-lineage candidates are not treated as independent evidence. Lineage tables 
 - `scripts/gold_ml_v1/cost_stress/run_cost_stress_raw_reconstructed.py`
 - `scripts/gold_ml_v1/cost_stress/run_cost_stress_raw_reconstructed.bat`
 - `tests/gold_ml_v1/test_cost_stress_contract.py`
+- `.github/workflows/gold_ml_v1_cost_stress_tests.yml`
 - `config/gold_ml_v1/next_local_action.json`
 - this handoff
 
@@ -189,4 +191,4 @@ Even if all candidate stress gates pass, the following remain required:
 
 ## Test honesty
 
-Syntax and repository governance tests may be run before commit. A GitHub Actions CI result must not be claimed PASS unless an actual workflow result is observed for the commit.
+Syntax and repository governance tests were run locally. A GitHub Actions CI result must not be claimed PASS unless an actual workflow result is observed for the commit.
