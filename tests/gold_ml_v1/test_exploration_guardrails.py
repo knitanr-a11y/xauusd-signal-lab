@@ -9,12 +9,13 @@ GUARDRAILS = ROOT / "config/gold_ml_v1/exploration_guardrails_20260625.json"
 CURRENT_STATE = ROOT / "config/gold_ml_v1/current_state_snapshot_20260624.json"
 NEXT_ACTION = ROOT / "config/gold_ml_v1/next_local_action.json"
 COST_STRESS = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
+COST_STRESS_PASS = ROOT / "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
 AGENTS = ROOT / "AGENTS.md"
 START_HERE = ROOT / "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
 ONE_CLICK_HANDOFF_V2 = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
 TRIPLE_CHECK = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md"
 CORE_FIX_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md"
-DIAGNOSTIC_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASTE_ME_DIAGNOSTIC_USER_RERUN_NEXT_20260625.md"
+PASS_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
 
 
 class ExplorationGuardrailTests(unittest.TestCase):
@@ -23,12 +24,13 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.state = json.loads(CURRENT_STATE.read_text(encoding="utf-8"))
         self.action = json.loads(NEXT_ACTION.read_text(encoding="utf-8"))
         self.cost_stress = json.loads(COST_STRESS.read_text(encoding="utf-8"))
+        self.cost_stress_pass = json.loads(COST_STRESS_PASS.read_text(encoding="utf-8"))
         self.agents = AGENTS.read_text(encoding="utf-8")
         self.start_here = START_HERE.read_text(encoding="utf-8")
         self.handoff = ONE_CLICK_HANDOFF_V2.read_text(encoding="utf-8")
         self.triple_check = TRIPLE_CHECK.read_text(encoding="utf-8")
         self.core_fix_handoff = CORE_FIX_HANDOFF.read_text(encoding="utf-8")
-        self.diagnostic_handoff = DIAGNOSTIC_HANDOFF.read_text(encoding="utf-8")
+        self.pass_handoff = PASS_HANDOFF.read_text(encoding="utf-8")
 
     def test_frozen_period_split(self) -> None:
         periods = self.guardrails["period_contract"]
@@ -98,31 +100,31 @@ class ExplorationGuardrailTests(unittest.TestCase):
             "forbidden",
         )
 
-    def test_governance_references_current_diagnostic_handoff(self) -> None:
+    def test_governance_references_verified_pass_handoff(self) -> None:
         guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
         v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
         cost_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
-        diagnostic_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASTE_ME_DIAGNOSTIC_USER_RERUN_NEXT_20260625.md"
+        pass_path = "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
+        pass_handoff_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md"
         self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
         self.assertEqual(self.state["authoritative_handoff"], v2_path)
-        self.assertEqual(self.state["latest_phase_handoff"], diagnostic_path)
+        self.assertEqual(self.state["latest_phase_handoff"], pass_handoff_path)
         self.assertIn(guardrail_path, self.agents)
         self.assertIn(v2_path, self.agents)
         self.assertIn(cost_path, self.agents)
+        self.assertIn(pass_path, self.agents)
+        self.assertIn(pass_handoff_path, self.agents)
         self.assertIn(guardrail_path, self.start_here)
         self.assertIn(v2_path, self.start_here)
-        self.assertIn(diagnostic_path, self.start_here)
+        self.assertIn(pass_handoff_path, self.start_here)
         self.assertTrue(self.state["audit_only"])
         self.assertFalse(self.state["execution_switches"]["new_exploration"])
         self.assertTrue(self.action["audit_only"])
         self.assertFalse(self.action["live_ready"])
-        self.assertEqual(self.action["mode"], "bat")
-        self.assertEqual(
-            self.action["runner"],
-            "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
-        )
+        self.assertEqual(self.action["mode"], "status_only")
+        self.assertNotIn("runner", self.action)
 
-    def test_one_click_cost_stress_and_diagnostics_are_fail_closed(self) -> None:
+    def test_cost_stress_pass_and_prospective_next_are_fail_closed(self) -> None:
         self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.handoff)
         self.assertIn("fixed-slippage grid", self.handoff)
         self.assertIn("2026: diagnostic only", self.handoff)
@@ -146,8 +148,12 @@ class ExplorationGuardrailTests(unittest.TestCase):
         )
         self.assertIn("INPUT_SCHEMA_ASSUMPTION_BUG", self.core_fix_handoff)
         self.assertIn("warmup_bridge_core_registry.csv", self.core_fix_handoff)
-        self.assertIn("PASTE_ME_GOLD_ML_V1.txt", self.diagnostic_handoff)
-        self.assertIn("FULL_CONSOLE_LOG.txt", self.diagnostic_handoff)
+        self.assertEqual(self.cost_stress_pass["status"], "PASS")
+        self.assertEqual(self.cost_stress_pass["raw_baseline_parity_checks"], 1687)
+        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["pass"], 9)
+        self.assertEqual(self.cost_stress_pass["candidate_stress_gate"]["fail"], 0)
+        self.assertIn("Fresh prospective confirmation", self.pass_handoff)
+        self.assertIn("2026-06-23 18:15:00", self.pass_handoff)
         self.assertFalse(self.action["automatic_next_phase"])
         self.assertFalse(self.action["automatic_promotion"])
         self.assertFalse(self.action["automatic_registration"])
