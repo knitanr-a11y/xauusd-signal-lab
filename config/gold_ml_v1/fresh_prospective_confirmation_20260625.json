@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "record_id": "GML1-FRESH-PROSPECTIVE-CONFIRMATION-20260625",
+  "status": "FROZEN_BEFORE_FIRST_PROSPECTIVE_RUN",
+  "audit_only": true,
+  "cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "decision_time_rule": "decision_close_time must be strictly greater than cutoff",
+  "time_contract": {
+    "csv_time": "bar-open time in MT5 server time",
+    "latest_valid_row": "closed by contract",
+    "open_or_as_of_row_use": "forbidden",
+    "silent_time_sorting": "forbidden",
+    "same_m1_tp_sl_priority": "SL"
+  },
+  "input_files": {
+    "M1": "goldsharp_m1.csv",
+    "M15": "goldsharp_m15.csv",
+    "H1": "goldsharp_h1.csv",
+    "H4": "goldsharp_h4.csv",
+    "D1": "goldsharp_d1.csv"
+  },
+  "candidate_pool": {
+    "frozen_accumulated_ids": [
+      "GML1-PROV-007",
+      "GML1-PROV-008",
+      "GML1-WATCH-022-B",
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ],
+    "silent_add_remove_replace_or_relabel": "forbidden",
+    "rules_frozen": true,
+    "retuning_from_prospective_results": "forbidden"
+  },
+  "lineage_contract": {
+    "M15_H4": {
+      "parent_horizon_hours": 6,
+      "hit_exit_time": "M1 close",
+      "time_exit_time": "M1 close"
+    },
+    "H1_D1": {
+      "parent_horizon_hours": 48,
+      "hit_exit_time": "M1 open",
+      "time_exit_time": "M1 open"
+    },
+    "same_lineage_candidates_are_independent_edges": false,
+    "pool_pf_or_profit_across_same_lineage": "forbidden"
+  },
+  "causality_contract": {
+    "candidate_generation_uses_future_exit_information": false,
+    "resolved_outcome_uses_only_bars_present_at_run_time": true,
+    "unresolved_candidates_preserved": true,
+    "suppressed_parent_events_recorded": true,
+    "missing_rows_or_losses_silent_exclusion": "forbidden",
+    "future_candidate_entry_affects_prior_state": false
+  },
+  "result_contract": {
+    "runner_pass_means": "input validation and report generation completed",
+    "no_candidate_yet": "valid prospective observation, not runner failure",
+    "unresolved": "kept explicit and excluded from resolved performance metrics",
+    "performance_gate": "NOT_APPLICABLE_PROSPECTIVE_AUDIT_ONLY",
+    "automatic_next_phase": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "execution_switches": {
+    "new_exploration": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
