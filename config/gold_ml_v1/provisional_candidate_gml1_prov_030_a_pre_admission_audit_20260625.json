@@ -1,0 +1,38 @@
+{
+  "record_id": "GML1-PROV-030-A-PRE-ADMISSION-AUDIT-20260625",
+  "status": "PASS_CORRECTED_DEPLOYABLE_ORDERING",
+  "candidate_id": "GML1-PROV-030-A",
+  "issue_checked": "A regime discovered from accepted base-variant rows must be applied before M5 confirmation and one-open-position admission for deployable parity.",
+  "previous_post_admission_rows": 242,
+  "corrected_pre_admission_rows": 247,
+  "restored_valid_entries": 5,
+  "removed_previous_entries": 0,
+  "corrected_metrics": {
+    "2023": {"count": 58, "profit_factor": 1.3793103448275863, "mean_R": 0.1896551724137931, "total_R": 11.0, "max_DD_R": 10.0},
+    "2024": {"count": 77, "profit_factor": 1.728245848270764, "mean_R": 0.33102084012307453, "total_R": 25.488604689476738, "max_DD_R": 9.0},
+    "2025": {"count": 87, "profit_factor": 1.8477434926157421, "mean_R": 0.32237081021546876, "total_R": 28.04626048874578, "max_DD_R": 10.0},
+    "2026_diagnostic": {"count": 25, "profit_factor": 1.0416666666666667, "mean_R": 0.02, "total_R": 0.5, "max_DD_R": 7.0}
+  },
+  "corrected_cost_stress": {
+    "scenarios": 12,
+    "pass": 12,
+    "fail": 0,
+    "worst_2024_profit_factor": 1.2947621266721008,
+    "worst_2024_mean_R": 0.1680427227174492,
+    "worst_2025_profit_factor": 1.4640186811915803,
+    "worst_2025_mean_R": 0.2123151272019993
+  },
+  "corrected_sensitivity": {
+    "cells": 25,
+    "cells_passing_2024_and_2025": 16
+  },
+  "canonical_output": {
+    "candidate_trades_sha256": "47912c3131f6917ecae31c13a797568aacca1a08a8b655721d5527e295e579c3",
+    "year_metrics_sha256": "7b8018c04635d368d31332961829884b636ea142042e30be6f013a227213bdb9",
+    "archive_sha256": "19f8c0c5f668238610ffc2e9a7fd54dc781ea565064c4e2895dab747e6087e10"
+  },
+  "decision": "KEEP_PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+  "existing_frozen_nine_modified": false,
+  "registration_authorized": false,
+  "live_authorized": false
+}
