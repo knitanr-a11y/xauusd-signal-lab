@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-M",
-  "status": "BATCH023_WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-N",
+  "status": "BATCH023_WARMUP_BRIDGE_9_OF_9_PASS_ONE_CLICK_WORKFLOW_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -17,41 +17,39 @@
     "GML1-WATCH-021-C"
   ],
   "accumulated_candidate_total": 9,
-  "source_contract": {
-    "raw_time": "bar-open time",
-    "bar_availability": "bar-open time plus timeframe duration",
-    "time_basis": "MT5 server naive time",
-    "latest_csv_row": "closed",
-    "historical_raw": "gold_v3_2023_2026 only",
-    "live_new_closed_bars": "goldsharp only",
-    "historical_rows_may_trigger_new_live_signal": false
-  },
-  "uploaded_raw_integrity": {
-    "duplicate_times": 0,
-    "invalid_ohlc_rows": 0,
-    "higher_timeframe_ohlc_matches_m1": true,
-    "record": "config/gold_ml_v1/batch023_uploaded_raw_forensic_audit_20260625.json"
+  "verified_uploaded_run": {
+    "status": "PASS",
+    "exit_code": 0,
+    "raw_hashes_match": "6/6",
+    "candidate_parity": "9/9",
+    "missing_or_extra": 0,
+    "entry_mismatches": 0,
+    "exit_mismatches": 0,
+    "r_value_mismatches": 0,
+    "direction_mismatches": 0
   },
   "warmup_bridge": {
-    "status": "9_OF_9_CORE_PARITY_PASS",
     "audit_class": "SEPARATELY_VERSIONED_WARMUP_BRIDGE_NOT_RAW_ONLY_PARITY",
-    "result_record": "config/gold_ml_v1/batch023_warmup_bridge_pass_20260625.json",
-    "handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH023_WARMUP_BRIDGE_PASS_20260625.md",
-    "all_candidates_missing_or_extra": 0,
-    "all_candidates_entry_mismatches": 0,
-    "all_candidates_exit_mismatches": 0,
-    "all_candidates_r_value_mismatches": 0,
-    "all_candidates_direction_mismatches": 0,
     "row_sources": ["RAW_RECONSTRUCTED", "WARMUP_BRIDGE_EXACT"],
     "bridge_rows_live_forbidden": true,
     "raw_only_parity": false,
     "raw_only_parity_blocker": "pre-2023 D1/H1/H4 history or serialized indicator seed state is absent"
   },
-  "next": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_SEPARATELY_THEN_FRESH_PROSPECTIVE",
+  "one_click_workflow": {
+    "stable_user_entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
+    "dispatcher": "scripts/gold_ml_v1/run_next_local.py",
+    "action_config": "config/gold_ml_v1/next_local_action.json",
+    "current_action_mode": "status_only",
+    "current_action_reason": "Batch023 verification is already complete; next chat must implement cost stress before enabling a BAT action",
+    "latest_dispatch_summary": "outputs/gold_ml_v1/next_action/LATEST_NEXT_ACTION.txt",
+    "user_instruction_for_future_phases": "Pull and double-click RUN_GOLD_ML_V1_NEXT.bat"
+  },
+  "mandatory_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md",
+  "next": "IMPLEMENT_COST_STRESS_UPDATE_NEXT_ACTION_THEN_USER_RUNS_RUN_GOLD_ML_V1_NEXT_BAT",
   "registration_blockers": [
-    "spread 1.5x and 2.0x plus fixed-slippage stress on RAW_RECONSTRUCTED rows",
+    "spread 1.5x and 2.0x plus predeclared fixed-slippage stress on RAW_RECONSTRUCTED rows",
     "report WARMUP_BRIDGE_EXACT rows separately",
-    "fresh prospective confirmation from goldsharp closed bars after the fixed cutoff",
+    "fresh prospective confirmation from goldsharp closed bars",
     "no registration or live activation authorization"
   ],
   "execution_switches": {
