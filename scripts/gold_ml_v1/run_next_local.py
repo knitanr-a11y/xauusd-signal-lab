@@ -16,8 +16,8 @@ OUTPUT_DIR = Path("outputs/gold_ml_v1/next_action")
 STATUS_FILE = OUTPUT_DIR / "LATEST_NEXT_ACTION.txt"
 CONSOLE_LOG_FILE = OUTPUT_DIR / "FULL_CONSOLE_LOG.txt"
 PASTE_ME_OUTPUT_FILE = OUTPUT_DIR / "PASTE_ME_GOLD_ML_V1.txt"
-PASTE_ME_ROOT_FILE = Path("PASTE_ME_GOLD_ML_V1.txt")
 COST_OUTPUT_DIR = Path("outputs/gold_ml_v1/cost_stress_raw_reconstructed")
+UPLOAD_FILE = COST_OUTPUT_DIR / "UPLOAD_THIS_GOLD_ML_V1.txt"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -105,7 +105,7 @@ def tail_text(path: Path, maximum_lines: int) -> list[str]:
     return lines
 
 
-def write_paste_me(
+def write_upload_file(
     repo_root: Path,
     exit_code: int,
     action_id: str = "UNKNOWN",
@@ -127,8 +127,8 @@ def write_paste_me(
         ),
     ]
     lines = [
-        "GOLD_ML_V1 PASTE ME",
-        "Copy everything in this file and paste it into ChatGPT.",
+        "GOLD_ML_V1 UPLOAD FILE",
+        "Upload this file directly to ChatGPT.",
         f"generated_local={datetime.now().isoformat(timespec='seconds')}",
         f"exit_code={exit_code}",
         f"action_id={action_id}",
@@ -149,13 +149,15 @@ def write_paste_me(
             ]
         )
     text = "\n".join(lines).rstrip() + "\n"
-    output_dir = repo_root / OUTPUT_DIR
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = repo_root / PASTE_ME_OUTPUT_FILE
-    root_path = repo_root / PASTE_ME_ROOT_FILE
-    output_path.write_text(text, encoding="utf-8")
-    root_path.write_text(text, encoding="utf-8")
-    return root_path
+    next_output_dir = repo_root / OUTPUT_DIR
+    cost_output_dir = repo_root / COST_OUTPUT_DIR
+    next_output_dir.mkdir(parents=True, exist_ok=True)
+    cost_output_dir.mkdir(parents=True, exist_ok=True)
+    next_copy = repo_root / PASTE_ME_OUTPUT_FILE
+    upload_path = repo_root / UPLOAD_FILE
+    next_copy.write_text(text, encoding="utf-8")
+    upload_path.write_text(text, encoding="utf-8")
+    return upload_path
 
 
 def validate_required_paths(
@@ -226,8 +228,8 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
         lines = header + ["status=PASS", "exit_code=0", f"message={message}"]
         write_status(repo_root, lines)
         write_console_log(repo_root, message + "\n")
-        paste_path = write_paste_me(repo_root, 0, action_id=action_id)
-        print(f"PASTE_ME: {paste_path}")
+        upload_path = write_upload_file(repo_root, 0, action_id=action_id)
+        print(f"UPLOAD_FILE: {upload_path}")
         return 0
 
     if mode != "bat":
@@ -259,13 +261,13 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
         f"exit_code={completed_return_code}",
     ]
     write_status(repo_root, lines)
-    paste_path = write_paste_me(
+    upload_path = write_upload_file(
         repo_root,
         completed_return_code,
         action_id=action_id,
         runner=str(runner),
     )
-    print(f"PASTE_ME: {paste_path}")
+    print(f"UPLOAD_FILE: {upload_path}")
     return completed_return_code
 
 
@@ -293,14 +295,14 @@ def main() -> int:
                 f"error={error}",
             ],
         )
-        paste_path = write_paste_me(
+        upload_path = write_upload_file(
             repo_root,
             4,
             action_id=str(config.get("action_id", "UNKNOWN")),
             runner=str(config.get("runner", "")),
             error=error,
         )
-        print(f"PASTE_ME: {paste_path}", file=sys.stderr)
+        print(f"UPLOAD_FILE: {upload_path}", file=sys.stderr)
         return 4
 
 
