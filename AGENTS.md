@@ -17,7 +17,9 @@
    - `config/gold_ml_v1/batch023_local_warmup_bridge_implementation_20260625.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH023_WARMUP_BRIDGE_PASS_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md`
-5. The V2 one-click handoff is authoritative and supersedes the earlier one-click handoff.
+   - `docs/gold_ml_v1/GOLD_ML_V1_EXPLORATION_HANDOFF_FINAL_THREE_PASS_AUDIT_20260625.md`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md`
+5. The V2 one-click handoff remains the authoritative governance handoff; the dated cost-stress handoff is the latest operational continuation record.
 6. Do not ask the user to repeat paths, results, or decisions already recorded there.
 7. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
 8. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, seed, neighborhood cell, or year is forbidden.
@@ -25,21 +27,27 @@
 10. No new exploration may begin before cost stress and fresh prospective confirmation. A separate branch requires explicit user authorization, remains audit-only, and must not modify the frozen nine.
 11. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
 12. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
-13. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals, exploration rows, or tuning rows.
+13. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals, exploration rows, tuning rows, primary cost-stress rows, or promotion rows.
 14. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
 15. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
 16. The only user-facing launcher is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
 17. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
 18. Do not give ordinary phase users Python, PowerShell, or long command lines.
 19. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
-20. Every runner must create outputs, preserve previous output safely, validate provenance, print PASS/FAIL, return 0 only for PASS, and write a latest summary and error trace.
+20. Every runner must create outputs, preserve previous output safely, validate provenance, print PASS/FAIL, return 0 only for validation/report PASS, and write a latest summary and error trace.
 21. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
-22. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
+22. The cost-stress grid is frozen in `config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json`: spread 1.0x/1.5x/2.0x crossed with fixed slippage 0/5/10/20 points per side. Do not change it after results.
+23. Cost stress must use `RAW_RECONSTRUCTED` as the primary population and must write `WARMUP_BRIDGE_EXACT` to separate reports with `NOT_ELIGIBLE_AUDIT_ONLY` gate status.
+24. Cost-stress baseline must reproduce every registry entry price, exit price, exit time, and R before stressed scenarios are accepted.
+25. A candidate stress-gate FAIL is a preserved result, not a runner error and not permission to retune or rescue the candidate.
+26. The cost-stress runner must stop after reporting. It must not automatically begin fresh prospective confirmation.
+27. Fresh prospective confirmation must use only goldsharp closed bars after `2026-06-23 18:15:00` MT5 server close and requires a separately committed phase.
+28. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
 
 Current status:
 
-`GOLD_ML_V1_016_BATCH023_WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_ONE_CLICK_WORKFLOW_READY_AUDIT_ONLY`
+`GOLD_ML_V1_017_COST_STRESS_IMPLEMENTED_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
-Next phase:
+Next action:
 
-`IMPLEMENT_COST_STRESS_UPDATE_NEXT_ACTION_THEN_USER_RUNS_RUN_GOLD_ML_V1_NEXT_BAT`
+`USER_PULLS_AND_RUNS_RUN_GOLD_ML_V1_NEXT_BAT_THEN_UPLOADS_COST_STRESS_SUMMARY`
