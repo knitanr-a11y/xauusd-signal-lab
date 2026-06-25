@@ -1,6 +1,7 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260624",
-  "status": "SIX_ACCUMULATED_CANDIDATES_WITH_CAVEATS",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260625",
+  "status": "NINE_ACCUMULATED_CANDIDATES_WITH_CAVEATS",
+  "updated": "2026-06-25",
   "core_accumulated_ids": [
     "GML1-PROV-007",
     "GML1-PROV-008",
@@ -9,12 +10,30 @@
   ],
   "user_authorized_accumulated_ids": [
     "GML1-PROV-020",
-    "GML1-WATCH-014-A"
+    "GML1-WATCH-014-A",
+    "GML1-WATCH-021-A",
+    "GML1-WATCH-021-B",
+    "GML1-WATCH-021-C"
   ],
-  "accumulated_candidate_total": 6,
+  "accumulated_candidate_total": 9,
+  "lineage_groups": {
+    "M15_H4": ["GML1-PROV-007", "GML1-PROV-008"],
+    "H1_D1_PROV015_FAMILY": [
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-014-A",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ]
+  },
   "caveats": {
     "GML1-PROV-020": "Second-stage exclusion fired zero times in 2026; fresh activations are required.",
-    "GML1-WATCH-014-A": "Seed stability and human-auditable path-pattern interpretation remain unresolved."
+    "GML1-WATCH-014-A": "Seed stability and human-auditable path-pattern interpretation remain unresolved.",
+    "GML1-WATCH-021-A": "Registry derivation and neighborhood passed; raw replay, cost stress and fresh confirmation remain pending.",
+    "GML1-WATCH-021-B": "Registry derivation and all 9 local neighborhood cells passed PF2; raw replay, cost stress and fresh confirmation remain pending.",
+    "GML1-WATCH-021-C": "A OR B combined exclusion passed all 81 local neighborhood cells but has greater search multiplicity and complexity."
   },
   "reference_only": ["GML1-PROV-002"],
   "watch_only_not_accumulated": [
@@ -29,14 +48,29 @@
     "GML1-WATCH-012-B"
   ],
   "rejected": ["GML1-PROV-017"],
-  "authorization_record": "config/gold_ml_v1/user_authorized_accumulation_override_20260624.json",
+  "authorization_records": [
+    "config/gold_ml_v1/user_authorized_accumulation_override_20260624.json",
+    "config/gold_ml_v1/user_authorized_watch021_accumulation_override_20260625.json"
+  ],
+  "validation_records": [
+    "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json"
+  ],
   "policies": [
     "config/gold_ml_v1/provisional_stack_admission_gate_20260624.json",
     "config/gold_ml_v1/watch_pool_policy_20260624.json",
-    "config/gold_ml_v1/pf2_refinement_policy_20260624.json"
+    "config/gold_ml_v1/pf2_refinement_policy_20260624.json",
+    "config/gold_ml_v1/coverage_first_loss_subtraction_policy_20260624.json"
   ],
   "historical_result_files_remain_authoritative_for_metrics": true,
+  "same_lineage_candidates_are_not_independent_edges": true,
+  "portfolio_simple_sum_forbidden": true,
   "local_replay_required_before_registration": true,
+  "cost_stress_required_before_registration": true,
   "fresh_prospective_confirmation_required": true,
-  "portfolio_use_forbidden_before_registration": true
+  "portfolio_use_forbidden_before_registration": true,
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_order": false,
+  "discord": false
 }
