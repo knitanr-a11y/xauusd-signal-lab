@@ -1,0 +1,11 @@
+{
+  "record_id": "GML1-BATCH026-RESULT-20260625",
+  "status": "PASS_ZERO_SURVIVORS",
+  "accepted_loss_leaves": {"LONG": 1, "SHORT": 1},
+  "base_candidates_evaluated": 21,
+  "passed_2023_gate": 0,
+  "survivors": 0,
+  "rescue_tuning": false,
+  "local_implementation": false,
+  "frozen_nine_modified": false
+}
