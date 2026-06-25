@@ -1,75 +1,69 @@
 {
   "schema_version": 1,
-  "action_id": "GML1-STATEFUL-PROSPECTIVE-MONITOR-CYCLE-READY-V1-CI-PASS",
+  "action_id": "GML1-EXPLORATION-BATCH024-M15-H1-PULLBACK-READY-V1-CI-PASS",
   "mode": "bat",
-  "title": "GOLD_ML_V1 stateful prospective monitoring cycle",
-  "message": "Run one CI-verified audit-only monitoring cycle. Read current closed goldsharp bars, preserve the cumulative candidate ledger, add only new candidate keys, update unresolved candidates when later closed M1 bars resolve them, and fail closed on historical mutation or resolved-result rewrite.",
-  "runner": "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat",
+  "title": "GOLD_ML_V1 Batch024 candidate exploration",
+  "message": "Run the explicitly authorized, CI-verified audit-only Batch024 exploration. Evaluate every one of the 36 predeclared H1-trend plus M15-pullback cells on the frozen 2023-2026 raw history, preserve every failure and survivor, and leave the existing frozen nine unchanged.",
+  "runner": "scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat",
   "arguments": [
-    "{MQL5_FILES}",
-    "{REPO_ROOT}/config/gold_ml_v1/prospective_monitoring_20260625.json"
+    "{RAW_HISTORY_DIR}",
+    "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"
   ],
   "required_paths": [
-    {"label": "MQL5 Files directory", "path": "{MQL5_FILES}"},
-    {"label": "closed GOLD M1 CSV", "path": "{MQL5_FILES}/goldsharp_m1.csv"},
-    {"label": "closed GOLD M15 CSV", "path": "{MQL5_FILES}/goldsharp_m15.csv"},
-    {"label": "closed GOLD H1 CSV", "path": "{MQL5_FILES}/goldsharp_h1.csv"},
-    {"label": "closed GOLD H4 CSV", "path": "{MQL5_FILES}/goldsharp_h4.csv"},
-    {"label": "closed GOLD D1 CSV", "path": "{MQL5_FILES}/goldsharp_d1.csv"},
-    {"label": "frozen monitoring config", "path": "{REPO_ROOT}/config/gold_ml_v1/prospective_monitoring_20260625.json"},
-    {"label": "first prospective run record", "path": "{REPO_ROOT}/config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json"},
-    {"label": "monitoring CI PASS record", "path": "{REPO_ROOT}/config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json"}
+    {"label": "frozen raw history directory", "path": "{RAW_HISTORY_DIR}"},
+    {"label": "frozen GOLD M1 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_m1.csv"},
+    {"label": "frozen GOLD M15 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_m15.csv"},
+    {"label": "frozen GOLD H1 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_h1.csv"},
+    {"label": "predeclared Batch024 config", "path": "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"},
+    {"label": "Batch024 CI PASS record", "path": "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json"}
   ],
-  "upload_output_dir": "outputs/gold_ml_v1/prospective_monitoring",
+  "upload_output_dir": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback",
   "upload_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
   "upload_sections": [
     {
-      "title": "STATEFUL MONITOR LATEST SUMMARY",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/LATEST_RUN_SUMMARY.txt",
-      "max_lines": 420
+      "title": "BATCH024 LATEST SUMMARY",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/LATEST_RUN_SUMMARY.txt",
+      "max_lines": 520
     },
     {
-      "title": "STATEFUL MONITOR ERROR TRACE",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/MONITOR_RUN_ERROR.txt",
-      "max_lines": 200
+      "title": "BATCH024 ERROR TRACE",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/EXPLORATION_RUN_ERROR.txt",
+      "max_lines": 220
     },
     {
-      "title": "CUMULATIVE CANDIDATE SUMMARY",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_candidate_summary.csv",
+      "title": "ALL 36 ATTEMPTED CELLS",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/exploration_attempt_registry.csv",
       "max_lines": 80
     },
     {
-      "title": "NEW CANDIDATES THIS CYCLE",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_new_candidates_latest.csv",
-      "max_lines": 180
+      "title": "BATCH024 SURVIVORS",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/exploration_survivors.csv",
+      "max_lines": 100
     },
     {
-      "title": "RESOLVED TRANSITIONS THIS CYCLE",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_resolved_transitions_latest.csv",
-      "max_lines": 180
+      "title": "YEAR METRICS FOR EVERY CELL",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/exploration_year_metrics.csv",
+      "max_lines": 220
     },
     {
-      "title": "CUMULATIVE CANDIDATE LEDGER",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_candidate_ledger.csv",
+      "title": "SIGNAL AND TRADE AUDIT TAIL",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/exploration_trade_registry.csv",
       "max_lines": 320
     },
     {
-      "title": "MONITOR RUN HISTORY",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_run_history.csv",
+      "title": "EXPLORATION SUMMARY JSON",
+      "path": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/exploration_summary.json",
       "max_lines": 180
-    },
-    {
-      "title": "MONITOR STATE",
-      "path": "outputs/gold_ml_v1/prospective_monitoring/monitor_state.json",
-      "max_lines": 260
     }
   ],
-  "current_status": "GOLD_ML_V1_024_STATEFUL_PROSPECTIVE_MONITOR_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
-  "phase": "STATEFUL_PROSPECTIVE_MONITORING_ONE_CYCLE",
-  "after_success": "STOP_AND_UPLOAD_PROSPECTIVE_MONITORING_UPLOAD_THIS_GOLD_ML_V1_TXT",
+  "current_status": "GOLD_ML_V1_026_EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "phase": "EXPLORATION_BATCH024_M15_H1_PULLBACK_FULL_36_CELL_GRID",
+  "after_success": "STOP_AND_UPLOAD_BATCH024_UPLOAD_THIS_GOLD_ML_V1_TXT",
+  "authorized_exploration_scope": "BATCH024_ONLY",
   "automatic_next_phase": false,
   "background_task_installed": false,
-  "new_exploration_allowed": false,
+  "new_exploration_allowed": true,
+  "existing_frozen_nine_modified": false,
   "audit_only": true,
   "live_ready": false,
   "final_signal": false,
@@ -77,6 +71,7 @@
   "discord": false,
   "ai_api": false,
   "live_hook": false,
+  "automatic_accumulation": false,
   "automatic_promotion": false,
   "automatic_registration": false
 }
