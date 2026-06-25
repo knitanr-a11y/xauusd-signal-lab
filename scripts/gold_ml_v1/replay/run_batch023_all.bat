@@ -49,23 +49,17 @@ echo ============================================================
 if errorlevel 1 goto :failed
 
 echo ============================================================
-echo STEP 3/4 Corrected historical replay V3
-
-echo   decisions/trades: gold_v3_2023_2026 only
-
-echo   pre-2023 warmup: older goldsharp H4/D1/etc only
-
-echo   ATR14: simple mean of 14 true ranges
-
-echo   horizon gaps: use last available M1 close within horizon
-
+echo STEP 3/4 Exact-contract historical replay V4
+echo   raw time is fixed as bar-open time
+echo   stored H4/M15 features must reproduce exactly
+echo   RCI implementation is selected only if all M15 candidates match
+echo   H1 event order is restored to the frozen Batch006 evaluator
 echo ============================================================
-"%PYTHON_EXE%" scripts\gold_ml_v1\replay\nine_candidate_local_replay_v3.py --repo-root "%CD%" --mode raw --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v3
+"%PYTHON_EXE%" scripts\gold_ml_v1\replay\nine_candidate_local_replay_v4.py --repo-root "%CD%" --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v4
 if errorlevel 1 goto :failed
 
 echo ============================================================
 echo STEP 4/4 Audit goldsharp as the live-only new-bar source
-
 echo ============================================================
 "%PYTHON_EXE%" scripts\gold_ml_v1\replay\goldsharp_live_source_preflight.py --historical-dir "%HISTORICAL_DIR%" --live-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\goldsharp_live_source_preflight
 if errorlevel 1 goto :failed
@@ -73,9 +67,8 @@ if errorlevel 1 goto :failed
 echo.
 echo [PASS] Batch023 completed.
 echo Historical decisions used only gold_v3_2023_2026 rows.
-echo Older goldsharp rows were used only for indicator warmup.
-echo Weekend and maintenance gaps used the last available M1 close inside the horizon.
-echo Live preflight treated only goldsharp rows after the historical maximum as new operational rows.
+echo Stored feature values and all nine exact registries matched.
+echo Goldsharp was audited as the live-only new-bar source.
 echo Python packages were installed only inside .venv_batch023.
 pause
 exit /b 0
@@ -91,6 +84,6 @@ exit /b 1
 set RC=%ERRORLEVEL%
 echo.
 echo [FAIL] Batch023 stopped at the first failed step. Exit code: %RC%
-echo Check outputs\gold_ml_v1 for the generated report.
+echo Check outputs\gold_ml_v1\batch023_historical_replay_v4 for the exact contract report.
 pause
 exit /b %RC%
