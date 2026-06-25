@@ -1,0 +1,35 @@
+{
+  "addendum_id": "GML1-BATCH023-HISTORICAL-LIVE-SOURCE-SPLIT-20260625",
+  "status": "SOURCE_SPLIT_IMPLEMENTED_LOCAL_EXECUTION_PENDING",
+  "historical_exact_replay": {
+    "source": "gold_v3_2023_2026_*.csv only",
+    "goldsharp_included": false,
+    "runner": "scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat"
+  },
+  "live_operation": {
+    "new_closed_bar_source": "goldsharp_*.csv only",
+    "historical_use": "indicator warmup and continuity only",
+    "historical_rows_may_trigger_new_live_signal": false,
+    "goldsharp_rows_at_or_before_historical_max": "overlap/backfill audit only",
+    "preflight_python": "scripts/gold_ml_v1/replay/goldsharp_live_source_preflight.py",
+    "preflight_runner": "scripts/gold_ml_v1/replay/run_goldsharp_live_source_preflight.bat"
+  },
+  "contract": "config/gold_ml_v1/replay/historical_live_source_contract_20260625.json",
+  "tests": "tests/gold_ml_v1/test_goldsharp_live_source_preflight.py",
+  "workflow": ".github/workflows/gold_ml_v1_batch023_tests.yml",
+  "time_basis": "MT5 server naive time",
+  "latest_row_contract": "closed",
+  "local_paths_received": true,
+  "local_paths_committed": false,
+  "historical_replay_executed_here": false,
+  "goldsharp_preflight_executed_here": false,
+  "reason": "The current execution environment cannot access the local machine filesystem.",
+  "boundaries": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "2026_retuning_forbidden": true
+  }
+}
