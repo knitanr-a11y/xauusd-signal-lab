@@ -1,0 +1,40 @@
+{
+  "record_id": "GML1-BATCH023-LOCAL-WARMUP-BRIDGE-IMPLEMENTATION-20260625",
+  "status": "LOCAL_IMPLEMENTATION_COMMITTED_AND_VERIFIED_9_OF_9_PASS_AUDIT_ONLY",
+  "files": {
+    "reconstruction": "scripts/gold_ml_v1/replay/batch023_warmup_bridge_reconstruction.py",
+    "launcher": "scripts/gold_ml_v1/replay/run_batch023_warmup_bridge_local.py",
+    "windows_runner": "scripts/gold_ml_v1/replay/run_batch023_warmup_bridge.bat",
+    "requirements": "scripts/gold_ml_v1/replay/requirements-batch023-warmup-bridge.txt",
+    "documentation": "docs/gold_ml_v1/GOLD_ML_V1_BATCH023_LOCAL_WARMUP_BRIDGE_IMPLEMENTATION_20260625.md"
+  },
+  "verified_local_test": {
+    "raw_hash_check": "6/6 PASS",
+    "batch023_zip_hash_check": "PASS",
+    "candidate_count": 9,
+    "missing_or_extra": 0,
+    "entry_mismatches": 0,
+    "exit_mismatches": 0,
+    "r_value_mismatches": 0,
+    "direction_mismatches": 0,
+    "exit_code": 0
+  },
+  "runner_behavior": {
+    "isolated_environment": ".venv_batch023_bridge",
+    "expected_registries": "extracted automatically from verified Batch023 ZIP to a temporary directory",
+    "previous_outputs": "moved to timestamped backup before each run",
+    "output": "outputs/gold_ml_v1/batch023_warmup_bridge_local",
+    "pass_summary": "LATEST_RUN_SUMMARY.txt",
+    "failure_trace": "LOCAL_RUN_ERROR.txt"
+  },
+  "policy": {
+    "audit_only": true,
+    "raw_time": "bar-open time in MT5 server time",
+    "raw_only_parity": false,
+    "warmup_bridge_exact_live_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
