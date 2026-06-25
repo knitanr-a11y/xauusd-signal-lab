@@ -35,18 +35,20 @@
 13. GML1-WATCH-022-B remains accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
 14. GML1-PROV-020 remains accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
 15. GML1-WATCH-021-A/B/C remain accumulated after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
-16. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
-17. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
-18. Historical audit files remain available after demotion.
-19. Local replay and fresh prospective confirmation are required before registration.
-20. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
-21. Remain audit-only. No live activation or automatic promotion.
-22. Never claim completion until outputs are inspected.
+16. Batch023 local replay package is ready. Registry SHA, row count, metrics and derivative-parent parity passed. Full raw replay is not complete because authorized historical M1/M15/H1/H4/D1 files were not mounted in the execution environment.
+17. Do not continue candidate exploration before Batch023 is run against authorized raw candles and its mismatch report is inspected.
+18. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
+19. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
+20. Historical audit files remain available after demotion.
+21. Local replay and fresh prospective confirmation are required before registration.
+22. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
+23. Remain audit-only. No live activation or automatic promotion.
+24. Never claim completion until outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_005_NINE_ACCUMULATED_CANDIDATES_BATCH022_ALL_WATCH_VALIDATED_AUDIT_ONLY`
+`GOLD_ML_V1_006_NINE_ACCUMULATED_CANDIDATES_BATCH023_LOCAL_REPLAY_PACKAGE_READY_RAW_INPUTS_PENDING_AUDIT_ONLY`
 
 Next phase:
 
-`RAW_REPLAY_COST_STRESS_AND_FRESH_CONFIRMATION_WHEN_INPUTS_EXIST_THEN_CONTINUE_INDEPENDENT_SHORT_AND_HIGH_COUNT_EXPLORATION`
+`RUN_BATCH023_ON_AUTHORIZED_RAW_CANDLES_INSPECT_ALL_NINE_DIFFS_THEN_COST_STRESS_AND_NEW_EXPLORATION`
