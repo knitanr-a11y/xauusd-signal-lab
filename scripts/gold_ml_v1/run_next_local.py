@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import locale
 import os
 import subprocess
 import sys
@@ -12,6 +13,11 @@ from typing import Any
 ACTION_CONFIG = Path("config/gold_ml_v1/next_local_action.json")
 LOCAL_PATHS_CONFIG = Path("config/gold_ml_v1/local_runtime_paths.local.json")
 OUTPUT_DIR = Path("outputs/gold_ml_v1/next_action")
+STATUS_FILE = OUTPUT_DIR / "LATEST_NEXT_ACTION.txt"
+CONSOLE_LOG_FILE = OUTPUT_DIR / "FULL_CONSOLE_LOG.txt"
+PASTE_ME_OUTPUT_FILE = OUTPUT_DIR / "PASTE_ME_GOLD_ML_V1.txt"
+PASTE_ME_ROOT_FILE = Path("PASTE_ME_GOLD_ML_V1.txt")
+COST_OUTPUT_DIR = Path("outputs/gold_ml_v1/cost_stress_raw_reconstructed")
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -45,7 +51,11 @@ def placeholders(repo_root: Path, overrides: dict[str, str]) -> dict[str, str]:
         "USER_HOME": str(Path.home()),
         "MQL5_FILES": str(mql5_files) if mql5_files else "",
         "RAW_HISTORY_DIR": str(mql5_files / "gold_v3_2023_2026") if mql5_files else "",
-        "BATCH023_ZIP": str(Path.home() / "Downloads" / "GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip"),
+        "BATCH023_ZIP": str(
+            Path.home()
+            / "Downloads"
+            / "GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip"
+        ),
     }
     defaults.update(overrides)
     return defaults
@@ -66,13 +76,91 @@ def resolve_existing_fallback(value: str, mapping: dict[str, str]) -> str:
     return options[0]
 
 
-def write_status(repo_root: Path, lines: list[str]) -> None:
+def write_status(repo_root: Path, lines: list[str]) -> Path:
     output_dir = repo_root / OUTPUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "LATEST_NEXT_ACTION.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path = repo_root / STATUS_FILE
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
 
 
-def validate_required_paths(required: list[dict[str, Any]], mapping: dict[str, str]) -> list[str]:
+def write_console_log(repo_root: Path, text: str) -> Path:
+    output_dir = repo_root / OUTPUT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = repo_root / CONSOLE_LOG_FILE
+    path.write_text(text, encoding="utf-8", errors="replace")
+    return path
+
+
+def tail_text(path: Path, maximum_lines: int) -> list[str]:
+    if not path.exists():
+        return [f"[FILE NOT CREATED] {path}"]
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as exc:
+        return [f"[FILE READ ERROR] {path}: {type(exc).__name__}: {exc}"]
+    if len(lines) > maximum_lines:
+        omitted = len(lines) - maximum_lines
+        return [f"[... {omitted} earlier lines omitted ...]", *lines[-maximum_lines:]]
+    return lines
+
+
+def write_paste_me(
+    repo_root: Path,
+    exit_code: int,
+    action_id: str = "UNKNOWN",
+    runner: str = "",
+    error: str = "",
+) -> Path:
+    sections: list[tuple[str, Path, int]] = [
+        ("NEXT ACTION STATUS", repo_root / STATUS_FILE, 80),
+        ("CAPTURED CONSOLE OUTPUT", repo_root / CONSOLE_LOG_FILE, 140),
+        (
+            "COST STRESS LATEST SUMMARY",
+            repo_root / COST_OUTPUT_DIR / "LATEST_RUN_SUMMARY.txt",
+            180,
+        ),
+        (
+            "COST STRESS ERROR TRACE",
+            repo_root / COST_OUTPUT_DIR / "COST_STRESS_RUN_ERROR.txt",
+            140,
+        ),
+    ]
+    lines = [
+        "GOLD_ML_V1 PASTE ME",
+        "Copy everything in this file and paste it into ChatGPT.",
+        f"generated_local={datetime.now().isoformat(timespec='seconds')}",
+        f"exit_code={exit_code}",
+        f"action_id={action_id}",
+        f"runner={runner}",
+        f"error={error}",
+        f"repo_root={repo_root}",
+        "",
+    ]
+    for title, path, limit in sections:
+        lines.extend(
+            [
+                "=" * 72,
+                title,
+                f"source_file={path}",
+                "=" * 72,
+                *tail_text(path, limit),
+                "",
+            ]
+        )
+    text = "\n".join(lines).rstrip() + "\n"
+    output_dir = repo_root / OUTPUT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = repo_root / PASTE_ME_OUTPUT_FILE
+    root_path = repo_root / PASTE_ME_ROOT_FILE
+    output_path.write_text(text, encoding="utf-8")
+    root_path.write_text(text, encoding="utf-8")
+    return root_path
+
+
+def validate_required_paths(
+    required: list[dict[str, Any]], mapping: dict[str, str]
+) -> list[str]:
     resolved: list[str] = []
     missing: list[str] = []
     for item in required:
@@ -85,6 +173,32 @@ def validate_required_paths(required: list[dict[str, Any]], mapping: dict[str, s
     if missing:
         raise FileNotFoundError("Required local paths are missing: " + "; ".join(missing))
     return resolved
+
+
+def run_subprocess_with_log(
+    command: list[str], repo_root: Path, log_path: Path
+) -> int:
+    encoding = locale.getpreferredencoding(False) or "utf-8"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("w", encoding="utf-8", errors="replace") as log_handle:
+        log_handle.write(f"command={command}\n")
+        log_handle.write(f"cwd={repo_root}\n")
+        log_handle.flush()
+        process = subprocess.Popen(
+            command,
+            cwd=str(repo_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding=encoding,
+            errors="replace",
+        )
+        assert process.stdout is not None
+        for line in process.stdout:
+            print(line, end="", flush=True)
+            log_handle.write(line)
+            log_handle.flush()
+        return int(process.wait())
 
 
 def run_action(repo_root: Path, config: dict[str, Any]) -> int:
@@ -111,6 +225,9 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
         print(message)
         lines = header + ["status=PASS", "exit_code=0", f"message={message}"]
         write_status(repo_root, lines)
+        write_console_log(repo_root, message + "\n")
+        paste_path = write_paste_me(repo_root, 0, action_id=action_id)
+        print(f"PASTE_ME: {paste_path}")
         return 0
 
     if mode != "bat":
@@ -128,19 +245,28 @@ def run_action(repo_root: Path, config: dict[str, Any]) -> int:
     for raw_argument in config.get("arguments", []):
         arguments.append(resolve_existing_fallback(str(raw_argument), mapping))
 
-    command = ["cmd", "/c", str(runner), *arguments]
+    command = ["cmd", "/d", "/c", str(runner), *arguments]
     print(f"Action: {action_id}")
     print(f"Runner: {runner}")
-    completed = subprocess.run(command, cwd=str(repo_root), check=False)
+    completed_return_code = run_subprocess_with_log(
+        command, repo_root, repo_root / CONSOLE_LOG_FILE
+    )
 
     lines = header + resolved_paths + [
         f"runner={runner}",
         f"command={command}",
-        f"status={'PASS' if completed.returncode == 0 else 'FAIL'}",
-        f"exit_code={completed.returncode}",
+        f"status={'PASS' if completed_return_code == 0 else 'FAIL'}",
+        f"exit_code={completed_return_code}",
     ]
     write_status(repo_root, lines)
-    return int(completed.returncode)
+    paste_path = write_paste_me(
+        repo_root,
+        completed_return_code,
+        action_id=action_id,
+        runner=str(runner),
+    )
+    print(f"PASTE_ME: {paste_path}")
+    return completed_return_code
 
 
 def main() -> int:
@@ -148,22 +274,33 @@ def main() -> int:
     parser.add_argument("--repo-root", type=Path, required=True)
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    config: dict[str, Any] = {}
     try:
         config = load_json(repo_root / ACTION_CONFIG)
         return run_action(repo_root, config)
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         print(f"[ERROR] {error}", file=sys.stderr)
+        write_console_log(repo_root, f"[ERROR] {error}\n")
         write_status(
             repo_root,
             [
                 "GOLD_ML_V1 NEXT ACTION",
                 f"time_local={datetime.now().isoformat(timespec='seconds')}",
+                f"action_id={config.get('action_id', 'UNKNOWN')}",
                 "status=FAIL",
                 "exit_code=4",
                 f"error={error}",
             ],
         )
+        paste_path = write_paste_me(
+            repo_root,
+            4,
+            action_id=str(config.get("action_id", "UNKNOWN")),
+            runner=str(config.get("runner", "")),
+            error=error,
+        )
+        print(f"PASTE_ME: {paste_path}", file=sys.stderr)
         return 4
 
 
