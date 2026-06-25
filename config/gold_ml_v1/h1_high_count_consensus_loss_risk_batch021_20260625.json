@@ -1,0 +1,74 @@
+{
+  "result_id": "GML1-BATCH-021-H1-HIGH-COUNT-CONSENSUS-LOSS-RISK",
+  "date": "2026-06-25",
+  "status": "ONE_PROMISING_HIGH_COUNT_MODEL_WATCH_DISCOVERED_VALIDATION_PENDING",
+  "mode": "audit-only",
+  "candidate_id": "GML1-WATCH-023-A",
+  "lineage": {
+    "base_parent": "GML1-PROV-010",
+    "first_stage_parent": "GML1-PROV-015",
+    "lane": "H1-D1",
+    "direction": "LONG",
+    "independent_edge_count_increment": 0
+  },
+  "selection_contract": {
+    "training_year": 2023,
+    "confirmation_years": [2024, 2025],
+    "diagnostic_only_year": 2026,
+    "target": "r_value <= 0",
+    "feature_count": 56,
+    "model_family": "deterministic L2 logistic loss-risk consensus",
+    "regularization_C_values": [0.01, 0.03, 0.1, 0.3, 1.0, 3.0],
+    "training_score_quantiles": [0.8, 0.85, 0.9, 0.95],
+    "risk_flags": 24,
+    "consensus_exclusion": "outside PROV-015 OR at least 12 of 24 risk flags true",
+    "2026_used_for_selection": false
+  },
+  "pre_2026": {
+    "trades": 182,
+    "wins": 123,
+    "win_rate": 0.6758241758,
+    "profit_factor": 2.1038712287,
+    "total_r": 64.3289235678,
+    "max_drawdown_r": 4.0,
+    "max_nonpositive_streak": 4,
+    "retained_fraction_vs_PROV010": 0.8017621145,
+    "retained_fraction_vs_PROV015": 0.91
+  },
+  "year_metrics": {
+    "2023": {"trades": 41, "profit_factor": 2.228318, "total_r": 15.434469},
+    "2024": {"trades": 57, "profit_factor": 1.461073, "total_r": 10.604673},
+    "2025": {"trades": 84, "profit_factor": 2.686016, "total_r": 38.289781},
+    "2026_diagnostic": {"trades": 24, "profit_factor": 2.848861, "total_r": 11.093167}
+  },
+  "excluded_pre_2026": {
+    "all": {"trades": 45, "wins": 13, "profit_factor": 0.4131284305, "total_r": -18.4672122288},
+    "outside_PROV015_first_stage": {"trades": 27, "wins": 8, "profit_factor": 0.4210526316, "total_r": -11.0},
+    "consensus_risk_inside_PROV015": {"trades": 18, "wins": 5, "profit_factor": 0.4010519680, "total_r": -7.4672122288}
+  },
+  "vote_neighborhood": {
+    "tested_min_votes": [8,9,10,11,12,13,14,15,16,17],
+    "pf_at_least_2_cells": 10,
+    "all_year_total_r_positive_cells": 10,
+    "retained_fraction_vs_PROV010_range": [0.7665198238, 0.8237885463],
+    "profit_factor_range": [2.0019232844, 2.203648]
+  },
+  "month_block_bootstrap_50000": {
+    "vs_PROV010": {"prob_total_r_improvement": 0.99788, "p05_difference_r": 7.848767, "median_difference_r": 18.467212, "p95_difference_r": 29.404915},
+    "vs_PROV015": {"prob_total_r_improvement": 0.93470, "p05_difference_r": -0.532788, "median_difference_r": 7.0, "p95_difference_r": 16.0}
+  },
+  "negative_results": {
+    "independent_SHORT": "Not executable without authorized raw M1 path and ask-side SHORT execution.",
+    "M15_PROV007_PROV008_union": "No exclusion rule passed 75 percent retention, PF2 and all-year-positive gates."
+  },
+  "verdict": "KEEP_AS_UNACCUMULATED_EXPLORATION_WATCH_AND_VALIDATE_NEXT",
+  "pending": [
+    "deterministic model regeneration parity",
+    "training bootstrap and feature/coefficient stability",
+    "excluded-row stability across model families",
+    "authorized raw M1/H1 exact replay",
+    "spread and slippage stress",
+    "fresh post-cutoff confirmation"
+  ],
+  "execution_switches": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
