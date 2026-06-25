@@ -1,0 +1,85 @@
+{
+  "result_id": "GML1-BATCH-022-ALL-WATCH-VALIDATION-20260625",
+  "date": "2026-06-25",
+  "mode": "audit-only",
+  "status": "AVAILABLE_INTERNAL_VALIDATIONS_COMPLETED_EXTERNAL_DATA_BLOCKERS_REMAIN",
+  "accumulated_before": 10,
+  "accumulated_after": 9,
+  "verdicts": {
+    "GML1-WATCH-014-A": {
+      "verdict": "DEMOTE_FROM_ACCUMULATED_TO_RESEARCH_ONLY",
+      "deterministic_artifact_consistency": true,
+      "reference_seed_pre_2026": {"trades": 178, "profit_factor": 2.088225, "total_r": 62.328924, "max_drawdown_r": 3.0},
+      "cross_seed_pre_2026": {
+        "profit_factor_min": 1.949223,
+        "profit_factor_max": 2.088225,
+        "total_r_min": 48.328924,
+        "total_r_max": 62.328924,
+        "seeds_with_pf_at_least_2": 3,
+        "seeds_total": 6,
+        "seeds_where_excluded_subset_was_profitable": 2
+      },
+      "seed_stability": {
+        "cluster_1_mean_membership_jaccard": 0.1859297565,
+        "cluster_1_min_membership_jaccard": 0.0,
+        "cluster_2_mean_membership_jaccard": 0.6143986277,
+        "cluster_2_min_membership_jaccard": 0.3488372093
+      },
+      "reason": "The reference-seed result reproduces, but the selected combined loser motif is not seed-stable. Under seeds 7061 and 7081 the aligned excluded subset is profitable."
+    },
+    "GML1-WATCH-021-A": {"verdict": "KEEP_ACCUMULATED_WATCH", "validation": "Batch018 registry, causality, threshold provenance and neighborhood passed"},
+    "GML1-WATCH-021-B": {"verdict": "KEEP_ACCUMULATED_WATCH", "validation": "Batch018 registry, causality, threshold provenance and neighborhood passed"},
+    "GML1-WATCH-021-C": {"verdict": "KEEP_ACCUMULATED_WATCH", "validation": "Batch018 registry, causality and all 81 local neighborhood cells passed PF2"},
+    "GML1-WATCH-022-A": {"verdict": "KEEP_RESEARCH_ONLY", "validation": "Batch020 failed accumulation gate"},
+    "GML1-WATCH-022-B": {"verdict": "KEEP_ACCUMULATED_WATCH_WITH_TEMPORAL_CONCENTRATION_CAVEAT", "validation": "Batch020 conditional pass"},
+    "GML1-WATCH-023-A": {
+      "verdict": "KEEP_RESEARCH_ONLY_DO_NOT_ACCUMULATE",
+      "deterministic_regeneration": {
+        "all_six_models_match_manifest": true,
+        "candidate_registry_rows_all_period": 206,
+        "candidate_registry_exact": true,
+        "max_abs_coefficient_diff": 7.91033905045424e-16,
+        "max_abs_preprocessor_diff": 1.1102230246251565e-16
+      },
+      "l2_solver_stability": {
+        "solvers_tested": ["liblinear", "lbfgs", "newton-cg", "newton-cholesky", "saga"],
+        "minimum_risk_set_jaccard_vs_reference": 0.95,
+        "all_solver_pre_2026_pf_at_least_2": true
+      },
+      "leave_one_out_46": {
+        "pf_at_least_2_fraction": 1.0,
+        "risk_jaccard_at_least_0_5_fraction": 1.0
+      },
+      "stratified_training_bootstrap_1000": {
+        "pf_at_least_2_fraction": 0.197,
+        "pf_median": 1.9246056936,
+        "pf_p05": 1.8258594482,
+        "pf_p95": 2.0605590812,
+        "risk_set_jaccard_median": 0.2666666667,
+        "risk_set_jaccard_at_least_0_5_fraction": 0.036,
+        "total_r_median": 57.8944545889
+      },
+      "reason": "Published artifacts reproduce exactly and L2 solvers agree, but the 46-row 2023 training sample is not stable under resampling."
+    },
+    "GML1-WATCH-012-A": {"verdict": "UNCHANGED_HISTORICAL_WATCH", "reason": "Exact artifacts are not present in the current verified bundle"},
+    "GML1-WATCH-012-B": {"verdict": "UNCHANGED_HISTORICAL_WATCH", "reason": "Exact artifacts are not present in the current verified bundle"}
+  },
+  "kept_accumulated": ["GML1-WATCH-021-A", "GML1-WATCH-021-B", "GML1-WATCH-021-C", "GML1-WATCH-022-B"],
+  "demoted_to_research_only": ["GML1-WATCH-014-A"],
+  "kept_research_only": ["GML1-WATCH-022-A", "GML1-WATCH-023-A"],
+  "external_blockers": [
+    "authorized raw M1/M15/H1/H4/D1 candle replay",
+    "spread 1.5x and 2.0x plus fixed-slippage stress",
+    "fresh post-cutoff confirmation; current post-cutoff parent-event registry has zero rows",
+    "historical WATCH-012 exact source artifacts"
+  ],
+  "boundaries": {
+    "candidate_artifacts_preserved": true,
+    "2026_retuning_forbidden": true,
+    "automatic_promotion": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
