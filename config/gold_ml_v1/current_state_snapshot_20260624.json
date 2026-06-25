@@ -1,7 +1,7 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-T",
-  "status": "COST_STRESS_PASS_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT_AUDIT_ONLY",
-  "formal_status": "GOLD_ML_V1_021_COST_STRESS_PASS_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-U",
+  "status": "FRESH_PROSPECTIVE_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "formal_status": "GOLD_ML_V1_022_FRESH_PROSPECTIVE_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -9,7 +9,7 @@
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
   "exploration_triple_check": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md",
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_IMPLEMENTED_USER_RUN_NEXT_20260625.md",
   "evaluation_period_contract": {
     "2023": "EXPLORATION_ONLY",
     "2024": "VALIDATION_ONLY_NO_RETUNE",
@@ -61,14 +61,6 @@
     "raw_only_parity": false,
     "raw_only_parity_blocker": "pre-2023 D1/H1/H4 history or serialized indicator state is absent"
   },
-  "failed_cost_stress_attempt": {
-    "status": "FAIL",
-    "exit_code": 4,
-    "error": "GML1-PROV-010_warmup_bridge_exact_schema_registry.csv missing entry_price and exit_price columns",
-    "classification": "INPUT_SCHEMA_ASSUMPTION_BUG_BEFORE_ANY_COST_STRESS_RESULT",
-    "candidate_results_produced": false,
-    "grid_or_gate_changed_after_result": false
-  },
   "verified_cost_stress_run": {
     "record": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
     "status": "PASS",
@@ -87,33 +79,20 @@
     "pass_record": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
     "runner_python": "scripts/gold_ml_v1/cost_stress/run_cost_stress_raw_reconstructed.py",
     "runner_bat": "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
-    "authoritative_registry": "*_warmup_bridge_core_registry.csv",
     "primary_population": "RAW_RECONSTRUCTED",
     "bridge_population": "WARMUP_BRIDGE_EXACT_EXACT_CORE_AUDIT_SEPARATE_NOT_ELIGIBLE",
-    "spread_multipliers": [1.0, 1.5, 2.0],
-    "fixed_slippage_points_per_side": [0, 5, 10, 20],
     "scenario_count": 12,
-    "grid_frozen_before_result": true,
-    "baseline_parity_required": true,
-    "bridge_stress_replay": "NOT_CALCULATED_AUDIT_ONLY",
-    "candidate_membership_frozen": true,
-    "automatic_next_phase": false,
-    "result_available": true,
     "result": "PASS_9_OF_9",
-    "output_dir": "outputs/gold_ml_v1/cost_stress_raw_reconstructed"
-  },
-  "one_click_workflow": {
-    "stable_user_entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "dispatcher": "scripts/gold_ml_v1/run_next_local.py",
-    "action_config": "config/gold_ml_v1/next_local_action.json",
-    "cost_stress_phase_bat": "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
-    "cost_stress_upload_file": "outputs/gold_ml_v1/cost_stress_raw_reconstructed/UPLOAD_THIS_GOLD_ML_V1.txt",
-    "current_action_mode": "status_only",
-    "current_action_reason": "Cost stress is complete. Fresh prospective must be implemented as a separately committed phase before the root launcher is pointed to it."
+    "do_not_rerun": true
   },
   "fresh_prospective": {
-    "status": "IMPLEMENTATION_NEXT_NOT_YET_RUN",
+    "status": "IMPLEMENTED_USER_RUN_NEXT",
+    "config": "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json",
+    "engine": "scripts/gold_ml_v1/prospective/fresh_prospective_engine.py",
+    "runner_python": "scripts/gold_ml_v1/prospective/run_fresh_prospective_confirmation.py",
+    "runner_bat": "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
     "cutoff_mt5_server_close": "2026-06-23 18:15:00",
+    "decision_time_rule": "STRICTLY_GREATER_THAN_CUTOFF",
     "authoritative_live_candle_filenames": [
       "goldsharp_m1.csv",
       "goldsharp_m15.csv",
@@ -123,13 +102,42 @@
     ],
     "closed_bars_only": true,
     "candidate_rules_frozen": true,
+    "candidate_generation_future_exit_use": false,
+    "unresolved_candidates_preserved": true,
+    "suppressed_parent_events_recorded": true,
+    "same_m1_tp_sl_priority": "SL",
+    "performance_gate": "NOT_APPLICABLE_PROSPECTIVE_AUDIT_ONLY",
+    "no_candidate_yet_is_valid": true,
     "retuning_forbidden": true,
     "automatic_promotion": false,
-    "live_use": false
+    "live_use": false,
+    "output_dir": "outputs/gold_ml_v1/fresh_prospective_confirmation",
+    "output_files": [
+      "fresh_prospective_candidate_registry.csv",
+      "fresh_prospective_parent_event_audit.csv",
+      "fresh_prospective_candidate_summary.csv",
+      "input_provenance.json",
+      "fresh_prospective_summary.json",
+      "LATEST_RUN_SUMMARY.txt",
+      "FRESH_PROSPECTIVE_RUN_ERROR.txt",
+      "UPLOAD_THIS_GOLD_ML_V1.txt"
+    ],
+    "result_available": false
   },
-  "next": "IMPLEMENT_FRESH_PROSPECTIVE_CONFIRMATION_AS_SEPARATE_AUDIT_ONLY_PHASE",
+  "one_click_workflow": {
+    "stable_user_entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
+    "launcher_revision": "PHASE_UPLOAD_V2_20260625",
+    "dispatcher": "scripts/gold_ml_v1/run_next_local.py",
+    "action_config": "config/gold_ml_v1/next_local_action.json",
+    "current_action_mode": "bat",
+    "current_action_runner": "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
+    "current_upload_path_file": "outputs/gold_ml_v1/next_action/CURRENT_UPLOAD_PATH.txt",
+    "current_upload_file": "outputs/gold_ml_v1/fresh_prospective_confirmation/UPLOAD_THIS_GOLD_ML_V1.txt",
+    "user_instruction": "GitHub DesktopでPullしてRUN_GOLD_ML_V1_NEXT.batをダブルクリックし、開いたフォルダのUPLOAD_THIS_GOLD_ML_V1.txtをドラッグしてください"
+  },
+  "next": "USER_PULLS_AND_RUNS_FRESH_PROSPECTIVE_ONE_CLICK_THEN_UPLOADS_PHASE_FILE",
   "registration_blockers": [
-    "fresh prospective confirmation from goldsharp closed bars after 2026-06-23 18:15:00 MT5 server close has not yet been implemented and reviewed",
+    "fresh prospective confirmation has not yet been run and reviewed",
     "no explicit registration, promotion or live activation authorization"
   ],
   "execution_switches": {
