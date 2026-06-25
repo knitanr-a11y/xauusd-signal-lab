@@ -1,0 +1,12 @@
+{
+  "formal_status": "GOLD_ML_V1_031_HANDOFF_READY_AUDIT_ONLY",
+  "date": "2026-06-26",
+  "candidate_stack": "config/gold_ml_v1/provisional_candidate_stack_20260624.json",
+  "accumulated_candidate_total": 9,
+  "active_new_candidate_total": 0,
+  "existing_nine_modified": false,
+  "next_local_action": "config/gold_ml_v1/next_local_action.json",
+  "next": "WAIT_FOR_EXPLICIT_USER_DIRECTION",
+  "audit_only": true,
+  "live_ready": false
+}
