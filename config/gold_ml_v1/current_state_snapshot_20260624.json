@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-Y",
-  "formal_status": "GOLD_ML_V1_026_EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
-  "status": "EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-Z",
+  "formal_status": "GOLD_ML_V1_026A_RAW_INPUT_TRANSFER_FOR_ASSISTANT_EXPLORATION_READY_AUDIT_ONLY",
+  "status": "RAW_INPUT_TRANSFER_FOR_ASSISTANT_EXPLORATION_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ASSISTANT_EXPLORATION_RAW_UPLOAD_NEXT_20260625.md",
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
@@ -35,7 +35,8 @@
     ],
     "silent_add_remove_replace_or_relabel": "forbidden",
     "existing_frozen_nine_modified": false,
-    "new_exploration_allowed_now": true,
+    "assistant_exploration_authorized_now": true,
+    "local_exploration_allowed_now": false,
     "authorized_exploration_scope": "BATCH024_ONLY"
   },
   "completed": {
@@ -53,27 +54,43 @@
     "ledger_preserved": true
   },
   "exploration_batch024": {
-    "status": "IMPLEMENTED_CI_VERIFIED_USER_RUN_NEXT",
+    "status": "ASSISTANT_EXECUTION_PENDING_RAW_UPLOAD",
     "authorization": "config/gold_ml_v1/exploration_batch024_authorization_20260625.json",
     "config": "config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json",
-    "ci_record": "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json",
+    "implementation_ci_record": "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json",
     "lineage_id": "M15_H1_TREND_PULLBACK_LINEAGE_EXP024",
     "attempted_cells": 36,
+    "search_space_frozen": true,
+    "assistant_result_available": false,
+    "local_reproduction_available": false,
+    "local_discovery_run_forbidden": true,
     "existing_frozen_nine_modified": false,
     "automatic_accumulation": false,
-    "automatic_promotion": false,
-    "result_available": false,
-    "output_dir": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback",
-    "upload_file": "outputs/gold_ml_v1/exploration_batch024_m15_h1_pullback/UPLOAD_THIS_GOLD_ML_V1.txt"
+    "automatic_promotion": false
+  },
+  "raw_input_transfer": {
+    "status": "ONE_CLICK_PACKAGE_READY",
+    "runner_bat": "scripts/gold_ml_v1/exploration/windows/package_batch024_raw_for_assistant.bat",
+    "package_output": "outputs/gold_ml_v1/exploration_batch024_data_upload/GOLD_ML_V1_BATCH024_FROZEN_RAW_INPUT.zip",
+    "package_contains": [
+      "gold_v3_2023_2026_m1.csv",
+      "gold_v3_2023_2026_m15.csv",
+      "gold_v3_2023_2026_h1.csv",
+      "batch024_input_manifest.json",
+      "exploration_batch024_frozen_config.json"
+    ],
+    "hash_validation_required": true,
+    "exploration_executed_by_package_action": false
   },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "action_id": "GML1-EXPLORATION-BATCH024-M15-H1-PULLBACK-READY-V1-CI-PASS",
-    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat"
+    "action_id": "GML1-BATCH024-PACKAGE-FROZEN-RAW-FOR-ASSISTANT",
+    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/package_batch024_raw_for_assistant.bat"
   },
-  "next": "USER_PULLS_AND_RUNS_BATCH024_EXPLORATION_THEN_UPLOADS_PHASE_FILE",
+  "next": "USER_UPLOADS_HASH_VERIFIED_RAW_ZIP_THEN_ASSISTANT_EXECUTES_EXPLORATION",
   "execution_switches": {
-    "new_exploration": true,
+    "local_exploration": false,
+    "assistant_exploration": true,
     "live_ready": false,
     "final_signal": false,
     "mt5_order": false,
