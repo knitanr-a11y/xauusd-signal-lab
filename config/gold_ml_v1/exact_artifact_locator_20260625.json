@@ -1,30 +1,65 @@
 {
-  "locator_id": "GML1-EXACT-ARTIFACT-LOCATOR-20260625",
-  "status": "ARTIFACTS_GENERATED_EXTERNALLY_REPOSITORY_PATHS_RESERVED",
-  "bundle": {
-    "filename": "GOLD_ML_V1_EXACT_HANDOFF_ARTIFACTS_20260625.zip",
-    "sha256": "1c4cb9677ff54db177005fcec4225aa59c31140f4e2356e9dad9c5becba10bdb"
+  "locator_id": "GML1-EXACT-ARTIFACT-LOCATOR-20260625-BATCH023",
+  "status": "BATCH023_GITHUB_REPLAY_IMPLEMENTED_EXTERNAL_ARTIFACT_INSTALL_REQUIRED",
+  "bundles": {
+    "original_handoff": {
+      "filename": "GOLD_ML_V1_EXACT_HANDOFF_ARTIFACTS_20260625.zip",
+      "sha256": "1c4cb9677ff54db177005fcec4225aa59c31140f4e2356e9dad9c5becba10bdb"
+    },
+    "batch023_local_replay": {
+      "filename": "GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip",
+      "sha256": "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
+      "installer": "scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat",
+      "installer_python": "scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py"
+    }
   },
   "repository_target_directory": "config/gold_ml_v1/registries/",
+  "replay": {
+    "python": "scripts/gold_ml_v1/replay/nine_candidate_local_replay.py",
+    "raw_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "registry_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_registry_parity.bat",
+    "config": "config/gold_ml_v1/replay/nine_candidate_replay_config_20260625.json",
+    "expected_metrics": "config/gold_ml_v1/replay/nine_candidate_expected_metrics_20260625.json",
+    "expected_hashes": "config/gold_ml_v1/replay/nine_candidate_expected_sha256_20260625.json"
+  },
   "trade_registries": {
-    "GML1-PROV-007": ["GML1-PROV-007_exact_trade_registry.csv", "16b3f8bb1b6abe53e9e1e58026d0a329697cce29a137361e8404be7a1a99ed49"],
-    "GML1-PROV-008": ["GML1-PROV-008_exact_trade_registry.csv", "3568b3133073898ed2cd7eda1c764d33f8e9181483e777f2a8c10e55a8b4ecb1"],
-    "GML1-PROV-010": ["GML1-PROV-010_exact_trade_registry.csv", "d8016e6067c147103b6c98ab4399623b3409c59579487136757118206e28f9d8"],
-    "GML1-PROV-015": ["GML1-PROV-015_exact_trade_registry.csv", "b41f5c40bd340e69a8df08cf0649fd5e1723889a4af7f80aaf4ed80977560b7b"],
-    "GML1-PROV-020": ["GML1-PROV-020_exact_trade_registry.csv", "211679ad00273be7b52ba8a77a041c5b9aea29f76fbfcd176e2e621ebb275f6e"],
-    "GML1-WATCH-014-A": ["GML1-WATCH-014-A_exact_trade_registry.csv", "c2707dadb78343e3cb25791b9453d5d41f2052ac395161139cb5708db47b97d5"]
+    "GML1-PROV-007": ["GML1-PROV-007_exact_trade_registry.csv", "16b3f8bb1b6abe53e9e1e58026d0a329697cce29a137361e8404be7a1a99ed49", 154],
+    "GML1-PROV-008": ["GML1-PROV-008_exact_trade_registry.csv", "3568b3133073898ed2cd7eda1c764d33f8e9181483e777f2a8c10e55a8b4ecb1", 169],
+    "GML1-WATCH-022-B": ["GML1-WATCH-022-B_exact_trade_registry.csv", "70237975943bb7ae8e1e4fce80634f133f8e9763423c1d19cdcdb681169ec54a", 135],
+    "GML1-PROV-010": ["GML1-PROV-010_exact_trade_registry.csv", "d8016e6067c147103b6c98ab4399623b3409c59579487136757118206e28f9d8", 254],
+    "GML1-PROV-015": ["GML1-PROV-015_exact_trade_registry.csv", "b41f5c40bd340e69a8df08cf0649fd5e1723889a4af7f80aaf4ed80977560b7b", 225],
+    "GML1-PROV-020": ["GML1-PROV-020_exact_trade_registry.csv", "211679ad00273be7b52ba8a77a041c5b9aea29f76fbfcd176e2e621ebb275f6e", 204],
+    "GML1-WATCH-021-A": ["GML1-WATCH-021-A_exact_trade_registry.csv", "470ae65127ccf64817450b75d8cfa5c005432f7da13e2f906e7da4cdb9293731", 210],
+    "GML1-WATCH-021-B": ["GML1-WATCH-021-B_exact_trade_registry.csv", "978d10d973ad9c8dfc6d63cdda34b800bcd6845001731364daa9c7d5cca11bf8", 207],
+    "GML1-WATCH-021-C": ["GML1-WATCH-021-C_exact_trade_registry.csv", "2c72975b48fa237acf15f43679fb69ac5eeb4a586eddab1d26929be3109b2560", 196],
+    "GML1-WATCH-014-A_RESEARCH_ONLY": ["GML1-WATCH-014-A_exact_trade_registry.csv", "c2707dadb78343e3cb25791b9453d5d41f2052ac395161139cb5708db47b97d5"]
   },
   "prov015_parent_events": {
-    "all_available": ["GML1-PROV-015_parent_event_registry_all_available.csv", "1b16b9200eaccab701c32614fb9240ed30e753d40b61b6c9e25e69a765e7b180"],
+    "all_available": ["GML1-PROV-015_parent_event_registry_all_available.csv", "1b16b9200eaccab701c32614fb9240ed30e753d40b61b6c9e25e69a765e7b180", 254],
     "post_cutoff": ["GML1-PROV-015_parent_event_registry_post_cutoff.csv", "aaacaa86207ad79ed7f2f0915afff42a5a10f1e75533eb195ebd4506ea1d7a26", 0]
   },
-  "watch014": {
-    "features54": ["GML1-WATCH-014-A_54_feature_registry.csv", "81695541d57e8aef16ebd6732d3b7829516524e2a7539ef995abca17f1cc0f65"],
+  "watch014_support": {
+    "features54": ["GML1-WATCH-014-A_54_feature_registry.csv", "81695541d57e8aef16ebd6732d3b7829516524e2a7539ef995abca17f1cc0f65", 225],
     "assignments6seeds": ["GML1-WATCH-014-A_cluster_assignments_6seeds.csv", "ae805e3f6652baa1b981e6bb303a2534384748a94f73d8f54212a276e5caa77f"],
     "models6seeds": ["GML1-WATCH-014-A_cluster_models_6seeds.json", "27b54e3c70e8b13ef04b6b47dfdb006d02707e3128a2d5719db645061af53eb2"]
   },
+  "authorized_raw_historical": [
+    "gold_v3_2023_2026_m1.csv",
+    "gold_v3_2023_2026_m15.csv",
+    "gold_v3_2023_2026_h1.csv",
+    "gold_v3_2023_2026_h4.csv",
+    "gold_v3_2023_2026_d1.csv"
+  ],
+  "authorized_raw_live_optional": [
+    "goldsharp_m1.csv",
+    "goldsharp_m15.csv",
+    "goldsharp_h1.csv",
+    "goldsharp_h4.csv",
+    "goldsharp_d1.csv"
+  ],
   "fresh_cutoff": "2026-06-23 18:15:00",
   "latest_available_h1_close": "2026-06-23 18:00:00",
   "latest_available_m15_close": "2026-06-23 18:15:00",
-  "post_cutoff_rows": 0
+  "post_cutoff_rows": 0,
+  "known_unknown": "The local filesystem directory containing the authorized raw candle CSV files has not been provided."
 }
