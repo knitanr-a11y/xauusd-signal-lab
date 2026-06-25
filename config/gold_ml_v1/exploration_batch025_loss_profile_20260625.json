@@ -1,0 +1,160 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH025-LOSS-PROFILE-20260625",
+  "status": "PREDECLARED_BEFORE_2024_2025_EVALUATION",
+  "audit_only": true,
+  "purpose": "Mine composite decision-time conditions disproportionately associated with losses in high-count Batch024 candidates, remove those trades, and validate the frozen exclusions without retuning.",
+  "source_batch": "GML1-EXPLORATION-BATCH024-M15-H1-PULLBACK-20260625",
+  "source_assistant_result": "config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json",
+  "existing_frozen_nine_modified": false,
+  "local_implementation_before_survivor": "forbidden",
+  "time_contract": {
+    "csv_time": "MT5 server naive bar-open time",
+    "M5_close": "time + 5 minutes",
+    "M15_close": "time + 15 minutes",
+    "H1_close": "time + 1 hour",
+    "H4_close": "time + 4 hours",
+    "D1_close": "time + 1 day",
+    "decision_timestamp": "M15 bar close",
+    "all_feature_joins": "latest bar close less than or equal to decision timestamp"
+  },
+  "period_contract": {
+    "2023_H1": "DISCOVERY_ONLY_2023-01-01_THROUGH_2023-06-30",
+    "2023_H2": "INTERNAL_VALIDATION_ONLY_2023-07-01_THROUGH_2023-12-31",
+    "2024": "EXTERNAL_VALIDATION_ONLY_NO_RETUNE",
+    "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+    "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE"
+  },
+  "candidate_eligibility": {
+    "minimum_2023_resolved_trades": 150,
+    "minimum_2023_H1_resolved_trades": 70,
+    "minimum_2023_H2_resolved_trades": 70,
+    "eligible_base_ids": [
+      "GML1-EXP024-L-G000-R35-RC",
+      "GML1-EXP024-L-G000-R40-RC",
+      "GML1-EXP024-L-G000-R45-ER",
+      "GML1-EXP024-L-G000-R45-RC",
+      "GML1-EXP024-L-G015-R35-RC",
+      "GML1-EXP024-L-G015-R40-RC",
+      "GML1-EXP024-L-G015-R45-RC",
+      "GML1-EXP024-L-G030-R35-RC",
+      "GML1-EXP024-L-G030-R40-RC",
+      "GML1-EXP024-L-G030-R45-RC",
+      "GML1-EXP024-S-G000-R35-RC",
+      "GML1-EXP024-S-G000-R40-RC",
+      "GML1-EXP024-S-G000-R45-ER",
+      "GML1-EXP024-S-G000-R45-RC",
+      "GML1-EXP024-S-G015-R35-RC",
+      "GML1-EXP024-S-G015-R40-RC",
+      "GML1-EXP024-S-G015-R45-ER",
+      "GML1-EXP024-S-G015-R45-RC",
+      "GML1-EXP024-S-G030-R35-RC",
+      "GML1-EXP024-S-G030-R40-RC",
+      "GML1-EXP024-S-G030-R45-RC"
+    ]
+  },
+  "feature_contract": {
+    "timeframes": ["M5", "M15", "H1", "H4", "D1"],
+    "decision_time_only": true,
+    "direction_normalization": "LONG uses raw directional sign; SHORT multiplies directional price and momentum features by minus one",
+    "indicator_formulas": {
+      "ATR14": "Wilder exponential average of true range with alpha 1/14",
+      "RSI14": "Wilder gain/loss averages with alpha 1/14",
+      "EMA20_EMA50_EMA200": "pandas ewm span N adjust false min_periods N",
+      "returns": "close minus lagged close divided by current ATR14",
+      "EMA_distance": "close minus EMA divided by current ATR14",
+      "EMA_slope3": "EMA minus EMA shifted 3 bars divided by current ATR14",
+      "wick_and_body": "current closed candle values divided by current ATR14",
+      "ATR_ratio_50": "ATR14 divided by rolling median ATR14 over 50 bars with minimum 20",
+      "volume_ratio_50": "tick volume divided by rolling median tick volume over 50 bars with minimum 20",
+      "close_position_20": "close within rolling 20-bar high-low range",
+      "BB_z20": "close minus rolling mean20 divided by rolling population standard deviation20"
+    },
+    "feature_families": ["momentum", "trend", "candle", "volatility", "volume", "location", "time"],
+    "curated_feature_count": 53,
+    "future_data": "forbidden",
+    "outcome_or_exit_as_feature": "forbidden"
+  },
+  "atomic_condition_generation": {
+    "continuous_threshold_quantiles_from_2023_H1_only": [0.2, 0.3, 0.7, 0.8],
+    "lower_quantiles_operator": "less_than_or_equal",
+    "upper_quantiles_operator": "greater_than_or_equal",
+    "categorical_atoms": {
+      "MT5_server_hour_bucket_4h": [0, 1, 2, 3, 4, 5],
+      "weekday": [0, 1, 2, 3, 4]
+    },
+    "missing_feature_match": false
+  },
+  "composite_rule_search": {
+    "top_discovery_atoms_per_step": 18,
+    "atom_preselection_score": "negative_removed_total_R multiplied by square_root_removed_count",
+    "atom_preselection_support_fraction_min": 0.07,
+    "atom_preselection_support_fraction_max": 0.45,
+    "composite_sizes": [2, 3],
+    "distinct_feature_names_required": true,
+    "minimum_distinct_feature_families": 2,
+    "maximum_atoms_from_same_timeframe": 2,
+    "maximum_sequential_exclusion_rules": 2,
+    "sequential_second_rule_search_population": "trades remaining after first frozen exclusion",
+    "selection_order": "highest 2023_H1 discovery score only among rules that pass 2023_H2; lexical rule text breaks ties",
+    "2023_H2_used_for": "pass_or_fail_only_not_ranking"
+  },
+  "per_rule_acceptance": {
+    "2023_H1": {
+      "minimum_removed_count": "max(10, floor(0.06 * current_remaining_count))",
+      "removed_fraction_min": 0.05,
+      "removed_fraction_max": 0.35,
+      "minimum_removed_loss_rate": 0.68,
+      "maximum_removed_mean_R": -0.2,
+      "minimum_remaining_mean_R_improvement": 0.06
+    },
+    "2023_H2": {
+      "minimum_removed_count": "max(6, floor(0.04 * current_remaining_count))",
+      "removed_fraction_min": 0.04,
+      "removed_fraction_max": 0.35,
+      "minimum_removed_loss_rate": 0.62,
+      "maximum_removed_mean_R": -0.1,
+      "minimum_remaining_mean_R_improvement": 0.03
+    }
+  },
+  "post_filter_2023_gate": {
+    "2023_H1": {"minimum_count": 60, "minimum_profit_factor": 1.15, "minimum_mean_R_exclusive": 0.1},
+    "2023_H2": {"minimum_count": 60, "minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+    "2023_FULL": {"minimum_count": 130, "minimum_profit_factor": 1.2, "minimum_mean_R_exclusive": 0.1}
+  },
+  "external_gates": {
+    "2024": {"minimum_count": 80, "minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+    "2025": {"minimum_count": 80, "minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+    "2026": "DIAGNOSTIC_ONLY_NO_GATE"
+  },
+  "candidate_status_contract": {
+    "new_candidate_id_format": "GML1-EXP025-{base_candidate_suffix}-LF{rule_count}",
+    "2023_gate_fail": "REJECTED_WITH_FULL_REASON",
+    "2023_pass_later_fail": "RESEARCH_ONLY_FAILED_EXTERNAL_GATE",
+    "all_gate_pass": "RESEARCH_ONLY_PENDING_CORRELATION_AND_COST_REVIEW",
+    "zero_survivors": "VALID_COMPLETED_RESULT",
+    "rescue_tuning": "forbidden",
+    "automatic_accumulation": false,
+    "automatic_promotion": false,
+    "automatic_local_implementation": false
+  },
+  "multiplicity_contract": {
+    "eligible_base_candidates": 21,
+    "all_generated_atomic_conditions_recorded": true,
+    "all_tested_composite_rules_recorded": true,
+    "all_selected_and_rejected_rules_recorded": true,
+    "same_lineage_metric_pooling": "forbidden",
+    "near_duplicate_survivors": "record overlap clusters; do not claim independent edges"
+  },
+  "execution_switches": {
+    "modify_existing_nine": false,
+    "local_implementation": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
