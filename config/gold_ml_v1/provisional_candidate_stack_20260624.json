@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260625_E",
-  "status": "TEN_ACCUMULATED_CANDIDATES_WITH_CAVEATS",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260625_F",
+  "status": "TEN_ACCUMULATED_CANDIDATES_WITH_ONE_NEW_HIGH_COUNT_WATCH_PENDING_VALIDATION",
   "updated": "2026-06-25",
   "core_accumulated_ids": [
     "GML1-PROV-007",
@@ -56,7 +56,11 @@
     "GML1-PROV-019",
     "GML1-WATCH-012-A",
     "GML1-WATCH-012-B",
-    "GML1-WATCH-022-A"
+    "GML1-WATCH-022-A",
+    "GML1-WATCH-023-A"
+  ],
+  "research_watch_records": [
+    "config/gold_ml_v1/h1_high_count_consensus_loss_risk_batch021_20260625.json"
   ],
   "rejected": [
     "GML1-PROV-017"
