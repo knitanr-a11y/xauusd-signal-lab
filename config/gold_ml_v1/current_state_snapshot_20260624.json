@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-Z",
-  "formal_status": "GOLD_ML_V1_026A_RAW_INPUT_TRANSFER_FOR_ASSISTANT_EXPLORATION_READY_AUDIT_ONLY",
-  "status": "RAW_INPUT_TRANSFER_FOR_ASSISTANT_EXPLORATION_READY_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-AA",
+  "formal_status": "GOLD_ML_V1_027_BATCH024_ASSISTANT_RESULT_FROZEN_LOCAL_REPRODUCTION_READY_AUDIT_ONLY",
+  "status": "BATCH024_ASSISTANT_RESULT_FROZEN_LOCAL_REPRODUCTION_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ASSISTANT_EXPLORATION_RAW_UPLOAD_NEXT_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH024_ZERO_SURVIVORS_LOCAL_REPRODUCTION_NEXT_20260625.md",
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
@@ -33,17 +33,16 @@
       "GML1-WATCH-022-A",
       "GML1-WATCH-023-A"
     ],
-    "silent_add_remove_replace_or_relabel": "forbidden",
     "existing_frozen_nine_modified": false,
-    "assistant_exploration_authorized_now": true,
-    "local_exploration_allowed_now": false,
-    "authorized_exploration_scope": "BATCH024_ONLY"
+    "batch024_added_candidates": [],
+    "silent_add_remove_replace_or_relabel": "forbidden"
   },
   "completed": {
     "warmup_bridge": "PASS_9_OF_9_ZERO_CORE_MISMATCH",
     "cost_stress": "PASS_9_OF_9_RAW_BASELINE_1687",
     "fresh_prospective_first_run": "PASS_NO_CANDIDATE_YET",
-    "stateful_monitor_initialization": "PASS_MONITOR_INITIALIZED_NO_CANDIDATE_YET"
+    "stateful_monitor_initialization": "PASS_MONITOR_INITIALIZED_NO_CANDIDATE_YET",
+    "batch024_assistant_exploration": "PASS_ZERO_SURVIVORS_VALID_COMPLETED_EXPLORATION"
   },
   "stateful_monitoring": {
     "status": "INITIALIZED_PRESERVED_NOT_CURRENT_ROOT_ACTION",
@@ -54,43 +53,36 @@
     "ledger_preserved": true
   },
   "exploration_batch024": {
-    "status": "ASSISTANT_EXECUTION_PENDING_RAW_UPLOAD",
+    "status": "ASSISTANT_RESULT_FROZEN_ZERO_SURVIVORS",
     "authorization": "config/gold_ml_v1/exploration_batch024_authorization_20260625.json",
     "config": "config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json",
-    "implementation_ci_record": "config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json",
+    "assistant_result": "config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json",
     "lineage_id": "M15_H1_TREND_PULLBACK_LINEAGE_EXP024",
+    "time_column_semantics": "BAR_OPEN_TIME",
     "attempted_cells": 36,
+    "year_metric_rows": 144,
+    "signal_audit_rows": 25327,
+    "survivor_count": 0,
+    "assistant_replay_count": 2,
+    "assistant_replays_equal": true,
+    "rescue_tuning_performed": false,
     "search_space_frozen": true,
-    "assistant_result_available": false,
-    "local_reproduction_available": false,
     "local_discovery_run_forbidden": true,
+    "local_reproduction_available": true,
     "existing_frozen_nine_modified": false,
     "automatic_accumulation": false,
     "automatic_promotion": false
   },
-  "raw_input_transfer": {
-    "status": "ONE_CLICK_PACKAGE_READY",
-    "runner_bat": "scripts/gold_ml_v1/exploration/windows/package_batch024_raw_for_assistant.bat",
-    "package_output": "outputs/gold_ml_v1/exploration_batch024_data_upload/GOLD_ML_V1_BATCH024_FROZEN_RAW_INPUT.zip",
-    "package_contains": [
-      "gold_v3_2023_2026_m1.csv",
-      "gold_v3_2023_2026_m15.csv",
-      "gold_v3_2023_2026_h1.csv",
-      "batch024_input_manifest.json",
-      "exploration_batch024_frozen_config.json"
-    ],
-    "hash_validation_required": true,
-    "exploration_executed_by_package_action": false
-  },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "action_id": "GML1-BATCH024-PACKAGE-FROZEN-RAW-FOR-ASSISTANT",
-    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/package_batch024_raw_for_assistant.bat"
+    "action_id": "GML1-BATCH024-LOCAL-REPRODUCE-ASSISTANT-FROZEN-RESULT",
+    "active_phase_bat": "scripts/gold_ml_v1/exploration/windows/reproduce_batch024.bat",
+    "output_dir": "outputs/gold_ml_v1/exploration_batch024_local_reproduction"
   },
-  "next": "USER_UPLOADS_HASH_VERIFIED_RAW_ZIP_THEN_ASSISTANT_EXECUTES_EXPLORATION",
+  "next": "USER_RUNS_LOCAL_REPRODUCTION_AND_UPLOADS_PARITY_RESULT",
   "execution_switches": {
     "local_exploration": false,
-    "assistant_exploration": true,
+    "local_reproduction": true,
     "live_ready": false,
     "final_signal": false,
     "mt5_order": false,
