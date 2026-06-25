@@ -1,0 +1,58 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH027-EVENT-FAMILIES-LOSS-FILTER-20260625",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_EVALUATION",
+  "audit_only": true,
+  "purpose": "Test distinct event hypotheses and remove composite loss profiles only when the event family has at least 200 resolved 2023 trades.",
+  "local_implementation_before_survivor": "forbidden",
+  "time": "MT5 server bar-open time; decisions occur at M15 close",
+  "execution": "M15 ATR14 risk, SL 1R, TP 1.5R, horizon 720 minutes, exact M1 entry, same-M1 SL priority, one open position per family",
+  "families": {
+    "B_BREAKOUT_LONG": "H1 and H4 uptrend; M15 close above prior20 high; positive body over 0.3 ATR; close location above 0.7",
+    "B_BREAKOUT_SHORT": "H1 and H4 downtrend; M15 close below prior20 low; negative body below -0.3 ATR; close location below 0.3",
+    "C_FAILED_BREAK_LONG": "M15 pierces prior20 low and closes back above it; lower wick exceeds absolute body; RSI below45",
+    "C_FAILED_BREAK_SHORT": "M15 pierces prior20 high and closes back below it; upper wick exceeds absolute body; RSI above55",
+    "F_TREND_ACCEL_LONG": "H1 normalized EMA gap above0.3 and rising; M15 close above prior8 high; M5 four-bar return positive",
+    "F_TREND_ACCEL_SHORT": "H1 normalized EMA gap below-0.3 and falling; M15 close below prior8 low; M5 four-bar return negative"
+  },
+  "2023_counts": {
+    "B_BREAKOUT_LONG": 296,
+    "B_BREAKOUT_SHORT": 226,
+    "C_FAILED_BREAK_LONG": 593,
+    "C_FAILED_BREAK_SHORT": 628,
+    "F_TREND_ACCEL_LONG": 525,
+    "F_TREND_ACCEL_SHORT": 417
+  },
+  "periods": {
+    "2023_H1": "loss-filter discovery only",
+    "2023_H2": "internal validation only",
+    "2024": "external validation only; no retune",
+    "2025": "final test only; no retune",
+    "2026": "diagnostic only"
+  },
+  "loss_filter": {
+    "decision_time_feature_count": 54,
+    "continuous_quantiles_from_2023_H1": [0.2, 0.3, 0.7, 0.8],
+    "categorical_atoms": ["four-hour MT5 bucket", "weekday"],
+    "top_atoms_each_step": 18,
+    "composite_sizes": [2, 3],
+    "minimum_feature_families": 2,
+    "maximum_rules": 2,
+    "H1_min_loss_rate": 0.68,
+    "H1_max_removed_mean_R": -0.2,
+    "H1_min_mean_R_improvement": 0.06,
+    "H2_min_loss_rate": 0.62,
+    "H2_max_removed_mean_R": -0.1,
+    "H2_min_mean_R_improvement": 0.03
+  },
+  "candidate_gates": {
+    "2023_H1": "count>=60 PF>=1.15 meanR>0.10",
+    "2023_H2": "count>=60 PF>=1.10 meanR>0.05",
+    "2023_FULL": "count>=130 PF>=1.20 meanR>0.10",
+    "2024": "count>=80 PF>=1.10 meanR>0.05",
+    "2025": "count>=80 PF>=1.10 meanR>0.05"
+  },
+  "rescue_tuning": "forbidden",
+  "automatic_local_implementation": false,
+  "automatic_promotion": false,
+  "existing_frozen_nine_modified": false
+}
