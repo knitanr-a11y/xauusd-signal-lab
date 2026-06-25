@@ -1,6 +1,6 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-H",
-  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH023_LOCAL_REPLAY_PACKAGE_READY_RAW_INPUTS_PENDING_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-I",
+  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH023_GITHUB_IMPLEMENTED_RAW_DIRECTORY_PENDING_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
@@ -45,18 +45,29 @@
     "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
     "batch021_high_count_consensus_exploration":"COMPLETED_WATCH023A_RESEARCH_ONLY_AFTER_BATCH022",
     "batch022_all_watch_validation":"COMPLETED_WATCH014_DEMOTED_WATCH023_RESEARCH_ONLY_EXTERNAL_BLOCKERS_REMAIN",
-    "batch023_nine_candidate_local_replay_package":"PACKAGE_READY_REGISTRY_PARITY_PASS_RAW_INPUTS_NOT_MOUNTED"
+    "batch023_nine_candidate_local_replay":"GITHUB_IMPLEMENTATION_COMMITTED_REGISTRY_PARITY_PASS_RAW_DIRECTORY_PENDING"
   },
   "batch023_local_replay": {
     "status_record":"config/gold_ml_v1/nine_candidate_local_replay_batch023_status_20260625.json",
+    "documentation":"docs/gold_ml_v1/GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.md",
+    "replay_python":"scripts/gold_ml_v1/replay/nine_candidate_local_replay.py",
+    "artifact_installer":"scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat",
+    "raw_runner":"scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "registry_runner":"scripts/gold_ml_v1/replay/run_nine_candidate_registry_parity.bat",
+    "workflow":".github/workflows/gold_ml_v1_batch023_tests.yml",
     "package_filename":"GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip",
     "package_sha256":"d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
     "registry_parity":"9/9 PASS",
     "derivative_parity":"PROV-020, WATCH-021-A/B/C, WATCH-022-B PASS",
-    "raw_replay":"NOT_EXECUTED_MISSING_AUTHORIZED_RAW_INPUTS"
+    "local_staging_tests":"4 PASS",
+    "raw_replay":"NOT_EXECUTED_LOCAL_RAW_DIRECTORY_UNKNOWN"
   },
+  "known_unknowns": [
+    "local filesystem directory containing authorized raw M1/M15/H1/H4/D1 candle CSV files"
+  ],
   "registration_blockers": [
-    "run Batch023 on authorized raw M1/M15/H1/H4/D1 files and obtain 9-of-9 exact trade-registry parity",
+    "install the verified Batch023 artifact ZIP into the repository worktree",
+    "run Batch023 against authorized raw M1/M15/H1/H4/D1 files and inspect all nine mismatch reports",
     "spread 1.5x and 2.0x plus fixed-slippage stress",
     "fresh prospective confirmation after 2026-06-23 18:15 MT5 server close",
     "no portfolio activation authorization",
