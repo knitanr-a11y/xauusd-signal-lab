@@ -1,0 +1,160 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-M15-H1-PULLBACK-20260625",
+  "status": "PREDECLARED_BEFORE_FIRST_LOCAL_RUN",
+  "audit_only": true,
+  "explicit_user_authorization_date": "2026-06-25",
+  "authoritative_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
+  "existing_frozen_nine": [
+    "GML1-PROV-007",
+    "GML1-PROV-008",
+    "GML1-WATCH-022-B",
+    "GML1-PROV-010",
+    "GML1-PROV-015",
+    "GML1-PROV-020",
+    "GML1-WATCH-021-A",
+    "GML1-WATCH-021-B",
+    "GML1-WATCH-021-C"
+  ],
+  "existing_pool_change": "FORBIDDEN",
+  "new_lineage": {
+    "lineage_id": "M15_H1_TREND_PULLBACK_LINEAGE_EXP024",
+    "reason": "Diversify away from the frozen M15-H4 and H1-D1 breakout lineages by testing a causal H1 trend plus M15 pullback-reentry family.",
+    "decision_timeframe": "M15",
+    "context_timeframe": "H1",
+    "execution_timeframe": "M1"
+  },
+  "period_contract": {
+    "2023": "EXPLORATION_ONLY",
+    "2024": "VALIDATION_ONLY_NO_RETUNE",
+    "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+    "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE"
+  },
+  "input_contract": {
+    "raw_dir_filenames": {
+      "M1": "gold_v3_2023_2026_m1.csv",
+      "M15": "gold_v3_2023_2026_m15.csv",
+      "H1": "gold_v3_2023_2026_h1.csv"
+    },
+    "expected_sha256": {
+      "gold_v3_2023_2026_m1.csv": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "gold_v3_2023_2026_m15.csv": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "gold_v3_2023_2026_h1.csv": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"
+    },
+    "csv_time": "MT5 server naive bar-open time",
+    "closed_bars_only": true,
+    "confirmed_h1_asof_join": true,
+    "lookahead": "forbidden",
+    "warmup_bridge_use": "forbidden"
+  },
+  "feature_contract": {
+    "H1": {
+      "ema_fast": 20,
+      "ema_slow": 50,
+      "atr": "Wilder ATR14",
+      "trend_gap": "abs(EMA20-EMA50)/ATR14"
+    },
+    "M15": {
+      "ema": 20,
+      "rsi": "Wilder RSI14",
+      "trade_risk": "Wilder ATR14"
+    }
+  },
+  "search_space": {
+    "directions": ["LONG", "SHORT"],
+    "h1_gap_atr_min": [0.0, 0.15, 0.3],
+    "m15_rsi_long_reentry_level": [35, 40, 45],
+    "short_level_mapping": "100 minus long reentry level",
+    "trigger_modes": ["RSI_CROSS_ONLY", "EMA20_TOUCH_RECLOSE"],
+    "full_cartesian_cell_count": 36,
+    "candidate_id_format": "GML1-EXP024-{direction_code}-G{gap_code}-R{rsi_level}-{mode_code}",
+    "all_cells_must_be_reported": true,
+    "post_result_grid_change": "forbidden"
+  },
+  "signal_contract": {
+    "LONG": {
+      "h1_trend": "confirmed H1 EMA20 > EMA50 and (EMA20-EMA50)/ATR14 >= configured gap",
+      "rsi_cross": "previous M15 RSI14 <= configured level and current RSI14 > configured level",
+      "RSI_CROSS_ONLY": "trend and RSI cross",
+      "EMA20_TOUCH_RECLOSE": "trend and RSI cross and current M15 low <= EMA20 and close > EMA20"
+    },
+    "SHORT": {
+      "h1_trend": "confirmed H1 EMA20 < EMA50 and (EMA50-EMA20)/ATR14 >= configured gap",
+      "rsi_cross": "previous M15 RSI14 >= (100-configured long level) and current RSI14 < that short level",
+      "RSI_CROSS_ONLY": "trend and RSI cross",
+      "EMA20_TOUCH_RECLOSE": "trend and RSI cross and current M15 high >= EMA20 and close < EMA20"
+    },
+    "exact_m1_entry_required": true,
+    "one_open_position_per_cell": true,
+    "same_m1_tp_sl_priority": "SL"
+  },
+  "execution_contract": {
+    "point_size": 0.01,
+    "risk_unit": "decision M15 Wilder ATR14",
+    "stop_r_multiple": 1.0,
+    "target_r_multiple": 1.5,
+    "horizon_minutes": 720,
+    "LONG": "entry at M1 ask=open+spread; exits on bid OHLC",
+    "SHORT": "entry at M1 bid=open; exits and time close on ask=bid+spread",
+    "stored_exit_time": "M1 bar close",
+    "slippage": "not applied in this exploration batch; later cost stress is separate"
+  },
+  "gates": {
+    "2023_EXPLORATION": {
+      "minimum_trade_count": 24,
+      "minimum_profit_factor": 1.1,
+      "minimum_mean_r_exclusive": 0.05
+    },
+    "2024_VALIDATION": {
+      "minimum_trade_count": 18,
+      "minimum_profit_factor": 1.0,
+      "minimum_mean_r_exclusive": 0.0
+    },
+    "2025_FINAL_TEST": {
+      "minimum_trade_count": 18,
+      "minimum_profit_factor": 1.0,
+      "minimum_mean_r_exclusive": 0.0
+    },
+    "2026_DIAGNOSTIC": {
+      "performance_gate": "NOT_APPLICABLE_NEVER_RETUNE"
+    },
+    "survivor_rule": "PASS 2023 exploration AND PASS 2024 validation AND PASS 2025 final test",
+    "no_survivor": "valid completed exploration result",
+    "post_result_gate_change": "forbidden"
+  },
+  "status_contract": {
+    "all_gate_pass": "RESEARCH_ONLY",
+    "2023_fail": "REJECTED_WITH_REASON",
+    "2023_pass_later_fail": "RESEARCH_ONLY",
+    "automatic_accumulation": false,
+    "automatic_relabel_existing_nine": false,
+    "automatic_promotion": false
+  },
+  "multiplicity_contract": {
+    "attempted_cells": 36,
+    "deterministic_seeds": 0,
+    "best_cell_only_reporting": "forbidden",
+    "same_lineage_metric_pooling": "forbidden",
+    "all_trade_rows_and_year_metrics_preserved": true
+  },
+  "required_outputs": [
+    "exploration_attempt_registry.csv",
+    "exploration_year_metrics.csv",
+    "exploration_trade_registry.csv",
+    "exploration_survivors.csv",
+    "input_provenance.json",
+    "exploration_summary.json",
+    "LATEST_RUN_SUMMARY.txt",
+    "EXPLORATION_RUN_ERROR.txt"
+  ],
+  "execution_switches": {
+    "modify_existing_nine": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
