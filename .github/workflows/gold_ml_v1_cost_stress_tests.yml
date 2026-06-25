@@ -51,9 +51,11 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/prospective/fresh_prospective_engine.py
           python -m py_compile scripts/gold_ml_v1/prospective/run_fresh_prospective_confirmation.py
           python -m py_compile scripts/gold_ml_v1/run_next_local.py
-      - name: Run tests
-        run: |
-          python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
-          python -m unittest tests/gold_ml_v1/test_cost_stress_contract.py -v
-          python -m unittest tests/gold_ml_v1/test_cost_stress_core_registry_fix.py -v
-          python -m unittest tests/gold_ml_v1/test_fresh_prospective_engine.py -v
+      - name: Test governance guardrails
+        run: python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
+      - name: Test cost stress contract
+        run: python -m unittest tests/gold_ml_v1/test_cost_stress_contract.py -v
+      - name: Test cost stress core registry
+        run: python -m unittest tests/gold_ml_v1/test_cost_stress_core_registry_fix.py -v
+      - name: Test fresh prospective engine
+        run: python -m unittest tests/gold_ml_v1/test_fresh_prospective_engine.py -v
