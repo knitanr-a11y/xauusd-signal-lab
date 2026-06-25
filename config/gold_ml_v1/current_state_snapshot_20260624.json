@@ -1,84 +1,69 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-D",
-  "status": "NINE_ACCUMULATED_CANDIDATES_BATCH018_REGISTRY_VALIDATED_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-E",
+  "status": "TEN_ACCUMULATED_CANDIDATES_BATCH020_WATCH022_VALIDATED_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "active_accumulated_candidates": [
-    {"id": "GML1-PROV-007", "parent": "GML1-PROV-002", "lane": "M15-H4", "direction": "LONG", "class": "loss-filtered derivative"},
-    {"id": "GML1-PROV-008", "parent": "GML1-PROV-002", "lane": "M15-H4", "direction": "LONG", "class": "Bollinger-compression loss-filtered derivative"},
-    {"id": "GML1-PROV-010", "parent": null, "lane": "H1-D1", "direction": "LONG", "class": "independent Bollinger breakout event"},
-    {"id": "GML1-PROV-015", "parent": "GML1-PROV-010", "lane": "H1-D1", "direction": "LONG", "class": "D1 participation and progress loss-filtered derivative"},
-    {"id": "GML1-PROV-020", "parent": "GML1-PROV-015", "lane": "H1-D1", "direction": "LONG", "class": "PF2 second-stage loss-filter derivative", "caveat": "Second-stage exclusion fired zero times in 2026; fresh activations are required."},
-    {"id": "GML1-WATCH-014-A", "parent": "GML1-PROV-015", "lane": "H1-D1", "direction": "LONG", "class": "path-shape clustering accumulated research candidate", "caveat": "Seed-stable human-readable motif remains unresolved; excluded cluster 1 was unstable."},
-    {"id": "GML1-WATCH-021-A", "parent": "GML1-PROV-015", "lane": "H1-D1", "direction": "LONG", "class": "range-compression after large-span loss exclusion", "caveat": "Registry and neighborhood passed; raw replay, cost stress and fresh confirmation pending."},
-    {"id": "GML1-WATCH-021-B", "parent": "GML1-PROV-015", "lane": "H1-D1", "direction": "LONG", "class": "lagged path-state loss exclusion", "caveat": "Registry and 9-of-9 neighborhood PF2 passed; raw replay, cost stress and fresh confirmation pending."},
-    {"id": "GML1-WATCH-021-C", "parent": "GML1-PROV-015", "lane": "H1-D1", "direction": "LONG", "class": "combined A OR B loss exclusion", "caveat": "81-of-81 local neighborhood PF2 passed, but search multiplicity and rule complexity are higher."}
+    {"id":"GML1-PROV-007","parent":"GML1-PROV-002","lane":"M15-H4","direction":"LONG","class":"loss-filtered derivative"},
+    {"id":"GML1-PROV-008","parent":"GML1-PROV-002","lane":"M15-H4","direction":"LONG","class":"Bollinger-compression loss-filtered derivative"},
+    {"id":"GML1-WATCH-022-B","parent":"GML1-PROV-007","lane":"M15-H4","direction":"LONG","class":"second-stage high-slope small-wick loss exclusion","caveat":"Improvement is concentrated in 2025; 2024 excluded subset was profitable. Raw replay, cost stress and fresh confirmation remain pending."},
+    {"id":"GML1-PROV-010","parent":null,"lane":"H1-D1","direction":"LONG","class":"independent Bollinger breakout event"},
+    {"id":"GML1-PROV-015","parent":"GML1-PROV-010","lane":"H1-D1","direction":"LONG","class":"D1 participation and progress loss-filtered derivative"},
+    {"id":"GML1-PROV-020","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"PF2 second-stage loss-filter derivative","caveat":"Second-stage exclusion fired zero times in 2026; fresh activations are required."},
+    {"id":"GML1-WATCH-014-A","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"path-shape clustering accumulated research candidate","caveat":"Seed-stable human-readable motif remains unresolved; excluded cluster 1 was unstable."},
+    {"id":"GML1-WATCH-021-A","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"range-compression after large-span loss exclusion","caveat":"Registry and neighborhood passed; raw replay, cost stress and fresh confirmation pending."},
+    {"id":"GML1-WATCH-021-B","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"lagged path-state loss exclusion","caveat":"Registry and neighborhood passed; raw replay, cost stress and fresh confirmation pending."},
+    {"id":"GML1-WATCH-021-C","parent":"GML1-PROV-015","lane":"H1-D1","direction":"LONG","class":"combined A OR B loss exclusion","caveat":"All 81 local neighborhood cells passed PF2, but search multiplicity and rule complexity are higher."}
   ],
-  "accumulated_candidate_total": 9,
+  "accumulated_candidate_total": 10,
+  "research_only_not_accumulated": ["GML1-WATCH-022-A"],
   "lineage_interpretation": {
-    "M15_H4_family": ["GML1-PROV-007", "GML1-PROV-008"],
-    "H1_D1_PROV015_family": ["GML1-PROV-010", "GML1-PROV-015", "GML1-PROV-020", "GML1-WATCH-014-A", "GML1-WATCH-021-A", "GML1-WATCH-021-B", "GML1-WATCH-021-C"],
+    "M15_H4_family": ["GML1-PROV-007","GML1-PROV-008","GML1-WATCH-022-B"],
+    "H1_D1_PROV015_family": ["GML1-PROV-010","GML1-PROV-015","GML1-PROV-020","GML1-WATCH-014-A","GML1-WATCH-021-A","GML1-WATCH-021-B","GML1-WATCH-021-C"],
     "same_lineage_candidates_are_not_independent_edges": true,
     "simple_metric_sum_forbidden": true
   },
-  "data_contract": {
-    "historical_primary": "gold_v3_2023_2026_*.csv",
-    "live_append_only": "goldsharp_*.csv strictly after historical maximum",
-    "raw_time_semantics": "MT5 server time; time is bar open; latest row is closed",
-    "higher_timeframe_availability": "bar close only",
-    "point_provisional": 0.01
-  },
-  "execution_contract": {
-    "entry": "next exact M1 open at decision-bar close",
-    "long_entry": "M1 bid open plus dynamic spread",
-    "short_entry": "M1 bid open",
-    "short_exit": "bid plus dynamic spread",
-    "same_bar_priority": "SL",
-    "one_position_at_a_time_per_lineage": true,
-    "exact_horizon_close_required_for_time_exit": true
-  },
   "evaluation_contract": {
-    "exploration": "2023",
-    "validation": "2024",
-    "test": "2025",
-    "2026": "diagnostic only; never retune on it",
-    "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00"
+    "exploration":"2023",
+    "validation":"2024",
+    "test":"2025",
+    "2026":"diagnostic only; never retune on it",
+    "fresh_prospective_cutoff_mt5_server_close":"2026-06-23 18:15:00"
   },
   "completed_exact_audits": {
-    "batch015_overlap_independence": "COMPLETED",
-    "prov020_fresh_activation": "COMPLETED_NO_POST_CUTOFF_SOURCE_COVERAGE",
-    "batch016_watch014_centroid_seed_stability": "COMPLETED",
-    "batch017_watch021_exploration": "COMPLETED",
-    "batch018_watch021_registry_validation": "COMPLETED_RAW_REPLAY_COST_STRESS_FRESH_PENDING"
+    "batch015_overlap_independence":"COMPLETED",
+    "prov020_fresh_activation":"COMPLETED_NO_POST_CUTOFF_SOURCE_COVERAGE",
+    "batch016_watch014_centroid_seed_stability":"COMPLETED",
+    "batch017_watch021_exploration":"COMPLETED",
+    "batch018_watch021_registry_validation":"COMPLETED_RAW_REPLAY_COST_STRESS_FRESH_PENDING",
+    "batch019_watch022_exploration":"COMPLETED",
+    "batch020_watch022_validation":"COMPLETED_B_ACCUMULATED_A_RESEARCH_ONLY_RAW_REPLAY_COST_STRESS_FRESH_PENDING"
   },
-  "watch021_pre_2026_metrics": {
-    "GML1-WATCH-021-A": {"trades": 186, "retained_fraction": 0.93, "profit_factor": 2.1189891947, "total_r": 66.3289235678, "max_drawdown_r": 3.0},
-    "GML1-WATCH-021-B": {"trades": 182, "retained_fraction": 0.91, "profit_factor": 2.1783260674, "total_r": 66.8617113390, "max_drawdown_r": 2.0},
-    "GML1-WATCH-021-C": {"trades": 172, "retained_fraction": 0.86, "profit_factor": 2.4678401407, "total_r": 72.3289235678, "max_drawdown_r": 2.0}
+  "watch022_validation": {
+    "GML1-WATCH-022-A": {"verdict":"DO_NOT_ACCUMULATE_KEEP_RESEARCH_ONLY","pre_2026_trades":112,"profit_factor":2.0210919554,"total_r":36.9169278733,"max_drawdown_r":5.0},
+    "GML1-WATCH-022-B": {"verdict":"PASS_AS_ACCUMULATED_WATCH_WITH_TEMPORAL_CONCENTRATION_CAVEAT","pre_2026_trades":104,"profit_factor":2.2926222440,"total_r":40.0712895640,"max_drawdown_r":3.0}
   },
   "validation_records": [
     "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json",
-    "config/gold_ml_v1/user_authorized_watch021_accumulation_override_20260625.json"
+    "config/gold_ml_v1/watch022_ab_validation_batch020_20260625.json"
   ],
   "registration_blockers": [
-    "authorized raw M1/H1 exact replay for WATCH-021 A/B/C",
-    "spread 1.5x and 2.0x plus fixed-slippage stress for WATCH-021 A/B/C",
+    "authorized raw exact replay for accumulated WATCH candidates",
+    "spread 1.5x and 2.0x plus fixed-slippage stress",
     "fresh prospective confirmation after 2026-06-23 18:15 MT5 server close",
     "WATCH-014-A stable human-readable motif",
     "no portfolio activation authorization",
     "audit-only remains active"
   ],
   "next_research": [
-    "complete WATCH-021 raw replay and cost stress when raw candles are available",
-    "append fresh post-cutoff WATCH-021 filter activations",
-    "MAE and MFE meta-labeling on broad parent pools",
-    "time-to-target and stagnation modeling",
     "independent SHORT discovery",
     "M5/M15 high-count state plus cooldown-reentry exploration",
+    "MAE and MFE meta-labeling on broad parent pools",
+    "time-to-target and stagnation modeling",
     "stable regime transitions",
     "previous-week and previous-month levels plus opening-range acceptance and rejection"
   ],
-  "execution_switches": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+  "execution_switches": {"live_ready":false,"final_signal":false,"mt5_order":false,"discord":false}
 }
