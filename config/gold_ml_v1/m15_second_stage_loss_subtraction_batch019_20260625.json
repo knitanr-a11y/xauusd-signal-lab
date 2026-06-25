@@ -1,0 +1,62 @@
+{
+  "result_id": "GML1-BATCH-019-M15-H4-SECOND-STAGE-LOSS-SUBTRACTION",
+  "date": "2026-06-25",
+  "status": "TWO_PROMISING_WATCH_CANDIDATES_DISCOVERED_VALIDATION_PENDING",
+  "mode": "audit-only",
+  "search_contract": {
+    "parents": ["GML1-PROV-007", "GML1-PROV-008"],
+    "threshold_source": "2023 quantiles only",
+    "confirmation_years": [2024, 2025],
+    "diagnostic_only_year": 2026,
+    "retained_fraction_gate": [0.75, 0.95],
+    "pre_2026_profit_factor_gate": 2.0,
+    "all_year_total_r_positive_required": true,
+    "future_or_holdout_threshold_generation": false
+  },
+  "candidates": {
+    "GML1-WATCH-022-A": {
+      "parent": "GML1-PROV-007",
+      "class": "count-preserving second-stage loss subtraction",
+      "exclude_all": [
+        {"feature": "upper_wick_frac", "operator": "<=", "threshold": 0.1677737608541299, "source_2023_quantile": 0.6},
+        {"feature": "ema40_slope6_atr", "operator": "<=", "threshold": 0.5056518291622855, "source_2023_quantile": 0.3}
+      ],
+      "pre_2026": {"trades": 112, "retained_fraction": 0.9256198347, "win_rate": 0.6696428571, "profit_factor": 2.0210919554, "total_r": 36.9169278733, "max_drawdown_r": 5.0},
+      "2026_diagnostic": {"trades": 24, "win_rate": 0.6666666667, "profit_factor": 2.0, "total_r": 8.0, "max_drawdown_r": 3.0},
+      "excluded_pre_2026": {"trades": 9, "wins": 4, "profit_factor": 0.8, "total_r": -1.0},
+      "caveat": "The improvement is modest and retained 2025 PF remains below 2, although every year remains profitable."
+    },
+    "GML1-WATCH-022-B": {
+      "parent": "GML1-PROV-007",
+      "class": "balanced second-stage loss subtraction",
+      "exclude_all": [
+        {"feature": "upper_wick_frac", "operator": "<=", "threshold": 0.06526044468913629, "source_2023_quantile": 0.2},
+        {"feature": "ema40_slope6_atr", "operator": ">=", "threshold": 0.8700779249713114, "source_2023_quantile": 0.7}
+      ],
+      "pre_2026": {"trades": 104, "retained_fraction": 0.8595041322, "win_rate": 0.7019230769, "profit_factor": 2.2926222440, "total_r": 40.0712895640, "max_drawdown_r": 3.0},
+      "2026_diagnostic": {"trades": 31, "win_rate": 0.6129032258, "profit_factor": 1.5833333333, "total_r": 7.0, "max_drawdown_r": 3.0},
+      "excluded_pre_2026": {"trades": 17, "wins": 6, "profit_factor": 0.5908790905, "total_r": -4.1543616906},
+      "caveat": "Most of the improvement appears in 2025; the excluded 2024 subset was profitable, so prospective confirmation is mandatory."
+    }
+  },
+  "negative_result": {
+    "GML1-PROV-008": "No two-feature Bollinger-width exclusion passed retained-fraction, PF2, all-year-positive and confirmation-loss gates."
+  },
+  "selection_multiplicity": {
+    "GML1-PROV-007_surviving_rules": 22,
+    "GML1-PROV-008_surviving_rules": 0,
+    "automatic_admission_forbidden": true
+  },
+  "lineage": {
+    "same_M15_H4_family_as_PROV_007": true,
+    "independent_edge_count_increment": 0,
+    "existing_candidate_logic_unchanged": true
+  },
+  "pending": [
+    "exact registry parity recheck",
+    "threshold-neighborhood validation",
+    "spread and slippage stress using authorized raw candles",
+    "fresh post-cutoff confirmation"
+  ],
+  "execution_switches": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
