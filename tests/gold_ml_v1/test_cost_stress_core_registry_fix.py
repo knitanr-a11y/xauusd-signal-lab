@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "scripts/gold_ml_v1"))
 from cost_stress_contract import BRIDGE
 from cost_stress_engine import recover_risk
 from cost_stress_reports import bridge_candidate_summary, bridge_trade_audit
-from run_next_local import write_paste_me
+from run_next_local import write_upload_file
 
 
 class CoreRegistryFixTests(unittest.TestCase):
@@ -54,20 +54,27 @@ class CoreRegistryFixTests(unittest.TestCase):
         )
         self.assertEqual(summary.iloc[0]["trade_count"], 2)
 
-    def test_bat_folder_and_visible_diagnostic(self) -> None:
-        action = json.loads(
-            (ROOT / "config/gold_ml_v1/next_local_action.json").read_text(
-                encoding="utf-8"
-            )
+    def test_completed_phase_bat_and_root_upload_behavior(self) -> None:
+        pass_record = json.loads(
+            (
+                ROOT
+                / "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
+            ).read_text(encoding="utf-8")
         )
-        self.assertIn("/windows/", action["runner"])
-        self.assertIn("PASTE-ME", action["action_id"])
+        self.assertEqual(pass_record["candidate_stress_gate"]["pass"], 9)
+        self.assertEqual(pass_record["candidate_stress_gate"]["fail"], 0)
+        self.assertTrue(
+            (
+                ROOT
+                / "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat"
+            ).exists()
+        )
         launcher = (ROOT / "RUN_GOLD_ML_V1_NEXT.bat").read_text(encoding="utf-8")
-        self.assertIn("PASTE_ME_GOLD_ML_V1.txt", launcher)
-        self.assertIn("notepad.exe", launcher)
+        self.assertIn("UPLOAD_THIS_GOLD_ML_V1.txt", launcher)
+        self.assertIn("explorer.exe /select", launcher)
         self.assertIn("pause", launcher.lower())
 
-    def test_paste_me_collects_only_diagnostic_files(self) -> None:
+    def test_upload_file_collects_only_diagnostic_files(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary)
             next_output = repo / "outputs/gold_ml_v1/next_action"
@@ -86,10 +93,10 @@ class CoreRegistryFixTests(unittest.TestCase):
             (cost_output / "COST_STRESS_RUN_ERROR.txt").write_text(
                 "trace marker\n", encoding="utf-8"
             )
-            path = write_paste_me(
+            path = write_upload_file(
                 repo,
                 4,
-                action_id="TEST-PASTE-ME",
+                action_id="TEST-UPLOAD-FILE",
                 runner="runner.bat",
                 error="example",
             )
@@ -97,6 +104,10 @@ class CoreRegistryFixTests(unittest.TestCase):
             self.assertIn("console marker", text)
             self.assertIn("summary marker", text)
             self.assertIn("trace marker", text)
+            self.assertEqual(
+                path,
+                cost_output / "UPLOAD_THIS_GOLD_ML_V1.txt",
+            )
             self.assertTrue(
                 (next_output / "PASTE_ME_GOLD_ML_V1.txt").exists()
             )
