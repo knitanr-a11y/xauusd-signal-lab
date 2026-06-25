@@ -1,2 +1,3 @@
 Temporary validation trigger for the GOLD_ML_V1 fresh prospective audit tests. Production implementation is already on main. Do not merge this file.
 Second validation run uses split diagnostic test steps.
+Third validation run includes the advanced cost-stress contract test.
