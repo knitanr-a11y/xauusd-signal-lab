@@ -3,15 +3,15 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 title GOLD_ML_V1 - ONE CLICK NEXT ACTION
 
-set "PASTE_ME=%CD%\PASTE_ME_GOLD_ML_V1.txt"
 set "NEXT_OUTPUT=%CD%\outputs\gold_ml_v1\next_action"
-set "OUTPUT_PASTE_ME=%NEXT_OUTPUT%\PASTE_ME_GOLD_ML_V1.txt"
+set "COST_OUTPUT=%CD%\outputs\gold_ml_v1\cost_stress_raw_reconstructed"
+set "UPLOAD_FILE=%COST_OUTPUT%\UPLOAD_THIS_GOLD_ML_V1.txt"
 set "BOOTSTRAP_ERROR=%NEXT_OUTPUT%\DISPATCHER_BOOTSTRAP_ERROR.txt"
 if not exist "%NEXT_OUTPUT%" mkdir "%NEXT_OUTPUT%"
+if not exist "%COST_OUTPUT%" mkdir "%COST_OUTPUT%"
 
 rem Never show a stale diagnostic from a previous attempt.
-if exist "%PASTE_ME%" del /q "%PASTE_ME%" >nul 2>nul
-if exist "%OUTPUT_PASTE_ME%" del /q "%OUTPUT_PASTE_ME%" >nul 2>nul
+if exist "%UPLOAD_FILE%" del /q "%UPLOAD_FILE%" >nul 2>nul
 if exist "%BOOTSTRAP_ERROR%" del /q "%BOOTSTRAP_ERROR%" >nul 2>nul
 
 set "PYTHON_CMD="
@@ -21,17 +21,16 @@ if not defined PYTHON_CMD where py >nul 2>nul && set "PYTHON_CMD=py -3.12"
 if not defined PYTHON_CMD where python >nul 2>nul && set "PYTHON_CMD=python"
 
 if not defined PYTHON_CMD (
-  >"%PASTE_ME%" echo GOLD_ML_V1 PASTE ME
-  >>"%PASTE_ME%" echo Copy everything in this file and paste it into ChatGPT.
-  >>"%PASTE_ME%" echo status=FAIL
-  >>"%PASTE_ME%" echo exit_code=4
-  >>"%PASTE_ME%" echo error=Python 3.12 could not be found.
-  >>"%PASTE_ME%" echo repo_root=%CD%
-  copy /y "%PASTE_ME%" "%OUTPUT_PASTE_ME%" >nul 2>nul
+  >"%UPLOAD_FILE%" echo GOLD_ML_V1 UPLOAD FILE
+  >>"%UPLOAD_FILE%" echo Upload this file directly to ChatGPT.
+  >>"%UPLOAD_FILE%" echo status=FAIL
+  >>"%UPLOAD_FILE%" echo exit_code=4
+  >>"%UPLOAD_FILE%" echo error=Python 3.12 could not be found.
+  >>"%UPLOAD_FILE%" echo repo_root=%CD%
   echo [ERROR] Python 3.12 could not be found.
-  echo A diagnostic file was created:
-  echo %PASTE_ME%
-  start "" notepad.exe "%PASTE_ME%" >nul 2>nul
+  echo Upload this file to ChatGPT:
+  echo %UPLOAD_FILE%
+  start "" explorer.exe /select,"%UPLOAD_FILE%" >nul 2>nul
   echo.
   echo Press any key to close this window.
   pause >nul
@@ -40,7 +39,7 @@ if not defined PYTHON_CMD (
 
 echo ============================================================
 echo GOLD_ML_V1 - ONE CLICK NEXT ACTION
-echo Launcher revision: PASTE_ME_V2_20260625
+echo Launcher revision: UPLOAD_FILE_V1_20260625
 echo ============================================================
 %PYTHON_CMD% scripts\gold_ml_v1\run_next_local.py --repo-root "%CD%" 2>"%BOOTSTRAP_ERROR%"
 set "RC=%ERRORLEVEL%"
@@ -62,30 +61,27 @@ if "%RC%"=="0" (
 )
 
 echo.
-if exist "%PASTE_ME%" (
-  echo The copy-and-paste diagnostic file is here:
-  echo %PASTE_ME%
+if exist "%UPLOAD_FILE%" (
+  echo Upload this file to ChatGPT:
+  echo %UPLOAD_FILE%
   echo.
-  echo It will now open in Notepad.
-  start "" notepad.exe "%PASTE_ME%" >nul 2>nul
+  echo The output folder will now open with the file selected.
+  start "" explorer.exe /select,"%UPLOAD_FILE%" >nul 2>nul
 ) else (
-  echo [WARNING] PASTE_ME file was not created by Python.
-  >"%PASTE_ME%" echo GOLD_ML_V1 PASTE ME
-  >>"%PASTE_ME%" echo Copy everything in this file and paste it into ChatGPT.
-  >>"%PASTE_ME%" echo status=FAIL
-  >>"%PASTE_ME%" echo exit_code=%RC%
-  >>"%PASTE_ME%" echo error=PASTE_ME was not created by the dispatcher.
-  >>"%PASTE_ME%" echo repo_root=%CD%
+  echo [WARNING] Upload file was not created by Python.
+  >"%UPLOAD_FILE%" echo GOLD_ML_V1 UPLOAD FILE
+  >>"%UPLOAD_FILE%" echo Upload this file directly to ChatGPT.
+  >>"%UPLOAD_FILE%" echo status=FAIL
+  >>"%UPLOAD_FILE%" echo exit_code=%RC%
+  >>"%UPLOAD_FILE%" echo error=UPLOAD_THIS_GOLD_ML_V1.txt was not created by the dispatcher.
+  >>"%UPLOAD_FILE%" echo repo_root=%CD%
   if exist "%BOOTSTRAP_ERROR%" (
-    >>"%PASTE_ME%" echo.
-    >>"%PASTE_ME%" echo ===== DISPATCHER BOOTSTRAP ERROR =====
-    type "%BOOTSTRAP_ERROR%" >>"%PASTE_ME%"
-    >>"%PASTE_ME%" echo ===== END DISPATCHER BOOTSTRAP ERROR =====
+    >>"%UPLOAD_FILE%" echo.
+    >>"%UPLOAD_FILE%" echo ===== DISPATCHER BOOTSTRAP ERROR =====
+    type "%BOOTSTRAP_ERROR%" >>"%UPLOAD_FILE%"
+    >>"%UPLOAD_FILE%" echo ===== END DISPATCHER BOOTSTRAP ERROR =====
   )
-  >>"%PASTE_ME%" echo.
-  >>"%PASTE_ME%" echo Check outputs\gold_ml_v1\next_action\LATEST_NEXT_ACTION.txt
-  copy /y "%PASTE_ME%" "%OUTPUT_PASTE_ME%" >nul 2>nul
-  start "" notepad.exe "%PASTE_ME%" >nul 2>nul
+  start "" explorer.exe /select,"%UPLOAD_FILE%" >nul 2>nul
 )
 
 echo.
