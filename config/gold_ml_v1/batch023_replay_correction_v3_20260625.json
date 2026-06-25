@@ -1,0 +1,42 @@
+{
+  "correction_id": "GML1-BATCH023-REPLAY-CORRECTION-V3-20260625",
+  "status": "GITHUB_FIX_COMMITTED_LOCAL_RERUN_REQUIRED",
+  "v2_observation": {
+    "registry_parity": "PASS",
+    "GML1_PROV_002_actual_trades": 89,
+    "GML1_PROV_002_expected_trades": 193,
+    "all_nine_value_diff_rows": 0,
+    "interpretation": "ATR, entry/exit price, R value and feature calculations match on every common trade; only event rows are missing."
+  },
+  "remaining_root_cause": {
+    "incorrect_v2_contract": "complete horizon required an exact M1 bar at horizon_end minus one minute",
+    "correct_contract": "the dataset must extend beyond the wall-clock horizon, but weekends and broker maintenance gaps are allowed; time exit uses the last available M1 close inside the horizon",
+    "exact_registry_evidence": [
+      "GML1-PROV-010 2023-01-06 21:00 entry exits at Friday 23:57 although its 48-hour horizon extends through the weekend",
+      "GML1-PROV-010 has multiple Friday time exits before the nominal 48-hour horizon because the market is closed"
+    ]
+  },
+  "implementation": {
+    "python": "scripts/gold_ml_v1/replay/nine_candidate_local_replay_v3.py",
+    "one_command_runner": "scripts/gold_ml_v1/replay/run_batch023_all.bat",
+    "standalone_runner": "scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat",
+    "output_directory": "outputs/gold_ml_v1/batch023_historical_replay_v3",
+    "tests": "tests/gold_ml_v1/test_nine_candidate_local_replay_v3.py"
+  },
+  "frozen_behavior": {
+    "exact_entry": "decision close timestamp must exist as an M1 bar-open timestamp",
+    "complete_horizon": "decision timestamp plus horizon must not exceed the latest available M1 close",
+    "time_exit": "last available M1 close strictly inside the wall-clock horizon",
+    "same_m1_priority": "SL",
+    "historical_decision_source": "gold_v3_2023_2026 only",
+    "goldsharp_prehistory": "indicator warmup only",
+    "goldsharp_post_historical": "not used in historical replay"
+  },
+  "candidate_logic_changed": false,
+  "candidate_count_changed": false,
+  "audit_only": true,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_order": false,
+  "discord": false
+}
