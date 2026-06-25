@@ -1,0 +1,35 @@
+{
+  "record_id": "GML1-USER-AUTHORIZED-WATCH021-ACCUMULATION-20260625",
+  "date": "2026-06-25",
+  "status": "ACCUMULATE_AS_WATCH_WITH_CAVEATS",
+  "authorized_ids": [
+    "GML1-WATCH-021-A",
+    "GML1-WATCH-021-B",
+    "GML1-WATCH-021-C"
+  ],
+  "basis": "User explicitly requested that all three promising candidates be retained in the accumulated candidate pool, followed by validation.",
+  "validation_record": "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json",
+  "classification": "ACCUMULATED_WATCH_NOT_REGISTERED_NOT_LIVE",
+  "caveats": {
+    "GML1-WATCH-021-A": "Registry derivation and neighborhood passed; raw replay, cost stress and fresh confirmation remain pending.",
+    "GML1-WATCH-021-B": "Registry derivation and all 9 local neighborhood cells passed PF2; raw replay, cost stress and fresh confirmation remain pending.",
+    "GML1-WATCH-021-C": "Combined A OR B exclusion passed 81 local neighborhood cells but has greater search multiplicity and complexity."
+  },
+  "lineage": {
+    "parent": "GML1-PROV-015",
+    "all_three_same_lineage": true,
+    "independent_edge_count_increment": 0,
+    "standalone_metrics_only": true,
+    "simple_portfolio_sum_forbidden": true
+  },
+  "boundaries": {
+    "existing_candidate_logic_unchanged": true,
+    "2026_retuning_forbidden": true,
+    "automatic_promotion": false,
+    "registration_pending": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
