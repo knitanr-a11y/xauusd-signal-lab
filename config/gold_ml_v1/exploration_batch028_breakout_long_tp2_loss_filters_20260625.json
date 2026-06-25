@@ -1,0 +1,52 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH028-BREAKOUT-LONG-TP2-LOSS-FILTERS-20260625",
+  "status": "FROZEN_BEFORE_2024_2025_EVALUATION",
+  "audit_only": true,
+  "base_event": "B_BREAKOUT_LONG from Batch027",
+  "base_condition": "H1 EMA20>EMA50; H4 EMA20>EMA50; M15 close above prior20 high; M15 body greater than 0.3 ATR; M15 close location above 0.7",
+  "time": "MT5 server bar-open time; decision at M15 close; exact M1 entry",
+  "execution": {
+    "risk": "M15 Wilder ATR14",
+    "stop_R": 1.0,
+    "target_R": 2.0,
+    "horizon_minutes": 1440,
+    "one_open_position": true,
+    "same_M1_priority": "SL",
+    "entry": "ask",
+    "exit_prices": "bid"
+  },
+  "frozen_exclusion_rules": [
+    {
+      "rule_id": "GML1-B028-LF-01",
+      "all_conditions": [
+        "dir_h1_dist_ema50_atr >= 3.3933200446201655",
+        "dir_h1_ema20_50_gap_atr >= 1.9736296048504889",
+        "h4_close_pos20 >= 0.8874345549738237"
+      ]
+    },
+    {
+      "rule_id": "GML1-B028-LF-02",
+      "all_conditions": [
+        "dir_h1_dist_ema50_atr <= 1.0332746967803552",
+        "dir_m15_ema20_50_gap_atr <= 0.37653771717745355",
+        "dir_h1_rsi14 <= 4.736027426021366"
+      ]
+    }
+  ],
+  "filter_combination": "exclude when rule1 OR rule2 is true",
+  "2023_internal_result": {
+    "H1": {"count": 68, "profit_factor": 1.6344992201109905, "mean_R": 0.3452422227074507},
+    "H2": {"count": 121, "profit_factor": 1.484616899832519, "mean_R": 0.2763517858549076},
+    "FULL": {"count": 189, "profit_factor": 1.5369343135146272, "mean_R": 0.30113776313518764}
+  },
+  "external_gates": {
+    "2024": "count>=80 PF>=1.10 meanR>0.05",
+    "2025": "count>=80 PF>=1.10 meanR>0.05",
+    "2026": "diagnostic only"
+  },
+  "new_candidate_id": "GML1-EXP028-BREAKOUT-LONG-TP2-LF2",
+  "rescue_tuning": "forbidden",
+  "automatic_local_implementation": false,
+  "automatic_promotion": false,
+  "existing_frozen_nine_modified": false
+}
