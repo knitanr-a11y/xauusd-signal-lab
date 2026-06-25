@@ -7,6 +7,7 @@ on:
       - "scripts/gold_ml_v1/replay/**"
       - "scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py"
       - "tests/gold_ml_v1/test_nine_candidate_local_replay.py"
+      - "tests/gold_ml_v1/test_goldsharp_live_source_preflight.py"
       - "config/gold_ml_v1/replay/**"
       - ".github/workflows/gold_ml_v1_batch023_tests.yml"
 
@@ -31,7 +32,10 @@ jobs:
       - name: Compile replay tools
         run: |
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay.py
+          python -m py_compile scripts/gold_ml_v1/replay/goldsharp_live_source_preflight.py
           python -m py_compile scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py
 
       - name: Run unit tests
-        run: python -m unittest tests/gold_ml_v1/test_nine_candidate_local_replay.py -v
+        run: |
+          python -m unittest tests/gold_ml_v1/test_nine_candidate_local_replay.py -v
+          python -m unittest tests/gold_ml_v1/test_goldsharp_live_source_preflight.py -v
