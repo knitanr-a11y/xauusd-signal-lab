@@ -31,22 +31,23 @@
    - GML1-WATCH-021-B
    - GML1-WATCH-021-C
 10. GML1-WATCH-022-A remains research-only and is not accumulated after Batch020 validation.
-11. GML1-WATCH-022-B is accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
-12. GML1-PROV-020 is accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
-13. GML1-WATCH-014-A is accumulated with the caveat that stable human-readable motif interpretation remains unresolved.
-14. GML1-WATCH-021-A/B/C are accumulated WATCH candidates after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
-15. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
-16. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
-17. Historical audit files remain available after demotion.
-18. Local replay and fresh prospective confirmation are required before registration.
-19. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
-20. Remain audit-only. No live activation or automatic promotion.
-21. Never claim completion until outputs are inspected.
+11. GML1-WATCH-023-A is a new unaccumulated H1 high-count consensus loss-risk WATCH discovered in Batch021. Validate deterministic regeneration and model/excluded-row stability before accumulation.
+12. GML1-WATCH-022-B is accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
+13. GML1-PROV-020 is accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
+14. GML1-WATCH-014-A is accumulated with the caveat that stable human-readable motif interpretation remains unresolved.
+15. GML1-WATCH-021-A/B/C are accumulated WATCH candidates after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
+16. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
+17. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
+18. Historical audit files remain available after demotion.
+19. Local replay and fresh prospective confirmation are required before registration.
+20. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
+21. Remain audit-only. No live activation or automatic promotion.
+22. Never claim completion until outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_003_TEN_ACCUMULATED_CANDIDATES_BATCH020_WATCH022_VALIDATED_AUDIT_ONLY`
+`GOLD_ML_V1_004_TEN_ACCUMULATED_CANDIDATES_BATCH021_HIGH_COUNT_WATCH_DISCOVERED_AUDIT_ONLY`
 
 Next phase:
 
-`INDEPENDENT_SHORT_AND_HIGH_COUNT_ENTRY_EXPLORATION_WHILE_RAW_REPLAY_COST_STRESS_FRESH_CONFIRMATION_REMAIN_PENDING`
+`VALIDATE_WATCH023A_THEN_CONTINUE_SHORT_AND_RAW_HIGH_COUNT_EXPLORATION_WHEN_AUTHORIZED_RAW_DATA_ARE_AVAILABLE`
