@@ -1,13 +1,13 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-V",
-  "formal_status": "GOLD_ML_V1_023_FRESH_PROSPECTIVE_CI_PASS_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
-  "status": "FRESH_PROSPECTIVE_CI_PASS_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-W",
+  "formal_status": "GOLD_ML_V1_024_STATEFUL_PROSPECTIVE_MONITOR_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
+  "status": "STATEFUL_PROSPECTIVE_MONITOR_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
   "audit_only": true,
   "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
-  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_CI_PASS_USER_RUN_NEXT_20260625.md",
+  "latest_phase_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_STATEFUL_PROSPECTIVE_MONITOR_CI_PASS_USER_RUN_NEXT_20260625.md",
   "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
   "period_contract": {
     "2023": "EXPLORATION_ONLY",
@@ -34,75 +34,42 @@
       "GML1-WATCH-023-A"
     ],
     "silent_add_remove_replace_or_relabel": "forbidden",
-    "same_lineage_candidates_are_independent_edges": false,
     "new_exploration_allowed_now": false
   },
-  "warmup_bridge": {
-    "status": "PASS_9_OF_9_ZERO_CORE_MISMATCH",
-    "raw_only_parity": false,
-    "sources": ["RAW_RECONSTRUCTED", "WARMUP_BRIDGE_EXACT"],
-    "bridge_live_or_promotion_use": "forbidden"
+  "completed": {
+    "warmup_bridge": "PASS_9_OF_9_ZERO_CORE_MISMATCH",
+    "cost_stress": "PASS_9_OF_9_RAW_BASELINE_1687",
+    "fresh_prospective_first_run": "PASS_NO_CANDIDATE_YET"
   },
-  "cost_stress": {
-    "status": "COMPLETED_AND_VERIFIED_PASS_9_OF_9",
-    "pass_record": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
-    "raw_baseline_parity_checks": 1687,
-    "candidate_gate_pass": 9,
-    "candidate_gate_fail": 0,
-    "scenario_count": 12,
-    "runner_bat": "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
-    "do_not_rerun": true
+  "records": {
+    "cost_stress": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
+    "fresh_prospective_first_run": "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json",
+    "monitoring_config": "config/gold_ml_v1/prospective_monitoring_20260625.json",
+    "monitoring_ci": "config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json"
   },
-  "fresh_prospective_ci": {
-    "status": "PASS",
-    "record": "config/gold_ml_v1/fresh_prospective_ci_pass_20260625.json",
-    "validated_main_commit": "8cdb858f56288a5cc6e3ad4a49fa25beaf8a6f3a",
-    "validation_pr": 26,
-    "workflow_run_id": 28165292690,
-    "job_id": 83415630145,
-    "validated_steps": [
-      "compile_tools",
-      "governance_guardrails",
-      "cost_stress_contract",
-      "cost_stress_core_registry",
-      "fresh_prospective_engine"
-    ],
-    "validation_pr_merged": false
-  },
-  "fresh_prospective": {
-    "status": "IMPLEMENTED_AND_CI_VERIFIED_USER_RUN_NEXT",
-    "config": "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json",
-    "engine": "scripts/gold_ml_v1/prospective/fresh_prospective_engine.py",
-    "runner_python": "scripts/gold_ml_v1/prospective/run_fresh_prospective_confirmation.py",
-    "runner_bat": "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
-    "cutoff_rule": "decision_close_time strictly greater than 2026-06-23 18:15:00 MT5 server close",
-    "input_files": [
-      "goldsharp_m1.csv",
-      "goldsharp_m15.csv",
-      "goldsharp_h1.csv",
-      "goldsharp_h4.csv",
-      "goldsharp_d1.csv"
-    ],
-    "closed_bars_only": true,
-    "candidate_generation_future_exit_use": false,
-    "unresolved_candidates_preserved": true,
-    "suppressed_parent_events_recorded": true,
-    "same_m1_tp_sl_priority": "SL",
-    "no_candidate_yet_is_valid": true,
-    "performance_gate": "NOT_APPLICABLE_PROSPECTIVE_AUDIT_ONLY",
+  "stateful_monitoring": {
+    "status": "IMPLEMENTED_CI_VERIFIED_USER_INITIALIZATION_RUN_NEXT",
+    "runner_bat": "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat",
+    "output_dir": "outputs/gold_ml_v1/prospective_monitoring",
+    "candidate_key": ["candidate_id", "decision_close_time"],
+    "parent_event_key": ["parent_lineage", "decision_close_time"],
+    "historical_prefix_mutation": "FAIL_CLOSED",
+    "input_truncation": "FAIL_CLOSED",
+    "duplicate_candidate_registration": "FORBIDDEN",
+    "allowed_candidate_transition": "UNRESOLVED_TO_RESOLVED",
+    "resolved_result_rewrite": "FAIL_CLOSED",
+    "transactional_update": true,
+    "background_task_installed": false,
+    "one_cycle_per_root_bat_run": true,
     "result_available": false,
-    "output_dir": "outputs/gold_ml_v1/fresh_prospective_confirmation",
-    "upload_file": "outputs/gold_ml_v1/fresh_prospective_confirmation/UPLOAD_THIS_GOLD_ML_V1.txt"
+    "upload_file": "outputs/gold_ml_v1/prospective_monitoring/UPLOAD_THIS_GOLD_ML_V1.txt"
   },
   "one_click_workflow": {
     "entrypoint": "RUN_GOLD_ML_V1_NEXT.bat",
-    "dispatcher": "scripts/gold_ml_v1/run_next_local.py",
-    "action_config": "config/gold_ml_v1/next_local_action.json",
-    "action_id": "GML1-FRESH-PROSPECTIVE-CONFIRMATION-READY-V2-CI-PASS",
-    "active_phase_bat": "scripts/gold_ml_v1/prospective/windows/run_fresh_prospective_confirmation.bat",
-    "current_upload_path_file": "outputs/gold_ml_v1/next_action/CURRENT_UPLOAD_PATH.txt"
+    "action_id": "GML1-STATEFUL-PROSPECTIVE-MONITOR-CYCLE-READY-V1-CI-PASS",
+    "active_phase_bat": "scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat"
   },
-  "next": "USER_PULLS_AND_RUNS_CI_VERIFIED_FRESH_PROSPECTIVE_ONE_CLICK_THEN_UPLOADS_PHASE_FILE",
+  "next": "USER_PULLS_AND_RUNS_FIRST_STATEFUL_MONITOR_CYCLE_THEN_UPLOADS_PHASE_FILE",
   "execution_switches": {
     "new_exploration": false,
     "live_ready": false,
