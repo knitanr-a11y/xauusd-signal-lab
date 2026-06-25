@@ -1,0 +1,16 @@
+{
+  "record_id": "GML1-PROV030A-REJECTION-20260626",
+  "candidate_id": "GML1-PROV-030-A",
+  "status": "REJECTED_DO_NOT_USE",
+  "date": "2026-06-26",
+  "active": false,
+  "provisional_stack_member": false,
+  "accumulated": false,
+  "registered": false,
+  "prospective_monitoring": false,
+  "local_reproduction": false,
+  "live_ready": false,
+  "preserve_for_audit_only": true,
+  "existing_frozen_nine_modified": false,
+  "restart_requires_explicit_user_authorization": true
+}
