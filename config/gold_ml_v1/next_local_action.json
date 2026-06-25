@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "action_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-READY-V2",
+  "action_id": "GML1-COST-STRESS-RAW-RECONSTRUCTED-READY-V3-PASTE-ME",
   "mode": "bat",
   "title": "GOLD_ML_V1 frozen nine-candidate cost stress",
-  "message": "Run the corrected audit-only cost stress. RAW_RECONSTRUCTED is stressed. WARMUP_BRIDGE_EXACT is reported separately as a historical exact-core audit. No later phase starts automatically.",
+  "message": "Run the corrected audit-only cost stress. The dispatcher captures the complete console output and creates PASTE_ME_GOLD_ML_V1.txt for review whether the action passes or fails. RAW_RECONSTRUCTED is stressed. WARMUP_BRIDGE_EXACT remains a separate historical exact-core audit. No later phase starts automatically.",
   "runner": "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat",
   "arguments": [
     "{RAW_HISTORY_DIR}",
@@ -18,9 +18,9 @@
     {"label": "verified warmup bridge summary", "path": "{REPO_ROOT}/outputs/gold_ml_v1/batch023_warmup_bridge_local/warmup_bridge_summary.json"},
     {"label": "frozen cost stress config", "path": "{REPO_ROOT}/config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"}
   ],
-  "current_status": "GOLD_ML_V1_018_COST_STRESS_CORE_REGISTRY_FIX_ONE_CLICK_USER_RERUN_READY_AUDIT_ONLY",
-  "phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_EXACT_CORE_SEPARATELY",
-  "after_success": "STOP_AND_UPLOAD_LATEST_RUN_SUMMARY_FOR_REVIEW",
+  "current_status": "GOLD_ML_V1_019_COST_STRESS_PASTE_ME_DIAGNOSTIC_USER_RERUN_READY_AUDIT_ONLY",
+  "phase": "COST_STRESS_RAW_RECONSTRUCTED_WITH_CAPTURED_DIAGNOSTIC_REPORTING",
+  "after_success": "STOP_AND_PASTE_REPOSITORY_ROOT_PASTE_ME_GOLD_ML_V1_TXT_FOR_REVIEW",
   "automatic_next_phase": false,
   "new_exploration_allowed": false,
   "audit_only": true,
