@@ -9,7 +9,8 @@ GUARDRAILS = ROOT / "config/gold_ml_v1/exploration_guardrails_20260625.json"
 CURRENT_STATE = ROOT / "config/gold_ml_v1/current_state_snapshot_20260624.json"
 NEXT_ACTION = ROOT / "config/gold_ml_v1/next_local_action.json"
 AGENTS = ROOT / "AGENTS.md"
-ONE_CLICK_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md"
+START_HERE = ROOT / "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
+ONE_CLICK_HANDOFF_V2 = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
 TRIPLE_CHECK = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md"
 
 
@@ -19,7 +20,8 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.state = json.loads(CURRENT_STATE.read_text(encoding="utf-8"))
         self.action = json.loads(NEXT_ACTION.read_text(encoding="utf-8"))
         self.agents = AGENTS.read_text(encoding="utf-8")
-        self.one_click_handoff = ONE_CLICK_HANDOFF.read_text(encoding="utf-8")
+        self.start_here = START_HERE.read_text(encoding="utf-8")
+        self.handoff = ONE_CLICK_HANDOFF_V2.read_text(encoding="utf-8")
         self.triple_check = TRIPLE_CHECK.read_text(encoding="utf-8")
 
     def test_frozen_period_split(self) -> None:
@@ -39,6 +41,7 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertTrue(rules["predeclare_search_space"])
         self.assertTrue(rules["record_every_attempted_rule_and_parameter_cell"])
         self.assertTrue(rules["record_total_search_count_and_search_multiplicity"])
+        self.assertTrue(rules["report_all_survivors_and_failures_not_only_best"])
         self.assertEqual(rules["candidate_pool_silent_removal"], "forbidden")
         self.assertEqual(rules["simple_metric_sum_across_same_lineage"], "forbidden")
         self.assertEqual(
@@ -49,25 +52,42 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.assertEqual(len(pool["research_only_ids"]), 3)
         self.assertEqual(pool["silent_add_remove_or_relabel"], "forbidden")
         self.assertTrue(pool["separate_research_must_not_modify_current_nine"])
+        self.assertIn("forbidden", pool["new_exploration_before_cost_stress_and_fresh_confirmation"])
+
+    def test_data_leakage_and_bridge_use_are_blocked(self) -> None:
+        rules = self.guardrails["data_and_evaluation_rules"]
+        self.assertTrue(rules["closed_bars_only"])
+        self.assertEqual(rules["lookahead"], "forbidden")
+        self.assertEqual(rules["future_label_or_exit_data_in_features"], "forbidden")
+        self.assertEqual(rules["missing_rows_or_losses_silent_exclusion"], "forbidden")
+        self.assertTrue(rules["raw_reconstructed_and_warmup_bridge_rows_must_be_separate"])
+        self.assertEqual(rules["warmup_bridge_rows_live_use"], "forbidden")
 
     def test_guardrails_are_referenced_by_governance_files(self) -> None:
-        expected = "config/gold_ml_v1/exploration_guardrails_20260625.json"
-        self.assertEqual(self.state["exploration_guardrails"], expected)
-        self.assertIn(expected, self.agents)
-        self.assertIn("EXPLORATION_GUARDRAILS_TRIPLE_CHECK", self.agents)
+        guardrail_path = "config/gold_ml_v1/exploration_guardrails_20260625.json"
+        v2_path = "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md"
+        self.assertEqual(self.state["exploration_guardrails"], guardrail_path)
+        self.assertEqual(self.state["authoritative_handoff"], v2_path)
+        self.assertIn(guardrail_path, self.agents)
+        self.assertIn(v2_path, self.agents)
+        self.assertIn(guardrail_path, self.start_here)
+        self.assertIn(v2_path, self.start_here)
         self.assertTrue(self.state["audit_only"])
+        self.assertFalse(self.state["execution_switches"]["new_exploration"])
         self.assertTrue(self.action["audit_only"])
         self.assertFalse(self.action["live_ready"])
         self.assertEqual(self.action["mode"], "status_only")
 
     def test_one_click_and_triple_check_handoffs_are_fail_closed(self) -> None:
-        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.one_click_handoff)
-        self.assertIn("fixed-slippage grid", self.one_click_handoff)
-        self.assertIn("2026", self.one_click_handoff)
+        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.handoff)
+        self.assertIn("fixed-slippage grid", self.handoff)
+        self.assertIn("2026: diagnostic only", self.handoff)
         self.assertIn("Every attempted rule", self.triple_check)
         self.assertIn("multiplicity", self.triple_check.lower())
         self.assertIn("No new candidate exploration", self.triple_check)
         self.assertIn("Automatic promotion", self.triple_check)
+        self.assertIn("WARMUP_BRIDGE_EXACT", self.handoff)
+        self.assertIn("must not be used for exploration", self.handoff)
 
 
 if __name__ == "__main__":
