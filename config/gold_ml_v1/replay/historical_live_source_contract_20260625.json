@@ -1,0 +1,45 @@
+{
+  "contract_id": "GML1-HISTORICAL-LIVE-SOURCE-CONTRACT-20260625",
+  "mode": "audit-only",
+  "time_basis": "MT5 server naive time",
+  "closed_row_contract": true,
+  "historical_replay": {
+    "source_pattern": "gold_v3_2023_2026_*.csv",
+    "purpose": "exact historical reproduction only",
+    "include_goldsharp": false,
+    "historical_files": [
+      "gold_v3_2023_2026_m1.csv",
+      "gold_v3_2023_2026_m15.csv",
+      "gold_v3_2023_2026_h1.csv",
+      "gold_v3_2023_2026_h4.csv",
+      "gold_v3_2023_2026_d1.csv"
+    ]
+  },
+  "live_operation": {
+    "source_pattern": "goldsharp_*.csv",
+    "purpose": "new closed-bar observation for live audit and future signal generation",
+    "live_files": [
+      "goldsharp_m1.csv",
+      "goldsharp_m15.csv",
+      "goldsharp_h1.csv",
+      "goldsharp_h4.csv",
+      "goldsharp_d1.csv"
+    ],
+    "new_signal_decision_source": "goldsharp only",
+    "historical_rows_may_trigger_new_signals": false,
+    "historical_use": "indicator warmup and continuity only",
+    "append_rule": "use goldsharp rows strictly after the historical maximum bar-open time for operational decisions",
+    "overlap_rows": "allowed for continuity checks but never eligible as new live decisions",
+    "latest_row": "closed by CSV contract; do not delete as open"
+  },
+  "boundaries": {
+    "no_JST_conversion": true,
+    "no_historical_live_blending_during_exact_replay": true,
+    "no_backlog_signal_emission": true,
+    "2026_retuning_forbidden": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
