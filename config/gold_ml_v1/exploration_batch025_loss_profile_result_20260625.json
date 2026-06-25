@@ -1,0 +1,13 @@
+{
+  "record_id": "GML1-BATCH025-RESULT-20260625",
+  "status": "PASS_ZERO_SURVIVORS",
+  "eligible_declared": 21,
+  "eligible_after_half_count": 19,
+  "selected_rules": 20,
+  "passed_2023_internal": 5,
+  "passed_2024": 0,
+  "survivors": 0,
+  "rescue_tuning": false,
+  "local_implementation": false,
+  "frozen_nine_modified": false
+}
