@@ -1,0 +1,73 @@
+{
+  "record_id": "GML1-BATCH023-UPLOADED-RAW-FORENSIC-AUDIT-20260625",
+  "status": "ROOT_CAUSE_IDENTIFIED_POST_WARMUP_PARITY_PROVEN_AUDIT_ONLY",
+  "raw_files": {
+    "D1": {"rows": 894, "first_open": "2023-01-03 00:00:00", "last_open": "2026-06-19 00:00:00", "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"},
+    "H1": {"rows": 20459, "first_open": "2023-01-03 01:00:00", "last_open": "2026-06-19 19:00:00", "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"},
+    "H4": {"rows": 5352, "first_open": "2023-01-03 00:00:00", "last_open": "2026-06-19 16:00:00", "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913"},
+    "M1": {"rows": 1225431, "first_open": "2023-01-03 01:00:00", "last_open": "2026-06-19 19:54:00", "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2"},
+    "M5": {"rows": 245327, "first_open": "2023-01-03 01:00:00", "last_open": "2026-06-19 19:50:00", "sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d"},
+    "M15": {"rows": 81781, "first_open": "2023-01-03 01:00:00", "last_open": "2026-06-19 19:45:00", "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28"}
+  },
+  "raw_integrity": {
+    "duplicate_times": 0,
+    "out_of_order_timeframes": 0,
+    "invalid_ohlc_rows": 0,
+    "m1_aggregation_ohlc_parity": {
+      "M5": "245327/245327",
+      "M15": "81781/81781",
+      "H1": "20459/20459",
+      "H4": "5352/5352",
+      "D1": "894/894"
+    }
+  },
+  "recovered_lineage_contracts": {
+    "M15_H4": {
+      "h4_rci18": "18-bar rank-difference RCI on H4 close",
+      "h4_state_spread_atr": "H4 spread price divided by simple rolling-mean TR14",
+      "h4_ema40_slope6_atr": "EMA40 adjust=false slope6 divided by Wilder ATR14",
+      "m15_trade_atr": "simple rolling-mean TR14",
+      "m15_bollinger": "population std ddof=0; width divided by simple ATR14",
+      "m15_bb60_percentile100": "fraction of trailing 100 values <= current value",
+      "signal": "false-to-true of state AND exact-M1-entry eligibility on the full M15 sequence",
+      "one_position": true,
+      "same_m1_priority": "SL",
+      "exit_time_storage": "M1 bar close time (bar open plus one minute)"
+    },
+    "H1_D1": {
+      "h1_bb60": "population std ddof=0",
+      "d1_rci18": "18-bar rank-difference RCI on D1 close",
+      "h1_trade_atr": "Wilder ATR14 with prior-history seed",
+      "d1_tickvol_ratio50": "D1 tick volume divided by rolling median50 including current bar",
+      "d1_delta_atr3": "three-bar close delta divided by Wilder ATR14",
+      "h1_spread_atr": "H1 spread price divided by Wilder ATR14",
+      "time_exit": "last available M1 close inside the wall-clock horizon when the exact horizon minute is unavailable",
+      "one_position": true,
+      "same_m1_priority": "SL"
+    }
+  },
+  "proven_parity": {
+    "GML1-PROV-007": {"reconstructed_common_rows": 153, "expected_rows": 154, "decision_set_extra": 0, "r_value_mismatches": 0, "only_missing": "2023-01-10 04:00:00"},
+    "GML1-PROV-008": {"reconstructed_common_rows": 168, "expected_rows": 169, "decision_set_extra": 0, "r_value_mismatches": 0, "only_missing": "2023-01-10 04:00:00"},
+    "GML1-WATCH-022-B": {"reconstructed_common_rows": 134, "expected_rows": 135, "decision_set_extra": 0, "r_value_mismatches": 0, "only_missing": "2023-01-10 04:00:00"},
+    "GML1-PROV-010": {"reconstructed_common_rows": 242, "expected_rows": 254, "decision_set_extra": 0, "exit_time_mismatches": 0, "r_value_mismatches": 0, "missing_reason": "12 January-2023 decisions require pre-2023 D1 RCI warmup"},
+    "derived_H1_filters": {
+      "GML1-PROV-015_membership": "225/225 exact from PROV-010 decisions",
+      "GML1-PROV-020_membership": "204/204 exact from PROV-015 decisions",
+      "GML1-WATCH-021-A_membership": "210/210 exact from PROV-015 decisions",
+      "GML1-WATCH-021-B_membership": "207/207 exact from PROV-015 decisions",
+      "GML1-WATCH-021-C_membership": "196/196 exact from PROV-015 decisions"
+    }
+  },
+  "remaining_blocker": {
+    "cause": "The authorized raw set starts on 2023-01-03, but the exact registries contain indicator values and decisions that require earlier history.",
+    "minimum_missing_warmup": [
+      "pre-2023 D1 history for D1 RCI18 and median50 participation features",
+      "pre-2023 H1 history or serialized Wilder ATR state",
+      "pre-2023 H4 history or serialized EMA40/Wilder ATR state for the first M15-H4 event"
+    ],
+    "not_a_data_quality_failure": true
+  },
+  "corrected_interpretation": "The nine registries are overwhelmingly reproducible from the uploaded raw candles once lineage-specific formulas are restored. Full row-for-row raw replay is blocked only by missing pre-2023 warmup state, not by the 2023-2026 candle bodies.",
+  "execution_switches": {"audit_only": true, "live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
