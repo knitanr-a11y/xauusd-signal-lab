@@ -1,0 +1,17 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-AUTHORIZATION-20260625",
+  "status": "EXPLICIT_USER_AUTHORIZATION_RECORDED",
+  "authorized_date": "2026-06-25",
+  "authorized_scope": "EXPLORATION_BATCH024_M15_H1_PULLBACK_ONLY",
+  "prerequisite_records": [
+    "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json",
+    "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json",
+    "config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json"
+  ],
+  "existing_frozen_nine_must_remain_unchanged": true,
+  "separate_new_ids_required": true,
+  "audit_only": true,
+  "automatic_accumulation": false,
+  "automatic_promotion": false,
+  "live_ready": false
+}
