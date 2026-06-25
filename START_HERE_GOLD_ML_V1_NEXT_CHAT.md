@@ -4,7 +4,7 @@ Repository: `knitanr-a11y/xauusd-signal-lab`
 
 Current status:
 
-`GOLD_ML_V1_021_COST_STRESS_PASS_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT_AUDIT_ONLY`
+`GOLD_ML_V1_022_FRESH_PROSPECTIVE_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
 Read `AGENTS.md` first, then follow its mandatory read order exactly.
 
@@ -19,24 +19,34 @@ Authoritative workflow governance handoff:
 
 Latest operational continuation handoff:
 
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md`
+- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_FRESH_PROSPECTIVE_IMPLEMENTED_USER_RUN_NEXT_20260625.md`
 
-Verified cost-stress result record:
+Verified cost-stress result:
 
 - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
+- RAW baseline parity: 1687
+- frozen candidate gate: PASS=9, FAIL=0
+- do not rerun cost stress
 
-Important:
+Fresh prospective contract:
 
-- Batch023 warmup bridge passed 9/9 with zero core mismatches.
-- The corrected cost-stress run completed with exit code 0.
-- RAW baseline parity checks: 1687.
-- Frozen cost-stress candidate gate: PASS=9, FAIL=0.
-- All frozen nine candidates passed all frozen twelve cost scenarios.
-- Do not rerun cost stress.
-- `RAW_RECONSTRUCTED` remains the only stressed primary population.
-- `WARMUP_BRIDGE_EXACT` remains a separate exact-core audit and is not eligible for live use or promotion.
-- Candidate rules, IDs, periods, grid and gates remain frozen. No post-result retuning.
-- Fresh prospective confirmation is the next phase and must be implemented separately.
-- Fresh prospective uses closed goldsharp bars strictly after `2026-06-23 18:15:00` MT5 server close.
-- The current root launcher action is status-only; no local rerun is required now.
-- Audit-only remains active. All registration, promotion and execution switches remain off.
+- `config/gold_ml_v1/fresh_prospective_confirmation_20260625.json`
+- decisions strictly after `2026-06-23 18:15:00` MT5 server close
+- closed `goldsharp_m1/m15/h1/h4/d1.csv` files only
+- candidate rules and nine IDs frozen
+- no future exit information in candidate generation
+- unresolved candidates preserved
+- suppressed parent events recorded
+- no retuning or performance gate
+
+The only user-facing launcher remains repository-root:
+
+`RUN_GOLD_ML_V1_NEXT.bat`
+
+It now launches the dedicated fresh prospective BAT and opens:
+
+`outputs/gold_ml_v1/fresh_prospective_confirmation/UPLOAD_THIS_GOLD_ML_V1.txt`
+
+with the file selected in Explorer.
+
+Audit-only remains active. All registration, promotion and execution switches remain off.
