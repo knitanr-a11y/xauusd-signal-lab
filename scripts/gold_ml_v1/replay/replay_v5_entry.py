@@ -8,6 +8,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from fast_m1_engine_hotfix import evaluate_fast_m1_no_infinity
+
 path = Path(__file__).with_name("nine_candidate_local_replay_v4.py")
 spec = importlib.util.spec_from_file_location("batch023_v4_for_v5", path)
 if spec is None or spec.loader is None:
@@ -15,6 +17,7 @@ if spec is None or spec.loader is None:
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+module.FastM1Engine.evaluate = evaluate_fast_m1_no_infinity
 
 _SELECTED_EVENT_MODE = "masked_full_series"
 
