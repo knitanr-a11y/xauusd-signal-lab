@@ -32,12 +32,16 @@ from prospective_monitor_state import (  # noqa: E402
     reconcile_parent_events,
 )
 
-STATEFUL_FILES = [
+TRANSACTION_FILES = [
     "monitor_state.json",
     "monitor_candidate_ledger.csv",
     "monitor_parent_event_ledger.csv",
     "monitor_candidate_summary.csv",
     "monitor_run_history.csv",
+    "monitor_new_candidates_latest.csv",
+    "monitor_resolved_transitions_latest.csv",
+    "monitor_new_parent_events_latest.csv",
+    "monitor_parent_admission_transitions_latest.csv",
     "input_provenance.json",
     "monitor_latest_snapshot_summary.json",
     "LATEST_RUN_SUMMARY.txt",
@@ -70,8 +74,27 @@ def dataframe_display(frame: pd.DataFrame) -> str:
     return frame.to_csv(index=False, date_format="%Y-%m-%d %H:%M:%S").rstrip()
 
 
-def backup_state(output_dir: Path, run_id: str) -> Path | None:
-    existing = [output_dir / name for name in STATEFUL_FILES if (output_dir / name).exists()]
+def atomic_write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    temporary.replace(path)
+
+
+def write_staged_text(staging_dir: Path, name: str, text: str) -> None:
+    path = staging_dir / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def write_staged_dataframe(staging_dir: Path, name: str, frame: pd.DataFrame) -> None:
+    write_staged_text(staging_dir, name, dataframe_csv_text(frame))
+
+
+def backup_transaction_files(output_dir: Path, run_id: str) -> Path | None:
+    existing = [
+        output_dir / name for name in TRANSACTION_FILES if (output_dir / name).exists()
+    ]
     if not existing:
         return None
     backup_dir = output_dir / "backups" / run_id
@@ -81,15 +104,40 @@ def backup_state(output_dir: Path, run_id: str) -> Path | None:
     return backup_dir
 
 
-def atomic_write_text(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
-    temporary.replace(path)
-
-
-def atomic_write_dataframe(path: Path, frame: pd.DataFrame) -> None:
-    atomic_write_text(path, dataframe_csv_text(frame))
+def commit_transaction(
+    output_dir: Path,
+    staging_dir: Path,
+    backup_dir: Path | None,
+    run_id: str,
+) -> None:
+    committed: list[str] = []
+    final_snapshot_dir = output_dir / "snapshots" / run_id
+    staged_snapshot_dir = staging_dir / "snapshot"
+    try:
+        for name in TRANSACTION_FILES:
+            staged = staging_dir / name
+            if not staged.exists():
+                raise FileNotFoundError(f"Staged transaction file missing: {name}")
+            final = output_dir / name
+            staged.replace(final)
+            committed.append(name)
+        if final_snapshot_dir.exists():
+            raise FileExistsError(final_snapshot_dir)
+        final_snapshot_dir.parent.mkdir(parents=True, exist_ok=True)
+        staged_snapshot_dir.replace(final_snapshot_dir)
+    except Exception:
+        for name in committed:
+            final = output_dir / name
+            backup = backup_dir / name if backup_dir else None
+            if backup is not None and backup.exists():
+                shutil.copy2(backup, final)
+            elif final.exists():
+                final.unlink()
+        if final_snapshot_dir.exists():
+            shutil.rmtree(final_snapshot_dir, ignore_errors=True)
+        raise
+    finally:
+        shutil.rmtree(staging_dir, ignore_errors=True)
 
 
 def observation_state(candidates: pd.DataFrame) -> str:
@@ -187,6 +235,7 @@ def build_summary_text(
         "historical_prefix_mutation=FAIL_CLOSED",
         "duplicate_candidate_registration=FORBIDDEN",
         "resolved_result_rewrite=FORBIDDEN",
+        "transactional_ledger_update=TRUE",
         "performance_gate=NOT_APPLICABLE_PROSPECTIVE_AUDIT_ONLY",
         "scheduled_task_installed=FALSE",
         "automatic_next_phase=FALSE",
@@ -340,6 +389,7 @@ def run_monitor(
             "historical_prefix_mutation": "FAIL_CLOSED",
             "duplicate_candidate_registration": "FORBIDDEN",
             "resolved_result_rewrite": "FORBIDDEN",
+            "transactional_ledger_update": True,
             "scheduled_task_installed": False,
             "new_exploration": False,
             "live_ready": False,
@@ -353,25 +403,9 @@ def run_monitor(
         },
     }
 
-    backup_dir = backup_state(output_dir, run_id)
-    snapshot_dir = output_dir / "snapshots" / run_id
-    snapshot_dir.mkdir(parents=True, exist_ok=False)
-
-    atomic_write_text(output_dir / "monitor_candidate_ledger.csv", candidate_text)
-    atomic_write_text(output_dir / "monitor_parent_event_ledger.csv", parent_text)
-    atomic_write_text(output_dir / "monitor_candidate_summary.csv", summary_text_csv)
-    atomic_write_text(output_dir / "monitor_run_history.csv", history_text)
-    atomic_write_dataframe(output_dir / "monitor_new_candidates_latest.csv", new_candidates)
-    atomic_write_dataframe(
-        output_dir / "monitor_resolved_transitions_latest.csv", resolved_transitions
-    )
-    atomic_write_dataframe(output_dir / "monitor_new_parent_events_latest.csv", new_parent_events)
-    atomic_write_dataframe(
-        output_dir / "monitor_parent_admission_transitions_latest.csv",
-        parent_admission_transitions,
-    )
-    atomic_write_text(output_dir / "monitor_state.json", json_text(state))
-    atomic_write_text(output_dir / "input_provenance.json", json_text(provenance))
+    backup_dir = backup_transaction_files(output_dir, run_id)
+    staging_dir = output_dir / ".staging" / run_id
+    staging_dir.mkdir(parents=True, exist_ok=False)
 
     latest_snapshot_summary = {
         "status": "PASS",
@@ -385,12 +419,37 @@ def run_monitor(
         "candidate_summary": cumulative_summary.to_dict(orient="records"),
         "policy": state["policy"],
     }
-    atomic_write_text(
-        output_dir / "monitor_latest_snapshot_summary.json",
+
+    write_staged_text(staging_dir, "monitor_candidate_ledger.csv", candidate_text)
+    write_staged_text(staging_dir, "monitor_parent_event_ledger.csv", parent_text)
+    write_staged_text(staging_dir, "monitor_candidate_summary.csv", summary_text_csv)
+    write_staged_text(staging_dir, "monitor_run_history.csv", history_text)
+    write_staged_dataframe(staging_dir, "monitor_new_candidates_latest.csv", new_candidates)
+    write_staged_dataframe(
+        staging_dir,
+        "monitor_resolved_transitions_latest.csv",
+        resolved_transitions,
+    )
+    write_staged_dataframe(
+        staging_dir,
+        "monitor_new_parent_events_latest.csv",
+        new_parent_events,
+    )
+    write_staged_dataframe(
+        staging_dir,
+        "monitor_parent_admission_transitions_latest.csv",
+        parent_admission_transitions,
+    )
+    write_staged_text(staging_dir, "monitor_state.json", json_text(state))
+    write_staged_text(staging_dir, "input_provenance.json", json_text(provenance))
+    write_staged_text(
+        staging_dir,
+        "monitor_latest_snapshot_summary.json",
         json_text(latest_snapshot_summary),
     )
-    atomic_write_text(
-        output_dir / "LATEST_RUN_SUMMARY.txt",
+    write_staged_text(
+        staging_dir,
+        "LATEST_RUN_SUMMARY.txt",
         build_summary_text(
             run_id=run_id,
             cycle=cycle,
@@ -408,12 +467,24 @@ def run_monitor(
             backup_dir=backup_dir,
         ),
     )
-    atomic_write_text(output_dir / "MONITOR_RUN_ERROR.txt", "status=PASS\nerror=NONE\n")
+    write_staged_text(staging_dir, "MONITOR_RUN_ERROR.txt", "status=PASS\nerror=NONE\n")
 
-    atomic_write_dataframe(snapshot_dir / "candidate_snapshot.csv", current_candidates)
-    atomic_write_dataframe(snapshot_dir / "parent_event_snapshot.csv", current_parent_events)
-    atomic_write_text(snapshot_dir / "input_provenance.json", json_text(provenance))
-    atomic_write_text(snapshot_dir / "monitor_state_after_run.json", json_text(state))
+    write_staged_dataframe(staging_dir / "snapshot", "candidate_snapshot.csv", current_candidates)
+    write_staged_dataframe(
+        staging_dir / "snapshot", "parent_event_snapshot.csv", current_parent_events
+    )
+    write_staged_text(
+        staging_dir / "snapshot",
+        "input_provenance.json",
+        json_text(provenance),
+    )
+    write_staged_text(
+        staging_dir / "snapshot",
+        "monitor_state_after_run.json",
+        json_text(state),
+    )
+
+    commit_transaction(output_dir, staging_dir, backup_dir, run_id)
 
     print("=" * 72)
     print("GOLD_ML_V1 STATEFUL PROSPECTIVE MONITOR - PASS")
