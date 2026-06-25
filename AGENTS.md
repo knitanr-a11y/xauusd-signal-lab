@@ -20,7 +20,9 @@
    - `docs/gold_ml_v1/GOLD_ML_V1_EXPLORATION_HANDOFF_FINAL_THREE_PASS_AUDIT_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_IMPLEMENTED_USER_RUN_NEXT_20260625.md`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_CORE_REGISTRY_FIX_USER_RERUN_NEXT_20260625.md`
-5. The V2 one-click handoff remains the authoritative governance handoff; the latest dated cost-stress handoff is the current operational continuation record.
+   - `config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_COST_STRESS_PASS_FRESH_PROSPECTIVE_NEXT_20260625.md`
+5. The V2 one-click handoff remains the authoritative governance handoff; the latest dated handoff is the current operational continuation record.
 6. Do not ask the user to repeat paths, results, or decisions already recorded there.
 7. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
 8. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, seed, neighborhood cell, or year is forbidden.
@@ -32,26 +34,27 @@
 14. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
 15. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
 16. The only user-facing launcher is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-17. Phase BAT files belong in a dedicated phase subfolder. The current phase BAT is `scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat`.
-18. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
+17. Phase BAT files belong in a dedicated phase subfolder. The completed cost-stress BAT is `scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat`.
+18. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat` after the phase is ready.
 19. Do not give ordinary phase users Python, PowerShell, or long command lines.
 20. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
 21. Every runner must create outputs, preserve previous output safely, validate provenance, print PASS/FAIL, return 0 only for validation/report PASS, and write a latest summary and error trace.
 22. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
 23. The cost-stress grid is frozen in `config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json`: spread 1.0x/1.5x/2.0x crossed with fixed slippage 0/5/10/20 points per side. Do not change it after results.
-24. Cost stress must use `RAW_RECONSTRUCTED` as the only stressed primary population and must write `WARMUP_BRIDGE_EXACT` to separate reports with `NOT_ELIGIBLE_AUDIT_ONLY` gate status.
-25. The authoritative cost-stress registry input is each `*_warmup_bridge_core_registry.csv`. Do not require optional exact-schema price columns.
-26. RAW baseline must reproduce core registry `r_value` and `exit_time`; compare source entry/exit prices only when those optional columns exist. Derived prices come from frozen M1 and are written to output.
-27. `WARMUP_BRIDGE_EXACT` exact spread/slippage replay must not be fabricated when pre-2023 state or complete price/risk fields are absent. Report exact-core baseline metrics and the blocker separately.
-28. A candidate stress-gate FAIL is a preserved result, not a runner error and not permission to retune or rescue the candidate.
-29. The cost-stress runner must stop after reporting. It must not automatically begin fresh prospective confirmation.
-30. Fresh prospective confirmation must use only goldsharp closed bars after `2026-06-23 18:15:00` MT5 server close and requires a separately committed phase.
-31. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
+24. Cost stress completed successfully with RAW baseline parity 1687 and candidate gate PASS=9 FAIL=0. Do not rerun or reinterpret it as live authorization.
+25. Cost stress used `RAW_RECONSTRUCTED` as the only stressed primary population and wrote `WARMUP_BRIDGE_EXACT` separately with `NOT_ELIGIBLE_AUDIT_ONLY` gate status.
+26. The authoritative cost-stress registry input is each `*_warmup_bridge_core_registry.csv`. Optional exact-schema price columns are not required.
+27. `WARMUP_BRIDGE_EXACT` exact spread/slippage replay must not be fabricated when pre-2023 state or complete price/risk fields are absent.
+28. A candidate stress-gate FAIL would be a preserved result, not a runner error and not permission to retune. The verified run had zero candidate FAILs.
+29. The cost-stress runner stopped after reporting and did not automatically begin fresh prospective confirmation.
+30. Fresh prospective confirmation must use closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, and `goldsharp_d1.csv` bars strictly after `2026-06-23 18:15:00` MT5 server close and requires a separately committed phase.
+31. Fresh prospective candidate generation must be causal; unresolved candidates remain explicit; prospective results must not retune thresholds or rules.
+32. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
 
 Current status:
 
-`GOLD_ML_V1_018_COST_STRESS_CORE_REGISTRY_FIX_ONE_CLICK_USER_RERUN_READY_AUDIT_ONLY`
+`GOLD_ML_V1_021_COST_STRESS_PASS_FRESH_PROSPECTIVE_IMPLEMENTATION_NEXT_AUDIT_ONLY`
 
 Next action:
 
-`USER_PULLS_AND_RERUNS_RUN_GOLD_ML_V1_NEXT_BAT_THEN_UPLOADS_COST_STRESS_SUMMARY`
+`IMPLEMENT_FRESH_PROSPECTIVE_CONFIRMATION_AS_SEPARATE_AUDIT_ONLY_PHASE`
