@@ -1,0 +1,25 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH024-CI-PASS-20260625",
+  "status": "PASS",
+  "validation_pr": 32,
+  "validation_head_commit": "9015989c600ea1b693fa5226c726930b3c553b03",
+  "workflow_run_id": 28167936911,
+  "job_id": 83424511552,
+  "validated_steps": {
+    "compile_tools": "PASS",
+    "governance_guardrails": "PASS",
+    "cost_stress_contract": "PASS",
+    "cost_stress_core_registry": "PASS",
+    "fresh_prospective_engine": "PASS",
+    "stateful_prospective_monitor": "PASS",
+    "batch024_exploration": "PASS"
+  },
+  "validation_pr_merged": false,
+  "production_changes_from_validation_branch": false,
+  "attempted_cells": 36,
+  "existing_frozen_nine_modified": false,
+  "audit_only": true,
+  "automatic_accumulation": false,
+  "automatic_promotion": false,
+  "live_ready": false
+}
