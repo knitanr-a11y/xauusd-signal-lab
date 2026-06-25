@@ -3,14 +3,17 @@
   "action_id": "GML1-BATCH023-WARMUP-BRIDGE-COMPLETE",
   "mode": "status_only",
   "title": "GOLD_ML_V1 Batch023 warmup bridge is complete",
-  "message": "9/9 candidate parity is PASS. Do not rerun V1-V5 or the old Batch023 replay BAT files. Before switching this file to mode=bat, the next chat must read exploration_guardrails_20260625.json and the triple-check handoff, implement the predeclared cost-stress phase, preserve the frozen nine-candidate pool, run governance tests, and then instruct the user only to Pull and double-click RUN_GOLD_ML_V1_NEXT.bat.",
+  "message": "9/9 candidate parity is PASS. Do not rerun V1-V5 or the old Batch023 replay BAT files. New exploration is locked. Before switching this file to mode=bat, the next chat must read the authoritative exploration guardrails, triple-check audit, and V2 one-click handoff; implement the predeclared cost-stress phase; preserve the frozen nine-candidate pool; run governance tests; and then instruct the user only to Pull and double-click RUN_GOLD_ML_V1_NEXT.bat.",
   "required_governance_before_bat_mode": [
     "config/gold_ml_v1/exploration_guardrails_20260625.json",
     "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md",
+    "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md",
+    "docs/gold_ml_v1/GOLD_ML_V1_EXPLORATION_HANDOFF_FINAL_THREE_PASS_AUDIT_20260625.md",
     "tests/gold_ml_v1/test_exploration_guardrails.py"
   ],
-  "current_status": "GOLD_ML_V1_016_BATCH023_WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_AUDIT_ONLY",
+  "current_status": "GOLD_ML_V1_016_BATCH023_WARMUP_BRIDGE_9_OF_9_CORE_PARITY_PASS_ONE_CLICK_WORKFLOW_READY_AUDIT_ONLY",
   "next_phase": "COST_STRESS_RAW_RECONSTRUCTED_ONLY_REPORT_BRIDGE_SEPARATELY_THEN_FRESH_PROSPECTIVE",
+  "new_exploration_allowed": false,
   "audit_only": true,
   "live_ready": false
 }
