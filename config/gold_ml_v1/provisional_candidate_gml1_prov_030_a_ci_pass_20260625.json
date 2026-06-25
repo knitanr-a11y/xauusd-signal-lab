@@ -1,0 +1,27 @@
+{
+  "record_id": "GML1-PROV-030-A-CI-PASS-20260625",
+  "status": "PASS",
+  "validated_main_commit": "f2198e19a74080b4d9ff428dce5535379af22f9a",
+  "validation_pr": 40,
+  "validation_head_commit": "d298aa53ee7c39d7540153e2a813aa5e5cda69c1",
+  "workflow_run_id": 28183445447,
+  "job_id": 83478972686,
+  "validation_pr_merged": false,
+  "validated_steps": {
+    "compile_tools_including_prov030a_reproducer": "PASS",
+    "governance_guardrails": "PASS",
+    "cost_stress_contract": "PASS",
+    "cost_stress_core_registry": "PASS",
+    "fresh_prospective_engine": "PASS",
+    "stateful_prospective_monitor": "PASS",
+    "batch024_exploration": "PASS",
+    "batch024_raw_package": "PASS",
+    "batch024_local_reproduction": "PASS"
+  },
+  "candidate_status": "PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+  "candidate_trade_rows": 247,
+  "candidate_trades_sha256": "47912c3131f6917ecae31c13a797568aacca1a08a8b655721d5527e295e579c3",
+  "existing_frozen_nine_modified": false,
+  "audit_only": true,
+  "live_ready": false
+}
