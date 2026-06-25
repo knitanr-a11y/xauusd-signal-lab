@@ -15,46 +15,50 @@ class ExplorationGuardrailTests(unittest.TestCase):
     def setUp(self) -> None:
         self.state = load("config/gold_ml_v1/current_state_snapshot_20260624.json")
         self.action = load("config/gold_ml_v1/next_local_action.json")
-        self.r24 = load("config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json")
-        self.r25 = load("config/gold_ml_v1/exploration_batch025_loss_profile_result_20260625.json")
-        self.r26 = load("config/gold_ml_v1/exploration_batch026_shared_loss_tree_result_20260625.json")
-        self.r27 = load("config/gold_ml_v1/exploration_batch027_event_families_result_20260625.json")
-        self.r28 = load("config/gold_ml_v1/exploration_batch028_breakout_long_result_20260625.json")
+        self.contract = load("config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json")
+        self.audit = load("config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_pre_admission_audit_20260625.json")
+        self.stack = load("config/gold_ml_v1/provisional_candidate_stack_20260624.json")
 
-    def test_periods_and_time(self) -> None:
+    def test_time_and_frozen_periods(self) -> None:
+        self.assertEqual(self.contract["time_contract"]["csv_time"], "MT5 server bar-open time")
         self.assertEqual(self.state["period_contract"]["2023"], "EXPLORATION_ONLY")
         self.assertEqual(self.state["period_contract"]["2024"], "VALIDATION_ONLY_NO_RETUNE")
         self.assertEqual(self.state["period_contract"]["2025"], "FINAL_TEST_ONLY_NO_RETUNE")
         self.assertEqual(self.state["period_contract"]["2026"], "DIAGNOSTIC_ONLY_NEVER_RETUNE")
-        self.assertEqual(self.r24["time_contract"]["csv_time"], "MT5 server naive bar-open time")
 
-    def test_no_new_survivor(self) -> None:
-        self.assertEqual(len(self.state["candidate_pool"]["frozen_accumulated_ids"]), 9)
+    def test_candidate_is_provisional_not_accumulated(self) -> None:
+        self.assertEqual(self.stack["accumulated_candidate_total"], 9)
+        self.assertIn("GML1-PROV-030-A", self.stack["provisional_research_only_ids"])
+        accumulated = (
+            self.stack["core_accumulated_ids"]
+            + self.stack["user_authorized_accumulated_ids"]
+            + self.stack["validation_admitted_accumulated_ids"]
+        )
+        self.assertNotIn("GML1-PROV-030-A", accumulated)
         self.assertFalse(self.state["candidate_pool"]["existing_frozen_nine_modified"])
-        self.assertEqual(self.r24["survivor_count"], 0)
-        self.assertEqual(self.r25["survivors"], 0)
-        self.assertEqual(self.r26["survivors"], 0)
-        self.assertEqual(self.r27["survivors"], 0)
-        self.assertFalse(self.r28["survivor"])
 
-    def test_local_work_is_disabled(self) -> None:
-        self.assertEqual(self.action["mode"], "status_only")
-        self.assertIsNone(self.action["runner"])
+    def test_corrected_pre_admission_contract(self) -> None:
+        self.assertEqual(self.audit["status"], "PASS_CORRECTED_DEPLOYABLE_ORDERING")
+        self.assertEqual(self.audit["corrected_pre_admission_rows"], 247)
+        self.assertEqual(self.audit["corrected_cost_stress"]["pass"], 12)
+        self.assertEqual(self.audit["corrected_cost_stress"]["fail"], 0)
+        self.assertEqual(
+            self.contract["canonical_reproduction"]["candidate_trades_sha256"],
+            "47912c3131f6917ecae31c13a797568aacca1a08a8b655721d5527e295e579c3",
+        )
+        self.assertEqual(self.contract["canonical_reproduction"]["candidate_trade_rows"], 247)
+
+    def test_current_action_is_local_audit_only(self) -> None:
+        self.assertEqual(self.action["mode"], "bat")
+        self.assertTrue(self.action["runner"].endswith("reproduce_prov030a.bat"))
+        self.assertTrue(self.action["local_reproduction_allowed"])
         self.assertFalse(self.action["local_exploration_allowed"])
-        self.assertFalse(self.action["local_reproduction_allowed"])
-        self.assertFalse(self.action["local_implementation_allowed"])
-        self.assertFalse(self.action["local_user_action_required"])
-
-    def test_research_reset(self) -> None:
-        policy = self.state["research_policy_now"]
-        self.assertFalse(policy["rescue_failed_batch024_lineage"])
-        self.assertTrue(policy["new_independent_base_families_only"])
-        self.assertEqual(policy["minimum_2023_count_before_loss_profile_analysis"], 200)
-        self.assertFalse(policy["local_implementation_before_survivor"])
-        self.assertFalse(self.r28["rescue_tuning"])
-        self.assertFalse(self.action["live_ready"])
-        self.assertFalse(self.action["mt5_order"])
-        self.assertFalse(self.action["automatic_promotion"])
+        self.assertFalse(self.action["existing_frozen_nine_modified"])
+        for key in (
+            "live_ready", "final_signal", "mt5_order", "discord", "ai_api", "live_hook",
+            "automatic_accumulation", "automatic_promotion", "automatic_registration",
+        ):
+            self.assertFalse(self.action[key])
 
 
 if __name__ == "__main__":
