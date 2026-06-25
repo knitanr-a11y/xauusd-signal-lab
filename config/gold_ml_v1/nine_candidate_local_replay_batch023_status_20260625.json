@@ -1,0 +1,75 @@
+{
+  "result_id": "GML1-BATCH-023-NINE-CANDIDATE-LOCAL-REPLAY",
+  "date": "2026-06-25",
+  "status": "PACKAGE_READY_REGISTRY_PARITY_PASS_RAW_INPUTS_NOT_MOUNTED",
+  "mode": "audit-only",
+  "candidates": [
+    "GML1-PROV-007",
+    "GML1-PROV-008",
+    "GML1-WATCH-022-B",
+    "GML1-PROV-010",
+    "GML1-PROV-015",
+    "GML1-PROV-020",
+    "GML1-WATCH-021-A",
+    "GML1-WATCH-021-B",
+    "GML1-WATCH-021-C"
+  ],
+  "package": {
+    "filename": "GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip",
+    "sha256": "d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9",
+    "zip_integrity": "PASS"
+  },
+  "completed": {
+    "expected_registry_sha256_checks": "9/9 PASS",
+    "expected_row_count_checks": "9/9 PASS",
+    "metrics_recalculation_checks": "9/9 PASS",
+    "GML1_PROV_020_parent_derivation": "PASS",
+    "GML1_WATCH_021_A_parent_derivation": "PASS",
+    "GML1_WATCH_021_B_parent_derivation": "PASS",
+    "GML1_WATCH_021_C_parent_derivation": "PASS",
+    "GML1_WATCH_022_B_parent_derivation": "PASS",
+    "unit_tests": "2 passed"
+  },
+  "raw_preflight": {
+    "executed": true,
+    "exit_code": 1,
+    "missing_historical_inputs": [
+      "gold_v3_2023_2026_m1.csv",
+      "gold_v3_2023_2026_m15.csv",
+      "gold_v3_2023_2026_h1.csv",
+      "gold_v3_2023_2026_h4.csv",
+      "gold_v3_2023_2026_d1.csv"
+    ],
+    "raw_replay_executed": false,
+    "reason": "Authorized raw candle files are not mounted in the current execution environment."
+  },
+  "package_contents": [
+    "one-click Windows BAT",
+    "registry-only BAT",
+    "Python replay entrypoint",
+    "frozen nine-candidate JSON",
+    "dependency lock",
+    "nine expected exact trade registries",
+    "support feature/event registries",
+    "expected metrics",
+    "input and package SHA256 manifests",
+    "comparison and diagnostic outputs"
+  ],
+  "exit_codes": {
+    "0": "exact parity",
+    "1": "input missing or mismatch",
+    "2": "trade registry mismatch",
+    "3": "metrics mismatch",
+    "4": "environment or dependency error"
+  },
+  "boundaries": {
+    "raw_replay_result_not_claimed": true,
+    "candidate_count_unchanged": 9,
+    "2026_retuning_forbidden": true,
+    "automatic_promotion": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
