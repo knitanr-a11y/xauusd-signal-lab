@@ -1,0 +1,98 @@
+{
+  "record_id": "GML1-EXPLORATION-BATCH029-M5-CONFIRMATION-RESULT-20260625",
+  "status": "PASS_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES",
+  "audit_only": true,
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "M1_close": "time + 1 minute",
+    "M5_close": "time + 5 minutes",
+    "M15_close": "time + 15 minutes",
+    "H1_close": "time + 1 hour",
+    "H4_close": "time + 4 hours",
+    "decision_time": "M15 close",
+    "entry_time": "exact M1 open after the frozen M5 confirmation window closes"
+  },
+  "research_scope": {
+    "event_families": 6,
+    "m5_wait_bars": [1, 2, 3],
+    "execution_profiles": ["TP1.5R_H12", "TP2.0R_H24"],
+    "baseline_variants": 36,
+    "loss_rule_size": [2, 3],
+    "maximum_sequential_loss_rules": 2,
+    "logistic_loss_filter": "trained on 2023 H1 only; fixed top-20-percent predicted-loss exclusion",
+    "periods": {
+      "2023_H1": "discovery only",
+      "2023_H2": "internal validation only",
+      "2024": "external validation no retune",
+      "2025": "final test no retune",
+      "2026": "diagnostic only"
+    }
+  },
+  "baseline_result": {
+    "variants_evaluated": 36,
+    "passed_2023_H1": 1,
+    "passed_2023_H2": 2,
+    "passed_2023_full": 0,
+    "passed_2024": 0,
+    "passed_2025": 8,
+    "survivors": 0
+  },
+  "composite_loss_rule_result": {
+    "variants_selected_using_2023_only": 6,
+    "variants_with_validated_loss_rules": 6,
+    "survivors": 0,
+    "finding": "Loss-heavy groups were removed in multiple years, but the remaining edge was insufficient or the removed group changed from loss-heavy to profitable in another year."
+  },
+  "logistic_loss_filter_result": {
+    "variants_evaluated": 6,
+    "survivors": 0,
+    "closest": [
+      {
+        "variant": "F_TREND_ACCEL_LONG-W3-TP20_H24",
+        "2024": {"count": 367, "profit_factor": 1.174478, "mean_R": 0.108934},
+        "2025": {"count": 463, "profit_factor": 1.046830, "mean_R": 0.030433},
+        "failure": "2025 gate"
+      },
+      {
+        "variant": "B_BREAKOUT_LONG-W3-TP20_H24",
+        "2024": {"count": 181, "profit_factor": 0.998870, "mean_R": -0.000749},
+        "2025": {"count": 250, "profit_factor": 1.405975, "mean_R": 0.237930},
+        "failure": "2024 gate"
+      }
+    ]
+  },
+  "post_hoc_combined_long_diagnostic": {
+    "valid_clean_candidate": false,
+    "reason": "The combination was examined after individual 2024 and 2025 results were visible, so it cannot be treated as an untouched external-validation result.",
+    "baseline_metrics": {
+      "2023": {"count": 440, "profit_factor": 1.203543, "mean_R": 0.126236},
+      "2024": {"count": 441, "profit_factor": 1.106153, "mean_R": 0.067671},
+      "2025": {"count": 558, "profit_factor": 1.102615, "mean_R": 0.065543},
+      "2026": {"count": 133, "profit_factor": 1.002977, "mean_R": 0.001970}
+    },
+    "cost_stress": {
+      "scenarios": 12,
+      "pass": 6,
+      "fail": 6,
+      "all_scenarios_required": true,
+      "overall_pass": false,
+      "examples": [
+        {"scenario": "SPREAD_1.0X_SLIP_10PTS", "2024_profit_factor": 0.978496, "2024_mean_R": -0.014856},
+        {"scenario": "SPREAD_2.0X_SLIP_0PTS", "2025_profit_factor": 0.992860, "2025_mean_R": -0.004728}
+      ]
+    },
+    "stability": {
+      "negative_quarters": ["2024Q3", "2025Q2", "2025Q3", "2026Q2"],
+      "individual_year_bootstrap_95pct_mean_R_interval_crossed_zero": [2023, 2024, 2025]
+    }
+  },
+  "final_decision": {
+    "accepted_new_candidates": 0,
+    "existing_frozen_nine_modified": false,
+    "rescue_tuning_performed": false,
+    "near_miss_promoted": false,
+    "local_implementation_created": false,
+    "automatic_accumulation": false,
+    "automatic_promotion": false
+  }
+}
