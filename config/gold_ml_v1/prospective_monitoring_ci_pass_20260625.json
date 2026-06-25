@@ -1,7 +1,12 @@
 {
   "status": "PASS",
-  "workflow_run_id": 28166897114,
-  "job_id": 83421022660,
+  "implementation_workflow_run_id": 28166897114,
+  "implementation_job_id": 83421022660,
+  "final_current_state_workflow_run_id": 28167101226,
+  "final_current_state_job_id": 83421697843,
   "stateful_prospective_monitor": "PASS",
+  "governance_guardrails": "PASS",
+  "cost_stress_contract": "PASS",
+  "fresh_prospective_engine": "PASS",
   "audit_only": true
 }
