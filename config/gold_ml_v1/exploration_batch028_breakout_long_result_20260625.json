@@ -1,0 +1,14 @@
+{
+  "record_id": "GML1-BATCH028-RESULT-20260625",
+  "status": "NEAR_MISS_REJECTED_BY_2024_GATE",
+  "candidate_id": "GML1-EXP028-BREAKOUT-LONG-TP2-LF2",
+  "2023": {"count": 189, "profit_factor": 1.5369343135146272, "mean_R": 0.30113776313518764},
+  "2024": {"count": 259, "profit_factor": 1.0614380160969732, "mean_R": 0.03961797231507277},
+  "2025": {"count": 324, "profit_factor": 1.2248364100235192, "mean_R": 0.13878790742192543},
+  "2026_diagnostic": {"count": 75, "profit_factor": 0.7999340608405232, "mean_R": -0.1413799303393636},
+  "required_2024": {"minimum_profit_factor": 1.1, "minimum_mean_R_exclusive": 0.05},
+  "survivor": false,
+  "rescue_tuning": false,
+  "local_implementation": false,
+  "frozen_nine_modified": false
+}
