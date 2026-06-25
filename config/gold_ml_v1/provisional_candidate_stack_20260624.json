@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260625_G",
-  "status": "NINE_ACCUMULATED_CANDIDATES_AFTER_BATCH022_WATCH_VALIDATION",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260625_H",
+  "status": "NINE_ACCUMULATED_PLUS_ONE_PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
   "updated": "2026-06-25",
   "core_accumulated_ids": [
     "GML1-PROV-007",
@@ -18,6 +18,10 @@
     "GML1-WATCH-022-B"
   ],
   "accumulated_candidate_total": 9,
+  "provisional_research_only_ids": [
+    "GML1-PROV-030-A"
+  ],
+  "provisional_research_only_total": 1,
   "lineage_groups": {
     "M15_H4": [
       "GML1-PROV-007",
@@ -31,6 +35,9 @@
       "GML1-WATCH-021-A",
       "GML1-WATCH-021-B",
       "GML1-WATCH-021-C"
+    ],
+    "M15_H1_H4_TREND_PULLBACK50_M5_STOP_CONFIRM_D1_STRENGTH": [
+      "GML1-PROV-030-A"
     ]
   },
   "caveats": {
@@ -38,17 +45,20 @@
     "GML1-WATCH-021-A": "Registry derivation and neighborhood passed; raw replay, cost stress and fresh confirmation remain pending.",
     "GML1-WATCH-021-B": "Registry derivation and all 9 local neighborhood cells passed PF2; raw replay, cost stress and fresh confirmation remain pending.",
     "GML1-WATCH-021-C": "A OR B combined exclusion passed all 81 local neighborhood cells but has greater search multiplicity and complexity.",
-    "GML1-WATCH-022-B": "Batch020 validation passed, but improvement is concentrated in 2025; 2024 excluded subset was profitable. Raw replay, cost stress and fresh confirmation remain pending."
+    "GML1-WATCH-022-B": "Batch020 validation passed, but improvement is concentrated in 2025; 2024 excluded subset was profitable. Raw replay, cost stress and fresh confirmation remain pending.",
+    "GML1-PROV-030-A": "Cost stress passed 12/12 and 2024-2025 external bootstrap is positive, but the final 2023 H1 non-missing leaf has 11 trades, multiplicity-adjusted monthly significance is not established, and 2026 is near flat. Local audit reproduction and fresh prospective confirmation are required before any admission."
   },
   "research_only_not_accumulated": [
     "GML1-WATCH-014-A",
     "GML1-WATCH-022-A",
-    "GML1-WATCH-023-A"
+    "GML1-WATCH-023-A",
+    "GML1-PROV-030-A"
   ],
   "research_only_reasons": {
     "GML1-WATCH-014-A": "Batch022 seed-stability validation failed. Reference artifacts reproduce, but aligned exclusions are not stable and can remove profitable subsets.",
     "GML1-WATCH-022-A": "Batch020 accumulation validation failed.",
-    "GML1-WATCH-023-A": "Batch022 deterministic parity passed but 2023 training-sample bootstrap stability failed."
+    "GML1-WATCH-023-A": "Batch022 deterministic parity passed but 2023 training-sample bootstrap stability failed.",
+    "GML1-PROV-030-A": "Provisional cost-pass candidate. Local audit reproduction and fresh prospective confirmation are pending; promotion and registration are not authorized."
   },
   "reference_only": [
     "GML1-PROV-002"
@@ -76,7 +86,9 @@
   "validation_records": [
     "config/gold_ml_v1/watch021_abc_validation_batch018_20260625.json",
     "config/gold_ml_v1/watch022_ab_validation_batch020_20260625.json",
-    "config/gold_ml_v1/all_watch_validation_batch022_20260625.json"
+    "config/gold_ml_v1/all_watch_validation_batch022_20260625.json",
+    "config/gold_ml_v1/exploration_batch030_034_multiview_result_20260625.json",
+    "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json"
   ],
   "research_watch_records": [
     "config/gold_ml_v1/h1_high_count_consensus_loss_risk_batch021_20260625.json"
