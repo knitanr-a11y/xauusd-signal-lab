@@ -43,7 +43,7 @@ def write_canonical_csv(frame: pd.DataFrame, path: Path) -> None:
         path,
         index=False,
         date_format="%Y-%m-%d %H:%M:%S",
-        float_format="%.15g",
+        float_format="%.12g",
         na_rep="",
         lineterminator="\n",
     )
@@ -66,7 +66,6 @@ def run(
     config = load_json(config_path)
     frozen = load_json(frozen_result_path)
     backup = backup_output(output_dir)
-
     result = run_exploration(raw_dir, config)
     outputs = {
         "exploration_attempt_registry.csv": result["attempt_registry"],
@@ -86,30 +85,16 @@ def run(
         for filename, actual in actual_hashes.items()
         if expected_hashes.get(filename) != actual
     }
-
     count_checks = {
-        "attempted_cells": {
-            "expected": int(frozen["attempted_cells"]),
-            "actual": int(len(result["attempt_registry"])),
-        },
-        "year_metric_rows": {
-            "expected": int(frozen["year_metric_rows"]),
-            "actual": int(len(result["year_metrics"])),
-        },
-        "signal_audit_rows": {
-            "expected": int(frozen["signal_audit_rows"]),
-            "actual": int(len(result["trade_registry"])),
-        },
-        "survivor_count": {
-            "expected": int(frozen["survivor_count"]),
-            "actual": int(len(result["survivors"])),
-        },
+        "attempted_cells": {"expected": int(frozen["attempted_cells"]), "actual": int(len(result["attempt_registry"]))},
+        "year_metric_rows": {"expected": int(frozen["year_metric_rows"]), "actual": int(len(result["year_metrics"]))},
+        "signal_audit_rows": {"expected": int(frozen["signal_audit_rows"]), "actual": int(len(result["trade_registry"]))},
+        "survivor_count": {"expected": int(frozen["survivor_count"]), "actual": int(len(result["survivors"]))},
     }
     count_mismatches = {
         key: value for key, value in count_checks.items()
         if value["expected"] != value["actual"]
     }
-
     status = "PASS" if not mismatches and not count_mismatches else "FAIL"
     summary = {
         "status": status,
@@ -122,6 +107,7 @@ def run(
         "frozen_result_sha256": sha256_file(frozen_result_path),
         "previous_output_backup": str(backup) if backup else None,
         "time_contract": frozen["time_contract"],
+        "canonical_float_format": "%.12g",
         "actual_hashes": actual_hashes,
         "expected_hashes": expected_hashes,
         "hash_mismatches": mismatches,
@@ -136,7 +122,6 @@ def run(
         json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-
     lines = [
         "GOLD_ML_V1 BATCH024 LOCAL REPRODUCTION",
         f"status={status}",
@@ -145,6 +130,7 @@ def run(
         "M1_close=time+1 minute",
         "M15_close=time+15 minutes",
         "H1_close=time+1 hour",
+        "canonical_float_format=%.12g",
         f"attempted_cells={count_checks['attempted_cells']['actual']}",
         f"year_metric_rows={count_checks['year_metric_rows']['actual']}",
         f"signal_audit_rows={count_checks['signal_audit_rows']['actual']}",
@@ -174,20 +160,16 @@ def run(
             "PASS: local outputs exactly reproduce the assistant-frozen result.",
             "The frozen result remains zero survivors; no rescue tuning is allowed.",
         ])
-    (output_dir / "LATEST_RUN_SUMMARY.txt").write_text(
-        "\n".join(lines) + "\n", encoding="utf-8"
-    )
+    (output_dir / "LATEST_RUN_SUMMARY.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (output_dir / "LOCAL_REPRODUCTION_ERROR.txt").write_text(
         "status=PASS\nerror=NONE\n" if status == "PASS" else
         "status=FAIL\nerror=FROZEN_RESULT_MISMATCH\n",
         encoding="utf-8",
     )
-
     if status != "PASS":
         raise RuntimeError(
             f"Frozen-result reproduction mismatch: hash={len(mismatches)} count={len(count_mismatches)}"
         )
-
     print("=" * 72)
     print("GOLD_ML_V1 BATCH024 LOCAL REPRODUCTION - PASS")
     print("All canonical output hashes match the assistant-frozen result.")
@@ -197,9 +179,7 @@ def run(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Reproduce Batch024 and compare against assistant-frozen hashes"
-    )
+    parser = argparse.ArgumentParser(description="Reproduce Batch024 and compare against assistant-frozen hashes")
     parser.add_argument("--raw-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--frozen-result", type=Path, required=True)
@@ -207,19 +187,12 @@ def main() -> int:
     args = parser.parse_args()
     output_dir = args.output_dir.resolve()
     try:
-        return run(
-            args.raw_dir.resolve(),
-            args.config.resolve(),
-            args.frozen_result.resolve(),
-            output_dir,
-        )
+        return run(args.raw_dir.resolve(), args.config.resolve(), args.frozen_result.resolve(), output_dir)
     except Exception as exc:
         output_dir.mkdir(parents=True, exist_ok=True)
         error = f"{type(exc).__name__}: {exc}"
-        existing = output_dir / "LOCAL_REPRODUCTION_ERROR.txt"
-        existing.write_text(
-            f"status=FAIL\nerror={error}\n\n{traceback.format_exc()}",
-            encoding="utf-8",
+        (output_dir / "LOCAL_REPRODUCTION_ERROR.txt").write_text(
+            f"status=FAIL\nerror={error}\n\n{traceback.format_exc()}", encoding="utf-8"
         )
         if not (output_dir / "LATEST_RUN_SUMMARY.txt").exists():
             (output_dir / "LATEST_RUN_SUMMARY.txt").write_text(
