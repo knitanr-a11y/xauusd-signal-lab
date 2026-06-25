@@ -108,7 +108,7 @@ class CostStressContractTests(unittest.TestCase):
         pass_text = PASS_HANDOFF.read_text(encoding="utf-8")
         self.assertIn("PASS=9", pass_text)
         self.assertIn("FAIL=0", pass_text)
-        self.assertIn("Fresh prospective", pass_text)
+        self.assertIn("fresh prospective", pass_text.lower())
 
 
 if __name__ == "__main__":
