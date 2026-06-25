@@ -4,26 +4,22 @@ Repository: `knitanr-a11y/xauusd-signal-lab`
 
 Current status:
 
-`GOLD_ML_V1_030_PROV030A_PROVISIONAL_COST_PASS_LOCAL_REPRODUCTION_READY_AUDIT_ONLY`
+`GOLD_ML_V1_031_HANDOFF_READY_AUDIT_ONLY`
 
 Read `AGENTS.md` first, then:
 
-- `config/gold_ml_v1/current_state_snapshot_20260624.json`
+- `config/gold_ml_v1/current_state_20260626.json`
 - `config/gold_ml_v1/next_local_action.json`
-- `config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json`
-- `config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_pre_admission_audit_20260625.json`
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_PROV030A_LOCAL_AUDIT_REPRODUCTION_NEXT_20260625.md`
+- `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
+- `config/gold_ml_v1/prov030a_rejection_20260626.json`
 
 Facts:
 
-- `time` is MT5 server bar-open time.
-- Frozen accumulated candidates remain nine and are unchanged.
-- `GML1-PROV-030-A` is a new provisional research-only candidate.
-- It passed all 12 cost scenarios but still requires local parity and prospective audit-only confirmation.
-- It is not registered, promoted or live.
+- CSV `time` is MT5 server bar-open time.
+- The accumulated pool remains the existing nine.
+- There is no active new provisional candidate.
+- `GML1-PROV-030-A` is prior audit history only and must not be resumed automatically.
+- No local run or upload is active.
+- Wait for a new explicit user direction.
 
-User action:
-
-1. Pull `main` in GitHub Desktop.
-2. Double-click repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-3. Upload the selected `UPLOAD_THIS_GOLD_ML_V1.txt`.
+Audit-only remains active. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
