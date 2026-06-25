@@ -26,20 +26,23 @@
    - `config/gold_ml_v1/prospective_monitoring_20260625.json`
    - `config/gold_ml_v1/prospective_monitoring_ci_pass_20260625.json`
    - `config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json`
-   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_MONITOR_INITIALIZED_CONTINUE_CYCLES_20260625.md`
+   - `config/gold_ml_v1/exploration_batch024_authorization_20260625.json`
+   - `config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json`
+   - `config/gold_ml_v1/exploration_batch024_ci_pass_20260625.json`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_BATCH024_CI_PASS_USER_RUN_NEXT_20260625.md`
 5. The V2 one-click handoff remains authoritative governance; the latest dated handoff is the operational continuation.
 6. Do not ask the user to repeat recorded paths, results or decisions.
 7. Periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
-8. Every exploration must predeclare its search space and record all attempted rules/cells, total search count, failures, survivors and multiplicity. Cherry-picking is forbidden.
+8. Every exploration must predeclare its complete search space, gates and execution contract before local results; record all attempted rules/cells, total search count, failures, survivors and multiplicity. Cherry-picking is forbidden.
 9. Silent candidate addition, removal, replacement or relabeling is forbidden.
-10. New exploration remains off while the frozen nine are under stateful prospective monitoring. Any later exploration requires explicit user authorization and cannot modify the frozen nine.
+10. Batch024 is explicitly user-authorized and is the only currently authorized new exploration scope. It must not modify the frozen nine.
 11. Same-lineage candidates are not independent edges. Do not pool or sum their PF, profit or trades as a portfolio.
 12. Batch023 warmup bridge passed 9/9 with zero core mismatch.
 13. `RAW_RECONSTRUCTED` and `WARMUP_BRIDGE_EXACT` remain separate. Bridge rows are historical audit only and never live, tuning, exploration, primary cost-stress or promotion rows.
 14. This is not raw-only parity because pre-2023 history or serialized seed state remains absent.
 15. Replay V1-V5 and ZIP replay are not original generators. Do not rerun them.
 16. The only user-facing launcher is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-17. Phase BATs belong in dedicated subfolders. Current phase BAT: `scripts/gold_ml_v1/monitoring/windows/run_prospective_monitor_cycle.bat`.
+17. Phase BATs belong in dedicated subfolders. Current phase BAT: `scripts/gold_ml_v1/exploration/windows/run_batch024_pullback_exploration.bat`.
 18. Users must not run phase BATs directly. The root launcher supplies required arguments.
 19. For future phases, commit implementation first, then update `config/gold_ml_v1/next_local_action.json`.
 20. Do not give ordinary users Python, PowerShell or long command lines.
@@ -49,24 +52,23 @@
 24. Audit-only is mandatory. No live activation, registration, MT5 order, Discord, AI API or live hook.
 25. Cost stress is complete: RAW baseline parity 1687, candidate PASS=9 FAIL=0 across all twelve frozen scenarios. Do not rerun it.
 26. The first fresh prospective run passed with `NO_CANDIDATE_YET`, zero candidate rows and no error.
-27. Stateful monitoring initialization passed locally: `MONITOR_INITIALIZED`, run count 1, latest M1 close `2026-06-25 14:36:00`, candidate total 0, parent event total 0, error none.
-28. Monitoring uses only closed `goldsharp_m1.csv`, `goldsharp_m15.csv`, `goldsharp_h1.csv`, `goldsharp_h4.csv`, `goldsharp_d1.csv` rows strictly after the frozen cutoff.
-29. Candidate generation remains causal and cannot use future exit information.
-30. Persistent candidate key is `candidate_id + decision_close_time`; persistent parent key is `parent_lineage + decision_close_time`.
-31. Existing candidate disappearance, duplicate keys, closed-bar prefix mutation, input truncation, resolved-to-unresolved regression and resolved-result rewrite must fail closed.
-32. Allowed candidate transition is only `UNRESOLVED -> RESOLVED`. Unresolved rows remain explicit; synthetic exits/R are forbidden.
-33. A parent event may move from frozen non-overlap suppression to accepted only when later bars show the earlier unresolved parent had already exited before that event.
-34. Monitoring output updates must be staged and committed transactionally with backups and snapshots.
-35. Current monitoring is one cycle per root-BAT execution. No background scheduled task is installed.
-36. `NO_NEW_CLOSED_BAR` and `NO_CANDIDATE_YET` are valid PASS observations.
-37. Monitoring results cannot retune thresholds, filters, horizons, IDs or lineage membership. There is no prospective performance gate.
-38. Continue monitoring by running the root BAT after newer closed bars are available; upload the generated monitoring file for review.
-39. Before chat length runs out, update AGENTS, current state, next action and a dated handoff.
+27. Stateful monitoring initialization passed locally and its ledger remains preserved. It is not the current root-BAT action.
+28. Batch024 uses only exact-hash frozen M1/M15/H1 raw history and never uses `WARMUP_BRIDGE_EXACT`.
+29. Batch024 new lineage is `M15_H1_TREND_PULLBACK_LINEAGE_EXP024`, separate from the frozen breakout lineages.
+30. Batch024 search space is exactly 36 cells: 2 directions × 3 H1 gap thresholds × 3 M15 RSI levels × 2 trigger modes.
+31. Every Batch024 cell has a distinct `GML1-EXP024-*` ID and every cell must remain in the attempt registry regardless of result.
+32. Batch024 execution is fixed before results: M15 decision, confirmed H1 context, exact M1 entry, Wilder M15 ATR14 risk, SL 1.0R, TP 1.5R, 720-minute horizon, one position per cell, same-M1 SL priority.
+33. 2023 gate is count>=24, PF>=1.10, mean R>0.05. 2024 and 2025 gates are independently count>=18, PF>=1.00, mean R>0. 2026 has no gate and can never retune.
+34. Failed cells, suppressed signals, missing exact-M1 entries, unresolved diagnostic rows, nulls and all survivors must be preserved.
+35. All-gate-pass Batch024 cells remain `RESEARCH_ONLY`; no automatic accumulation, promotion, registration or modification of the frozen nine.
+36. Post-result search-grid, threshold, gate, execution or year-contract changes are forbidden.
+37. A zero-survivor Batch024 result is valid and must not trigger rescue tuning.
+38. Before chat length runs out, update AGENTS, current state, next action and a dated handoff.
 
 Current status:
 
-`GOLD_ML_V1_025_STATEFUL_PROSPECTIVE_MONITOR_INITIALIZED_OPERATIONAL_AUDIT_ONLY`
+`GOLD_ML_V1_026_EXPLORATION_BATCH024_ONE_CLICK_USER_RUN_READY_AUDIT_ONLY`
 
 Next action:
 
-`CONTINUE_ONE_AUDIT_ONLY_MONITOR_CYCLE_AFTER_NEW_CLOSED_BARS`
+`USER_PULLS_AND_RUNS_BATCH024_EXPLORATION_THEN_UPLOADS_PHASE_FILE`
