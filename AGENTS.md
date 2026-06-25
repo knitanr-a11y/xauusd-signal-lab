@@ -9,28 +9,24 @@
    - `START_HERE_GOLD_ML_V1_NEXT_CHAT.md`
    - `config/gold_ml_v1/current_state_snapshot_20260624.json`
    - `config/gold_ml_v1/next_local_action.json`
-   - `config/gold_ml_v1/exploration_guardrails_20260625.json`
-   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH025_028_RESEARCH_RESET_20260625.md`
-5. Periods remain frozen: 2023 exploration; 2024 validation with no retune; 2025 final test with no retune; 2026 diagnostic only.
-6. Predeclare every search space, gate and execution contract. Record all attempts and failures. Cherry-picking is forbidden.
-7. Same-lineage variants are not independent edges. Do not pool their trades or PF as a portfolio.
-8. Existing frozen nine remain unchanged.
-9. Batch024 through Batch028 produced no accepted survivor.
-10. Batch028 was rejected despite being close to the 2024 gate. Near-miss promotion and rescue tuning are forbidden.
-11. Stop rescuing Batch024 descendants. Research independent event families instead of threshold clones.
-12. Require at least 200 resolved 2023 trades before composite loss analysis.
-13. Composite loss exclusions use 2 or 3 decision-time features and at most two sequential rules.
-14. Discover loss conditions in 2023 H1 and require the same conditions to work in 2023 H2.
-15. Apply frozen conditions unchanged to 2024 and 2025. Use 2026 only for diagnostics.
-16. Do not create local exploration, reproduction or implementation until a non-duplicate candidate passes 2023, 2024, 2025 and a separate cost review.
-17. `RUN_GOLD_ML_V1_NEXT.bat` is currently status-only. No user action is required.
-18. Audit-only is mandatory. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
-19. Before chat length runs out, update AGENTS, current state, next action and a dated handoff.
+   - `config/gold_ml_v1/exploration_batch029_m5_confirmation_result_20260625.json`
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH029_M5_CONFIRMATION_COMPLETE_20260625.md`
+5. Periods remain frozen: 2023 exploration; 2024 validation without retune; 2025 final test without retune; 2026 diagnostic only.
+6. Predeclare search spaces, gates and execution contracts. Preserve all attempts and failures. Cherry-picking is forbidden.
+7. Existing frozen nine remain unchanged.
+8. Batch029 completed six event families, three M5 confirmation waits, two execution profiles, composite loss rules and a 2023-trained logistic filter.
+9. Batch029 accepted candidates: zero.
+10. A post-hoc combined LONG diagnostic is not a clean candidate and failed the frozen cost-stress requirement, passing 6 of 12 scenarios.
+11. Rescue tuning, near-miss promotion and post-result filter changes are forbidden.
+12. Do not create local exploration, reproduction or implementation until a clean non-duplicate candidate passes 2023, 2024, 2025 and separate cost review.
+13. `RUN_GOLD_ML_V1_NEXT.bat` is status-only. No user action is required.
+14. Audit-only is mandatory. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
+15. Before chat length runs out, update AGENTS, current state, next action and a dated handoff.
 
 Current status:
 
-`GOLD_ML_V1_028_NEW_BASE_FAMILY_RESEARCH_ASSISTANT_SIDE_AUDIT_ONLY`
+`GOLD_ML_V1_029_M5_CONFIRMATION_RESEARCH_COMPLETE_ZERO_ACCEPTED_CANDIDATES_AUDIT_ONLY`
 
 Next action:
 
-`ASSISTANT_CONTINUES_NEW_BASE_FAMILY_RESEARCH_NO_USER_LOCAL_ACTION`
+`WAIT_FOR_NEXT_EXPLICIT_RESEARCH_DIRECTION_NO_LOCAL_ACTION`
