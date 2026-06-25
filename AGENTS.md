@@ -7,25 +7,24 @@
 3. Raw CSV `time` is bar-open time. Bar availability is open time plus timeframe duration. Never reinterpret this contract.
 4. Preserve MT5 server timestamps. CSV latest rows are closed by contract.
 5. Candidate logic is immutable. Changed logic requires a new ID.
-6. The accumulated set contains nine entries: GML1-PROV-007, GML1-PROV-008, GML1-WATCH-022-B, GML1-PROV-010, GML1-PROV-015, GML1-PROV-020, GML1-WATCH-021-A, GML1-WATCH-021-B, GML1-WATCH-021-C.
+6. The accumulated set contains nine audit-only entries: GML1-PROV-007, GML1-PROV-008, GML1-WATCH-022-B, GML1-PROV-010, GML1-PROV-015, GML1-PROV-020, GML1-WATCH-021-A, GML1-WATCH-021-B, GML1-WATCH-021-C.
 7. GML1-WATCH-014-A, GML1-WATCH-022-A and GML1-WATCH-023-A remain research-only.
-8. Batch023 registry parity and derivative-parent parity passed.
-9. Replay V1-V5 were reconstructed implementations and are not the source of truth. Their failures are implementation failures, not candidate failures.
-10. The only accepted Batch023 historical evaluator is the verbatim `replay_nine_candidates.py` extracted at runtime from the verified ZIP with SHA256 `d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9`.
-11. Launch the frozen evaluator through `scripts/gold_ml_v1/replay/run_frozen_batch023_from_zip.py` or `scripts/gold_ml_v1/replay/run_batch023_step3_v5.bat`.
-12. Do not copy, rewrite, reinterpret or optimize the frozen evaluator logic before exact parity is established.
-13. Historical replay raw input is the `gold_v3_2023_2026` directory only. Goldsharp files are not passed into frozen historical replay.
-14. Live closed-bar observation uses `goldsharp_*.csv`; historical rows never emit new live signals.
-15. Do not continue exploration before frozen Batch023 output and all nine parity reports are inspected.
-16. Same-lineage candidates are not independent edges and must not be summed as a portfolio.
-17. The 2026 sample is diagnostic only and cannot be used for retuning.
-18. Remain audit-only. No live activation or automatic promotion.
-19. Never claim completion until outputs are inspected.
+8. Exact CSV SHA, row-count and derivative-filter audits passed for the supplied registry bodies. This does not establish raw-candle replay provenance.
+9. Read `config/gold_ml_v1/batch023_provenance_failure_20260625.json` before any Batch023 work.
+10. Replay V1-V5 and the ZIP-bundled `replay_nine_candidates.py` all fail to reproduce the bundled exact registries from the authorized `gold_v3_2023_2026` CSVs. The ZIP script is not the original generator.
+11. Do not run or describe `run_batch023_step3_v5.bat`, `run_frozen_batch023_from_zip.py`, or reconstructed replay scripts as exact/original replay tools.
+12. The actual original registry-generation script/notebook/environment and exact raw snapshot hashes are not preserved in the repository or Batch023 ZIP.
+13. Raw parity is blocked until the original generator and raw snapshot are recovered, or a separately versioned reconstruction is created and clearly labeled non-original.
+14. Historical raw input remains `gold_v3_2023_2026_*.csv`; live closed-bar observation remains `goldsharp_*.csv`. Never mix historical rows into new live decisions.
+15. Same-lineage candidates are not independent edges and must not be summed as a portfolio.
+16. The 2026 sample is diagnostic only and cannot be used for retuning.
+17. Remain audit-only. No live activation, registration, automatic promotion, MT5 order, or Discord signal.
+18. Never claim completion until provenance and raw parity are independently verified.
 
 Current status:
 
-`GOLD_ML_V1_013_BATCH023_FROZEN_ORIGINAL_EVALUATOR_LAUNCHER_COMMITTED_LOCAL_RERUN_REQUIRED_AUDIT_ONLY`
+`GOLD_ML_V1_014_BATCH023_ORIGINAL_GENERATOR_NOT_PRESERVED_RAW_PARITY_BLOCKED_AUDIT_ONLY`
 
 Next phase:
 
-`PULL_FROZEN_LAUNCHER_RERUN_STEP3_INSPECT_ALL_NINE_PARITY_REPORTS`
+`RECOVER_ORIGINAL_GENERATOR_AND_RAW_SNAPSHOT_OR_START_NEW_VERSIONED_RECONSTRUCTION`
