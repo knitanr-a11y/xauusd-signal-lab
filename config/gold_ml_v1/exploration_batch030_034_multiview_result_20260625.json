@@ -1,5 +1,5 @@
 {
-  "record_id": "GML1-EXPLORATION-BATCH030-034-MULTIVIEW-RESULT-20260625",
+  "record_id": "GML1-EXPLORATION-BATCH030-035-MULTIVIEW-RESULT-20260625",
   "status": "PASS_ONE_PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
   "audit_only": true,
   "time_contract": "MT5 server bar-open time; closes equal open plus timeframe",
@@ -19,66 +19,61 @@
       "threshold perturbation",
       "cost stress",
       "block bootstrap",
-      "leave-one-month and leave-one-quarter-out"
+      "leave-one-month and leave-one-quarter-out",
+      "pre-admission deployable-ordering audit"
     ]
   },
-  "batch030": {
-    "result": "ZERO_STRICT_BASELINE_SURVIVORS",
-    "events": 22732,
-    "variants": 414
-  },
-  "batch031": {
-    "result": "ZERO_DIVERSIFIED_PORTFOLIO_SURVIVORS",
-    "views": ["LONG", "SHORT", "MIXED"]
-  },
-  "batch032": {
-    "result": "WALK_FORWARD_LOSS_MODEL_FAILED_2023_INTERNAL_VALIDATION",
-    "external_periods_used_for_selection": false
-  },
+  "batch030": {"result": "ZERO_STRICT_BASELINE_SURVIVORS", "events": 22732, "variants": 414},
+  "batch031": {"result": "ZERO_DIVERSIFIED_PORTFOLIO_SURVIVORS", "views": ["LONG", "SHORT", "MIXED"]},
+  "batch032": {"result": "WALK_FORWARD_LOSS_MODEL_FAILED_2023_INTERNAL_VALIDATION", "external_periods_used_for_selection": false},
   "batch033": {
     "universe_selected_using_2023_only": 5,
     "regime_methods": 15,
     "provisional_candidates": ["GML1-PROV-030-A"],
-    "same_lineage_kmeans_shadow_not_admitted": true,
-    "candidate_contract": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json"
+    "same_lineage_kmeans_shadow_not_admitted": true
   },
-  "batch034": {
-    "candidate": "GML1-PROV-030-A",
-    "baseline_parity_max_abs_R": 1.4e-13,
-    "cost_scenarios": 12,
-    "pass": 12,
-    "fail": 0
+  "batch034": {"candidate": "GML1-PROV-030-A", "baseline_parity_max_abs_R": 1.4e-13, "cost_scenarios": 12, "pass": 12, "fail": 0},
+  "batch035": {
+    "result": "PASS_CORRECTED_DEPLOYABLE_ORDERING",
+    "regime_application": "before M5 confirmation and before one-open-position admission",
+    "previous_rows": 242,
+    "corrected_rows": 247,
+    "restored_entries": 5,
+    "removed_previous_entries": 0,
+    "audit_record": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_pre_admission_audit_20260625.json"
   },
   "selected_candidate": {
     "candidate_id": "GML1-PROV-030-A",
     "status": "PROVISIONAL_COST_PASS_PROSPECTIVE_REQUIRED",
+    "contract": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_20260625.json",
     "baseline": {
-      "2023": {"count": 56, "profit_factor": 1.4285714285714286, "mean_R": 0.21428571428571427, "total_R": 12.0, "max_DD_R": 9.0},
-      "2024": {"count": 75, "profit_factor": 1.705547196749316, "mean_R": 0.31984806252635656, "total_R": 23.98860468947674, "max_DD_R": 9.0},
-      "2025": {"count": 86, "profit_factor": 1.9053353283070396, "mean_R": 0.33774721498541604, "total_R": 29.04626048874578, "max_DD_R": 10.0},
+      "2023": {"count": 58, "profit_factor": 1.3793103448275863, "mean_R": 0.1896551724137931, "total_R": 11.0, "max_DD_R": 10.0},
+      "2024": {"count": 77, "profit_factor": 1.728245848270764, "mean_R": 0.33102084012307453, "total_R": 25.488604689476738, "max_DD_R": 9.0},
+      "2025": {"count": 87, "profit_factor": 1.8477434926157421, "mean_R": 0.32237081021546876, "total_R": 28.04626048874578, "max_DD_R": 10.0},
       "2026_diagnostic": {"count": 25, "profit_factor": 1.0416666666666667, "mean_R": 0.02, "total_R": 0.5, "max_DD_R": 7.0}
     },
     "cost_stress": {
       "pass": 12,
       "fail": 0,
-      "worst_2024_profit_factor": 1.274442736014053,
-      "worst_2024_mean_R": 0.156635353118998,
-      "worst_2025_profit_factor": 1.5072577356486283,
-      "worst_2025_mean_R": 0.2280625888515159
+      "worst_2024_profit_factor": 1.2947621266721008,
+      "worst_2024_mean_R": 0.1680427227174492,
+      "worst_2025_profit_factor": 1.4640186811915803,
+      "worst_2025_mean_R": 0.2123151272019993
     },
-    "sensitivity": {
-      "cells": 25,
-      "cells_passing_2024_and_2025": 15
-    },
+    "sensitivity": {"cells": 25, "cells_passing_2024_and_2025": 16},
     "external_bootstrap": {
-      "2024_2025_mean_R_95pct": [0.07869759861677555, 0.5361941909571795],
-      "2024_2025_profit_factor_95pct_lower": 1.1652927194655585,
-      "probability_mean_R_positive": 0.9946
+      "2024_2025_mean_R_95pct": [0.07035063973542839, 0.5287750584367648],
+      "2024_2025_profit_factor_95pct_lower": 1.146562170417929,
+      "probability_mean_R_positive": 0.9932
     },
     "multiplicity_caveat": {
-      "monthly_one_sided_p": 0.0176549471841926,
-      "bonferroni_15": 0.264824207762889,
+      "monthly_one_sided_p": 0.01748383773153153,
+      "bonferroni_15": 0.26225756597297295,
       "conservative_adjusted_significance": false
+    },
+    "canonical_trade_registry": {
+      "rows": 247,
+      "sha256": "47912c3131f6917ecae31c13a797568aacca1a08a8b655721d5527e295e579c3"
     }
   },
   "decision": {
@@ -90,8 +85,8 @@
     "live_authorized": false,
     "automatic_promotion": false
   },
-  "result_archive": {
-    "local_path": "/mnt/data/GOLD_ML_V1_BATCH030_034_MULTIVIEW_FINAL_RESULTS.zip",
-    "sha256": "7e9e6ab1bb77a6b603773777e4ccd03206b4a2ab7a68458bcdab36b126e07516"
+  "corrected_result_archive": {
+    "local_path": "/mnt/data/GOLD_ML_V1_PROV030A_PREFILTER_CORRECTED_RESULTS.zip",
+    "sha256": "19f8c0c5f668238610ffc2e9a7fd54dc781ea565064c4e2895dab747e6087e10"
   }
 }
