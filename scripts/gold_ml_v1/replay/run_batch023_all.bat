@@ -37,9 +37,13 @@ echo ============================================================
 if errorlevel 1 goto :failed
 
 echo ============================================================
-echo STEP 3/4 Historical replay V4
+echo STEP 3/4 Historical replay V5
+echo   ATR14: frozen Wilder SMA-seed
+echo   raw time: bar-open time
+echo   M15 onset: false-to-true on state AND eligibility
+echo   H1 event: frozen Batch006 event-before-execution order
 echo ============================================================
-"%PYTHON_EXE%" scripts\gold_ml_v1\replay\replay_v4_entry.py --repo-root "%CD%" --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v4
+"%PYTHON_EXE%" scripts\gold_ml_v1\replay\replay_v5_entry.py --repo-root "%CD%" --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v5
 if errorlevel 1 goto :failed
 
 echo ============================================================
@@ -59,6 +63,6 @@ exit /b 1
 :failed
 set RC=%ERRORLEVEL%
 echo [FAIL] Exit code: %RC%
-echo Check outputs\gold_ml_v1\batch023_historical_replay_v4
+echo Check outputs\gold_ml_v1\batch023_historical_replay_v5
 pause
 exit /b %RC%
