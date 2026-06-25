@@ -1,52 +1,62 @@
 {
   "schema_version": 1,
-  "action_id": "GML1-BATCH024-PACKAGE-FROZEN-RAW-FOR-ASSISTANT",
+  "action_id": "GML1-BATCH024-LOCAL-REPRODUCE-ASSISTANT-FROZEN-RESULT",
   "mode": "bat",
-  "title": "Package frozen GOLD RAW inputs for assistant-side exploration",
-  "message": "This action does not run exploration. It only validates and packages the frozen M1, M15 and H1 CSV inputs so the assistant can execute the exploration first.",
-  "runner": "scripts/gold_ml_v1/exploration/windows/package_batch024_raw_for_assistant.bat",
+  "title": "Reproduce the assistant-frozen Batch024 result locally",
+  "message": "Recalculate the frozen 36-cell Batch024 grid and fail closed unless all canonical output hashes exactly match the assistant-side result. This is reproduction only, not a new search or selection run.",
+  "runner": "scripts/gold_ml_v1/exploration/windows/reproduce_batch024.bat",
   "arguments": [
     "{RAW_HISTORY_DIR}",
-    "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"
+    "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json",
+    "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json"
   ],
   "required_paths": [
     {"label": "frozen raw history directory", "path": "{RAW_HISTORY_DIR}"},
     {"label": "frozen GOLD M1 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_m1.csv"},
     {"label": "frozen GOLD M15 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_m15.csv"},
     {"label": "frozen GOLD H1 history", "path": "{RAW_HISTORY_DIR}/gold_v3_2023_2026_h1.csv"},
-    {"label": "frozen Batch024 config", "path": "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"}
+    {"label": "frozen Batch024 config", "path": "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_m15_h1_pullback_20260625.json"},
+    {"label": "assistant-frozen Batch024 result", "path": "{REPO_ROOT}/config/gold_ml_v1/exploration_batch024_assistant_result_20260625.json"}
   ],
-  "upload_output_dir": "outputs/gold_ml_v1/exploration_batch024_data_upload",
+  "upload_output_dir": "outputs/gold_ml_v1/exploration_batch024_local_reproduction",
   "upload_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
-  "primary_upload_path": "outputs/gold_ml_v1/exploration_batch024_data_upload/GOLD_ML_V1_BATCH024_FROZEN_RAW_INPUT.zip",
   "upload_sections": [
     {
-      "title": "RAW PACKAGE SUMMARY",
-      "path": "outputs/gold_ml_v1/exploration_batch024_data_upload/LATEST_RUN_SUMMARY.txt",
-      "max_lines": 120
+      "title": "LOCAL REPRODUCTION SUMMARY",
+      "path": "outputs/gold_ml_v1/exploration_batch024_local_reproduction/LATEST_RUN_SUMMARY.txt",
+      "max_lines": 160
     },
     {
-      "title": "RAW PACKAGE ERROR TRACE",
-      "path": "outputs/gold_ml_v1/exploration_batch024_data_upload/PACKAGE_RUN_ERROR.txt",
+      "title": "LOCAL REPRODUCTION ERROR",
+      "path": "outputs/gold_ml_v1/exploration_batch024_local_reproduction/LOCAL_REPRODUCTION_ERROR.txt",
       "max_lines": 180
     },
     {
-      "title": "RAW PACKAGE MANIFEST",
-      "path": "outputs/gold_ml_v1/exploration_batch024_data_upload/batch024_input_manifest.json",
-      "max_lines": 160
+      "title": "LOCAL REPRODUCTION JSON",
+      "path": "outputs/gold_ml_v1/exploration_batch024_local_reproduction/local_reproduction_summary.json",
+      "max_lines": 220
+    },
+    {
+      "title": "ATTEMPT REGISTRY",
+      "path": "outputs/gold_ml_v1/exploration_batch024_local_reproduction/exploration_attempt_registry.csv",
+      "max_lines": 80
+    },
+    {
+      "title": "YEAR METRICS",
+      "path": "outputs/gold_ml_v1/exploration_batch024_local_reproduction/exploration_year_metrics.csv",
+      "max_lines": 180
     }
   ],
-  "current_status": "GOLD_ML_V1_026A_RAW_INPUT_TRANSFER_FOR_ASSISTANT_EXPLORATION_READY_AUDIT_ONLY",
-  "phase": "PACKAGE_INPUT_ONLY_NO_LOCAL_EXPLORATION",
-  "after_success": "UPLOAD_SELECTED_ZIP_TO_CHATGPT_FOR_ASSISTANT_SIDE_EXPLORATION",
-  "local_exploration_executed": false,
+  "current_status": "GOLD_ML_V1_027_BATCH024_ASSISTANT_RESULT_FROZEN_LOCAL_REPRODUCTION_READY_AUDIT_ONLY",
+  "phase": "LOCAL_REPRODUCTION_AGAINST_ASSISTANT_FROZEN_HASHES",
+  "after_success": "STOP_AND_UPLOAD_LOCAL_REPRODUCTION_FILE",
+  "assistant_result_available": true,
+  "assistant_survivor_count": 0,
   "local_exploration_allowed": false,
-  "assistant_exploration_authorized": true,
-  "assistant_exploration_required_before_local_reproduction": true,
-  "local_reproduction_available_after_assistant_result": true,
+  "local_reproduction_allowed": true,
+  "candidate_selection_performed": false,
   "automatic_next_phase": false,
   "background_task_installed": false,
-  "authorized_exploration_scope": "BATCH024_ONLY",
   "existing_frozen_nine_modified": false,
   "audit_only": true,
   "live_ready": false,
