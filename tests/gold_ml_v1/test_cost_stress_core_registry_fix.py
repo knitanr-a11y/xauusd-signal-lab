@@ -54,7 +54,7 @@ class CoreRegistryFixTests(unittest.TestCase):
         )
         self.assertEqual(summary.iloc[0]["trade_count"], 2)
 
-    def test_completed_phase_bat_and_root_upload_behavior(self) -> None:
+    def test_completed_cost_stress_phase_is_preserved(self) -> None:
         pass_record = json.loads(
             (
                 ROOT
@@ -63,42 +63,73 @@ class CoreRegistryFixTests(unittest.TestCase):
         )
         self.assertEqual(pass_record["candidate_stress_gate"]["pass"], 9)
         self.assertEqual(pass_record["candidate_stress_gate"]["fail"], 0)
+        self.assertEqual(pass_record["raw_baseline_parity_checks"], 1687)
         self.assertTrue(
             (
                 ROOT
                 / "scripts/gold_ml_v1/cost_stress/windows/run_cost_stress_raw_reconstructed.bat"
             ).exists()
         )
+
+    def test_root_launcher_uses_phase_selected_upload_path(self) -> None:
         launcher = (ROOT / "RUN_GOLD_ML_V1_NEXT.bat").read_text(encoding="utf-8")
-        self.assertIn("UPLOAD_THIS_GOLD_ML_V1.txt", launcher)
+        self.assertIn("CURRENT_UPLOAD_PATH.txt", launcher)
         self.assertIn("explorer.exe /select", launcher)
         self.assertIn("pause", launcher.lower())
+        self.assertNotIn(
+            "outputs\\gold_ml_v1\\cost_stress_raw_reconstructed\\UPLOAD_THIS",
+            launcher,
+        )
 
-    def test_upload_file_collects_only_diagnostic_files(self) -> None:
+    def test_upload_file_uses_configured_phase_output(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary)
             next_output = repo / "outputs/gold_ml_v1/next_action"
-            cost_output = repo / "outputs/gold_ml_v1/cost_stress_raw_reconstructed"
+            phase_output = repo / "outputs/gold_ml_v1/example_phase"
             next_output.mkdir(parents=True)
-            cost_output.mkdir(parents=True)
+            phase_output.mkdir(parents=True)
             (next_output / "LATEST_NEXT_ACTION.txt").write_text(
                 "status=FAIL\nexit_code=4\n", encoding="utf-8"
             )
             (next_output / "FULL_CONSOLE_LOG.txt").write_text(
                 "console marker\n", encoding="utf-8"
             )
-            (cost_output / "LATEST_RUN_SUMMARY.txt").write_text(
+            (phase_output / "LATEST_RUN_SUMMARY.txt").write_text(
                 "summary marker\n", encoding="utf-8"
             )
-            (cost_output / "COST_STRESS_RUN_ERROR.txt").write_text(
+            (phase_output / "RUN_ERROR.txt").write_text(
                 "trace marker\n", encoding="utf-8"
             )
+            config = {
+                "upload_output_dir": "outputs/gold_ml_v1/example_phase",
+                "upload_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
+                "upload_sections": [
+                    {
+                        "title": "SUMMARY",
+                        "path": "outputs/gold_ml_v1/example_phase/LATEST_RUN_SUMMARY.txt",
+                        "max_lines": 20,
+                    },
+                    {
+                        "title": "ERROR",
+                        "path": "outputs/gold_ml_v1/example_phase/RUN_ERROR.txt",
+                        "max_lines": 20,
+                    },
+                ],
+            }
             path = write_upload_file(
                 repo,
                 4,
                 action_id="TEST-UPLOAD-FILE",
                 runner="runner.bat",
                 error="example",
+                config=config,
+                mapping={
+                    "REPO_ROOT": str(repo),
+                    "USER_HOME": str(repo),
+                    "MQL5_FILES": str(repo),
+                    "RAW_HISTORY_DIR": str(repo),
+                    "BATCH023_ZIP": str(repo / "batch.zip"),
+                },
             )
             text = path.read_text(encoding="utf-8")
             self.assertIn("console marker", text)
@@ -106,11 +137,12 @@ class CoreRegistryFixTests(unittest.TestCase):
             self.assertIn("trace marker", text)
             self.assertEqual(
                 path,
-                cost_output / "UPLOAD_THIS_GOLD_ML_V1.txt",
+                phase_output / "UPLOAD_THIS_GOLD_ML_V1.txt",
             )
-            self.assertTrue(
-                (next_output / "PASTE_ME_GOLD_ML_V1.txt").exists()
-            )
+            current_path = (next_output / "CURRENT_UPLOAD_PATH.txt").read_text(
+                encoding="utf-8"
+            ).strip()
+            self.assertEqual(Path(current_path), path.resolve())
 
 
 if __name__ == "__main__":
