@@ -18,18 +18,54 @@
 - GML1-WATCH-021-B
 - GML1-WATCH-021-C
 
-## リポジトリ内の実装
+## GitHub実装
 
 - Python: `scripts/gold_ml_v1/replay/nine_candidate_local_replay.py`
 - one-click raw replay: `scripts/gold_ml_v1/replay/run_nine_candidate_local_replay.bat`
 - registry-only parity: `scripts/gold_ml_v1/replay/run_nine_candidate_registry_parity.bat`
+- artifact installer: `scripts/gold_ml_v1/tools/install_batch023_local_replay_artifacts.py`
+- installer BAT: `scripts/gold_ml_v1/tools/run_install_batch023_local_replay_artifacts.bat`
 - frozen config: `config/gold_ml_v1/replay/nine_candidate_replay_config_20260625.json`
 - expected metrics: `config/gold_ml_v1/replay/nine_candidate_expected_metrics_20260625.json`
 - expected hashes: `config/gold_ml_v1/replay/nine_candidate_expected_sha256_20260625.json`
-- exact registries: `config/gold_ml_v1/registries/`
 - tests: `tests/gold_ml_v1/test_nine_candidate_local_replay.py`
+- GitHub Actions: `.github/workflows/gold_ml_v1_batch023_tests.yml`
 
-## 必要なraw historicalファイル
+## 1. 正本artifactをインストール
+
+Batch023 ZIPを任意の場所へ保存し、リポジトリ内で次を実行する。
+
+```bat
+scripts\gold_ml_v1\tools\run_install_batch023_local_replay_artifacts.bat "C:\path\to\GOLD_ML_V1_BATCH023_NINE_CANDIDATE_LOCAL_REPLAY_20260625.zip"
+```
+
+installerは次をfail-closedで検証する。
+
+- ZIP SHA256: `d1e9ab8cbeb7d73c8cf75f688bad39af0d64982901fbcd4474c1b230802b53b9`
+- 9候補exact registryのSHA256と行数
+- PROV-015 parent-event registry
+- WATCH-021派生に必要な54-feature registry
+
+PASSしたファイルだけを`config/gold_ml_v1/registries/`へ配置する。
+
+## 2. registry parity
+
+```bat
+scripts\gold_ml_v1\replay\run_nine_candidate_registry_parity.bat
+```
+
+確認対象:
+
+- registry SHA256
+- 行数
+- metrics再計算
+- PROV-020の親台帳派生
+- WATCH-021-A/B/Cの親台帳派生
+- WATCH-022-Bの親台帳派生
+
+## 3. 必要なraw candle CSV
+
+historical必須:
 
 - `gold_v3_2023_2026_m1.csv`
 - `gold_v3_2023_2026_m15.csv`
@@ -37,7 +73,7 @@
 - `gold_v3_2023_2026_h4.csv`
 - `gold_v3_2023_2026_d1.csv`
 
-任意のlive append:
+live appendは任意:
 
 - `goldsharp_m1.csv`
 - `goldsharp_m15.csv`
@@ -47,28 +83,19 @@
 
 historical最大bar-open時刻より後だけをappendする。
 
-## 実行
+## 4. raw replay
 
-リポジトリの任意の場所からBATを起動し、raw CSVフォルダを第1引数に渡す。
+raw CSVを含むフォルダを第1引数へ渡す。
 
 ```bat
 scripts\gold_ml_v1\replay\run_nine_candidate_local_replay.bat "C:\path\to\raw"
 ```
 
-正本台帳だけを検査する場合:
-
-```bat
-scripts\gold_ml_v1\replay\run_nine_candidate_registry_parity.bat
-```
+rawフォルダ配下は再帰検索するため、5ファイルが同じ直下フォルダにある必要はない。
 
 ## 出力
 
-既定出力先:
-
 - `outputs/gold_ml_v1/batch023_local_replay/`
-
-主な出力:
-
 - `raw_input_manifest.json`
 - `raw_replay_comparison.csv`
 - `raw_replay_summary.json`
@@ -84,11 +111,11 @@ scripts\gold_ml_v1\replay\run_nine_candidate_registry_parity.bat
 - 3: metrics mismatch
 - 4: environment/dependency/exception
 
-## 現在分かっている未完了点
+## 現在の未完了点
 
-GitHubにはraw candle CSVを保存していないため、GitHub上だけではfull raw replayを実行できない。ユーザーPC上の許可済みraw CSVの保存場所を指定して実行する必要がある。
+GitHubへの実装は完了した。registry SHA、row count、metrics、PROV-020 / WATCH-021-A/B/C / WATCH-022-Bの親台帳派生一致は事前にPASSしている。
 
-registry SHA、row count、metrics、PROV-020 / WATCH-021-A/B/C / WATCH-022-Bの親台帳派生一致は事前にPASSしている。full raw replayのPASSはまだ主張しない。
+ただし、許可済みraw candle CSVのユーザーPC上の保存フォルダが未提示のため、full raw replayはまだ実行していない。raw replayのPASSは主張しない。
 
 ## 境界
 
