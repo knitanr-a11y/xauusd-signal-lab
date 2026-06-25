@@ -9,7 +9,8 @@ GUARDRAILS = ROOT / "config/gold_ml_v1/exploration_guardrails_20260625.json"
 CURRENT_STATE = ROOT / "config/gold_ml_v1/current_state_snapshot_20260624.json"
 NEXT_ACTION = ROOT / "config/gold_ml_v1/next_local_action.json"
 AGENTS = ROOT / "AGENTS.md"
-HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md"
+ONE_CLICK_HANDOFF = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md"
+TRIPLE_CHECK = ROOT / "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_EXPLORATION_GUARDRAILS_TRIPLE_CHECK_20260625.md"
 
 
 class ExplorationGuardrailTests(unittest.TestCase):
@@ -18,7 +19,8 @@ class ExplorationGuardrailTests(unittest.TestCase):
         self.state = json.loads(CURRENT_STATE.read_text(encoding="utf-8"))
         self.action = json.loads(NEXT_ACTION.read_text(encoding="utf-8"))
         self.agents = AGENTS.read_text(encoding="utf-8")
-        self.handoff = HANDOFF.read_text(encoding="utf-8")
+        self.one_click_handoff = ONE_CLICK_HANDOFF.read_text(encoding="utf-8")
+        self.triple_check = TRIPLE_CHECK.read_text(encoding="utf-8")
 
     def test_frozen_period_split(self) -> None:
         periods = self.guardrails["period_contract"]
@@ -33,6 +35,7 @@ class ExplorationGuardrailTests(unittest.TestCase):
 
     def test_search_multiplicity_and_candidate_pool_are_protected(self) -> None:
         rules = self.guardrails["exploration_rules"]
+        pool = self.guardrails["current_candidate_pool"]
         self.assertTrue(rules["predeclare_search_space"])
         self.assertTrue(rules["record_every_attempted_rule_and_parameter_cell"])
         self.assertTrue(rules["record_total_search_count_and_search_multiplicity"])
@@ -42,20 +45,29 @@ class ExplorationGuardrailTests(unittest.TestCase):
             rules["post_hoc_threshold_change_after_validation_test_or_2026"],
             "forbidden",
         )
+        self.assertEqual(len(pool["frozen_accumulated_ids"]), 9)
+        self.assertEqual(len(pool["research_only_ids"]), 3)
+        self.assertEqual(pool["silent_add_remove_or_relabel"], "forbidden")
+        self.assertTrue(pool["separate_research_must_not_modify_current_nine"])
 
     def test_guardrails_are_referenced_by_governance_files(self) -> None:
         expected = "config/gold_ml_v1/exploration_guardrails_20260625.json"
         self.assertEqual(self.state["exploration_guardrails"], expected)
         self.assertIn(expected, self.agents)
+        self.assertIn("EXPLORATION_GUARDRAILS_TRIPLE_CHECK", self.agents)
         self.assertTrue(self.state["audit_only"])
         self.assertTrue(self.action["audit_only"])
         self.assertFalse(self.action["live_ready"])
+        self.assertEqual(self.action["mode"], "status_only")
 
-    def test_one_click_handoff_requires_predeclared_cost_grid(self) -> None:
-        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.handoff)
-        self.assertIn("predeclare", self.handoff.lower())
-        self.assertIn("search", self.handoff.lower())
-        self.assertIn("2026", self.handoff)
+    def test_one_click_and_triple_check_handoffs_are_fail_closed(self) -> None:
+        self.assertIn("RUN_GOLD_ML_V1_NEXT.bat", self.one_click_handoff)
+        self.assertIn("fixed-slippage grid", self.one_click_handoff)
+        self.assertIn("2026", self.one_click_handoff)
+        self.assertIn("Every attempted rule", self.triple_check)
+        self.assertIn("multiplicity", self.triple_check.lower())
+        self.assertIn("No new candidate exploration", self.triple_check)
+        self.assertIn("Automatic promotion", self.triple_check)
 
 
 if __name__ == "__main__":
