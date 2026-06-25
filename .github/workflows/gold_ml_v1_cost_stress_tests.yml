@@ -55,6 +55,7 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/exploration/batch024_pullback_engine.py
           python -m py_compile scripts/gold_ml_v1/exploration/run_batch024_pullback_exploration.py
           python -m py_compile scripts/gold_ml_v1/exploration/package_batch024_raw_for_assistant.py
+          python -m py_compile scripts/gold_ml_v1/exploration/run_batch024_local_reproduction.py
           python -m py_compile scripts/gold_ml_v1/run_next_local.py
       - name: Test governance guardrails
         run: python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
@@ -70,3 +71,5 @@ jobs:
         run: python -m unittest tests/gold_ml_v1/test_exploration_batch024.py -v
       - name: Test Batch024 RAW package transfer
         run: python -m unittest tests/gold_ml_v1/test_batch024_raw_package.py -v
+      - name: Test Batch024 local reproduction
+        run: python -m unittest tests/gold_ml_v1/test_batch024_local_reproduction.py -v
