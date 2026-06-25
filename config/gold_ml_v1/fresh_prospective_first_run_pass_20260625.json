@@ -1,0 +1,32 @@
+{
+  "record_id": "GML1-FRESH-PROSPECTIVE-FIRST-RUN-PASS-20260625",
+  "status": "PASS",
+  "verified_from_user_uploaded_output": true,
+  "uploaded_filename": "UPLOAD_THIS_GOLD_ML_V1.txt",
+  "generated_local": "2026-06-25T20:12:06",
+  "action_id": "GML1-FRESH-PROSPECTIVE-CONFIRMATION-READY-V2-CI-PASS",
+  "exit_code": 0,
+  "observation_state": "NO_CANDIDATE_YET",
+  "cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "candidate_rows": 0,
+  "resolved_candidate_rows": 0,
+  "unresolved_candidate_rows": 0,
+  "accepted_parent_events": 0,
+  "suppressed_parent_events": 0,
+  "error": "NONE",
+  "candidate_rules_frozen": true,
+  "retuning_performed": false,
+  "automatic_next_phase_performed": false,
+  "authorization": {
+    "new_exploration": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "next_required_phase": "STATEFUL_AUDIT_ONLY_PROSPECTIVE_MONITORING"
+}
