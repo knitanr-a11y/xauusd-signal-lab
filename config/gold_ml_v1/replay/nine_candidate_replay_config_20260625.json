@@ -1,0 +1,188 @@
+{
+  "package_id": "GML1-BATCH-023-NINE-CANDIDATE-LOCAL-REPLAY",
+  "mode": "audit-only",
+  "point": 0.01,
+  "time_basis": "MT5 server naive time",
+  "raw_files": {
+    "M1": {
+      "historical": "gold_v3_2023_2026_m1.csv",
+      "live": "goldsharp_m1.csv"
+    },
+    "M15": {
+      "historical": "gold_v3_2023_2026_m15.csv",
+      "live": "goldsharp_m15.csv"
+    },
+    "H1": {
+      "historical": "gold_v3_2023_2026_h1.csv",
+      "live": "goldsharp_h1.csv"
+    },
+    "H4": {
+      "historical": "gold_v3_2023_2026_h4.csv",
+      "live": "goldsharp_h4.csv"
+    },
+    "D1": {
+      "historical": "gold_v3_2023_2026_d1.csv",
+      "live": "goldsharp_d1.csv"
+    }
+  },
+  "execution": {
+    "target_r": 1.0,
+    "stop_atr_multiple": 1.0,
+    "atr_period": 14,
+    "atr_method": "wilder_sma_seed",
+    "entry": "next exact M1 open at decision close",
+    "same_m1_priority": "SL",
+    "dynamic_spread": true,
+    "one_position_per_lineage": true
+  },
+  "candidates": {
+    "GML1-PROV-007": {
+      "parent": "GML1-PROV-002",
+      "lane": "M15-H4",
+      "horizon_hours": 6,
+      "base_state": {
+        "h4_rci18_gte": 73.993808,
+        "h4_spread_price_div_atr14_lte": 0.012772,
+        "signal": "false_to_true_onset_after_eligibility"
+      },
+      "exclude_all": [
+        {
+          "feature": "h4_upper_wick_fraction",
+          "op": ">=",
+          "value": 0.27488556398168634
+        },
+        {
+          "feature": "h4_ema40_slope6_atr",
+          "op": ">=",
+          "value": 0.6863028800058267
+        }
+      ]
+    },
+    "GML1-PROV-008": {
+      "parent": "GML1-PROV-002",
+      "lane": "M15-H4",
+      "horizon_hours": 6,
+      "base_state": "same_as_GML1-PROV-007_parent",
+      "exclude_all": [
+        {
+          "feature": "m15_bb_width20_atr",
+          "op": "<=",
+          "value": 3.3719018700718184
+        },
+        {
+          "feature": "m15_bb_width60_trailing100_percentile",
+          "op": "<=",
+          "value": 0.536
+        }
+      ]
+    },
+    "GML1-WATCH-022-B": {
+      "parent": "GML1-PROV-007",
+      "lane": "M15-H4",
+      "exclude_all": [
+        {
+          "feature": "h4_upper_wick_fraction",
+          "op": "<=",
+          "value": 0.06526044468913629
+        },
+        {
+          "feature": "h4_ema40_slope6_atr",
+          "op": ">=",
+          "value": 0.8700779249713114
+        }
+      ]
+    },
+    "GML1-PROV-010": {
+      "parent": null,
+      "lane": "H1-D1",
+      "horizon_hours": 48,
+      "event": "previous H1 close <= previous BB60 upper and current H1 close > current BB60 upper",
+      "context": "last closed D1 RCI18 >= 0"
+    },
+    "GML1-PROV-015": {
+      "parent": "GML1-PROV-010",
+      "exclude_all": [
+        {
+          "feature": "d1_tick_volume_ratio50",
+          "op": "<=",
+          "value": 0.876789995391398
+        },
+        {
+          "feature": "d1_delta_atr_3",
+          "op": "<=",
+          "value": 0.2256991669382677
+        }
+      ]
+    },
+    "GML1-PROV-020": {
+      "parent": "GML1-PROV-015",
+      "exclude_all": [
+        {
+          "feature": "h1_decision_close_server_hour",
+          "op": "between_inclusive",
+          "lower": 8,
+          "upper": 16
+        },
+        {
+          "feature": "h1_spread_price_div_atr14",
+          "op": ">=",
+          "value": 0.0308778597897866
+        }
+      ]
+    },
+    "GML1-WATCH-021-A": {
+      "parent": "GML1-PROV-015",
+      "exclude_all": [
+        {
+          "feature": "range_atr_lag1",
+          "op": "<=",
+          "value": 0.6571970935503249
+        },
+        {
+          "feature": "span_atr_12",
+          "op": ">=",
+          "value": 5.058013327710588
+        }
+      ]
+    },
+    "GML1-WATCH-021-B": {
+      "parent": "GML1-PROV-015",
+      "exclude_all": [
+        {
+          "feature": "close_pos_lag5",
+          "op": "<=",
+          "value": 0.424089068826
+        },
+        {
+          "feature": "range_atr_lag10",
+          "op": ">=",
+          "value": 1.17215632583
+        }
+      ]
+    },
+    "GML1-WATCH-021-C": {
+      "parent": "GML1-PROV-015",
+      "exclude_when": "WATCH-021-A OR WATCH-021-B"
+    }
+  },
+  "comparison": {
+    "key": [
+      "decision_close_time",
+      "entry_time",
+      "exit_time"
+    ],
+    "numeric_tolerance": 1e-09,
+    "required_equal": [
+      "direction"
+    ],
+    "expected_manifest": "config/gold_ml_v1/replay/nine_candidate_expected_sha256_20260625.json"
+  },
+  "boundaries": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "2026_retuning_forbidden": true
+  }
+}
