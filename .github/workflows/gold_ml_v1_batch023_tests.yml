@@ -34,6 +34,7 @@ jobs:
 
       - name: Compile replay tools
         run: |
+          python -m py_compile scripts/gold_ml_v1/replay/run_frozen_batch023_from_zip.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v2.py
           python -m py_compile scripts/gold_ml_v1/replay/nine_candidate_local_replay_v3.py
