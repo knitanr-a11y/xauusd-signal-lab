@@ -18,24 +18,23 @@
 5. Candidate logic is immutable. Changed logic requires a new ID. Portfolio records are separate.
 6. Apply the broad-search, coverage-first loss-subtraction, causal structural-feature, watch-pool, and PF2-refinement policies under `config/gold_ml_v1/`.
 7. PF2 or higher is the refinement target, but count, year stability, cost stress, and genuine later-period filter activations remain mandatory.
-8. Low-count structures are preserved and updated prospectively.
-9. The accumulated provisional/watch candidate set currently contains ten entries:
+8. Low-count and demoted WATCH artifacts are preserved for research and prospective review.
+9. The accumulated provisional/watch candidate set currently contains nine entries:
    - GML1-PROV-007
    - GML1-PROV-008
    - GML1-WATCH-022-B
    - GML1-PROV-010
    - GML1-PROV-015
    - GML1-PROV-020
-   - GML1-WATCH-014-A
    - GML1-WATCH-021-A
    - GML1-WATCH-021-B
    - GML1-WATCH-021-C
-10. GML1-WATCH-022-A remains research-only and is not accumulated after Batch020 validation.
-11. GML1-WATCH-023-A is a new unaccumulated H1 high-count consensus loss-risk WATCH discovered in Batch021. Validate deterministic regeneration and model/excluded-row stability before accumulation.
-12. GML1-WATCH-022-B is accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
-13. GML1-PROV-020 is accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
-14. GML1-WATCH-014-A is accumulated with the caveat that stable human-readable motif interpretation remains unresolved.
-15. GML1-WATCH-021-A/B/C are accumulated WATCH candidates after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
+10. GML1-WATCH-014-A was demoted to research-only in Batch022 because the reference-seed result was not stable across seeds; its artifacts must remain preserved.
+11. GML1-WATCH-022-A remains research-only after Batch020 validation failure.
+12. GML1-WATCH-023-A remains research-only after exact deterministic parity passed but 2023 training-sample bootstrap stability failed in Batch022.
+13. GML1-WATCH-022-B remains accumulated with the caveat that improvement is concentrated in 2025 and the excluded 2024 subset was profitable.
+14. GML1-PROV-020 remains accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
+15. GML1-WATCH-021-A/B/C remain accumulated after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
 16. Same-lineage candidates do not add independent market edges. Never sum their results as a portfolio.
 17. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
 18. Historical audit files remain available after demotion.
@@ -46,8 +45,8 @@
 
 Current status:
 
-`GOLD_ML_V1_004_TEN_ACCUMULATED_CANDIDATES_BATCH021_HIGH_COUNT_WATCH_DISCOVERED_AUDIT_ONLY`
+`GOLD_ML_V1_005_NINE_ACCUMULATED_CANDIDATES_BATCH022_ALL_WATCH_VALIDATED_AUDIT_ONLY`
 
 Next phase:
 
-`VALIDATE_WATCH023A_THEN_CONTINUE_SHORT_AND_RAW_HIGH_COUNT_EXPLORATION_WHEN_AUTHORIZED_RAW_DATA_ARE_AVAILABLE`
+`RAW_REPLAY_COST_STRESS_AND_FRESH_CONFIRMATION_WHEN_INPUTS_EXIST_THEN_CONTINUE_INDEPENDENT_SHORT_AND_HIGH_COUNT_EXPLORATION`
