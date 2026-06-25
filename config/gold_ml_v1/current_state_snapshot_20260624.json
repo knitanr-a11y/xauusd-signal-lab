@@ -1,10 +1,18 @@
 {
-  "snapshot_id": "GML1-CURRENT-STATE-20260625-N",
+  "snapshot_id": "GML1-CURRENT-STATE-20260625-O",
   "status": "BATCH023_WARMUP_BRIDGE_9_OF_9_PASS_ONE_CLICK_WORKFLOW_READY_AUDIT_ONLY",
   "updated": "2026-06-25",
   "audit_only": true,
   "repo": "knitanr-a11y/xauusd-signal-lab",
   "namespace": "gold_ml_v1",
+  "exploration_guardrails": "config/gold_ml_v1/exploration_guardrails_20260625.json",
+  "evaluation_period_contract": {
+    "2023": "EXPLORATION_ONLY",
+    "2024": "VALIDATION_ONLY_NO_RETUNE",
+    "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+    "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE",
+    "fresh_prospective_cutoff_mt5_server_close": "2026-06-23 18:15:00"
+  },
   "active_accumulated_candidate_ids": [
     "GML1-PROV-007",
     "GML1-PROV-008",
@@ -17,6 +25,18 @@
     "GML1-WATCH-021-C"
   ],
   "accumulated_candidate_total": 9,
+  "research_only_candidates": [
+    {"id": "GML1-WATCH-014-A", "reason": "seed-stability validation failed; artifacts preserved"},
+    {"id": "GML1-WATCH-022-A", "reason": "Batch020 accumulation validation failed"},
+    {"id": "GML1-WATCH-023-A", "reason": "deterministic parity passed but 2023 training-sample bootstrap stability failed"}
+  ],
+  "candidate_pool_contract": {
+    "silent_removal": "forbidden",
+    "every_attempted_rule_must_be_recorded": true,
+    "search_multiplicity_must_be_reported": true,
+    "same_lineage_candidates_are_independent_edges": false,
+    "simple_metric_sum_across_same_lineage": "forbidden"
+  },
   "verified_uploaded_run": {
     "status": "PASS",
     "exit_code": 0,
@@ -49,7 +69,7 @@
   "registration_blockers": [
     "spread 1.5x and 2.0x plus predeclared fixed-slippage stress on RAW_RECONSTRUCTED rows",
     "report WARMUP_BRIDGE_EXACT rows separately",
-    "fresh prospective confirmation from goldsharp closed bars",
+    "fresh prospective confirmation from goldsharp closed bars after 2026-06-23 18:15:00 MT5 server close",
     "no registration or live activation authorization"
   ],
   "execution_switches": {
