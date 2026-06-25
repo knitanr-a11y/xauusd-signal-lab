@@ -30,6 +30,7 @@ analysis_outputs/
 research_outputs/
 backtest_outputs/
 walk_forward_outputs/
+PASTE_ME_GOLD_ML_V1.txt
 *.zip
 *.parquet
 *.feather
