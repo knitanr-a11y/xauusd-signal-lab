@@ -1,0 +1,61 @@
+{
+  "package_id": "GML1-BATCH-023-NINE-CANDIDATE-LOCAL-REPLAY",
+  "created": "2026-06-25",
+  "expected_registries": {
+    "GML1-PROV-007": {
+      "filename": "GML1-PROV-007_exact_trade_registry.csv",
+      "sha256": "16b3f8bb1b6abe53e9e1e58026d0a329697cce29a137361e8404be7a1a99ed49",
+      "rows": 154
+    },
+    "GML1-PROV-008": {
+      "filename": "GML1-PROV-008_exact_trade_registry.csv",
+      "sha256": "3568b3133073898ed2cd7eda1c764d33f8e9181483e777f2a8c10e55a8b4ecb1",
+      "rows": 169
+    },
+    "GML1-WATCH-022-B": {
+      "filename": "GML1-WATCH-022-B_exact_trade_registry.csv",
+      "sha256": "70237975943bb7ae8e1e4fce80634f133f8e9763423c1d19cdcdb681169ec54a",
+      "rows": 135
+    },
+    "GML1-PROV-010": {
+      "filename": "GML1-PROV-010_exact_trade_registry.csv",
+      "sha256": "d8016e6067c147103b6c98ab4399623b3409c59579487136757118206e28f9d8",
+      "rows": 254
+    },
+    "GML1-PROV-015": {
+      "filename": "GML1-PROV-015_exact_trade_registry.csv",
+      "sha256": "b41f5c40bd340e69a8df08cf0649fd5e1723889a4af7f80aaf4ed80977560b7b",
+      "rows": 225
+    },
+    "GML1-PROV-020": {
+      "filename": "GML1-PROV-020_exact_trade_registry.csv",
+      "sha256": "211679ad00273be7b52ba8a77a041c5b9aea29f76fbfcd176e2e621ebb275f6e",
+      "rows": 204
+    },
+    "GML1-WATCH-021-A": {
+      "filename": "GML1-WATCH-021-A_exact_trade_registry.csv",
+      "sha256": "470ae65127ccf64817450b75d8cfa5c005432f7da13e2f906e7da4cdb9293731",
+      "rows": 210
+    },
+    "GML1-WATCH-021-B": {
+      "filename": "GML1-WATCH-021-B_exact_trade_registry.csv",
+      "sha256": "978d10d973ad9c8dfc6d63cdda34b800bcd6845001731364daa9c7d5cca11bf8",
+      "rows": 207
+    },
+    "GML1-WATCH-021-C": {
+      "filename": "GML1-WATCH-021-C_exact_trade_registry.csv",
+      "sha256": "2c72975b48fa237acf15f43679fb69ac5eeb4a586eddab1d26929be3109b2560",
+      "rows": 196
+    }
+  },
+  "support_inputs": {
+    "GML1-PROV-015_parent_event_registry_all_available.csv": {
+      "sha256": "1b16b9200eaccab701c32614fb9240ed30e753d40b61b6c9e25e69a765e7b180",
+      "rows": 254
+    },
+    "GML1-WATCH-014-A_54_feature_registry.csv": {
+      "sha256": "81695541d57e8aef16ebd6732d3b7829516524e2a7539ef995abca17f1cc0f65",
+      "rows": 225
+    }
+  }
+}
