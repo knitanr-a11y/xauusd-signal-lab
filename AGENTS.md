@@ -7,6 +7,7 @@
 3. Candidate rules are immutable. Changed logic requires a new candidate ID.
 4. New chats must read, in order:
    - `AGENTS.md`
+   - `START_HERE_GOLD_ML_V1_NEXT_CHAT.md`
    - `config/gold_ml_v1/current_state_snapshot_20260624.json`
    - `config/gold_ml_v1/next_local_action.json`
    - `config/gold_ml_v1/exploration_guardrails_20260625.json`
@@ -15,24 +16,25 @@
    - `config/gold_ml_v1/batch023_warmup_bridge_pass_20260625.json`
    - `config/gold_ml_v1/batch023_local_warmup_bridge_implementation_20260625.json`
    - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_BATCH023_WARMUP_BRIDGE_PASS_20260625.md`
-   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_20260625.md`
-5. Do not ask the user to repeat paths, results, or decisions already recorded there.
-6. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
-7. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, or year is forbidden.
-8. Candidate-pool silent removal is forbidden. Every candidate must remain explicitly accumulated, research-only, demoted with reason, or rejected with reason.
-9. No new exploration may replace or modify the current nine before cost stress and fresh prospective confirmation. A separate research branch requires explicit user authorization and remains audit-only.
-10. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
-11. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
-12. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals.
-13. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
-14. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
-15. The only user-facing launcher from now on is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
-16. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
-17. Do not give ordinary phase users Python, PowerShell, or long command lines.
-18. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
-19. Every runner must create outputs, preserve previous output safely, print PASS/FAIL, return 0 only for PASS, and write a latest summary and error trace.
-20. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
-21. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
+   - `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_ONE_CLICK_WORKFLOW_V2_20260625.md`
+5. The V2 one-click handoff is authoritative and supersedes the earlier one-click handoff.
+6. Do not ask the user to repeat paths, results, or decisions already recorded there.
+7. Exploration periods are frozen: 2023 exploration only; 2024 validation only with no retune; 2025 final test only with no retune; 2026 diagnostic only and never retune.
+8. Every exploration must predeclare its search space, record every attempted rule/parameter cell, total search count, failures, survivors, and multiplicity. Cherry-picking only the best PF, win rate, seed, neighborhood cell, or year is forbidden.
+9. Candidate-pool silent addition, removal, replacement, or relabeling is forbidden. Every candidate must remain explicitly accumulated, research-only, demoted with reason, or rejected with reason.
+10. No new exploration may begin before cost stress and fresh prospective confirmation. A separate branch requires explicit user authorization, remains audit-only, and must not modify the frozen nine.
+11. Same-lineage candidates are not independent edges. Do not sum them as a portfolio.
+12. Batch023 warmup bridge passes 9/9 candidates with zero missing/extra, entry, exit, R, or direction mismatch.
+13. Rows are labeled `RAW_RECONSTRUCTED` or `WARMUP_BRIDGE_EXACT`. Bridge rows are historical audit only and never live signals, exploration rows, or tuning rows.
+14. This is not raw-only parity. Pre-2023 history or serialized indicator state is still absent.
+15. Replay V1-V5 and the ZIP replay are not original/exact replay tools. Do not rerun them.
+16. The only user-facing launcher is repository-root `RUN_GOLD_ML_V1_NEXT.bat`.
+17. For each future phase, first commit the phase implementation, then update `config/gold_ml_v1/next_local_action.json`. Tell the user only to Pull and double-click `RUN_GOLD_ML_V1_NEXT.bat`.
+18. Do not give ordinary phase users Python, PowerShell, or long command lines.
+19. Private path overrides belong only in gitignored `config/gold_ml_v1/local_runtime_paths.local.json`.
+20. Every runner must create outputs, preserve previous output safely, validate provenance, print PASS/FAIL, return 0 only for PASS, and write a latest summary and error trace.
+21. Audit-only remains mandatory. No live activation, registration, MT5 order, Discord, AI API, or live hook.
+22. Before chat length runs out, update AGENTS, current state, next action, exploration guardrails if changed, and a dated handoff.
 
 Current status:
 
