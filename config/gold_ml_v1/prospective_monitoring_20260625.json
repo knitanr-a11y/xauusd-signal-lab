@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "record_id": "GML1-STATEFUL-PROSPECTIVE-MONITORING-20260625",
+  "status": "FROZEN_BEFORE_FIRST_MONITOR_CYCLE",
+  "audit_only": true,
+  "cutoff_mt5_server_close": "2026-06-23 18:15:00",
+  "source_contract": "config/gold_ml_v1/fresh_prospective_confirmation_20260625.json",
+  "first_run_record": "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json",
+  "candidate_pool": {
+    "frozen_accumulated_ids": [
+      "GML1-PROV-007",
+      "GML1-PROV-008",
+      "GML1-WATCH-022-B",
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ],
+    "silent_add_remove_replace_or_relabel": "forbidden",
+    "rules_thresholds_horizons_and_lineages_frozen": true,
+    "retuning_from_monitor_results": "forbidden"
+  },
+  "input_files": {
+    "M1": "goldsharp_m1.csv",
+    "M15": "goldsharp_m15.csv",
+    "H1": "goldsharp_h1.csv",
+    "H4": "goldsharp_h4.csv",
+    "D1": "goldsharp_d1.csv"
+  },
+  "continuity_contract": {
+    "latest_valid_rows_closed": true,
+    "historical_closed_bar_prefix_change": "fail_closed",
+    "input_truncation": "fail_closed",
+    "duplicate_or_out_of_order_timestamp": "fail_closed",
+    "silent_sorting": "forbidden"
+  },
+  "ledger_contract": {
+    "candidate_key": ["candidate_id", "decision_close_time"],
+    "parent_event_key": ["parent_lineage", "decision_close_time"],
+    "duplicate_candidate_registration": "forbidden",
+    "previous_candidate_disappearance": "fail_closed",
+    "resolved_to_unresolved_regression": "fail_closed",
+    "resolved_result_rewrite": "fail_closed",
+    "allowed_candidate_transition": "UNRESOLVED_TO_RESOLVED",
+    "allowed_parent_transition": "SUPPRESSED_BY_FROZEN_NON_OVERLAP_TO_ACCEPTED_PARENT_EVENT",
+    "unresolved_candidates_preserved": true
+  },
+  "run_contract": {
+    "mode": "one_monitor_cycle_per_root_bat_run",
+    "background_task_installed": false,
+    "recommended_manual_cadence": "after new closed bars are available",
+    "no_new_closed_bar": "valid_pass_without_ledger_change",
+    "no_candidate_yet": "valid_pass_without_rule_change",
+    "performance_gate": "NOT_APPLICABLE_PROSPECTIVE_AUDIT_ONLY",
+    "automatic_next_phase": false
+  },
+  "output_dir": "outputs/gold_ml_v1/prospective_monitoring",
+  "execution_switches": {
+    "new_exploration": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
