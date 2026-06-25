@@ -49,7 +49,7 @@ echo ============================================================
 if errorlevel 1 goto :failed
 
 echo ============================================================
-echo STEP 3/4 Corrected historical replay
+echo STEP 3/4 Corrected historical replay V3
 
 echo   decisions/trades: gold_v3_2023_2026 only
 
@@ -57,8 +57,10 @@ echo   pre-2023 warmup: older goldsharp H4/D1/etc only
 
 echo   ATR14: simple mean of 14 true ranges
 
+echo   horizon gaps: use last available M1 close within horizon
+
 echo ============================================================
-"%PYTHON_EXE%" scripts\gold_ml_v1\replay\nine_candidate_local_replay_v2.py --repo-root "%CD%" --mode raw --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v2
+"%PYTHON_EXE%" scripts\gold_ml_v1\replay\nine_candidate_local_replay_v3.py --repo-root "%CD%" --mode raw --historical-dir "%HISTORICAL_DIR%" --warmup-dir "%LIVE_DIR%" --output-dir outputs\gold_ml_v1\batch023_historical_replay_v3
 if errorlevel 1 goto :failed
 
 echo ============================================================
@@ -72,6 +74,7 @@ echo.
 echo [PASS] Batch023 completed.
 echo Historical decisions used only gold_v3_2023_2026 rows.
 echo Older goldsharp rows were used only for indicator warmup.
+echo Weekend and maintenance gaps used the last available M1 close inside the horizon.
 echo Live preflight treated only goldsharp rows after the historical maximum as new operational rows.
 echo Python packages were installed only inside .venv_batch023.
 pause
