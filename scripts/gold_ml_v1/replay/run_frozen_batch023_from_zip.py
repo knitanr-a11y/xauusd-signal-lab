@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -83,6 +84,11 @@ def run_frozen(
             f"Batch023 ZIP SHA mismatch: expected={EXPECTED_ZIP_SHA256} actual={actual_sha}"
         )
 
+    results_dir = output_dir / "results"
+    if results_dir.exists():
+        shutil.rmtree(results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
+
     # The repository path is very deep under MetaQuotes. Extracting below the
     # repository exceeded the classic Windows MAX_PATH limit. Use the short
     # system temporary directory and delete it automatically after execution.
@@ -111,7 +117,7 @@ def run_frozen(
             "--raw-dir",
             str(historical_dir),
             "--output-dir",
-            str(output_dir / "results"),
+            str(results_dir),
             "--mode",
             "raw",
         ]
@@ -121,6 +127,7 @@ def run_frozen(
             "zip_path": str(zip_path),
             "zip_sha256": actual_sha,
             "historical_dir": str(historical_dir),
+            "results_dir": str(results_dir),
             "temporary_package_root": str(package_root),
             "frozen_script": str(frozen_script),
             "command": command,
@@ -130,6 +137,7 @@ def run_frozen(
                 "goldsharp_in_historical_replay": False,
                 "time_contract": "raw CSV time is bar-open time",
                 "temporary_extraction": "system TEMP to avoid Windows MAX_PATH",
+                "results_directory": "created clean before frozen evaluator launch",
             },
         }
         (output_dir / "frozen_run_metadata.json").write_text(
