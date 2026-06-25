@@ -19,26 +19,31 @@
 6. Apply the broad-search, coverage-first loss-subtraction, causal structural-feature, watch-pool, and PF2-refinement policies under `config/gold_ml_v1/`.
 7. PF2 or higher is the refinement target, but count, year stability, cost stress, and genuine later-period filter activations remain mandatory.
 8. Low-count structures are preserved and updated prospectively.
-9. The accumulated provisional candidate set currently contains six entries:
+9. The accumulated provisional/watch candidate set currently contains nine entries:
    - GML1-PROV-007
    - GML1-PROV-008
    - GML1-PROV-010
    - GML1-PROV-015
    - GML1-PROV-020
    - GML1-WATCH-014-A
+   - GML1-WATCH-021-A
+   - GML1-WATCH-021-B
+   - GML1-WATCH-021-C
 10. GML1-PROV-020 is accumulated with the caveat that its second-stage exclusion fired zero times in 2026.
-11. GML1-WATCH-014-A is accumulated with the caveat that seed stability and human-auditable interpretation remain unresolved.
-12. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
-13. Historical audit files remain available after demotion.
-14. Local replay and fresh prospective confirmation are required before registration.
-15. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
-16. Remain audit-only. No live activation or automatic promotion.
-17. Never claim completion until outputs are inspected.
+11. GML1-WATCH-014-A is accumulated with the caveat that stable human-readable motif interpretation remains unresolved.
+12. GML1-WATCH-021-A/B/C are accumulated WATCH candidates after Batch018 registry and neighborhood validation; authorized raw-candle replay, cost stress and fresh post-cutoff confirmation remain pending.
+13. WATCH-021-A/B/C are all descendants of GML1-PROV-015 and do not add three independent market edges. Never sum their results as a portfolio.
+14. Exact artifact CSVs must come from the verified bundle named in `exact_artifact_locator_20260625.json`; never reconstruct entry timestamps from summary metrics.
+15. Historical audit files remain available after demotion.
+16. Local replay and fresh prospective confirmation are required before registration.
+17. The 2026 sample is diagnostic only and cannot be used for retuning. Fresh prospective confirmation begins after MT5 server close time `2026-06-23 18:15:00`.
+18. Remain audit-only. No live activation or automatic promotion.
+19. Never claim completion until outputs are inspected.
 
 Current status:
 
-`GOLD_ML_V1_001_EXACT_INPUT_BUNDLE_LOCATED_AUDIT_RUNS_PENDING`
+`GOLD_ML_V1_002_NINE_ACCUMULATED_CANDIDATES_BATCH018_REGISTRY_VALIDATED_AUDIT_ONLY`
 
 Next phase:
 
-`INSTALL_EXACT_BUNDLE_RUN_BATCH015_PROV020_BATCH016_THEN_MAE_MFE_SHORT_AND_PF2_REFINEMENT`
+`WATCH021_RAW_REPLAY_COST_STRESS_FRESH_CONFIRMATION_THEN_MAE_MFE_SHORT_AND_HIGH_COUNT_EXPLORATION`
