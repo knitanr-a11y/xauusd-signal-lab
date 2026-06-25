@@ -1,0 +1,38 @@
+name: GOLD_ML_V1 Cost Stress Tests
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/gold_ml_v1/cost_stress/**"
+      - "config/gold_ml_v1/cost_stress_raw_reconstructed_20260625.json"
+      - "config/gold_ml_v1/current_state_snapshot_20260624.json"
+      - "config/gold_ml_v1/next_local_action.json"
+      - "docs/gold_ml_v1/**"
+      - "tests/gold_ml_v1/test_cost_stress_contract.py"
+      - "tests/gold_ml_v1/test_exploration_guardrails.py"
+      - "AGENTS.md"
+      - "START_HERE_GOLD_ML_V1_NEXT_CHAT.md"
+      - ".github/workflows/gold_ml_v1_cost_stress_tests.yml"
+
+jobs:
+  audit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install numpy==2.1.3 pandas==2.2.3
+      - name: Compile cost-stress tools
+        run: |
+          python -m py_compile scripts/gold_ml_v1/cost_stress/cost_stress_contract.py
+          python -m py_compile scripts/gold_ml_v1/cost_stress/cost_stress_engine.py
+          python -m py_compile scripts/gold_ml_v1/cost_stress/cost_stress_reports.py
+          python -m py_compile scripts/gold_ml_v1/cost_stress/run_cost_stress_raw_reconstructed.py
+      - name: Run governance tests
+        run: |
+          python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
+          python -m unittest tests/gold_ml_v1/test_cost_stress_contract.py -v
