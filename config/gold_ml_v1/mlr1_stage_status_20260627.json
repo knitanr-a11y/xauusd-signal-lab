@@ -20,12 +20,13 @@
     "ML-03 Base, Strong and Extreme realized-R columns implemented",
     "ML-03 deterministic registry produced 148317 resolved direction labels",
     "ML-03 eight label tests and fourteen combined feature/label tests passed",
-    "ML-03 two-run hash parity and future-cutoff outcome invariance passed"
+    "ML-03 two-run hash parity and future-cutoff outcome invariance passed",
+    "Historical gold_v3_2023_2026 data and Files-root goldsharp live data roles frozen as separate non-fallback sources"
   ],
   "pending_acceptance": [
-    "Run run_build_features.bat under Python 3.12, numpy 2.2.6 and pandas 2.2.3",
+    "Run run_build_features.bat with the explicit historical directory C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\gold_v3_2023_2026 under Python 3.12, numpy 2.2.6 and pandas 2.2.3",
     "Confirm feature registry rows 74168 and SHA256 81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
-    "Run run_build_labels.bat after feature parity passes",
+    "Run run_build_labels.bat with the same explicit historical directory after feature parity passes",
     "Confirm resolved label rows 148317 and SHA256 c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed"
   ],
   "not_completed": [
@@ -33,11 +34,12 @@
     "ML-05 tabular model training",
     "ML-06 calibration and EV policy evaluation",
     "ML-07 optional sequence-model comparison",
-    "ML-08 frozen shadow package",
+    "ML-08 frozen shadow package and explicit goldsharp live adapter",
     "ML-09 prospective evaluation"
   ],
   "authoritative_contract": "config/gold_ml_v1/mlr1_stage_ml00_design_contract_20260627.json",
   "authoritative_hash_correction": "config/gold_ml_v1/mlr1_stage_ml00_correction_001_20260627.json",
+  "data_source_role_contract": "config/gold_ml_v1/mlr1_data_source_role_contract_20260627.json",
   "raw_data_audit": "config/gold_ml_v1/mlr1_stage_ml01_raw_data_audit_20260627.json",
   "feature_contract": "config/gold_ml_v1/mlr1_feature_contract_v1_20260627.json",
   "feature_validation": "config/gold_ml_v1/mlr1_stage_ml02_feature_validation_20260627.json",
@@ -47,12 +49,16 @@
   "label_validation": "config/gold_ml_v1/mlr1_stage_ml03_label_validation_20260627.json",
   "label_engine": "scripts/gold_ml_v1/mlr1/build_labels.py",
   "label_tests": "tests/gold_ml_v1/test_mlr1_labels.py",
+  "historical_development_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\gold_v3_2023_2026",
+  "live_files_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
+  "live_file_glob": "goldsharp_*.csv",
   "next_development_stage": "ML-04_DETERMINISTIC_AND_LINEAR_BASELINES",
   "next_acceptance_step": "ML-02_AND_ML-03_USER_PC_PINNED_REPLAY",
   "existing_candidate_stack_modified": false,
   "audit_only": true,
   "feature_engine_implemented": true,
   "label_engine_implemented": true,
+  "live_adapter_implemented": false,
   "model_trained": false,
   "live_ready": false,
   "final_signal": false,
