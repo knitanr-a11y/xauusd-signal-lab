@@ -1,0 +1,67 @@
+{
+  "candidate_id": "GML1-WATCH-029-A",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "role": "SIMPLE_FIXED_FIVE_META_LANE",
+  "source_stack": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_P",
+  "selection_warning": "The rule was chosen after inspecting 2023-2026 diagnostics. It is not untouched validation and must remain fixed for data after 2026-06-26.",
+  "entry_universe": "Current 13-candidate entries collapsed to one trigger per identical entry_time and direction.",
+  "entry_gate": {
+    "branch_A": "exact_group_size <= 1 AND source family != H1-D1 existing",
+    "branch_B": "directional room to prior M15 20-bar high/low divided by M15 ATR14 >= 1.355958344 AND MT5 server entry hour not in 14,15,16",
+    "logic": "A OR B"
+  },
+  "execution": {
+    "take_profit_price_usd": 5.0,
+    "emergency_stop_price_usd": 10.0,
+    "maximum_horizon_hours": 12,
+    "same_m1_collision": "protective stop first",
+    "one_open_across_lane": true
+  },
+  "diagnostic_metrics_one_open": {
+    "trades": 198,
+    "positive_rate": 0.8181818182,
+    "tp5_hit_rate": 0.7777777778,
+    "profit_factor": 2.6027406329,
+    "mean_price_usd": 2.4455555556,
+    "total_price_usd": 484.22,
+    "max_drawdown_price_usd": 30.0
+  },
+  "year_metrics": {
+    "2023": {"trades": 66, "positive_rate": 0.818182, "profit_factor": 3.730426, "total_price_usd": 186.57},
+    "2024": {"trades": 47, "positive_rate": 0.851064, "profit_factor": 3.049694, "total_price_usd": 130.75},
+    "2025": {"trades": 62, "positive_rate": 0.790323, "profit_factor": 1.860769, "total_price_usd": 111.90},
+    "2026_to_cutoff": {"trades": 23, "positive_rate": 0.826087, "profit_factor": 2.375, "total_price_usd": 55.0}
+  },
+  "2026_monthly": {
+    "2026-01": {"trades": 6, "tp5": 5, "total_price_usd": 15.0},
+    "2026-02": {"trades": 5, "tp5": 4, "total_price_usd": 10.0},
+    "2026-03": {"trades": 3, "tp5": 2, "total_price_usd": 0.0},
+    "2026-04": {"trades": 4, "tp5": 3, "total_price_usd": 5.0},
+    "2026-05": {"trades": 3, "tp5": 3, "total_price_usd": 15.0},
+    "2026-06_to_19th": {"trades": 2, "tp5": 2, "total_price_usd": 10.0}
+  },
+  "coverage": {
+    "months": 42,
+    "mean_trades_per_month": 4.7142857143,
+    "median_trades_per_month": 4.5,
+    "zero_trade_months": 1,
+    "negative_months": 3
+  },
+  "strong_cost_all_period": {
+    "scenario": "spread 2x plus 0.10 entry and exit slippage",
+    "trades": 198,
+    "positive_rate": 0.8030303030,
+    "tp5_hit_rate": 0.7626262626,
+    "profit_factor": 2.2464077103,
+    "mean_price_usd": 2.1554040404,
+    "total_price_usd": 426.77,
+    "max_drawdown_price_usd": 30.0
+  },
+  "limitations": [
+    "This is a meta lane using the current candidate stack as proposal engines, not an independent raw entry detector.",
+    "exact_group_size depends on the frozen source-stack composition; changing the stack requires a new candidate ID.",
+    "The -10 emergency stop is twice the +5 target; the loss filter is what makes the expectancy positive."
+  ],
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
