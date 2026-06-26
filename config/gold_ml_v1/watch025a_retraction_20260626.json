@@ -1,0 +1,19 @@
+{
+  "record_id": "GML1-WATCH-025-A-RETRACTION-20260626",
+  "candidate_id": "GML1-WATCH-025-A",
+  "status": "RETRACTED_FROM_ACCUMULATED_STACK_INSUFFICIENT_AUDIT",
+  "reason": "WATCH-025-A was added before a standalone independent exploration package, exact trade registry, threshold-neighborhood audit and reproducible implementation were created. The metrics in its draft record are therefore not accepted as a completed candidate audit.",
+  "action": {
+    "remove_from_accumulated_ids": true,
+    "preserve_original_record_for_audit": true,
+    "candidate_id_must_not_be_reused": true,
+    "portfolio_use_forbidden": true,
+    "live_use_forbidden": true
+  },
+  "actual_additional_exploration_status": {
+    "broad_search": "completed across STP, RPB, BREAK, MOM, SWEEP, EMA and SQUEEZE; zero candidates met the requested external WR/PF target",
+    "reopen_search": "completed across RPB, STP, CBO and P30; STP SHORT was the most stable independent family but remained around PF 1.1-1.4 and is not candidate quality",
+    "new_valid_accumulated_candidate_from_separate_search": false
+  },
+  "controls": {"existing_nine_modified": false, "WATCH_024_A_unchanged": true, "live_ready": false, "mt5_order": false, "discord": false}
+}
