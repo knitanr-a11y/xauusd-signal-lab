@@ -1,0 +1,79 @@
+{
+  "candidate_id": "GML1-WATCH-024-A",
+  "status": "ACCUMULATED_PROSPECTIVE_WATCH_NOT_REGISTERED",
+  "audit_only": true,
+  "role": "INDEPENDENT_HIGH_RR_LONG_PROSPECTIVE_LINEAGE",
+  "lane": "M15-M5-H1-H4-D1",
+  "direction": "LONG",
+  "selection_warning": "The final rule was fixed after inspection of 2023-2026 diagnostics. It is not an untouched holdout result. Formal confirmation starts only with data after 2026-06-26.",
+  "setup": {
+    "m15_overextension": "16-bar return / ATR14 at or below the frozen 2023 lower-10% threshold",
+    "episode": "false-to-true onset only",
+    "exclude_existing_parent_lineages": true,
+    "m5_confirmation": "HOLD_BOS within 240 minutes before 1.0 M15-ATR continuation invalidation",
+    "h4_dist_high20_atr_lte": 3.7864707809039273,
+    "h1_roc6_atr_lte": -0.8532783779257462,
+    "d1_ema20_slope4_atr_gte": -0.2532763484983291,
+    "m5_confirmation_body_fraction_gte": 0.4504081632653521
+  },
+  "execution": {
+    "entry": "exact M1 open at confirming M5 close including dynamic spread",
+    "initial_stop": "setup episode low minus 0.10 M15 ATR; minimum risk 0.75 ATR; reject above 1.50 ATR",
+    "same_m1_priority": "protective stop first",
+    "maximum_horizon_hours": 24
+  },
+  "profit_management": {
+    "default_at_3r": "close full position at 3R unless the upper-timeframe extension gate passes",
+    "extension_gate_a": "H1 EMA20 >= H1 EMA50 and H1 EMA20 six-bar slope / ATR >= 0",
+    "extension_gate_b": "no H1/H4/D1 timeframe remains in EMA20 < EMA50 and EMA20 slope < 0 state",
+    "when_extension_gate_passes": "move original stop to +1.5R, add 0.75 unit at +3R, then use 2.0 M15-ATR chandelier through the original 24h horizon",
+    "worst_combined_R_after_add": 0.375
+  },
+  "diagnostic_metrics": {
+    "trades": 67,
+    "win_rate": 0.5522388060,
+    "profit_factor_entry_gate_only": 4.459670,
+    "profit_factor_dynamic_runner": 4.779524,
+    "mean_R_dynamic_runner": 1.527069,
+    "average_winner_R_dynamic_runner": 3.496868,
+    "total_R_dynamic_runner": 102.313604,
+    "max_drawdown_R_entry_gate_only": 4.829655
+  },
+  "year_diagnostics_entry_gate": {
+    "2023": {"trades": 19, "win_rate": 0.578947, "profit_factor": 10.917831},
+    "2024": {"trades": 24, "win_rate": 0.541667, "profit_factor": 2.895557},
+    "2025": {"trades": 18, "win_rate": 0.555556, "profit_factor": 2.684534},
+    "2026_to_available_cutoff": {"trades": 6, "win_rate": 0.500000, "profit_factor": 2.875313}
+  },
+  "independence_diagnostic": {
+    "exact_entry_matches_vs_current_definition_replay_of_existing_nine": 0,
+    "maximum_plus_minus_60m_fraction": 0.0163934426,
+    "maximum_concurrent_fraction": 0.0573770492,
+    "authoritative_exact_parity": false,
+    "reason": "Available replay did not reproduce all frozen nine expected registries; formal overlap must be rerun when authoritative exact registry bodies are available."
+  },
+  "prospective_gate": {
+    "start_after": "2026-06-26",
+    "minimum_resolved_trades_before_registration": 20,
+    "minimum_win_rate": 0.50,
+    "minimum_profit_factor": 2.0,
+    "minimum_mean_R": 0.50,
+    "maximum_drawdown_R": 6.0,
+    "no_rule_or_threshold_changes": true
+  },
+  "controls": {
+    "registered_candidate": false,
+    "portfolio_use_forbidden": true,
+    "existing_nine_modified": false,
+    "health_gate": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "sources": [
+    "config/gold_ml_v1/high_rr_long_prospective_contract_20260626.json",
+    "config/gold_ml_v1/high_rr_upper_tf_final_result_20260626.json",
+    "docs/gold_ml_v1/GOLD_ML_V1_HIGH_RR_UPPER_TF_STUDY_20260626.md"
+  ]
+}
