@@ -1,0 +1,42 @@
+{
+  "candidate_id": "GML1-WATCH-027-B",
+  "parent_candidate_id": "GML1-WATCH-027-A",
+  "status": "RESEARCH_WATCH_HIGH_CONFIDENCE_DERIVATIVE",
+  "audit_only": true,
+  "direction": "LONG",
+  "role": "WIN_RATE_UPGRADED_COMPRESSION_EXPANSION_DERIVATIVE",
+  "selection_warning": "The final gate was identified after historical diagnostics. It is prospective-only and not an untouched holdout result.",
+  "parent_logic_unchanged": true,
+  "additional_gate": {
+    "h4_atr_ratio50_lte": 1.0272994926035721,
+    "h1_roc12_atr_lte": 1.6743096954190337,
+    "logic": "AND",
+    "interpretation": "Trade the inside-range release only before H4 volatility and the preceding H1 advance become overextended; reject exhaustion breakouts."
+  },
+  "execution": {
+    "stop": "1.25 M15 ATR",
+    "target": "4R",
+    "maximum_horizon_hours": 24,
+    "same_m1_priority": "protective stop first"
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 35, "win_rate": 0.5714285714, "profit_factor": 5.146454, "mean_R": 1.777052, "average_winner_R": 3.859841, "total_R": 62.196811, "max_drawdown_R": 2.0},
+    "2023": {"trades": 11, "win_rate": 0.636364, "profit_factor": 7.0},
+    "2024": {"trades": 8, "win_rate": 0.50, "profit_factor": 3.299203},
+    "2025": {"trades": 13, "win_rate": 0.538462, "profit_factor": 4.666667},
+    "2026_diagnostic": {"trades": 3, "win_rate": 0.666667, "profit_factor": 8.0}
+  },
+  "cost_stress_all": {
+    "spread_1_5x_slip_0_05": {"trades": 35, "win_rate": 0.485714, "profit_factor": 3.553143, "mean_R": 1.332628, "total_R": 46.641993, "max_drawdown_R": 4.083178},
+    "spread_2x_slip_0_10": {"trades": 35, "win_rate": 0.457143, "profit_factor": 3.095039, "mean_R": 1.173919, "total_R": 41.087174, "max_drawdown_R": 5.241090}
+  },
+  "threshold_neighborhood": {
+    "selected_cell": "H4 ATR-ratio q67 and H1 ROC12 q67",
+    "selected": {"trades": 35, "win_rate": 0.571429, "profit_factor": 5.146454},
+    "adjacent_looser_h4": {"trades": 41, "win_rate": 0.512195, "profit_factor": 4.059841},
+    "adjacent_tighter_h4": {"trades": 29, "win_rate": 0.482759, "profit_factor": 3.733333},
+    "warning": "The payoff remains positive in adjacent cells, but the 57% win rate is less plateau-stable than WATCH-026-B."
+  },
+  "prospective_requirements": {"start_after": "2026-06-26", "minimum_resolved_trades": 25, "minimum_win_rate": 0.50, "minimum_profit_factor": 2.0, "cost_stress_review_required": true, "no_rule_changes": true},
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
