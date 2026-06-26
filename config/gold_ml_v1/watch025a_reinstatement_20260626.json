@@ -1,0 +1,31 @@
+{
+  "record_id": "GML1-WATCH-025-A-REINSTATEMENT-20260626",
+  "candidate_id": "GML1-WATCH-025-A",
+  "status": "RESEARCH_WATCH_PENDING_FULL_AUDIT",
+  "audit_only": true,
+  "reason": "The idea is still worth monitoring, but the prior draft did not satisfy the evidence package required for accumulated-candidate status.",
+  "relationship_to_retraction": {
+    "retraction_record_preserved": "config/gold_ml_v1/watch025a_retraction_20260626.json",
+    "retraction_meaning": "removed from accumulated stack, not deletion of the research hypothesis",
+    "candidate_id_reuse": "same hypothesis and same ID retained; logic changes require a new suffix"
+  },
+  "required_before_accumulation": [
+    "reproducible implementation checked into the repository",
+    "exact resolved and unresolved trade registries",
+    "2023-only or rolling-causal selection contract",
+    "threshold-neighborhood and parameter-plateau audit",
+    "cost and slippage stress by year",
+    "monthly and volatility segmentation",
+    "authoritative overlap audit against the frozen existing candidate registries",
+    "fresh post-2026-06-26 confirmation"
+  ],
+  "current_permissions": {
+    "may_be_researched": true,
+    "may_be_replayed": true,
+    "may_be_compared": true,
+    "may_be_accumulated": false,
+    "portfolio_use": false,
+    "live_use": false
+  },
+  "controls": {"existing_candidates_modified": false, "health_gate": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
