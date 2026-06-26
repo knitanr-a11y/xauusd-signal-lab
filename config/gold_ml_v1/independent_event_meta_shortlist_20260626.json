@@ -1,0 +1,28 @@
+{
+  "record_id": "GML1-INDEPENDENT-EVENT-META-SHORTLIST-20260626",
+  "status": "FROZEN_2023_OOF_DIAGNOSTIC_SHORTLIST_NO_PROMOTION",
+  "audit_only": true,
+  "shortlist_sha256": "53bf242f0d58bf4879329ba9c4f3e0d2dcb4b3b23940bb1b109ab552fc6c2f7b",
+  "strict_target_pass_count": 0,
+  "diagnostic_shortlist": [
+    {"id":"GML1-INDEP-DIAG-01","family":"EXT_L","profile":"E11","direction":"LONG","gate":"LGB>=0.688137","oof_n":51,"oof_wr":0.627451,"oof_pf":1.663819},
+    {"id":"GML1-INDEP-DIAG-02","family":"STP_S","profile":"P20","direction":"SHORT","gate":"EXTRA>=0.496751 AND REGSIG>=0.620022","oof_n":27,"oof_wr":0.481481,"oof_pf":1.857143},
+    {"id":"GML1-INDEP-DIAG-03","family":"SWEEP_L","profile":"P15","direction":"LONG","gate":"LGB>=0.455148 AND EXTRA>=0.564384","oof_n":46,"oof_wr":0.456522,"oof_pf":1.308314},
+    {"id":"GML1-INDEP-DIAG-04","family":"SWEEP_S","profile":"P20","direction":"SHORT","gate":"LOGIT>=0.452484 AND REGSIG>=0.642829","oof_n":66,"oof_wr":0.409091,"oof_pf":1.355972},
+    {"id":"GML1-INDEP-DIAG-05","family":"BREAK_L","profile":"P15","direction":"LONG","gate":"LOGIT>=0.049740 AND LGB>=0.351027","oof_n":50,"oof_wr":0.460000,"oof_pf":1.175134},
+    {"id":"GML1-INDEP-DIAG-06","family":"EXT_S","profile":"E11","direction":"SHORT","gate":"LOGIT>=0.781490 AND REGSIG>=0.503157","oof_n":127,"oof_wr":0.519685,"oof_pf":1.069301}
+  ],
+  "independence": {
+    "existing_m15_h4_long_state_excluded_before_training": true,
+    "existing_h1_d1_long_event_plus_minus_60m_excluded_before_training": true,
+    "maximum_pairwise_oof_exact_jaccard": 0.054645
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "external_results_not_used_for_selection": true,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
