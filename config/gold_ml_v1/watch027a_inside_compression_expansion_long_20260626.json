@@ -1,0 +1,65 @@
+{
+  "candidate_id": "GML1-WATCH-027-A",
+  "status": "RESEARCH_WATCH_PENDING_PROSPECTIVE_CONFIRMATION",
+  "audit_only": true,
+  "role": "INDEPENDENT_COMPRESSION_EXPANSION_LONG_LINEAGE",
+  "lane": "M15-H4",
+  "direction": "LONG",
+  "selection_warning": "Discovered through the 2026-06-26 multiview audit and refined after inspecting 2023-2026 diagnostics. This is not an untouched holdout result.",
+  "mechanism": {
+    "base": "Bullish H4 context, a prior M15 inside bar, then an M15 breakout above the previous high with range expansion and a positive body.",
+    "quality_gate": {
+      "h4_lower_wick_fraction_gte": 0.193865345181,
+      "m15_8bar_return_atr_gte": 1.33572326343
+    },
+    "interpretation": "Trade a compressed range release when H4 shows lower-price rejection and M15 momentum has already begun to expand."
+  },
+  "execution": {
+    "stop": "1.25 M15 ATR",
+    "target": "4.0R",
+    "maximum_horizon_hours": 24,
+    "entry": "exact M1 open at the closed M15 breakout decision time with dynamic spread",
+    "same_m1_priority": "protective stop first",
+    "one_open_per_lineage": true
+  },
+  "exact_diagnostic_metrics": {
+    "trades": 101,
+    "win_rate": 0.3663366337,
+    "profit_factor": 2.2276,
+    "mean_R": 0.7779,
+    "average_winner_R": 3.853,
+    "total_R": 78.56,
+    "max_drawdown_R": 8.0,
+    "positive_years": 4,
+    "worst_year_profit_factor": 1.571
+  },
+  "cost_stress_all_available": {
+    "spread_1_5x": {"profit_factor": 2.038},
+    "spread_1_5x_slip_0_05_each_side": {"profit_factor": 1.917},
+    "spread_2_0x_slip_0_10_each_side": {"trades": 102, "profit_factor": 1.616, "mean_R": 0.440, "total_R": 44.85, "max_drawdown_R": 11.51}
+  },
+  "neighborhood_audit": {
+    "result": "BROAD_POSITIVE_BUT_COST_SENSITIVE_PLATEAU",
+    "description": "Multiple neighboring parameter cells remained around PF 1.8-2.3; the effect was not a single-cell spike, but execution cost materially weakened it."
+  },
+  "overlap_diagnostic": {
+    "exact_entry_maximum_fraction": 0.01,
+    "maximum_plus_minus_60m_fraction": 0.297,
+    "maximum_concurrent_fraction": 0.267,
+    "main_nearby_lineage": "existing H1-D1 LONG family",
+    "versus_WATCH_024_A": {"exact_entry_matches": 0, "plus_minus_60m_matches": 0, "concurrent_fraction": 0.02},
+    "after_excluding_plus_minus_60m_of_all_existing_and_WATCH_024_A": {"trades": 71, "profit_factor": 1.987, "mean_R": 0.653, "total_R": 46.37, "max_drawdown_R": 8.0},
+    "authoritative_exact_parity": false
+  },
+  "prospective_requirements": {
+    "start_after": "2026-06-26",
+    "minimum_resolved_trades": 30,
+    "minimum_profit_factor": 2.0,
+    "minimum_mean_R": 0.50,
+    "maximum_drawdown_R": 8.0,
+    "cost_stress_review_required": true,
+    "no_rule_changes": true,
+    "authoritative_overlap_registry_required_before_accumulation": true
+  },
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
