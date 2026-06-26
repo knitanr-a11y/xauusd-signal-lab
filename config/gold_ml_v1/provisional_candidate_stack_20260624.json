@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_L",
-  "status": "TEN_ACCUMULATED_WITH_ONE_POST_AUDIT_PROSPECTIVE_HIGH_RR_WATCH",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_M",
+  "status": "TEN_ACCUMULATED_ONE_PROSPECTIVE_WATCH_ONE_RESEARCH_WATCH_PENDING_AUDIT",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -20,19 +20,29 @@
   "prospective_watch_records": [
     "config/gold_ml_v1/watch024a_high_rr_upper_tf_prospective_20260626.json"
   ],
-  "retracted_ids": ["GML1-WATCH-025-A"],
-  "retraction_records": [
-    "config/gold_ml_v1/watch025a_retraction_20260626.json"
+  "research_watch_ids": ["GML1-WATCH-025-A"],
+  "research_watch_records": [
+    "config/gold_ml_v1/watch025a_h4_h1_trend_resumption_prospective_20260626.json",
+    "config/gold_ml_v1/watch025a_retraction_20260626.json",
+    "config/gold_ml_v1/watch025a_reinstatement_20260626.json"
   ],
+  "research_watch_policy": {
+    "counted_in_accumulated_total": false,
+    "eligible_for_full_reaudit": true,
+    "eligible_for_future_accumulation_after_audit": true,
+    "portfolio_use_forbidden": true
+  },
   "research_priority_families": [
-    "STP SHORT: H4 down alignment, H1 down slope, M15 EMA50 recross plus upper-wick rejection",
-    "independent breakout continuation with high-RR payoff and authoritative overlap audit"
+    "SHORT trend resumption across H4-H1-M15-M5",
+    "breakout continuation and failed-breakout reversal in both directions",
+    "compression-expansion and volatility-regime transition",
+    "liquidity sweep and session-range events",
+    "cross-timeframe trend-pullback, reversal and regime-state combinations"
   ],
   "rejected_ids": ["GML1-PROV-030-A"],
   "rejection_record": "config/gold_ml_v1/prov030a_rejection_20260626.json",
   "existing_frozen_nine_modified": false,
   "preserve_prior_files_for_audit_only": true,
-  "portfolio_use_forbidden_for_prospective_watches": true,
   "audit_only": true,
   "live_ready": false,
   "final_signal": false,
