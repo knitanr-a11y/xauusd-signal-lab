@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_O",
-  "status": "TEN_ACCUMULATED_ONE_PROSPECTIVE_WATCH_SEVEN_RESEARCH_WATCHES",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_P",
+  "status": "THIRTEEN_ACCUMULATED_WITH_FOUR_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -12,32 +12,31 @@
     "GML1-WATCH-021-A",
     "GML1-WATCH-021-B",
     "GML1-WATCH-021-C",
-    "GML1-WATCH-024-A"
+    "GML1-WATCH-024-A",
+    "GML1-WATCH-026-B",
+    "GML1-WATCH-027-B",
+    "GML1-WATCH-028-B"
   ],
-  "accumulated_candidate_total": 10,
-  "prospective_watch_ids": ["GML1-WATCH-024-A"],
+  "accumulated_candidate_total": 13,
+  "prospective_accumulated_ids": [
+    "GML1-WATCH-024-A",
+    "GML1-WATCH-026-B",
+    "GML1-WATCH-027-B",
+    "GML1-WATCH-028-B"
+  ],
   "research_watch_ids": [
     "GML1-WATCH-025-A",
     "GML1-WATCH-026-A",
-    "GML1-WATCH-026-B",
     "GML1-WATCH-027-A",
-    "GML1-WATCH-027-B",
-    "GML1-WATCH-028-A",
-    "GML1-WATCH-028-B"
+    "GML1-WATCH-028-A"
   ],
-  "research_watch_policy": {
-    "A_variants": "coverage-oriented parent watches",
-    "B_variants": "high-confidence win-rate derivatives preserving the parent 4R payoff",
+  "parent_derivative_policy": {
+    "A_variants": "coverage-oriented research parents",
+    "B_variants": "high-confidence accumulated derivatives preserving 4R payoff",
     "parent_and_derivative_kept_separately": true,
-    "counted_in_accumulated_total": false,
-    "eligible_for_future_accumulation_after_fixed_prospective_confirmation": true,
-    "portfolio_use_forbidden": true
+    "A_variants_counted_in_accumulated_total": false
   },
-  "high_confidence_summary": {
-    "GML1-WATCH-026-B": "30 trades, WR63.3%, PF5.96, strong-cost PF5.70",
-    "GML1-WATCH-027-B": "35 trades, WR57.1%, PF5.15, strong-cost PF3.10",
-    "GML1-WATCH-028-B": "31 trades, WR61.3%, PF6.33, strong-cost WR53.1% PF4.27"
-  },
+  "count_audit_note": "Existing frozen-nine exact registry bodies are not all available. Aggregate count reporting uses the current-definition replay for those nine and exact local registries for WATCH-024-A and WATCH-026-B through WATCH-028-B, with the limitation disclosed.",
   "existing_frozen_nine_modified": false,
   "audit_only": true,
   "live_ready": false,
