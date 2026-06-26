@@ -1,0 +1,63 @@
+{
+  "candidate_id": "GML1-WATCH-028-A",
+  "status": "RESEARCH_WATCH_PENDING_PROSPECTIVE_CONFIRMATION",
+  "audit_only": true,
+  "role": "INDEPENDENT_EARLY_TREND_RESUMPTION_SHORT_LINEAGE",
+  "lane": "M15-M5-H4",
+  "direction": "SHORT",
+  "selection_warning": "Discovered through the 2026-06-26 multiview SHORT audit and refined after inspecting 2023-2026 diagnostics. This is not an untouched holdout result.",
+  "mechanism": {
+    "base": "H4 bearish context; M15 crosses below EMA20 while below EMA50 and closes in the lower quarter; M5 bearish HOLD/BOS confirms continuation.",
+    "quality_gate": {
+      "h4_distance_below_20bar_high_atr_lte": 3.44284907354,
+      "m5_ema20_12bar_slope_atr_gte": -0.0999695310281
+    },
+    "interpretation": "Sell the early return to the H4 downtrend, but avoid entries after price and M5 momentum have already accelerated too far downward."
+  },
+  "execution": {
+    "stop": "1.0 M15 ATR",
+    "target": "4.0R",
+    "maximum_horizon_hours": 48,
+    "entry": "exact M1 bid/ask-consistent entry at the closed confirmation time",
+    "same_m1_priority": "protective stop first",
+    "one_open_per_lineage": true
+  },
+  "exact_diagnostic_metrics": {
+    "all_available": {"trades": 59, "win_rate": 0.4067796610, "profit_factor": 2.743, "mean_R": 1.034, "average_winner_R": 4.0, "total_R": 61.0, "max_drawdown_R": 12.0},
+    "2023": {"trades": 27, "win_rate": 0.5185, "profit_factor": 4.308, "mean_R": 1.593, "total_R": 43.0, "max_drawdown_R": 4.0},
+    "2024": {"trades": 18, "win_rate": 0.2222, "profit_factor": 1.143, "mean_R": 0.111, "total_R": 2.0, "max_drawdown_R": 12.0},
+    "2025": {"trades": 10, "win_rate": 0.30, "profit_factor": 1.714, "mean_R": 0.50, "total_R": 5.0, "max_drawdown_R": 4.0},
+    "2026_to_available_cutoff": {"trades": 4, "win_rate": 0.75, "profit_factor": 12.0, "mean_R": 2.75, "total_R": 11.0}
+  },
+  "cost_stress_all_available": {
+    "spread_1_5x_slip_0_05_each_side": {"trades": 60, "win_rate": 0.383, "profit_factor": 2.412, "mean_R": 0.893, "total_R": 53.59, "max_drawdown_R": 12.31},
+    "spread_2_0x_slip_0_10_each_side": {"trades": 60, "win_rate": 0.35, "profit_factor": 2.029, "mean_R": 0.703, "total_R": 42.17, "max_drawdown_R": 12.62}
+  },
+  "neighborhood_audit": {
+    "result": "LOCAL_SUPPORT_WITH_REGIME_RISK",
+    "examples": [
+      "central q50/q33: approximately 60 trades, PF 2.67, DD 12R",
+      "q33/q33: 41 trades, PF 2.07, DD 10R",
+      "q50/q50: 37 trades, PF 2.44, DD 6R",
+      "looser q67 cells degraded"
+    ]
+  },
+  "overlap_diagnostic": {
+    "exact_entry_matches": 0,
+    "plus_minus_60m_matches": 0,
+    "maximum_concurrent_fraction": 0.0678,
+    "interpretation": "Timing and direction are substantially independent from the existing all-LONG accumulated families.",
+    "authoritative_exact_parity": false
+  },
+  "prospective_requirements": {
+    "start_after": "2026-06-26",
+    "minimum_resolved_trades": 25,
+    "minimum_profit_factor": 2.0,
+    "minimum_mean_R": 0.50,
+    "maximum_drawdown_R": 10.0,
+    "year_or_regime_OFF_controller_research_required": true,
+    "no_rule_changes": true,
+    "authoritative_overlap_registry_required_before_accumulation": true
+  },
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
