@@ -1,0 +1,45 @@
+{
+  "record_id": "GML1-HIGH-RR-UPPER-TF-EXTENSION-STUDY-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_RULE_EVALUATION",
+  "audit_only": true,
+  "base_contract": "f376cf9c4f60274978c282b1e544405fa3e0adc3",
+  "question": "Why do some high-RR LONG setups reach 3R, 5R and 6R while others hit the initial stop, and can upper-timeframe structure raise win rate without capping the runner?",
+  "targets": {
+    "primary_win": "reach +3R before the initial -1R stop",
+    "runner_5R": "reach +5R within 24 hours after entry",
+    "runner_6R": "reach +6R within 24 hours after entry"
+  },
+  "causal_feature_families": {
+    "D1": ["EMA20/50/200 order and gaps", "EMA slopes", "RSI14", "ADX14", "ATR regime", "3/6/12-bar momentum", "candle location and pullback depth", "volume ratio", "Bollinger compression"],
+    "H4": ["same trend, momentum, volatility, compression and pullback features"],
+    "H1": ["same features plus setup-to-entry transition and local expansion"],
+    "cross_timeframe": ["slope alignment count", "EMA-gap alignment", "D1/H4 trend with H1 pullback", "H4 compression followed by H1 expansion"]
+  },
+  "time_contract": {
+    "higher_timeframe_availability": "last bar with bar_close_time <= entry_time",
+    "open_or_future_bars": "forbidden",
+    "same_M1_collision": "initial stop first"
+  },
+  "selection": {
+    "2023_only": true,
+    "rule_forms": ["single interpretable condition", "two-condition AND from different feature families"],
+    "thresholds": "2023 quantiles only",
+    "minimum_2023_trades_after_one_open": 20,
+    "minimum_2023_win_rate": 0.50,
+    "minimum_2023_profit_factor": 2.0,
+    "minimum_2023_average_winner_R": 2.5,
+    "minimum_2023_expectancy_R": 0.50,
+    "positive_chronological_blocks": 2,
+    "maximum_frozen_rules": 8
+  },
+  "external_role": "2024-2026 fixed diagnostic only because these periods are already exposed",
+  "controls": {
+    "profit_management_unchanged": true,
+    "existing_nine_modified": false,
+    "automatic_promotion": false,
+    "prospective_only_if_retained": true,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
