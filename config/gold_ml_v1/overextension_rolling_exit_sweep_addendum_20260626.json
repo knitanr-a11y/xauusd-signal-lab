@@ -1,0 +1,12 @@
+{
+  "record_id": "GML1-OVEREXTENSION-ROLLING-EXIT-SWEEP-20260626",
+  "status": "PREDECLARED_EXPLORATORY_DIAGNOSTIC",
+  "audit_only": true,
+  "reason": "The causal rolling LONG gate improved win rate but a 0.75R cap cannot reach the requested PF without an unrealistically high win rate.",
+  "same_state_machine_and_monthly_gate": true,
+  "targets_R": [0.75, 1.0, 1.25, 1.5, 2.0],
+  "horizons_hours": [4, 8, 12],
+  "monthly_switch_requirement": "prior 120-day validation n>=8, WR>=0.60, PF>=2.0, positive mean R",
+  "external_role": "diagnostic only because periods have already been exposed",
+  "controls": {"existing_nine_modified": false, "live_ready": false, "automatic_promotion": false}
+}
