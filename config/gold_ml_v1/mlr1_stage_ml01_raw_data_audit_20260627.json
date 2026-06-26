@@ -1,0 +1,126 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-01",
+  "date": "2026-06-27",
+  "status": "PASS_WITH_EXPECTED_MARKET_GAPS_AND_RECORDED_HASH_CORRECTION",
+  "authoritative_hash_correction": "config/gold_ml_v1/mlr1_stage_ml00_correction_001_20260627.json",
+  "snapshot": {
+    "M1": {
+      "file": "gold_v3_2023_2026_m1.csv",
+      "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "rows": 1225431,
+      "first_bar_open": "2023-01-03 01:00:00",
+      "last_bar_open": "2026-06-19 19:54:00"
+    },
+    "M15": {
+      "file": "gold_v3_2023_2026_m15.csv",
+      "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "rows": 81781,
+      "first_bar_open": "2023-01-03 01:00:00",
+      "last_bar_open": "2026-06-19 19:45:00"
+    },
+    "H1": {
+      "file": "gold_v3_2023_2026_h1.csv",
+      "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+      "rows": 20459,
+      "first_bar_open": "2023-01-03 01:00:00",
+      "last_bar_open": "2026-06-19 19:00:00"
+    },
+    "H4": {
+      "file": "gold_v3_2023_2026_h4.csv",
+      "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+      "rows": 5352,
+      "first_bar_open": "2023-01-03 00:00:00",
+      "last_bar_open": "2026-06-19 16:00:00"
+    },
+    "D1": {
+      "file": "gold_v3_2023_2026_d1.csv",
+      "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6",
+      "rows": 894,
+      "first_bar_open": "2023-01-03 00:00:00",
+      "last_bar_open": "2026-06-19 00:00:00"
+    }
+  },
+  "schema_contract": {
+    "columns": ["time", "open", "high", "low", "close", "tick_volume", "spread", "real_volume"],
+    "all_timeframes_match": true,
+    "time_parse_failures": 0,
+    "nonfinite_numeric_values": 0,
+    "real_volume_all_zero": true,
+    "real_volume_feature_use": "FORBIDDEN_IN_MLR1_V1"
+  },
+  "ordering_and_integrity": {
+    "duplicate_timestamps": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0},
+    "strictly_monotonic_increasing": {"M1": true, "M15": true, "H1": true, "H4": true, "D1": true},
+    "timestamp_alignment_errors": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0},
+    "invalid_ohlc_rows": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0},
+    "negative_spread_rows": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0},
+    "zero_spread_rows": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0},
+    "zero_tick_volume_rows": {"M1": 0, "M15": 0, "H1": 0, "H4": 0, "D1": 0}
+  },
+  "aggregation_parity": {
+    "M1_to_M15": {"higher_rows": 81781, "missing_lower_group": 0, "ohlc_or_tick_volume_mismatch_rows": 0, "lower_rows_per_bar_min": 1, "lower_rows_per_bar_max": 15},
+    "M15_to_H1": {"higher_rows": 20459, "missing_lower_group": 0, "ohlc_or_tick_volume_mismatch_rows": 0, "lower_rows_per_bar_min": 1, "lower_rows_per_bar_max": 4},
+    "H1_to_H4": {"higher_rows": 5352, "missing_lower_group": 0, "ohlc_or_tick_volume_mismatch_rows": 0, "lower_rows_per_bar_min": 1, "lower_rows_per_bar_max": 4},
+    "H1_to_D1": {"higher_rows": 894, "missing_lower_group": 0, "ohlc_or_tick_volume_mismatch_rows": 0, "lower_rows_per_bar_min": 16, "lower_rows_per_bar_max": 23}
+  },
+  "exact_m1_entry_audit": {
+    "m15_decisions": 81781,
+    "exact_m1_available": 80882,
+    "missing_exact_m1": 899,
+    "exact_rate": 0.9890072266,
+    "missing_by_decision_hour": {"0": 793, "1": 4, "20": 7, "21": 25, "23": 70},
+    "rule": "All 899 missing-exact-M1 decisions are invalid samples and must be skipped. No next-M1 fallback is allowed.",
+    "last_missing_decision": "2026-06-19 20:00:00"
+  },
+  "closed_higher_timeframe_availability_at_exact_m1_decisions": {
+    "H1": {"eligible_decisions": 80882, "no_prior_closed_bar": 3, "median_close_lag": "00:30:00"},
+    "H4": {"eligible_decisions": 80882, "no_prior_closed_bar": 11, "median_close_lag": "02:00:00"},
+    "D1": {"eligible_decisions": 80882, "no_prior_closed_bar": 91, "median_close_lag": "15:15:00"},
+    "rule": "Rows without all required closed higher-timeframe history are excluded by causal warmup; no bridge or imputation."
+  },
+  "gap_audit": {
+    "M1_gap_count_above_one_minute": 941,
+    "M15_gap_count_above_fifteen_minutes": 893,
+    "H1_gap_count_above_one_hour": 893,
+    "H4_gap_count_above_four_hours": 184,
+    "D1_gap_count_above_one_day": 184,
+    "interpretation": "The dominant gaps match daily maintenance breaks, weekends and market holidays. Gaps are preserved and never forward-filled or interpolated.",
+    "maximum_M1_gap": "3 days 02:02:00",
+    "maximum_M15_gap": "3 days 02:15:00"
+  },
+  "spread_audit": {
+    "M1_points": {"min": 12, "median": 17, "p95": 27, "p99": 32, "max": 270},
+    "M15_points": {"min": 12, "median": 16, "p95": 22, "p99": 28, "max": 124},
+    "rule": "Do not delete or silently clip high spreads in ML-01. ML-02 may use causal spread/ATR and log-transformed diagnostics, while raw spread remains available for execution costs."
+  },
+  "walk_forward_decision_counts_before_feature_warmup": {
+    "fold1_train": {"decisions": 23561, "exact_m1": 23303, "missing_exact_m1": 258},
+    "fold1_validation": {"decisions": 11736, "exact_m1": 11606, "missing_exact_m1": 130},
+    "fold1_test": {"decisions": 11955, "exact_m1": 11824, "missing_exact_m1": 131},
+    "fold2_test": {"decisions": 11615, "exact_m1": 11488, "missing_exact_m1": 127},
+    "fold3_test": {"decisions": 11948, "exact_m1": 11815, "missing_exact_m1": 133},
+    "fold4_test": {"decisions": 10966, "exact_m1": 10846, "missing_exact_m1": 120}
+  },
+  "ml01_gate": {
+    "snapshot_identity_resolved": true,
+    "schema_pass": true,
+    "timestamp_order_pass": true,
+    "ohlc_integrity_pass": true,
+    "aggregation_parity_pass": true,
+    "exact_m1_skip_contract_confirmed": true,
+    "market_gaps_preserved": true,
+    "pass_to_next_stage": true
+  },
+  "next_stage": "ML-02_COMMON_CAUSAL_FEATURE_ENGINE",
+  "controls": {
+    "audit_only": true,
+    "features_implemented": false,
+    "labels_implemented": false,
+    "model_trained": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
