@@ -1,0 +1,32 @@
+{
+  "system_id": "GML1-MLR1",
+  "correction_id": "ML00-CORRECTION-001",
+  "date": "2026-06-27",
+  "status": "AUTHORITATIVE_HASH_CORRECTION_BEFORE_MODEL_IMPLEMENTATION",
+  "reason": "ML-01 recomputed every raw-file SHA256 from the mounted source files. The H1 and D1 full hash strings recorded in the initial ML-00 contract were transcription errors. No feature engine, label engine or model existed when this correction was made.",
+  "supersedes_fields": [
+    "development_snapshot.sha256.H1",
+    "development_snapshot.sha256.D1"
+  ],
+  "incorrect_values": {
+    "H1": "fb9d4ad523726c4fc19fc71359ebefac0c3da5d14bbb7dbfb68e25a82f1b1629",
+    "D1": "58d9b8e7cc7f347355d536503550f98d64d7b834f86d80b164752b2015ca3cba"
+  },
+  "authoritative_values": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "authority_rule": "For MLR1-v1 snapshot identity, these authoritative_values override the corresponding hash fields in mlr1_stage_ml00_design_contract_20260627.json.",
+  "impact": {
+    "training_started": false,
+    "features_created": false,
+    "labels_created": false,
+    "model_created": false,
+    "candidate_stack_modified": false,
+    "live_or_runtime_impact": false
+  },
+  "audit_only": true
+}
