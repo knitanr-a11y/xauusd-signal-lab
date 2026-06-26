@@ -1,0 +1,13 @@
+{
+  "record_id": "GML1-OVEREXTENSION-PRUNE-AUDIT-20260626",
+  "status": "AUDIT_COMPLETE_NO_PROMOTION",
+  "audit_only": true,
+  "frozen_contract_sha256": "57e44199e51cf0227dffd23e641fd850bab7af17ec57f1cff345cafe2e08f406",
+  "long_result": "The 2023-derived pair filter did not generalize and was rejected.",
+  "short_result": "The 2023-derived pair filter removed negative subsets in 2024 and 2025, but the retained strategy remained below break-even and was not promoted.",
+  "existing_nine_modified": false,
+  "active_new_candidate_total": 0,
+  "live_ready": false,
+  "mt5_order": false,
+  "discord": false
+}
