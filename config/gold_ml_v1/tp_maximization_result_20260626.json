@@ -1,0 +1,27 @@
+{
+  "record_id": "GML1-TP-MAXIMIZATION-RESULT-20260626",
+  "status": "TP100_ROBUST_MAX_WITH_TP75_PRACTICAL_PRIMARY",
+  "audit_only": true,
+  "search_contract": {
+    "entry_rule_source": "788 entry rules frozen from the prior 2023-eligible TP5-to-10 search",
+    "fixed_target_grid_usd": [5, 7.5, 10, 15, 20, 30, 40, 50, 60, 75, 100, 125, 150],
+    "runner_target_grid_usd": [75, 100, 125, 150, 200],
+    "maximum_horizon_hours": 168,
+    "strong_cost": "spread 2x plus 0.10 USD-price entry and exit slippage",
+    "same_m1_collision": "protective level first"
+  },
+  "result": {
+    "maximum_robust_fixed_target_usd": 100,
+    "practical_fixed_target_usd": 75,
+    "maximum_robust_runner_target_usd": 100,
+    "targets_125_150_status": "observed but target hits occurred in only two years",
+    "target_200_status": "no runner hits"
+  },
+  "selected_watches": {
+    "GML1-WATCH-034-A": {"type": "fixed", "target": 75, "protective_distance": 10, "horizon_hours": 168, "strong_cost_pf": 2.194952, "strong_cost_mean": 8.743878, "strong_cost_target_hits": 17, "years_with_target_hit": 4},
+    "GML1-WATCH-034-B": {"type": "fixed", "target": 100, "protective_distance": 5, "horizon_hours": 168, "strong_cost_pf": 2.094506, "strong_cost_mean": 4.784554, "strong_cost_target_hits": 7, "years_with_target_hit": 3},
+    "GML1-WATCH-034-C": {"type": "runner", "milestone": 50, "partial_fraction": 0.25, "runner_target": 100, "initial_protective_distance": 8, "lock_after_milestone": 10, "horizon_hours": 168, "strong_cost_pf": 2.279160, "strong_cost_mean": 7.488787, "strong_cost_runner_hits": 7, "years_with_runner_hit": 3}
+  },
+  "selection_warning": "2024-2026 diagnostics and the full exit grid were inspected. All WATCH-034 variants are prospective-only after 2026-06-26.",
+  "controls": {"accumulated_candidate_total": 15, "new_watches_accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
