@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_Q",
-  "status": "FOURTEEN_ACCUMULATED_WITH_FOUR_RESEARCH_WATCHES",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_R",
+  "status": "FOURTEEN_ACCUMULATED_WITH_FIVE_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -30,10 +30,15 @@
     "GML1-WATCH-025-A",
     "GML1-WATCH-026-A",
     "GML1-WATCH-027-A",
-    "GML1-WATCH-028-A"
+    "GML1-WATCH-028-A",
+    "GML1-WATCH-030-A"
   ],
+  "research_watch_summary": {
+    "GML1-WATCH-030-A": "independent previous-day high liquidity sweep and rejection SHORT; exact and plus/minus 60-minute overlap are zero versus existing 13 and WATCH-029-A"
+  },
   "lane_policy": {
-    "GML1-WATCH-029-A": "simple fixed +5 USD-price meta lane using the frozen 13-candidate source stack; one-open and duplicate-collapsed",
+    "GML1-WATCH-029-A": "simple fixed +5 USD-price meta lane using the frozen 13-candidate source stack",
+    "GML1-WATCH-030-A": "independent raw M15/H4 liquidity-reversal detector; research watch pending prospective confirmation",
     "source_stack_changes_require_new_meta_lane_id": true,
     "portfolio_use_forbidden_until_later_authorization": true
   },
