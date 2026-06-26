@@ -5,6 +5,8 @@
   "authoritative_stack_path": "config/gold_ml_v1/provisional_candidate_stack_20260624.json",
   "authoritative_implementation_status_path": "config/gold_ml_v1/implementation_status_and_metrics_20260626.json",
   "three_pass_audit_path": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_THREE_PASS_AUDIT_IMPLEMENTATION_AND_METRICS_20260626.md",
+  "implementation_contract_path": "docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md",
+  "historical_handoff_path": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md",
   "status": "FIFTEEN_ACCUMULATED_WITH_NINE_RESEARCH_WATCHES",
   "audit_only": true,
   "accumulated_total": 15,
@@ -30,14 +32,21 @@
     "added_candidate_executable_implementation_count": 0,
     "accumulated_does_not_mean_implemented": true
   },
+  "authority_order": [
+    "Candidate state: config/gold_ml_v1/provisional_candidate_stack_20260624.json",
+    "Implementation completion and metrics: config/gold_ml_v1/implementation_status_and_metrics_20260626.json",
+    "Corrections and incomplete items: docs/gold_ml_v1/NEXT_CHAT_HANDOFF_THREE_PASS_AUDIT_IMPLEMENTATION_AND_METRICS_20260626.md",
+    "Entry and exit logic: docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md",
+    "Historical context only: docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md"
+  ],
   "required_read_order": [
     "docs/gold_ml_v1/NEXT_CHAT_START_HERE_20260626.md",
     "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_THREE_PASS_AUDIT_IMPLEMENTATION_AND_METRICS_20260626.md",
-    "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md",
     "docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md",
     "config/gold_ml_v1/implementation_status_and_metrics_20260626.json",
     "config/gold_ml_v1/handoff_snapshot_20260626.json",
-    "config/gold_ml_v1/provisional_candidate_stack_20260624.json"
+    "config/gold_ml_v1/provisional_candidate_stack_20260624.json",
+    "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md as historical context only"
   ],
   "candidate_config_paths": {
     "GML1-WATCH-029-A": "config/gold_ml_v1/watch029a_fixed5_simple_meta_lane_20260626.json",
@@ -58,7 +67,7 @@
     "D1": "2026-06-19 00:00"
   },
   "true_prospective_start_after": "2026-06-26",
-  "state_authority_note": "The stack file is authoritative for accumulated/research/retired state. The implementation-status ledger is authoritative for code completion and metrics.",
+  "obsolete_historical_statement": "The old handoff statement that WATCH-029-A and WATCH-030-A configs still have accumulated=false is obsolete; both configs are synchronized to accumulated.",
   "implementation_warnings": [
     "WATCH-029-A must use the frozen 13-candidate source stack P, not the current 15 accumulated stack.",
     "WATCH-033-A preserves component-specific TP5 and TP7.5 plus fixed component priority.",
