@@ -1,0 +1,111 @@
+{
+  "candidate_id": "GML1-WATCH-031-A",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "role": "INDEPENDENT_TIGHT_STOP_MULTI_MECHANISM_COVERAGE_LANE",
+  "lane": "RAW_M15_M5_H1_H4_MULTI_MECHANISM",
+  "selection_warning": "The component profiles and their one-open combination were selected after 2023 discovery and 2024-2026 diagnostic inspection. This is prospective-only for data after 2026-06-26.",
+  "objective": "Increase monthly coverage without using the -10 USD-price emergency stop of WATCH-029-A and WATCH-030-A. Every component uses a fixed stop between 3 and 5 USD-price.",
+  "components": {
+    "COMP_DAY_LONG": {
+      "mechanism": "bullish inside-bar plus NR7 compression breakout with H1/H4 alignment",
+      "session_mt5_server_hours": "10 through 16",
+      "entry_quality": "breakout at least 0.10 M15 ATR above the prior high and bullish body fraction at least 0.50",
+      "take_profit_price_usd": 5.0,
+      "stop_price_usd": 4.0,
+      "maximum_horizon_hours": 4
+    },
+    "COMP_NIGHT_LONG": {
+      "mechanism": "bullish inside-bar plus NR7 compression breakout with H1/H4 alignment",
+      "session_mt5_server_hours": "19 through 24",
+      "entry_quality": "breakout at least 0.10 M15 ATR above the prior high and bullish body fraction at least 0.50",
+      "take_profit_price_usd": 3.0,
+      "stop_price_usd": 4.0,
+      "maximum_horizon_hours": 8
+    },
+    "ROLL20_NIGHT_LONG": {
+      "mechanism": "M15 sweeps the prior rolling 20-bar low by at least 0.30 ATR and closes back above it",
+      "session_mt5_server_hours": "19 through 24",
+      "take_profit_price_usd": 5.0,
+      "stop_price_usd": 5.0,
+      "maximum_horizon_hours": 8
+    },
+    "BLOCK_SWEEP_SHORT": {
+      "mechanism": "completed MT5-server 07-13 range high is swept by at least 0.30 ATR and rejected with upper wick at least 0.15 and close in the lower 25 percent",
+      "market_state": "range state",
+      "session_mt5_server_hours": "13 through 19",
+      "take_profit_price_usd": 4.0,
+      "stop_price_usd": 3.0,
+      "maximum_horizon_hours": 8
+    }
+  },
+  "execution": {
+    "entry": "exact M1 bid/ask-consistent open after the decision bar is closed",
+    "same_m1_collision": "protective stop first",
+    "one_open_across_lane": true,
+    "average_fixed_stop_price_usd": 3.766
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 424, "win_rate": 0.5660, "profit_factor": 1.4437, "mean_price_usd": 0.6767, "total_price_usd": 286.93, "max_drawdown_price_usd": 43.0},
+    "2023": {"trades": 113, "profit_factor": 1.589, "total_price_usd": 85.38},
+    "2024": {"trades": 129, "profit_factor": 1.531, "total_price_usd": 100.78},
+    "2025": {"trades": 123, "profit_factor": 1.311, "total_price_usd": 65.77},
+    "2026_to_cutoff": {"trades": 59, "profit_factor": 1.347, "total_price_usd": 35.0}
+  },
+  "strong_cost_stress": {
+    "scenario": "spread 2x plus 0.10 USD-price entry and exit slippage",
+    "trades": 423,
+    "win_rate": 0.5343,
+    "profit_factor": 1.213,
+    "mean_price_usd": 0.356,
+    "total_price_usd": 150.75,
+    "max_drawdown_price_usd": 52.8,
+    "year_metrics": {
+      "2023": {"profit_factor": 1.300, "total_price_usd": 49.21},
+      "2024": {"profit_factor": 1.228, "total_price_usd": 47.54},
+      "2025": {"profit_factor": 1.139, "total_price_usd": 31.90},
+      "2026_to_cutoff": {"profit_factor": 1.207, "total_price_usd": 22.10}
+    }
+  },
+  "2026_monthly_base": {
+    "2026-01": {"trades": 13, "total_price_usd": 20.0},
+    "2026-02": {"trades": 8, "total_price_usd": 30.0},
+    "2026-03": {"trades": 12, "total_price_usd": 19.0},
+    "2026-04": {"trades": 14, "total_price_usd": -13.0},
+    "2026-05": {"trades": 8, "total_price_usd": -13.0},
+    "2026-06_to_19th": {"trades": 4, "total_price_usd": -8.0}
+  },
+  "overlap_diagnostic": {
+    "LONG_exact_fraction_vs_existing15": 0.0189,
+    "LONG_plus_minus_60m_fraction_vs_existing15": 0.0717,
+    "SHORT_exact_fraction_vs_existing15": 0.0314,
+    "SHORT_plus_minus_60m_fraction_vs_existing15": 0.0566,
+    "interpretation": "Low overlap, but not zero. Internal component overlap is negligible except limited compression-versus-rolling proximity."
+  },
+  "structural_stop_audit": {
+    "tested_distance_range_price_usd": "2.5 through 5.0",
+    "result": "REJECTED_FOR_THIS_LANE",
+    "reason": "At 2026 volatility, chart-structural stops frequently exceeded 5 USD-price and removed most current events. The remaining structural-stop variants failed strong-cost stability. Fixed 3-5 USD-price stops were more stationary."
+  },
+  "reference_union_with_WATCH_029_A_and_WATCH_030_A": {
+    "warning": "Diagnostic registry-level union, not authoritative raw-event portfolio parity.",
+    "all": {"trades": 697, "win_rate": 0.6628, "profit_factor": 1.799, "mean_price_usd": 1.282, "total_price_usd": 893.79, "max_drawdown_price_usd": 54.53},
+    "2026": {"trades": 93, "win_rate": 0.6667, "profit_factor": 1.861, "total_price_usd": 130.0, "max_drawdown_price_usd": 31.0},
+    "2026_monthly_trades": {"January": 19, "February": 15, "March": 18, "April": 18, "May": 13, "June_to_19th": 10}
+  },
+  "prospective_requirements": {
+    "start_after": "2026-06-26",
+    "minimum_resolved_trades": 60,
+    "minimum_profit_factor": 1.25,
+    "minimum_mean_price_usd": 0.40,
+    "maximum_drawdown_price_usd": 45.0,
+    "recent_month_review_required": true,
+    "no_rule_changes": true
+  },
+  "limitations": [
+    "The lane itself lost money in April, May and June 2026-to-cutoff despite a positive 2026 aggregate.",
+    "Its historical edge is materially smaller than the high-confidence 4R candidates.",
+    "The component combination was formed after diagnostic inspection and is not untouched validation."
+  ],
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
