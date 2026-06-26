@@ -1,0 +1,81 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "DATA_SOURCE_ROLES_FROZEN_AUDIT_ONLY",
+  "historical_development_source": {
+    "role": "RESEARCH_TRAINING_BACKTEST_AND_PINNED_REPLAY_ONLY",
+    "windows_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\gold_v3_2023_2026",
+    "file_family": "gold_v3_2023_2026_*.csv",
+    "expected_files": [
+      "gold_v3_2023_2026_m1.csv",
+      "gold_v3_2023_2026_m15.csv",
+      "gold_v3_2023_2026_h1.csv",
+      "gold_v3_2023_2026_h4.csv",
+      "gold_v3_2023_2026_d1.csv"
+    ],
+    "allowed_uses": [
+      "ML-01 source audit",
+      "ML-02 pinned feature replay",
+      "ML-03 pinned label replay",
+      "ML-04 through ML-07 historical development and walk-forward evaluation"
+    ],
+    "forbidden_uses": [
+      "live inference input",
+      "runtime signal input",
+      "MT5 order decisions",
+      "prospective shadow input after a model package is frozen"
+    ],
+    "selection_rule": "Historical builders must receive this directory explicitly. They must never recursively discover live goldsharp files from the parent Files directory."
+  },
+  "live_operational_source": {
+    "role": "FUTURE_SHADOW_AND_LIVE_CLOSED_BAR_INPUT_ONLY",
+    "windows_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
+    "file_glob": "goldsharp_*.csv",
+    "location_rule": "Only Files-root goldsharp_*.csv files are live inputs. The gold_v3_2023_2026 subdirectory is excluded from live discovery.",
+    "allowed_uses": [
+      "future ML-08 audit-only shadow feature construction",
+      "future ML-09 prospective evaluation",
+      "future live inference only after all separate activation gates pass"
+    ],
+    "forbidden_uses": [
+      "MLR1-v1 training",
+      "MLR1-v1 feature selection",
+      "MLR1-v1 hyperparameter selection",
+      "MLR1-v1 probability calibration",
+      "MLR1-v1 threshold or coverage-policy selection",
+      "historical backtest replacement"
+    ],
+    "current_activation": {
+      "shadow_enabled": false,
+      "live_ready": false,
+      "final_signal": false,
+      "mt5_order": false,
+      "discord": false
+    }
+  },
+  "shared_semantic_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "latest_row": "closed by CSV contract",
+    "higher_timeframe_use": "only bars with close_time less than or equal to decision_time",
+    "exact_m1": "mandatory when the stage requires entry or label evaluation; missing exact M1 means skip",
+    "feature_logic": "The same frozen causal feature definitions must be used for historical and live data. Only the source adapter and snapshot-identity policy differ."
+  },
+  "adapter_policy": {
+    "historical_adapter": "hash-locked fixed-snapshot reader used by current ML-02 and ML-03 builders",
+    "live_adapter": "not yet implemented; must read only explicit Files-root goldsharp_*.csv paths and must not use recursive globbing",
+    "no_automatic_fallback": true,
+    "no_cross_source_concatenation": true,
+    "no_silent_source_switch": true,
+    "manifest_requirement": "Every produced registry or prediction batch must record source role, resolved paths, first/last timestamp, row counts and source-file hashes."
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_modified": false,
+    "model_trained": false,
+    "live_adapter_implemented": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
