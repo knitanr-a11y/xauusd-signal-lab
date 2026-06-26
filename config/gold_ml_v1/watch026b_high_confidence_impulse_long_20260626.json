@@ -1,0 +1,38 @@
+{
+  "candidate_id": "GML1-WATCH-026-B",
+  "parent_candidate_id": "GML1-WATCH-026-A",
+  "status": "RESEARCH_WATCH_HIGH_CONFIDENCE_DERIVATIVE",
+  "audit_only": true,
+  "direction": "LONG",
+  "role": "WIN_RATE_UPGRADED_IMPULSE_CONTINUATION_DERIVATIVE",
+  "selection_warning": "The final gate was identified after historical diagnostics. It is prospective-only and not an untouched holdout result.",
+  "parent_logic_unchanged": true,
+  "additional_gate": {
+    "m5_adx14_lte": 26.739420121598915,
+    "interpretation": "Enter the M15 impulse breakout only while M5 trend strength is still immature; reject late continuation after the lower-timeframe trend is already established."
+  },
+  "execution": {
+    "stop": "1.25 M15 ATR",
+    "target": "4R",
+    "maximum_horizon_hours": 12,
+    "same_m1_priority": "protective stop first"
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 30, "win_rate": 0.6333333333, "profit_factor": 5.956458, "mean_R": 1.817368, "average_winner_R": 3.448476, "total_R": 54.521037, "max_drawdown_R": 2.0},
+    "2023": {"trades": 10, "win_rate": 0.70, "profit_factor": 7.992054},
+    "2024": {"trades": 6, "win_rate": 0.666667, "profit_factor": 6.553896},
+    "2025": {"trades": 11, "win_rate": 0.636364, "profit_factor": 6.109271},
+    "2026_diagnostic": {"trades": 3, "win_rate": 0.333333, "profit_factor": 2.0}
+  },
+  "cost_stress_all": {
+    "spread_1_5x_slip_0_05": {"trades": 30, "win_rate": 0.633333, "profit_factor": 5.799747, "mean_R": 1.779482, "total_R": 53.384463, "max_drawdown_R": 2.031011},
+    "spread_2x_slip_0_10": {"trades": 30, "win_rate": 0.633333, "profit_factor": 5.701931, "mean_R": 1.762393, "total_R": 52.871800, "max_drawdown_R": 2.062021}
+  },
+  "threshold_neighborhood": {
+    "q33": {"threshold": 25.0590397735, "trades": 24, "win_rate": 0.625, "profit_factor": 5.823694},
+    "q50_selected": {"threshold": 26.7394201216, "trades": 30, "win_rate": 0.633333, "profit_factor": 5.956458},
+    "q67": {"threshold": 28.6332263464, "trades": 37, "win_rate": 0.567568, "profit_factor": 4.419778}
+  },
+  "prospective_requirements": {"start_after": "2026-06-26", "minimum_resolved_trades": 20, "minimum_win_rate": 0.55, "minimum_profit_factor": 2.0, "no_rule_changes": true},
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
