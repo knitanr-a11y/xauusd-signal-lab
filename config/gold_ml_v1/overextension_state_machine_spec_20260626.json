@@ -1,0 +1,39 @@
+{
+  "record_id": "GML1-OVEREXTENSION-STATE-MACHINE-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_DIAGNOSTIC",
+  "audit_only": true,
+  "core_change": "Overextension is a setup, not an entry. Entry is allowed only after a causal M5 reversal confirmation before continuation invalidation.",
+  "setup": {
+    "timeframe": "M15",
+    "episode": "false-to-true onset only",
+    "families": ["CONSENSUS_EXTREME", "HTF_SUPPORTED_CONSENSUS", "SHOCK_EXTREME"],
+    "thresholds": "2023 feature quantiles only",
+    "existing_parent_lineages_excluded": true
+  },
+  "confirmation": {
+    "timeframe": "M5",
+    "triggers": ["BOS3", "BOS5", "EMA20_RECLAIM", "DOUBLE_CLOSE"],
+    "maximum_wait_minutes": [60, 120, 240],
+    "continuation_invalidation_atr": [0.5, 0.75, 1.0]
+  },
+  "entry_exit": {
+    "entry": "exact M1 open at confirming M5 close",
+    "stop": "setup episode extreme plus buffer, clipped to 0.5-1.5 M15 ATR",
+    "targets_R": [1.5, 2.0],
+    "horizon_hours": [12, 24],
+    "same_m1_collision": "SL priority"
+  },
+  "selection": {
+    "2023": "three chronological purged folds and neighborhood stability",
+    "2024_2026": "diagnostic only because these periods have already been exposed",
+    "target": "WR >= 0.60 and PF >= 2.0 with minimum counts and fold stability"
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "health_gate": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
