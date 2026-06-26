@@ -1,0 +1,27 @@
+{
+  "record_id": "GML1-HIGH-RR-AT3R-EXTENSION-GATE-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_GATE_EVALUATION",
+  "audit_only": true,
+  "base": "frozen LONG Q10 countertrend HOLD_BOS wait240 invalidation1.0 STRUCT_SETUP with a default 3R take-profit and 24h horizon",
+  "decision_point": "the first M1 bar at which favorable excursion reaches 3R before the initial stop",
+  "principle": "All losing trades are unchanged. Only already-profitable 3R trades may be extended; otherwise profit is closed at 3R.",
+  "entry_known_at_3r_features": [
+    "minutes from entry to 3R",
+    "maximum adverse excursion before 3R",
+    "M5 EMA20 slope normalized by M5 ATR",
+    "M5 close distance above EMA20 normalized by M5 ATR",
+    "M5 RSI14",
+    "M5 ADX14",
+    "H1 and H4 EMA slopes available at the 3R timestamp"
+  ],
+  "2023_rule_grid": {
+    "thresholds": "33rd, 50th and 67th percentiles of 2023 3R-hit features",
+    "rules": "single conditions and two-condition AND rules",
+    "minimum_extended_2023": 8,
+    "minimum_positive_chronological_blocks": 2
+  },
+  "extension_exit": "at 3R set protective floor to +1.5R and use a 2.5 M15-ATR chandelier through the original 24h horizon",
+  "selection": ["2023 PF", "2023 expectancy", "average winner", "threshold-neighborhood stability"],
+  "external_role": "fixed 2024-2026 diagnostic only",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
