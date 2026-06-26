@@ -1,0 +1,24 @@
+{
+  "record_id": "GML1-HIGH-RR-COST-ROBUST-STRUCTURAL-SELECTOR-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_SELECTOR_RUN",
+  "audit_only": true,
+  "base_universe": "the frozen high-RR LONG setup, confirmation, structural risk and ADD75_CH2_H24 profit-funded pyramid",
+  "rule_grid": "the previously frozen 2,201 economically interpretable structural rules; no new features or arbitrary loser-pair mining",
+  "selection_data": "2023 only",
+  "simultaneous_2023_scenarios": [
+    {"id": "BASE", "spread_multiplier": 1.0, "entry_slippage": 0.0, "exit_slippage": 0.0},
+    {"id": "ROBUST", "spread_multiplier": 1.5, "entry_slippage": 0.05, "exit_slippage": 0.05}
+  ],
+  "required_in_both_scenarios": {
+    "minimum_trades": 30,
+    "minimum_each_chronological_block": 5,
+    "minimum_profit_factor": 2.0,
+    "minimum_expectancy_R": 0.50,
+    "minimum_average_winner_R": 3.0,
+    "positive_blocks": 2,
+    "minimum_block_profit_factor": 0.80
+  },
+  "ranking": ["maximum of the minimum PF across BASE and ROBUST", "minimum expectancy", "minimum total R", "lower rule complexity"],
+  "external_role": "2024-2026 fixed diagnostic only and not untouched because those periods were already inspected earlier",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
