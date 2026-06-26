@@ -1,0 +1,23 @@
+{
+  "record_id": "GML1-HIGH-RR-POST3R-EXTENSION-ADDENDUM-20260626",
+  "status": "PREDECLARED_BEFORE_POST3R_EVALUATION",
+  "audit_only": true,
+  "base_entry": "same frozen LONG Q10 countertrend HOLD_BOS wait240 invalidation1.0 STRUCT_SETUP entry",
+  "rationale": "Across the fixed base events, a large fraction of trades that reached 3R subsequently reached 5R or 6R. Three R is therefore treated as the start of profit protection, not the final target.",
+  "profiles": [
+    "full position: at 3R move stop to +1.5R, target 5R",
+    "full position: at 3R move stop to +1.5R, target 6R",
+    "full position: at 3R move stop to +2R, target 5R",
+    "full position: at 3R move stop to +2R, target 6R",
+    "25% exit at 3R; stop remainder +1.5R; target 6R",
+    "25% exit at 3R; stop remainder +2R; target 6R",
+    "50% exit at 3R; stop remainder +1.5R; target 6R",
+    "50% exit at 3R; stop remainder +2R; target 6R",
+    "full position: at 3R activate chandelier trail with 1.0, 1.5, 2.0 or 2.5 M15 ATR and floor +1.5R",
+    "25% exit at 3R; same chandelier variants for remainder"
+  ],
+  "horizons_hours": [24, 48, 72],
+  "selection": "2023 PF, expectancy, average winner and chronological-block stability only",
+  "external_role": "2024-2026 diagnostic only",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false}
+}
