@@ -1,0 +1,47 @@
+{
+  "record_id": "GML1-SEPARATE-VECTOR-LIQUIDITY-REVERSION-RESULT-20260626",
+  "status": "ONE_INDEPENDENT_RESEARCH_WATCH_FOUND",
+  "audit_only": true,
+  "search_scope": {
+    "raw_detector_families": [
+      "previous-day high/low sweep and reclaim",
+      "completed server-time block range sweep",
+      "daily VWAP deviation and reclaim",
+      "daily-open reclaim after excursion",
+      "opening-range failed breakout"
+    ],
+    "directions": ["LONG", "SHORT"],
+    "rules": 2448,
+    "union_events": 19312,
+    "2023_eligible_profiles": 59,
+    "external_screened_profiles": 59,
+    "strict_quality_profiles": 4
+  },
+  "strict_profiles_common_mechanism": "previous-day high liquidity sweep and rejection SHORT",
+  "selected_research_watch": "GML1-WATCH-030-A",
+  "selected_metrics": {
+    "trades": 106,
+    "positive_rate": 0.7735849057,
+    "tp5_rate": 0.7169811321,
+    "profit_factor": 1.8492752241,
+    "mean_price_usd": 1.6802830189,
+    "total_price_usd": 178.11,
+    "max_drawdown_price_usd": 35.0,
+    "positive_years": 4,
+    "exact_overlap_existing": 0,
+    "near60_overlap_existing": 0,
+    "exact_overlap_watch029": 0,
+    "near60_overlap_watch029": 0
+  },
+  "complement_diagnostic_with_watch029": {
+    "global_one_open_trades": 303,
+    "positive_rate": 0.8019801980,
+    "profit_factor": 2.2842489841,
+    "total_price_usd": 657.33,
+    "max_drawdown_price_usd": 29.53,
+    "2026_trades": 37,
+    "2026_monthly_counts": {"January": 6, "February": 7, "March": 8, "April": 5, "May": 5, "June_to_19th": 6}
+  },
+  "warning": "WATCH-030-A combines two fixed profiles after external diagnostics and is therefore post-audit prospective-only. It is not accumulated automatically.",
+  "controls": {"accumulated_candidate_total": 14, "watch030_accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
