@@ -6,16 +6,25 @@ Read these files first and in this order:
 
 1. `docs/gold_ml_v1/NEXT_CHAT_START_HERE_20260626.md`
 2. `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_THREE_PASS_AUDIT_IMPLEMENTATION_AND_METRICS_20260626.md`
-3. `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md`
-4. `docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md`
-5. `config/gold_ml_v1/implementation_status_and_metrics_20260626.json`
-6. `config/gold_ml_v1/handoff_snapshot_20260626.json`
-7. `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
+3. `docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md`
+4. `config/gold_ml_v1/implementation_status_and_metrics_20260626.json`
+5. `config/gold_ml_v1/handoff_snapshot_20260626.json`
+6. `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
+7. `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md` only for historical exploration context
 
-Current authority is stack `GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W`.
+Authority order:
+
+1. candidate state: stack file
+2. implementation completion and performance metrics: `implementation_status_and_metrics_20260626.json`
+3. corrections and known incomplete items: three-pass audit document
+4. entry and exit logic: implementation contract
+5. old handoff: historical context only
+
+The old handoff statement that WATCH-029-A and WATCH-030-A candidate configs still say accumulated=false is obsolete. Their configs have now been synchronized to accumulated.
 
 Current state:
 
+- stack: `GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W`
 - accumulated: 15
 - research watches: 9
 - retired: `GML1-WATCH-031-A`
@@ -32,8 +41,6 @@ Important terminology:
 
 Important rules:
 
-- Use the stack file as the authority for candidate state.
-- Use `implementation_status_and_metrics_20260626.json` as the authority for implementation completion and performance metrics.
 - WATCH-029-A uses frozen source stack P with 13 proposal engines, not the current accumulated 15.
 - WATCH-031-A stays retired and must not be implemented or reused.
 - WATCH-033-A keeps component-specific TP5 and TP7.5 plus fixed priority.
