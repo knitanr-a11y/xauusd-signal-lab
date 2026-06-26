@@ -1,0 +1,62 @@
+{
+  "record_id": "GML1-MULTIVIEW-CANDIDATE-EXPLORATION-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_EVALUATION",
+  "audit_only": true,
+  "objective": "Find additional non-duplicate GOLD candidates by separating market mechanism, direction, timeframe context, confirmation, risk and payoff instead of repeatedly filtering one LONG lineage.",
+  "data": {
+    "authorized_csvs": ["M1", "M5", "M15", "H1", "H4", "D1"],
+    "bar_time": "MT5 server bar-open time",
+    "decision": "closed bars only; higher timeframe bar_close_time <= decision_time",
+    "entry": "exact M1 open at decision time with bid/ask handling",
+    "same_m1_collision": "protective stop first"
+  },
+  "mechanism_families": [
+    "HTF_TREND_PULLBACK_RESUMPTION",
+    "RANGE_BREAKOUT_CONTINUATION",
+    "COMPRESSION_RELEASE",
+    "LIQUIDITY_SWEEP_RECLAIM",
+    "FAILED_BREAKOUT_REVERSAL",
+    "IMPULSE_CONTINUATION",
+    "INSIDE_OR_NR_EXPANSION",
+    "SESSION_RANGE_BREAKOUT",
+    "OVEREXTENSION_REVERSAL",
+    "REGIME_FLIP",
+    "VOLATILITY_EXPANSION_TREND",
+    "MULTI_TIMEFRAME_ALIGNMENT_BREAK"
+  ],
+  "directions": ["LONG", "SHORT"],
+  "risk_profiles": [
+    "0.75, 1.0 and 1.25 M15 ATR fixed stop",
+    "8 and 16 M15-bar structural swing with 0.10 ATR buffer, clipped to 0.50-1.50 ATR"
+  ],
+  "payoff_profiles": {
+    "targets_R": [2.0, 3.0, 4.0],
+    "horizons_hours": [12, 24, 48]
+  },
+  "selection_contract": {
+    "discovery": "2023 only with three chronological blocks",
+    "freeze": "top stable variants per mechanism and direction before later-period diagnostics",
+    "diagnostic": "2024, 2025 and 2026 fixed; no post-result threshold changes",
+    "neighborhood": "adjacent parameter cells must remain positive",
+    "rolling_check": "monthly causal selector using past resolved results only, reported separately from static candidates"
+  },
+  "candidate_quality": {
+    "minimum_resolved": 40,
+    "minimum_all_period_profit_factor": 2.0,
+    "minimum_mean_R": 0.40,
+    "minimum_average_winner_R": 2.0,
+    "minimum_positive_years": 3,
+    "minimum_worst_year_profit_factor": 0.80,
+    "maximum_drawdown_R": 8.0,
+    "cost_stress_required": true,
+    "overlap_audit_required": true
+  },
+  "controls": {
+    "existing_candidates_modified": false,
+    "automatic_promotion": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
