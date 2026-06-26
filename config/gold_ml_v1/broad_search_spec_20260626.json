@@ -1,0 +1,51 @@
+{
+  "record_id": "GML1-BROAD-SEARCH-SPEC-20260626",
+  "audit_only": true,
+  "data_hashes": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "M1_close": "time+1m",
+    "M5_close": "time+5m",
+    "M15_close": "time+15m",
+    "H1_close": "time+1h",
+    "H4_close": "time+4h",
+    "D1_close": "time+1d",
+    "latest_row": "closed",
+    "higher_tf_join": "bar_close_time <= decision_time",
+    "same_m1_collision": "SL priority"
+  },
+  "period_contract": {
+    "2023": "exploration and filter design only",
+    "2024": "validation only",
+    "2025": "final test only",
+    "2026": "diagnostic only"
+  },
+  "search": {
+    "concept_families": ["STP", "RPB", "BREAK", "MOM", "SWEEP", "EMA", "SQUEEZE"],
+    "event_parameter_cells": 7296,
+    "unique_2023_event_masks": 5920,
+    "stage1_robust_cells": 3637,
+    "stage2_execution_variants_passing_lenient_2023_gate": 14358,
+    "entry_modes": ["IMM", "M5_DIR3", "M5_STOP3", "M5_RECLOSE3", "M5_REJECT3"],
+    "risk_modes": ["ATR", "RANGE", "STRUCT"],
+    "exit_profiles": ["E10", "E12", "E15", "E20", "E25B", "E20B", "E15S"],
+    "loss_filter_features": ["hour4", "weekday", "atr_reg", "bb_reg", "rsi_dir", "closepos_dir", "body_dir", "fav_wick", "adv_wick", "h1_gap", "h4_gap", "d1_gap", "h1_slope", "h4_slope", "ema20_dist", "ema50_dist", "vol_ratio", "h1_adx", "h4_adx"],
+    "frozen_candidate_count": 55,
+    "frozen_candidate_sha256": "11294c59d0d6fb13592749e835d445c07114144b7857b1c6a6c0a1933999c0d8"
+  },
+  "switches": {
+    "health_gate": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false
+  }
+}
