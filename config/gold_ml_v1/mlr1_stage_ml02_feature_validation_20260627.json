@@ -1,0 +1,87 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-02",
+  "date": "2026-06-27",
+  "status": "IMPLEMENTED_AND_CONTAINER_VALIDATED_USER_PC_PINNED_REPLAY_PENDING",
+  "github_commits": {
+    "feature_engine": "62ef0882dd7639e02ba33a9798176e1278487e2c",
+    "feature_contract": "a0090a5aed23f28e752366409371b1ce01069ca5",
+    "unit_tests": "9b0bf636b083edbce9db318498dc002574b6d5e2",
+    "dependencies": "500afb16f15679c048cdca7c9963d2341e6b90bf",
+    "windows_runner": "9cf7bc166a7ce8707bc595a1ab25664a6c90d802"
+  },
+  "implementation": {
+    "engine": "scripts/gold_ml_v1/mlr1/build_features.py",
+    "contract": "config/gold_ml_v1/mlr1_feature_contract_v1_20260627.json",
+    "tests": "tests/gold_ml_v1/test_mlr1_features.py",
+    "runner": "scripts/gold_ml_v1/mlr1/run_build_features.bat",
+    "requirements": "scripts/gold_ml_v1/mlr1/requirements-mlr1.txt"
+  },
+  "container_validation_environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "target_user_environment": "Windows 11 / Python 3.12 / numpy 2.2.6 / pandas 2.2.3",
+    "limitation": "The exact pinned Python 3.12 and numpy 2.2.6 environment was not available in the container. User-PC pinned replay remains required before calling the output cross-environment exact parity."
+  },
+  "unit_tests": {
+    "passed": 6,
+    "failed": 0,
+    "checks": [
+      "Wilder RMA uses an SMA seed",
+      "lagged percentile excludes the current decision value",
+      "as-of join never selects a future higher-timeframe bar",
+      "future append does not change earlier timeframe features",
+      "model columns exclude absolute-price metadata",
+      "gzip output is deterministic across output filenames"
+    ]
+  },
+  "full_snapshot_validation": {
+    "m15_decisions": 81781,
+    "missing_exact_m1": 899,
+    "missing_closed_higher_timeframe": 91,
+    "feature_warmup_or_nonfinite": 6623,
+    "eligible_rows": 74168,
+    "model_feature_count": 161,
+    "first_decision": "2023-04-18 01:15:00",
+    "last_decision": "2026-06-19 19:45:00",
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "feature_columns_sha256": "b6f588f1e091906be3f2b3c1623898d59c12b28017d7a4e1209b2ec915af4d60",
+    "two_independent_full_runs_same_sha256": true,
+    "all_model_features_finite": true,
+    "model_feature_names_unique": true,
+    "absolute_price_model_columns": 0
+  },
+  "causality_validation": {
+    "all_h1_close_times_le_decision": true,
+    "all_h4_close_times_le_decision": true,
+    "all_d1_close_times_le_decision": true,
+    "future_append_cutoff": "2024-12-31 12:00:00",
+    "rows_compared": 39987,
+    "maximum_absolute_numeric_difference": 0.0,
+    "decision_times_equal": true
+  },
+  "expected_outputs": {
+    "directory": "outputs/gold_ml_v1/mlr1/ml02_features_v1",
+    "feature_registry": "mlr1_features_v1.csv.gz",
+    "feature_columns": "mlr1_feature_columns_v1.json",
+    "manifest": "mlr1_feature_manifest_v1.json"
+  },
+  "acceptance_remaining": [
+    "Run run_build_features.bat on the authorized raw snapshot under the pinned user-PC environment",
+    "Confirm 74168 rows and 161 model features",
+    "Confirm feature registry SHA256 81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "Confirm feature columns SHA256 b6f588f1e091906be3f2b3c1623898d59c12b28017d7a4e1209b2ec915af4d60"
+  ],
+  "controls": {
+    "audit_only": true,
+    "label_engine_implemented": false,
+    "model_trained": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "next_stage_after_pinned_replay": "ML-03_EXACT_M1_LABEL_ENGINE"
+}
