@@ -1,0 +1,27 @@
+{
+  "record_id": "GML1-HIGH-RR-STRUCTURAL-QUALITY-FILTER-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_FILTER_EVALUATION",
+  "audit_only": true,
+  "base_profile": "profit-funded LONG ADD75_CH2_H24: at +3R lock +1.5R, add 0.75 unit, chandelier 2 M15 ATR, 24h maximum",
+  "principle": "Use only economically interpretable entry-time structure. Do not mine arbitrary loser-pair signatures.",
+  "feature_families": {
+    "trend_context": ["H1 EMA20 slope/ATR", "H4 EMA20 slope/ATR", "D1 EMA20 slope/ATR", "H1/H4/D1 EMA20-EMA50 gap/ATR"],
+    "reversal_quality": ["setup-to-confirmation minutes", "M5 confirmation body/range", "M5 close position", "M5 EMA distance/ATR", "M5 EMA slope/ATR"],
+    "volatility_cost": ["M15 ATR percentile in trailing 200 bars", "M15 range/ATR", "entry spread/M15 ATR"],
+    "time_structure": ["predeclared contiguous MT5-server hour windows of 4, 6 and 8 hours"]
+  },
+  "thresholds": "2023 feature quantiles 20%, 33%, 50%, 67% and 80% with direction fixed by economic interpretation",
+  "rule_forms": ["single structural condition", "one trend condition AND one reversal/volatility/session condition"],
+  "selection_2023": {
+    "minimum_trades": 30,
+    "minimum_each_chronological_block": 5,
+    "minimum_pf": 2.0,
+    "minimum_expectancy_r": 0.50,
+    "minimum_average_winner_r": 3.0,
+    "positive_blocks": 2,
+    "minimum_block_pf": 0.8,
+    "neighborhood_support": "adjacent quantile or adjacent session window must remain positive"
+  },
+  "external_role": "2024-2026 fixed diagnostic only",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
