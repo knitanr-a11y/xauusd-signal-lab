@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_M",
-  "status": "TEN_ACCUMULATED_ONE_PROSPECTIVE_WATCH_ONE_RESEARCH_WATCH_PENDING_AUDIT",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_N",
+  "status": "TEN_ACCUMULATED_ONE_PROSPECTIVE_WATCH_FOUR_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -20,25 +20,32 @@
   "prospective_watch_records": [
     "config/gold_ml_v1/watch024a_high_rr_upper_tf_prospective_20260626.json"
   ],
-  "research_watch_ids": ["GML1-WATCH-025-A"],
+  "research_watch_ids": [
+    "GML1-WATCH-025-A",
+    "GML1-WATCH-026-A",
+    "GML1-WATCH-027-A",
+    "GML1-WATCH-028-A"
+  ],
   "research_watch_records": [
     "config/gold_ml_v1/watch025a_h4_h1_trend_resumption_prospective_20260626.json",
-    "config/gold_ml_v1/watch025a_retraction_20260626.json",
-    "config/gold_ml_v1/watch025a_reinstatement_20260626.json"
+    "config/gold_ml_v1/watch025a_reinstatement_20260626.json",
+    "config/gold_ml_v1/watch026a_impulse_continuation_long_20260626.json",
+    "config/gold_ml_v1/watch027a_inside_compression_expansion_long_20260626.json",
+    "config/gold_ml_v1/watch028a_early_trend_resumption_short_20260626.json"
   ],
   "research_watch_policy": {
     "counted_in_accumulated_total": false,
-    "eligible_for_full_reaudit": true,
-    "eligible_for_future_accumulation_after_audit": true,
+    "eligible_for_replay_and_full_reaudit": true,
+    "eligible_for_future_accumulation_after_fixed_prospective_confirmation": true,
     "portfolio_use_forbidden": true
   },
-  "research_priority_families": [
-    "SHORT trend resumption across H4-H1-M15-M5",
-    "breakout continuation and failed-breakout reversal in both directions",
-    "compression-expansion and volatility-regime transition",
-    "liquidity sweep and session-range events",
-    "cross-timeframe trend-pullback, reversal and regime-state combinations"
-  ],
+  "lineage_summary": {
+    "GML1-WATCH-024-A": "high-RR overextension reversal LONG; accumulated prospective watch",
+    "GML1-WATCH-025-A": "draft H4-H1 pullback resumption LONG; full audit pending",
+    "GML1-WATCH-026-A": "H1-H4 impulse breakout continuation LONG; local plateau and cost robust",
+    "GML1-WATCH-027-A": "inside-bar compression expansion LONG; count rich but cost and overlap sensitive",
+    "GML1-WATCH-028-A": "early H4 downtrend resumption SHORT; timing independent but DD and 2024 weak"
+  },
   "rejected_ids": ["GML1-PROV-030-A"],
   "rejection_record": "config/gold_ml_v1/prov030a_rejection_20260626.json",
   "existing_frozen_nine_modified": false,
