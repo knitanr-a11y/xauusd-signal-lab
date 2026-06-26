@@ -1,0 +1,21 @@
+{
+  "record_id": "GML1-HIGH-RR-LONG-ROLLING-SWITCH-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_SWITCH_EVALUATION",
+  "audit_only": true,
+  "base_profile": "FULL_T3_CH2.5_F15_H24 on the frozen high-RR LONG entry",
+  "principle": "Do not reduce the 3R-plus payoff. Turn the expert OFF when its fully resolved recent record no longer supports positive high-RR expectancy.",
+  "decision_time": "first MT5-server timestamp of each calendar month",
+  "training_information": "only trades with exit_time strictly before month start",
+  "grid_selected_on_2023_only": {
+    "lookback_days": [90, 120, 180, 240],
+    "minimum_resolved": [6, 8, 10, 12],
+    "minimum_recent_pf": [1.2, 1.5, 1.8, 2.0],
+    "minimum_recent_mean_r": [0.0, 0.15, 0.30],
+    "minimum_months_on": 4,
+    "minimum_2023_admitted": 20
+  },
+  "selection_order": ["2023 PF", "2023 mean R", "2023 total R", "fewer parameters"],
+  "external_role": "fixed 2024-2026 diagnostic only",
+  "execution": "OFF-month trades are removed before one-open admission; position state is carried across month boundaries",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
