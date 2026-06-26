@@ -1,0 +1,39 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "current_stage": "ML-00",
+  "status": "ML00_DESIGN_CONTRACT_COMPLETE_AUDIT_ONLY",
+  "completed": [
+    "new ML lane separated from old Stage2",
+    "development snapshot identity frozen",
+    "time and causality contract frozen",
+    "primary ATR-normalized label frozen",
+    "bid/ask and exact-M1 label handling frozen",
+    "cost scenarios frozen",
+    "initial feature boundaries frozen",
+    "model ladder frozen",
+    "walk-forward folds frozen",
+    "shadow acceptance gate frozen"
+  ],
+  "not_completed": [
+    "ML-01 raw-data and timestamp audit",
+    "feature engine",
+    "label engine",
+    "baseline training",
+    "tabular model training",
+    "calibration",
+    "EV policy evaluation",
+    "shadow package",
+    "prospective evaluation"
+  ],
+  "authoritative_contract": "config/gold_ml_v1/mlr1_stage_ml00_design_contract_20260627.json",
+  "human_readable_contract": "docs/gold_ml_v1/GML1_MLR1_STAGE_ML00_DESIGN_CONTRACT_20260627.md",
+  "next_stage": "ML-01_RAW_DATA_AND_TIMESTAMP_AUDIT",
+  "existing_candidate_stack_modified": false,
+  "audit_only": true,
+  "model_trained": false,
+  "live_ready": false,
+  "final_signal": false,
+  "mt5_order": false,
+  "discord": false
+}
