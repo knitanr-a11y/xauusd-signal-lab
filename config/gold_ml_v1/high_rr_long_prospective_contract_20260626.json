@@ -1,0 +1,49 @@
+{
+  "record_id": "GML1-HIGH-RR-LONG-PROSPECTIVE-CONTRACT-20260626",
+  "status": "POST_AUDIT_PROSPECTIVE_RESEARCH_ONLY",
+  "audit_only": true,
+  "warning": "This rule is not an untouched holdout winner. It was one of 97 rules that passed the 2023-only structural gate, and its 2024-2026 diagnostics were subsequently inspected. True confirmation begins only after 2026-06-26.",
+  "setup": {
+    "direction": "LONG",
+    "m15_overextension": "16-bar return / ATR14 at or below the frozen 2023 lower-10% threshold",
+    "episode": "false-to-true onset",
+    "existing_two_parent_long_lineages": "excluded",
+    "confirmation": "M5 HOLD_BOS within 240 minutes before 1.0 M15-ATR continuation invalidation"
+  },
+  "quality_gate": {
+    "d1_ema20_slope4_atr_gte": -0.2532763484983291,
+    "formula_d1": "(last closed D1 EMA20 - D1 EMA20[4]) / D1 ATR14",
+    "m5_confirmation_body_fraction_gte": 0.4504081632653521,
+    "formula_m5": "(confirmation close - confirmation open) / (confirmation high - confirmation low)"
+  },
+  "initial_risk": {
+    "stop": "setup episode low minus 0.10 M15 ATR",
+    "minimum_distance": "0.75 M15 ATR",
+    "reject_if_distance_above": "1.50 M15 ATR",
+    "entry": "exact M1 open at confirming M5 close including dynamic spread"
+  },
+  "profit_management": {
+    "before_3R": "one original risk unit; protective stop remains at -1R",
+    "at_3R": "move original protective floor to +1.5R and add 0.75 risk-unit-equivalent position at the +3R price",
+    "after_3R": "shared exit by a 2.0 M15-ATR chandelier, never below the +1.5R original-coordinate floor",
+    "maximum_horizon_hours": 24,
+    "combined_return_after_add": "original_R + 0.75 * (original_R - 3R)",
+    "worst_combined_return_after_add": 0.375
+  },
+  "diagnostic_metrics": {
+    "2023": {"trades": 39, "win_rate": 0.410256, "profit_factor": 3.728977, "mean_R": 1.385344, "average_winner_R": 4.614154},
+    "2024": {"trades": 46, "win_rate": 0.434783, "profit_factor": 2.003863, "mean_R": 0.513630, "average_winner_R": 2.358149},
+    "2025": {"trades": 29, "win_rate": 0.482759, "profit_factor": 2.021201, "mean_R": 0.504120, "average_winner_R": 2.066819},
+    "2026_diagnostic_to_available_cutoff": {"trades": 8, "win_rate": 0.500000, "profit_factor": 2.374946, "mean_R": 0.687473, "average_winner_R": 2.374946}
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "automatic_promotion": false,
+    "prospective_monitor_only": true,
+    "health_gate": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
