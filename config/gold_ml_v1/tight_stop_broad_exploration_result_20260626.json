@@ -1,0 +1,68 @@
+{
+  "record_id": "GML1-TIGHT-STOP-BROAD-EXPLORATION-RESULT-20260626",
+  "status": "ONE_HIGH_COVERAGE_RESEARCH_WATCH_FOUND_NO_AUTOMATIC_ACCUMULATION",
+  "audit_only": true,
+  "watch030_stop_reduction": {
+    "result": "DO_NOT_MODIFY_WATCH_030_A",
+    "original": {"take_profit_price_usd": 5.0, "stop_price_usd": 10.0, "trades": 106, "profit_factor": 1.849, "positive_years": 4, "total_price_usd": 178.11},
+    "example_tighter": {"take_profit_price_usd": 5.0, "stop_price_usd": 5.0, "trades": 114, "profit_factor": 1.502, "positive_years": 3, "worst_year_profit_factor": 0.936, "total_price_usd": 109.71},
+    "interpretation": "The wide emergency stop is part of the historical WATCH-030-A payoff distribution. Tightening it damaged cross-year stability."
+  },
+  "search_scope": {
+    "mechanism_families": 11,
+    "rules": 4208,
+    "union_events": 49306,
+    "evaluated_profiles": 143643,
+    "eligible_2023_profiles": 8155,
+    "frozen_family_direction_profiles": 97,
+    "strict_external_quality_profiles": 141,
+    "strong_cost_robust_profiles": 57
+  },
+  "mechanism_families": [
+    "previous-day sweep and rejection",
+    "previous-day breakout",
+    "VWAP reclaim",
+    "VWAP trend pullback",
+    "daily-open reclaim",
+    "completed session-block sweep and breakout",
+    "opening-range fakeout and breakout",
+    "EMA pullback",
+    "Bollinger mean reversion",
+    "inside plus NR7 compression breakout",
+    "rolling high-low failure and breakout"
+  ],
+  "selected_research_watch": "GML1-WATCH-031-A",
+  "selected_metrics": {
+    "trades": 424,
+    "win_rate": 0.5660,
+    "profit_factor": 1.4437,
+    "mean_price_usd": 0.6767,
+    "total_price_usd": 286.93,
+    "max_drawdown_price_usd": 43.0,
+    "average_stop_price_usd": 3.766,
+    "positive_years": 4
+  },
+  "selected_strong_cost": {
+    "trades": 423,
+    "win_rate": 0.5343,
+    "profit_factor": 1.213,
+    "mean_price_usd": 0.356,
+    "total_price_usd": 150.75,
+    "max_drawdown_price_usd": 52.8,
+    "positive_years": 4
+  },
+  "structural_stop_result": {
+    "status": "REJECTED",
+    "tested_distance_price_usd": "2.5 to 5.0",
+    "reason": "High-volatility 2026 structures often required more than 5 USD-price, removing current trades. Remaining structural-stop variants were not strong-cost stable."
+  },
+  "coverage_union_reference": {
+    "members": ["GML1-WATCH-029-A", "GML1-WATCH-030-A", "GML1-WATCH-031-A"],
+    "warning": "Registry-level one-open reference, not authoritative exact raw-event portfolio replay.",
+    "all": {"trades": 697, "win_rate": 0.6628, "profit_factor": 1.799, "total_price_usd": 893.79, "max_drawdown_price_usd": 54.53},
+    "2026": {"trades": 93, "win_rate": 0.6667, "profit_factor": 1.861, "total_price_usd": 130.0},
+    "2026_monthly_trades": {"January": 19, "February": 15, "March": 18, "April": 18, "May": 13, "June_to_19th": 10}
+  },
+  "decision": "WATCH-031-A is preserved as a research watch for coverage. It is not accumulated automatically because its recent April-June 2026 standalone results were negative and the strong-cost edge is modest.",
+  "controls": {"accumulated_candidate_total": 15, "watch031_accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
