@@ -1,0 +1,127 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-04",
+  "version": "v1",
+  "status": "FROZEN_DETERMINISTIC_AND_LINEAR_BASELINE_CONTRACT_AUDIT_ONLY",
+  "created": "2026-06-27",
+  "source_role": "HISTORICAL_DEVELOPMENT_ONLY",
+  "input_sha256": {
+    "feature_registry": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "label_registry": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed"
+  },
+  "model_feature_count": 161,
+  "directions": ["LONG", "SHORT"],
+  "outcome_order": ["PROTECTIVE", "TARGET", "TIME"],
+  "models": {
+    "unconditional_class_rate": "Training-segment class frequencies applied unchanged to validation and test.",
+    "unconditional_mean_r": "Training-segment mean Strong R applied unchanged to validation and test.",
+    "always_trade_one_open": "Enter at every eligible M15 decision while flat, evaluated separately per direction.",
+    "multinomial_logistic": "StandardScaler plus multinomial LogisticRegression; C selected only by validation multiclass log loss.",
+    "ridge_strong_r": "StandardScaler plus Ridge regression on Strong R; alpha selected only by validation mean squared error."
+  },
+  "logistic_c_grid": [0.01, 0.1, 1.0],
+  "ridge_alpha_grid": [1.0, 10.0, 100.0, 1000.0],
+  "probability_to_score": "For multinomial logistic, score equals the dot product of raw class probabilities and training-only class-conditional mean Strong R.",
+  "calibration": "Not performed in ML-04. Calibration belongs to ML-06.",
+  "model_refit_after_validation": false,
+  "refit_reason": "The validation score distribution is used to freeze policy thresholds; keeping the train-fitted model unchanged makes the validation threshold directly transferable to test.",
+  "policies": {
+    "conservative": 0.0025,
+    "standard": 0.005,
+    "high_coverage": 0.01
+  },
+  "policy_threshold_rule": "For each fold, direction and model, use the validation score quantile at 1 minus coverage with method=higher. Test requires score greater than or equal to the frozen threshold and score greater than zero. No test retuning.",
+  "position_rule": {
+    "scope": "one open position per direction",
+    "candidate_order": "decision_time ascending",
+    "skip": "skip when decision_time is earlier than the accepted prior trade exit_time",
+    "equality": "decision_time equal to prior exit_time is allowed",
+    "cross_direction_netting": false,
+    "reason": "ML-04 evaluates LONG and SHORT estimators independently; combined portfolio netting is deferred."
+  },
+  "folds": [
+    {
+      "fold_id": "F1",
+      "train_start": "2023-01-01 00:00:00",
+      "train_end": "2024-01-01 00:00:00",
+      "validation_start": "2024-01-01 00:00:00",
+      "validation_end": "2024-07-01 00:00:00",
+      "test_start": "2024-07-01 00:00:00",
+      "test_end": "2025-01-01 00:00:00",
+      "purge_hours": 6,
+      "embargo_hours": 6,
+      "test_end_purge_hours": 6
+    },
+    {
+      "fold_id": "F2",
+      "train_start": "2023-01-01 00:00:00",
+      "train_end": "2024-07-01 00:00:00",
+      "validation_start": "2024-07-01 00:00:00",
+      "validation_end": "2025-01-01 00:00:00",
+      "test_start": "2025-01-01 00:00:00",
+      "test_end": "2025-07-01 00:00:00",
+      "purge_hours": 6,
+      "embargo_hours": 6,
+      "test_end_purge_hours": 6
+    },
+    {
+      "fold_id": "F3",
+      "train_start": "2023-01-01 00:00:00",
+      "train_end": "2025-01-01 00:00:00",
+      "validation_start": "2025-01-01 00:00:00",
+      "validation_end": "2025-07-01 00:00:00",
+      "test_start": "2025-07-01 00:00:00",
+      "test_end": "2026-01-01 00:00:00",
+      "purge_hours": 6,
+      "embargo_hours": 6,
+      "test_end_purge_hours": 6
+    },
+    {
+      "fold_id": "F4",
+      "train_start": "2023-01-01 00:00:00",
+      "train_end": "2025-07-01 00:00:00",
+      "validation_start": "2025-07-01 00:00:00",
+      "validation_end": "2026-01-01 00:00:00",
+      "test_start": "2026-01-01 00:00:00",
+      "test_end": "2026-06-20 00:00:00",
+      "purge_hours": 6,
+      "embargo_hours": 6,
+      "test_end_purge_hours": 0
+    }
+  ],
+  "selection_metrics": {
+    "multinomial_logistic": "minimum validation multiclass log loss; ties choose smaller C",
+    "ridge_strong_r": "minimum validation mean squared error; ties choose smaller alpha"
+  },
+  "test_metrics": [
+    "multiclass log loss",
+    "multiclass Brier score",
+    "R regression MSE and MAE",
+    "Strong and Extreme trade count, mean R, total R, profit factor, drawdown and losing streak",
+    "top-five and top-five-percent winner removal",
+    "positive fold count"
+  ],
+  "dependencies": {
+    "python": "3.12",
+    "numpy": "2.2.6",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.8.0"
+  },
+  "determinism": {
+    "blas_threads": 1,
+    "logistic_random_state": 0,
+    "gzip_mtime": 0,
+    "gzip_filename": "",
+    "canonical_json_lf": true
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promotion_allowed": false,
+    "probability_calibrated": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
