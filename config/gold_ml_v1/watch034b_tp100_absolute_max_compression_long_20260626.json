@@ -1,0 +1,29 @@
+{
+  "candidate_id": "GML1-WATCH-034-B",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "role": "ABSOLUTE_MAX_ROBUST_FIXED_TARGET",
+  "direction": "LONG",
+  "mechanism": "Inside plus NR7 M15 compression breakout with H1 and H4 alignment, MT5 server hours 19 through 24, bullish body fraction at least 0.50",
+  "execution": {
+    "target_price_move_usd": 100.0,
+    "protective_distance_usd": 5.0,
+    "maximum_horizon_hours": 168,
+    "same_m1_collision": "protective level first",
+    "one_open_across_lane": true
+  },
+  "diagnostic_metrics": {
+    "base": {"trades": 112, "target_hit_rate": 0.053571, "target_hits": 6, "profit_factor": 2.194674, "mean_price_usd": 5.066696, "total_price_usd": 567.47, "max_drawdown_price_usd": 80.0},
+    "strong_cost": {"trades": 112, "target_hit_rate": 0.0625, "target_hits": 7, "profit_factor": 2.094506, "mean_price_usd": 4.784554, "total_price_usd": 535.87, "max_drawdown_price_usd": 81.6},
+    "strong_cost_2026": {"trades": 16, "target_hit_rate": 0.125, "target_hits": 2, "profit_factor": 2.798319, "total_price_usd": 128.40}
+  },
+  "robustness": {
+    "positive_years": 4,
+    "years_with_target_hit": 3,
+    "worst_year_profit_factor_strong_cost": 1.302332,
+    "maximum_meaningful_fixed_target_usd": 100.0,
+    "interpretation": "TP125 and TP150 produced isolated hits but not across at least three years. TP100 was the highest fixed target satisfying the robust-hit requirement."
+  },
+  "selection_warning": "TP100 was selected after inspecting the target ladder. Target-hit frequency is low, so this is the absolute-maximum research variant rather than the practical primary variant.",
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
