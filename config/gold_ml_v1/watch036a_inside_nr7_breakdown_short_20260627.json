@@ -1,0 +1,117 @@
+{
+  "candidate_id": "GML1-WATCH-036-A",
+  "status": "RESEARCH_WATCH_CONCENTRATION_RISK_PENDING_PROSPECTIVE_CONFIRMATION",
+  "audit_only": true,
+  "accumulated": false,
+  "direction": "SHORT",
+  "role": "INDEPENDENT_M15_INSIDE_NR7_BREAKDOWN_SHORT",
+  "selection_warning": "This rule was selected after inspecting historical diagnostics. Aggregate Strong-cost performance is positive, but 2023 is negative, nearby cells are weaker, and removing the five largest R winners makes the historical result negative. It must not be described as robust or portfolio-ready.",
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "m15_decision_time": "M15 bar-open plus 15 minutes",
+    "entry": "exact M1 bar-open equal to the M15 decision time; missing exact M1 skips",
+    "h4_context": "last closed H4 with bar-close time less than or equal to decision time"
+  },
+  "mechanism": {
+    "setup": [
+      "the immediately preceding M15 bar is inside the M15 bar before it",
+      "the immediately preceding M15 range is the minimum of the latest seven M15 ranges including itself"
+    ],
+    "breakdown": [
+      "last closed H4 EMA20 four-bar slope divided by H4 ATR14 is below zero",
+      "current M15 close is at least 0.10 M15 ATR14 below the setup low",
+      "current M15 close location is in the bottom 10 percent of its range",
+      "current bearish body fraction is at least 0.45",
+      "current M15 bar-open server hour is 12 through 18 inclusive"
+    ]
+  },
+  "execution": {
+    "entry": "exact M1 bid open at decision time",
+    "target": "2.50 times entry-time M15 ATR14",
+    "protective_stop": "1.25 times entry-time M15 ATR14",
+    "maximum_horizon_hours": 24,
+    "same_m1_priority": "protective stop first",
+    "time_exit": "last available M1 close at or before the wall-clock horizon",
+    "one_open_per_candidate": true,
+    "one_open_equality": "entry_time equal to occupied_until skips"
+  },
+  "historical_audit": {
+    "raw_proposals": 33,
+    "exact_m1_missing": 0,
+    "strong_cost": {
+      "definition": "2x dynamic spread plus adverse entry and exit slippage of 0.10 USD-price",
+      "trades": 33,
+      "profit_factor_R": 1.4965776986,
+      "total_R": 11.5573034391,
+      "mean_R": 0.3502213163,
+      "positive_rate": 0.4545454545,
+      "maximum_drawdown_R": 4.0298446126,
+      "maximum_losing_streak": 3
+    },
+    "year_R": {
+      "2023": {"trades": 17, "profit_factor": 0.8736020607, "total_R": -1.8079624988},
+      "2024": {"trades": 7, "profit_factor": 1.4331293674, "total_R": 2.2412259485},
+      "2025": {"trades": 5, "profit_factor": 2.9407865409, "total_R": 4.9144655298},
+      "2026_to_2026_06_19": {"trades": 4, "profit_factor": 5.9146790402, "total_R": 6.2095744596}
+    },
+    "winner_concentration": {
+      "remove_top_3": {"trades": 30, "profit_factor": 1.1754604796, "total_R": 4.0836509780},
+      "remove_top_5": {"trades": 28, "profit_factor": 0.9616123430, "total_R": -0.8934307803}
+    },
+    "cost_sensitivity": {
+      "base": {"profit_factor_R": 2.0218274275, "total_R": 20.4346773333},
+      "spread_1_5x_slip_0_05": {"profit_factor_R": 1.7401765472, "total_R": 15.9951091743},
+      "spread_2x_slip_0_10": {"profit_factor_R": 1.4965776986, "total_R": 11.5573034391},
+      "spread_3x_slip_0_20": {"profit_factor_R": 1.2539964841, "total_R": 6.4325468964}
+    },
+    "neighborhood": {
+      "tested_cells": 144,
+      "median_profit_factor_R": 1.1860278037,
+      "positive_total_cells": 101,
+      "profit_factor_R_gte_1_4_cells": 38,
+      "cells_with_positive_2023": 0,
+      "interpretation": "The family has post-2023 support but no tested nearby cell repaired the negative 2023 regime."
+    }
+  },
+  "overlap_audit": {
+    "available_exact_registries": {
+      "GML1-WATCH-030-A": {"exact": 0, "within_60_minutes": 0},
+      "GML1-WATCH-032-A": {"exact": 1, "within_60_minutes": 3},
+      "GML1-WATCH-033-A": {"exact": 0, "within_60_minutes": 0},
+      "GML1-WATCH-034-A": {"exact": 0, "within_60_minutes": 0},
+      "GML1-WATCH-034-B": {"exact": 0, "within_60_minutes": 0},
+      "GML1-WATCH-034-C": {"exact": 0, "within_60_minutes": 0}
+    },
+    "limitation": "The frozen-nine exact registry bodies were not available in the current audit environment, and GitHub records their original generator provenance as incomplete. Full-stack exact overlap is therefore not claimed."
+  },
+  "evidence": {
+    "source_sha256": {
+      "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913"
+    },
+    "proposal_registry_sha256": "3a45fd1ee628c2cdb58a640fe20d74aed961ae67161427a4323756526cdd6429",
+    "strong_registry_sha256": "93b42a0e6326eb2f69aa0004e2a12a88a4125bb36bb5d8257bd510a2fe2c9354",
+    "audit_json_sha256": "aa7edc62a4b64f6419912c795ca946a458f9790a94c6e37f754ce06af241a221",
+    "neighborhood_csv_sha256": "cd2fe0cc8ecb2a88448232b4bda3c11c1618689d6c4ab07207f3d3decd7aa84d"
+  },
+  "prospective_requirements": {
+    "start_after": "2026-06-27",
+    "minimum_resolved_trades": 20,
+    "minimum_elapsed_calendar_months": 12,
+    "minimum_profit_factor_R": 1.30,
+    "minimum_mean_R": 0.15,
+    "maximum_drawdown_R": 8.0,
+    "winner_concentration_review_required": true,
+    "regime_review_required": true,
+    "no_rule_or_threshold_changes": true
+  },
+  "controls": {
+    "portfolio_use": false,
+    "implementation_allowed_by_this_record": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
