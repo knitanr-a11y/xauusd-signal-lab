@@ -1,0 +1,87 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-04",
+  "date": "2026-06-27",
+  "status": "IMPLEMENTED_SYNTHETIC_VALIDATED_FULL_WINDOWS_REPLAY_PENDING",
+  "github_commits": {
+    "baseline_engine": "edf9a125ff9fb72d50af3cb7b327aeef8b434014",
+    "baseline_contract": "abee5ab9779c38c1ea15a075af3518ad84e7edb9",
+    "unit_tests": "8088ebe27d6dac76ad915c74bc6de31c232aa394",
+    "dependencies": "c9f3fc725f02d6ba7f67abf43038453e3e962d9a",
+    "windows_runner": "2c4fed394577436d1236bb8c94437f6e799174c7"
+  },
+  "implementation": {
+    "engine": "scripts/gold_ml_v1/mlr1/run_ml04_baselines.py",
+    "contract": "config/gold_ml_v1/mlr1_ml04_contract_v1_20260627.json",
+    "tests": "tests/gold_ml_v1/test_mlr1_ml04_baselines.py",
+    "requirements": "scripts/gold_ml_v1/mlr1/requirements-ml04.txt",
+    "runner": "scripts/gold_ml_v1/mlr1/run_ml04_baselines.bat"
+  },
+  "input_contract": {
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "model_feature_count": 161,
+    "source_role": "HISTORICAL_DEVELOPMENT_ONLY"
+  },
+  "implemented_baselines": [
+    "training-only unconditional class-rate baseline",
+    "training-only unconditional Strong-R mean baseline",
+    "always-trade one-open executable baseline",
+    "standardized multinomial logistic outcome model",
+    "standardized Ridge Strong-R model"
+  ],
+  "validation_and_test_contract": {
+    "folds": 4,
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "hyperparameter_selection": "validation only",
+    "policy_threshold_selection": "validation only",
+    "test_retuning": false,
+    "post_validation_refit": false,
+    "one_open_scope": "per direction",
+    "one_open_equality": "allowed when decision_time equals prior exit_time",
+    "cross_direction_netting": false
+  },
+  "local_synthetic_validation": {
+    "tests_passed": 7,
+    "tests_failed": 0,
+    "checks": [
+      "one-open skips overlapping trades and allows equality at exit time",
+      "purge and embargo boundaries are enforced",
+      "validation quantile uses method=higher",
+      "profit factor and R diagnostics are calculated correctly",
+      "perfect multiclass probabilities have zero Brier score",
+      "gzip outputs are deterministic",
+      "logistic and Ridge validation-only model selection executes"
+    ]
+  },
+  "models_are_not_promoted": true,
+  "calibration_performed": false,
+  "expected_output_directory": "outputs/gold_ml_v1/mlr1/ml04_baselines_v1",
+  "expected_outputs": [
+    "mlr1_ml04_fold_metrics.csv",
+    "mlr1_ml04_policy_metrics.csv",
+    "mlr1_ml04_test_predictions.csv.gz",
+    "mlr1_ml04_coefficients.csv.gz",
+    "mlr1_ml04_summary.json"
+  ],
+  "acceptance_remaining": [
+    "Install the pinned ML-04 requirements under Python 3.12",
+    "Run the committed ML-04 Windows runner against the already accepted ML-02 and ML-03 registries",
+    "Review all four test folds separately for LONG and SHORT",
+    "Compare logistic and Ridge against unconditional and always-trade baselines",
+    "Do not advance a model based on aggregate PF alone"
+  ],
+  "controls": {
+    "audit_only": true,
+    "model_trained_for_full_snapshot": false,
+    "model_promoted": false,
+    "portfolio_use": false,
+    "live_adapter_implemented": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "next_step": "ML-04_USER_PC_FULL_WALK_FORWARD_REPLAY"
+}
