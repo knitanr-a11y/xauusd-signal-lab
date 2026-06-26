@@ -1,0 +1,109 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-03",
+  "date": "2026-06-27",
+  "status": "IMPLEMENTED_AND_CONTAINER_VALIDATED_USER_PC_PINNED_REPLAY_PENDING",
+  "github_commits": {
+    "label_engine": "48ed431f8ac3ca69ff923e1b53265602941a1b00",
+    "label_contract": "fea00bf45d70aee25ffb42f803a7ad4701595734",
+    "unit_tests": "94eb579b788909a65f421aee1828e63df1a46d08",
+    "windows_runner": "b0570dfb51d8a1ce1f54a87515a97f4fef0a571f"
+  },
+  "implementation": {
+    "engine": "scripts/gold_ml_v1/mlr1/build_labels.py",
+    "contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+    "tests": "tests/gold_ml_v1/test_mlr1_labels.py",
+    "runner": "scripts/gold_ml_v1/mlr1/run_build_labels.bat"
+  },
+  "container_validation_environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "target_user_environment": "Windows 11 / Python 3.12 / numpy 2.2.6 / pandas 2.2.3",
+    "limitation": "The pinned user-PC environment must reproduce the frozen feature registry first and then the label registry before cross-environment exact parity is claimed."
+  },
+  "unit_tests": {
+    "label_tests_passed": 8,
+    "combined_feature_and_label_tests_passed": 14,
+    "failed": 0,
+    "checks": [
+      "LONG same-M1 collision resolves protective first",
+      "SHORT same-M1 collision resolves protective first",
+      "SHORT protective touch uses reconstructed ask",
+      "M1 bar opening exactly at the six-hour horizon is excluded",
+      "protective gap fills use adverse M1 open",
+      "no-hit rows past snapshot end remain unresolved",
+      "Strong and Extreme R subtract incremental cost",
+      "label gzip output is deterministic"
+    ]
+  },
+  "full_snapshot_validation": {
+    "feature_rows": 74168,
+    "potential_direction_rows": 148336,
+    "resolved_rows": 148317,
+    "unresolved": {"LONG": 11, "SHORT": 8},
+    "resolved_by_direction": {"LONG": 74157, "SHORT": 74160},
+    "outcomes_by_direction": {
+      "LONG": {"PROTECTIVE": 42991, "TARGET": 26549, "TIME": 4617},
+      "SHORT": {"PROTECTIVE": 44675, "TARGET": 25123, "TIME": 4362}
+    },
+    "same_m1_collisions": {"LONG": 47, "SHORT": 50},
+    "protective_gap_fills": {"LONG": 372, "SHORT": 489},
+    "first_decision": "2023-04-18 01:15:00",
+    "last_decision": "2026-06-19 19:30:00",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "two_independent_full_runs_same_sha256": true,
+    "duplicate_decision_direction_keys": 0,
+    "finite_base_strong_extreme_r": true,
+    "holding_minutes_min": 1,
+    "holding_minutes_max": 360
+  },
+  "causality_validation": {
+    "future_cutoff": "2024-12-31 12:00:00",
+    "safe_decision_cutoff": "2024-12-31 06:00:00",
+    "rows_compared": 79926,
+    "decision_direction_keys_equal": true,
+    "outcomes_equal": true,
+    "maximum_persisted_numeric_difference": 4.999947122996673e-09
+  },
+  "unconditional_diagnostics_not_model_results": {
+    "LONG": {
+      "base_mean_r": -0.0279224818,
+      "base_profit_factor": 0.9524591287,
+      "strong_mean_r": -0.1552234580,
+      "strong_profit_factor": 0.7665871914,
+      "extreme_mean_r": -0.2825244343,
+      "extreme_profit_factor": 0.6199222941
+    },
+    "SHORT": {
+      "base_mean_r": -0.0892703699,
+      "base_profit_factor": 0.8543249808,
+      "strong_mean_r": -0.2162100164,
+      "strong_profit_factor": 0.6889417885,
+      "extreme_mean_r": -0.3431496630,
+      "extreme_profit_factor": 0.5589808486
+    },
+    "interpretation": "Always-trade LONG and SHORT are both negative after costs. ML-04 must beat these frozen unconditional baselines without retuning on test periods."
+  },
+  "expected_outputs": {
+    "directory": "outputs/gold_ml_v1/mlr1/ml03_labels_v1",
+    "label_registry": "mlr1_labels_v1.csv.gz",
+    "manifest": "mlr1_label_manifest_v1.json"
+  },
+  "acceptance_remaining": [
+    "Complete the pinned ML-02 feature replay on the user PC",
+    "Run run_build_labels.bat under Python 3.12, numpy 2.2.6 and pandas 2.2.3",
+    "Confirm 148317 resolved rows",
+    "Confirm label registry SHA256 c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed"
+  ],
+  "controls": {
+    "audit_only": true,
+    "model_trained": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "next_development_stage": "ML-04_DETERMINISTIC_AND_LINEAR_BASELINES"
+}
