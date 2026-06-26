@@ -1,0 +1,65 @@
+{
+  "record_id": "GML1-HIGH-RR-FINAL-AUDIT-RESULT-20260626",
+  "status": "HIGH_RR_ARCHITECTURE_FOUND_PROSPECTIVE_ONLY_NO_PROMOTION",
+  "audit_only": true,
+  "architecture": {
+    "direction": "LONG",
+    "setup": "M15 16-bar return/ATR lower-10% onset outside the two existing parent LONG lineages",
+    "confirmation": "M5 HOLD_BOS within 240 minutes before 1.0 M15-ATR continuation invalidation",
+    "quality_gate": {
+      "d1_ema20_slope4_atr_gte": -0.2532763484983291,
+      "m5_confirmation_body_fraction_gte": 0.4504081632653521
+    },
+    "initial_risk": "episode low minus 0.10 ATR; minimum 0.75 ATR; reject above 1.50 ATR",
+    "profit_management": "at +3R lock +1.5R, add 0.75 unit, then 2.0 M15-ATR chandelier, 24h maximum",
+    "worst_combined_R_after_add": 0.375
+  },
+  "normal_cost": {
+    "all_period": {"trades": 122, "win_rate": 0.4426229508, "profit_factor": 2.5859620582, "mean_R": 0.8014315019, "average_winner_R": 2.9523091694, "average_loser_R": -0.9201500286, "total_R": 97.7746432292},
+    "2023": {"trades": 39, "win_rate": 0.4102564103, "profit_factor": 3.7289771936, "mean_R": 1.3853439337, "average_winner_R": 4.6141536540, "total_R": 54.0284134157},
+    "2024": {"trades": 46, "win_rate": 0.4347826087, "profit_factor": 2.0038632517, "mean_R": 0.5136295148, "average_winner_R": 2.3581494873, "total_R": 23.6269576801},
+    "2025": {"trades": 29, "win_rate": 0.4827586207, "profit_factor": 2.0212011542, "mean_R": 0.5041203446, "average_winner_R": 2.0668189142, "total_R": 14.6194899944},
+    "2026_diagnostic": {"trades": 8, "win_rate": 0.5, "profit_factor": 2.3749455348, "mean_R": 0.6874727674, "average_winner_R": 2.3749455348, "total_R": 5.4997821390}
+  },
+  "cost_stress": {
+    "spread_1_5x_all_period_pf": 2.5414582902,
+    "spread_1_5x_slip_0_05_all_period_pf": 2.2982461866,
+    "spread_2_0x_all_period_pf": 2.2920286799,
+    "spread_2_0x_slip_0_10_all_period_pf": 2.2258818344,
+    "warning": "strong stress remained profitable in aggregate but some individual years fell below PF2"
+  },
+  "gold_extension": {
+    "hit_5R_given_3R": {"2023": 0.6923076923, "2024": 0.7058823529, "2025": 0.6428571429, "2026_diagnostic": 1.0},
+    "hit_6R_given_3R": {"2023": 0.4615384615, "2024": 0.5882352941, "2025": 0.5714285714, "2026_diagnostic": 0.75}
+  },
+  "cost_robust_selector": {
+    "rules_tested": 2201,
+    "strict_2023_base_and_stress_pass": 59,
+    "fixed_2024_2025_base_and_stress_survivors": 1,
+    "survivor_failed_2026_diagnostic": true,
+    "decision": "no external post-selected replacement"
+  },
+  "overlap": {
+    "current_definition_replay_exact_entry_matches": 0,
+    "maximum_plus_minus_60m_fraction": 0.0163934426,
+    "maximum_concurrent_fraction": 0.0573770492,
+    "authoritative_exact_parity": false,
+    "reason": "the available raw definition replay did not reproduce the frozen expected nine-candidate row counts and exact registry bodies are unavailable in the repository"
+  },
+  "correction": {
+    "broad_one_open_index_bug_found": true,
+    "preliminary_broad_ranking_invalidated": true,
+    "corrected_files_used_for_final_conclusion": true
+  },
+  "decision": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "automatic_promotion": false,
+    "prospective_monitor_only": true,
+    "true_confirmation_start": "after 2026-06-26",
+    "health_gate": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
