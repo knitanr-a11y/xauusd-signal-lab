@@ -1,0 +1,28 @@
+{
+  "record_id": "GML1-HIGH-RR-UPPER-TF-PULLBACK-HYPOTHESIS-20260626",
+  "status": "POST_AUDIT_PROSPECTIVE_HYPOTHESIS_ONLY",
+  "audit_only": true,
+  "warning": "This hypothesis was identified after inspecting 2023-2026 diagnostics. It is not an untouched validation result and may only be confirmed on data after 2026-06-26.",
+  "base_contract": "f376cf9c4f60274978c282b1e544405fa3e0adc3",
+  "additional_entry_gate": {
+    "h4_distance_below_20bar_high_atr_lte": 3.7864707809039273,
+    "h1_six_bar_return_atr_lte": -0.8532783779257462,
+    "logic": "AND",
+    "availability": "last fully closed H4 and H1 bars at entry"
+  },
+  "interpretation": {
+    "h4": "Price remains within 3.7865 H4 ATR of the trailing 20-bar high, so the medium-term structure is not a deep structural breakdown.",
+    "h1": "The latest six closed H1 bars are still down by at least 0.8533 H1 ATR, so the setup is a genuine active pullback rather than a late chase after the rebound is already complete.",
+    "combined": "A fast H1 liquidation inside a still-recoverable H4 structure, followed by the existing M5 HOLD_BOS confirmation."
+  },
+  "profit_management": "unchanged: +3R locks +1.5R, add 0.75 unit, then 2.0 M15-ATR chandelier, 24h maximum",
+  "next_audits": ["adjacent-threshold neighborhood", "cost stress", "month and volatility segmentation", "3R-to-5R and 3R-to-6R decomposition"],
+  "controls": {
+    "existing_nine_modified": false,
+    "automatic_promotion": false,
+    "prospective_only": true,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
