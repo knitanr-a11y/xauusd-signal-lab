@@ -1,0 +1,22 @@
+{
+  "record_id": "GML1-HIGH-RR-LONG-COST-STRESS-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_COST_EVALUATION",
+  "audit_only": true,
+  "rule": "frozen prospective high-RR LONG contract f376cf9c4f60274978c282b1e544405fa3e0adc3",
+  "scenarios": [
+    {"id": "BASE", "spread_multiplier": 1.0, "entry_slippage_price": 0.0, "exit_slippage_price": 0.0},
+    {"id": "SPREAD_1_5X", "spread_multiplier": 1.5, "entry_slippage_price": 0.0, "exit_slippage_price": 0.0},
+    {"id": "SPREAD_2_0X", "spread_multiplier": 2.0, "entry_slippage_price": 0.0, "exit_slippage_price": 0.0},
+    {"id": "SPREAD_1_5X_SLIP_0_05", "spread_multiplier": 1.5, "entry_slippage_price": 0.05, "exit_slippage_price": 0.05},
+    {"id": "SPREAD_2_0X_SLIP_0_10", "spread_multiplier": 2.0, "entry_slippage_price": 0.10, "exit_slippage_price": 0.10}
+  ],
+  "stress_execution": {
+    "long_entry": "M1 open plus stressed spread plus entry slippage",
+    "protective_and_trailing_exit": "trigger on the original M1 low and debit exit slippage from realized exit price",
+    "risk_recomputed": "from stressed entry to the unchanged structural stop, with the same 0.75-1.50 M15 ATR bounds",
+    "pyramid_activation": "recomputed at +3R using stressed entry and risk",
+    "same_m1_priority": "protective stop before activation or favorable continuation"
+  },
+  "diagnostics": ["year", "month", "M15 ATR-percentile volatility band", "trade count", "PF", "mean R", "average winner", "max drawdown"],
+  "controls": {"no_rule_change_after_results": true, "existing_nine_modified": false, "automatic_promotion": false, "live_ready": false}
+}
