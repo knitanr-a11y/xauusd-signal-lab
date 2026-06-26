@@ -1,0 +1,96 @@
+{
+  "record_id": "GML1-ML-SYNERGY-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_EVALUATION",
+  "audit_only": true,
+  "objective": {
+    "target_win_rate": 0.60,
+    "target_profit_factor": 2.0,
+    "minimum_external_resolved_per_year": 20,
+    "secondary_objective": "maximize stable expected R without sacrificing chronological fold stability"
+  },
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "decision_time": "M15 bar close = time + 15 minutes",
+    "entry_time": "exact M1 open equal to M15 decision time",
+    "higher_timeframe_join": "bar_close_time <= decision_time only",
+    "latest_csv_row": "closed",
+    "same_m1_tp_sl_collision": "SL priority",
+    "open_bar_and_future_features": "forbidden"
+  },
+  "period_contract": {
+    "2023": "training, purged walk-forward validation, model/threshold selection only",
+    "2024": "validation only, no model or threshold change",
+    "2025": "final test only, no model or threshold change",
+    "2026": "diagnostic only, no model or threshold change"
+  },
+  "universe": {
+    "decision_grid": "every valid closed M15 bar",
+    "directions": ["LONG", "SHORT"],
+    "entry_mode": "immediate exact M1 open at M15 close",
+    "risk": "decision M15 Wilder ATR14",
+    "profiles": {
+      "P15": {"stop_R": 1.0, "target_R": 1.5, "horizon_minutes": 720},
+      "P20": {"stop_R": 1.0, "target_R": 2.0, "horizon_minutes": 1440}
+    }
+  },
+  "features": {
+    "source_timeframes": ["M15", "H1", "H4", "D1"],
+    "categories": [
+      "normalized returns and momentum",
+      "EMA20/50/200 position, gap and slope",
+      "ATR regime and realized volatility",
+      "RSI, ADX, Bollinger z-score and width",
+      "candle body, range, close position and wick asymmetry",
+      "rolling breakout distances",
+      "tick-volume ratio",
+      "closed higher-timeframe context",
+      "cross-timeframe alignment and disagreement",
+      "server-hour and weekday cyclical encoding",
+      "entry spread normalized by ATR"
+    ],
+    "absolute_price_features": "excluded",
+    "future_derived_features": "excluded"
+  },
+  "walk_forward": {
+    "folds": [
+      {"train_end": "2023-04-30 23:59:59", "validation_start": "2023-05-02 00:00:00", "validation_end": "2023-06-30 23:59:59"},
+      {"train_end": "2023-06-30 23:59:59", "validation_start": "2023-07-02 00:00:00", "validation_end": "2023-08-31 23:59:59"},
+      {"train_end": "2023-08-31 23:59:59", "validation_start": "2023-09-02 00:00:00", "validation_end": "2023-10-31 23:59:59"},
+      {"train_end": "2023-10-31 23:59:59", "validation_start": "2023-11-02 00:00:00", "validation_end": "2023-12-31 23:59:59"}
+    ],
+    "purge_embargo": "one full day between train and validation",
+    "threshold_selection_data": "2023 out-of-fold predictions only",
+    "one_open_position": true
+  },
+  "models": {
+    "LOGIT": {"type": "L2 logistic regression", "C": 0.2, "max_iter": 2000},
+    "LGB_CLF": {"type": "LightGBM classifier", "n_estimators": 300, "learning_rate": 0.03, "num_leaves": 15, "max_depth": 4, "min_child_samples": 200, "subsample": 0.8, "colsample_bytree": 0.8, "reg_alpha": 0.2, "reg_lambda": 1.0},
+    "EXTRA": {"type": "ExtraTrees classifier", "n_estimators": 350, "max_depth": 8, "min_samples_leaf": 80, "max_features": 0.7},
+    "LGB_REG": {"type": "LightGBM expected-R regressor", "n_estimators": 300, "learning_rate": 0.03, "num_leaves": 15, "max_depth": 4, "min_child_samples": 200, "subsample": 0.8, "colsample_bytree": 0.8, "reg_alpha": 0.2, "reg_lambda": 1.0}
+  },
+  "fixed_scores": {
+    "LOGIT": "logistic probability",
+    "LGB_CLF": "LightGBM win probability",
+    "EXTRA": "ExtraTrees win probability",
+    "BLEND_C": "0.5*LGB_CLF + 0.3*EXTRA + 0.2*LOGIT",
+    "BLEND_CR": "0.45*LGB_CLF + 0.25*EXTRA + 0.15*LOGIT + 0.15*sigmoid(LGB_REG)"
+  },
+  "selection": {
+    "threshold_grid": "pooled 2023 OOF score quantiles 0.70 through 0.995 plus fixed probability levels",
+    "minimum_oof_resolved": 40,
+    "minimum_per_fold_resolved": 6,
+    "required_oof_target": "WR >= 0.60 and PF >= 2.0",
+    "stability": "at least 3 folds positive mean R and no fold PF below 0.8",
+    "maximum_frozen_candidates": 8,
+    "external_outcomes_used_for_selection": false
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "health_gate": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
