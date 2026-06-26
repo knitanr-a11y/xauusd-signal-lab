@@ -1,0 +1,73 @@
+{
+  "record_id": "GML1-HIGH-RR-UPPER-TF-FINAL-STUDY-RESULT-20260626",
+  "status": "POST_AUDIT_PROSPECTIVE_HYPOTHESIS_ONLY",
+  "audit_only": true,
+  "warning": "The final hypothesis was selected after inspecting 2023-2026 diagnostics. It is not an untouched holdout result and may only be confirmed on data after 2026-06-26.",
+  "entry_gate": {
+    "h4_dist_high20_atr_lte": 3.7864707809039273,
+    "h1_roc6_atr_lte": -0.8532783779257462,
+    "interpretation": "An active H1 liquidation inside an H4 structure that has not suffered a deep breakdown."
+  },
+  "baseline": {
+    "trades": 122,
+    "win_rate": 0.4426229508,
+    "profit_factor": 2.5859620582,
+    "mean_R": 0.8014315019,
+    "average_winner_R": 2.9523091694,
+    "total_R": 97.7746432292,
+    "max_drawdown_R": 8.3976034382
+  },
+  "entry_gate_diagnostic": {
+    "trades": 67,
+    "win_rate": 0.5522388060,
+    "profit_factor": 4.459670,
+    "mean_R": 1.397836,
+    "average_winner_R": 3.262851,
+    "total_R": 93.654980,
+    "max_drawdown_R": 4.829655,
+    "year_metrics": {
+      "2023": {"trades": 19, "win_rate": 0.578947, "profit_factor": 10.917831, "mean_R": 2.866398},
+      "2024": {"trades": 24, "win_rate": 0.541667, "profit_factor": 2.895557, "mean_R": 0.849667},
+      "2025": {"trades": 18, "win_rate": 0.555556, "profit_factor": 2.684534, "mean_R": 0.731969},
+      "2026_diagnostic": {"trades": 6, "win_rate": 0.500000, "profit_factor": 2.875313, "mean_R": 0.937657}
+    }
+  },
+  "four_quadrant_decomposition": {
+    "intact_H4_active_H1_pullback": {"trades": 67, "win_rate": 0.552239, "profit_factor": 4.459670},
+    "intact_H4_late_H1_rebound": {"trades": 32, "win_rate": 0.406250, "profit_factor": 1.621894},
+    "deep_H4_break_active_H1_pullback": {"trades": 22, "win_rate": 0.318182, "profit_factor": 1.140640},
+    "deep_H4_break_late_H1_rebound": {"trades": 4, "win_rate": 0.0, "profit_factor": 0.0}
+  },
+  "cost_stress_all_period": {
+    "base": {"trades": 67, "win_rate": 0.552239, "profit_factor": 4.459670, "total_R": 93.654980},
+    "spread_1_5x": {"trades": 65, "win_rate": 0.538462, "profit_factor": 4.216146, "total_R": 84.033622},
+    "spread_1_5x_slip_0_05": {"trades": 64, "win_rate": 0.531250, "profit_factor": 3.873563, "total_R": 76.313394},
+    "spread_2_0x": {"trades": 63, "win_rate": 0.523810, "profit_factor": 3.828647, "total_R": 74.108136},
+    "spread_2_0x_slip_0_10": {"trades": 59, "win_rate": 0.542373, "profit_factor": 3.748932, "total_R": 67.299397}
+  },
+  "post3_extension_decomposition": {
+    "all_3R_hits": {"trades": 42, "hit5_rate": 0.666667, "hit6_rate": 0.476190},
+    "H1_ema20_slope_positive": {"trades": 21, "hit5_rate": 0.952381, "hit6_rate": 0.666667},
+    "H1_ema20_above_ema50_and_slope_positive": {"trades": 14, "hit5_rate": 0.928571, "hit6_rate": 0.785714},
+    "no_H1_H4_D1_down_state": {"trades": 18, "hit5_rate": 0.888889, "hit6_rate": 0.722222}
+  },
+  "post3_dynamic_runner_hypothesis": {
+    "logic": "Continue the existing add-and-trail only when H1 has fully recovered or when no H1/H4/D1 down state remains; otherwise close the full position at 3R.",
+    "diagnostic_trades": 67,
+    "win_rate": 0.552239,
+    "profit_factor": 4.779524,
+    "mean_R": 1.527069,
+    "average_winner_R": 3.496868,
+    "total_R": 102.313604
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "automatic_promotion": false,
+    "prospective_only": true,
+    "health_gate": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
