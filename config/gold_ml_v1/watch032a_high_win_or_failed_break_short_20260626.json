@@ -1,0 +1,29 @@
+{
+  "candidate_id": "GML1-WATCH-032-A",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "direction": "SHORT",
+  "mechanism": "MT5-server 13:00-13:59 opening-range high sweep and closed-M15 return inside after M15 and H4 upward slope flatten",
+  "entry_filters": {
+    "trade_hours": "14:00-18:59 MT5 server bar-open",
+    "h4_range_state": true,
+    "m15_upper_wick_fraction_min": 0.30,
+    "m15_close_position_max": 0.35,
+    "m15_ema20_slope4_atr_max": 0.2531587996,
+    "h4_ema20_slope4_atr_max": 0.004782248063
+  },
+  "execution": {
+    "target_price_move_usd": 5.0,
+    "protective_distance_usd": 6.0,
+    "maximum_horizon_hours": 24,
+    "same_m1_collision": "protective level first"
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 97, "target_hit_rate": 0.7113402062, "profit_factor": 2.1191646192, "mean_price_usd": 1.8783505155, "total_price_usd": 182.20, "max_drawdown_price_usd": 18.0},
+    "strong_cost": {"trades": 98, "target_hit_rate": 0.6938775510, "profit_factor": 1.8908182953, "mean_price_usd": 1.6018367347, "total_price_usd": 156.98, "max_drawdown_price_usd": 18.3},
+    "2026_to_cutoff": {"trades": 14, "target_hit_rate": 0.7857142857, "profit_factor": 3.0555555556, "total_price_usd": 37.0}
+  },
+  "independence": {"exact_matches_vs_existing15": 0, "plus_minus_60m_matches_vs_existing15": 2},
+  "prospective_start_after": "2026-06-26",
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
