@@ -1,0 +1,18 @@
+{
+  "record_id": "GML1-OVEREXTENSION-ROLLING-META-SPEC-20260626",
+  "status": "PREDECLARED_CAUSAL_RESEARCH",
+  "audit_only": true,
+  "base_experts": {
+    "LONG": "M15 overextension setup, two-stage M5 EMA hold confirmation, structural risk, 0.75R target, 12h horizon",
+    "SHORT": "M15 overextension setup, two-stage M5 retest-break confirmation, structural risk, 1R target, 4h horizon"
+  },
+  "schedule": "retrain at each calendar month start using only events fully resolved before that month",
+  "training_window_months": 18,
+  "inner_validation_days": 120,
+  "models": ["regularized logistic", "regularized LightGBM", "ExtraTrees", "expected-R regressor"],
+  "monthly_switch": "OFF unless the immediately prior validation segment has at least 8 admitted trades, WR >= 0.60, PF >= 2.0 and positive mean R",
+  "thresholds": "score-quantile gates selected in the prior validation segment only",
+  "execution": "apply gate to raw trigger events, then one-open admission with open state carried across months",
+  "features": "entry-known setup, higher-timeframe context, setup-to-confirmation path and M5 confirmation features",
+  "controls": {"future_outcomes": "forbidden", "existing_nine_modified": false, "live_ready": false, "mt5_order": false}
+}
