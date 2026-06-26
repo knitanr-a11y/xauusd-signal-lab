@@ -1,78 +1,51 @@
 {
   "candidate_id": "GML1-WATCH-025-A",
-  "status": "ACCUMULATED_PROSPECTIVE_WATCH_NOT_REGISTERED",
+  "status": "RESEARCH_WATCH_PENDING_FULL_AUDIT",
   "audit_only": true,
-  "role": "INDEPENDENT_H4_H1_TREND_RESUMPTION_LONG_LINEAGE",
+  "role": "H4_H1_TREND_RESUMPTION_LONG_HYPOTHESIS",
   "lane": "M15-M5-H1-H4",
   "direction": "LONG",
-  "selection_warning": "The final structural rule was fixed after inspection of 2023-2026 diagnostics. It is not an untouched holdout result. Formal confirmation starts only with data after 2026-06-26.",
-  "setup": {
+  "history": {
+    "initial_record": "Drafted as an accumulated prospective watch before the full evidence package existed.",
+    "retraction_record": "config/gold_ml_v1/watch025a_retraction_20260626.json",
+    "reinstatement_record": "config/gold_ml_v1/watch025a_reinstatement_20260626.json",
+    "current_meaning": "The hypothesis is preserved and may be fully re-audited, but it is not counted in the accumulated stack."
+  },
+  "draft_hypothesis": {
     "h4_trend": "last closed H4 EMA20 > EMA50 and H4 EMA20 four-bar slope / ATR14 > 0",
     "m15_pullback_onset": "M15 close < EMA20 and M15 close > EMA50, false-to-true onset only",
     "h1_pullback_quality": "last closed H1 candle body fraction <= -0.2263978366340859",
     "h4_expansion_quality": "last closed H4 BB20 width / ATR14 >= 3.1793389189197567",
     "m5_confirmation": "HOLD_BOS within 240 minutes",
-    "continuation_invalidation": "setup low extended by 0.50 M15 ATR before confirmation"
+    "target": "draft fixed 2.50R"
   },
-  "interpretation": "A genuine bearish H1 pullback inside a rising and sufficiently expanded H4 trend, followed by an early M5 bullish structure break. This is trend resumption rather than the countertrend overextension reversal used by WATCH-024-A.",
-  "execution": {
-    "entry": "exact M1 open at confirming M5 close including dynamic spread",
-    "initial_stop": "confirmation/setup structural low with 0.10 M15 ATR buffer; minimum risk 0.50 M15 ATR; reject above 1.50 M15 ATR",
-    "target": "fixed 2.50R",
-    "maximum_horizon_hours": 24,
-    "same_m1_priority": "protective stop first",
-    "one_open_per_lineage": true
+  "draft_metrics_not_accepted_as_completed_audit": {
+    "trades": 93,
+    "win_rate": 0.5053763441,
+    "profit_factor": 2.437611,
+    "mean_R": 0.696302,
+    "average_winner_R": 2.336177,
+    "total_R": 64.7561,
+    "max_drawdown_R": 4.0
   },
-  "diagnostic_metrics": {
-    "all_available": {
-      "trades": 93,
-      "win_rate": 0.5053763441,
-      "profit_factor": 2.437611,
-      "mean_R": 0.696302,
-      "average_winner_R": 2.336177,
-      "average_loser_R": -0.979221,
-      "total_R": 64.7561,
-      "max_drawdown_R": 4.0
-    },
-    "2023": {"trades": 21, "win_rate": 0.571429, "profit_factor": 3.333333, "mean_R": 1.000000, "total_R": 21.0000, "max_drawdown_R": 2.0},
-    "2024": {"trades": 29, "win_rate": 0.517241, "profit_factor": 2.300590, "mean_R": 0.627873, "total_R": 18.2083, "max_drawdown_R": 3.0},
-    "2025": {"trades": 37, "win_rate": 0.459459, "profit_factor": 2.105210, "mean_R": 0.568859, "total_R": 21.0478, "max_drawdown_R": 4.0},
-    "2026_to_available_cutoff": {"trades": 6, "win_rate": 0.500000, "profit_factor": 2.500000, "mean_R": 0.750000, "total_R": 4.5000, "max_drawdown_R": 1.0}
-  },
-  "cost_stress_all_available": {
-    "spread_1_5x": {"trades": 85, "win_rate": 0.458824, "profit_factor": 2.091450, "total_R": 48.11, "max_drawdown_R": 5.50},
-    "spread_2_0x": {"trades": 81, "win_rate": 0.481481, "profit_factor": 2.295140, "total_R": 51.98, "max_drawdown_R": 4.50},
-    "spread_1_5x_slip_0_05": {"trades": 82, "win_rate": 0.475610, "profit_factor": 2.196050, "total_R": 49.91, "max_drawdown_R": 4.60},
-    "spread_2_0x_slip_0_10": {"trades": 76, "win_rate": 0.486842, "profit_factor": 2.253650, "total_R": 47.90, "max_drawdown_R": 5.25},
-    "warning": "Aggregate stress PF remained above 2, but some individual stressed years were below PF2."
-  },
-  "independence_diagnostic": {
-    "versus_WATCH_024_A": {"exact_entry_matches": 0, "plus_minus_60m_matches": 0, "concurrent_fraction": 0.0107526882},
-    "versus_current_definition_replay_of_existing_nine": {
-      "maximum_exact_entry_matches": 0,
-      "maximum_plus_minus_60m_fraction": 0.0322580645,
-      "maximum_concurrent_fraction": 0.0537634409,
-      "authoritative_exact_parity": false,
-      "reason": "Available replay did not reproduce every frozen registry exactly; formal overlap must be rerun when authoritative exact registry bodies are available."
-    }
-  },
-  "neighborhood_caveat": {
-    "selected_cell": "H1 body threshold at the 2023 median and H4 BB-width threshold at the 2023 20th percentile",
-    "observation": "Adjacent cells remained positive in aggregate but several had 2024 or 2025 PF below 2. The exact selected cell is locally stronger and requires prospective confirmation."
-  },
-  "prospective_gate": {
-    "start_after": "2026-06-26",
-    "minimum_resolved_trades_before_registration": 25,
-    "minimum_win_rate": 0.48,
-    "minimum_profit_factor": 2.0,
-    "minimum_mean_R": 0.50,
-    "maximum_drawdown_R": 7.0,
-    "cost_stress_review_required": true,
-    "no_rule_or_threshold_changes": true
+  "required_before_accumulation": [
+    "reproducible implementation checked into the repository",
+    "exact raw-event and one-open trade registries",
+    "causal selection contract and chronological-block audit",
+    "threshold-neighborhood plateau",
+    "yearly cost and slippage stress",
+    "authoritative overlap audit",
+    "fresh post-2026-06-26 fixed-rule confirmation"
+  ],
+  "permissions": {
+    "research": true,
+    "replay": true,
+    "comparison": true,
+    "accumulated": false,
+    "portfolio_use": false,
+    "live_use": false
   },
   "controls": {
-    "registered_candidate": false,
-    "portfolio_use_forbidden": true,
     "existing_candidates_modified": false,
     "health_gate": false,
     "live_ready": false,
