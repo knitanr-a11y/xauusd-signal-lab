@@ -8,15 +8,30 @@ Stack: `GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W`
 `GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md`
 は経緯参照用であり、状態判定・実装判断には使用しない。
 
-## 1. 現在状態
+## 1. 現在状態とこの契約の対象
 
-- accumulated: `GML1-WATCH-029-A`, `GML1-WATCH-030-A`
-- Research WATCH: `GML1-WATCH-032-A`, `GML1-WATCH-033-A`, `GML1-WATCH-034-A/B/C`
+stack全体:
+
+- accumulated: 15
+- Research WATCH: 9
 - retired: `GML1-WATCH-031-A`
 - implementation level: 2 / 6
 - executable candidate implementation committed: 0
 - audit-only
 - portfolio/live/MT5 order/Discord/final signal: OFF
+
+このV2契約の対象:
+
+- accumulated: `GML1-WATCH-029-A`, `GML1-WATCH-030-A`
+- Research WATCH: `GML1-WATCH-032-A`, `GML1-WATCH-033-A`, `GML1-WATCH-034-A/B/C`
+- retired: `GML1-WATCH-031-A`
+
+このV2の対象外だがstackに存在する既存Research WATCH:
+
+- `GML1-WATCH-025-A`
+- `GML1-WATCH-026-A`
+- `GML1-WATCH-027-A`
+- `GML1-WATCH-028-A`
 
 `accumulated`は研究stack採用を意味し、コード実装済みを意味しない。
 
@@ -111,8 +126,8 @@ EMA/ADX:
 
 - `gap20_50_atr = (EMA20-EMA50)/ATR14`
 - `slope4_atr = (EMA20-EMA20.shift(4))/ATR14`
-- `H4 range_state = ADX14 <= 27 OR abs(gap20_50_atr) <= 0.25`
-- `not_strong_bear = NOT(gap20_50_atr < -0.35 AND slope4_atr < 0)`
+- `H4 range_state = H4 ADX14 <= 27 OR abs(H4 gap20_50_atr) <= 0.25`
+- `H4 not_strong_bear = NOT(H4 gap20_50_atr < -0.35 AND H4 slope4_atr < 0)`
 
 ## 8. WATCH-029-A — accumulated meta lane
 
@@ -266,7 +281,7 @@ Priority 1 `HW_BLOCK_5_5`:
 - close >= block low
 - lower_wick_frac >= 0.15
 - close_pos >= 0.75
-- not_strong_bear
+- H4 not_strong_bear
 - TP5 / protective 5 / 8h
 
 Priority 2 `HW_BLOCK_DEEP_7.5_5`:
@@ -305,9 +320,9 @@ Expected strong cost:
 
 Configs:
 
-- `watch034a_tp75_practical_compression_long_20260626.json`
-- `watch034b_tp100_absolute_max_compression_long_20260626.json`
-- `watch034c_tp100_runner_compression_long_20260626.json`
+- `config/gold_ml_v1/watch034a_tp75_practical_compression_long_20260626.json`
+- `config/gold_ml_v1/watch034b_tp100_absolute_max_compression_long_20260626.json`
+- `config/gold_ml_v1/watch034c_tp100_runner_compression_long_20260626.json`
 
 Current M15 indexをiとする。
 
