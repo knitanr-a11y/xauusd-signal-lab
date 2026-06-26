@@ -1,0 +1,71 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "ML02_AND_ML03_USER_PC_PINNED_REPLAY_ACCEPTED",
+  "environment": {
+    "os": "Windows 11",
+    "python": "3.12",
+    "numpy": "2.2.6",
+    "pandas": "2.2.3"
+  },
+  "historical_source": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\gold_v3_2023_2026",
+  "ml02_feature_replay": {
+    "exit_code": 0,
+    "input_hashes_match_frozen_contract": true,
+    "rows": 74168,
+    "model_feature_count": 161,
+    "first_decision": "2023-04-18 01:15:00",
+    "last_decision": "2026-06-19 19:45:00",
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "feature_registry_exact_cross_environment_match": true,
+    "feature_columns_json_sha256_windows": "e9177d76b766cc44cea430db70ec4f726d58680e7ea425fc94327201ce2f7ebd",
+    "feature_columns_json_sha256_container": "b6f588f1e091906be3f2b3c1623898d59c12b28017d7a4e1209b2ec915af4d60",
+    "feature_columns_hash_interpretation": "AUXILIARY_TEXT_SERIALIZATION_DIFFERENCE_NOT_FEATURE_CONTENT_FAILURE",
+    "feature_columns_hash_cause": "The JSON writer uses pathlib.Path.write_text with platform-native newline translation. Linux emitted LF and Windows emitted CRLF. The deterministic gzip feature registry, including its ordered header columns and all values, matched exactly.",
+    "acceptance": "PASS"
+  },
+  "ml03_label_replay": {
+    "exit_code": 0,
+    "input_m1_sha256_match": true,
+    "input_feature_registry_sha256_match": true,
+    "resolved_rows": 148317,
+    "first_decision": "2023-04-18 01:15:00",
+    "last_decision": "2026-06-19 19:30:00",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "label_registry_exact_cross_environment_match": true,
+    "resolved_by_direction": {"LONG": 74157, "SHORT": 74160},
+    "outcomes_by_direction": {
+      "LONG": {"PROTECTIVE": 42991, "TARGET": 26549, "TIME": 4617},
+      "SHORT": {"PROTECTIVE": 44675, "TARGET": 25123, "TIME": 4362}
+    },
+    "same_m1_collisions": {"LONG": 47, "SHORT": 50},
+    "acceptance": "PASS"
+  },
+  "parity_policy_clarification": {
+    "byte_exact_required": [
+      "mlr1_features_v1.csv.gz",
+      "mlr1_labels_v1.csv.gz"
+    ],
+    "semantic_or_manifest_only": [
+      "mlr1_feature_columns_v1.json",
+      "mlr1_feature_manifest_v1.json",
+      "mlr1_label_manifest_v1.json"
+    ],
+    "reason": "Auxiliary JSON files currently use platform-native line endings. They are not model matrices or label registries. Their logical fields remain audited, while core gzip registries require byte-exact parity."
+  },
+  "gate_result": {
+    "ml02_user_pc_acceptance_complete": true,
+    "ml03_user_pc_acceptance_complete": true,
+    "pass_to_ml04": true,
+    "next_stage": "ML-04_DETERMINISTIC_AND_LINEAR_BASELINES"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_trained": false,
+    "live_adapter_implemented": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
