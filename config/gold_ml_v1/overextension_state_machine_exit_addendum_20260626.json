@@ -1,0 +1,14 @@
+{
+  "record_id": "GML1-OVEREXTENSION-STATE-MACHINE-EXIT-ADDENDUM-20260626",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_DIAGNOSTIC",
+  "audit_only": true,
+  "reason": "Separate reversal detection from payoff design and test whether the event is a short snapback rather than a 1.5R-2R trend reversal.",
+  "trigger_population": "Generated independently of trade exit; one-open admission is applied only after each exit profile is simulated.",
+  "profiles": {
+    "targets_R": [0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
+    "horizon_hours": [4, 8, 12, 24],
+    "stop": "structural episode extreme plus 0.1 ATR buffer, risk clipped to 0.5-1.5 M15 ATR"
+  },
+  "analysis": ["MFE and MAE distribution", "first-touch win rate and PF", "three chronological 2023 blocks", "fixed 2024-2026 diagnostic"],
+  "controls": {"existing_nine_modified": false, "active_new_candidate_total": 0, "live_ready": false}
+}
