@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_T",
-  "status": "FIFTEEN_ACCUMULATED_WITH_FIVE_RESEARCH_WATCHES",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_V",
+  "status": "FIFTEEN_ACCUMULATED_WITH_SIX_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -33,14 +33,13 @@
     "GML1-WATCH-026-A",
     "GML1-WATCH-027-A",
     "GML1-WATCH-028-A",
-    "GML1-WATCH-031-A"
+    "GML1-WATCH-032-A",
+    "GML1-WATCH-033-A"
   ],
-  "lane_policy": {
-    "GML1-WATCH-029-A": "simple fixed +5 USD-price meta lane using the frozen 13-candidate source stack",
-    "GML1-WATCH-030-A": "independent previous-day high liquidity sweep SHORT with +5 target and -10 emergency stop",
-    "GML1-WATCH-031-A": "independent multi-mechanism coverage lane using fixed 3-5 USD-price stops; research watch because recent months and strong-cost edge are modest",
-    "source_stack_changes_require_new_meta_lane_id": true,
-    "portfolio_use_forbidden_until_later_authorization": true
+  "retired_research_ids": ["GML1-WATCH-031-A"],
+  "research_watch_summary": {
+    "GML1-WATCH-032-A": "high-win opening-range failed-breakout SHORT with TP5 and SL6",
+    "GML1-WATCH-033-A": "compact lower-wick rejection LONG with configured TP5 or TP7.5 and SL5"
   },
   "existing_frozen_nine_modified": false,
   "audit_only": true,
