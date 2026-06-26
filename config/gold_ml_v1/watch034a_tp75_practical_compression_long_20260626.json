@@ -1,0 +1,28 @@
+{
+  "candidate_id": "GML1-WATCH-034-A",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "role": "PRACTICAL_MAX_FIXED_TARGET",
+  "direction": "LONG",
+  "mechanism": "Inside plus NR7 M15 compression breakout with H1 and H4 alignment, MT5 server hours 19 through 24, bullish body fraction at least 0.50",
+  "execution": {
+    "target_price_move_usd": 75.0,
+    "protective_distance_usd": 10.0,
+    "maximum_horizon_hours": 168,
+    "same_m1_collision": "protective level first",
+    "one_open_across_lane": true
+  },
+  "diagnostic_metrics": {
+    "base": {"trades": 96, "target_hit_rate": 0.1875, "target_hits": 18, "profit_factor": 2.403191, "mean_price_usd": 9.939271, "total_price_usd": 954.17, "max_drawdown_price_usd": 74.25},
+    "strong_cost": {"trades": 98, "target_hit_rate": 0.173469, "target_hits": 17, "profit_factor": 2.194952, "mean_price_usd": 8.743878, "total_price_usd": 856.90, "max_drawdown_price_usd": 70.70},
+    "strong_cost_2026": {"trades": 17, "target_hit_rate": 0.294118, "target_hits": 5, "profit_factor": 3.089934, "total_price_usd": 253.30}
+  },
+  "robustness": {
+    "positive_years": 4,
+    "years_with_target_hit": 4,
+    "worst_year_profit_factor_strong_cost": 1.406997,
+    "interpretation": "Highest practical fixed target because the target was reached in every year and the strong-cost mean return exceeded the TP100 variant."
+  },
+  "selection_warning": "Entry rules were frozen from the prior TP5-to-10 eligible set. Exit targets through TP150 were inspected, so this is prospective-only after 2026-06-26.",
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
