@@ -1,0 +1,63 @@
+{
+  "snapshot_id": "GOLD_ML_V1_HANDOFF_20260626_W",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "authoritative_stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W",
+  "authoritative_stack_path": "config/gold_ml_v1/provisional_candidate_stack_20260624.json",
+  "status": "FIFTEEN_ACCUMULATED_WITH_NINE_RESEARCH_WATCHES",
+  "audit_only": true,
+  "accumulated_total": 15,
+  "accumulated_added_in_this_chat": [
+    "GML1-WATCH-029-A",
+    "GML1-WATCH-030-A"
+  ],
+  "research_watch_total": 9,
+  "research_added_in_this_chat": [
+    "GML1-WATCH-032-A",
+    "GML1-WATCH-033-A",
+    "GML1-WATCH-034-A",
+    "GML1-WATCH-034-B",
+    "GML1-WATCH-034-C"
+  ],
+  "retired_ids": [
+    "GML1-WATCH-031-A"
+  ],
+  "required_read_order": [
+    "docs/gold_ml_v1/NEXT_CHAT_START_HERE_20260626.md",
+    "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_15_ACCUMULATED_9_WATCHES_20260626.md",
+    "docs/gold_ml_v1/GOLD_ML_V1_WATCH029_034_IMPLEMENTATION_CONTRACT_20260626.md",
+    "config/gold_ml_v1/provisional_candidate_stack_20260624.json"
+  ],
+  "candidate_config_paths": {
+    "GML1-WATCH-029-A": "config/gold_ml_v1/watch029a_fixed5_simple_meta_lane_20260626.json",
+    "GML1-WATCH-030-A": "config/gold_ml_v1/watch030a_prev_day_high_sweep_short_20260626.json",
+    "GML1-WATCH-032-A": "config/gold_ml_v1/watch032a_high_win_or_failed_break_short_20260626.json",
+    "GML1-WATCH-033-A": "config/gold_ml_v1/watch033a_high_win_compact_rejection_long_20260626.json",
+    "GML1-WATCH-034-A": "config/gold_ml_v1/watch034a_tp75_practical_compression_long_20260626.json",
+    "GML1-WATCH-034-B": "config/gold_ml_v1/watch034b_tp100_absolute_max_compression_long_20260626.json",
+    "GML1-WATCH-034-C": "config/gold_ml_v1/watch034c_tp100_runner_compression_long_20260626.json"
+  },
+  "raw_cutoff_mt5_server": {
+    "M1": "2026-06-19 19:54",
+    "M5": "2026-06-19 19:50",
+    "M15": "2026-06-19 19:45",
+    "H1": "2026-06-19 19:00",
+    "H4": "2026-06-19 16:00",
+    "D1": "2026-06-19 00:00"
+  },
+  "true_prospective_start_after": "2026-06-26",
+  "state_authority_note": "The stack file is authoritative for accumulated/research/retired state. Per-candidate controls may reflect their pre-promotion research state.",
+  "implementation_warnings": [
+    "WATCH-029-A must use the frozen 13-candidate source stack P, not the current 15 accumulated stack.",
+    "WATCH-033-A preserves component-specific TP5 and TP7.5 plus fixed component priority.",
+    "WATCH-034-A/B/C are mutually exclusive exit variants of the same entry lineage.",
+    "WATCH-031-A is retired because it included targets below the user-required TP5 minimum.",
+    "No live, MT5 order, Discord, final signal, or automatic promotion is authorized."
+  ],
+  "controls": {
+    "live_ready": false,
+    "portfolio_use": false,
+    "mt5_order": false,
+    "discord": false,
+    "final_signal": false
+  }
+}
