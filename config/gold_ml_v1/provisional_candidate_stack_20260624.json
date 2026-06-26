@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_P",
-  "status": "THIRTEEN_ACCUMULATED_WITH_FOUR_RESEARCH_WATCHES",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_Q",
+  "status": "FOURTEEN_ACCUMULATED_WITH_FOUR_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -15,14 +15,16 @@
     "GML1-WATCH-024-A",
     "GML1-WATCH-026-B",
     "GML1-WATCH-027-B",
-    "GML1-WATCH-028-B"
+    "GML1-WATCH-028-B",
+    "GML1-WATCH-029-A"
   ],
-  "accumulated_candidate_total": 13,
+  "accumulated_candidate_total": 14,
   "prospective_accumulated_ids": [
     "GML1-WATCH-024-A",
     "GML1-WATCH-026-B",
     "GML1-WATCH-027-B",
-    "GML1-WATCH-028-B"
+    "GML1-WATCH-028-B",
+    "GML1-WATCH-029-A"
   ],
   "research_watch_ids": [
     "GML1-WATCH-025-A",
@@ -30,13 +32,11 @@
     "GML1-WATCH-027-A",
     "GML1-WATCH-028-A"
   ],
-  "parent_derivative_policy": {
-    "A_variants": "coverage-oriented research parents",
-    "B_variants": "high-confidence accumulated derivatives preserving 4R payoff",
-    "parent_and_derivative_kept_separately": true,
-    "A_variants_counted_in_accumulated_total": false
+  "lane_policy": {
+    "GML1-WATCH-029-A": "simple fixed +5 USD-price meta lane using the frozen 13-candidate source stack; one-open and duplicate-collapsed",
+    "source_stack_changes_require_new_meta_lane_id": true,
+    "portfolio_use_forbidden_until_later_authorization": true
   },
-  "count_audit_note": "Existing frozen-nine exact registry bodies are not all available. Aggregate count reporting uses the current-definition replay for those nine and exact local registries for WATCH-024-A and WATCH-026-B through WATCH-028-B, with the limitation disclosed.",
   "existing_frozen_nine_modified": false,
   "audit_only": true,
   "live_ready": false,
