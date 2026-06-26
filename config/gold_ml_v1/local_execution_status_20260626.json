@@ -1,0 +1,93 @@
+{
+  "record_id": "GML1-LOCAL-EXECUTION-STATUS-20260626",
+  "status": "HANDOFF_AUDIT",
+  "date": "2026-06-26",
+  "user_pc_verified_runs": [
+    {
+      "phase": "COST_STRESS_RAW_RECONSTRUCTED",
+      "status": "PASS",
+      "verified_from_user_uploaded_output": true,
+      "generated_local": "2026-06-25T19:31:38",
+      "result": "9 of 9 frozen candidates passed all 12 cost scenarios",
+      "raw_baseline_parity_checks": 1687,
+      "record": "config/gold_ml_v1/cost_stress_raw_reconstructed_pass_20260625.json"
+    },
+    {
+      "phase": "FRESH_PROSPECTIVE_FIRST_RUN",
+      "status": "PASS_NO_CANDIDATE_YET",
+      "verified_from_user_uploaded_output": true,
+      "generated_local": "2026-06-25T20:12:06",
+      "candidate_rows": 0,
+      "record": "config/gold_ml_v1/fresh_prospective_first_run_pass_20260625.json"
+    },
+    {
+      "phase": "STATEFUL_PROSPECTIVE_MONITOR_INITIALIZATION",
+      "status": "PASS_MONITOR_INITIALIZED_NO_CANDIDATE_YET",
+      "verified_from_user_uploaded_output": true,
+      "generated_local": "2026-06-25T20:36:30",
+      "run_count": 1,
+      "latest_m1_close": "2026-06-25 14:36:00",
+      "candidate_total": 0,
+      "parent_event_total": 0,
+      "background_task_installed": false,
+      "record": "config/gold_ml_v1/prospective_monitoring_initialization_pass_20260625.json"
+    }
+  ],
+  "local_implementation_and_test_records": [
+    {
+      "phase": "BATCH023_WARMUP_BRIDGE",
+      "status": "LOCAL_IMPLEMENTATION_COMMITTED_AND_VERIFIED_9_OF_9_PASS_AUDIT_ONLY",
+      "raw_hash_check": "6 of 6 PASS",
+      "candidate_count": 9,
+      "missing_or_extra": 0,
+      "entry_mismatches": 0,
+      "exit_mismatches": 0,
+      "r_value_mismatches": 0,
+      "direction_mismatches": 0,
+      "record": "config/gold_ml_v1/batch023_local_warmup_bridge_implementation_20260625.json",
+      "note": "Warmup bridge rows are historical audit rows only and are forbidden for live use."
+    }
+  ],
+  "implemented_or_ci_validated_but_not_verified_by_user_pc_output": [
+    {
+      "phase": "BATCH024_LOCAL_REPRODUCTION",
+      "status": "CODE_AND_CI_PASS_ONLY",
+      "ci_status": "PASS",
+      "user_pc_parity_upload_received": false,
+      "assistant_survivor_count": 0,
+      "current_use": false,
+      "record": "config/gold_ml_v1/exploration_batch024_local_reproduction_ci_pass_20260625.json"
+    },
+    {
+      "phase": "PROV030A_LOCAL_REPRODUCTION",
+      "status": "REPRODUCER_COMPILED_AND_CI_PASS_ONLY",
+      "ci_status": "PASS",
+      "user_pc_run_completed": false,
+      "user_pc_output_uploaded": false,
+      "candidate_rejected_before_local_run": true,
+      "current_use": false,
+      "record": "config/gold_ml_v1/provisional_candidate_gml1_prov_030_a_ci_pass_20260625.json"
+    }
+  ],
+  "assistant_side_only_research": {
+    "batch024_through_batch035": "Research and audit artifacts exist, but none authorizes local execution or live use now.",
+    "prov030a": "Rejected and inactive. Preserve for audit history only."
+  },
+  "current_local_state": {
+    "root_bat_mode": "status_only",
+    "local_action_required": false,
+    "local_exploration": false,
+    "local_reproduction": false,
+    "prospective_monitoring": false,
+    "background_scheduler": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "candidate_state": {
+    "accumulated_candidate_total": 9,
+    "active_new_candidate_total": 0,
+    "prov030a_rejected": true,
+    "existing_nine_modified": false
+  }
+}
