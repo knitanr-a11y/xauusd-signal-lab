@@ -1,0 +1,68 @@
+{
+  "record_id": "GML1-MULTIVIEW-CANDIDATE-EXPLORATION-RESULT-20260626",
+  "status": "THREE_NEW_RESEARCH_WATCHES_FOUND_NO_AUTOMATIC_ACCUMULATION",
+  "audit_only": true,
+  "watch025a": {
+    "status": "RESEARCH_WATCH_PENDING_FULL_AUDIT",
+    "counted_in_accumulated_total": false,
+    "future_accumulation_possible": true
+  },
+  "search_scope": {
+    "mechanism_families": 12,
+    "directions": ["LONG", "SHORT"],
+    "interpretable_rules": 604,
+    "union_events": 27942,
+    "evaluated_profiles": 19147,
+    "eligible_2023_profiles": 555,
+    "stable_2023_profiles": 513,
+    "frozen_profiles": 28,
+    "direct_static_strict_pass": 0
+  },
+  "research_watches": {
+    "GML1-WATCH-026-A": {
+      "mechanism": "H1-H4 impulse continuation LONG",
+      "trades": 59,
+      "win_rate": 0.4406779661,
+      "profit_factor": 2.748983,
+      "mean_R": 0.978245,
+      "average_winner_R": 3.489094,
+      "total_R": 57.716443,
+      "max_drawdown_R": 4.562918,
+      "strong_cost_profit_factor": 2.438632,
+      "caveat": "Near and concurrent overlap with the existing H1-D1 LONG lineage."
+    },
+    "GML1-WATCH-027-A": {
+      "mechanism": "Inside compression expansion LONG",
+      "trades": 101,
+      "win_rate": 0.3663366337,
+      "profit_factor": 2.227556,
+      "mean_R": 0.777857,
+      "average_winner_R": 3.853070,
+      "total_R": 78.563584,
+      "max_drawdown_R": 8.0,
+      "strong_cost_profit_factor": 1.616,
+      "caveat": "Count-rich but cost-sensitive and close in time to the H1-D1 LONG lineage."
+    },
+    "GML1-WATCH-028-A": {
+      "mechanism": "Early H4 downtrend resumption SHORT",
+      "trades": 59,
+      "win_rate": 0.4067796610,
+      "profit_factor": 2.742857,
+      "mean_R": 1.033898,
+      "average_winner_R": 4.0,
+      "total_R": 61.0,
+      "max_drawdown_R": 12.0,
+      "strong_cost_profit_factor": 2.029376,
+      "caveat": "Highly independent timing and direction, but 2024 PF 1.143 and 12R drawdown."
+    }
+  },
+  "current_state": {
+    "accumulated_total": 10,
+    "prospective_accumulated_watch": "GML1-WATCH-024-A",
+    "research_watch_ids": ["GML1-WATCH-025-A", "GML1-WATCH-026-A", "GML1-WATCH-027-A", "GML1-WATCH-028-A"],
+    "portfolio_use": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
