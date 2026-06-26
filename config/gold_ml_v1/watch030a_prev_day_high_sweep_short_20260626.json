@@ -1,11 +1,16 @@
 {
   "candidate_id": "GML1-WATCH-030-A",
-  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "status": "ACCUMULATED_POST_AUDIT_PROSPECTIVE_ONLY",
   "audit_only": true,
   "role": "INDEPENDENT_PREVIOUS_DAY_HIGH_LIQUIDITY_SWEEP_SHORT",
   "lane": "RAW_M15_H4_SESSION_LIQUIDITY_REVERSAL",
   "direction": "SHORT",
   "selection_warning": "The two-branch lane was combined after fixed 2023 selection and 2024-2026 diagnostics were inspected. It is prospective-only for data after 2026-06-26.",
+  "current_stack_state": {
+    "authoritative_stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W",
+    "classification": "ACCUMULATED",
+    "logic_changed_by_state_update": false
+  },
   "mechanism": {
     "common": [
       "M15 high reaches at least previous-day high plus 0.25 M15 ATR14",
@@ -33,10 +38,10 @@
   },
   "diagnostic_metrics": {
     "all": {"trades": 106, "positive_rate": 0.7735849057, "tp5_rate": 0.7169811321, "profit_factor": 1.8492752241, "mean_price_usd": 1.6802830189, "total_price_usd": 178.11, "max_drawdown_price_usd": 35.0},
-    "2023": {"trades": 31, "positive_rate": 0.774194, "profit_factor": 1.920093, "total_price_usd": 51.24},
-    "2024": {"trades": 33, "positive_rate": 0.787879, "profit_factor": 1.984137, "total_price_usd": 62.04},
-    "2025": {"trades": 28, "positive_rate": 0.714286, "profit_factor": 1.349768, "total_price_usd": 24.83},
-    "2026_to_cutoff": {"trades": 14, "positive_rate": 0.857143, "profit_factor": 3.0, "total_price_usd": 40.0}
+    "2023": {"trades": 31, "positive_rate": 0.774194, "tp5_rate": 0.645161, "profit_factor": 1.920093, "mean_price_usd": 1.652903, "total_price_usd": 51.24, "max_drawdown_price_usd": 30.0},
+    "2024": {"trades": 33, "positive_rate": 0.787879, "tp5_rate": 0.757576, "profit_factor": 1.984137, "mean_price_usd": 1.88, "total_price_usd": 62.04, "max_drawdown_price_usd": 23.04},
+    "2025": {"trades": 28, "positive_rate": 0.714286, "tp5_rate": 0.678571, "profit_factor": 1.349768, "mean_price_usd": 0.886786, "total_price_usd": 24.83, "max_drawdown_price_usd": 35.0},
+    "2026_to_cutoff": {"trades": 14, "positive_rate": 0.857143, "tp5_rate": 0.857143, "profit_factor": 3.0, "mean_price_usd": 2.857143, "total_price_usd": 40.0, "max_drawdown_price_usd": 20.0}
   },
   "2026_monthly": {
     "2026-01": {"trades": 0, "total_price_usd": 0.0},
@@ -47,8 +52,14 @@
     "2026-06_to_19th": {"trades": 4, "total_price_usd": 20.0}
   },
   "cost_stress": {
-    "spread_1_5x_slip_0_05": {"trades": 108, "positive_rate": 0.75, "profit_factor": 1.652892, "mean_price_usd": 1.400694, "total_price_usd": 151.275, "max_drawdown_price_usd": 35.4},
-    "spread_2x_slip_0_10": {"trades": 108, "positive_rate": 0.731481, "profit_factor": 1.494705, "mean_price_usd": 1.128981, "total_price_usd": 121.93, "max_drawdown_price_usd": 38.14}
+    "spread_1_5x_slip_0_05": {"trades": 108, "positive_rate": 0.75, "tp5_rate": 0.703704, "profit_factor": 1.652892, "mean_price_usd": 1.400694, "total_price_usd": 151.275, "max_drawdown_price_usd": 35.4},
+    "spread_2x_slip_0_10": {"trades": 108, "positive_rate": 0.731481, "tp5_rate": 0.685185, "profit_factor": 1.494705, "mean_price_usd": 1.128981, "total_price_usd": 121.93, "max_drawdown_price_usd": 38.14}
+  },
+  "strong_cost_year_metrics": {
+    "2023": {"trades": 31, "positive_rate": 0.774194, "tp5_rate": 0.645161, "profit_factor": 1.813158, "total_price_usd": 46.35},
+    "2024": {"trades": 35, "positive_rate": 0.657143, "tp5_rate": 0.657143, "profit_factor": 1.159226, "total_price_usd": 15.48},
+    "2025": {"trades": 28, "positive_rate": 0.714286, "tp5_rate": 0.678571, "profit_factor": 1.298404, "total_price_usd": 21.5},
+    "2026_to_cutoff": {"trades": 14, "positive_rate": 0.857143, "tp5_rate": 0.857143, "profit_factor": 2.910891, "total_price_usd": 38.6}
   },
   "threshold_neighborhood": {
     "tested_cells": 16,
@@ -67,18 +78,6 @@
     "exact_matches_vs_WATCH_029_A": 0,
     "plus_minus_60m_matches_vs_WATCH_029_A": 0
   },
-  "complement_with_WATCH_029_A_diagnostic": {
-    "global_one_open_trades": 303,
-    "positive_rate": 0.8019801980,
-    "profit_factor": 2.2842489841,
-    "mean_price_usd": 2.1694059406,
-    "total_price_usd": 657.33,
-    "max_drawdown_price_usd": 29.53,
-    "2026_trades": 37,
-    "2026_profit_factor": 2.5833333333,
-    "2026_total_price_usd": 95.0,
-    "2026_monthly_trade_range": "5 to 8 trades from January through June 19"
-  },
   "prospective_requirements": {
     "start_after": "2026-06-26",
     "minimum_resolved_trades": 25,
@@ -87,5 +86,6 @@
     "maximum_drawdown_price_usd": 40.0,
     "no_rule_changes": true
   },
-  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+  "implementation_state": "SPEC_AND_DIAGNOSTIC_ONLY_NOT_EXECUTABLE_IN_REPOSITORY",
+  "controls": {"accumulated": true, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
 }
