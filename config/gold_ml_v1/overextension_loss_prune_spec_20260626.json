@@ -1,0 +1,36 @@
+{
+  "record_id": "GML1-OVEREXTENSION-LOSS-PRUNE-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_EXTERNAL_EVALUATION",
+  "audit_only": true,
+  "scope": ["LONG downside-overextension reversal", "SHORT upside-overextension reversal"],
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "decision": "M15 close = time + 15 minutes",
+    "higher_timeframe": "bar_close_time <= decision_time",
+    "entry": "exact M1 open at decision time",
+    "same_m1_collision": "SL priority",
+    "future_features": "forbidden"
+  },
+  "period_contract": {
+    "2023": "tail definition, purged walk-forward model/gate and composite loss-zone selection only",
+    "2024": "fixed validation only",
+    "2025": "fixed final test only",
+    "2026": "fixed diagnostic only"
+  },
+  "event": {
+    "measure": "M15 16-bar return divided by M15 ATR14",
+    "long_tail": "2023 eligible 7th percentile or lower",
+    "short_tail": "2023 eligible 93rd percentile or higher",
+    "trigger_variants": ["TAIL_ONLY", "CANDLE_TURN", "RSI_TURN", "WICK_TURN", "ANY_TURN"],
+    "exclude_existing_parent_lineages": true
+  },
+  "execution": {"stop_atr": 1.0, "target_atr": 1.0, "horizon_minutes": 720},
+  "models": ["logistic loss classifier", "LightGBM loss classifier", "ExtraTrees loss classifier", "LightGBM expected-R regressor"],
+  "loss_zone": {
+    "form": "two entry-known feature conditions joined by AND",
+    "thresholds": "2023 OOF feature quantiles only",
+    "minimum_excluded": 6,
+    "minimum_retained": 30
+  },
+  "switches": {"existing_nine_modified": false, "health_gate": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
