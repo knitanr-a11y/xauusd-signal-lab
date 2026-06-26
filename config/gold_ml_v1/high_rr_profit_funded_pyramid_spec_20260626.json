@@ -1,0 +1,32 @@
+{
+  "record_id": "GML1-HIGH-RR-PROFIT-FUNDED-PYRAMID-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_PYRAMID_EVALUATION",
+  "audit_only": true,
+  "base_entry": "frozen high-RR LONG Q10 countertrend HOLD_BOS wait240 invalidation1.0 STRUCT_SETUP",
+  "activation": "first touch of +3R before the original protective stop",
+  "risk_contract": {
+    "original_position_stop_after_activation": "+1.5R",
+    "additional_entry_price": "the +3R price level",
+    "additional_size_units": [0.25, 0.50, 0.75, 1.00],
+    "shared_exit_floor": "+1.5R in original-position coordinates",
+    "worst_combined_R_after_add": [1.125, 0.75, 0.375, 0.0],
+    "initial_pre_activation_loss": "unchanged at -1R"
+  },
+  "profit_exits": [
+    "combined fixed exit at original +6R",
+    "combined chandelier exit using 2.0 or 2.5 M15 ATR with a +1.5R floor",
+    "maximum horizon 24 or 48 hours"
+  ],
+  "combined_return_formula_after_add": "original_R + add_size * (original_R - 3R)",
+  "selection": {
+    "2023_only": true,
+    "minimum_trades": 30,
+    "minimum_profit_factor": 2.0,
+    "minimum_expectancy_R": 0.50,
+    "minimum_average_winner_R": 3.0,
+    "positive_chronological_blocks": 2,
+    "minimum_block_pf": 0.8
+  },
+  "external_role": "2024-2026 fixed diagnostic only",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
