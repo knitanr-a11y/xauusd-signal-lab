@@ -1,0 +1,44 @@
+{
+  "record_id": "GML1-OVEREXTENSION-ROOT-RETHINK-RESULT-20260626",
+  "status": "ROOT_CAUSE_AUDIT_COMPLETE_REBUILD_REQUIRED_NO_PROMOTION",
+  "audit_only": true,
+  "root_findings": [
+    "Overextension is a setup, not an entry signal.",
+    "First-touch sequencing dominates simple MFE presence.",
+    "LONG and SHORT are not symmetric.",
+    "Static 2023 models face strong covariate shift.",
+    "Fixed payoff and binary win labels conflate snapback and true reversal."
+  ],
+  "diagnostics": {
+    "long_mfe_ge_1r": 0.7653846154,
+    "long_mae_ge_1r": 0.7923076923,
+    "short_mfe_ge_1r": 0.8176100629,
+    "short_mae_ge_1r": 0.8301886792,
+    "entry_feature_year_classifier_auc_2023_vs_2025": 0.8815966387
+  },
+  "two_stage_long": {
+    "description": "M15 overextension then M5 reversal and two closes held on the reversal side of EMA20",
+    "risk_floor_atr": 1.0,
+    "target_r": 0.75,
+    "horizon_hours": 12,
+    "2023": {"n": 101, "wr": 0.6138613861, "pf": 1.2095275186},
+    "2024": {"n": 118, "wr": 0.6101694915, "pf": 1.2013903777},
+    "2025": {"n": 87, "wr": 0.5057471264, "pf": 0.7670191649},
+    "2026_diagnostic": {"n": 47, "wr": 0.5106382979, "pf": 0.7826086957}
+  },
+  "rolling_meta": {
+    "long": {"n": 35, "wr": 0.6571428571, "pf": 1.5286658652, "total_r": 5.965650429, "months_on": 13},
+    "short": {"n": 59, "wr": 0.4237288136, "pf": 0.7877085958, "total_r": -6.3063188182, "months_on": 16}
+  },
+  "decision": {
+    "static_loss_pruning_rejected": true,
+    "immediate_overextension_entry_rejected": true,
+    "short_overextension_candidate_rejected": true,
+    "long_two_stage_expert": "research_only",
+    "new_candidate_promoted": false,
+    "existing_nine_modified": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
