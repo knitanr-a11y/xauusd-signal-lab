@@ -1,0 +1,68 @@
+{
+  "candidate_id": "GML1-WATCH-026-A",
+  "status": "RESEARCH_WATCH_PENDING_PROSPECTIVE_CONFIRMATION",
+  "audit_only": true,
+  "role": "INDEPENDENT_IMPULSE_CONTINUATION_LONG_LINEAGE",
+  "lane": "M15-M5-H1-H4",
+  "direction": "LONG",
+  "selection_warning": "Discovered through the 2026-06-26 multiview audit and refined after inspecting 2023-2026 diagnostics. This is not an untouched holdout result.",
+  "mechanism": {
+    "base": "H1 and H4 bullish alignment followed by an abnormally large M15 bullish range/body breakout above the prior 10-bar high with volume expansion.",
+    "quality_gate": {
+      "m5_ema50_minus_ema200_gap_atr_lte": 2.48850082488,
+      "h1_12bar_return_atr_lte": 1.54012350173
+    },
+    "interpretation": "Buy an early, forceful multi-timeframe breakout, but reject entries where the lower-timeframe trend or the preceding H1 advance is already excessively extended."
+  },
+  "execution": {
+    "stop": "1.25 M15 ATR",
+    "target": "4.0R",
+    "maximum_horizon_hours": 12,
+    "entry": "exact M1 open at the closed M15 decision time with dynamic spread",
+    "same_m1_priority": "protective stop first",
+    "one_open_per_lineage": true
+  },
+  "exact_diagnostic_metrics": {
+    "trades": 59,
+    "win_rate": 0.4406779661,
+    "profit_factor": 2.74898,
+    "mean_R": 0.9782,
+    "average_winner_R": 3.489,
+    "total_R": 57.716,
+    "max_drawdown_R": 4.563,
+    "positive_years": 4,
+    "worst_year_profit_factor": 1.333
+  },
+  "cost_stress_all_available": {
+    "spread_1_5x": {"profit_factor": 2.746},
+    "spread_1_5x_slip_0_05_each_side": {"profit_factor": 2.680, "total_R": 56.16},
+    "spread_2_0x_slip_0_10_each_side": {"trades": 59, "win_rate": 0.4237, "profit_factor": 2.439, "mean_R": 0.851, "total_R": 50.22, "max_drawdown_R": 4.71}
+  },
+  "neighborhood_audit": {
+    "result": "SUPPORTED_LOCAL_PLATEAU",
+    "examples": [
+      "adjacent q67/q33: 52 trades, PF approximately 2.75",
+      "adjacent q50/q33: 44 trades, PF approximately 2.55",
+      "looser cells degraded gradually rather than collapsing immediately"
+    ]
+  },
+  "overlap_diagnostic": {
+    "exact_entry_matches": 0,
+    "maximum_plus_minus_60m_fraction": 0.322,
+    "maximum_concurrent_fraction": 0.271,
+    "main_nearby_lineage": "existing H1-D1 LONG family",
+    "versus_WATCH_024_A": {"plus_minus_60m_fraction": 0.017, "concurrent_fraction": 0.051},
+    "after_excluding_plus_minus_60m_of_all_existing_and_WATCH_024_A": {"trades": 38, "profit_factor": 2.479, "mean_R": 0.895, "total_R": 34.01, "warning": "2024 alone fell to PF approximately 0.67"},
+    "authoritative_exact_parity": false
+  },
+  "prospective_requirements": {
+    "start_after": "2026-06-26",
+    "minimum_resolved_trades": 25,
+    "minimum_profit_factor": 2.0,
+    "minimum_mean_R": 0.50,
+    "maximum_drawdown_R": 7.0,
+    "no_rule_changes": true,
+    "authoritative_overlap_registry_required_before_accumulation": true
+  },
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
