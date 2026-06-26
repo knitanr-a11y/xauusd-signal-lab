@@ -1,0 +1,225 @@
+{
+  "system_id": "GML1-MLR1",
+  "version": "v1",
+  "stage": "ML-00",
+  "status": "DESIGN_CONTRACT_FROZEN_AUDIT_ONLY",
+  "created": "2026-06-27",
+  "purpose": "Rebuild the GOLD_ML_V1 machine-learning lane as a causal, reproducible, regime-aware research system.",
+  "separation": {
+    "reuse_old_stage2_weights": false,
+    "reuse_old_stage2_scalers": false,
+    "reuse_old_stage2_feature_contract": false,
+    "modify_existing_candidate_stack": false,
+    "candidate_flags_in_v1_features": false
+  },
+  "controls": {
+    "audit_only": true,
+    "training_code_implemented": false,
+    "model_trained": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "automatic_retraining": false
+  },
+  "development_snapshot": {
+    "raw_files": {
+      "M1": "gold_v3_2023_2026_m1.csv",
+      "M15": "gold_v3_2023_2026_m15.csv",
+      "H1": "gold_v3_2023_2026_h1.csv",
+      "H4": "gold_v3_2023_2026_h4.csv",
+      "D1": "gold_v3_2023_2026_d1.csv"
+    },
+    "sha256": {
+      "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "H1": "fb9d4ad523726c4fc19fc71359ebefac0c3da5d14bbb7dbfb68e25a82f1b1629",
+      "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+      "D1": "58d9b8e7cc7f347355d536503550f98d64d7b834f86d80b164752b2015ca3cba"
+    },
+    "rule": "Only this exact snapshot may be used for MLR1-v1 development, feature selection, hyperparameter selection, calibration and policy-threshold selection.",
+    "prospective_reservation": "Rows outside this exact snapshot must never be merged back into MLR1-v1 development. They are reserved for shadow/prospective evaluation or a separately versioned MLR1-v2."
+  },
+  "time_contract": {
+    "timezone_basis": "MT5 server naive time",
+    "csv_time_meaning": "bar-open time",
+    "latest_csv_row": "closed by data contract",
+    "decision_universe": "every eligible closed M15 bar",
+    "m15_decision_time": "M15 bar-open plus 15 minutes",
+    "entry_requirement": "an exact M1 bar-open equal to decision time is required; otherwise skip",
+    "higher_timeframe_join": "use only H1/H4/D1 bars whose bar-close time is less than or equal to decision time",
+    "jst_conversion_in_v1": false,
+    "future_bar_use": false
+  },
+  "market_price_contract": {
+    "raw_ohlc_side": "bid",
+    "point": 0.01,
+    "long_entry": "M1 bid open plus contemporaneous spread times point",
+    "long_exit_and_touch_side": "bid",
+    "short_entry": "M1 bid open",
+    "short_exit_and_touch_side": "ask reconstructed as bid plus contemporaneous spread times point",
+    "same_m1_collision": "protective first",
+    "missing_exact_m1": "skip",
+    "wall_clock_horizon": true
+  },
+  "primary_label_contract": {
+    "label_id": "MLR1_LABEL_6H_TP1P5_SL1P0_ATR14",
+    "directions": ["LONG", "SHORT"],
+    "entry_atr": "M15 Wilder ATR14 calculated using the current closed M15 bar",
+    "target_distance_atr": 1.5,
+    "protective_distance_atr": 1.0,
+    "maximum_horizon_hours": 6,
+    "outcome_classes": ["TARGET", "PROTECTIVE", "TIME"],
+    "time_exit": "last available M1 close at or before the six-hour wall-clock horizon; never use a bar after the horizon",
+    "continuous_target": "realized gross R under the frozen exit contract",
+    "auxiliary_targets": [
+      "three-class outcome probability",
+      "conditional TIME-exit R"
+    ],
+    "other_label_geometries_in_v1": false,
+    "change_rule": "Any change to ATR period, target, stop, horizon, price-side handling or collision priority requires a new label ID and a new MLR version."
+  },
+  "cost_contract": {
+    "base": "actual dynamic spread and no extra slippage",
+    "strong": "2x dynamic spread plus adverse entry and exit slippage of 0.10 USD-price per side",
+    "extreme": "3x dynamic spread plus adverse entry and exit slippage of 0.20 USD-price per side",
+    "primary_model_selection_cost": "strong",
+    "label_path_uses": "bid/ask-consistent actual spread; policy evaluation additionally applies the selected cost scenario"
+  },
+  "feature_contract": {
+    "initial_model_form": "tabular decision-time snapshot; no neural sequence model in the baseline stage",
+    "absolute_price_features_allowed": false,
+    "future_confirmed_zigzag_allowed": false,
+    "repainting_swing_features_allowed": false,
+    "candidate_event_flags_allowed_in_v1": false,
+    "feature_families": [
+      "dimensionless returns and momentum over fixed causal lookbacks",
+      "M15/H1/H4/D1 candle body, wick and range normalized by ATR",
+      "EMA gaps and slopes normalized by ATR",
+      "ATR-to-price, ATR short-to-long ratios and trailing ATR percentile",
+      "RSI, ADX and MACD normalized where price-scaled",
+      "Bollinger width divided by ATR and close location",
+      "distance to prior completed-day/week and trailing highs/lows divided by ATR",
+      "dynamic spread divided by ATR",
+      "tick-volume ratios and trailing percentiles",
+      "MT5 server hour and weekday cyclic encodings"
+    ],
+    "indicator_rule": "Causal indicators may include the current closed decision bar.",
+    "distribution_baseline_rule": "Rolling percentiles, ranks, historical extrema and comparison baselines must exclude the current bar by shift(1).",
+    "warmup_bridge": false,
+    "missing_feature_policy": "Do not impute across unavailable history. Exclude rows until all required causal warmups exist."
+  },
+  "model_ladder": {
+    "stage_1_baselines": [
+      "unconditional class-rate and mean-R baselines",
+      "always-LONG and always-SHORT execution baselines",
+      "regularized logistic or multinomial regression",
+      "regularized linear expected-R regression"
+    ],
+    "stage_2_tabular": [
+      "histogram gradient boosting classifier",
+      "histogram gradient boosting regressor"
+    ],
+    "stage_3_sequence": "TCN/LSTM may be evaluated only after the tabular model passes the frozen baseline gate and only if it produces material walk-forward improvement.",
+    "long_short_models": "Separate LONG and SHORT estimators, calibration and diagnostics are required."
+  },
+  "ev_contract": {
+    "formula": "P(TARGET)*1.5R + P(PROTECTIVE)*(-1.0R) + P(TIME)*E[TIME_R|x] minus scenario trading cost in R",
+    "calibration_required": true,
+    "calibration_data": "validation segment only",
+    "policies": {
+      "conservative": "top 0.25 percent of eligible decisions per direction by calibrated strong-cost EV, with EV greater than zero",
+      "standard": "top 0.50 percent per direction by calibrated strong-cost EV, with EV greater than zero",
+      "high_coverage": "top 1.00 percent per direction by calibrated strong-cost EV, with EV greater than zero"
+    },
+    "threshold_selection_data": "validation segments only",
+    "test_threshold_retuning": false
+  },
+  "walk_forward_contract": {
+    "method": "expanding-window purged walk-forward",
+    "purge_before_each_boundary_hours": 6,
+    "embargo_after_each_boundary_hours": 6,
+    "folds": [
+      {
+        "fold": 1,
+        "train": "2023-01-01 through 2023-12-31",
+        "validation": "2024-01-01 through 2024-06-30",
+        "test": "2024-07-01 through 2024-12-31"
+      },
+      {
+        "fold": 2,
+        "train": "2023-01-01 through 2024-06-30",
+        "validation": "2024-07-01 through 2024-12-31",
+        "test": "2025-01-01 through 2025-06-30"
+      },
+      {
+        "fold": 3,
+        "train": "2023-01-01 through 2024-12-31",
+        "validation": "2025-01-01 through 2025-06-30",
+        "test": "2025-07-01 through 2025-12-31"
+      },
+      {
+        "fold": 4,
+        "train": "2023-01-01 through 2025-06-30",
+        "validation": "2025-07-01 through 2025-12-31",
+        "test": "2026-01-01 through the exact end of the frozen development snapshot"
+      }
+    ],
+    "random_split_allowed": false,
+    "historical_test_interpretation": "development diagnosis only because the period has been inspected previously; it is not a pristine holdout"
+  },
+  "evaluation_contract": {
+    "ml_metrics": [
+      "multiclass log loss",
+      "Brier score and Brier skill",
+      "ROC-AUC and PR-AUC for TARGET and PROTECTIVE",
+      "calibration intercept and slope",
+      "reliability by probability decile"
+    ],
+    "trading_metrics": [
+      "signals and resolved trades by month",
+      "profit factor and mean R under base/strong/extreme cost",
+      "total R, maximum drawdown R and maximum losing streak",
+      "LONG/SHORT balance",
+      "year, ATR regime, trend regime, session and spread regime breakdowns",
+      "top-five and top-five-percent winner removal",
+      "feature and prediction drift"
+    ],
+    "no_primary_metric": "No single AUC, PF or win-rate value is sufficient for acceptance."
+  },
+  "shadow_gate": {
+    "applies_per_direction_and_standard_policy": true,
+    "minimum_total_test_trades": 100,
+    "minimum_positive_test_folds": 3,
+    "minimum_aggregate_strong_profit_factor": 1.2,
+    "minimum_aggregate_strong_mean_R": 0.05,
+    "maximum_aggregate_strong_drawdown_R": 20.0,
+    "top_five_winners_removed_total_R_must_be_nonnegative": true,
+    "maximum_single_fold_share_of_positive_R": 0.5,
+    "brier_skill_must_be_positive": true,
+    "strong_EV_must_remain_positive_under_extreme_cost_review": true,
+    "failure_result": "remain research-only; do not begin prospective shadow signalling"
+  },
+  "prospective_contract": {
+    "start": "after a separately committed frozen model package passes the shadow gate",
+    "data": "only rows outside the frozen development snapshot",
+    "minimum_elapsed_months": 6,
+    "minimum_resolved_trades_per_direction": 100,
+    "no_retraining_or_threshold_change_within_version": true,
+    "model_update": "A retrained model must receive a new immutable version ID."
+  },
+  "stage_sequence": [
+    "ML-00 design contract",
+    "ML-01 raw-data and timestamp audit",
+    "ML-02 common causal feature engine",
+    "ML-03 exact-M1 label engine",
+    "ML-04 deterministic and linear baselines",
+    "ML-05 tabular gradient-boosting models",
+    "ML-06 calibration and strong-cost EV policies",
+    "ML-07 optional sequence-model comparison",
+    "ML-08 audit-only frozen shadow package",
+    "ML-09 prospective evaluation"
+  ],
+  "next_stage": "ML-01_RAW_DATA_AND_TIMESTAMP_AUDIT"
+}
