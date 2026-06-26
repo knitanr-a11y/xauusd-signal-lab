@@ -1,0 +1,114 @@
+{
+  "record_id": "GML1-REOPEN-BATCH024-PROV030A-MULTIVIEW-AUDIT-20260626",
+  "date": "2026-06-26",
+  "status": "AUDIT_COMPLETE_NO_CANDIDATE_ACTIVATION",
+  "formal_parent_status": "GOLD_ML_V1_031_HANDOFF_READY_AUDIT_ONLY",
+  "authorization": "User explicitly reopened Batch024 and GML1-PROV-030-A for audit and renewed exploration.",
+  "audit_only": true,
+  "input_contract": {
+    "all_six_raw_hashes_match": true,
+    "closed_bars_only": true,
+    "higher_timeframes_closed_by_decision_only": true,
+    "same_m1_tp_sl_priority": "SL",
+    "periods": {
+      "2023": "EXPLORATION_AND_SHORTLIST_ONLY",
+      "2024": "VALIDATION_ONLY_NO_RETUNE",
+      "2025": "FINAL_TEST_ONLY_NO_RETUNE",
+      "2026": "DIAGNOSTIC_ONLY_NEVER_RETUNE"
+    }
+  },
+  "predeclared_spec_sha256": "590f2b138fbe7850d6f717ed4a4d01fdd433aa6ee411ed5f225a6830c02ea4d8",
+  "exact_reproduction": {
+    "batch024": {
+      "attempted_cells": 36,
+      "gate_pass_counts": {"2023": 4, "2024": 17, "2025": 15},
+      "all_period_survivors": 0,
+      "matches_historical_record": true,
+      "interpretation": "The zero-survivor result is reproducible, but the RSI-centered 36-cell grid and single 1R/1.5R exit profile were too narrow to represent the wider pullback space."
+    },
+    "prov030a": {
+      "matches_historical_record": true,
+      "metrics": {
+        "2023": {"count": 58, "profit_factor": 1.3793103448275863, "mean_r": 0.1896551724137931, "total_r": 11.0},
+        "2024": {"count": 77, "profit_factor": 1.728245848270764, "mean_r": 0.33102084012307453, "total_r": 25.488604689476738},
+        "2025": {"count": 87, "profit_factor": 1.8477434926157421, "mean_r": 0.32237081021546876, "total_r": 28.04626048874578},
+        "2026_diagnostic": {"count": 25, "profit_factor": 1.0416666666666667, "mean_r": 0.02, "total_r": 0.5}
+      },
+      "interpretation": "The historical candidate was not an implementation false negative. Its precise regime leaf remains vulnerable to local optimization."
+    }
+  },
+  "new_multiview_search": {
+    "families": ["RPB_EXPANDED_PULLBACK", "STP_STRUCTURAL_PULLBACK", "CBO_COMPRESSION_BREAKOUT", "P30_DECOMPOSITION_AND_MIRROR"],
+    "predeclared_cells": 1344,
+    "unique_event_sets": 496,
+    "eligible_using_2023_only": 225,
+    "frozen_shortlist_using_2023_only": 20,
+    "frozen_shortlist_sha256": "2b07285ebdd0b97258b509dd3ecff16f17467bd180d3516379d91e8125e467f9",
+    "external_labels": {"STRICT_PASS": 4, "SOFT_WATCH": 1, "FAIL": 15},
+    "external_data_used_for_shortlist": false
+  },
+  "family_findings": {
+    "P30_LONG": {
+      "neighborhood_tested": 6,
+      "strict_2024_2025": 6,
+      "positive_2026": 0,
+      "negative_2026": 6,
+      "decision": "HISTORICAL_EDGE_CURRENT_DIAGNOSTIC_DEGRADATION_NO_REACTIVATION"
+    },
+    "RPB_LONG_REJECTION": {
+      "neighborhood_tested": 8,
+      "strict_2024_2025": 2,
+      "positive_2026": 0,
+      "negative_2026": 2,
+      "decision": "HISTORICAL_SUPPORT_NARROW_PLATEAU_CURRENTLY_WEAK"
+    },
+    "STP_SHORT_STRUCTURAL_PULLBACK": {
+      "neighborhood_tested": 36,
+      "strict_2024_2025": 6,
+      "positive_2026": 6,
+      "negative_2026": 0,
+      "decision": "STRONGEST_NEW_RESEARCH_DIRECTION_NOT_AN_ACTIVE_CANDIDATE"
+    }
+  },
+  "representative_2023_frozen_results": {
+    "P30_LONG": {
+      "candidate_id": "GML1-REOPEN-P30-L-window1-offset0p05-candleTrue-regimePULLBACK_SLOPE03-exitE25B",
+      "2024": {"count": 92, "profit_factor": 1.469367, "mean_r": 0.229582},
+      "2025": {"count": 131, "profit_factor": 1.277138, "mean_r": 0.139112},
+      "2026_diagnostic": {"count": 28, "profit_factor": 0.714286, "mean_r": -0.142857}
+    },
+    "RPB_LONG": {
+      "candidate_id": "GML1-REOPEN-RPB-L-gap0p3-rsi45-h4True-triggerREJECTION-exitE25B",
+      "2024": {"count": 59, "profit_factor": 1.73913, "mean_r": 0.288136},
+      "2025": {"count": 66, "profit_factor": 1.067567, "mean_r": 0.035831},
+      "2026_diagnostic": {"count": 26, "profit_factor": 0.769231, "mean_r": -0.115385}
+    },
+    "STP_SHORT": {
+      "candidate_id": "GML1-REOPEN-STP-S-gap0p0-h4True-ema50-wick0p5-h1slopeTrue-exitE20",
+      "2024": {"count": 69, "profit_factor": 1.104735, "mean_r": 0.065348},
+      "2025": {"count": 44, "profit_factor": 1.384615, "mean_r": 0.227273},
+      "2026_diagnostic": {"resolved_count": 65, "profit_factor": 1.067892, "mean_r": 0.043869}
+    }
+  },
+  "decision": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "batch024_reactivated_as_candidate": false,
+    "prov030a_reactivated": false,
+    "exact_new_cell_promoted": false,
+    "reason_no_exact_promotion": "External and diagnostic results are now visible; selecting or retuning an exact cell from them would violate the frozen-period contract.",
+    "next_research_direction": "Predeclare a family-level STP SHORT structural-pullback contract or prospective audit-only observation without using 2024-2026 to choose exact thresholds."
+  },
+  "execution_switches": {
+    "root_bat_changed": false,
+    "health_gate": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "ai_api": false,
+    "live_hook": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
