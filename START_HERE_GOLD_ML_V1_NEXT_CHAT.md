@@ -9,17 +9,15 @@ Current status:
 Read `AGENTS.md` first, then:
 
 - `config/gold_ml_v1/current_state_20260626.json`
+- `config/gold_ml_v1/local_execution_status_20260626.json`
 - `config/gold_ml_v1/next_local_action.json`
 - `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
 - `config/gold_ml_v1/prov030a_rejection_20260626.json`
 
-Facts:
+The local execution status file is authoritative for what was run on the user PC, what only passed CI, and what was never run locally.
 
-- CSV `time` is MT5 server bar-open time.
-- The accumulated pool remains the existing nine.
-- There is no active new provisional candidate.
-- `GML1-PROV-030-A` is prior audit history only and must not be resumed automatically.
-- No local run or upload is active.
-- Wait for a new explicit user direction.
+The accumulated pool remains nine. There is no active new candidate. `GML1-PROV-030-A` is inactive audit history.
 
-Audit-only remains active. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
+`RUN_GOLD_ML_V1_NEXT.bat` is status-only. No local action is active. Wait for explicit user direction.
+
+CSV `time` is MT5 server bar-open time. Audit-only remains active. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
