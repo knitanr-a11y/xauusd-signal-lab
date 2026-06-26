@@ -1,0 +1,76 @@
+{
+  "record_id": "GML1-OVEREXTENSION-HIGH-RR-REDESIGN-SPEC-20260626",
+  "status": "PREDECLARED_BEFORE_EXIT_EVALUATION",
+  "audit_only": true,
+  "core_principle": "Do not cap GOLD winners at 0.75R-1R. Fix initial risk, classify whether the move is a snapback or trend resumption, and preserve a runner for 3R-6R potential.",
+  "time_contract": {
+    "csv_time": "MT5 server bar-open time",
+    "decision": "closed M15/M5 bars only",
+    "entry": "exact M1 open at confirming M5 close",
+    "same_m1_collision": "protective stop first",
+    "future_data": "forbidden"
+  },
+  "setup_families": [
+    "COUNTERTREND_REVERSAL",
+    "H1_H4_TREND_RESUMPTION",
+    "D1_H4_TREND_RESUMPTION"
+  ],
+  "setup": {
+    "m15_overextension": "2023 quantiles of 16-bar return / ATR14 at 5%, 7.5% and 10% tails",
+    "episode": "false-to-true onset only",
+    "existing_two_parent_long_lineages": "excluded"
+  },
+  "confirmation": {
+    "HOLD_BOS": "two M5 closes on reversal side of EMA20 and close beyond prior 3-bar structure",
+    "RETEST_REBREAK": "first M5 BOS, pullback to EMA20 within six bars, then re-break beyond prior 2-bar structure",
+    "wait_minutes": [120, 240],
+    "continuation_invalidation_atr": [0.75, 1.0]
+  },
+  "initial_stop": {
+    "STRUCT_SETUP": "setup episode extreme plus 0.10 M15 ATR buffer; risk clipped to 0.75-1.50 ATR",
+    "STRUCT_CONFIRM": "confirmation swing extreme plus 0.10 M15 ATR buffer; risk clipped to 0.50-1.25 ATR",
+    "ATR1": "one M15 ATR"
+  },
+  "exit_profiles": {
+    "fixed_targets_R": [2.0, 3.0, 4.0, 5.0],
+    "partial_runners": [
+      "25% at 1R, 75% to 4R",
+      "25% at 1R, 75% to 6R",
+      "33% at 1.5R, 67% to 4R",
+      "50% at 1R, 50% with M5 swing trail"
+    ],
+    "runner_trails": [
+      "M5 prior-3-bar swing after 1.5R",
+      "M5 EMA20 close-cross after 1.5R",
+      "chandelier 2.0 M15 ATR after 1.5R"
+    ],
+    "break_even": ["none", "after 1.5R only"],
+    "maximum_horizon_hours": [24, 48, 72]
+  },
+  "selection_2023": {
+    "chronological_blocks": 3,
+    "minimum_trades": 30,
+    "minimum_each_block": 6,
+    "minimum_profit_factor": 2.0,
+    "minimum_expectancy_R": 0.35,
+    "minimum_average_winner_R": 2.0,
+    "minimum_win_rate": 0.40,
+    "positive_blocks_required": 2,
+    "maximum_profiles_frozen": 8
+  },
+  "external_role": {
+    "2024": "fixed diagnostic only",
+    "2025": "fixed diagnostic only",
+    "2026": "fixed diagnostic only",
+    "reason": "these periods have already been exposed in prior research"
+  },
+  "controls": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "automatic_promotion": false,
+    "health_gate": false,
+    "live_ready": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
