@@ -1,0 +1,25 @@
+{
+  "candidate_id": "GML1-WATCH-033-A",
+  "status": "RESEARCH_WATCH_POST_AUDIT_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "direction": "LONG",
+  "mechanism": "19:00-23:59 MT5-server sweep and reclaim of the completed 13:00-18:59 range low or prior rolling-20 low, restricted to compact large-lower-wick rejection bars",
+  "entry_filters": {
+    "m15_range_atr_max": 1.223196212,
+    "m15_lower_wick_fraction_min": 0.4319499106
+  },
+  "execution": {
+    "configured_target_price_moves_usd": [5.0, 7.5],
+    "protective_distance_usd": 5.0,
+    "maximum_horizon_hours": 8,
+    "same_m1_collision": "protective level first"
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 70, "positive_exit_rate": 0.7142857143, "full_target_hit_rate": 0.50, "profit_factor": 2.4335565738, "mean_price_usd": 1.743, "total_price_usd": 122.01, "max_drawdown_price_usd": 10.0},
+    "strong_cost": {"trades": 70, "positive_exit_rate": 0.7142857143, "full_target_hit_rate": 0.50, "profit_factor": 2.1497558329, "mean_price_usd": 1.5135714286, "total_price_usd": 105.95, "max_drawdown_price_usd": 10.72},
+    "2026_to_cutoff": {"trades": 13, "positive_exit_rate": 0.6923076923, "full_target_hit_rate": 0.6923076923, "profit_factor": 2.25, "total_price_usd": 25.0}
+  },
+  "note": "Positive-exit rate includes profitable time exits; it is not identical to full configured target hit rate.",
+  "prospective_start_after": "2026-06-26",
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
