@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_J",
-  "status": "TEN_ACCUMULATED_WITH_ONE_POST_AUDIT_PROSPECTIVE_HIGH_RR_WATCH",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_K",
+  "status": "ELEVEN_ACCUMULATED_WITH_TWO_POST_AUDIT_PROSPECTIVE_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -12,14 +12,21 @@
     "GML1-WATCH-021-A",
     "GML1-WATCH-021-B",
     "GML1-WATCH-021-C",
-    "GML1-WATCH-024-A"
+    "GML1-WATCH-024-A",
+    "GML1-WATCH-025-A"
   ],
-  "accumulated_candidate_total": 10,
+  "accumulated_candidate_total": 11,
   "active_provisional_ids": [],
-  "prospective_watch_ids": ["GML1-WATCH-024-A"],
+  "prospective_watch_ids": ["GML1-WATCH-024-A", "GML1-WATCH-025-A"],
   "prospective_watch_records": [
-    "config/gold_ml_v1/watch024a_high_rr_upper_tf_prospective_20260626.json"
+    "config/gold_ml_v1/watch024a_high_rr_upper_tf_prospective_20260626.json",
+    "config/gold_ml_v1/watch025a_h4_h1_trend_resumption_prospective_20260626.json"
   ],
+  "lineage_summary": {
+    "existing_frozen_nine": "two historical LONG parent lineages plus derivatives",
+    "GML1-WATCH-024-A": "countertrend overextension reversal with upper-timeframe pullback context and dynamic runner",
+    "GML1-WATCH-025-A": "H4 bullish trend and H1 bearish pullback trend-resumption with fixed 2.5R target"
+  },
   "rejected_ids": ["GML1-PROV-030-A"],
   "rejection_record": "config/gold_ml_v1/prov030a_rejection_20260626.json",
   "existing_frozen_nine_modified": false,
