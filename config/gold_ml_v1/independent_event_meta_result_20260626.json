@@ -1,0 +1,51 @@
+{
+  "record_id": "GML1-INDEPENDENT-EVENT-META-SEARCH-RESULT-20260626",
+  "status": "AUDIT_COMPLETE_ZERO_STRICT_CANDIDATES",
+  "audit_only": true,
+  "existing_nine_interpretation": "two parent LONG lineages plus seven derivative filters",
+  "search": {
+    "event_families": 12,
+    "profiles": ["E11", "P15", "P20"],
+    "causal_features": 177,
+    "purged_walk_forward_folds": 3,
+    "single_threshold_rows": 1954,
+    "two_model_agreement_rows": 12554,
+    "strict_2023_oof_pass_count": 0,
+    "frozen_diagnostic_shortlist_count": 6,
+    "shortlist_sha256": "53bf242f0d58bf4879329ba9c4f3e0d2dcb4b3b23940bb1b109ab552fc6c2f7b"
+  },
+  "novelty": {
+    "existing_m15_h4_state_hits_external_total": 0,
+    "existing_h1_d1_parent_exact_hits_external_total": 0,
+    "existing_h1_d1_parent_plus_minus_60m_hits_external_total": 0,
+    "maximum_oof_pairwise_jaccard": 0.0546448087431694,
+    "maximum_external_pairwise_jaccard": 0.06354515050167224
+  },
+  "best_2023_oof_diagnostic": {
+    "candidate_id": "GML1-INDEP-DIAG-01",
+    "family": "EXT_L",
+    "description": "LONG reversal after downside overextension outside existing parent states",
+    "profile": "E11",
+    "resolved": 51,
+    "win_rate": 0.627451,
+    "profit_factor": 1.663819,
+    "mean_r": 0.242851,
+    "external": {
+      "2024": {"resolved": 113, "win_rate": 0.469027, "profit_factor": 0.878743, "total_r": -6.953388},
+      "2025": {"resolved": 112, "win_rate": 0.517857, "profit_factor": 1.095794, "total_r": 4.990662},
+      "2026_diagnostic": {"resolved": 93, "win_rate": 0.462366, "profit_factor": 0.836408, "total_r": -8.179607}
+    }
+  },
+  "external_target_survivor_count": 0,
+  "decision": {
+    "existing_nine_modified": false,
+    "active_new_candidate_total": 0,
+    "new_candidate_promoted": false,
+    "reason": "No 2023 OOF candidate met WR >= 60%, PF >= 2 and fold stability. All six 2023-frozen diagnostics failed fixed 2024/2025 evaluation.",
+    "health_gate": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
