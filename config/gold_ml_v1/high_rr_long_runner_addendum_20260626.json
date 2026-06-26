@@ -1,0 +1,35 @@
+{
+  "record_id": "GML1-HIGH-RR-LONG-RUNNER-ADDENDUM-20260626",
+  "status": "PREDECLARED_BEFORE_RUNNER_EVALUATION",
+  "audit_only": true,
+  "base_entry": {
+    "direction": "LONG",
+    "m15_overextension": "2023 lower 10% of 16-bar return/ATR",
+    "context": "countertrend family outside the existing two parent LONG lineages",
+    "confirmation": "M5 HOLD_BOS",
+    "maximum_wait_minutes": 240,
+    "continuation_invalidation_atr": 1.0,
+    "stop": "setup episode low minus 0.10 M15 ATR; minimum risk 0.75 ATR; reject above 1.50 ATR"
+  },
+  "reason": "The fixed 3R/24h base was positive in 2023, 2024 and 2025 with average winners above 2R. Early 1R partial exits cap GOLD trend potential.",
+  "new_exit_profiles": [
+    "25% at 2R, stop remainder at +0.5R, 75% target 5R",
+    "25% at 2R, stop remainder at +0.5R, 75% target 6R",
+    "33% at 2R, stop remainder at +0.5R, 67% target 5R",
+    "33% at 2R, stop remainder at +1R, 67% target 6R",
+    "50% at 3R, stop remainder at +1R, 50% target 6R",
+    "no partial; activate M5 prior-3-bar swing trail after 2R",
+    "25% at 2R; M5 prior-3-bar swing trail remainder after 2R",
+    "25% at 2R; chandelier trail of 2 M15 ATR remainder after 2R"
+  ],
+  "maximum_horizon_hours": [24, 48, 72],
+  "selection": {
+    "primary": "PF and expectancy, not raw win rate",
+    "minimum_2023_pf": 2.0,
+    "minimum_2023_expectancy_r": 0.35,
+    "minimum_average_winner_r": 2.0,
+    "positive_2023_blocks": 2
+  },
+  "external_role": "2024-2026 diagnostic only; no threshold or profile changes after reading results",
+  "controls": {"existing_nine_modified": false, "automatic_promotion": false, "live_ready": false, "mt5_order": false}
+}
