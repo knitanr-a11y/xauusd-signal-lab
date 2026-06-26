@@ -1,0 +1,15 @@
+{
+  "record_id": "GML1-WINRATE-UPGRADE-RESULT-20260626",
+  "status": "THREE_HIGH_CONFIDENCE_DERIVATIVES_FOUND_PROSPECTIVE_ONLY",
+  "audit_only": true,
+  "principle": "Preserve the 4R payoff and improve win rate by rejecting mature or exhausted entries rather than shortening the target.",
+  "results": {
+    "GML1-WATCH-026-B": {"parent": "GML1-WATCH-026-A", "trades": 30, "win_rate": 0.6333333333, "profit_factor": 5.956458, "mean_R": 1.817368, "total_R": 54.521037, "max_drawdown_R": 2.0, "strong_cost_profit_factor": 5.701931},
+    "GML1-WATCH-027-B": {"parent": "GML1-WATCH-027-A", "trades": 35, "win_rate": 0.5714285714, "profit_factor": 5.146454, "mean_R": 1.777052, "total_R": 62.196811, "max_drawdown_R": 2.0, "strong_cost_profit_factor": 3.095039},
+    "GML1-WATCH-028-B": {"parent": "GML1-WATCH-028-A", "trades": 31, "win_rate": 0.6129032258, "profit_factor": 6.333333, "mean_R": 2.064516, "total_R": 64.0, "max_drawdown_R": 6.0, "strong_cost_win_rate": 0.53125, "strong_cost_profit_factor": 4.267973}
+  },
+  "diagnostic_union_one_open": {"trades": 91, "win_rate": 0.5824175824, "profit_factor": 5.3353075084, "mean_R": 1.8103481903, "total_R": 164.7416853182, "max_drawdown_R": 5.0},
+  "common_finding": "High-quality trades occurred before the lower-timeframe move matured: moderate M5 ADX/range and non-exhausted H1/H4 context. Late impulse and exhaustion confirmation bars caused most avoidable losses.",
+  "warning": "All B rules were found after historical diagnostic inspection and therefore require fixed prospective confirmation after 2026-06-26.",
+  "controls": {"accumulated_candidate_total": 10, "B_variants_accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
