@@ -1,0 +1,43 @@
+{
+  "candidate_id": "GML1-WATCH-028-B",
+  "parent_candidate_id": "GML1-WATCH-028-A",
+  "status": "RESEARCH_WATCH_HIGH_CONFIDENCE_DERIVATIVE",
+  "audit_only": true,
+  "direction": "SHORT",
+  "role": "WIN_RATE_UPGRADED_EARLY_TREND_RESUMPTION_SHORT_DERIVATIVE",
+  "selection_warning": "The final gate was identified after historical diagnostics. It is prospective-only and not an untouched holdout result.",
+  "parent_logic_unchanged": true,
+  "additional_gate": {
+    "d1_bb20_width_atr_gte": 2.70461299536,
+    "m5_range_atr_lte": 1.35214778742,
+    "logic": "AND",
+    "interpretation": "Require a sufficiently developed D1 volatility regime, but reject a large M5 confirmation candle that indicates late exhaustion chasing."
+  },
+  "execution": {
+    "stop": "1.0 M15 ATR",
+    "target": "4R",
+    "maximum_horizon_hours": 48,
+    "same_m1_priority": "protective stop first"
+  },
+  "diagnostic_metrics": {
+    "all": {"trades": 31, "win_rate": 0.6129032258, "profit_factor": 6.333333, "mean_R": 2.064516, "average_winner_R": 4.0, "total_R": 64.0, "max_drawdown_R": 6.0},
+    "2023": {"trades": 15, "win_rate": 0.733333, "profit_factor": 11.0},
+    "2024": {"trades": 9, "win_rate": 0.333333, "profit_factor": 2.0},
+    "2025": {"trades": 4, "win_rate": 0.50, "profit_factor": 4.0},
+    "2026_diagnostic": {"trades": 3, "win_rate": 1.0, "profit_factor": "INF"}
+  },
+  "cost_stress_all": {
+    "spread_1_5x_slip_0_05": {"trades": 32, "win_rate": 0.5625, "profit_factor": 4.982962, "mean_R": 1.789301, "total_R": 57.257629, "max_drawdown_R": 6.120376},
+    "spread_2x_slip_0_10": {"trades": 32, "win_rate": 0.53125, "profit_factor": 4.267973, "mean_R": 1.609852, "total_R": 51.515258, "max_drawdown_R": 6.240753}
+  },
+  "threshold_neighborhood": {
+    "q20_q50": {"trades": 24, "win_rate": 0.541667, "profit_factor": 4.727273},
+    "q20_q67_selected": {"trades": 31, "win_rate": 0.612903, "profit_factor": 6.333333},
+    "q20_q80": {"trades": 39, "win_rate": 0.512821, "profit_factor": 4.210526},
+    "q33_q67": {"trades": 29, "win_rate": 0.620690, "profit_factor": 6.545455},
+    "interpretation": "A broad local plateau retains WR above 51% and PF above 4.2."
+  },
+  "caveat": "2024 win rate remained 33.3%, although the 4R payoff kept the year at PF2 and positive total R.",
+  "prospective_requirements": {"start_after": "2026-06-26", "minimum_resolved_trades": 20, "minimum_win_rate": 0.52, "minimum_profit_factor": 2.0, "maximum_drawdown_R": 8.0, "no_rule_changes": true},
+  "controls": {"accumulated": false, "portfolio_use": false, "live_ready": false, "mt5_order": false, "discord": false}
+}
