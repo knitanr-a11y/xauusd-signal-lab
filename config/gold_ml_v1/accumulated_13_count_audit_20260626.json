@@ -1,0 +1,55 @@
+{
+  "record_id": "GML1-ACCUMULATED-13-COUNT-AUDIT-20260626",
+  "status": "COUNT_AUDIT_COMPLETE_WITH_EXISTING_NINE_REPLAY_CAVEAT",
+  "audit_only": true,
+  "data_cutoff": "2026-06-19 19:54:00 MT5 server time",
+  "accumulated_candidate_total": 13,
+  "accumulated_ids": [
+    "GML1-PROV-007",
+    "GML1-PROV-008",
+    "GML1-WATCH-022-B",
+    "GML1-PROV-010",
+    "GML1-PROV-015",
+    "GML1-PROV-020",
+    "GML1-WATCH-021-A",
+    "GML1-WATCH-021-B",
+    "GML1-WATCH-021-C",
+    "GML1-WATCH-024-A",
+    "GML1-WATCH-026-B",
+    "GML1-WATCH-027-B",
+    "GML1-WATCH-028-B"
+  ],
+  "definitions": {
+    "nominal": "Every candidate trade counts separately, including same-time derivative signals.",
+    "unique_time_direction": "Entries with identical entry_time and direction are collapsed to one trigger opportunity.",
+    "global_one_open_reference": "Stack-priority chronological simulation allowing only one open position across all candidates; reference only because priority changes the result."
+  },
+  "all_period": {
+    "nominal": 1545,
+    "unique_time_direction": 461,
+    "global_one_open_reference": 429
+  },
+  "year_counts": {
+    "2023": {"nominal": 264, "unique_time_direction": 107, "global_one_open_reference": 98},
+    "2024": {"nominal": 439, "unique_time_direction": 126, "global_one_open_reference": 118},
+    "2025": {"nominal": 645, "unique_time_direction": 173, "global_one_open_reference": 162},
+    "2026_to_cutoff": {"nominal": 197, "unique_time_direction": 55, "global_one_open_reference": 51}
+  },
+  "monthly_2026": {
+    "2026-01": {"nominal": 88, "unique": 22, "one_open": 20, "long_nominal": 88, "short_nominal": 0},
+    "2026-02": {"nominal": 47, "unique": 13, "one_open": 13, "long_nominal": 46, "short_nominal": 1},
+    "2026-03": {"nominal": 22, "unique": 7, "one_open": 5, "long_nominal": 22, "short_nominal": 0},
+    "2026-04": {"nominal": 28, "unique": 7, "one_open": 7, "long_nominal": 28, "short_nominal": 0},
+    "2026-05": {"nominal": 5, "unique": 3, "one_open": 3, "long_nominal": 4, "short_nominal": 1},
+    "2026-06_to_19th": {"nominal": 7, "unique": 3, "one_open": 3, "long_nominal": 6, "short_nominal": 1}
+  },
+  "new_B_increment_2026": {
+    "nominal": 9,
+    "unique": 9,
+    "old_10_unique": 46,
+    "new_13_unique": 55,
+    "increase_percent": 19.5652173913
+  },
+  "caveat": "The exact frozen registry bodies for all existing nine candidates are not available. Their counts use a current-definition replay on the authorized raw CSVs. WATCH-024-A and WATCH-026-B through WATCH-028-B use exact local registries.",
+  "controls": {"live_ready": false, "final_signal": false, "mt5_order": false, "discord": false}
+}
