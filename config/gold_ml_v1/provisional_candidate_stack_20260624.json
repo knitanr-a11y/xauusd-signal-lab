@@ -1,6 +1,6 @@
 {
-  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_V",
-  "status": "FIFTEEN_ACCUMULATED_WITH_SIX_RESEARCH_WATCHES",
+  "stack_id": "GOLD_ML_V1_PROVISIONAL_CANDIDATE_STACK_20260626_W",
+  "status": "FIFTEEN_ACCUMULATED_WITH_NINE_RESEARCH_WATCHES",
   "updated": "2026-06-26",
   "accumulated_ids": [
     "GML1-PROV-007",
@@ -34,12 +34,18 @@
     "GML1-WATCH-027-A",
     "GML1-WATCH-028-A",
     "GML1-WATCH-032-A",
-    "GML1-WATCH-033-A"
+    "GML1-WATCH-033-A",
+    "GML1-WATCH-034-A",
+    "GML1-WATCH-034-B",
+    "GML1-WATCH-034-C"
   ],
   "retired_research_ids": ["GML1-WATCH-031-A"],
   "research_watch_summary": {
-    "GML1-WATCH-032-A": "high-win opening-range failed-breakout SHORT with TP5 and SL6",
-    "GML1-WATCH-033-A": "compact lower-wick rejection LONG with configured TP5 or TP7.5 and SL5"
+    "GML1-WATCH-032-A": "high-win opening-range failed-breakout SHORT, TP5",
+    "GML1-WATCH-033-A": "high-win compact rejection LONG, TP5 or TP7.5",
+    "GML1-WATCH-034-A": "practical fixed TP75 compression breakout LONG",
+    "GML1-WATCH-034-B": "absolute robust fixed TP100 compression breakout LONG",
+    "GML1-WATCH-034-C": "25 percent at +50 then runner to +100 compression breakout LONG"
   },
   "existing_frozen_nine_modified": false,
   "audit_only": true,
