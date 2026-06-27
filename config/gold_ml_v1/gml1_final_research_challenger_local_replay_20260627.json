@@ -1,0 +1,46 @@
+{
+  "system_id": "GML1-FINAL-RESEARCH-CHALLENGER-LOCAL-REPLAY",
+  "date": "2026-06-27",
+  "status": "ARTIFACT_EXACT_LOCAL_REPLAY_IMPLEMENTED_AND_PARITY_PASSED_AUDIT_ONLY",
+  "final_change": "GML1-WATCH-024-A addition after GML1-WATCH-022-C replacement",
+  "package": {
+    "manifest": "config/gold_ml_v1/research_challenger/final_20260627/manifest.json",
+    "artifacts": "config/gold_ml_v1/research_challenger/final_20260627/artifacts",
+    "verifier": "scripts/gold_ml_v1/research_challenger/verify_final_research_challenger.py",
+    "windows_runner": "scripts/gold_ml_v1/research_challenger/run_verify_final_research_challenger.bat",
+    "test": "tests/gold_ml_v1/test_final_research_challenger_replay.py"
+  },
+  "parity": {
+    "completion_stage": true,
+    "watch022c_replacement_stage": true,
+    "watch024a_final_addition_stage": true,
+    "final_2024": {"trades": 271, "win_rate": 0.6568265682656826, "profit_factor": 2.494488621652696, "total_r": 137.48083552627205, "max_drawdown_r": 5.907692307692287},
+    "final_2025": {"trades": 402, "win_rate": 0.5920398009950248, "profit_factor": 2.0121618989110295, "total_r": 148.09279029902123, "max_drawdown_r": 7.384615384615387},
+    "final_2026_partial": {"trades": 101, "win_rate": 0.6138613861386139, "profit_factor": 1.8772867024210496, "total_r": 42.055774842215214, "max_drawdown_r": 6.7997924973867985}
+  },
+  "ml_lineage_audit": {
+    "all_m15_ml_synergy_20260626_is_final_challenger_ml": false,
+    "active_event_core_score_sizing_is_final_challenger_ml": false,
+    "mlr1_meta_model_core_is_final_challenger_ml": false,
+    "final_challenger_ml_interpretation": "candidate-local stable loss leaves, candidate-local score quality controls already reflected in frozen P16/P18/P19 APPROX trade artifacts, and fixed component risk multipliers",
+    "stable_loss_leaf_rules_committed": true,
+    "candidate_local_model_or_scaler_artifacts_recovered": false,
+    "fresh_ml_inference_enabled": false,
+    "substitution_with_other_ml_forbidden": true
+  },
+  "limitations": [
+    "P16, P18 and P19 remain approximate frozen post-filter trade artifacts.",
+    "The package reproduces artifact lineage, stage transformations and portfolio performance; it does not claim raw-candle regeneration of the approximate sleeves.",
+    "Several CSV byte hashes differ from hashes recorded by older summaries; local byte hashes and historical hashes are both retained in the manifest, and row-level parity passes.",
+    "WATCH-022-C source CSVs omitted candidate_id and w for A_CORE; source files remain unchanged and only normalized derived outputs fill the known values."
+  ],
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
