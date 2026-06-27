@@ -1,0 +1,26 @@
+{
+  "system_id": "GML1-EVENT-CORE",
+  "stage": "RESOLVED_EVENT_JOIN",
+  "version": "v1",
+  "proposal_registry_sha256": "b5e017f2e8b08b8fdad3bcd9ca603155510d23cf2385bbcde2a36bdeff456c0b",
+  "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+  "join_keys": ["decision_time", "direction"],
+  "candidate_ids": [
+    "GML1-EVT-001-L",
+    "GML1-EVT-002-S",
+    "GML1-EVT-003-L",
+    "GML1-EVT-003-S"
+  ],
+  "model_feature_count": 161,
+  "rules": {
+    "raw_events_preserved": true,
+    "dedup": false,
+    "one_position": false,
+    "unmatched_last_snapshot_event_may_remain_unresolved": true
+  },
+  "expected": {
+    "proposal_rows": 831,
+    "resolved_event_rows": 830
+  },
+  "deployment_allowed": false
+}
