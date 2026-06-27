@@ -1,0 +1,60 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "PROSPECTIVE_CAPTURE",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_RESOLVED_ONLY_PROSPECTIVE_CAPTURE_AUDIT_ONLY",
+  "historical_boundary": {
+    "last_historical_feature_decision": "2026-06-19 19:45:00",
+    "prospective_rule": "decision_time > 2026-06-19 19:45:00"
+  },
+  "sources": {
+    "live_feature_registry_sha256": "93fd57f07f03537a12738e83fef2fe93b02b433a196d75fcc8e34b7dc2f1d493",
+    "prospective_candidate_proposal_sha256": "5d17ae9ce09831c567ad4ce7d553f03eb7127d3bf54dfe151d93cb1dd40d277f",
+    "goldsharp_m1_sha256": "8c03c1a5503db0c2c17d365983cf5e2f465107e3753e0a86d65226c136538fca",
+    "label_contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json"
+  },
+  "proposal_rules": {
+    "calculate_onset_before_boundary_filter": true,
+    "candidate_definitions_changed": false,
+    "candidate_added_or_deleted": false,
+    "candidate_promoted_or_demoted": false,
+    "labels_available_to_proposal_builder": false,
+    "candidate_performance_available_to_proposal_builder": false
+  },
+  "label_rules": {
+    "exact_m1_required": true,
+    "horizon_hours": 6,
+    "same_m1_priority": "PROTECTIVE",
+    "snapshot_end_rule": "TARGET or PROTECTIVE before snapshot end resolves immediately. TIME resolves only when the full wall-clock horizon is observed.",
+    "unresolved_rows_separated": true,
+    "resolved_candidate_event_rule": "A candidate event is resolved only after its label exit_time exists in the observed M1 snapshot.",
+    "history_availability_rule": "A result may enter any rolling history only when exit_time <= simulated as-of time."
+  },
+  "outputs": [
+    "mlr1_prospective_candidate_proposals_v1.csv.gz",
+    "mlr1_prospective_resolved_labels_v1.csv.gz",
+    "mlr1_prospective_unresolved_label_keys_v1.csv.gz",
+    "mlr1_prospective_resolved_candidate_events_v1.csv.gz",
+    "mlr1_prospective_unresolved_candidate_events_v1.csv.gz"
+  ],
+  "forbidden": [
+    "using prospective outcomes to revise candidate definitions",
+    "using unresolved outcomes",
+    "adding an open event result to history",
+    "one-position or health filtering before preserving the raw candidate event registry",
+    "model promotion from this small capture snapshot"
+  ],
+  "controls": {
+    "audit_only": true,
+    "candidate_performance_calculated": false,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
