@@ -1,0 +1,78 @@
+{
+  "system_id": "GML1-EVENT-DISCOVERY",
+  "version": "v2",
+  "date": "2026-06-27",
+  "status": "FROZEN_LABEL_FREE_POOL_EVALUATED_NOT_PROMOTED",
+  "proposal_registry_sha256": "7886b519d7adf3b4127599478e1f56271701667865dfcaac3b99ad833ac093e6",
+  "resolved_event_registry_sha256": "6334ac82af4959540da7fa953efb4df30d934907e33da49cddcd99cd97dc4421",
+  "resolved_event_rows": 10335,
+  "unresolved_event_rows": 1,
+  "unresolved_event": {
+    "decision_time": "2026-06-19 17:15:00",
+    "candidate_id": "GML1-DISC-MOM-S",
+    "reason": "full label horizon was not resolved before the historical M1 endpoint"
+  },
+  "meta_core": "GML1-META-CORE v1 unchanged",
+  "conservative_one_position": {
+    "trades": 127,
+    "long_trades": 76,
+    "short_trades": 51,
+    "strong_total_r": -24.048344669982,
+    "strong_mean_r": -0.189357044646,
+    "strong_profit_factor": 0.719717567583,
+    "extreme_total_r": -29.306583550353,
+    "strong_maximum_drawdown_r": 24.048344669982,
+    "positive_months": 5,
+    "negative_months": 8
+  },
+  "standard_one_position": {
+    "trades": 234,
+    "long_trades": 132,
+    "short_trades": 102,
+    "strong_total_r": -48.706734,
+    "strong_mean_r": -0.208148,
+    "strong_profit_factor": 0.697923,
+    "extreme_total_r": -59.123363
+  },
+  "high_coverage_one_position": {
+    "trades": 315,
+    "long_trades": 200,
+    "short_trades": 115,
+    "strong_total_r": -78.100276,
+    "strong_mean_r": -0.247937,
+    "strong_profit_factor": 0.649441,
+    "extreme_total_r": -91.910447
+  },
+  "fold_conservative_strong_r": {
+    "F1": -3.387186598620,
+    "F2": 0.0,
+    "F3": -16.221043219634,
+    "F4": -4.440114851728
+  },
+  "model_diagnostics": {
+    "fold_direction_fits": 8,
+    "zero_calibration_slope_fits": 3,
+    "zero_slope_segments": ["F1 LONG", "F2 LONG", "F4 SHORT"],
+    "all_raw_candidate_ids_negative_strong_total": true,
+    "interpretation": "The event pool hard-coded direction before the meta-model and supplied too many structurally adverse hypotheses. The fixed regressor did not obtain stable ranking power."
+  },
+  "decision": {
+    "candidate_conditions_changed": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "v2_is_immutable_failed_reference": true,
+    "next_design": "Use direction-neutral event gates and emit paired LONG and SHORT hypotheses at the same decision, allowing the separate direction models and score competition to choose direction."
+  },
+  "outputs_sha256": {
+    "oos_predictions": "654aa95915cf3443d77bcf1f9613b3e7433b0011d06ec3abb9253e968537c252",
+    "policy_metrics": "a7945ac03268f5eb0be2b14afbbfc75bfb0e859fc6b8ad59765313ad5d5497e2",
+    "diagnostics": "0b325528c26abfd5ef56f25b069de53c4e3a1df8f3d76c32dbe952270d96ec91"
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
