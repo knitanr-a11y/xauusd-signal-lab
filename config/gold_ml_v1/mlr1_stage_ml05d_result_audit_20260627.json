@@ -1,0 +1,63 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05D",
+  "date": "2026-06-27",
+  "status": "NONLINEAR_META_MODEL_AUDITED_NOT_PROMOTED_AUDIT_ONLY",
+  "input": {
+    "candidate_event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+    "oos_events": 2675
+  },
+  "conservative_one_position": {
+    "trades": 271,
+    "long_trades": 126,
+    "short_trades": 145,
+    "strong_total_r": -4.53524982243389,
+    "strong_mean_r": -0.016735239197173027,
+    "strong_profit_factor": 0.9725475737857604,
+    "extreme_total_r": -28.503067559884013,
+    "extreme_mean_r": -0.10517737106968271,
+    "extreme_profit_factor": 0.8410129353551483,
+    "strong_maximum_drawdown_r": 35.54447604741179,
+    "strong_top_five_removed_total_r": -11.95900022585389,
+    "strong_top_five_percent_removed_total_r": -25.22728346434389,
+    "positive_months": 12,
+    "negative_months": 12
+  },
+  "fold_conservative_strong_r": {
+    "F1": -24.512550821861797,
+    "F2": -6.436261474849999,
+    "F3": 24.696118472118897,
+    "F4": 1.7174440021590003
+  },
+  "model_quality_against_direction_unconditional": {
+    "log_loss_better": "4 of 8 fold-direction comparisons",
+    "positive_brier_skill": "1 of 8 fold-direction comparisons",
+    "positive_strong_r_mse_skill": "1 of 8 fold-direction comparisons"
+  },
+  "session_ablation": {
+    "classifier_no_time_selected": ["F1-LONG", "F1-SHORT"],
+    "classifier_full_selected": ["F2-LONG", "F2-SHORT", "F3-LONG", "F3-SHORT", "F4-LONG", "F4-SHORT"],
+    "regressor_no_time_selected": ["F1-SHORT", "F2-LONG", "F2-SHORT"],
+    "regressor_full_selected": ["F1-LONG", "F3-LONG", "F3-SHORT", "F4-LONG", "F4-SHORT"],
+    "interpretation": "No stable universal session-feature advantage."
+  },
+  "outputs": {
+    "oos_predictions_sha256": "d80b0ab0e9023699327ae2fe8e9e96670e53b8a6baff1a50ca9c16c0f98f4dcc",
+    "policy_metrics_sha256": "58f69a3bd412e9081b072ee7a9700045d4ff69a27a61c016fa46a09520f31052",
+    "model_diagnostics_sha256": "81765cf2052b5cf5fd6f32374cb5c4248d47830d46fdf8ccc997e4547736c10d",
+    "summary_sha256": "acca4ac6da9babf1f46fed60b5e6f7e0e593ff3f54ded74c564f341e061a0aa1"
+  },
+  "decision": {
+    "model_promoted": false,
+    "calibration_research_allowed": true,
+    "reason": "Aggregate conservative policy is negative under Strong and Extreme cost and prediction quality does not beat the frozen baselines consistently."
+  },
+  "controls": {
+    "audit_only": true,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
