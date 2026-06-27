@@ -1,0 +1,99 @@
+{
+  "system_id": "GML1-META-CORE",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "RESEARCH_META_MODEL_STRUCTURE_FROZEN_NOT_DEPLOYABLE",
+  "purpose": "Candidate-agnostic, reproducible walk-forward evaluation layer for any separately frozen candidate proposal registry.",
+  "reference_input_sha256": {
+    "event_registry": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+    "feature_registry": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b"
+  },
+  "runtime_versions": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scikit_learn": "1.8.0",
+    "xgboost": "3.1.3",
+    "python_major_minor": ["3.12", "3.13"]
+  },
+  "input_contract": {
+    "unit": "one raw candidate event before dedup or one-position",
+    "target": "strong_r",
+    "audit_targets": ["extreme_r", "outcome"],
+    "market_feature_count": 161,
+    "candidate_context": ["candidate_id", "candidate_definition_version", "candidate_family", "direction", "proposal_strength"],
+    "forbidden_model_inputs": ["outcome", "entry_time", "exit_time", "fill_price", "base_r", "strong_r", "extreme_r", "holding_minutes", "same_m1_collision"]
+  },
+  "estimator": {
+    "form": "direct Strong-R regression",
+    "library": "xgboost",
+    "class": "XGBRegressor",
+    "objective": "reg:squarederror",
+    "separate_long_short": true,
+    "candidate_id_one_hot": true,
+    "classifier_in_decision_path": false,
+    "classifier_exclusion_reason": "The prior validation-selected ensemble assigned classifier weight 0.0 in all eight fold-direction fits.",
+    "feature_set_order": ["FULL", "NO_TIME"],
+    "feature_set_selection": "minimum validation Strong-R MSE; ties use feature_set_order",
+    "parameters": {
+      "n_estimators": 150,
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "min_child_weight": 20.0,
+      "reg_lambda": 10.0,
+      "max_bin": 64,
+      "tree_method": "hist",
+      "subsample": 1.0,
+      "colsample_bytree": 1.0,
+      "random_state": 20260627,
+      "n_jobs": 4
+    }
+  },
+  "calibration": {
+    "source": "validation only",
+    "form": "intercept plus nonnegative slope times raw prediction",
+    "slope_min": 0.0,
+    "slope_max": 2.0,
+    "test_reselection": false,
+    "refit_on_validation": false
+  },
+  "walk_forward": {
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "resolved_history_rule": "exit_time <= applicable train or validation cutoff",
+    "folds": [
+      {"fold":"F1","train_start":"2023-01-01 00:00:00","train_end":"2024-01-01 00:00:00","validation_start":"2024-01-01 00:00:00","validation_end":"2024-07-01 00:00:00","test_start":"2024-07-01 00:00:00","test_end":"2025-01-01 00:00:00"},
+      {"fold":"F2","train_start":"2023-01-01 00:00:00","train_end":"2024-07-01 00:00:00","validation_start":"2024-07-01 00:00:00","validation_end":"2025-01-01 00:00:00","test_start":"2025-01-01 00:00:00","test_end":"2025-07-01 00:00:00"},
+      {"fold":"F3","train_start":"2023-01-01 00:00:00","train_end":"2025-01-01 00:00:00","validation_start":"2025-01-01 00:00:00","validation_end":"2025-07-01 00:00:00","test_start":"2025-07-01 00:00:00","test_end":"2026-01-01 00:00:00"},
+      {"fold":"F4","train_start":"2023-01-01 00:00:00","train_end":"2025-07-01 00:00:00","validation_start":"2025-07-01 00:00:00","validation_end":"2026-01-01 00:00:00","test_start":"2026-01-01 00:00:00","test_end":"2026-06-20 00:00:00"}
+    ]
+  },
+  "policies": {
+    "coverage_per_direction": {
+      "conservative": 0.0025,
+      "standard": 0.005,
+      "high_coverage": 0.01
+    },
+    "threshold_source": "validation only",
+    "positive_score_required": true,
+    "same_decision_competition": "highest calibrated predicted Strong R; candidate_id ascending tie break",
+    "one_position": "accept only when decision_time >= active exit_time"
+  },
+  "promotion_gate": {
+    "minimum_total_test_trades": 100,
+    "minimum_trades_per_direction": 100,
+    "minimum_positive_test_folds": 3,
+    "minimum_strong_profit_factor": 1.2,
+    "minimum_strong_mean_r": 0.05,
+    "maximum_strong_drawdown_r": 20.0,
+    "maximum_single_positive_fold_share": 0.5
+  },
+  "deployment": {
+    "research_fold_models_may_be_saved": true,
+    "final_model_training": false,
+    "live_inference": false,
+    "shadow_signal": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
