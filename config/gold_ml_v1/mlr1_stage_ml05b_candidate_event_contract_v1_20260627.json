@@ -1,0 +1,53 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05B",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_RAW_CANDIDATE_EVENT_JOIN_AUDIT_ONLY",
+  "proposal_registry_sha256": "5687d0389446f848270dc4f7d8d71389ffd59cb0e0ea6642ce0928c9b147c5c9",
+  "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+  "join_keys": ["decision_time", "direction"],
+  "candidate_ids": [
+    "GML1-MLC-001-L", "GML1-MLC-001-S",
+    "GML1-MLC-002-L", "GML1-MLC-002-S",
+    "GML1-MLC-003-L", "GML1-MLC-003-S",
+    "GML1-MLC-004-L", "GML1-MLC-004-S",
+    "GML1-MLC-005-L", "GML1-MLC-005-S",
+    "GML1-MLC-006-L", "GML1-MLC-006-S"
+  ],
+  "model_feature_count": 161,
+  "forbidden_model_input_columns": [
+    "entry_time", "entry_bid_open", "entry_spread_points", "entry_price",
+    "label_atr14_price", "target_price", "protective_price", "outcome",
+    "exit_bar_open_time", "exit_time", "exit_bid_close", "exit_ask_close",
+    "exit_spread_points", "fill_price", "base_r", "strong_r", "extreme_r",
+    "same_m1_collision", "holding_minutes"
+  ],
+  "rules": {
+    "raw_events_preserved": true,
+    "one_open": false,
+    "dedup": false,
+    "candidate_definition_change": false,
+    "unmatched_proposal_action": "FAIL",
+    "duplicate_label_key_action": "FAIL",
+    "history_availability": "exit_time <= simulated_asof_time",
+    "purge_and_embargo_required": true
+  },
+  "expected_output": {
+    "proposal_rows": 4263,
+    "event_rows": 4263,
+    "candidate_count": 12,
+    "market_feature_count": 161
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_performance_calculated": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

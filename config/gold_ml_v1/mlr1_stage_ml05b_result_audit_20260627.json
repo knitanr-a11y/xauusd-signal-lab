@@ -1,0 +1,73 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05B",
+  "date": "2026-06-27",
+  "status": "RAW_CANDIDATE_EVENT_REGISTRY_VALIDATED_AUDIT_ONLY",
+  "input": {
+    "proposal_registry_sha256": "5687d0389446f848270dc4f7d8d71389ffd59cb0e0ea6642ce0928c9b147c5c9",
+    "proposal_rows": 4263,
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "label_rows": 148317,
+    "join_keys": ["decision_time", "direction"]
+  },
+  "result": {
+    "event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+    "event_rows": 4263,
+    "event_columns": 186,
+    "unique_decisions": 4040,
+    "candidate_count": 12,
+    "direction_counts": {"LONG": 2656, "SHORT": 1607},
+    "outcome_class_counts_for_join_audit_only": {
+      "PROTECTIVE": 2512,
+      "TARGET": 1589,
+      "TIME": 162
+    },
+    "first_decision": "2023-04-18 03:15:00",
+    "last_decision": "2026-06-19 16:30:00",
+    "first_exit": "2023-04-18 04:08:00",
+    "last_exit": "2026-06-19 17:01:00",
+    "holding_minutes_min": 1.0,
+    "holding_minutes_max": 360.0,
+    "same_m1_collisions": 2,
+    "model_input_column_count": 166,
+    "label_only_column_count": 19,
+    "deterministic_two_run_hash_match": true,
+    "unit_tests_passed": 6
+  },
+  "join_audit": {
+    "proposal_row_retention_exact": true,
+    "missing_label_events": 0,
+    "duplicate_candidate_events": 0,
+    "duplicate_label_keys": 0,
+    "all_values_nonnull": true,
+    "entry_equals_decision": true,
+    "exit_not_before_entry": true,
+    "holding_timestamp_match": true,
+    "direction_geometry_pass": true,
+    "one_open_applied": false,
+    "dedup_applied": false
+  },
+  "availability_and_leakage": {
+    "candidate_definitions_changed": false,
+    "label_columns_in_model_inputs": false,
+    "future_results_used_for_candidate_creation": false,
+    "resolved_history_rule": "exit_time <= simulated_asof_time",
+    "purge_and_embargo_required": true
+  },
+  "next_stage": {
+    "ml05b_complete": true,
+    "ml05c_candidate_selection_baselines_allowed": true,
+    "model_training_executed": false,
+    "candidate_performance_calculated": false
+  },
+  "controls": {
+    "audit_only": true,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
