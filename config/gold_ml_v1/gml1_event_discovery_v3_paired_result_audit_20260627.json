@@ -1,0 +1,59 @@
+{
+  "system_id": "GML1-EVENT-DISCOVERY",
+  "version": "v3-paired-research",
+  "date": "2026-06-27",
+  "status": "PAIRED_DIRECTION_HYPOTHESIS_EVALUATED_NOT_PROMOTED",
+  "proposal_registry_sha256": "ece2fd869138155cbda3b4da3ad8426564373556d5c4eb42b50311bcf370ac0a",
+  "resolved_event_registry_sha256": "70f1659a232f527af59f350498c6c13ecfcb7c137d767bbc08a2006efce4a054",
+  "resolved_event_rows": 30032,
+  "unresolved_event_rows": 2,
+  "meta_core": "GML1-META-CORE v1 unchanged",
+  "conservative_one_position": {
+    "trades": 82,
+    "long_trades": 82,
+    "short_trades": 0,
+    "strong_total_r": -20.829717216946,
+    "strong_mean_r": -0.254020941670,
+    "strong_profit_factor": 0.638833846295,
+    "extreme_total_r": -23.009041758434,
+    "strong_maximum_drawdown_r": 22.756459127376,
+    "positive_months": 2,
+    "negative_months": 4
+  },
+  "fold_conservative_strong_r": {
+    "F1": 0.0,
+    "F2": 0.0,
+    "F3": 0.0,
+    "F4": -20.829717216946
+  },
+  "score_diagnostics": {
+    "F1_LONG_max_score": -0.142151,
+    "F1_SHORT_max_score": -0.075245,
+    "F2_LONG_max_score": -0.112420,
+    "F2_SHORT_max_score": -0.045371,
+    "F3_LONG_max_score": -0.020933,
+    "F3_SHORT_max_score": -0.033235,
+    "F4_LONG_max_score": 0.040879,
+    "F4_SHORT_max_score": -0.110185,
+    "interpretation": "Only F4 LONG produced positive predicted Strong R. Paired-direction emission did not create stable ranking or direction selection."
+  },
+  "decision": {
+    "model_promoted": false,
+    "shadow_ready": false,
+    "v3_conditions_changed_after_result": false,
+    "paired_direction_hypothesis_supported": false,
+    "next_method": "nested walk-forward candidate grammar search using train and validation only, followed by untouched test evaluation with Meta Core unchanged"
+  },
+  "outputs_sha256": {
+    "oos_predictions": "c9786fb647e93ae184857f2778e8d494c33d99c20d63038cbedd8154e2428a6b",
+    "policy_metrics": "e78e57fd214e739163b3caadf20566e1945f464dff4d6803f9e4e974ee35d0be",
+    "diagnostics": "fdbfd235f368d74f71137b789dd9ebdb01d9ba8e56eaf1af2c8fbd0254fe5eef"
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
