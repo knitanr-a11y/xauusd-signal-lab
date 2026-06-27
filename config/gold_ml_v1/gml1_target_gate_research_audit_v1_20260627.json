@@ -1,0 +1,110 @@
+{
+  "system_id": "GML1-TARGET-GATE-RESEARCH",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "TARGET_NOT_MET_NO_PROMOTION",
+  "hard_target": {
+    "one_position_annualized_minimum": 250,
+    "quality_gate": "win_rate >= 0.60 OR strong_profit_factor >= 2.00",
+    "strong_cost_required": true,
+    "extreme_cost_report_required": true
+  },
+  "time_contract": {
+    "csv_time": "bar_open",
+    "m15_decision": "open plus 15 minutes",
+    "exact_m1_entry": true,
+    "closed_higher_timeframes_only": true,
+    "audit_passed": true
+  },
+  "closest_validation_then_test": {
+    "diverse_composite_regimes": {
+      "validation": {"annualized": 256.0720, "win_rate": 0.612403, "profit_factor": 2.056917, "strong_r": 53.4762},
+      "test": {"annualized": 324.4279, "win_rate": 0.364238, "profit_factor": 0.784336, "strong_r": -20.3542}
+    },
+    "adaptive_rule_portfolio": {
+      "validation": {"annualized": 250.1168, "win_rate": 0.611111, "profit_factor": 2.004618, "strong_r": 49.7126},
+      "test": {"annualized": 204.1103, "win_rate": 0.442105, "profit_factor": 1.083282, "strong_r": 4.4615}
+    },
+    "candidate_internal_loss_veto": {
+      "validation": {"annualized": 270.0, "win_rate": 0.5956, "profit_factor": 1.966, "strong_r": 52.55},
+      "test": {"annualized": 307.2, "win_rate": 0.4196, "profit_factor": 0.983, "strong_r": -1.40}
+    },
+    "exact_exit_grid": {
+      "existing_contract_reproduced_rows": 4730,
+      "outcome_equal": true,
+      "exit_time_equal": true,
+      "maximum_strong_r_error": 4.9989e-12,
+      "grid_configs": 126,
+      "validation_target_configs": 11,
+      "selected_validation": {"horizon_hours": 8, "target_atr": 1.0, "protective_atr": 1.0, "annualized": 349.3696, "win_rate": 0.647727, "profit_factor": 1.652293},
+      "test": {"annualized": 412.5176, "win_rate": 0.489583, "profit_factor": 0.880022, "strong_r": -11.9215}
+    },
+    "rolling_composite_loss_filter_2026_h1": {
+      "trades": 145,
+      "annualized": 311.5368,
+      "win_rate": 0.365517,
+      "profit_factor": 0.811318,
+      "strong_r": -16.8489,
+      "extreme_r": -22.2512
+    },
+    "mfe_mae_path_model": {
+      "validation": {"annualized": 283.8628, "win_rate": 0.468531, "profit_factor": 1.176781, "strong_r": 13.5963},
+      "test": {"annualized": 328.725, "win_rate": 0.379085, "profit_factor": 0.859068, "strong_r": -13.4429}
+    }
+  },
+  "additional_results": {
+    "label_contract_variants": 45,
+    "label_variant_ridge_test_pass_folds": 0,
+    "top_label_nonlinear_test_pass_folds": 0,
+    "nested_long_consensus_trades": 29,
+    "nested_long_consensus_rejected_reason": "far below annual 250 trade gate"
+  },
+  "composite_loss_findings": {
+    "recurring_normalized_features": [
+      "h4_adx14_scaled",
+      "h1_spread_atr14",
+      "d1_log_return_20",
+      "d1_spread_atr14",
+      "d1_tick_volume_ratio20_lagbase",
+      "h1_bb20_width_atr14",
+      "h4_bb20_close_location",
+      "h4_bb20_width_atr14",
+      "h4_body_fraction",
+      "h4_ema100_slope4_atr14",
+      "h4_log_return_12",
+      "m15_bb20_close_location",
+      "m15_tick_volume_ratio20_lagbase"
+    ],
+    "conclusion": "Compound loss clusters improved the development period but their signs and thresholds did not remain stable in the following half-year.",
+    "absolute_price_rule": "Any split using absolute entry price is rejected as nonstationary."
+  },
+  "failed_methods": [
+    "broad event pools",
+    "paired direction events",
+    "shallow rule mining",
+    "classification proposer",
+    "robust short proposer",
+    "M1 and M5 loss feature expansion",
+    "flattened M15 sequences",
+    "temporal CNN",
+    "monthly adaptive fixed-label models",
+    "direction comparison models",
+    "strategy grammar",
+    "static and rolling composite loss veto",
+    "MFE and MAE path ranking"
+  ],
+  "decision": {
+    "target_met": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "do_not_lower_gate": true,
+    "do_not_claim_validation_result_as_edge": true
+  },
+  "next_research": [
+    "Replace fixed direction-entry labels with setup lifecycle labels: setup, trigger, invalidation and post-trigger excursion.",
+    "Require each independent candidate family to pass rolling out-of-sample before aggregation.",
+    "Accept a loss interaction only when its direction repeats across multiple non-overlapping periods.",
+    "Keep annual 250 and win-rate 60 percent or PF 2 as hard gates."
+  ]
+}
