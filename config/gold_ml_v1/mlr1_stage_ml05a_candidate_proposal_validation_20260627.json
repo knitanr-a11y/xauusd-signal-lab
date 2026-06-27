@@ -1,0 +1,62 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05A",
+  "date": "2026-06-27",
+  "status": "IMPLEMENTED_LABEL_FREE_DENSITY_REPLAY_PENDING",
+  "github_commits": {
+    "eligibility_contract": "6f1ee95317db6de18729ecab5c84b63b791a7f8f",
+    "candidate_manifest": "1cb3dd7a040adbf084005a6bacfcad1e43dfa708",
+    "proposal_engine": "1b9673aa5fff32cf205294cb86ca7b726110e7fa",
+    "tests": "b0f2d12321fd419c5d5637b6b27d86e75b42ff54",
+    "windows_runner": "5808a0a56d50bc3e3fc3f9bf5aaefe9c4a4bf8b3"
+  },
+  "existing_stack_ml_treatment": {
+    "nonreproducible_excluded": 16,
+    "legacy_exact_reference_only": 9,
+    "primary_training_from_existing_stack": 0,
+    "historical_candidate_stack_modified": false
+  },
+  "new_primary_pool": {
+    "families": 6,
+    "candidates": 12,
+    "long": 6,
+    "short": 6,
+    "labels_used_to_define": false,
+    "performance_used_to_define": false,
+    "raw_proposals_before_one_open": true
+  },
+  "candidate_families": [
+    "HTF_TREND_PULLBACK_RESUMPTION",
+    "LOW_VOL_BOLLINGER_BREAKOUT",
+    "HIGH_VOL_MOMENTUM_EXPANSION",
+    "LOW_ADX_RANGE_REJECTION",
+    "HIGH_VOL_EXHAUSTION_REVERSAL",
+    "MULTITIMEFRAME_ROLLING_BREAKOUT"
+  ],
+  "density_gate": {
+    "minimum_proposals_per_candidate": 100,
+    "maximum_proposals_per_candidate": 5000,
+    "minimum_calendar_years": 3,
+    "must_be_reviewed_before_label_join": true,
+    "failure_action": "create a new candidate contract version before any outcome review"
+  },
+  "pending": [
+    "Run proposal unit tests on Windows Python 3.12",
+    "Build label-free proposal registry from the accepted ML-02 feature registry",
+    "Review only proposal counts, year coverage, direction balance and overlap",
+    "Do not join ML-03 labels until density gate is resolved"
+  ],
+  "controls": {
+    "audit_only": true,
+    "labels_joined": false,
+    "performance_reviewed": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  },
+  "next_step": "ML-05A_USER_PC_LABEL_FREE_PROPOSAL_DENSITY_REPLAY"
+}
