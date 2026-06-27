@@ -1,0 +1,43 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05A",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_BEFORE_LABEL_REVIEW_AUDIT_ONLY",
+  "engine": "scripts/gold_ml_v1/mlr1/build_ml_native_candidate_proposals.py",
+  "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+  "candidate_ids": [
+    "GML1-MLC-001-L", "GML1-MLC-001-S",
+    "GML1-MLC-002-L", "GML1-MLC-002-S",
+    "GML1-MLC-003-L", "GML1-MLC-003-S",
+    "GML1-MLC-004-L", "GML1-MLC-004-S",
+    "GML1-MLC-005-L", "GML1-MLC-005-S",
+    "GML1-MLC-006-L", "GML1-MLC-006-S"
+  ],
+  "families": [
+    "HTF_TREND_PULLBACK_RESUMPTION",
+    "LOW_VOL_BOLLINGER_BREAKOUT",
+    "HIGH_VOL_MOMENTUM_EXPANSION",
+    "LOW_ADX_RANGE_REJECTION",
+    "HIGH_VOL_EXHAUSTION_REVERSAL",
+    "MULTITIMEFRAME_ROLLING_BREAKOUT"
+  ],
+  "rules": {
+    "symmetric_long_short": true,
+    "state_onset_only": true,
+    "exact_previous_m15_when_required": true,
+    "one_open": false,
+    "dedup": false,
+    "labels_used_for_definition": false
+  },
+  "density_gate": {
+    "minimum_per_candidate": 100,
+    "maximum_per_candidate": 5000,
+    "minimum_years": 3,
+    "review_before_label_join": true
+  },
+  "audit_only": true,
+  "candidate_stack_modified": false,
+  "model_trained": false,
+  "live_ready": false
+}
