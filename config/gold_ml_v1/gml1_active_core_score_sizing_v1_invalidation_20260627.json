@@ -1,0 +1,21 @@
+{
+  "system_id": "GML1-ACTIVE-CORE-SYNERGY",
+  "date": "2026-06-27",
+  "status": "INVALID_FOR_PROJECT_BASELINE",
+  "invalidated_file": "config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json",
+  "reason": "The result used the later four-channel Active Event Core v1. The user-requested baseline is a retired multi-candidate pool removed from the current tree by PR #51.",
+  "prohibitions": [
+    "Do not use the 517-trade Active Event Core result as the original-candidate baseline.",
+    "Do not call the associated score-sizing result a project-level ML synergy result.",
+    "Do not compare future challengers against that result until the retired original pool is recovered."
+  ],
+  "required_next_action": "Recover and reproduce the retired original multi-candidate pool from Git history, then freeze its no-ML OOS baseline before further research.",
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
