@@ -1,0 +1,72 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05A",
+  "date": "2026-06-27",
+  "status": "V1_LABEL_FREE_DENSITY_AUDITED_PARTIAL_PASS_V2_REQUIRED",
+  "input": {
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "candidate_contract_sha256": "f41c8641f24868996e967aa21da335cd87a31561ab124fecd61061894754d3bf",
+    "proposal_registry_sha256": "d47a745402f4be01d7be5e1a6e830f33515e7317768363d745cff8ea09fb8219",
+    "proposal_registry_rows": 3180,
+    "proposal_registry_columns": 166,
+    "unique_decisions": 3002,
+    "decisions_with_multiple_candidates": 178,
+    "maximum_candidates_same_decision": 2,
+    "direction_counts": {
+      "LONG": 2118,
+      "SHORT": 1062
+    }
+  },
+  "density_gate": {
+    "minimum_proposals_per_candidate": 100,
+    "maximum_proposals_per_candidate": 5000,
+    "minimum_calendar_years": 3,
+    "labels_joined": false,
+    "performance_calculated": false
+  },
+  "accepted_v1_candidates": [
+    {"candidate_id": "GML1-MLC-001-L", "family": "HTF_TREND_PULLBACK_RESUMPTION", "direction": "LONG", "proposals": 1093, "years": [2023, 2024, 2025, 2026]},
+    {"candidate_id": "GML1-MLC-001-S", "family": "HTF_TREND_PULLBACK_RESUMPTION", "direction": "SHORT", "proposals": 416, "years": [2023, 2024, 2025, 2026]},
+    {"candidate_id": "GML1-MLC-003-L", "family": "HIGH_VOL_MOMENTUM_EXPANSION", "direction": "LONG", "proposals": 390, "years": [2023, 2024, 2025, 2026]},
+    {"candidate_id": "GML1-MLC-003-S", "family": "HIGH_VOL_MOMENTUM_EXPANSION", "direction": "SHORT", "proposals": 249, "years": [2023, 2024, 2025, 2026]},
+    {"candidate_id": "GML1-MLC-006-L", "family": "MULTITIMEFRAME_ROLLING_BREAKOUT", "direction": "LONG", "proposals": 454, "years": [2023, 2024, 2025, 2026]},
+    {"candidate_id": "GML1-MLC-006-S", "family": "MULTITIMEFRAME_ROLLING_BREAKOUT", "direction": "SHORT", "proposals": 222, "years": [2023, 2024, 2025, 2026]}
+  ],
+  "failed_v1_candidates": [
+    {"candidate_id": "GML1-MLC-002-L", "family": "LOW_VOL_BOLLINGER_BREAKOUT", "direction": "LONG", "proposals": 93, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"},
+    {"candidate_id": "GML1-MLC-002-S", "family": "LOW_VOL_BOLLINGER_BREAKOUT", "direction": "SHORT", "proposals": 78, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"},
+    {"candidate_id": "GML1-MLC-004-L", "family": "LOW_ADX_RANGE_REJECTION", "direction": "LONG", "proposals": 35, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"},
+    {"candidate_id": "GML1-MLC-004-S", "family": "LOW_ADX_RANGE_REJECTION", "direction": "SHORT", "proposals": 52, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"},
+    {"candidate_id": "GML1-MLC-005-L", "family": "HIGH_VOL_EXHAUSTION_REVERSAL", "direction": "LONG", "proposals": 53, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"},
+    {"candidate_id": "GML1-MLC-005-S", "family": "HIGH_VOL_EXHAUSTION_REVERSAL", "direction": "SHORT", "proposals": 45, "years": [2023, 2024, 2025, 2026], "reason": "below minimum 100"}
+  ],
+  "decision": {
+    "all_density_pass": false,
+    "accepted_v1_families": ["MLC-001", "MLC-003", "MLC-006"],
+    "v2_required_families": ["MLC-002", "MLC-004", "MLC-005"],
+    "join_labels_now": false,
+    "inspect_candidate_performance_now": false,
+    "preserve_v1_registry_and_contract": true,
+    "v2_rule": "Use only label-free condition-funnel counts, calendar coverage and overlap diagnostics to broaden the failed families. Freeze v2 before joining ML-03 outcomes."
+  },
+  "next_steps": [
+    "Create a label-free condition-funnel report for MLC-002, MLC-004 and MLC-005 by direction and year",
+    "Define new v2 candidate IDs and thresholds from density diagnostics only",
+    "Keep accepted MLC-001, MLC-003 and MLC-006 v1 definitions unchanged",
+    "Rebuild the mixed accepted-v1 plus revised-v2 proposal registry",
+    "Require every primary candidate to pass density before ML-05B label join"
+  ],
+  "controls": {
+    "audit_only": true,
+    "labels_joined": false,
+    "candidate_performance_reviewed": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_adapter_implemented": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
