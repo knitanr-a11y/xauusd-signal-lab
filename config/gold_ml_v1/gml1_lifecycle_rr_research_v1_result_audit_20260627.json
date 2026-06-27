@@ -1,0 +1,115 @@
+{
+  "system_id": "GML1-LIFECYCLE-RR-RESEARCH",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "SETUP_TRIGGER_HIGH_RR_AND_PARTIAL_EXIT_EVALUATED_NOT_PROMOTED",
+  "hard_gate": {
+    "annualized_one_position_minimum": 250,
+    "quality": "win_rate >= 0.60 OR strong_profit_factor >= 2.00"
+  },
+  "label_matrix": {
+    "horizons_hours": [2, 4, 6, 8, 12, 24],
+    "reward_risk_range": [2.0, 4.0],
+    "config_count": 66,
+    "current_contract_reproduction": {
+      "long_outcome_equal": true,
+      "short_outcome_equal": true,
+      "long_max_strong_r_difference": 1.5500054661998774e-7,
+      "short_max_strong_r_difference": 1.1031331537125766e-7
+    },
+    "labels_npz_sha256": "5ab326f320846acbc7d23d7334eca62c525ce67265ad592f8819a9ee5e56b0bf",
+    "manifest_sha256": "1f0f558a44409112037df25d6842d0e6fc9c338f89733d7c9e3eb977d805ffea"
+  },
+  "lifecycle_design": {
+    "variant_count": 380,
+    "families": [
+      "TREND_PULLBACK",
+      "COMPRESSION",
+      "BREAK_PREP",
+      "EXHAUSTION",
+      "FAILED_BREAK",
+      "MEAN_REENTRY"
+    ],
+    "setup_wait_bars": [1, 2, 4, 8],
+    "trigger_types": ["RSI_CROSS", "MACD_CROSS", "BODY_CONFIRMATION", "ROLLING_BREAK", "BOLLINGER_REENTRY", "DUAL_IMPROVEMENT"],
+    "entry": "exact M1 open after M15 trigger bar close"
+  },
+  "single_rr_portfolio": {
+    "selected_by_validation": {
+      "horizon_hours": 8,
+      "target_atr": 5.0,
+      "protective_atr": 1.25,
+      "reward_risk": 4.0,
+      "selected_lifecycle_series": 5,
+      "validation": {"trades": 158, "annualized": 313.6386, "win_rate": 0.379747, "strong_profit_factor": 1.586080, "strong_r": 71.4007, "extreme_r": 61.5367},
+      "test": {"trades": 152, "annualized": 326.5765, "win_rate": 0.25, "strong_profit_factor": 0.707487, "strong_r": -41.2240, "extreme_r": -46.3605}
+    },
+    "validation_gate_passes": 0,
+    "test_gate_passed": false
+  },
+  "half_year_persistence": {
+    "variants_positive_in_at_least_five_of_six_half_years": 60,
+    "direction": "all persistent variants were LONG",
+    "dominant_families": {
+      "EXHAUSTION": 29,
+      "TREND_PULLBACK": 18,
+      "BREAK_PREP": 10,
+      "COMPRESSION": 3
+    },
+    "finding": "Individual raw event streams sometimes stayed positive, but overlap and active-position competition removed the apparent edge at portfolio level. No independent SHORT lifecycle family persisted."
+  },
+  "multi_rr_portfolio": {
+    "development_selected_structures": 92,
+    "decorrelated_structures": 46,
+    "selected_by_validation": {
+      "selected_structures": 5,
+      "dominant_exit": "24 hours, TP 5 ATR, SL 1.25 ATR, RR 4",
+      "validation": {"trades": 366, "annualized": 726.5299, "win_rate": 0.286885, "strong_profit_factor": 1.331251, "strong_r": 112.4996, "extreme_r": 87.9035},
+      "test": {"trades": 248, "annualized": 532.8353, "win_rate": 0.245968, "strong_profit_factor": 0.964627, "strong_r": -8.4243, "extreme_r": -16.6340}
+    },
+    "test_gate_passed": false
+  },
+  "partial_exit_research": {
+    "rules": "50 percent at +1 ATR, remainder stop moved to entry or +0.25 ATR, remainder target 3 to 5 ATR, horizon 8 to 24 hours",
+    "config_count": 36,
+    "selected_by_validation": {
+      "horizon_hours": 24,
+      "initial_stop_atr": 1.25,
+      "partial_target_atr": 1.0,
+      "partial_fraction": 0.5,
+      "runner_target_atr": 5.0,
+      "runner_stop_after_partial_atr": 0.0,
+      "selected_structures": 15,
+      "validation": {"trades": 575, "annualized": 1141.4063, "win_rate": 0.575652, "strong_profit_factor": 1.110663, "strong_r": 35.1845, "extreme_r": -7.0741},
+      "test": {"trades": 537, "annualized": 1153.7603, "win_rate": 0.525140, "strong_profit_factor": 0.772625, "strong_r": -74.1498, "extreme_r": -94.7344}
+    },
+    "validation_gate_passed": false,
+    "test_gate_passed": false
+  },
+  "conclusion": {
+    "target_met": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "reason": "Separating setup and trigger and improving nominal RR did not create a stable portfolio edge. Individual LONG event streams overlapped heavily, no SHORT family persisted, and partial exits did not survive the following half-year."
+  },
+  "next_research": [
+    "Implement an explicit setup state machine with invalidation before trigger.",
+    "Block repeated entries from the same setup until reset or cooldown completion.",
+    "Learn trigger quality and post-trigger excursion within each independent family rather than pooling all families.",
+    "Require each family to pass rolling out-of-sample before aggregation.",
+    "Keep annual 250 and WR60/PF2 as hard gates."
+  ],
+  "artifact_sha256": {
+    "lifecycle_summary": "314e55a7938a37655724f512309d96ca404b5d64e1ffe1a3257311d3e9cf833b",
+    "lifecycle_persistence": "985ad1fe49ddf60df325d6eba54aabc85373f21cd70023dc3b495a2cf11740a5",
+    "multi_rr_summary": "d722f9e7320b283124b28419c91d02ba01f87e45d395d0c011f67993459bda86",
+    "partial_exit_summary": "4ac5949a78a0267c1b44789fb1f6675600cbf0cf83a165afa9619f238b86cbf4"
+  },
+  "controls": {
+    "audit_only": true,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
