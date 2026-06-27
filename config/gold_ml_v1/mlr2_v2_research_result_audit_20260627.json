@@ -1,0 +1,83 @@
+{
+  "system_id": "GML1-MLR2",
+  "candidate_version": "v2-research",
+  "date": "2026-06-27",
+  "status": "HISTORICAL_NUMERIC_GATE_PASSED_MANUAL_PROMOTION_REJECTED",
+  "proposal_registry_sha256": "3212f70556a38f6d35d6000c18a6750aa620596d3ff9b54c7d7c21d358604eca",
+  "candidate_event_registry_sha256": "f83d32651140a5479998b1bc02b468b825b0fe82541d6681ac0f075be25e3237",
+  "meta_core": "GML1-META-CORE v1 unchanged",
+  "conservative_one_position": {
+    "trades": 287,
+    "long_trades": 192,
+    "short_trades": 95,
+    "strong_total_r": 32.93403566831199,
+    "strong_mean_r": 0.11475273752025085,
+    "strong_profit_factor": 1.2087110617737848,
+    "extreme_total_r": 16.232204581615,
+    "extreme_profit_factor": 1.097609460252684,
+    "strong_maximum_drawdown_r": 12.047157402399996,
+    "all_gates_passed": false
+  },
+  "standard_one_position": {
+    "trades": 319,
+    "long_trades": 213,
+    "short_trades": 106,
+    "strong_total_r": 36.978322539153,
+    "strong_mean_r": 0.115919506392,
+    "strong_profit_factor": 1.211214,
+    "extreme_total_r": 17.307978687831,
+    "strong_maximum_drawdown_r": 12.0471574024,
+    "strong_top_five_removed_total_r": 29.528535,
+    "strong_top_five_percent_removed_total_r": 13.211237,
+    "positive_months": 12,
+    "negative_months": 6,
+    "frozen_numeric_gates_passed": true
+  },
+  "standard_fold_strong_r": {
+    "F1": 0.0,
+    "F2": 17.1353422996,
+    "F3": 17.8163131813,
+    "F4": 2.02666705825
+  },
+  "standard_candidate_breakdown": {
+    "GML1-MLR2-V2-C001-L": {"trades": 103, "strong_total_r": 5.236234, "strong_profit_factor": 1.086862, "extreme_total_r": -3.503888},
+    "GML1-MLR2-V2-C002-S": {"trades": 39, "strong_total_r": 7.952499, "strong_profit_factor": 1.389473, "extreme_total_r": 4.904997},
+    "GML1-MLR2-V2-C003-L": {"trades": 110, "strong_total_r": 16.693535, "strong_profit_factor": 1.286925, "extreme_total_r": 12.559317},
+    "GML1-MLR2-V2-C003-S": {"trades": 67, "strong_total_r": 7.096055, "strong_profit_factor": 1.196059, "extreme_total_r": 3.347553}
+  },
+  "manual_audit_findings": [
+    "F1 selected zero trades because both direction scores were non-positive.",
+    "F4 Strong R was only +2.03R and Extreme R was -1.75R.",
+    "Several later fold-direction calibrations had zero slope, so the policy accepted broad candidate groups rather than ranking events.",
+    "H1 pullback LONG remained negative under Extreme cost.",
+    "The candidate pool was assembled after historical candidate diagnostics were reviewed."
+  ],
+  "unseen_post_boundary_snapshot": {
+    "period": "2026-06-22 through 2026-06-26",
+    "candidate_events": 4,
+    "long_events": 2,
+    "short_events": 2,
+    "strong_total_r": -1.6872735805285555,
+    "extreme_total_r": -1.8745471610570499,
+    "interpretation": "Too few events for inference; reported only as an untouched sanity check and not used to modify v2."
+  },
+  "outputs": {
+    "oos_predictions_sha256": "e7a60d4400f4fab5f9e7dbca2180a9fb8a1bca348062e3d638647fdede76d532",
+    "policy_metrics_sha256": "5ccc2ed003d8542847f283ca2716a1885022731667fa7632c611ae5cc9d97f9c",
+    "diagnostics_sha256": "3f8160ae4983a9f111cbff5db1fca1d977b77c9b24ebf8b44a0b00f49250c4d7",
+    "summary_sha256": "a547ac1aefaca405c2c240f910f7ca7798a8588d318f2cc3ee75389c32884d97"
+  },
+  "decision": {
+    "numeric_gate_passed_by_standard_policy": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "reason": "Performance-informed candidate assembly, zero-trade F1, weak recent Extreme-cost behavior and only four untouched events do not support deployment."
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
