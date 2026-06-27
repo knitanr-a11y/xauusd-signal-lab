@@ -4,7 +4,7 @@
   "status": "RESEARCH_CHALLENGER_ADDITION_NOT_PROMOTED",
   "source": {
     "registry": "mlr1_candidate_event_registry_v1.csv.gz",
-    "registry_sha256": "d73eb443537317629edfa263cc01f56f305ea937f0b457d86e21722dd916fba6",
+    "registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
     "parent_candidate_id": "GML1-MLC-005-S",
     "candidate_family": "HIGH_VOL_EXHAUSTION_REVERSAL",
     "direction": "SHORT",
@@ -74,10 +74,10 @@
   ],
   "artifact_sha256": {
     "local_summary": "08acabe257719fb07a4f38f9cbb315086a3a41a6b69bf99bbfedc0b9bdb999b5",
-    "candidate_trades": "e8677146a1550b04a05bfa129dd6f7c4014bd3273c2c2c461cb3fd45a8293eb0",
-    "portfolio_2024": "5e43ac0bb94b3c8b61227cffb4590969d0e2f59fbaaaab452738989cefc85cd7",
-    "portfolio_2025": "bd8b554404e6134b6f7672367a7349b3a89bd773351057182109b136363a141f",
-    "portfolio_2026": "cc15698f7edcf077e50f53e7811e7e8189d631ddca6ce58921cb2d37e86c6dce"
+    "candidate_trades": "2cd135ea1c4d40b3f0c744be13adcae186223956bd99741f79882fd3c3ff86cb",
+    "portfolio_2024": "4e95ae586f10ffc7cfe1dd73c78537fc39eb993edcc2694b0f21d6d52be063a6",
+    "portfolio_2025": "768fb88dda310a3adf62c25a9b4415ae95baddf54f50f5bfc3c16d08385b1a03",
+    "portfolio_2026": "92ef200882d14458841266fd9d48691b2b6adee8ff7e9891c233236a504c3f0f"
   },
   "controls": {
     "audit_only": true,
