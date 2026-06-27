@@ -1,0 +1,71 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "PROSPECTIVE_CAPTURE",
+  "date": "2026-06-27",
+  "status": "RESOLVED_ONLY_PROSPECTIVE_CAPTURE_VALIDATED_AUDIT_ONLY",
+  "input": {
+    "historical_last_decision": "2026-06-19 19:45:00",
+    "goldsharp_m1_sha256": "8c03c1a5503db0c2c17d365983cf5e2f465107e3753e0a86d65226c136538fca",
+    "prospective_feature_registry_sha256": "93fd57f07f03537a12738e83fef2fe93b02b433a196d75fcc8e34b7dc2f1d493",
+    "prospective_candidate_proposal_sha256": "5d17ae9ce09831c567ad4ce7d553f03eb7127d3bf54dfe151d93cb1dd40d277f"
+  },
+  "label_engine_historical_parity": {
+    "reference_resolved_labels": 19169,
+    "rebuilt_reference_key_matches": 19169,
+    "original_snapshot_unresolved_but_later_resolvable": 19,
+    "outcome_exact": true,
+    "exit_bar_open_time_exact": true,
+    "exit_time_exact": true,
+    "same_m1_collision_exact": true,
+    "holding_minutes_exact": true,
+    "maximum_numeric_absolute_difference": 5.072251951787621e-09,
+    "interpretation": "The 19 additional rows were unresolved at the frozen historical snapshot boundary and are not treated as historical reference labels."
+  },
+  "current_capture": {
+    "prospective_feature_rows": 455,
+    "candidate_events": 32,
+    "unique_decision_direction_keys": 30,
+    "resolved_label_keys": 30,
+    "unresolved_label_keys": 0,
+    "resolved_candidate_events": 32,
+    "unresolved_candidate_events": 0,
+    "first_prospective_decision": "2026-06-22 01:15:00",
+    "last_prospective_decision": "2026-06-26 20:45:00",
+    "last_observed_m1_close": "2026-06-26 23:57:00",
+    "last_resolved_exit_time": "2026-06-26 23:57:00"
+  },
+  "outputs": {
+    "resolved_labels_sha256": "a16b2f1dd9c15e5922805c913f371c0e8c26d4ec5d2b471a2159a5729bfb13ac",
+    "unresolved_label_keys_sha256": "1df5168da8e52c0816e2e218fa4e444abe0ec708f9b82278e166af3fc4df8b25",
+    "resolved_candidate_events_sha256": "3af63862653882123da767fe328ea56d1a24b68dca3cb1f869919ea2a6232388",
+    "unresolved_candidate_events_sha256": "74b359d1d5f110eaa34ef341c085e859a4c5c81f2ed0db8d8b798a6b42b3ac56",
+    "deterministic_two_run_hash_match": true
+  },
+  "tests": {
+    "synthetic_tests_passed": 6,
+    "target_touch": true,
+    "protective_touch": true,
+    "same_m1_protective_priority": true,
+    "time_exit": true,
+    "unobserved_horizon_unresolved": true,
+    "many_candidates_share_one_label_without_dedup": true
+  },
+  "review_boundary": {
+    "candidate_performance_calculated": false,
+    "candidate_performance_reviewed": false,
+    "prospective_outcomes_used_for_candidate_changes": false,
+    "prospective_outcomes_used_for_model_selection": false
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_definitions_changed": false,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
