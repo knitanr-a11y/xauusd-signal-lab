@@ -1,0 +1,51 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05C",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_CANDIDATE_ID_BASELINES_AUDIT_ONLY",
+  "event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+  "purpose": "Establish market-blind candidate-selection baselines before nonlinear market-context models. Preserve all candidates and compare raw, deterministic decision dedup and deterministic one-position execution.",
+  "folds": [
+    {"fold":"F1","train_start":"2023-01-01 00:00:00","train_end":"2024-01-01 00:00:00","validation_start":"2024-01-01 00:00:00","validation_end":"2024-07-01 00:00:00","test_start":"2024-07-01 00:00:00","test_end":"2025-01-01 00:00:00"},
+    {"fold":"F2","train_start":"2023-01-01 00:00:00","train_end":"2024-07-01 00:00:00","validation_start":"2024-07-01 00:00:00","validation_end":"2025-01-01 00:00:00","test_start":"2025-01-01 00:00:00","test_end":"2025-07-01 00:00:00"},
+    {"fold":"F3","train_start":"2023-01-01 00:00:00","train_end":"2025-01-01 00:00:00","validation_start":"2025-01-01 00:00:00","validation_end":"2025-07-01 00:00:00","test_start":"2025-07-01 00:00:00","test_end":"2026-01-01 00:00:00"},
+    {"fold":"F4","train_start":"2023-01-01 00:00:00","train_end":"2025-07-01 00:00:00","validation_start":"2025-07-01 00:00:00","validation_end":"2026-01-01 00:00:00","test_start":"2026-01-01 00:00:00","test_end":"2026-06-20 00:00:00"}
+  ],
+  "purge_hours": 6,
+  "embargo_hours": 6,
+  "outcome_classes": ["PROTECTIVE", "TARGET", "TIME"],
+  "smoothing_alpha_grid": [0.0, 5.0, 10.0, 25.0, 50.0, 100.0],
+  "alpha_selection": {
+    "strong_r": "minimum validation MSE separately by direction; ties choose smaller alpha",
+    "outcome_probability": "minimum validation multiclass log loss separately by direction; ties choose smaller alpha"
+  },
+  "baselines": ["DIRECTION_UNCONDITIONAL", "CANDIDATE_ID_SHRUNK"],
+  "execution_views": ["RAW_ALL", "DEDUP_DIRECTION_UNCONDITIONAL", "ONE_POSITION_DIRECTION_UNCONDITIONAL", "DEDUP_CANDIDATE_ID_SHRUNK", "ONE_POSITION_CANDIDATE_ID_SHRUNK"],
+  "competition_rule": "At the same decision_time choose the highest train/refit-only predicted Strong R; ties choose candidate_id ascending.",
+  "one_position_rule": "After decision dedup, accept chronologically only when decision_time is greater than or equal to the active position exit_time.",
+  "availability_rule": "Training or validation outcomes are usable only when exit_time is less than or equal to the applicable segment cutoff. Refit rows must have exit_time less than or equal to test_start.",
+  "volatility_regimes": {
+    "LOW": "m15_atr14_percentile_lag1_256 <= 0.30",
+    "MID": "0.30 < m15_atr14_percentile_lag1_256 < 0.70",
+    "HIGH": "m15_atr14_percentile_lag1_256 >= 0.70"
+  },
+  "immutability": {
+    "candidate_added": false,
+    "candidate_deleted": false,
+    "candidate_renamed": false,
+    "candidate_promoted_or_demoted": false,
+    "candidate_definition_changed": false
+  },
+  "controls": {
+    "audit_only": true,
+    "health_gate_applied": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
