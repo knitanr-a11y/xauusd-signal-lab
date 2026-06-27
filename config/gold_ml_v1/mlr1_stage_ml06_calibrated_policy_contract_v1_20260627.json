@@ -1,0 +1,58 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-06",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_VALIDATION_ONLY_CALIBRATED_META_POLICY_AUDIT_ONLY",
+  "source_ml05d_prediction_sha256": "d80b0ab0e9023699327ae2fe8e9e96670e53b8a6baff1a50ca9c16c0f98f4dcc",
+  "calibration": {
+    "classifier_temperature_grid": [0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0],
+    "classifier_direction_prior_blend_grid": [0.0, 0.1, 0.25, 0.5, 0.75],
+    "classifier_selection": "minimum validation multiclass log loss separately by fold and direction",
+    "strong_r_regressor": "validation affine calibration with nonnegative slope clipped to 2.0",
+    "classifier_regressor_blend_grid": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "blend_selection": "minimum validation Strong-R MSE separately by fold and direction",
+    "test_reselection": false
+  },
+  "score": "validation-selected blend of calibrated class-probability Strong-cost EV and calibrated direct Strong-R regression",
+  "policies": {
+    "coverage_per_direction_of_eligible_m15_decisions": {
+      "conservative": 0.0025,
+      "standard": 0.005,
+      "high_coverage": 0.01
+    },
+    "threshold_source": "validation segment only",
+    "positive_score_required": true,
+    "same_decision_competition": "highest score; ties candidate_id ascending",
+    "one_position": "accept only when decision_time >= active exit_time"
+  },
+  "causality": {
+    "resolved_history": "exit_time <= simulated as-of cutoff",
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "future_result_columns_as_features": false
+  },
+  "frozen_shadow_gate": {
+    "minimum_total_test_trades": 100,
+    "minimum_resolved_trades_per_direction": 100,
+    "minimum_positive_test_folds": 3,
+    "minimum_strong_profit_factor": 1.2,
+    "minimum_strong_mean_r": 0.05,
+    "maximum_strong_drawdown_r": 20.0,
+    "top_five_removed_total_r_nonnegative": true,
+    "maximum_single_positive_fold_share": 0.5,
+    "positive_brier_skill": true,
+    "extreme_cost_total_r_positive": true
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_changed": false,
+    "model_promoted": false,
+    "sequence_model_allowed": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

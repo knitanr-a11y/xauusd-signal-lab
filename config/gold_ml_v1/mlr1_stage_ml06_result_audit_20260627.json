@@ -1,0 +1,91 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-06",
+  "date": "2026-06-27",
+  "status": "CALIBRATED_CANDIDATE_META_POLICY_RESEARCH_SIGNAL_NOT_SHADOW_READY_AUDIT_ONLY",
+  "source_ml05d_prediction_sha256": "d80b0ab0e9023699327ae2fe8e9e96670e53b8a6baff1a50ca9c16c0f98f4dcc",
+  "calibration_result": {
+    "classifier": "temperature plus direction-prior blend selected by validation log loss",
+    "regressor": "nonnegative affine calibration selected on validation",
+    "blend": "classifier/regressor weight selected by validation Strong-R MSE",
+    "selected_classifier_weight": "0.0 in all eight fold-direction fits",
+    "interpretation": "The validation-selected final score is the calibrated direct Strong-R regressor, not calibrated probability EV."
+  },
+  "conservative_one_position": {
+    "trades": 113,
+    "unique_decisions": 113,
+    "long_trades": 83,
+    "short_trades": 30,
+    "strong_total_r": 11.6373977593109,
+    "strong_mean_r": 0.10298582087885752,
+    "strong_profit_factor": 1.1848033711294401,
+    "extreme_total_r": 6.169841678618901,
+    "extreme_mean_r": 0.05460036883733541,
+    "extreme_profit_factor": 1.0935893755320973,
+    "strong_maximum_drawdown_r": 6.25765586492,
+    "strong_top_five_removed_total_r": 4.213647355890901,
+    "strong_top_five_percent_removed_total_r": 2.7305856231508994,
+    "positive_months": 13,
+    "negative_months": 9
+  },
+  "fold_conservative_strong_r": {
+    "F1": 0.036156274829999946,
+    "F2": -0.7647191974699996,
+    "F3": 10.6485166797919,
+    "F4": 1.7174440021590003
+  },
+  "positive_folds": 3,
+  "largest_positive_fold_share": 0.858604762146658,
+  "probability_quality": {
+    "aggregate_long_brier_skill_vs_unconditional": -0.012052165961898398,
+    "aggregate_short_brier_skill_vs_unconditional": -0.018750923260963726
+  },
+  "direction_breakdown": {
+    "LONG": {"trades":83,"strong_total_r":5.11956287685,"extreme_total_r":0.63416700213},
+    "SHORT": {"trades":30,"strong_total_r":6.51783488246,"extreme_total_r":5.53567467649}
+  },
+  "recent_months": {
+    "2026-01": 1.66402961851,
+    "2026-02": -5.17181211496,
+    "2026-03": 6.62725339012,
+    "2026-04": 0.88013382049,
+    "2026-05": -2.06408025763,
+    "2026-06": -0.21808045437
+  },
+  "shadow_gate": {
+    "minimum_total_test_trades": true,
+    "minimum_100_per_direction": false,
+    "minimum_positive_test_folds_3": true,
+    "strong_profit_factor_at_least_1_2": false,
+    "strong_mean_r_at_least_0_05": true,
+    "maximum_drawdown_at_most_20": true,
+    "top_five_removed_nonnegative": true,
+    "largest_positive_fold_share_at_most_0_5": false,
+    "positive_brier_skill": false,
+    "extreme_cost_positive": true,
+    "any_policy_passed": false
+  },
+  "outputs": {
+    "oos_predictions_sha256": "8f79be8baff8275c2600d408edb62e7b17f62c1b342ad70cbb3105703e009122",
+    "policy_metrics_sha256": "a2f144273400ff27abe014c654c62f4c3a6138a57f4dd30c5f6c254e422d6de5",
+    "calibration_diagnostics_sha256": "0904ed9dc2dfb022d1a184fa4a02f4a18668f84dbbb44aef887c30b35925aea2",
+    "monthly_metrics_sha256": "faa650974da23f7b2befd49e3b8de33e06952f80730385b11ec3d4ec13120b6f",
+    "candidate_metrics_sha256": "31757b78a42c6772f85b825bb83ad7aacaa63987ac1f7b47244f634bfd131987",
+    "regime_metrics_sha256": "cbca7525471cd55fab103e6c28329cebb77375aff213ed25b1c0d48931fa4f19",
+    "summary_sha256": "050f3f09efddb9e120ba8087c3dc92342fb1c706ed1a97ce7739cae109b0d1e4"
+  },
+  "decision": {
+    "model_promoted": false,
+    "shadow_ready": false,
+    "sequence_model_allowed": false,
+    "candidate_stack_changed": false,
+    "reason": "Strong PF is below 1.20, SHORT has only 30 trades, positive R is concentrated in F3, and Brier skill is negative despite positive aggregate Strong and Extreme R."
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "ML05D_AND_ML06_AUDITED_NO_MODEL_PROMOTED_RESEARCH_ONLY",
+  "ml05d": {
+    "status": "NONLINEAR_META_MODEL_AUDITED_NOT_PROMOTED_AUDIT_ONLY",
+    "conservative_one_position_trades": 271,
+    "strong_total_r": -4.53524982243389,
+    "strong_profit_factor": 0.9725475737857604,
+    "extreme_total_r": -28.503067559884013,
+    "model_promoted": false
+  },
+  "ml06": {
+    "status": "CALIBRATED_CANDIDATE_META_POLICY_RESEARCH_SIGNAL_NOT_SHADOW_READY_AUDIT_ONLY",
+    "conservative_one_position_trades": 113,
+    "long_trades": 83,
+    "short_trades": 30,
+    "strong_total_r": 11.6373977593109,
+    "strong_profit_factor": 1.1848033711294401,
+    "extreme_total_r": 6.169841678618901,
+    "positive_folds": 3,
+    "largest_positive_fold_share": 0.858604762146658,
+    "positive_brier_skill": false,
+    "shadow_gate_passed": false,
+    "model_promoted": false
+  },
+  "interpretation": "A validation-calibrated direct Strong-R regressor shows historical research signal, but it fails the frozen shadow gate because per-direction sample counts, Strong PF, fold concentration and Brier skill are insufficient.",
+  "candidate_stack_changed": false,
+  "candidate_added_or_deleted": false,
+  "candidate_promoted_or_demoted": false,
+  "sequence_model_allowed": false,
+  "next_stage": "HALT_MLR1_V1_BEFORE_SHADOW_AND_DEFINE_A_SEPARATELY_VERSIONED_RESEARCH_ITERATION_BEFORE_ANY_NEW_TUNING",
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "prospective_started": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
