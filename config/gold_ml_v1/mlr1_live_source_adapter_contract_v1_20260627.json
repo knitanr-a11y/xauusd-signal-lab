@@ -1,0 +1,49 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "PROSPECTIVE_INFRASTRUCTURE",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "EXPLICIT_PATH_LIVE_SOURCE_ADAPTER_AUDIT_ONLY",
+  "historical_snapshot_last_decision": "2026-06-19 19:45:00",
+  "required_timeframes": ["m1", "m15", "h1", "h4", "d1"],
+  "source_rules": {
+    "explicit_paths_required": true,
+    "recursive_discovery": false,
+    "same_parent_directory_required": true,
+    "filename_pattern": "goldsharp_*.csv",
+    "forbidden_path_segment": "gold_v3_2023_2026",
+    "cross_source_concatenation": false,
+    "automatic_fallback": false,
+    "hash_before_after_must_match": true
+  },
+  "time_contract": {
+    "timezone_basis": "MT5 server naive time",
+    "csv_time_meaning": "bar-open time",
+    "latest_csv_row": "closed by CSV contract",
+    "m15_decision_time": "M15 bar-open plus 15 minutes",
+    "higher_timeframe_close_le_decision": true,
+    "exact_m1_required": true
+  },
+  "feature_contract": "config/gold_ml_v1/mlr1_feature_contract_v1_20260627.json",
+  "warmup_policy": {
+    "historical_bridge": false,
+    "cross_source_imputation": false,
+    "insufficient_history": "exclude rows until causal warmups exist"
+  },
+  "prospective_rule": "Only decision_time strictly after historical_snapshot_last_decision is prospective.",
+  "outputs": {
+    "all_available_features": "mlr1_live_features_all_available_v1.csv.gz",
+    "prospective_features": "mlr1_prospective_features_v1.csv.gz",
+    "manifest": "mlr1_live_feature_manifest_v1.json"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
