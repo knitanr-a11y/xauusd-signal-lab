@@ -1,0 +1,22 @@
+{
+  "system_id": "GML1-FINAL-RESEARCH-CHALLENGER-LOCAL-REPLAY",
+  "date": "2026-06-27",
+  "status": "PARITY_PASSED_AUDIT_ONLY",
+  "final_change": "WATCH-024-A added after WATCH-022-C replaced WATCH-022-B",
+  "manifest": "config/gold_ml_v1/research_challenger/final_20260627/manifest.json",
+  "verifier": "scripts/gold_ml_v1/research_challenger/verify_final_research_challenger.py",
+  "machine_learning": {
+    "all_m15_synergy_used": false,
+    "active_event_score_sizing_used": false,
+    "mlr1_meta_core_used": false,
+    "fresh_inference_enabled": false,
+    "approx_sleeves_frozen": ["P16", "P18", "P19"]
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}

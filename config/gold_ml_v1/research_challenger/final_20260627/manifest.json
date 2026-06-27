@@ -1,0 +1,60 @@
+{
+  "package_id": "GML1-FINAL-RESEARCH-CHALLENGER-LOCAL-REPLAY-20260627",
+  "date": "2026-06-27",
+  "status": "ARTIFACT_EXACT_LOCAL_REPLAY_IMPLEMENTED_AUDIT_ONLY",
+  "source_of_truth_order": [
+    "watch024a final artifacts",
+    "watch022c replacement artifacts",
+    "completion challenger artifacts",
+    "historical documents for lineage interpretation only"
+  ],
+  "final_stage": {
+    "last_change": "GML1-WATCH-024-A added after GML1-WATCH-022-C replaced GML1-WATCH-022-B",
+    "components": {
+      "A_CORE": "GML1-WATCH-022-C",
+      "B_STATE": "GML1-H1D1-STATEFUL-REENTRY24-C",
+      "P16": "GML1-PROV-016-APPROX",
+      "P18": "GML1-PROV-018-APPROX",
+      "P19": "GML1-PROV-019-APPROX",
+      "W024A": "GML1-WATCH-024-A"
+    }
+  },
+  "ml_lineage": {
+    "stable_loss_rule_counts": {"P16": 3, "P18": 1, "P19": 4},
+    "candidate_local_model_artifacts_present": false,
+    "fresh_inference_enabled": false,
+    "unrelated_ml_substitution_allowed": false
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  },
+  "artifact_delivery": {
+    "local_package": "gml1_final_research_challenger_local_replay_20260627.zip",
+    "required_directory": "config/gold_ml_v1/research_challenger/final_20260627/artifacts",
+    "required_file_count": 15
+  },
+  "artifact_hashes": "config/gold_ml_v1/research_challenger/final_20260627/artifact_hashes.csv",
+  "artifact_names": [
+    "completion_challenger_v1_2024.csv",
+    "completion_challenger_v1_2025.csv",
+    "completion_challenger_v1_2026.csv",
+    "completion_challenger_v1_summary.json",
+    "stable_loss_leaf_rules.json",
+    "watch022c_challenger_2024.csv",
+    "watch022c_challenger_2025.csv",
+    "watch022c_challenger_2026.csv",
+    "watch022c_cost_stress.json",
+    "watch024a_addition_summary.json",
+    "watch024a_challenger_2024.csv",
+    "watch024a_challenger_2025.csv",
+    "watch024a_challenger_2026.csv",
+    "watch024a_exact_candidate_trades.csv",
+    "watch_addon_decision_summary.json"
+  ]
+}
