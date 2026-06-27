@@ -1,0 +1,66 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05C",
+  "date": "2026-06-27",
+  "status": "CANDIDATE_ID_BASELINES_AUDITED_NONLINEAR_META_MODEL_JUSTIFIED_AUDIT_ONLY",
+  "input": {
+    "candidate_event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+    "event_rows": 4263,
+    "candidate_count": 12
+  },
+  "walk_forward": {
+    "oos_rows": 2675,
+    "oos_unique_decisions": 2525,
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "resolved_only_history_enforced": true,
+    "refit_exit_time_le_test_start": true
+  },
+  "aggregate_policies": {
+    "RAW_ALL": {"trades":2675,"strong_total_r":-198.285334585,"strong_mean_r":-0.0741253587,"strong_profit_factor":0.8832499008,"extreme_total_r":-418.393072955,"strong_maximum_drawdown_r":209.440834077,"negative_months":17,"positive_folds":1},
+    "DEDUP_DIRECTION_UNCONDITIONAL": {"trades":2525,"strong_total_r":-186.040106574,"strong_mean_r":-0.0736792501,"strong_profit_factor":0.8838496161,"extreme_total_r":-395.417365804,"strong_maximum_drawdown_r":197.195606066,"negative_months":17,"positive_folds":1},
+    "ONE_POSITION_DIRECTION_UNCONDITIONAL": {"trades":2213,"strong_total_r":-168.76473885,"strong_mean_r":-0.076260614,"strong_profit_factor":0.8803522323,"extreme_total_r":-352.592577992,"strong_maximum_drawdown_r":177.058072363,"negative_months":16,"positive_folds":1},
+    "DEDUP_CANDIDATE_ID_SHRUNK": {"trades":2525,"strong_total_r":-183.540106574,"strong_mean_r":-0.0726891511,"strong_profit_factor":0.8853328109,"extreme_total_r":-392.917365804,"strong_maximum_drawdown_r":194.695606066,"negative_months":17,"positive_folds":1},
+    "ONE_POSITION_CANDIDATE_ID_SHRUNK": {"trades":2213,"strong_total_r":-166.26473885,"strong_mean_r":-0.0751309258,"strong_profit_factor":0.882033948,"extreme_total_r":-350.092577992,"strong_maximum_drawdown_r":174.558072363,"negative_months":16,"positive_folds":1}
+  },
+  "candidate_identity_prediction": {
+    "fold_direction_comparisons": 8,
+    "positive_strong_r_mse_skill": 5,
+    "positive_multiclass_brier_skill": 4,
+    "interpretation": "Candidate identity contains limited predictive information, but it does not produce a profitable executable aggregate baseline."
+  },
+  "positive_raw_oos_candidates_audit_only": [
+    {"candidate_id":"GML1-MLC-005-L","strong_total_r":25.951616,"strong_mean_r":0.141041,"strong_profit_factor":1.263245},
+    {"candidate_id":"GML1-MLC-005-S","strong_total_r":10.008621,"strong_mean_r":0.094421,"strong_profit_factor":1.170062},
+    {"candidate_id":"GML1-MLC-006-S","strong_total_r":1.351299,"strong_mean_r":0.010475,"strong_profit_factor":1.017271}
+  ],
+  "outputs": {
+    "selection_ledger_sha256": "b787b379bcdceec11611af1ee13437c46285f85e146e05dc1fd8909820f395d1",
+    "fold_policy_metrics_sha256": "5e76b264d714655ff2425c373c9eb323219ec7c53be9541d4f45cca3c1b1d9a5",
+    "aggregate_policy_metrics_sha256": "78337d5253140f48c35842f5392d1f80da34b92051901da109c8e12f61f81f7e",
+    "probability_metrics_sha256": "52dcfb9194711ac6d048eeeeafae842b4830b11c63438dd9a206b5b95cf7bd80",
+    "alpha_validation_sha256": "648e43e9dd5df8b56e3ca92f3aa0f4bd86f76c6b66ff5d153cd727b154918dfa",
+    "candidate_metrics_sha256": "a262db240cd4bfcfc83da4a12fbccba0fe9a91ec677b8821a93387c665d68403",
+    "regime_metrics_sha256": "2c5c24a76fbf14ea1c4b8c389901856e7ac51380f1d874c560d003bd63497661",
+    "monthly_metrics_sha256": "cc7cc898909c85f4f54912bff008258d1f322b1ef15af7f503088a4e5285df2e",
+    "summary_sha256": "b993350e4b4a05e685e9beb5bc8782b5b8c23afc7becdac44cf8cf6f536456de",
+    "deterministic_two_run_hash_match": true
+  },
+  "decision": {
+    "candidate_identity_baseline_promoted": false,
+    "candidate_stack_changed": false,
+    "candidate_promoted_or_demoted": false,
+    "nonlinear_market_context_model_justified": true,
+    "next_stage": "ML-05D_NONLINEAR_CANDIDATE_META_MODEL"
+  },
+  "controls": {
+    "audit_only": true,
+    "health_gate_applied": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
