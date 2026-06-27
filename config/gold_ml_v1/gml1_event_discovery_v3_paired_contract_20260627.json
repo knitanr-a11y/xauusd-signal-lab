@@ -1,0 +1,45 @@
+{
+  "system_id": "GML1-EVENT-DISCOVERY",
+  "version": "v3-paired-research",
+  "date": "2026-06-27",
+  "status": "PAIRED_DIRECTION_EVENT_POOL_FROZEN_RESEARCH_ONLY",
+  "provenance_warning": "This architecture was designed after the v2 historical result was inspected. It is research-only and cannot certify deployment.",
+  "source_feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+  "time_contract": "same passed bar-open to bar-close causality contract as Event Discovery v2",
+  "design": {
+    "direction_neutral_event_gates": 7,
+    "emit_both_long_and_short": true,
+    "rows_per_event_decision": 2,
+    "one_gate_per_decision": true,
+    "gate_priority": [
+      "EXHAUSTION", "BB_REENTRY", "EXTREME_BREAK", "COMPRESSION_RELEASE",
+      "MOMENTUM_TURN", "RSI_TURN", "EXPANSION_SHOCK"
+    ]
+  },
+  "gate_definitions": {
+    "EXHAUSTION": "ATR percentile >= 0.65, range >= 1 ATR, absolute RSI centered >= 0.25, maximum wick fraction >= 0.35",
+    "BB_REENTRY": "previous exact Bollinger location outside [0,1], current returns inside, maximum wick >= 0.20",
+    "EXTREME_BREAK": "cross of prior 50-bar high or low, body fraction >= 0.50, volume ratio >= 1.00",
+    "COMPRESSION_RELEASE": "previous exact ATR percentile <= 0.35, range >= 1 ATR, Bollinger location outside [0,1], body fraction >= 0.45",
+    "MOMENTUM_TURN": "MACD histogram crosses zero, absolute signed body >= 0.03 ATR, volume ratio >= 1.00",
+    "RSI_TURN": "RSI crosses inward through +/-0.35 with MACD histogram changing in the same turn direction",
+    "EXPANSION_SHOCK": "range >= 1.25 ATR, body fraction >= 0.55, volume ratio >= 1.20"
+  },
+  "label_free_reference": {
+    "unique_event_decisions": 15017,
+    "proposal_rows": 30034,
+    "long_rows": 15017,
+    "short_rows": 15017,
+    "raw_multi_gate_decisions": 3870,
+    "maximum_raw_gate_overlap": 5,
+    "proposal_registry_sha256": "ece2fd869138155cbda3b4da3ad8426564373556d5c4eb42b50311bcf370ac0a"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
