@@ -1,37 +1,64 @@
 # Current GML1 Handoff
 
-## Critical baseline correction
+## Correct baseline
 
-The Active Event Core v1 four-channel result recorded in PR #57 is not the user-requested original-candidate baseline.
+The original candidate era is the pool frozen at commit `5e8befb09981ff577f2e4716c758a2f5b2ad17ee`. It is not the later four-channel Active Event Core.
 
-Do not use the following as the project baseline or as a completed ML-synergy result:
+The historical set consists of nine accumulated candidates, three research-only candidates and three adjacent independent survivors. This matches the approximately fifteen-candidate pool referenced by the user.
 
-- Active Event Core v1 no-ML 517-trade result;
-- Active Event Core v1 score-sizing result;
-- `config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json`.
+## Current research challenger
 
-Those figures describe only the later four-channel Active Event Core research layer. The user refers to the retired multi-candidate pool that existed before PR #51 removed the old candidate definitions from the current tree.
+Protected core:
 
-## Required recovery order
+- `GML1-WATCH-022-B` for the M15-H4 lineage;
+- the WATCH-021-C H1-D1 structure extended into a single state machine with breakout and 24-hour above-band re-entry.
 
-1. Recover the retired candidate IDs, definitions, proposal registry and label join from Git history.
-2. Determine which retired pool is the actual original baseline; do not infer this from approximate candidate count alone.
-3. Reproduce its no-ML OOS result with the original deduplication, conflict and one-position contract.
-4. Freeze candidate count, IDs, SHA, trades, annualized trades, WR, Strong/Extreme PF and R, DD, fold, direction and candidate breakdown.
-5. Only then compare ML filtering, ML sizing or new candidate families against that baseline.
+Independent additions:
 
-No further candidate or ML result may be called an improvement until this recovery is complete.
+- `GML1-PROV-016`;
+- `GML1-PROV-018`;
+- `GML1-PROV-019`.
 
-## Confirmed historical pools under review
+ML is used only inside each structural candidate. Compound loss leaves must be negative in both 2023 and 2024. PROV-016 also removes its lowest validation-score decile. PROV-019 applies its lower validation-score support boundary. Candidate-specific risk is used instead of deleting all lower-confidence trades.
 
-Git history currently shows at least:
+## Results
 
-- MLR1 ML-05A/05B: 12 candidate IDs across six families, 4,263 raw events;
-- MLR2 v1: 10 candidate IDs across five families, 3,156 raw proposals;
-- later Active Event Core v1: four event channels, which is not the requested original pool.
+2024 validation:
 
-The first two remain historical audit objects only until the exact user-referenced original pool is established.
+- 264 trades;
+- WR 65.15%;
+- PF 2.398;
+- +128.53R;
+- DD 5.91R.
 
-## Time and safety contracts
+2025 following period:
 
-CSV `time` is bar-open time. M15 decision is open plus 15 minutes. Entry requires an exact M1 open. Higher-timeframe bars must be closed. Audit-only remains active. No model, shadow, live, Discord or MT5 output is enabled.
+- 388 trades;
+- WR 59.28%;
+- PF 2.0015;
+- +141.96R;
+- DD 8.12R;
+- all twelve months positive;
+- +91.74R after removing the top five percent of wins.
+
+2026 partial diagnostic:
+
+- 101 trades;
+- WR 60.40%;
+- PF 1.722;
+- +37.08R;
+- DD 7.01R.
+
+The complete 2024 and 2025 years pass the research target. The partial 2026 period does not establish a full-year pass.
+
+## Limits
+
+The exact trade registries for PROV-016, PROV-018 and PROV-019 are not present in the current tree. They were reconstructed from frozen definitions and remain approximate until decision, exit and R parity are completed.
+
+The final policy has been inspected against 2025 and is performance-informed. It is not deployment certification.
+
+`GML1-PROV-017` remains rejected because its historical loss filters did not repair its later breakdown.
+
+## Next
+
+Recover or reproduce the three exact independent registries. Rerun this policy unchanged. Do not tune it further on 2025 or 2026. All runtime outputs remain disabled.
