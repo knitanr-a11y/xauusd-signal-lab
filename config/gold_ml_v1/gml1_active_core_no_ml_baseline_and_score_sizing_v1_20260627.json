@@ -1,0 +1,109 @@
+{
+  "system_id": "GML1-ACTIVE-CORE-SYNERGY",
+  "version": "v1-research",
+  "date": "2026-06-27",
+  "status": "NO_ML_BASELINE_FROZEN_SCORE_SIZING_PROMISING_NOT_PROMOTED",
+  "comparison_contract": {
+    "candidate_layer": "GML1-EVENT-CORE v1",
+    "proposal_registry_sha256": "b5e017f2e8b08b8fdad3bcd9ca603155510d23cf2385bbcde2a36bdeff456c0b",
+    "event_registry_sha256": "c78971cd3dd0e4164f300d91c9e0c78d77e4b1182e9579eff4a0db48a13d4188",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "oos_folds": "GML1-META-CORE v1 F1-F4 with the frozen six-hour test-start embargo",
+    "one_position": "decision_time >= active exit_time",
+    "baseline_ml_filter": false,
+    "baseline_ml_sizing": false
+  },
+  "protected_no_ml_baseline": {
+    "trades": 517,
+    "annualized_trades": 262.634561891516,
+    "long_trades": 339,
+    "short_trades": 178,
+    "win_rate": 0.4738878143133462,
+    "strong_total_r": 51.39537591727199,
+    "strong_mean_r": 0.09941078513979108,
+    "strong_profit_factor": 1.176962159567736,
+    "extreme_total_r": 12.801456318118007,
+    "extreme_profit_factor": 1.0411730634220406,
+    "strong_maximum_drawdown_r": 13.567454281699998,
+    "strong_top_five_removed_total_r": 43.94558835246199,
+    "strong_top_five_percent_removed_total_r": 12.878882704681992,
+    "fold_strong_r": {
+      "F1": 5.598307696020997,
+      "F2": 18.999755305861996,
+      "F3": 24.770645857143002,
+      "F4": 2.0266670582460007
+    }
+  },
+  "score_sizing_challenger": {
+    "trade_filtering": false,
+    "trades_preserved": 517,
+    "gross_exposure_normalized_to_baseline": true,
+    "score_source": "unchanged GML1-META-CORE v1 calibrated Strong-R score",
+    "normalization": "score z-score within candidate_id using validation only",
+    "size_formula": "clip(1 + k * z, 0.5, 1.5), then normalize mean size to 1.0",
+    "allowed_k": [0.0, 0.15, 0.3, 0.5],
+    "k_selection": "validation maximum Strong R subject to validation maximum drawdown no greater than 105 percent of the no-ML validation baseline",
+    "selected_k": {"F1": 0.5, "F2": 0.5, "F3": 0.5, "F4": 0.0},
+    "result": {
+      "trades": 517,
+      "annualized_trades": 262.634561891516,
+      "long_trades": 339,
+      "short_trades": 178,
+      "win_rate": 0.4738878143133462,
+      "strong_total_r": 63.89590247504317,
+      "strong_mean_r": 0.12358975333664056,
+      "strong_profit_factor": 1.2245851186615437,
+      "extreme_total_r": 25.775359549161536,
+      "extreme_profit_factor": 1.0847344893219146,
+      "strong_maximum_drawdown_r": 13.894243814247034,
+      "strong_top_five_removed_total_r": 53.06949828261307,
+      "strong_top_five_percent_removed_total_r": 10.977295757695273,
+      "fold_strong_r": {
+        "F1": 13.704293384423444,
+        "F2": 22.84552268544233,
+        "F3": 25.3194193469314,
+        "F4": 2.0266670582460007
+      }
+    },
+    "incremental_value": {
+      "strong_total_r_change": 12.50052655777118,
+      "strong_total_r_percent": 24.322277934934,
+      "strong_profit_factor_change": 0.0476229590938077,
+      "extreme_total_r_change": 12.97390323104353,
+      "extreme_total_r_percent": 101.347085843175,
+      "maximum_drawdown_change_r": 0.326789532547036,
+      "trade_count_change": 0,
+      "gross_exposure_change": 0,
+      "strong_improved_folds": 3,
+      "unchanged_folds": 1,
+      "worsened_folds": 0
+    }
+  },
+  "honesty_and_limits": {
+    "hard_target_met": false,
+    "win_rate_target_0_60_met": false,
+    "strong_pf_target_2_00_met": false,
+    "historical_results_inspected": true,
+    "deployment_certification": false,
+    "concentration_note": "Top-five removal improved, but top-five-percent-removed Strong R declined slightly; winner concentration remains an unresolved concern.",
+    "interpretation": "This is the first tested ML use that preserves the protected no-ML trade count and improves Strong and Extreme results without filtering candidates. It is a completion-oriented challenger, not a promoted system."
+  },
+  "next_step": {
+    "primary": "Freeze this sizing rule for prospective shadow comparison against equal-size no-ML baseline.",
+    "research": "Search for complementary candidate families only when they add non-overlapping proposal supply and demonstrate ML lift without displacing protected baseline events.",
+    "baseline_protection": "No challenger may redefine or replace the 517-trade no-ML baseline."
+  },
+  "local_artifact_sha256": {
+    "summary": "e91bba9ced8a5c60b958ab91e0cd0ae817a8b33eef9573100a6f5c555148c01b",
+    "oos_rows": "333d777a4907997994f53b0b9c9eb67e9cc1b7bca492a3255b359ae58c6673b4"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
