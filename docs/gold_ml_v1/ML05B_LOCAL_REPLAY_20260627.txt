@@ -1,0 +1,17 @@
+After GitHub Desktop Pull origin, run from the repository root:
+
+scripts\gold_ml_v1\mlr1\run_build_ml05b_candidate_events.bat
+
+Expected output directory:
+
+outputs\gml1\ml05b
+
+Expected files:
+
+mlr1_candidate_event_registry_v1.csv.gz
+mlr1_candidate_event_columns_v1.json
+mlr1_candidate_event_summary_v1.json
+
+Expected candidate event registry SHA256:
+
+060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9
