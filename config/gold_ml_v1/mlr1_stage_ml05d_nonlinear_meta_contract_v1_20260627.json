@@ -1,0 +1,66 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05D",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_COMPACT_HISTOGRAM_META_MODEL_AUDIT_ONLY",
+  "event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+  "engine": {
+    "library": "xgboost",
+    "estimator_forms": ["multi-class outcome classifier", "Strong-R regressor"],
+    "separate_long_short": true,
+    "candidate_id_one_hot": true,
+    "market_feature_count": 161,
+    "parameters": {
+      "n_estimators": 150,
+      "max_depth": 3,
+      "learning_rate": 0.03,
+      "min_child_weight": 20.0,
+      "reg_lambda": 10.0,
+      "max_bin": 64,
+      "tree_method": "hist",
+      "subsample": 1.0,
+      "colsample_bytree": 1.0,
+      "random_state": 20260627
+    }
+  },
+  "feature_sets": {
+    "FULL": "all 161 frozen market features plus direction-specific candidate-ID one-hot columns",
+    "NO_TIME": "FULL without time_server_hour_sin, time_server_hour_cos, time_weekday_sin and time_weekday_cos"
+  },
+  "selection": {
+    "classifier": "minimum validation multiclass log loss",
+    "regressor": "minimum validation Strong-R MSE",
+    "feature_set_only": true,
+    "test_selection": false,
+    "refit_on_validation": false
+  },
+  "policies": {
+    "coverage_per_direction_of_eligible_m15_decisions": {
+      "conservative": 0.0025,
+      "standard": 0.005,
+      "high_coverage": 0.01
+    },
+    "threshold_data": "validation segment only",
+    "score": "raw predicted Strong R",
+    "positive_score_required": true,
+    "competition": "highest score at decision_time; ties candidate_id ascending",
+    "one_position": "accept only when decision_time >= active exit_time"
+  },
+  "causality": {
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "resolved_history": "exit_time <= applicable as-of cutoff",
+    "label_or_exit_columns_as_features": false
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_changed": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
