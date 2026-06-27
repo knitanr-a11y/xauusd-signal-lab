@@ -1,0 +1,42 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "REAL_LIVE_SOURCE_PARITY_AND_PROSPECTIVE_CAPTURE_VALIDATED_AUDIT_ONLY",
+  "live_source_parity": {
+    "accepted": true,
+    "eligible_live_feature_rows": 10049,
+    "historical_overlap_rows": 9594,
+    "all_161_features_within_absolute_3e_8": true,
+    "candidate_proposal_overlap_exact": true
+  },
+  "prospective_capture": {
+    "boundary": "decision_time > 2026-06-19 19:45:00",
+    "feature_rows": 455,
+    "candidate_events": 32,
+    "resolved_label_keys": 30,
+    "unresolved_label_keys": 0,
+    "resolved_candidate_events": 32,
+    "candidate_performance_reviewed": false
+  },
+  "model_state": {
+    "promoted_model_exists": false,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "reason": "ML-05D, ML-06 and MLR1-v2 research did not pass frozen promotion and shadow criteria."
+  },
+  "next_step": "Continue accumulating genuinely later Files-root goldsharp snapshots. Rebuild prospective features, proposals and resolved-only labels without revising candidate definitions or selecting a model from the current 32 events.",
+  "local_installation": {
+    "required_now": false,
+    "reason": "The capture pipeline is validated, but no model is approved for shadow or live use. Only a final approved package will be requested for local installation."
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "prospective_performance_gate_passed": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

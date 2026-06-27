@@ -1,0 +1,92 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "PROSPECTIVE_INFRASTRUCTURE",
+  "date": "2026-06-27",
+  "status": "REAL_GOLDSHARP_SOURCE_FEATURE_PARITY_ACCEPTED_AUDIT_ONLY",
+  "source_sha256": {
+    "m1": "8c03c1a5503db0c2c17d365983cf5e2f465107e3753e0a86d65226c136538fca",
+    "m15": "a5856be2fe6dbb4de6cc870bfb6736fa46bd14a0af1dde394fe84c8078092e9d",
+    "h1": "34367b3721a3c9d7bf138d18e43a0ff88a86a3bcb69bddcc87d1714fb24e21a6",
+    "h4": "66decc88eb521776d6671ed56ad089fda6246830e7d1a6e37611bf7772529d94",
+    "d1": "454cb9e4b2470029368cdbf7f5bcb232bd855c5a1ef112fa35f461d15456a9ad",
+    "m5": "a5a079a2347f8b7cfe666b73b4183c4805a0bff2eda33b7715410f298cebb4de"
+  },
+  "source_rows": {
+    "m1": 152237,
+    "m15": 30149,
+    "h1": 20037,
+    "h4": 10009,
+    "d1": 5001,
+    "m5": 90448
+  },
+  "source_last_bar_open": {
+    "m1": "2026-06-26 23:56:00",
+    "m15": "2026-06-26 23:30:00",
+    "h1": "2026-06-26 22:00:00",
+    "h4": "2026-06-26 16:00:00",
+    "d1": "2026-06-25 00:00:00",
+    "m5": "2026-06-26 23:50:00"
+  },
+  "source_checks": {
+    "schema_exact_8_columns": true,
+    "timestamps_monotonic": true,
+    "duplicate_timestamps": 0,
+    "timeframe_alignment_pass": true,
+    "m5_used_by_mlr1_feature_contract": false,
+    "latest_rows_closed_by_csv_contract": true
+  },
+  "feature_build": {
+    "model_feature_count": 161,
+    "output_columns": 173,
+    "m15_decisions": 30149,
+    "missing_exact_m1": 20100,
+    "missing_closed_higher_timeframe": 0,
+    "feature_warmup_or_nonfinite": 0,
+    "eligible_rows": 10049,
+    "first_eligible_decision": "2026-01-22 05:15:00",
+    "last_eligible_decision": "2026-06-26 23:45:00",
+    "all_available_sha256": "4021f5b1a6932e3bc00ebbe1726ec77d7753e7cee82ed7eb6683360743fc24f9"
+  },
+  "historical_overlap_parity": {
+    "overlap_rows": 9594,
+    "first_decision": "2026-01-22 05:15:00",
+    "last_decision": "2026-06-19 19:45:00",
+    "source_time_metadata_exact": true,
+    "entry_m1_open_and_spread_exact": true,
+    "maximum_feature_absolute_difference": 2.550378064292147e-08,
+    "all_161_features_within_absolute_3e_8": true,
+    "reference_candidate_proposals": 534,
+    "live_rebuilt_candidate_proposals": 534,
+    "candidate_proposal_key_set_exact": true
+  },
+  "prospective_boundary": {
+    "rule": "decision_time > 2026-06-19 19:45:00",
+    "feature_rows": 455,
+    "first_decision": "2026-06-22 01:15:00",
+    "last_decision": "2026-06-26 23:45:00",
+    "feature_registry_sha256": "93fd57f07f03537a12738e83fef2fe93b02b433a196d75fcc8e34b7dc2f1d493",
+    "candidate_proposal_rows": 32,
+    "unique_decision_direction_keys": 30,
+    "candidate_proposal_sha256": "5d17ae9ce09831c567ad4ce7d553f03eb7127d3bf54dfe151d93cb1dd40d277f"
+  },
+  "latest_causal_row": {
+    "decision_time": "2026-06-26 23:45:00",
+    "m15_open": "2026-06-26 23:30:00",
+    "m15_close": "2026-06-26 23:45:00",
+    "h1_close": "2026-06-26 23:00:00",
+    "h4_close": "2026-06-26 20:00:00",
+    "d1_close": "2026-06-26 00:00:00",
+    "exact_m1_entry_available": true
+  },
+  "controls": {
+    "audit_only": true,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "candidate_performance_reviewed": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
