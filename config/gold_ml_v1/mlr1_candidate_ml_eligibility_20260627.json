@@ -1,0 +1,87 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05A",
+  "date": "2026-06-27",
+  "status": "CANDIDATE_ML_ELIGIBILITY_FROZEN_AUDIT_ONLY",
+  "policy": {
+    "primary_meta_model_requires": [
+      "deterministic proposal generator committed to GitHub",
+      "causal closed-bar inputs only",
+      "exact reproducibility from the authorized source contract",
+      "candidate definition frozen before labeled performance is inspected",
+      "raw proposal events available before one-open or outcome filtering",
+      "same proposal logic usable for historical and future goldsharp adapters"
+    ],
+    "nonreproducible_action": "EXCLUDE_FROM_ALL_MLR1_MODEL_INPUT_TRAINING_VALIDATION_TEST_CALIBRATION_AND_LIVE_INFERENCE",
+    "existing_candidate_stack_action": "UNCHANGED; exclusion is ML eligibility only and does not delete, rename, retire, promote or demote the historical candidate stack"
+  },
+  "legacy_exact_reference_only": {
+    "reason": "These nine candidates have an exact raw replay engine, but all are LONG and collapse into two nested historically tuned lineages. They are retained only for benchmark and future ablation, not primary meta-model training.",
+    "generator": "scripts/gold_ml_v1/replay/nine_candidate_local_replay.py",
+    "config": "config/gold_ml_v1/replay/nine_candidate_replay_config_20260625.json",
+    "candidate_ids": [
+      "GML1-PROV-007",
+      "GML1-PROV-008",
+      "GML1-WATCH-022-B",
+      "GML1-PROV-010",
+      "GML1-PROV-015",
+      "GML1-PROV-020",
+      "GML1-WATCH-021-A",
+      "GML1-WATCH-021-B",
+      "GML1-WATCH-021-C"
+    ],
+    "lineages": {
+      "M15_H4_LONG": ["GML1-PROV-007", "GML1-PROV-008", "GML1-WATCH-022-B"],
+      "H1_D1_LONG": ["GML1-PROV-010", "GML1-PROV-015", "GML1-PROV-020", "GML1-WATCH-021-A", "GML1-WATCH-021-B", "GML1-WATCH-021-C"]
+    },
+    "primary_training_allowed": false,
+    "benchmark_allowed": true
+  },
+  "excluded_nonreproducible_current_stack": {
+    "count": 16,
+    "candidate_ids": [
+      "GML1-WATCH-024-A",
+      "GML1-WATCH-026-B",
+      "GML1-WATCH-027-B",
+      "GML1-WATCH-028-B",
+      "GML1-WATCH-029-A",
+      "GML1-WATCH-030-A",
+      "GML1-WATCH-025-A",
+      "GML1-WATCH-026-A",
+      "GML1-WATCH-027-A",
+      "GML1-WATCH-028-A",
+      "GML1-WATCH-032-A",
+      "GML1-WATCH-033-A",
+      "GML1-WATCH-034-A",
+      "GML1-WATCH-034-B",
+      "GML1-WATCH-034-C",
+      "GML1-WATCH-036-A"
+    ],
+    "reason": "No committed exact raw proposal generator plus proposal-level parity package satisfying the MLR1 primary meta-model contract.",
+    "ml_use_allowed": false,
+    "fallback_allowed": false
+  },
+  "permanently_excluded_or_retired": {
+    "GML1-WATCH-031-A": "retired; do not reuse",
+    "GML1-PROV-030-A": "rejected and closed; do not reuse, repair, recreate or use as fallback"
+  },
+  "primary_candidate_source": {
+    "type": "NEW_ML_NATIVE_STRUCTURAL_PROPOSAL_FAMILIES",
+    "contract": "config/gold_ml_v1/mlr1_ml_native_candidate_contract_v1_20260627.json",
+    "generator": "scripts/gold_ml_v1/mlr1/build_ml_native_candidate_proposals.py",
+    "definition_freeze_rule": "Candidate conditions are frozen before proposal counts are labeled or performance is evaluated.",
+    "outcome_free_design": true,
+    "symmetric_long_short": true
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_modified": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
