@@ -1,0 +1,155 @@
+{
+  "system_id": "GML1-WATCH-RESEARCH-CHALLENGER-ADDON",
+  "version": "v1-research",
+  "selected_candidate": {
+    "candidate_id": "GML1-WATCH-022-C",
+    "parent": "GML1-PROV-007",
+    "lineage": "M15-H4 LONG",
+    "independent_edge_count_increment": 0,
+    "action": "replace WATCH-022-B inside challenger; do not add as parallel sleeve",
+    "exclude_when": "WATCH-022-A exclusion OR WATCH-022-B exclusion",
+    "rule_A": {
+      "upper_wick_frac_lte": 0.1677737608541299,
+      "ema40_slope6_atr_lte": 0.5056518291622855
+    },
+    "rule_B": {
+      "upper_wick_frac_lte": 0.06526044468913629,
+      "ema40_slope6_atr_gte": 0.8700779249713114
+    }
+  },
+  "candidate_metrics": {
+    "all_available": {
+      "trades": 116,
+      "win_rate": 0.7241379310344828,
+      "pf": 2.564727798874187,
+      "R": 50.07128956397361,
+      "DD": 3.0
+    },
+    "2023": {
+      "trades": 17,
+      "win_rate": 0.8823529411764706,
+      "pf": 7.02644981107275,
+      "R": 12.05289962214551,
+      "DD": 1.0
+    },
+    "2024": {
+      "trades": 18,
+      "win_rate": 0.7222222222222222,
+      "pf": 2.600000000000144,
+      "R": 8.000000000000417,
+      "DD": 2.0
+    },
+    "2025": {
+      "trades": 59,
+      "win_rate": 0.6949152542372882,
+      "pf": 2.2232438856571153,
+      "R": 22.01838994182799,
+      "DD": 2.0
+    },
+    "2026_partial": {
+      "trades": 22,
+      "win_rate": 0.6818181818181818,
+      "pf": 2.1428571428570957,
+      "R": 7.999999999999686,
+      "DD": 3.0
+    }
+  },
+  "excluded_subset": {
+    "all_available": {
+      "trades": 37,
+      "win_rate": 0.40540540540540543,
+      "pf": 0.7090736283782619,
+      "R": -6.154361690628258,
+      "DD": 12.15436169062782
+    },
+    "2024": {
+      "trades": 6,
+      "win_rate": 0.5,
+      "pf": 1.0,
+      "R": 0.0
+    },
+    "2025": {
+      "trades": 18,
+      "win_rate": 0.2777777777777778,
+      "pf": 0.4113749555318354,
+      "R": -7.154361690627942
+    },
+    "2026_partial": {
+      "trades": 11,
+      "win_rate": 0.45454545454545453,
+      "pf": 0.833333333333323,
+      "R": -1.000000000000067
+    }
+  },
+  "challenger_comparison": {
+    "2024": {
+      "before": {
+        "trades": 264,
+        "win_rate": 0.6515151515151515,
+        "pf": 2.3978569565306076,
+        "R": 128.5269893724259,
+        "DD": 5.907692307692287
+      },
+      "after": {
+        "trades": 262,
+        "win_rate": 0.6564885496183206,
+        "pf": 2.4774473597469924,
+        "R": 131.48083552627207,
+        "DD": 5.907692307692287,
+        "positive_months": 12,
+        "negative_months": 0
+      }
+    },
+    "2025": {
+      "before": {
+        "trades": 388,
+        "win_rate": 0.5927835051546392,
+        "pf": 2.0014894080465178,
+        "R": 141.9552262725002,
+        "DD": 8.123076923076837
+      },
+      "after": {
+        "trades": 383,
+        "win_rate": 0.5953002610966057,
+        "pf": 2.0445609074022957,
+        "R": 143.43214934942324,
+        "DD": 7.384615384615387,
+        "positive_months": 12,
+        "negative_months": 0
+      }
+    },
+    "2026_partial": {
+      "before": {
+        "trades": 101,
+        "win_rate": 0.6039603960396039,
+        "pf": 1.7224596417098264,
+        "R": 37.078851765292036,
+        "DD": 7.014335642081573,
+        "positive_months": 5,
+        "negative_months": 1
+      },
+      "after": {
+        "trades": 92,
+        "win_rate": 0.6195652173913043,
+        "pf": 1.8774948756106402,
+        "R": 38.55577484221521,
+        "DD": 7.014335642081608,
+        "positive_months": 6,
+        "negative_months": 0
+      }
+    }
+  },
+  "watch_verdicts": {
+    "WATCH-022-C": "retain as research challenger replacement for WATCH-022-B",
+    "WATCH-023-A": "do not add; same H1-D1 lineage and current state machine is stronger in complete 2024 and 2025 periods",
+    "WATCH-014-A": "do not add; cross-seed stable-consensus experiment improved 2024 but degraded 2025 to PF 1.751 and increased DD to 11.915R",
+    "WATCH-021-A/B/C": "keep WATCH-021-C-based state machine; variants are same lineage and cannot be summed",
+    "WATCH-012-A/B": "unresolved; exact source artifacts still missing"
+  },
+  "honesty": {
+    "performance_informed": true,
+    "reason": "WATCH-022-C was retained after reviewing 2025 and partial 2026 behavior; it is not an untouched deployment certification.",
+    "exact_rule_reconstruction": true,
+    "runtime_enabled": false
+  }
+}
