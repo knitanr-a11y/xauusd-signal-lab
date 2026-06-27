@@ -1,0 +1,71 @@
+{
+  "system_id": "GML1-MLR1-V2-RESEARCH",
+  "date": "2026-06-27",
+  "status": "COMPACT_CANDIDATE_PRIOR_RESIDUAL_AUDITED_NOT_PROMOTED",
+  "source_event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+  "design": {
+    "compact_no_time_features": 48,
+    "compact_time_features": 52,
+    "validation_combinations_per_fold_direction": 30,
+    "candidate_prior_alpha_grid": [0.0, 10.0, 25.0, 50.0, 100.0],
+    "model_variants": ["SQUARED_UNWEIGHTED", "PSEUDOHUBER_UNWEIGHTED", "PSEUDOHUBER_CANDIDATE_BALANCED"],
+    "selection": "minimum validation Strong-R MSE only",
+    "test_selection": false
+  },
+  "selected_configuration_observation": {
+    "squared_unweighted_selected": "7 of 8 fold-direction fits",
+    "pseudohuber_unweighted_selected": "1 of 8 fold-direction fits",
+    "candidate_balanced_selected": "0 of 8 fold-direction fits",
+    "compact_no_time_selected": "6 of 8 fold-direction fits",
+    "compact_time_selected": "2 of 8 fold-direction fits"
+  },
+  "conservative_one_position": {
+    "trades": 228,
+    "long_trades": 135,
+    "short_trades": 93,
+    "strong_total_r": 1.4976779549652939,
+    "strong_mean_r": 0.006568762960374096,
+    "strong_profit_factor": 1.0110204003663783,
+    "extreme_total_r": -15.990829308179,
+    "extreme_mean_r": -0.07013521626394298,
+    "extreme_profit_factor": 0.8907588263131498,
+    "strong_maximum_drawdown_r": 20.864343965116692,
+    "strong_top_five_removed_total_r": -5.926235710154706,
+    "strong_top_five_percent_removed_total_r": -16.27856439356471,
+    "positive_months": 13,
+    "negative_months": 11
+  },
+  "fold_conservative_strong_r": {
+    "F1": -16.489358738136698,
+    "F2": -1.447817383790001,
+    "F3": 18.761977197270998,
+    "F4": 0.6728768796210002
+  },
+  "positive_folds": 2,
+  "largest_positive_fold_share": 0.9653778270236127,
+  "outputs": {
+    "oos_predictions_sha256": "14d4fa647d2251bfc8500ced0fe9acb204a4ec5ba0782eee3193994919c19d69",
+    "validation_selection_sha256": "9d9b87b90793a195b8f684ca12427ab50f11e5013a6c3ec42ba0c23277790af1",
+    "policy_metrics_sha256": "ab5101f43bbd6c67fedfef1a8af57d88ad4750e3609778cff7e15f0c34aacc11",
+    "candidate_metrics_sha256": "ad030f0fc45ac54f3b38391cc4d6a92396ddd5269de8e7cd72ac9daeef0671a0",
+    "regime_metrics_sha256": "8b34da0a4a165f150505df7d874545efb48ac19b23c024ea282ae45a73384464",
+    "monthly_metrics_sha256": "c263d703809df12f94b4119a0e38f07cba117aa18c4bc7ac4505cfe8fc8c84f4",
+    "summary_sha256": "ca6865578e3a35588024d18b86792e01bd759ae8899db7a766ffe72f9fd72f64"
+  },
+  "decision": {
+    "model_promoted": false,
+    "shadow_ready": false,
+    "better_than_mlr1_v1_ml06": false,
+    "candidate_stack_changed": false,
+    "reason": "Extreme-cost R is negative, only two folds are positive, F1 and F2 are negative, drawdown exceeds 20R, top-winner removal is negative and positive-fold R is concentrated in F3."
+  },
+  "historical_interpretation": "Research diagnosis only. The historical test periods were already inspected before this separately versioned experiment and cannot authorize activation.",
+  "controls": {
+    "audit_only": true,
+    "prospective_started": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
