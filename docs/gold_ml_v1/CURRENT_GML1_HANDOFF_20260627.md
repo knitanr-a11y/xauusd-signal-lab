@@ -8,6 +8,19 @@ Current sources:
 - `config/gold_ml_v1/gml1_target_gate_research_audit_v1_20260627.json`
 - `config/gold_ml_v1/gml1_lifecycle_rr_research_v1_result_audit_20260627.json`
 
+## Baseline definition
+
+The protected baseline is the original frozen candidate events evaluated without any machine-learning filter.
+
+- preserve all original raw candidate events;
+- apply the frozen deduplication and one-position rules;
+- use the frozen exact-M1 label and Strong/Extreme cost contracts;
+- do not apply Meta Core scores, ML thresholds, calibration or coverage selection.
+
+Meta Core output is a challenger, not the baseline. A new candidate-plus-ML system must be compared against the no-ML baseline first. It is not an improvement when PF rises slightly but total Strong R or trade count falls materially.
+
+Before the next challenger comparison, replay this no-ML baseline from the frozen proposal and label registries and freeze its exact count, WR, PF, Strong R, Extreme R and drawdown in a dedicated baseline audit file.
+
 ## Time contract
 
 CSV `time` is bar-open time. M15 decision time is open plus 15 minutes. Entry requires an exact M1 open. H1, H4 and D1 use closed bars only. The time-causality audit passed.
@@ -36,4 +49,4 @@ No model is promoted. Shadow, live, Discord and MT5 outputs remain off.
 
 ## Next stage
 
-Use an explicit state instance for each family: setup onset, invalidation, first valid trigger, reset and cooldown. Learn trigger quality and post-trigger excursion separately per family. Each family must pass rolling out-of-sample before aggregation. Do not tune the failed broad lifecycle pool further on the inspected snapshot.
+First freeze the exact no-ML baseline audit. Then evaluate candidate-plus-ML challengers only by incremental value over that baseline. Use an explicit state instance for each family: setup onset, invalidation, first valid trigger, reset and cooldown. Learn trigger quality and post-trigger excursion separately per family. Each family must pass rolling out-of-sample before aggregation. Do not tune the failed broad lifecycle pool further on the inspected snapshot.
