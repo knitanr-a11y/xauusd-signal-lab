@@ -1,0 +1,52 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "LIVE_SOURCE_ADAPTER_IMPLEMENTED_UNIT_TESTED_REAL_SOURCE_AUDIT_PENDING",
+  "adapter": "scripts/gold_ml_v1/mlr1/build_live_feature_snapshot.py",
+  "contract": "config/gold_ml_v1/mlr1_live_source_adapter_contract_v1_20260627.json",
+  "tests": {
+    "path": "tests/gold_ml_v1/test_mlr1_live_source_adapter.py",
+    "passed": 10,
+    "failed": 0,
+    "coverage": [
+      "explicit same-root files",
+      "historical-directory rejection",
+      "filename rejection",
+      "different-parent rejection",
+      "duplicate-path rejection",
+      "timeframe alignment rejection",
+      "source mutation rejection",
+      "future higher-timeframe rejection",
+      "finite causal feature acceptance",
+      "deterministic gzip"
+    ]
+  },
+  "real_source_audit": {
+    "completed": false,
+    "required_inputs": [
+      "Files-root goldsharp M1 CSV",
+      "Files-root goldsharp M15 CSV",
+      "Files-root goldsharp H1 CSV",
+      "Files-root goldsharp H4 CSV",
+      "Files-root goldsharp D1 CSV"
+    ],
+    "checks_pending": [
+      "actual delimiter and schema",
+      "actual timestamp alignment",
+      "stable before-after source hashes",
+      "causal warmup availability without historical bridge",
+      "frozen feature-column parity",
+      "prospective row boundary"
+    ]
+  },
+  "controls": {
+    "audit_only": true,
+    "model_loaded": false,
+    "prediction_generated": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
