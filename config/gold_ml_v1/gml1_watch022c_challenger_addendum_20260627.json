@@ -1,0 +1,62 @@
+{
+  "system_id": "GML1-WATCH-022-C",
+  "date": "2026-06-27",
+  "status": "RESEARCH_CHALLENGER_REPLACEMENT_NOT_PROMOTED",
+  "parent": "GML1-PROV-007",
+  "lineage": "M15-H4 LONG",
+  "independent_edge_count_increment": 0,
+  "replacement_target": "GML1-WATCH-022-B inside the original-pool research challenger",
+  "logic": {
+    "exclude_when": "rule_A OR rule_B",
+    "rule_A": {
+      "upper_wick_frac_lte": 0.1677737608541299,
+      "ema40_slope6_atr_lte": 0.5056518291622855
+    },
+    "rule_B": {
+      "upper_wick_frac_lte": 0.06526044468913629,
+      "ema40_slope6_atr_gte": 0.8700779249713114
+    },
+    "threshold_source": "frozen 2023 quantiles from WATCH-022-A and WATCH-022-B",
+    "new_threshold_tuning": false
+  },
+  "candidate_metrics": {
+    "all_available": {"trades": 116, "win_rate": 0.7241379310, "profit_factor": 2.5647277989, "total_r": 50.0712895640, "max_drawdown_r": 3.0},
+    "2024": {"trades": 18, "win_rate": 0.7222222222, "profit_factor": 2.6000000000, "total_r": 8.0, "max_drawdown_r": 2.0},
+    "2025": {"trades": 59, "win_rate": 0.6949152542, "profit_factor": 2.2232438857, "total_r": 22.0183899418, "max_drawdown_r": 2.0},
+    "2026_partial": {"trades": 22, "win_rate": 0.6818181818, "profit_factor": 2.1428571429, "total_r": 8.0, "max_drawdown_r": 3.0}
+  },
+  "excluded_subset": {
+    "all_available": {"trades": 37, "win_rate": 0.4054054054, "profit_factor": 0.7090736284, "total_r": -6.1543616906},
+    "2025": {"trades": 18, "win_rate": 0.2777777778, "profit_factor": 0.4113749555, "total_r": -7.1543616906},
+    "2026_partial": {"trades": 11, "win_rate": 0.4545454545, "profit_factor": 0.8333333333, "total_r": -1.0}
+  },
+  "portfolio_comparison": {
+    "2024_before": {"trades": 264, "win_rate": 0.6515151515, "profit_factor": 2.3978569565, "total_r": 128.5269893724, "max_drawdown_r": 5.9076923077},
+    "2024_after": {"trades": 262, "win_rate": 0.6564885496, "profit_factor": 2.4774473597, "total_r": 131.4808355263, "max_drawdown_r": 5.9076923077},
+    "2025_before": {"trades": 388, "win_rate": 0.5927835052, "profit_factor": 2.0014894080, "total_r": 141.9552262725, "max_drawdown_r": 8.1230769231},
+    "2025_after": {"trades": 383, "win_rate": 0.5953002611, "profit_factor": 2.0445609074, "total_r": 143.4321493494, "max_drawdown_r": 7.3846153846},
+    "2026_partial_before": {"trades": 101, "win_rate": 0.6039603960, "profit_factor": 1.7224596417, "total_r": 37.0788517653, "positive_months": 5, "negative_months": 1},
+    "2026_partial_after": {"trades": 92, "win_rate": 0.6195652174, "profit_factor": 1.8774948756, "total_r": 38.5557748422, "positive_months": 6, "negative_months": 0}
+  },
+  "other_watch_verdicts": {
+    "GML1-WATCH-023-A": "Do not add. It is the same H1-D1 lineage and did not beat the current state-machine core in complete 2024 and 2025 periods.",
+    "GML1-WATCH-014-A": "Do not add. A cross-seed consensus variant improved 2024 but degraded 2025 to PF 1.751 and DD 11.915R.",
+    "GML1-WATCH-021-A_B_C": "Keep the WATCH-021-C-based state machine; same-lineage results must not be summed.",
+    "GML1-WATCH-012-A_B": "Unresolved because exact source artifacts are still missing."
+  },
+  "cost_stress_note": "WATCH-022-C remains positive under tested spread and slippage stress, but its 2025 component PF falls below 2 as costs rise. Full-portfolio Strong and Extreme stress is still required.",
+  "limitations": {
+    "performance_informed": true,
+    "untouched_deployment_certification": false,
+    "runtime_enabled": false
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
