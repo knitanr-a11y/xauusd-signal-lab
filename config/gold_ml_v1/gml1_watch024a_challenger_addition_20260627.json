@@ -1,0 +1,91 @@
+{
+  "system_id": "GML1-WATCH-024-A",
+  "date": "2026-06-27",
+  "status": "RESEARCH_CHALLENGER_ADDITION_NOT_PROMOTED",
+  "source": {
+    "registry": "mlr1_candidate_event_registry_v1.csv.gz",
+    "registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+    "parent_candidate_id": "GML1-MLC-005-S",
+    "candidate_family": "HIGH_VOL_EXHAUSTION_REVERSAL",
+    "direction": "SHORT",
+    "label_contract": "exact 6h TP1.5ATR / SL1ATR registry contract"
+  },
+  "selection_rule": {
+    "operator": "AND",
+    "h4_body_fraction_gte": 0.7290171082088,
+    "h4_body_fraction_source": "2023 parent-candidate q70",
+    "m15_ema200_slope12_atr14_gte": 0.36208201390899997,
+    "m15_ema200_slope12_atr14_source": "2023 parent-candidate q60",
+    "uses_2025_or_2026_for_thresholds": false
+  },
+  "standalone_one_position": {
+    "2023": {
+      "trades": 9,
+      "base": {"profit_factor": 3.0, "total_r": 6.0},
+      "strong": {"profit_factor": 2.4475255523, "total_r": 4.8244424564},
+      "extreme": {"profit_factor": 1.9953915027, "total_r": 3.6488849128}
+    },
+    "2024": {
+      "trades": 9,
+      "base": {"profit_factor": 3.0, "total_r": 6.0},
+      "strong": {"profit_factor": 2.5936137358, "total_r": 5.2383770584},
+      "extreme": {"profit_factor": 2.2525150869, "total_r": 4.4767541168}
+    },
+    "2025": {
+      "trades": 19,
+      "base": {"profit_factor": 1.5178489944, "total_r": 4.6606409496},
+      "strong": {"profit_factor": 1.3424188017, "total_r": 3.3069328178},
+      "extreme": {"profit_factor": 1.1893552092, "total_r": 1.9532246860}
+    },
+    "2026_partial": {
+      "trades": 9,
+      "base": {"profit_factor": 1.875, "total_r": 3.5},
+      "strong": {"profit_factor": 1.7928593063, "total_r": 3.2684918018},
+      "extreme": {"profit_factor": 1.7154561079, "total_r": 3.0369836036}
+    }
+  },
+  "portfolio_addition": {
+    "risk_multiplier": 1.0,
+    "relationship_to_watch022c": "independent SHORT sleeve; WATCH-022-C remains unchanged",
+    "2024_before": {"trades": 262, "win_rate": 0.6564885496, "profit_factor": 2.4774473597, "total_r": 131.4808355263, "max_drawdown_r": 5.9076923077},
+    "2024_after": {"trades": 271, "win_rate": 0.6568265683, "profit_factor": 2.4944886217, "total_r": 137.4808355263, "max_drawdown_r": 5.9076923077},
+    "2025_before": {"trades": 383, "win_rate": 0.5953002611, "profit_factor": 2.0445609074, "total_r": 143.4321493494, "max_drawdown_r": 7.3846153846},
+    "2025_after": {"trades": 402, "win_rate": 0.5920398010, "profit_factor": 2.0121618989, "total_r": 148.0927902990, "max_drawdown_r": 7.3846153846},
+    "2026_partial_before": {"trades": 92, "win_rate": 0.6195652174, "profit_factor": 1.8774948756, "total_r": 38.5557748422, "max_drawdown_r": 7.0143356421},
+    "2026_partial_after": {"trades": 101, "win_rate": 0.6138613861, "profit_factor": 1.8772867024, "total_r": 42.0557748422, "max_drawdown_r": 6.7997924974}
+  },
+  "active_time_overlap": {
+    "same_decision_time_rows": {"2024": 0, "2025": 0, "2026_partial": 0},
+    "candidate_trades_overlapping_existing_active_intervals": {"2024": 1, "2025": 2, "2026_partial": 3},
+    "requirement": "Portfolio-level total-risk cap before any operation"
+  },
+  "rejected_alternatives": {
+    "WATCH-012-A_B": "Exact entry/exit parity remains unavailable; approximate 2025 reconstruction diverged.",
+    "new_breakout_LONG_variants": "Collapsed in 2026 partial after positive development screens.",
+    "GML1-MLC-006-S_ML_filter": "Relative score ordering inverted in 2026.",
+    "GML1-MLC-003-L_volume_context": "Did not improve portfolio PF and drawdown sufficiently.",
+    "GML1-MLC-003-S_low_H1_volatility": "2024 Extreme-cost result was negative."
+  },
+  "limitations": [
+    "Current challenger still contains approximate reconstructed PROV-016, PROV-018 and PROV-019 sleeves.",
+    "Portfolio headline uses base-compatible weighted R; all-sleeve Strong and Extreme replay remains required.",
+    "Independent sleeves can overlap in active time.",
+    "The inspected historical snapshot cannot certify deployment."
+  ],
+  "artifact_sha256": {
+    "local_summary": "08acabe257719fb07a4f38f9cbb315086a3a41a6b69bf99bbfedc0b9bdb999b5",
+    "candidate_trades": "2cd135ea1c4d40b3f0c744be13adcae186223956bd99741f79882fd3c3ff86cb",
+    "portfolio_2024": "4e95ae586f10ffc7cfe1dd73c78537fc39eb993edcc2694b0f21d6d52be063a6",
+    "portfolio_2025": "768fb88dda310a3adf62c25a9b4415ae95baddf54f50f5bfc3c16d08385b1a03",
+    "portfolio_2026": "92ef200882d14458841266fd9d48691b2b6adee8ff7e9891c233236a504c3f0f"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
