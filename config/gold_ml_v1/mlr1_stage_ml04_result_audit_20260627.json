@@ -1,0 +1,131 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-04",
+  "date": "2026-06-27",
+  "status": "FULL_WINDOWS_REPLAY_AUDITED_NO_MODEL_PROMOTED_ML05_JUSTIFIED",
+  "input_artifacts": {
+    "fold_metrics_sha256": "8a243d481d6a58761c360c73015a00edbe0bdd67b93217fde70352c36c398693",
+    "policy_metrics_sha256": "926b8a8e46a97356a56ab5f32878b0c0365bae9efba965c8c737c364da34e1e4",
+    "test_predictions_sha256": "d15e899854c6d0a524cf10eaa2f3d47ecf2a23640dc096d60228d91afe820ec0",
+    "coefficients_sha256": "409b1f5f0b6994e7179c4fd6f7b25dfd2d74d339c1983b00ecab6fdc9b2ddf5d"
+  },
+  "row_parity": {
+    "features": 74168,
+    "labels": 148317,
+    "merged": 148317,
+    "pass": true
+  },
+  "always_trade_baselines": {
+    "LONG": {
+      "accepted_trades": 10603,
+      "strong_total_r": -1026.4713542938928,
+      "strong_mean_r": -0.09680952129528367,
+      "strong_profit_factor": 0.85007636446099,
+      "positive_folds": 0
+    },
+    "SHORT": {
+      "accepted_trades": 10780,
+      "strong_total_r": -1664.7012689319622,
+      "strong_mean_r": -0.15442497856511708,
+      "strong_profit_factor": 0.7704357873776111,
+      "positive_folds": 0
+    },
+    "interpretation": "The frozen trade geometry is negative without selection in both directions. Any positive result must come from genuine ranking or selection rather than unconditional drift."
+  },
+  "LONG_result": {
+    "decision": "REJECT_ALL_ML04_LINEAR_LONG_MODELS",
+    "multinomial_logistic": {
+      "conservative": {"trades": 561, "strong_total_r": 15.5935392840831, "strong_pf": 1.0473191948255904, "extreme_total_r": -15.845236740507994, "top5_removed_total_r": -9.933316853905902},
+      "standard": {"trades": 674, "strong_total_r": 0.8368562654823026, "strong_pf": 1.0020752100213899, "extreme_total_r": -40.60826997391099, "top5_removed_total_r": -28.283269754677697},
+      "high_coverage": {"trades": 797, "strong_total_r": -15.19415170620089, "strong_pf": 0.9684853983366551, "extreme_total_r": -67.68387240263638, "top5_removed_total_r": -44.376870313030885}
+    },
+    "ridge": "All policies fail Extreme cost or winner-concentration review and none provide stable fold-level evidence.",
+    "reason": "Aggregate Strong values are near flat, Extreme cost is negative, and removing top winners makes every LONG policy negative."
+  },
+  "SHORT_multinomial_logistic": {
+    "decision": "RESEARCH_SIGNAL_PRESENT_BUT_NOT_SHADOW_READY",
+    "conservative": {
+      "accepted_trades": 185,
+      "strong_total_r": 22.6431356020381,
+      "strong_mean_r": 0.12239532757858433,
+      "strong_pf": 1.2222964294183443,
+      "extreme_total_r": 16.0298749589315,
+      "extreme_pf": 1.1520056047756075,
+      "top5_removed_total_r": 0.4153272159281034,
+      "positive_folds": 2,
+      "fold_strong_r": {"F1": 0.0, "F2": -2.9385064716, "F3": 5.03571515578, "F4": 20.5459269179},
+      "largest_positive_fold_share": 0.8031512152
+    },
+    "standard": {
+      "accepted_trades": 335,
+      "strong_total_r": 41.3111953503311,
+      "strong_mean_r": 0.12331700104576447,
+      "strong_pf": 1.2228027570594877,
+      "extreme_total_r": 28.74308514273249,
+      "extreme_pf": 1.1495551606946672,
+      "top5_removed_total_r": 19.064074088071102,
+      "positive_folds": 2,
+      "fold_strong_r": {"F1": 0.0, "F2": -5.85227829823, "F3": 15.821218836, "F4": 31.3422548125},
+      "largest_positive_fold_share": 0.6645450894
+    },
+    "high_coverage": {
+      "accepted_trades": 567,
+      "strong_total_r": 57.804639783308495,
+      "strong_mean_r": 0.10194821831271339,
+      "strong_pf": 1.1818454198654536,
+      "extreme_total_r": 33.564515420316496,
+      "extreme_pf": 1.1014708780533278,
+      "top5_removed_total_r": 28.601734560958498,
+      "positive_folds": 3,
+      "fold_strong_r": {"F1": 6.35249594231, "F2": -8.58806770407, "F3": 16.391888339, "F4": 43.6483232061},
+      "largest_positive_fold_share": 0.6574264683
+    },
+    "interpretation": "The SHORT classifier has useful tail-ranking evidence because all three policies are positive under Strong and Extreme cost, and the Standard and High-coverage policies remain positive after removing fold-level top five winners. However F2 is negative and F4 contributes more than 65 percent of positive-fold R, so the signal is regime-concentrated."
+  },
+  "probability_and_regression_quality": {
+    "multinomial_logistic_log_loss_better_than_unconditional": "5 of 8 fold-direction comparisons",
+    "multinomial_logistic_brier_skill_positive": "0 of 8 fold-direction comparisons",
+    "ridge_mse_better_than_unconditional_mean": "0 of 8 fold-direction comparisons",
+    "interpretation": "Raw logistic probabilities are not calibrated and Ridge does not improve point prediction. ML-04 scores may be used only as ranking evidence, not as calibrated probabilities or EV."
+  },
+  "coefficient_stability": {
+    "SHORT_TARGET_fold_correlation_range": "approximately 0.61 to 0.89",
+    "stable_feature_groups": [
+      "MT5 server-hour cyclic features",
+      "H4 EMA50-to-EMA100 ATR-normalized gap",
+      "D1 EMA slope",
+      "M15 and H4 volatility or spread state",
+      "tick-volume ratios",
+      "distance from completed multi-day highs"
+    ],
+    "risk": "Time-of-day coefficients are among the largest. ML-05 must verify that performance is not merely a narrow session proxy."
+  },
+  "frozen_shadow_gate_check": {
+    "LONG": "FAIL",
+    "SHORT_conservative": "FAIL: fewer than three positive folds, negative Brier skill, and single-fold concentration above 50 percent",
+    "SHORT_standard": "FAIL: fewer than three positive folds, negative Brier skill, and single-fold concentration above 50 percent",
+    "SHORT_high_coverage": "FAIL: aggregate Strong PF below 1.20, maximum fold DD above 20R, negative Brier skill, and single-fold concentration above 50 percent",
+    "any_policy_passed": false
+  },
+  "ml05_authorization_by_result": {
+    "proceed": true,
+    "scope": "Train and audit nonlinear tabular gradient-boosting models for both directions under the same frozen folds and policies. Treat LONG as a required negative-control lane and SHORT as the primary research lane.",
+    "requirements": [
+      "No ML-04 test outcomes may be used to alter ML-05 feature definitions or policy coverage levels",
+      "Hyperparameters must be selected on validation only",
+      "Probability calibration remains deferred to ML-06",
+      "Report session-ablation results because server-hour coefficients dominate the linear model",
+      "No model promotion or shadow activation at ML-05"
+    ]
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "portfolio_use": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
