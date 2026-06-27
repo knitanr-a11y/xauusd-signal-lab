@@ -16,11 +16,11 @@
     "raw_events_preserved": true,
     "dedup": false,
     "one_position": false,
-    "unmatched_last_snapshot_event_may_remain_unresolved": true
+    "unmatched_proposals_allowed": false
   },
   "expected": {
     "proposal_rows": 831,
-    "resolved_event_rows": 830
+    "resolved_event_rows": 831
   },
   "deployment_allowed": false
 }
