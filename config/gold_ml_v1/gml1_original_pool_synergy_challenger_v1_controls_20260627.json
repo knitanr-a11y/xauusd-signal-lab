@@ -1,0 +1,12 @@
+{
+  "status": "RESEARCH_ONLY",
+  "candidate_pool": "original multi-candidate era",
+  "exact_registry_parity_complete": false,
+  "performance_informed": true,
+  "model_promoted": false,
+  "shadow_ready": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "mt5_order": false
+}
