@@ -1,0 +1,91 @@
+{
+  "system_id": "GML1-MLR1-V2-RESEARCH",
+  "date": "2026-06-27",
+  "status": "COMPACT_CANDIDATE_PRIOR_RESIDUAL_DESIGN_FROZEN_BEFORE_RUN_AUDIT_ONLY",
+  "source_event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+  "historical_interpretation": "The development snapshot and its prior test periods have already been inspected. Results are research diagnostics only and cannot authorize shadow or live activation.",
+  "candidate_contract": {
+    "candidate_ids_unchanged": true,
+    "candidate_definitions_unchanged": true,
+    "candidate_add_delete_rename_promote_demote": false
+  },
+  "compact_market_features_without_time": [
+    "m15_log_return_1", "m15_log_return_4", "m15_log_return_16",
+    "m15_range_atr14", "m15_signed_body_atr14", "m15_body_fraction",
+    "m15_upper_wick_fraction", "m15_lower_wick_fraction", "m15_close_location",
+    "m15_atr14_atr50_ratio", "m15_atr14_percentile_lag1_256",
+    "m15_ema20_ema50_gap_atr14", "m15_ema50_ema200_gap_atr14",
+    "m15_ema20_slope4_atr14", "m15_rsi14_centered", "m15_adx14_scaled",
+    "m15_bb20_width_atr14", "m15_bb20_close_location",
+    "m15_tick_volume_ratio20_lagbase", "m15_spread_atr14",
+    "h1_log_return_6", "h1_range_atr14", "h1_atr14_percentile_lag1_168",
+    "h1_ema20_ema50_gap_atr14", "h1_ema50_ema200_gap_atr14",
+    "h1_ema20_slope4_atr14", "h1_rsi14_centered", "h1_adx14_scaled",
+    "h1_bb20_width_atr14", "h1_tick_volume_ratio20_lagbase",
+    "h4_log_return_3", "h4_range_atr14", "h4_atr14_percentile_lag1_126",
+    "h4_ema20_ema50_gap_atr14", "h4_ema50_ema100_gap_atr14",
+    "h4_ema20_slope4_atr14", "h4_rsi14_centered", "h4_adx14_scaled",
+    "d1_log_return_3", "d1_atr14_percentile_lag1_60",
+    "d1_ema10_ema20_gap_atr14", "d1_ema20_ema50_gap_atr14",
+    "d1_ema10_slope4_atr14", "d1_adx14_scaled",
+    "cross_distance_from_completed_day_high_atr14",
+    "cross_distance_from_completed_day_low_atr14",
+    "cross_distance_from_completed_5d_high_atr14",
+    "cross_distance_from_completed_5d_low_atr14"
+  ],
+  "time_features": [
+    "time_server_hour_sin", "time_server_hour_cos",
+    "time_weekday_sin", "time_weekday_cos"
+  ],
+  "feature_sets": ["COMPACT_NO_TIME", "COMPACT_TIME"],
+  "target": "Strong-R residual relative to a train-only direction and candidate shrinkage prior",
+  "candidate_prior_alpha_grid": [0.0, 10.0, 25.0, 50.0, 100.0],
+  "model_variants": [
+    {"id":"SQUARED_UNWEIGHTED","objective":"reg:squarederror","candidate_balanced_weight":false},
+    {"id":"PSEUDOHUBER_UNWEIGHTED","objective":"reg:pseudohubererror","candidate_balanced_weight":false},
+    {"id":"PSEUDOHUBER_CANDIDATE_BALANCED","objective":"reg:pseudohubererror","candidate_balanced_weight":true}
+  ],
+  "fixed_xgboost_parameters": {
+    "n_estimators": 200,
+    "max_depth": 2,
+    "learning_rate": 0.03,
+    "min_child_weight": 30.0,
+    "reg_lambda": 20.0,
+    "max_bin": 64,
+    "tree_method": "hist",
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "random_state": 20260627
+  },
+  "selection": {
+    "scope": "separately by fold and direction",
+    "metric": "minimum validation Strong-R MSE",
+    "tie_break": "feature_set, model_variant, alpha ascending by frozen order",
+    "test_selection": false,
+    "validation_refit": false
+  },
+  "walk_forward": {
+    "same_folds_as_mlr1_v1": true,
+    "purge_hours": 6,
+    "embargo_hours": 6,
+    "resolved_history": "exit_time <= applicable simulated cutoff"
+  },
+  "policies": {
+    "coverage_per_direction": {"conservative":0.0025,"standard":0.005,"high_coverage":0.01},
+    "threshold_source": "validation only",
+    "positive_score_required": true,
+    "same_decision_competition": "highest predicted Strong R; candidate_id ascending tie break",
+    "one_position": "decision_time >= active exit_time"
+  },
+  "promotion_rule": "No historical result from this v2 research run can promote a model. A later immutable package requires genuinely uninspected prospective data.",
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "prospective_started": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

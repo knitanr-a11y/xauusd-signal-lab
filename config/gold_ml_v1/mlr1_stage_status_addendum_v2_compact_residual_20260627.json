@@ -1,0 +1,27 @@
+{
+  "system_id": "GML1-MLR1-V2-RESEARCH",
+  "date": "2026-06-27",
+  "status": "MLR1_V2_COMPACT_RESIDUAL_AUDITED_NOT_PROMOTED_PROSPECTIVE_INFRASTRUCTURE_NEXT",
+  "source_event_registry_sha256": "060e2cc0d12ce35cd9962684d73d9adac6d3255d9677848956ba44adf9ede7d9",
+  "conservative_one_position_trades": 228,
+  "strong_total_r": 1.4976779549652939,
+  "strong_profit_factor": 1.0110204003663783,
+  "extreme_total_r": -15.990829308179,
+  "positive_folds": 2,
+  "largest_positive_fold_share": 0.9653778270236127,
+  "model_promoted": false,
+  "candidate_stack_changed": false,
+  "historical_model_tuning_halted": true,
+  "next_step": "Implement and audit the explicit Files-root goldsharp live-source adapter, closed-bar causal feature parity and prospective data capture without activating a model or signal.",
+  "required_future_input": "Explicit current Files-root goldsharp_*.csv files; never recursively discover or mix gold_v3_2023_2026 historical files.",
+  "controls": {
+    "audit_only": true,
+    "shadow_ready": false,
+    "prospective_started": false,
+    "live_adapter_implemented": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
