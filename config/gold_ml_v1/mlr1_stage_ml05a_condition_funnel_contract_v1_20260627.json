@@ -1,0 +1,80 @@
+{
+  "system_id": "GML1-MLR1",
+  "stage": "ML-05A",
+  "diagnostic_id": "ML05A_V1_LABEL_FREE_CONDITION_FUNNEL",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "FROZEN_BEFORE_V2_DEFINITION_AUDIT_ONLY",
+  "purpose": "Measure cumulative condition survival and false-to-true onset conversion for the six failed v1 ML-native candidates without reading labels or candidate performance.",
+  "engine": "scripts/gold_ml_v1/mlr1/audit_ml_native_candidate_condition_funnels.py",
+  "inputs": {
+    "feature_registry": "outputs/gold_ml_v1/mlr1/ml02_features_v1/mlr1_features_v1.csv.gz",
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "feature_contract": "config/gold_ml_v1/mlr1_feature_contract_v1_20260627.json",
+    "candidate_contract": "config/gold_ml_v1/mlr1_ml_native_candidate_contract_v1_20260627.json",
+    "density_audit": "config/gold_ml_v1/mlr1_stage_ml05a_density_audit_v1_20260627.json"
+  },
+  "candidate_ids": [
+    "GML1-MLC-002-L",
+    "GML1-MLC-002-S",
+    "GML1-MLC-004-L",
+    "GML1-MLC-004-S",
+    "GML1-MLC-005-L",
+    "GML1-MLC-005-S"
+  ],
+  "expected_v1_onset_counts": {
+    "GML1-MLC-002-L": 93,
+    "GML1-MLC-002-S": 78,
+    "GML1-MLC-004-L": 35,
+    "GML1-MLC-004-S": 52,
+    "GML1-MLC-005-L": 53,
+    "GML1-MLC-005-S": 45
+  },
+  "required_breakdowns": [
+    "full snapshot",
+    "calendar year",
+    "direction",
+    "ordered cumulative condition stage",
+    "final false-to-true onset conversion"
+  ],
+  "invariants": [
+    "The immutable accepted v1 families MLC-001, MLC-003 and MLC-006 are not changed.",
+    "The final cumulative state for every audited candidate must equal the state produced by build_ml_native_candidate_proposals.py.",
+    "Final onset counts must exactly match the frozen v1 density audit.",
+    "M15 time gaps reset previous state and exact-previous feature conditions.",
+    "No one-open, cross-candidate dedup or outcome filtering is applied."
+  ],
+  "forbidden_inputs": [
+    "ML-03 label registry",
+    "outcome",
+    "Base R",
+    "Strong R",
+    "Extreme R",
+    "profit factor",
+    "win rate",
+    "drawdown",
+    "candidate performance"
+  ],
+  "outputs": {
+    "funnel_registry": "mlr1_ml05a_condition_funnel_v1.csv.gz",
+    "summary": "mlr1_ml05a_condition_funnel_summary_v1.json"
+  },
+  "stage_boundary": {
+    "v2_definition_frozen": false,
+    "combined_primary_registry_built": false,
+    "ml05b_label_join_allowed": false
+  },
+  "controls": {
+    "audit_only": true,
+    "labels_joined": false,
+    "candidate_performance_reviewed": false,
+    "accepted_v1_changed": false,
+    "model_trained": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
