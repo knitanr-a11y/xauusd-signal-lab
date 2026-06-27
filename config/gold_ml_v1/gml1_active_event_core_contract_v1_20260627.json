@@ -1,0 +1,25 @@
+{
+  "system_id": "GML1-EVENT-CORE",
+  "version": "v1",
+  "date": "2026-06-27",
+  "status": "DEVELOPMENT_ONLY",
+  "purpose": "Provide four non-overlapping event channels to the fixed meta-model.",
+  "candidate_ids": [
+    "GML1-EVT-001-L",
+    "GML1-EVT-002-S",
+    "GML1-EVT-003-L",
+    "GML1-EVT-003-S"
+  ],
+  "design": {
+    "one_candidate_maximum_per_decision": true,
+    "raw_events_preserved": true,
+    "candidate_ids_represent_event_types": true
+  },
+  "reference": {
+    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "proposal_rows": 831,
+    "direction_counts": {"LONG": 495, "SHORT": 336},
+    "proposal_registry_sha256": "b5e017f2e8b08b8fdad3bcd9ca603155510d23cf2385bbcde2a36bdeff456c0b"
+  },
+  "deployment_allowed": false
+}
