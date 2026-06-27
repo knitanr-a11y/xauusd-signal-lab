@@ -1,0 +1,51 @@
+{
+  "system_id": "GML1-MLR2",
+  "candidate_version": "v2-research",
+  "date": "2026-06-27",
+  "status": "HISTORICAL_RESEARCH_CANDIDATES_FROZEN_NOT_DEPLOYABLE",
+  "warning": "This pool was assembled after prior historical diagnostics were reviewed. Its historical result is research-only.",
+  "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+  "candidate_ids": [
+    "GML1-MLR2-V2-C001-L",
+    "GML1-MLR2-V2-C002-S",
+    "GML1-MLR2-V2-C003-L",
+    "GML1-MLR2-V2-C003-S"
+  ],
+  "families": {
+    "GML1-MLR2-V2-C001-L": "H1_TREND_PULLBACK_RESUMPTION",
+    "GML1-MLR2-V2-C002-S": "MULTIBAR_COMPRESSION_BREAKOUT",
+    "GML1-MLR2-V2-C003-L": "STRICT_HIGH_VOL_EXHAUSTION_REVERSAL",
+    "GML1-MLR2-V2-C003-S": "STRICT_HIGH_VOL_EXHAUSTION_REVERSAL"
+  },
+  "label_free_reference": {
+    "proposal_rows": 831,
+    "unique_decisions": 831,
+    "direction_counts": {"LONG": 495, "SHORT": 336},
+    "candidate_counts": {
+      "GML1-MLR2-V2-C001-L": 239,
+      "GML1-MLR2-V2-C002-S": 153,
+      "GML1-MLR2-V2-C003-L": 256,
+      "GML1-MLR2-V2-C003-S": 183
+    },
+    "calendar_years_each": [2023, 2024, 2025, 2026],
+    "same_time_overlap": 0,
+    "direction_conflicts": 0,
+    "proposal_registry_sha256": "3212f70556a38f6d35d6000c18a6750aa620596d3ff9b54c7d7c21d358604eca"
+  },
+  "rules": {
+    "C001_L": "Use the frozen MLR2-v1 H1 pullback LONG definition unchanged.",
+    "C002_S": "Use the frozen MLR2-v1 compression breakout SHORT definition unchanged.",
+    "C003_L": "ATR percentile >= 0.75, RSI centered <= -0.35, range >= 1 ATR, lower wick fraction >= 0.40.",
+    "C003_S": "ATR percentile >= 0.75, RSI centered >= 0.35, range >= 1 ATR, upper wick fraction >= 0.40."
+  },
+  "evaluation": "Join the fixed ML-03 labels and run GML1-META-CORE v1 unchanged.",
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}

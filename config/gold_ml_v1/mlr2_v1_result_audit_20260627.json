@@ -1,0 +1,50 @@
+{
+  "system_id": "GML1-MLR2",
+  "candidate_version": "v1",
+  "date": "2026-06-27",
+  "status": "MLR2_V1_FROZEN_EVALUATED_NOT_PROMOTED",
+  "proposal_registry_sha256": "0afe40cf2d856d7fbb195c163efb801ca7f964da9daad6097d14d774af119cfe",
+  "candidate_event_registry_sha256": "d8406c1ffe00916266277b59a35bda377ddf0e638ea521295e7175063c337811",
+  "meta_core": "GML1-META-CORE v1 unchanged",
+  "conservative_one_position": {
+    "trades": 238,
+    "long_trades": 238,
+    "short_trades": 0,
+    "strong_total_r": -24.6723814929437,
+    "strong_mean_r": -0.10366546845774664,
+    "strong_profit_factor": 0.8374806968802148,
+    "extreme_total_r": -35.009469193526,
+    "extreme_profit_factor": 0.7788463617557396,
+    "strong_maximum_drawdown_r": 30.583461572959692,
+    "positive_months": 3,
+    "negative_months": 9,
+    "strong_top_five_removed_total_r": -32.1355827984337,
+    "strong_top_five_percent_removed_total_r": -42.5108643185237
+  },
+  "fold_strong_r": {
+    "F1": 0.0,
+    "F2": -9.11692091151,
+    "F3": 0.0,
+    "F4": -15.555460581434
+  },
+  "diagnosis_after_freeze": {
+    "failed_breakout_reclaim": "Both directions were negative in every OOS fold.",
+    "broad_high_vol_exhaustion_short": "Negative in every OOS fold.",
+    "h1_pullback_long": "Small positive Strong R in all four folds but negative Extreme-cost total.",
+    "compression_breakout_short": "Positive Strong and Extreme totals with three positive folds.",
+    "rule": "This diagnosis may inform only a separately versioned research candidate pool. MLR2 v1 remains immutable."
+  },
+  "decision": {
+    "candidate_version_changed": false,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "reason": "Negative aggregate Strong and Extreme R, zero selected SHORT trades, excessive drawdown and poor month stability."
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
