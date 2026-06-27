@@ -3,10 +3,10 @@
   "date": "2026-06-27",
   "status": "ARTIFACT_EXACT_LOCAL_REPLAY_IMPLEMENTED_AUDIT_ONLY",
   "source_of_truth_order": [
-    "watch024a_challenger_2024.csv / 2025.csv / 2026.csv and watch024a_addition_summary.json (final state)",
-    "watch022c_challenger_*.csv and watch_addon_decision_summary.json (WATCH-022-C replacement stage)",
-    "completion_challenger_v1_*.csv and completion_challenger_v1_summary.json (pre-replacement completion stage)",
-    "historical documents and configs only for lineage interpretation; they may not override the final artifacts"
+    "watch024a final artifacts",
+    "watch022c replacement artifacts",
+    "completion challenger artifacts",
+    "historical documents for lineage interpretation only"
   ],
   "final_stage": {
     "last_change": "GML1-WATCH-024-A added after GML1-WATCH-022-C replaced GML1-WATCH-022-B",
@@ -17,25 +17,14 @@
       "P18": "GML1-PROV-018-APPROX",
       "P19": "GML1-PROV-019-APPROX",
       "W024A": "GML1-WATCH-024-A"
-    },
-    "known_source_artifact_omission": "watch022c/watch024a CSVs omit candidate_id and w only for A_CORE; verifier preserves source files and fills these only in normalized derived output"
+    }
   },
   "ml_lineage": {
-    "interpretation": "The final challenger uses candidate-local stable loss leaves, candidate-local score quality controls and fixed risk multipliers. It is not the all-M15 ML synergy, the invalidated Active Event Core score-sizing result, or the MLR1 candidate-universe meta model.",
-    "stable_loss_rule_counts": {
-      "P16": 3,
-      "P18": 1,
-      "P19": 4
-    },
+    "stable_loss_rule_counts": {"P16": 3, "P18": 1, "P19": 4},
     "candidate_local_model_artifacts_present": false,
-    "executable_status": "Frozen post-filter trade artifacts are executable for parity and portfolio replay. P16/P19 model retraining or fresh score inference is intentionally unavailable until the original model/score artifacts are recovered.",
-    "explicitly_unrelated_or_invalidated": [
-      "config/gold_ml_v1/ml_synergy_result_20260626.json",
-      "config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json",
-      "config/gold_ml_v1/mlr1_meta_model_core_contract_v1_20260627.json"
-    ]
+    "fresh_inference_enabled": false,
+    "unrelated_ml_substitution_allowed": false
   },
-  "byte_hash_note": "Several uploaded CSV byte hashes differ from hashes recorded in prior summaries, while row-level performance and stage transformations match. Local hashes above are authoritative for this committed package; historical hashes are retained as audit evidence and are not silently rewritten.",
   "controls": {
     "audit_only": true,
     "model_promoted": false,
@@ -46,13 +35,11 @@
     "mt5_order": false
   },
   "artifact_delivery": {
-    "repository_mode": "verifier_and_hash_contract_only",
     "local_package": "gml1_final_research_challenger_local_replay_20260627.zip",
     "required_directory": "config/gold_ml_v1/research_challenger/final_20260627/artifacts",
-    "required_file_count": 15,
-    "reason": "Exact source CSV/JSON artifacts are preserved in the separately delivered local audit package; repository verifier refuses missing or hash-mismatched inputs."
+    "required_file_count": 15
   },
-  "artifact_hashes": "config/gold_ml_v1/research_challenger/final_20260627/artifact_hashes.json",
+  "artifact_hashes": "config/gold_ml_v1/research_challenger/final_20260627/artifact_hashes.csv",
   "artifact_names": [
     "completion_challenger_v1_2024.csv",
     "completion_challenger_v1_2025.csv",
