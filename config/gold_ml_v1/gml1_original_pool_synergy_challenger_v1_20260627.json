@@ -1,0 +1,113 @@
+{
+  "system_id": "GML1-ORIGINAL-POOL-SYNERGY",
+  "version": "v1-research",
+  "date": "2026-06-27",
+  "status": "PROMISING_RESEARCH_CHALLENGER_NOT_PROMOTED",
+  "original_pool_recovery": {
+    "frozen_commit": "5e8befb09981ff577f2e4716c758a2f5b2ad17ee",
+    "active_candidate_count": 9,
+    "research_only_candidate_count": 3,
+    "adjacent_independent_survivors": ["GML1-PROV-016", "GML1-PROV-018", "GML1-PROV-019"],
+    "effective_historical_candidate_count": 15,
+    "note": "This is the candidate generation era referred to by the user, not the later four-channel Active Event Core."
+  },
+  "architecture": {
+    "core_a": "GML1-WATCH-022-B exact reconstructed M15-H4 lineage",
+    "core_b": "H1-D1 state machine: original breakout plus 24-hour above-band re-entry with the original WATCH-021-C compound loss exclusions",
+    "independent_candidates": [
+      "GML1-PROV-016 trendline break-retest",
+      "GML1-PROV-018 post-squeeze BB40 breakout",
+      "GML1-PROV-019 downside break then EMA20 retest"
+    ],
+    "ml_role": [
+      "Reject stable compound loss leaves that are negative in both 2023 discovery and 2024 validation.",
+      "For PROV-016 reject the validation-score bottom 10 percent.",
+      "For PROV-019 reject scores outside the lower validation support boundary.",
+      "Allocate lower risk to weaker independent sleeves without deleting their trade count."
+    ],
+    "risk_multipliers_after_normalization": {
+      "core_a": 1.4769230769230768,
+      "core_b": 1.4769230769230768,
+      "prov_016": 0.7384615384615384,
+      "prov_018": 0.3692307692307692,
+      "prov_019": 1.4769230769230768
+    }
+  },
+  "results": {
+    "2024_validation": {
+      "trades": 264,
+      "win_rate": 0.6515151515151515,
+      "profit_factor": 2.3978569565306076,
+      "total_r": 128.5269893724259,
+      "max_drawdown_r": 5.907692307692287,
+      "positive_months": 12,
+      "negative_months": 0,
+      "top_five_percent_removed_r": 87.17314321857975
+    },
+    "2025_following_period": {
+      "trades": 388,
+      "win_rate": 0.5927835051546392,
+      "profit_factor": 2.0014894080465178,
+      "total_r": 141.9552262725002,
+      "max_drawdown_r": 8.123076923076837,
+      "positive_months": 12,
+      "negative_months": 0,
+      "top_five_removed_r": 127.18599550326942,
+      "top_five_percent_removed_r": 91.7398416571149
+    },
+    "2026_partial_diagnostic": {
+      "trades": 101,
+      "win_rate": 0.6039603960396039,
+      "profit_factor": 1.7224596417098264,
+      "total_r": 37.078851765292036,
+      "max_drawdown_r": 7.014335642081573,
+      "positive_months": 5,
+      "negative_months": 1
+    }
+  },
+  "compound_loss_findings": {
+    "prov_016": [
+      "Weak M15 32-bar return combined with a large H1 body.",
+      "Moderate H4 EMA20/50 separation, depressed M15 ATR ratio and a large M15 body.",
+      "Low M15 volatility percentile, weak four-bar return and weak H4 24-bar return."
+    ],
+    "prov_019": [
+      "H4 volume active, H1 three-bar return not sufficiently negative and entry close to the completed-day low.",
+      "H4 close near the low, restricted M15 range and narrow H4 Bollinger width.",
+      "Negative M15 32-bar return combined with weak D1 close location and non-extreme D1 bearish body.",
+      "Non-negative M15 32-bar context combined with a small H1 lower wick."
+    ]
+  },
+  "rejected_follow_up": {
+    "candidate": "GML1-PROV-017",
+    "reason": "Compound loss leaves improved 2023 and 2024 but did not generalize to 2026; the remaining 2026 subset stayed negative."
+  },
+  "limitations": [
+    "The exact trade registries for PROV-016, PROV-018 and PROV-019 are absent from the current tree. They were reconstructed from frozen definitions and remain approximate until exact SHA parity is achieved.",
+    "The 2025 period has now been inspected while choosing the final research policy. The result is performance-informed and cannot certify deployment.",
+    "The 2026 period is partial and does not pass the PF2 target, although win rate remains above 60 percent.",
+    "Concurrent independent strategy sleeves require a portfolio risk-cap implementation before operational use."
+  ],
+  "decision": {
+    "retain_as_challenger": true,
+    "hard_target_passed_in_complete_years_2024_and_2025": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "next_step": "Restore or reproduce exact registries for PROV-016, PROV-018 and PROV-019, rerun parity, then freeze this challenger for prospective comparison without further historical tuning."
+  },
+  "artifact_sha256": {
+    "summary": "806fe6ef9745765b02e7be3d95aa52abc390199bb4f1573acf4815fb7022d71d",
+    "trades_2024": "8882a914d248407f25e5150e460f9a16c9df203897d48a90a6ad6cd6a7c202b1",
+    "trades_2025": "8ae3e7d0cee3a68ae86b8edc09b8e1d1d593217b225f8c8231965bbff10037f6",
+    "trades_2026": "9c30eea30372043eec1e4fe2eb54a60c0f73f18a4fad576d50532dc207c4eb53",
+    "stable_loss_summary": "545c5d4542029581e4c1752d289f4db8f01a070900f14cc21194cccabceb130b",
+    "stable_loss_rules": "977d61f5948f7d546f014afb43290f165d7a3a594ce834b0a0ef11fe98d54825"
+  },
+  "controls": {
+    "audit_only": true,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
