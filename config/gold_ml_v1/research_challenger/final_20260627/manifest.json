@@ -1,0 +1,130 @@
+{
+  "package_id": "GML1-FINAL-RESEARCH-CHALLENGER-LOCAL-REPLAY-20260627",
+  "date": "2026-06-27",
+  "status": "ARTIFACT_EXACT_LOCAL_REPLAY_IMPLEMENTED_AUDIT_ONLY",
+  "source_of_truth_order": [
+    "watch024a_challenger_2024.csv / 2025.csv / 2026.csv and watch024a_addition_summary.json (final state)",
+    "watch022c_challenger_*.csv and watch_addon_decision_summary.json (WATCH-022-C replacement stage)",
+    "completion_challenger_v1_*.csv and completion_challenger_v1_summary.json (pre-replacement completion stage)",
+    "historical documents and configs only for lineage interpretation; they may not override the final artifacts"
+  ],
+  "final_stage": {
+    "last_change": "GML1-WATCH-024-A added after GML1-WATCH-022-C replaced GML1-WATCH-022-B",
+    "components": {
+      "A_CORE": "GML1-WATCH-022-C",
+      "B_STATE": "GML1-H1D1-STATEFUL-REENTRY24-C",
+      "P16": "GML1-PROV-016-APPROX",
+      "P18": "GML1-PROV-018-APPROX",
+      "P19": "GML1-PROV-019-APPROX",
+      "W024A": "GML1-WATCH-024-A"
+    },
+    "known_source_artifact_omission": "watch022c/watch024a CSVs omit candidate_id and w only for A_CORE; verifier preserves source files and fills these only in normalized derived output"
+  },
+  "files": {
+    "completion_challenger_v1_2024.csv": {
+      "local_sha256": "56c80a1dda27d5149536077547d2c83e6c94553ce4c36c56fe3f6f8f72a305c5",
+      "bytes": 33083,
+      "historical_recorded_sha256": "8882a914d248407f25e5150e460f9a16c9df203897d48a90a6ad6cd6a7c202b1",
+      "historical_byte_match": false
+    },
+    "completion_challenger_v1_2025.csv": {
+      "local_sha256": "127cbede845ec5bb686a78d0b56bc9f75a98eebcb4886c688bb3362adb2958a0",
+      "bytes": 48904,
+      "historical_recorded_sha256": "8ae3e7d0cee3a68ae86b8edc09b8e1d1d593217b225f8c8231965bbff10037f6",
+      "historical_byte_match": false
+    },
+    "completion_challenger_v1_2026.csv": {
+      "local_sha256": "f8949f733ac51ec369f18296dc07f5285173bff395472884afd41256c4e88279",
+      "bytes": 13066,
+      "historical_recorded_sha256": "9c30eea30372043eec1e4fe2eb54a60c0f73f18a4fad576d50532dc207c4eb53",
+      "historical_byte_match": false
+    },
+    "completion_challenger_v1_summary.json": {
+      "local_sha256": "806fe6ef9745765b02e7be3d95aa52abc390199bb4f1573acf4815fb7022d71d",
+      "bytes": 3269,
+      "historical_recorded_sha256": "806fe6ef9745765b02e7be3d95aa52abc390199bb4f1573acf4815fb7022d71d",
+      "historical_byte_match": true
+    },
+    "stable_loss_leaf_rules.json": {
+      "local_sha256": "977d61f5948f7d546f014afb43290f165d7a3a594ce834b0a0ef11fe98d54825",
+      "bytes": 5620,
+      "historical_recorded_sha256": "977d61f5948f7d546f014afb43290f165d7a3a594ce834b0a0ef11fe98d54825",
+      "historical_byte_match": true
+    },
+    "watch022c_challenger_2024.csv": {
+      "local_sha256": "eb048cae1e0299646c371fbf05a31399888891bed36b8f48a8582e0dcf89bc56",
+      "bytes": 32467
+    },
+    "watch022c_challenger_2025.csv": {
+      "local_sha256": "6ffb7465f9488886c05477f00c6a83fbdbbe30c6310475a50988eb1165679650",
+      "bytes": 47119
+    },
+    "watch022c_challenger_2026.csv": {
+      "local_sha256": "4d025eb86bb19054c3d8905af492bb7f9d89033601dd35f2133fd211a3cde681",
+      "bytes": 11473
+    },
+    "watch022c_cost_stress.json": {
+      "local_sha256": "3f7c9e077c543ba40b2a5f5c6b3722d3b796b6a619047ac4cdd18a04426a86ea",
+      "bytes": 5066
+    },
+    "watch024a_addition_summary.json": {
+      "local_sha256": "08acabe257719fb07a4f38f9cbb315086a3a41a6b69bf99bbfedc0b9bdb999b5",
+      "bytes": 8847,
+      "historical_recorded_sha256": "08acabe257719fb07a4f38f9cbb315086a3a41a6b69bf99bbfedc0b9bdb999b5",
+      "historical_byte_match": true
+    },
+    "watch024a_challenger_2024.csv": {
+      "local_sha256": "5c95fec94cfb10f01e689367c579c78e75ccdad9c8da163fd61597e6766aa025",
+      "bytes": 33236,
+      "historical_recorded_sha256": "4e95ae586f10ffc7cfe1dd73c78537fc39eb993edcc2694b0f21d6d52be063a6",
+      "historical_byte_match": false
+    },
+    "watch024a_challenger_2025.csv": {
+      "local_sha256": "83e109c0b6182ba2c2fea55a81a6827162bd6b95fffa2386d8028f8aa6fcd6c7",
+      "bytes": 48764,
+      "historical_recorded_sha256": "768fb88dda310a3adf62c25a9b4415ae95baddf54f50f5bfc3c16d08385b1a03",
+      "historical_byte_match": false
+    },
+    "watch024a_challenger_2026.csv": {
+      "local_sha256": "2503a24b8a2b9ba72563c47dab63c90919ea73334efc811d8813a7a23ff7fb6d",
+      "bytes": 12245,
+      "historical_recorded_sha256": "92ef200882d14458841266fd9d48691b2b6adee8ff7e9891c233236a504c3f0f",
+      "historical_byte_match": false
+    },
+    "watch024a_exact_candidate_trades.csv": {
+      "local_sha256": "129db5322db95bb64a28f19bbc513d1807e26f576bb319c6ca694ff4e98e6b9f",
+      "bytes": 8652,
+      "historical_recorded_sha256": "2cd135ea1c4d40b3f0c744be13adcae186223956bd99741f79882fd3c3ff86cb",
+      "historical_byte_match": false
+    },
+    "watch_addon_decision_summary.json": {
+      "local_sha256": "eb57469fb86a784862564a082a1b9a29c39fbb785c255b5335baa4a51e0700c9",
+      "bytes": 4371
+    }
+  },
+  "ml_lineage": {
+    "interpretation": "The final challenger uses candidate-local stable loss leaves, candidate-local score quality controls and fixed risk multipliers. It is not the all-M15 ML synergy, the invalidated Active Event Core score-sizing result, or the MLR1 candidate-universe meta model.",
+    "stable_loss_rule_counts": {
+      "P16": 3,
+      "P18": 1,
+      "P19": 4
+    },
+    "candidate_local_model_artifacts_present": false,
+    "executable_status": "Frozen post-filter trade artifacts are executable for parity and portfolio replay. P16/P19 model retraining or fresh score inference is intentionally unavailable until the original model/score artifacts are recovered.",
+    "explicitly_unrelated_or_invalidated": [
+      "config/gold_ml_v1/ml_synergy_result_20260626.json",
+      "config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json",
+      "config/gold_ml_v1/mlr1_meta_model_core_contract_v1_20260627.json"
+    ]
+  },
+  "byte_hash_note": "Several uploaded CSV byte hashes differ from hashes recorded in prior summaries, while row-level performance and stage transformations match. Local hashes above are authoritative for this committed package; historical hashes are retained as audit evidence and are not silently rewritten.",
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
