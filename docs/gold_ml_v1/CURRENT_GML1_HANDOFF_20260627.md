@@ -1,63 +1,37 @@
 # Current GML1 Handoff
 
-Current sources:
+## Critical baseline correction
 
-- `docs/gold_ml_v1/META_CORE_V1_CURRENT_20260627.md`
-- `config/gold_ml_v1/mlr1_meta_model_core_contract_v1_20260627.json`
-- `config/gold_ml_v1/gml1_event_discovery_v2_time_causality_audit_20260627.json`
-- `config/gold_ml_v1/gml1_target_gate_research_audit_v1_20260627.json`
-- `config/gold_ml_v1/gml1_lifecycle_rr_research_v1_result_audit_20260627.json`
-- `config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json`
+The Active Event Core v1 four-channel result recorded in PR #57 is not the user-requested original-candidate baseline.
 
-## Protected baseline
+Do not use the following as the project baseline or as a completed ML-synergy result:
 
-The protected baseline is Active Event Core v1 without any ML filter or sizing. Use the same four walk-forward test periods and six-hour test-start embargo as Meta Core.
+- Active Event Core v1 no-ML 517-trade result;
+- Active Event Core v1 score-sizing result;
+- `config/gold_ml_v1/gml1_active_core_no_ml_baseline_and_score_sizing_v1_20260627.json`.
 
-- 517 one-position trades, annualized 262.63;
-- LONG 339, SHORT 178;
-- WR 47.39%;
-- Strong +51.3954R, PF 1.1770;
-- Extreme +12.8015R, PF 1.0412;
-- Strong maximum drawdown 13.5675R.
+Those figures describe only the later four-channel Active Event Core research layer. The user refers to the retired multi-candidate pool that existed before PR #51 removed the old candidate definitions from the current tree.
 
-Do not compare challengers with the full-history 831-event total, because that includes model-development history. Do not use the 319-trade Meta Core filtered result as the baseline.
+## Required recovery order
 
-## First positive ML synergy result
+1. Recover the retired candidate IDs, definitions, proposal registry and label join from Git history.
+2. Determine which retired pool is the actual original baseline; do not infer this from approximate candidate count alone.
+3. Reproduce its no-ML OOS result with the original deduplication, conflict and one-position contract.
+4. Freeze candidate count, IDs, SHA, trades, annualized trades, WR, Strong/Extreme PF and R, DD, fold, direction and candidate breakdown.
+5. Only then compare ML filtering, ML sizing or new candidate families against that baseline.
 
-ML filtering reduced trade count and total Strong R. A different use of the same calibrated Meta Core score was therefore tested: preserve every baseline trade and use the score only for candidate-specific risk allocation.
+No further candidate or ML result may be called an improvement until this recovery is complete.
 
-Sizing contract:
+## Confirmed historical pools under review
 
-- z-normalize the calibrated score within each candidate ID using validation only;
-- size = clip(1 + k * z, 0.5, 1.5);
-- normalize mean size to 1.0 so gross exposure equals the baseline;
-- validation may choose k from 0, 0.15, 0.30 and 0.50;
-- choose the largest validation Strong R subject to validation DD no greater than 105% of the no-ML baseline.
+Git history currently shows at least:
 
-Selected k values: F1 0.50, F2 0.50, F3 0.50, F4 0.00.
+- MLR1 ML-05A/05B: 12 candidate IDs across six families, 4,263 raw events;
+- MLR2 v1: 10 candidate IDs across five families, 3,156 raw proposals;
+- later Active Event Core v1: four event channels, which is not the requested original pool.
 
-OOS result:
+The first two remain historical audit objects only until the exact user-referenced original pool is established.
 
-- all 517 trades retained, annualized 262.63;
-- Strong +63.8959R, PF 1.2246;
-- Extreme +25.7754R, PF 1.0847;
-- Strong maximum drawdown 13.8942R;
-- Strong improved in F1, F2 and F3, and F4 was left unchanged;
-- Strong +24.3% and Extreme +101.3% versus equal-size no-ML baseline at equal total exposure.
+## Time and safety contracts
 
-This is the first result where ML provides incremental value without replacing or shrinking the protected candidate baseline. It remains research-only and does not meet WR60/PF2.
-
-## Hard target
-
-A completed candidate system still requires at least 250 annualized trades and either Strong WR at least 60% or Strong PF at least 2.00. Strong and Extreme resilience, concentration and drawdown must also pass.
-
-## Next stage
-
-Keep the no-ML baseline and score-sizing challenger frozen. Search only for complementary candidate families that:
-
-1. add non-overlapping proposal supply rather than replacing baseline events;
-2. show candidate-specific ML lift in validation;
-3. do not reduce baseline trade count or Strong R through position blocking;
-4. pass rolling OOS independently before portfolio aggregation.
-
-No model is promoted. Shadow, live, Discord and MT5 outputs remain off.
+CSV `time` is bar-open time. M15 decision is open plus 15 minutes. Entry requires an exact M1 open. Higher-timeframe bars must be closed. Audit-only remains active. No model, shadow, live, Discord or MT5 output is enabled.
