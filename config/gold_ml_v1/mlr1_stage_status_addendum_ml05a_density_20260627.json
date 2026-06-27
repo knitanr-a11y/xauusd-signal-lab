@@ -1,0 +1,15 @@
+{
+  "system_id": "GML1-MLR1",
+  "date": "2026-06-27",
+  "status": "ML05A_V1_DENSITY_AUDITED_PARTIAL_PASS_V2_REQUIRED",
+  "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_MLR1_ML05A_DENSITY_AUDITED_20260627.md",
+  "density_audit": "config/gold_ml_v1/mlr1_stage_ml05a_density_audit_v1_20260627.json",
+  "proposal_registry_sha256": "d47a745402f4be01d7be5e1a6e830f33515e7317768363d745cff8ea09fb8219",
+  "accepted_v1_families": ["MLC-001", "MLC-003", "MLC-006"],
+  "v2_required_families": ["MLC-002", "MLC-004", "MLC-005"],
+  "next_step": "Build label-free condition funnels and define density-only v2 candidates before any label join.",
+  "labels_joined": false,
+  "performance_reviewed": false,
+  "model_promoted": false,
+  "audit_only": true
+}
