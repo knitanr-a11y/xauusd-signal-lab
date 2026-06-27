@@ -1,0 +1,76 @@
+{
+  "system_id": "GML1-EVENT-DISCOVERY",
+  "version": "v2",
+  "date": "2026-06-27",
+  "status": "OPEN_TIME_TO_CLOSE_TIME_CAUSALITY_AUDIT_PASSED_LABEL_FREE",
+  "raw_csv_time_semantics": "bar_open_time",
+  "source_sha256": {
+    "m1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "m5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "m15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "h1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "h4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "d1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "source_rows": {
+    "m1": 1225431,
+    "m5": 245327,
+    "m15": 81781,
+    "h1": 20459,
+    "h4": 5352,
+    "d1": 894
+  },
+  "feature_registry": {
+    "sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+    "rows": 74168,
+    "first_decision": "2023-04-18 01:15:00",
+    "last_decision": "2026-06-19 19:45:00",
+    "m15_open_plus_15_equals_decision": true,
+    "m15_close_equals_decision": true,
+    "all_exact_m1_entry_rows_exist": true,
+    "exact_m1_open_max_abs_difference": 0.0,
+    "exact_m1_spread_max_abs_difference": 0.0,
+    "h1_latest_closed_asof_match_count": 74168,
+    "h4_latest_closed_asof_match_count": 74168,
+    "d1_latest_closed_asof_match_count": 74168,
+    "higher_timeframe_close_after_decision_count": 0
+  },
+  "last_eligible_feature_row": {
+    "decision_time": "2026-06-19 19:45:00",
+    "m15_source_open": "2026-06-19 19:30:00",
+    "m15_source_close": "2026-06-19 19:45:00",
+    "h1_source_open": "2026-06-19 18:00:00",
+    "h1_source_close": "2026-06-19 19:00:00",
+    "h4_source_open": "2026-06-19 12:00:00",
+    "h4_source_close": "2026-06-19 16:00:00",
+    "d1_source_open": "2026-06-18 00:00:00",
+    "d1_source_close": "2026-06-19 00:00:00",
+    "entry_exact_m1_open": "2026-06-19 19:45:00"
+  },
+  "excluded_unfinished_tail": {
+    "m15_open": "2026-06-19 19:45:00",
+    "m15_nominal_close": "2026-06-19 20:00:00",
+    "last_available_m1_open": "2026-06-19 19:54:00",
+    "last_available_m1_close": "2026-06-19 19:55:00",
+    "reason": "exact M1 at the M15 decision time 20:00 was unavailable"
+  },
+  "discovery_shortlist": {
+    "proposal_rows": 10336,
+    "unique_decisions": 10336,
+    "missing_feature_decisions": 0,
+    "duplicate_decisions": 0,
+    "maximum_abs_difference_across_161_copied_features": 0.0,
+    "proposal_registry_sha256": "7886b519d7adf3b4127599478e1f56271701667865dfcaac3b99ad833ac093e6",
+    "deterministic_rebuild_sha256": "7886b519d7adf3b4127599478e1f56271701667865dfcaac3b99ad833ac093e6",
+    "previous_exact_cross_gap_usage_count": 0,
+    "unfinished_source_bar_usage_count": 0,
+    "labels_read": false,
+    "performance_read": false
+  },
+  "m5_role": "format-audited only; not used by the feature registry or event discovery",
+  "conclusion": {
+    "passed": true,
+    "open_time_misuse_found": false,
+    "approved_next_step": "freeze definitions and proposal SHA before label join"
+  }
+}
