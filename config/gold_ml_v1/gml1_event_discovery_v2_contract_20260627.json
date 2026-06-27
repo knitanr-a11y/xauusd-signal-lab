@@ -1,0 +1,70 @@
+{
+  "system_id": "GML1-EVENT-DISCOVERY",
+  "version": "v2",
+  "date": "2026-06-27",
+  "status": "LABEL_FREE_EVENT_DEFINITIONS_FROZEN_TIME_CAUSALITY_AUDITED",
+  "source_feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
+  "time_contract": {
+    "raw_csv_time": "bar_open_time",
+    "decision_time": "m15 bar_open_time plus 15 minutes",
+    "entry_time": "decision_time with exact M1 open required",
+    "higher_timeframe_join": "latest source bar whose nominal close time is less than or equal to decision_time",
+    "previous_exact": "use prior feature row only when decision_time spacing equals exactly 15 minutes per requested lag",
+    "gap_behavior": "previous state and onset history reset after a non-15-minute gap"
+  },
+  "candidate_priority": [
+    "GML1-DISC-EXH-L", "GML1-DISC-EXH-S",
+    "GML1-DISC-RECL-L", "GML1-DISC-RECL-S",
+    "GML1-DISC-CMP-L", "GML1-DISC-CMP-S",
+    "GML1-DISC-BRK-L", "GML1-DISC-BRK-S",
+    "GML1-DISC-BBR-L", "GML1-DISC-BBR-S",
+    "GML1-DISC-MOM-L", "GML1-DISC-MOM-S",
+    "GML1-DISC-RSI-L", "GML1-DISC-RSI-S"
+  ],
+  "definitions": {
+    "GML1-DISC-EXH-L": "ATR percentile >= 0.65, RSI centered <= -0.25, range >= 1 ATR, lower wick fraction >= 0.40",
+    "GML1-DISC-EXH-S": "ATR percentile >= 0.65, RSI centered >= 0.25, range >= 1 ATR, upper wick fraction >= 0.40",
+    "GML1-DISC-RECL-L": "previous exact distance from prior 50-bar low < 0, current distance >= 0, lower wick >= 0.20, close location >= 0.55",
+    "GML1-DISC-RECL-S": "previous exact distance from prior 50-bar high > 0, current distance <= 0, upper wick >= 0.20, close location <= 0.45",
+    "GML1-DISC-CMP-L": "previous exact ATR percentile <= 0.40, current range >= 1 ATR, Bollinger close location > 1, positive body, body fraction >= 0.50",
+    "GML1-DISC-CMP-S": "previous exact ATR percentile <= 0.40, current range >= 1 ATR, Bollinger close location < 0, negative body, body fraction >= 0.50",
+    "GML1-DISC-BRK-L": "previous exact distance from prior 50-bar high < 0 and current >= 0, positive body, body fraction >= 0.55, volume ratio >= 1.10",
+    "GML1-DISC-BRK-S": "previous exact distance from prior 50-bar low > 0 and current <= 0, negative body, body fraction >= 0.55, volume ratio >= 1.10",
+    "GML1-DISC-BBR-L": "previous exact Bollinger close location < 0, current >= 0, lower wick >= 0.25, close location >= 0.50",
+    "GML1-DISC-BBR-S": "previous exact Bollinger close location > 1, current <= 1, upper wick >= 0.25, close location <= 0.50",
+    "GML1-DISC-MOM-L": "MACD histogram crosses above zero, signed body >= 0.05 ATR, close location >= 0.55, volume ratio >= 1.10",
+    "GML1-DISC-MOM-S": "MACD histogram crosses below zero, signed body <= -0.05 ATR, close location <= 0.45, volume ratio >= 1.10",
+    "GML1-DISC-RSI-L": "RSI centered crosses above -0.35 and MACD histogram improves from previous exact bar",
+    "GML1-DISC-RSI-S": "RSI centered crosses below 0.35 and MACD histogram declines from previous exact bar"
+  },
+  "assignment": {
+    "cross_direction_conflicts": "exclude the decision entirely",
+    "same_direction_overlap": "first matching candidate in candidate_priority wins",
+    "maximum_output_rows_per_decision": 1
+  },
+  "frozen_reference": {
+    "variant_search_count": 76,
+    "proposal_rows": 10336,
+    "unique_decisions": 10336,
+    "long_rows": 5109,
+    "short_rows": 5227,
+    "raw_direction_conflicts_excluded": 19,
+    "same_time_overlap_after_assignment": 0,
+    "proposal_registry_sha256": "7886b519d7adf3b4127599478e1f56271701667865dfcaac3b99ad833ac093e6",
+    "time_causality_audit_sha256": "225f9120f839ef82d28e2a471105e686edcf397218b1568e39907965ea3d1208"
+  },
+  "research_boundary": {
+    "labels_read": false,
+    "performance_read": false,
+    "candidate_conditions_may_change_after_label_join": false,
+    "next_step": "join frozen resolved labels and run GML1-META-CORE v1 unchanged"
+  },
+  "controls": {
+    "audit_only": true,
+    "model_promoted": false,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
