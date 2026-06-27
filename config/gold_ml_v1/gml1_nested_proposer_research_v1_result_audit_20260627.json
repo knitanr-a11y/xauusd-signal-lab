@@ -1,0 +1,127 @@
+{
+  "system_id": "GML1-NESTED-PROPOSER",
+  "version": "v1-research",
+  "date": "2026-06-27",
+  "status": "PROMISING_LONG_PROPOSER_FOUND_NOT_PROMOTED",
+  "method": {
+    "outer_test_untouched_during_each_run": true,
+    "inner_train_fraction": 0.65,
+    "inner_validation_fraction": 0.35,
+    "purge_hours": 6,
+    "candidate_proposer": "ExtraTreesRegressor",
+    "feature_set": "all 161 causal features excluding four time-cycle features",
+    "direction": "LONG",
+    "parameters": {
+      "n_estimators": 100,
+      "max_depth": 4,
+      "min_samples_leaf": 100,
+      "max_features": 0.65
+    },
+    "coverage_candidates": [0.0025, 0.005, 0.01, 0.02],
+    "coverage_selection": "inner validation only",
+    "test_selection": "fixed absolute score threshold from inner validation"
+  },
+  "single_seed_nested_result": {
+    "raw_test_events": 199,
+    "raw_strong_total_r": 53.7818593076873,
+    "raw_strong_profit_factor": 1.6140371263410287,
+    "one_position_trades": 41,
+    "one_position_strong_total_r": 9.054786243844,
+    "one_position_strong_profit_factor": 1.475855964155106,
+    "one_position_extreme_total_r": 6.849450415724001,
+    "one_position_extreme_profit_factor": 1.341956193358381,
+    "folds": {
+      "F1": {"trades": 24, "strong_total_r": 1.5283590531819988, "strong_profit_factor": 1.1186031327900505},
+      "F2": {"trades": 0, "strong_total_r": 0.0},
+      "F3": {"trades": 17, "strong_total_r": 7.526427190662, "strong_profit_factor": 2.225385649560883},
+      "F4": {"trades": 0, "strong_total_r": 0.0}
+    }
+  },
+  "seed_stability": {
+    "seeds": [20260627, 7, 42, 123, 2025],
+    "F1": {
+      "positive_test_seeds": 3,
+      "selected_seeds": 5,
+      "median_test_strong_r": 9.053856746490002,
+      "median_test_profit_factor": 1.197588896676035,
+      "interpretation": "positive but materially seed-sensitive"
+    },
+    "F3": {
+      "positive_test_seeds": 5,
+      "selected_seeds": 5,
+      "median_test_strong_r": 30.0560784589901,
+      "median_test_profit_factor": 1.8250419027579354,
+      "interpretation": "stable positive ranking across all tested seeds"
+    }
+  },
+  "four_of_five_seed_consensus": {
+    "F1": {
+      "raw_events": 59,
+      "raw_strong_total_r": 14.496341633042,
+      "raw_strong_profit_factor": 1.5196265944306877,
+      "one_position_trades": 16,
+      "one_position_strong_total_r": 3.8089039331659995,
+      "one_position_strong_profit_factor": 1.5081498043031227,
+      "one_position_extreme_total_r": 2.739714425088,
+      "one_position_extreme_profit_factor": 1.3428386831060877
+    },
+    "F3": {
+      "raw_events": 73,
+      "raw_strong_total_r": 24.6486448497253,
+      "raw_strong_profit_factor": 1.8315688069985578,
+      "one_position_trades": 13,
+      "one_position_strong_total_r": 4.180051514383001,
+      "one_position_strong_profit_factor": 1.8153000216740762,
+      "one_position_extreme_total_r": 3.8536070976329997,
+      "one_position_extreme_profit_factor": 1.7334587282257732
+    },
+    "combined_one_position": {
+      "trades": 29,
+      "strong_total_r": 7.988955447549,
+      "strong_profit_factor_note": "both component folds exceed 1.50",
+      "extreme_total_r": 6.593321522721
+    }
+  },
+  "meta_core_follow_up": {
+    "F1": "Meta Core rejected every test candidate.",
+    "F3": "Meta Core calibration slope was 0 and accepted the complete proposer set; it added no ranking value.",
+    "F3_one_position_trades": 17,
+    "F3_strong_total_r": 7.526427190662,
+    "F3_strong_profit_factor": 2.225385649560883,
+    "interpretation": "The detected edge belongs to the first-stage proposer, not yet to Meta Core."
+  },
+  "rejected_searches": {
+    "nested_shallow_tree_rules": {"one_position_strong_total_r": -17.286641338352677, "strong_profit_factor": 0.9765118822453085},
+    "classification_proposer": {"one_position_strong_total_r": -0.07657612414734949, "extreme_total_r": -13.589826023357801},
+    "robust_short_xgboost_proposer": {"one_position_strong_total_r": -14.747933472379001, "strong_profit_factor": 0.8401876001389958}
+  },
+  "limitations": [
+    "Only LONG generated a promising result.",
+    "F2 and F4 produced no accepted trades in the promising regression proposer.",
+    "The single-seed total has only 41 one-position trades.",
+    "The stronger four-of-five consensus has only 29 combined one-position trades.",
+    "The research sequence has now inspected the historical test results, so any further tuning on the same snapshot is performance-informed and cannot certify deployment."
+  ],
+  "decision": {
+    "model_promoted": false,
+    "shadow_ready": false,
+    "live_ready": false,
+    "retain_as_research_challenger": true,
+    "next_step": "Freeze a five-seed LONG consensus proposer challenger, audit feature and regime stability without changing thresholds, and seek an independent SHORT proposer using a separately declared research version."
+  },
+  "artifact_sha256": {
+    "nested_regression_proposer_summary": "384cf5bff123aa54591f20a33ab41788ce87456e6086c382a1027507d51c9e31",
+    "nested_tree_rule_summary": "ce4becba79b5dd875e4e008229407a93b22596830679fbe07169f250c35a8105",
+    "classification_proposer_summary": "50a6f6698f0d289ddca4041afd4564b6a50a80c69a76a2c9886863504894527b",
+    "short_xgboost_proposer_summary": "50ffeb578c0444c0a5bacc504392db32c1d9e818f4dbbf9fa1516dfb5203310b",
+    "proposer_meta_summary": "4cf4f97744808cbe8d2719df87b3b4b60d3cc0b393a3c1e33be1bc4d1c9f55c9",
+    "seed_stability_summary": "1c454b22221d1b7cf2a1d1a9b6c9a9fe1bf026e21015beafb29a95ec521912f8",
+    "consensus_summary": "defcf849ed208931ffd64232440a5d9c2a7c1bc43353e89680a94fc86e03aa51"
+  },
+  "controls": {
+    "audit_only": true,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false
+  }
+}
