@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6",
+  "date": "2026-06-28",
+  "status": "NO_STRICT_2024_OPTION_NON_PROMOTABLE_FALLBACK_FROZEN_BEFORE_2025_2026",
+  "strict_options": 0,
+  "base_2024": {
+    "one_position_count": 335,
+    "strong_positive_rate": 0.4567164179,
+    "strong_pf": 1.1288496967,
+    "strong_r": 22.9914429449,
+    "extreme_pf": 1.0017729502,
+    "extreme_r": 0.3329628981
+  },
+  "selected_fallback": {
+    "risk_model": "CATBOOST_RISK",
+    "loss_target": "FULL_PROTECTIVE_LOSS strong_r <= -0.80",
+    "risk_score_form": "FULL_LOSS_PROBABILITY",
+    "prune_fraction": 0.50,
+    "active_sleeves": 5,
+    "raw_primary_candidates_remaining": 1271,
+    "one_position_count": 326,
+    "strong_positive_rate": 0.4662576687,
+    "strong_pf": 1.1786343091,
+    "strong_r": 30.5199799230,
+    "extreme_pf": 1.0458375037,
+    "extreme_r": 8.2456269404,
+    "actual_primary_raw_loss_r_captured": 0.0475052519,
+    "winner_r_removed": 0.0164317674,
+    "promotable": false
+  },
+  "interpretation": "The model removed only 4.75 percent of primary-gated loss R despite a nominal 50 percent risk-prune setting because the out-of-sample risk-score scale was poorly separated. The improvement is too small for promotion.",
+  "later_year_policy": {
+    "risk model family, loss target and prune fraction unchanged": true,
+    "2025_used_for_selection_or_rescue": false,
+    "2026_used_for_selection_or_rescue": false,
+    "later_results_non_promotable": true
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_promoted": false,
+    "model_promoted": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
