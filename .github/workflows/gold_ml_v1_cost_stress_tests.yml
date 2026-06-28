@@ -67,8 +67,18 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_execution_supervisor.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/run_live_once.py
           python -m py_compile scripts/gold_ml_v1/run_next_local.py
-      - name: Test governance guardrails
-        run: python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
+      - name: Guardrail historical periods
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_time_and_frozen_periods -v
+      - name: Guardrail provisional candidate isolation
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_candidate_is_provisional_not_accumulated -v
+      - name: Guardrail corrected pre-admission contract
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_corrected_pre_admission_contract -v
+      - name: Guardrail current four-sleeve state
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_current_four_sleeve_handoff_is_fail_closed -v
+      - name: Guardrail label-free discovery ordering
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_current_discovery_action_preserves_label_free_ordering -v
+      - name: Guardrail local pointer remains status-only
+        run: python -m unittest tests.gold_ml_v1.test_exploration_guardrails.ExplorationGuardrailTests.test_local_pointer_is_status_only_and_never_auto_runs -v
       - name: Test live Discord and MT5 execution adapter
         run: |
           python -m pytest tests/gold_ml_v1/test_live_execution_delivery.py -q
