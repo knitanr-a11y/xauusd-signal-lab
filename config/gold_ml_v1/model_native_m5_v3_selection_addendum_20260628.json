@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3",
+  "date": "2026-06-28",
+  "status": "PER_SLEEVE_SELECTION_PROCEDURE_FROZEN_BEFORE_MODEL_RESULTS",
+  "training_models": "Each model family fits separate LONG and SHORT classifier, Strong-R regressor and Extreme-R regressor on 2023 resolved rows. Regime is an input feature; sleeve thresholds are selected separately.",
+  "score_reference": "For each annual model version, component predictions are converted to percentiles against that direction and sleeve's resolved training prediction distribution.",
+  "per_sleeve_2024_option_gate": {
+    "minimum_one_position_trades": 60,
+    "strong_pf_minimum": 1.5,
+    "strong_total_r_positive": true,
+    "strong_positive_rate_minimum": 0.50,
+    "extreme_pf_minimum": 1.0,
+    "extreme_total_r_positive": true
+  },
+  "per_sleeve_option_order": ["higher minimum of Strong PF and Extreme PF","higher Strong PF","higher Strong positive rate","higher Strong R","more trades","higher retention fraction"],
+  "sleeve_disable_rule": "A sleeve with no 2024 option passing the per-sleeve gate is disabled for that model and score configuration.",
+  "configuration_gate_2024": {
+    "minimum_enabled_sleeves": 3,
+    "minimum_combined_trades": 300,
+    "combined_strong_positive_rate_minimum": 0.60,
+    "combined_strong_pf_minimum": 2.0,
+    "combined_extreme_pf_minimum": 1.1,
+    "combined_strong_and_extreme_r_positive": true
+  },
+  "configuration_order": ["configuration gate pass","higher minimum of combined Strong PF and Extreme PF","higher combined Strong PF","higher combined positive rate","higher combined Strong R","more enabled sleeves","more combined trades","lower model complexity in frozen list order"],
+  "confirmation_2025": {
+    "same_model_score_form_and_per_sleeve_retention_fractions": true,
+    "minimum_enabled_sleeves_still_active": 3,
+    "each_enabled_sleeve_minimum_trades": 60,
+    "each_enabled_sleeve_strong_pf_minimum": 1.5,
+    "each_enabled_sleeve_strong_r_positive": true,
+    "combined_minimum_trades": 300,
+    "combined_strong_positive_rate_minimum": 0.60,
+    "combined_strong_pf_minimum": 2.0,
+    "combined_extreme_pf_minimum": 1.1,
+    "combined_strong_and_extreme_r_positive": true
+  },
+  "one_position": "Applied separately within each candidate sleeve after score gating. Opposite-direction simultaneity is preserved for audit and is not arbitrated until after unchanged 2025 confirmation.",
+  "controls": {"audit_only":true,"2025_used_for_selection":false,"2026_used_for_selection":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
