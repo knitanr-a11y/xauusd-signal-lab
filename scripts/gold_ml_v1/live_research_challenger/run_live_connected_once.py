@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import live_deal_archive_strict  # noqa: F401
 import run_live_once as base
 from live_execution_deal_safe import process_execution_cycle
 
