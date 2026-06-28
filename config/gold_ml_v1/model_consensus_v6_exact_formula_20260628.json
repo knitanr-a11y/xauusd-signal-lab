@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "date": "2026-06-28",
+  "static_score": "V4 behavior_score",
+  "stateful_score": "V5 behavior_score",
+  "model_disagreement": "abs(static_score-stateful_score)",
+  "normalized_rule_risk": "min(v2_rule_count,4)/4",
+  "forms": {
+    "MIN": "min(static_score,stateful_score)",
+    "MEAN": "(static_score+stateful_score)/2",
+    "MIN_DIS": "min(static_score,stateful_score)-lambda*model_disagreement",
+    "MEAN_DIS_RULE": "mean-lambda*model_disagreement-mu*normalized_rule_risk"
+  },
+  "probability_gate": "min(V4 p_percentile,V5 p_percentile) >= selected threshold",
+  "global_threshold": "2024 score quantile for selected retention fraction",
+  "direction_threshold": "separate 2024 LONG and SHORT score quantiles; numeric thresholds unchanged afterward",
+  "dedup_and_one_position": "same frozen V1 evaluation order"
+}
