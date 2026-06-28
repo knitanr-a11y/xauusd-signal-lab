@@ -53,11 +53,11 @@ if exist "%STOP_FILE%" del /q "%STOP_FILE%" >nul 2>&1
 if exist "%ROTATE_LOG%" call "%ROTATE_LOG%" "%OUTPUT_DIR%"
 set /a IDLE_TICKS=0
 
->>"%LOOP_LOG%" echo [%date% %time%] LOOP_START interval_seconds=%GML1_LIVE_INTERVAL_SECONDS%
+>>"%LOOP_LOG%" echo [%date% %time%] LOOP_START interval_seconds=%GML1_LIVE_INTERVAL_SECONDS% phase=wall_clock_anchored
 echo ============================================================
 echo GML1 live research challenger loop
 echo ============================================================
-echo Poll      : %GML1_LIVE_INTERVAL_SECONDS% seconds
+echo Poll      : %GML1_LIVE_INTERVAL_SECONDS% seconds, wall-clock anchored
 echo Heavy run : only when one or more input files change
 echo Output    : %OUTPUT_DIR%
 echo Log       : %LOOP_LOG%
@@ -69,7 +69,7 @@ echo.
 if exist "%STOP_FILE%" goto STOPPED
 if exist "%ROTATE_LOG%" call "%ROTATE_LOG%" "%OUTPUT_DIR%"
 
-py -3.12 "%PROBE%" --output-dir "%OUTPUT_DIR%" >nul 2>>"%LOOP_LOG%"
+py -3.12 "%PROBE%" --output-dir "%OUTPUT_DIR%" --align-seconds %GML1_LIVE_INTERVAL_SECONDS% >nul 2>>"%LOOP_LOG%"
 set "PROBE_EXIT=!ERRORLEVEL!"
 
 if "!PROBE_EXIT!"=="10" (
@@ -79,14 +79,12 @@ if "!PROBE_EXIT!"=="10" (
     >>"%LOOP_LOG%" echo [%date% %time%] IDLE_NO_FILE_CHANGE
     set /a IDLE_TICKS=0
   )
-  timeout /t %GML1_LIVE_INTERVAL_SECONDS% /nobreak >nul
   goto LOOP
 )
 
 if not "!PROBE_EXIT!"=="0" (
   echo [%date% %time%] PROBE_FAIL exit_code=!PROBE_EXIT! - loop continues
   >>"%LOOP_LOG%" echo [%date% %time%] PROBE_FAIL exit_code=!PROBE_EXIT!
-  timeout /t %GML1_LIVE_INTERVAL_SECONDS% /nobreak >nul
   goto LOOP
 )
 
@@ -111,9 +109,6 @@ if "!RUN_EXIT!"=="0" (
   >>"%LOOP_LOG%" echo [!RUN_ENDED!] RUN_ONCE_FAIL exit_code=!RUN_EXIT!
 )
 
-if exist "%STOP_FILE%" goto STOPPED
-
-timeout /t %GML1_LIVE_INTERVAL_SECONDS% /nobreak >nul
 goto LOOP
 
 :STOPPED
