@@ -3,380 +3,68 @@
   "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
   "date": "2026-06-28",
   "formal_stage": "GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY",
-  "status": "DISCOVERY_CONTRACT_FROZEN_BEFORE_CANDIDATE_LABEL_OR_PERFORMANCE_INSPECTION",
+  "status": "V1_POST_FREEZE_EVALUATION_COMPLETE_NO_SURVIVOR_NO_PROMOTION",
   "repository": {
     "full_name": "knitanr-a11y/xauusd-signal-lab",
     "base_ref": "main",
-    "authoritative_main_commit": "57741a078d8a91c825c49e6460a1cfe99d019aad",
-    "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md",
-    "current_state": "config/gold_ml_v1/current_state_20260628.json",
-    "next_action": "config/gold_ml_v1/next_action_20260628.json"
+    "authoritative_main_commit_at_start": "57741a078d8a91c825c49e6460a1cfe99d019aad",
+    "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md"
   },
-  "purpose": "Discover new reproducible independent LONG and SHORT strategy sleeves that can add trade count, total R, direction diversity, regime diversity and temporal independence to the current four live-capable sleeves without pretending to recover P16 or P19.",
-  "scope_separation": {
-    "historical_accumulated_candidate_stack": "REFERENCE_ONLY_NOT_THE_ACTIVE_LIVE_COMPOSITION",
-    "historical_six_sleeve_research_challenger": [
-      "A_CORE",
-      "B_STATE",
-      "P16",
-      "P18",
-      "P19",
-      "W024A"
-    ],
-    "current_four_sleeve_live_audit_runtime": [
-      "A_CORE",
-      "B_STATE",
-      "P18",
-      "W024A"
-    ],
-    "new_discovery": "SEPARATE_AUDIT_ONLY_RESEARCH_NAMESPACE_NO_LIVE_RUNTIME_MODIFICATION"
-  },
+  "purpose": "Discover reproducible independent LONG and SHORT sleeves without pretending to recover P16 or P19.",
   "frozen_benchmarks": {
-    "current_four_live_capable": {
-      "source_contract": "config/gold_ml_v1/live_research_challenger/live_runtime_contract_20260628.json",
-      "source_contract_blob_sha": "596234b28f291ab6881c862977ba9ad1260ebadf",
-      "sleeves": {
-        "A_CORE": {
-          "candidate_id": "GML1-WATCH-022-C",
-          "direction": "LONG",
-          "source_timeframe": "M15",
-          "higher_timeframe": "H4",
-          "target_r": 1.0,
-          "horizon_hours": 6
-        },
-        "B_STATE": {
-          "candidate_id": "GML1-H1D1-STATEFUL-REENTRY24-C",
-          "direction": "LONG",
-          "source_timeframe": "H1",
-          "higher_timeframe": "D1",
-          "target_r": 1.0,
-          "horizon_hours": 48
-        },
-        "P18": {
-          "candidate_id": "GML1-PROV-018-APPROX",
-          "direction": "LONG",
-          "source_timeframe": "M15",
-          "higher_timeframe": "H4",
-          "target_r": 1.0,
-          "horizon_hours": 12
-        },
-        "W024A": {
-          "candidate_id": "GML1-WATCH-024-A",
-          "direction": "SHORT",
-          "source_timeframe": "M15",
-          "higher_timeframe": "H4",
-          "target_r": 1.5,
-          "horizon_hours": 6
-        }
-      },
-      "change_policy": "FROZEN_DURING_DISCOVERY_EXCEPT_FOR_A_SEPARATELY_DEMONSTRATED_LIVE_RUNTIME_DEFECT"
-    },
-    "historical_six_sleeve_reference": {
-      "source_contract": "config/gold_ml_v1/research_challenger/runtime_20260628/runtime_contract.json",
-      "source_contract_blob_sha": "f1304bb17ab2477bb7014b57d0581fb88e58e683",
-      "raw_engine": "scripts/gold_ml_v1/research_challenger/raw_engine.py",
-      "raw_engine_blob_sha": "de5b67941bbe09ec75a79655c4357a84bbbb14d4",
-      "sleeves": [
-        "A_CORE",
-        "B_STATE",
-        "P16",
-        "P18",
-        "P19",
-        "W024A"
-      ],
-      "role": "HISTORICAL_REFERENCE_ONLY_NOT_A_FRESH_INFERENCE_UNIVERSE"
-    }
+    "current_four_live_capable": ["A_CORE", "B_STATE", "P18", "W024A"],
+    "historical_six_sleeve_reference": ["A_CORE", "B_STATE", "P16", "P18", "P19", "W024A"]
+  },
+  "completed_artifacts": [
+    "docs/gold_ml_v1/GML1_NEW_CANDIDATE_DISCOVERY_V1_FAMILY_SPEC_20260628.md",
+    "docs/gold_ml_v1/GML1_NEW_CANDIDATE_DISCOVERY_V1_STATE_MACHINE_ADDENDUM_20260628.md",
+    "scripts/gold_ml_v1/new_candidate_discovery/build_raw_proposals_v1.py",
+    "config/gold_ml_v1/new_candidate_discovery_v1_label_profile_20260628.json",
+    "config/gold_ml_v1/new_candidate_discovery_v1_evaluation_contract_20260628.json",
+    "config/gold_ml_v1/new_candidate_discovery_v1_label_free_audit_20260628.json",
+    "config/gold_ml_v1/new_candidate_discovery_v1_post_label_result_audit_20260628.json"
+  ],
+  "result": {
+    "raw_proposals": 5180,
+    "resolved_labeled": 5153,
+    "candidate_families": 5,
+    "directional_candidates": 10,
+    "2026_prefix_replay": "PASS",
+    "all_candidates_negative_strong_r_in_2024": true,
+    "ml_confirmation_gate_2025": "FAIL",
+    "ml_2026_prospective": "NEGATIVE",
+    "candidate_promoted": false,
+    "model_promoted": false,
+    "portfolio_addition": false
+  },
+  "2026_policy": {
+    "run_mode": "prospective closed-bar replay",
+    "used_for_candidate_definition": false,
+    "used_for_threshold_selection": false,
+    "used_for_model_selection": false,
+    "now_observed_for_v1": true,
+    "future_v1_retuning_from_2026": false
   },
   "p16_p19_policy": {
     "historical_reference_allowed": true,
     "fresh_inference_allowed": false,
-    "frozen_exclusion_decision_times_allowed_for_historical_reconstruction_only": true,
-    "frozen_exclusion_decision_times_allowed_for_new_or_future_bars": false,
-    "substitute_model_allowed": false,
-    "new_model_naming_restriction": "A_NEW_MODEL_MUST_NOT_BE_CALLED_RECOVERED_P16_OR_RECOVERED_P19"
+    "frozen_exclusion_times_allowed_for_future": false,
+    "substitute_model_allowed": false
   },
-  "authorized_sources": {
-    "historical_research_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\gold_v3_2023_2026",
-    "future_live_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
-    "historical_files": {
-      "M1": "gold_v3_2023_2026_m1.csv",
-      "M5": "gold_v3_2023_2026_m5.csv",
-      "M15": "gold_v3_2023_2026_m15.csv",
-      "H1": "gold_v3_2023_2026_h1.csv",
-      "H4": "gold_v3_2023_2026_h4.csv",
-      "D1": "gold_v3_2023_2026_d1.csv"
-    },
-    "future_live_files": {
-      "M1": "goldsharp_m1.csv",
-      "M5": "goldsharp_m5.csv",
-      "M15": "goldsharp_m15.csv",
-      "H1": "goldsharp_h1.csv",
-      "H4": "goldsharp_h4.csv",
-      "D1": "goldsharp_d1.csv"
-    },
-    "cross_source_mixing": false,
-    "live_retuning_from_future_live_data": false
-  },
-  "causal_feature_contract": {
-    "contract": "config/gold_ml_v1/mlr1_feature_contract_v1_20260627.json",
-    "contract_blob_sha": "909c5392c7317517568eea271e383dc0bf2c8514",
-    "engine": "scripts/gold_ml_v1/mlr1/build_features.py",
-    "engine_blob_sha": "b7e5507f55411b0ebac7d867e26a67540c7dc03f",
-    "feature_registry_sha256": "81a3c33c61d07eebbb13514965539a05d5f150e2ce521e613e2089be01d94a2b",
-    "model_feature_count": 161,
-    "use_policy": "AUTHORIZED_BASELINE_FEATURES_ONLY_UNLESS_A_NEW_CAUSAL_FEATURE_IS_PREDECLARED_VERSIONED_TESTED_AND_FROZEN_BEFORE_LABEL_INSPECTION"
-  },
-  "time_and_execution_contract": {
+  "time_contract": {
     "csv_time": "MT5_SERVER_NAIVE_BAR_OPEN_TIME",
-    "convert_decision_logic_to_jst": false,
-    "latest_valid_csv_row": "CLOSED_BY_CONTRACT",
+    "latest_valid_row": "CLOSED_BY_CONTRACT",
     "m15_decision_time": "bar_open_plus_15_minutes",
-    "h1_decision_time": "bar_open_plus_1_hour",
-    "exact_m1_bar_open_at_decision_required": true,
-    "next_m1_fallback_allowed": false,
-    "higher_timeframe_join": "SOURCE_BAR_CLOSE_TIME_LE_DECISION_TIME_ONLY",
-    "current_closed_decision_bar_allowed": true,
-    "open_or_unconfirmed_bar_allowed": false,
-    "future_high_low_close_or_future_indicator_allowed": false,
-    "future_confirmed_zigzag_or_repainting_feature_allowed": false,
-    "raw_ohlc_side": "BID",
-    "long_entry": "M1_BID_OPEN_PLUS_SPREAD",
-    "long_touch_and_exit_side": "BID",
-    "short_entry": "M1_BID_OPEN",
-    "short_touch_and_exit_side": "RECONSTRUCTED_ASK",
-    "same_m1_target_protective_collision": "PROTECTIVE_FIRST",
-    "horizon_type": "WALL_CLOCK"
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "higher_timeframe_join": "source_bar_close_time_le_decision_time",
+    "same_m1_priority": "PROTECTIVE",
+    "horizon": "wall_clock"
   },
-  "discovery_order": [
-    "FREEZE_CURRENT_FOUR_SLEEVE_BENCHMARK_AND_HISTORICAL_SIX_SLEEVE_REFERENCE",
-    "FREEZE_THIS_DISCOVERY_CONTRACT",
-    "WRITE_CANDIDATE_FAMILY_SPECIFICATION_WITHOUT_LABELS_OR_PERFORMANCE",
-    "IMPLEMENT_CAUSAL_DETERMINISTIC_RAW_PROPOSAL_GENERATOR",
-    "SAVE_ALL_RAW_PROPOSALS_BEFORE_DEDUP_ONE_POSITION_CONFLICT_OR_OUTCOME_FILTERING",
-    "RUN_LABEL_FREE_DENSITY_DIRECTION_TIME_REGIME_AND_OVERLAP_AUDIT",
-    "FREEZE_CANDIDATE_DEFINITIONS_GENERATOR_VERSION_AND_ARTIFACT_HASHES",
-    "JOIN_FROZEN_ML03_LABELS_ONLY_AFTER_FREEZE",
-    "RUN_EXPANDING_PURGED_WALK_FORWARD",
-    "EVALUATE_FROZEN_STRONG_AND_EXTREME_COSTS",
-    "EVALUATE_INCREMENTAL_PORTFOLIO_VALUE_AGAINST_CURRENT_FOUR_SLEEVES",
-    "KEEP_ALL_OUTPUTS_AUDIT_ONLY_UNTIL_SEPARATE_PROSPECTIVE_GATES_PASS"
-  ],
-  "candidate_family_design_rules": {
-    "starting_themes_are_search_areas_not_approved_candidates": true,
-    "long_themes": [
-      "BREAKOUT_THEN_FROZEN_LEVEL_RETEST",
-      "DONCHIAN_BREAKOUT_THEN_SHALLOW_RECLAIM",
-      "VOLATILITY_COMPRESSION_RELEASE_THEN_FIRST_PULLBACK",
-      "EMA_BAND_RECOVERY_THEN_CONTINUATION",
-      "FAILED_DOWNSIDE_BREAK_THEN_STRUCTURE_RECOVERY"
-    ],
-    "short_themes": [
-      "SUPPORT_BREAKDOWN_THEN_FROZEN_LEVEL_RETEST",
-      "DONCHIAN_BREAKDOWN_THEN_EMA_REJECTION",
-      "VOLATILITY_EXPANSION_WITH_WEAK_REBOUND",
-      "FAILED_UPSIDE_BREAK_THEN_BREAKDOWN",
-      "HIGH_VOLATILITY_EXHAUSTION_REVERSAL_INDEPENDENT_OF_W024A"
-    ],
-    "symmetry_default": "DEFINE_LONG_AND_SHORT_SYMMETRICALLY_WHEN_TECHNICALLY_MEANINGFUL",
-    "asymmetry_rule": "ANY_ASYMMETRY_MUST_BE_JUSTIFIED_AND_FROZEN_BEFORE_LABEL_OR_PERFORMANCE_INSPECTION",
-    "threshold_rule": "STRUCTURAL_OR_DISTRIBUTIONAL_THRESHOLDS_MUST_BE_PREDECLARED_FROM_LABEL_FREE_INFORMATION_ONLY",
-    "candidate_id_rule": "EVERY_DIRECTION_AND_DEFINITION_VERSION_REQUIRES_A_UNIQUE_IMMUTABLE_CANDIDATE_ID"
-  },
-  "label_and_outcome_embargo": {
-    "active_until": "CANDIDATE_DEFINITION_GENERATOR_AND_LABEL_FREE_ARTIFACT_HASHES_ARE_FROZEN",
-    "forbidden_during_embargo": [
-      "ML03_LABELS",
-      "OUTCOME",
-      "TP_OR_SL_RESULT",
-      "EXIT_RESULT",
-      "UNRESOLVED_HORIZON_RESULT",
-      "WIN_RATE",
-      "PROFIT_FACTOR",
-      "R",
-      "TOTAL_R",
-      "DRAWDOWN",
-      "MONTHLY_PROFITABILITY",
-      "2025_OR_2026_PERFORMANCE_GUIDED_RETUNING"
-    ],
-    "resolved_only_history_rule_after_labels_are_authorized": "ONLY_RESULTS_WITH_EXIT_DT_LE_CURRENT_ENTRY_DT_MAY_ENTER_ANY_ROLLING_HEALTH_SURVIVAL_OR_ADAPTIVE_HISTORY",
-    "open_trade_result_early_insertion_allowed": false
-  },
-  "raw_proposal_contract": {
-    "one_row_per": "CANDIDATE_ID_DIRECTION_DECISION_TIME_RAW_PROPOSAL",
-    "required_metadata_columns": [
-      "decision_time",
-      "candidate_id",
-      "candidate_definition_version",
-      "candidate_family",
-      "direction",
-      "source_timeframe",
-      "source_bar_open_time",
-      "source_bar_close_time",
-      "proposal_strength_label_free",
-      "exact_m1_available"
-    ],
-    "required_provenance_columns": [
-      "generator_version",
-      "candidate_definition_hash",
-      "feature_contract_sha256",
-      "source_snapshot_manifest_sha256"
-    ],
-    "dedup_applied": false,
-    "one_position_applied": false,
-    "conflict_arbitration_applied": false,
-    "outcome_filter_applied": false,
-    "labels_joined": false,
-    "sort_order": [
-      "decision_time",
-      "candidate_id"
-    ],
-    "duplicate_key_forbidden": [
-      "decision_time",
-      "candidate_id"
-    ]
-  },
-  "label_free_audit_requirements": [
-    "RAW_PROPOSAL_COUNT_BY_CANDIDATE_AND_DIRECTION",
-    "LONG_SHORT_RATIO",
-    "YEARLY_AND_MONTHLY_DENSITY",
-    "SERVER_TIME_OF_DAY_DISTRIBUTION",
-    "WEEKDAY_DISTRIBUTION",
-    "VOLATILITY_TREND_AND_RANGE_REGIME_DISTRIBUTION",
-    "DECISION_TIME_OVERLAP_WITH_EACH_CURRENT_FOUR_SLEEVE",
-    "HOLDING_INTERVAL_OVERLAP_WITH_EACH_CURRENT_FOUR_SLEEVE_USING_BENCHMARK_INTERVALS_ONLY",
-    "WITHIN_FAMILY_DUPLICATION",
-    "CROSS_FAMILY_DUPLICATION",
-    "EXACT_M1_AVAILABILITY",
-    "CLOSED_BAR_AND_HIGHER_TIMEFRAME_CAUSALITY"
-  ],
-  "definition_freeze_requirements": {
-    "candidate_family_specification_required": true,
-    "generator_source_hash_required": true,
-    "candidate_definition_hash_required": true,
-    "raw_proposal_registry_hash_required": true,
-    "source_snapshot_manifest_hash_required": true,
-    "feature_contract_hash_required": true,
-    "label_free_audit_hash_required": true,
-    "post_freeze_rule_change": "NEW_VERSION_AND_NEW_CANDIDATE_IDS_REQUIRED"
-  },
-  "post_freeze_label_join_and_evaluation": {
-    "label_source": "FROZEN_ML03_EXACT_M1_LABEL_REGISTRY_ONLY",
-    "join_keys": [
-      "decision_time",
-      "direction"
-    ],
-    "unresolved_future_horizon_rows": "EXCLUDE_UNTIL_RESOLVED_NOT_IMPUTED",
-    "strong_cost": "USE_FROZEN_ML03_STRONG_R_DEFINITION_WITHOUT_REDEFINITION_OR_RETUNING",
-    "extreme_cost": "USE_FROZEN_ML03_EXTREME_R_DEFINITION_WITHOUT_REDEFINITION_OR_RETUNING",
-    "walk_forward": {
-      "type": "EXPANDING_PURGED",
-      "split_definitions_must_be_frozen_before_scores_are_read": true,
-      "purge_and_embargo_must_cover_label_horizon_and_holding_overlap": true,
-      "test_predictions_must_be_out_of_sample": true
-    },
-    "reporting_layers_required": [
-      "RAW_PROPOSAL",
-      "DEDUPLICATED",
-      "ONE_POSITION_OR_PORTFOLIO_ARBITRATED",
-      "HEALTH_GATE_IF_ANY",
-      "RESOLVED_ONLY_LIVE_REPRODUCIBLE"
-    ],
-    "robustness_slices_required": [
-      "FULL_PERIOD",
-      "RECENT_MONTHS",
-      "HIGH_VOLATILITY",
-      "LOW_VOLATILITY",
-      "LONG",
-      "SHORT",
-      "MONTH_BY_MONTH",
-      "NEGATIVE_MONTH_COUNT"
-    ]
-  },
-  "incremental_portfolio_evaluation": {
-    "base_portfolio": [
-      "A_CORE",
-      "B_STATE",
-      "P18",
-      "W024A"
-    ],
-    "required_comparisons": [
-      "NEW_SLEEVE_STANDALONE",
-      "BASE_PLUS_ONE_NEW_SLEEVE",
-      "BASE_PLUS_MULTIPLE_NEW_SLEEVES_ONLY_AFTER_SINGLE_SLEEVE_AUDIT",
-      "DECISION_TIME_OVERLAP",
-      "HOLDING_INTERVAL_OVERLAP",
-      "DIRECTION_CONCENTRATION",
-      "REGIME_CONCENTRATION",
-      "TRADE_COUNT_CHANGE",
-      "TOTAL_R_CHANGE",
-      "PF_CHANGE",
-      "MAX_DD_CHANGE",
-      "MONTHLY_NEGATIVE_COUNT_CHANGE"
-    ],
-    "portfolio_risk_cap": "MUST_BE_DEFINED_AND_FROZEN_BEFORE_ANY_COMBINED_DEPLOYMENT_OR_PROMOTION"
-  },
-  "future_meta_model_artifact_requirements": [
-    "MODEL",
-    "SCALER_OR_PIPELINE",
-    "EXACT_FEATURE_ORDER",
-    "CALIBRATION",
-    "NUMERIC_THRESHOLD",
-    "FULL_PROPOSAL_SCORE_REGISTRY",
-    "SPLIT_DEFINITIONS",
-    "MODEL_MANIFEST",
-    "ARTIFACT_HASHES"
-  ],
-  "tests_required_before_label_join": [
-    "DETERMINISTIC_TWO_RUN_HASH_PARITY",
-    "FUTURE_APPEND_INVARIANCE",
-    "PREFIX_REPLAY_PARITY",
-    "HISTORICAL_AND_GOLDSHARP_ADAPTER_PROPOSAL_PARITY_ON_IDENTICAL_CLOSED_BARS",
-    "NO_OPEN_BAR_USE",
-    "NO_FUTURE_HTF_JOIN",
-    "EXACT_M1_REQUIRED_AND_NO_NEXT_M1_FALLBACK",
-    "RAW_PROPOSALS_EXIST_BEFORE_DEDUP_ONE_POSITION_AND_OUTCOME_FILTERING"
-  ],
-  "known_repository_audit_findings": [
-    {
-      "finding_id": "ML05A_V2_ARTIFACT_PATHS_REMOVED_FROM_CURRENT_MAIN",
-      "severity": "AUDIT_TRACEABILITY",
-      "facts": {
-        "pr": 41,
-        "merge_commit": "93d204871bfb2f9458954d92a0e723c4d8028ddd",
-        "completed_status_remains_authoritative": true,
-        "current_main_missing_paths": [
-          "config/gold_ml_v1/mlr1_ml_native_candidate_contract_v1_20260627.json",
-          "config/gold_ml_v1/mlr1_ml_native_candidate_contract_v2_density_20260627.json",
-          "scripts/gold_ml_v1/mlr1/build_ml_native_candidate_proposals.py",
-          "scripts/gold_ml_v1/mlr1/build_ml_native_candidate_proposals_combined_v1v2.py"
-        ]
-      },
-      "required_action": "DO_NOT_REPEAT_OR_SILENTLY_RECONSTRUCT_ML05A_V2; USE_PR41_MERGE_COMMIT_FOR_HISTORICAL_AUDIT_PROVENANCE_ONLY_AND_CREATE_NEW_VERSIONED_DISCOVERY_ARTIFACTS"
-    }
-  ],
-  "absolute_exclusions": [
-    "GOLD_V2",
-    "OLD_GOLD",
-    "DISC8",
-    "STAGE41",
-    "BATCH024_RESTART_REPAIR_RECREATE_OR_REFACTOR",
-    "GML1_PROV_030_A_RESTART_REPAIR_RECREATE_RESCUE_REEVALUATE_OR_FALLBACK",
-    "P16_P19_FROZEN_EXCLUSION_TIMES_FOR_NEW_OR_FUTURE_BARS",
-    "ML04_OR_OTHER_MODEL_AS_P16_P19_SUBSTITUTE",
-    "LABEL_OR_PERFORMANCE_GUIDED_DENSITY_ADJUSTMENT",
-    "AUTOMATIC_RETRAINING",
-    "AUTOMATIC_PROMOTION",
-    "AUTOMATIC_REGISTRATION",
-    "LIVE_RUNTIME_CHANGE_WITHOUT_A_DEMONSTRATED_DEFECT"
-  ],
   "controls": {
     "audit_only": true,
     "live_runtime_modified": false,
     "candidate_stack_modified": false,
-    "labels_joined": false,
-    "candidate_performance_reviewed": false,
-    "model_trained": false,
-    "model_promoted": false,
     "live_ready": false,
     "final_signal": false,
     "discord": false,
@@ -385,5 +73,5 @@
     "automatic_promotion": false,
     "automatic_registration": false
   },
-  "next_deliverable": "CANDIDATE_FAMILY_SPECIFICATION_DOCUMENT_BEFORE_RAW_PROPOSAL_IMPLEMENTATION"
+  "next_action": "Preserve V1 as a rejected audit branch. Any next discovery must use separately versioned structural hypotheses and must not use observed 2026 V1 outcomes to tune or rescue V1."
 }
