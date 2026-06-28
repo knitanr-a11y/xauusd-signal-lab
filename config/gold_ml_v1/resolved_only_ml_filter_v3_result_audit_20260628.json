@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-RESOLVED-ONLY-ML-FILTER-V3",
+  "date": "2026-06-28",
+  "status": "FAILED_NO_PROMOTION_AUDIT_ONLY",
+  "selected_model": {"id":"RF_3_20","threshold":0.4,"train_2023":1344,"train_through_2024":2660,"train_through_2025":4095},
+  "selection_2024": {"count":200,"strong_positive_rate":0.44,"strong_pf":0.8841056790962266,"strong_r":-14.6716320119114,"extreme_pf":0.6957050723825631,"gate_pass":false},
+  "confirmation_2025": {"count":868,"strong_positive_rate":0.4539170506912442,"strong_pf":1.0688263794933897,"strong_r":34.77873778232279,"extreme_pf":0.9365995476571658,"extreme_r":-34.45306247197159,"gate_pass":false},
+  "diagnostic_2026": {"count":490,"strong_positive_rate":0.40408163265306124,"strong_pf":0.9376966689292479,"strong_r":-18.833359467809,"extreme_pf":0.8767999558714549,"extreme_r":-38.715443957599},
+  "artifact_hashes": {"scores":"debce655b5ccc9eddc7ca4715b3eb07cc2fa296183c707ca46022b48e9b869fe","model_2024":"4227ab899a0ea1a253e2611a44be92b004958634b93c3db8ef01aa30a20238ed","model_2025":"ec80bd8175ea612abb74a2b3b7928555d878191053c7039071f6083d7cef637f","model_2026":"bad869d97e732951454594b316a5d5a594261a2d1dd10c588db402b6b646cc4d","selection_grid":"82cf060f956f95041a78beeeda427b62d0a0bccce932a894b9312059e7622e5d","result":"dc6f6a563ba6ded30e9df759896bff1f289a11520ed2b9aa21a3df23e07cd3c3"},
+  "conclusion": "V1 features did not provide stable enough separation to reach 60 percent positive rate and Strong PF 2.",
+  "controls": {"audit_only":true,"model_promoted":false,"automatic_retraining":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
