@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+import time
 import uuid
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from live_data import read_live_bars
+from live_data import probe_latest_bars, read_live_bars
 from live_position import LiveM1Engine
 from live_proposals_h1 import bstate_proposals
 from live_proposals_m15 import acore_proposals, p18_proposals, w024_proposals
@@ -26,14 +27,23 @@ from live_store import (
 )
 from live_runtime_base import (
     acquire_lock,
+    earliest_m1_needed,
+    has_open_position,
     hydrate_state,
-    latest_closed,
+    latest_closed_from_probe,
+    observed_times,
     processable_through,
+    ready_source_times,
     signatures,
 )
 
 
+def _write_status(path: Path, payload: dict[str, Any]) -> None:
+    atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2))
+
+
 def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
+    started = time.perf_counter()
     output_dir.mkdir(parents=True, exist_ok=True)
     state_path = output_dir / "live_state.json"
     registry_path = output_dir / "live_candidates.csv"
@@ -48,19 +58,86 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
     now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
     try:
+        state = load_state(state_path)
         before = signatures(live_dir)
-        bars = read_live_bars(live_dir)
+        if state is not None and state.get("input_signatures") == before:
+            return {
+                "run_id": run_id,
+                "status": "IDLE_NO_CHANGE",
+                "time": now_text,
+                "live_dir": str(live_dir),
+                "new_candidate_count": 0,
+                "processing_mode": "signature_only",
+                "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                "controls": state["controls"],
+            }
+
+        probe = probe_latest_bars(live_dir)
+        after_probe = signatures(live_dir)
+        if before != after_probe:
+            raise DeferredRun(
+                "INPUT_CHANGED_DURING_PROBE: retry on next BAT loop iteration"
+            )
+
+        ready_m15_hint, ready_h1_hint, waiting = ready_source_times(probe)
+        if state is not None:
+            last_m15 = pd.Timestamp(state["last_processed"]["M15"])
+            last_h1 = pd.Timestamp(state["last_processed"]["H1"])
+            if ready_m15_hint < last_m15 or ready_h1_hint < last_h1:
+                raise ValueError(
+                    "Synchronized source time regressed behind live_state cursor"
+                )
+            source_advanced = ready_m15_hint > last_m15 or ready_h1_hint > last_h1
+            last_observed_m1 = state.get("last_observed_times", {}).get("M1", {}).get("close")
+            m1_advanced = last_observed_m1 is None or probe["M1"]["close"] > pd.Timestamp(last_observed_m1)
+            position_needs_update = has_open_position(state) and m1_advanced
+
+            if not source_advanced and not position_needs_update:
+                state["input_signatures"] = after_probe
+                state["last_observed_times"] = observed_times(probe)
+                state["live_dir"] = str(live_dir)
+                state["last_successful_run"] = now_text
+                atomic_write_text(
+                    state_path,
+                    json.dumps(state, ensure_ascii=False, indent=2),
+                )
+                status = "WAITING_FOR_TIMEFRAME_SYNC" if waiting else "IDLE_NO_RELEVANT_BAR"
+                payload = {
+                    "run_id": run_id,
+                    "status": status,
+                    "time": now_text,
+                    "live_dir": str(live_dir),
+                    "latest_closed": latest_closed_from_probe(probe),
+                    "processable_through": {
+                        "M15": ready_m15_hint.strftime("%Y-%m-%d %H:%M:%S"),
+                        "H1": ready_h1_hint.strftime("%Y-%m-%d %H:%M:%S"),
+                    },
+                    "waiting_for": waiting,
+                    "new_candidate_count": 0,
+                    "processing_mode": "tail_probe_only",
+                    "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                    "controls": state["controls"],
+                }
+                append_jsonl(audit_jsonl, payload)
+                _write_status(latest_status_path, payload)
+                return payload
+
+        m1_since = earliest_m1_needed(state, ready_m15_hint, ready_h1_hint)
+        bars = read_live_bars(
+            live_dir,
+            m1_since=m1_since,
+            latest_probe=probe,
+        )
         after = signatures(live_dir)
-        if before != after:
+        if after_probe != after:
             raise DeferredRun(
                 "INPUT_CHANGED_DURING_READ: retry on next BAT loop iteration"
             )
 
-        state = load_state(state_path)
         registry = load_registry(registry_path)
         engine = LiveM1Engine(bars["M1"])
-        latest_m15 = processable_through(bars["M15"], engine.latest_close)
-        latest_h1 = processable_through(bars["H1"], engine.latest_close)
+        latest_m15 = processable_through(bars["M15"], ready_m15_hint)
+        latest_h1 = processable_through(bars["H1"], ready_h1_hint)
 
         if state is None:
             if not registry.empty:
@@ -88,6 +165,9 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
                     "pending_origin": hydrated["pending_origin"],
                 },
                 "open_parent_positions": hydrated["open_parent_positions"],
+                "input_signatures": after,
+                "last_observed_times": observed_times(probe),
+                "live_dir": str(live_dir),
                 "controls": {
                     "audit_only": True,
                     "final_signal": False,
@@ -107,22 +187,22 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
                 "status": "INITIALIZED_NO_BACKFILL",
                 "time": now_text,
                 "live_dir": str(live_dir),
-                "latest_closed": latest_closed(bars),
+                "latest_closed": latest_closed_from_probe(probe),
                 "processable_through": {
                     "M15": latest_m15.strftime("%Y-%m-%d %H:%M:%S"),
                     "H1": latest_h1.strftime("%Y-%m-%d %H:%M:%S"),
                 },
+                "waiting_for": waiting,
                 "hydration_proposal_counts": hydration_counts,
                 "open_parent_positions": hydrated["open_parent_positions"],
                 "b_state": state["b_state"],
                 "new_candidate_count": 0,
+                "processing_mode": "full_initialization_tail_m1",
+                "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                 "controls": state["controls"],
             }
             append_jsonl(audit_jsonl, payload)
-            atomic_write_text(
-                latest_status_path,
-                json.dumps(payload, ensure_ascii=False, indent=2),
-            )
+            _write_status(latest_status_path, payload)
             return payload
 
         last_m15 = pd.Timestamp(state["last_processed"]["M15"])
@@ -192,6 +272,9 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
             "pending_origin": json_value(origin),
         }
         state["open_parent_positions"] = new_positions
+        state["input_signatures"] = after
+        state["last_observed_times"] = observed_times(probe)
+        state["live_dir"] = str(live_dir)
         state["last_successful_run"] = now_text
         atomic_write_text(
             state_path,
@@ -203,11 +286,12 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
             "status": "PASS",
             "time": now_text,
             "live_dir": str(live_dir),
-            "latest_closed": latest_closed(bars),
+            "latest_closed": latest_closed_from_probe(probe),
             "processable_through": {
                 "M15": latest_m15.strftime("%Y-%m-%d %H:%M:%S"),
                 "H1": latest_h1.strftime("%Y-%m-%d %H:%M:%S"),
             },
+            "waiting_for": waiting,
             "proposal_counts": {
                 comp: int(len(frame)) for comp, frame in proposals.items()
             },
@@ -219,13 +303,12 @@ def run_live_once(live_dir: Path, output_dir: Path) -> dict[str, Any]:
             "open_parent_positions": new_positions,
             "b_state": state["b_state"],
             "admission_audit": all_audits,
+            "processing_mode": "full_rules_tail_m1",
+            "duration_ms": round((time.perf_counter() - started) * 1000, 3),
             "controls": state["controls"],
         }
         append_jsonl(audit_jsonl, payload)
-        atomic_write_text(
-            latest_status_path,
-            json.dumps(payload, ensure_ascii=False, indent=2),
-        )
+        _write_status(latest_status_path, payload)
         return payload
     finally:
         lock_path.unlink(missing_ok=True)

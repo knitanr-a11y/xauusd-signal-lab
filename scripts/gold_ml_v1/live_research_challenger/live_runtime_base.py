@@ -97,17 +97,72 @@ def acquire_lock(path: Path, stale_seconds: int = 900) -> None:
         os.close(descriptor)
 
 
-def processable_through(
-    frame: pd.DataFrame,
-    m1_latest_close: pd.Timestamp,
-) -> pd.Timestamp:
+def ready_source_times(
+    probe: dict[str, dict[str, pd.Timestamp]],
+) -> tuple[pd.Timestamp, pd.Timestamp, list[str]]:
+    ready_m15 = min(probe["M15"]["close"], probe["M1"]["open"])
+    ready_h1 = min(probe["H1"]["close"], probe["M1"]["open"])
+    waiting: list[str] = []
+    if probe["M1"]["open"] < probe["M15"]["close"]:
+        waiting.append("M15_WAIT_M1_ENTRY_ROW")
+    if probe["M1"]["open"] < probe["H1"]["close"]:
+        waiting.append("H1_WAIT_M1_ENTRY_ROW")
+    return pd.Timestamp(ready_m15), pd.Timestamp(ready_h1), waiting
+
+
+def processable_through(frame: pd.DataFrame, ready_time: pd.Timestamp) -> pd.Timestamp:
     eligible = frame.loc[
-        frame["bar_close_time"] <= m1_latest_close,
+        frame["bar_close_time"] <= pd.Timestamp(ready_time),
         "bar_close_time",
     ]
     if eligible.empty:
-        raise DeferredRun("No source bar is processable with current M1 coverage")
+        raise DeferredRun("No source bar is processable with current synchronized coverage")
     return pd.Timestamp(eligible.iloc[-1])
+
+
+def earliest_m1_needed(
+    state: dict[str, Any] | None,
+    ready_m15: pd.Timestamp,
+    ready_h1: pd.Timestamp,
+) -> pd.Timestamp:
+    if state is None:
+        return min(ready_m15, ready_h1) - pd.Timedelta(hours=96)
+    timestamps = [
+        pd.Timestamp(state["last_processed"]["M15"]),
+        pd.Timestamp(state["last_processed"]["H1"]),
+    ]
+    for payload in state.get("open_parent_positions", {}).values():
+        if payload and payload.get("decision_time"):
+            timestamps.append(pd.Timestamp(payload["decision_time"]))
+    return min(timestamps) - pd.Timedelta(hours=2)
+
+
+def has_open_position(state: dict[str, Any]) -> bool:
+    return any(
+        payload is not None
+        for payload in state.get("open_parent_positions", {}).values()
+    )
+
+
+def observed_times(
+    probe: dict[str, dict[str, pd.Timestamp]],
+) -> dict[str, dict[str, str]]:
+    return {
+        timeframe: {
+            "open": values["open"].strftime("%Y-%m-%d %H:%M:%S"),
+            "close": values["close"].strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for timeframe, values in probe.items()
+    }
+
+
+def latest_closed_from_probe(
+    probe: dict[str, dict[str, pd.Timestamp]],
+) -> dict[str, str]:
+    return {
+        timeframe: values["close"].strftime("%Y-%m-%d %H:%M:%S")
+        for timeframe, values in probe.items()
+    }
 
 
 def hydrate_state(
@@ -157,12 +212,3 @@ def hydrate_state(
         "pending_origin": json_value(origin),
         "open_parent_positions": positions,
     }, counts
-
-
-def latest_closed(bars: dict[str, pd.DataFrame]) -> dict[str, str]:
-    return {
-        timeframe: frame["bar_close_time"].iloc[-1].strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-        for timeframe, frame in bars.items()
-    }
