@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "empirical_percentile": "right-side search rank divided by training reference count, clipped to [0,1]",
+  "specialist_disagreement": "mean over probability, Strong-R and Extreme-R components of the standard deviation across available global/direction/candidate predictions divided by the matching global training-prediction standard deviation; final value clipped to [0,1]",
+  "scores": {
+    "P_ONLY": "p_percentile",
+    "S_ONLY": "strong_percentile",
+    "E_ONLY": "extreme_percentile",
+    "PS_MIN": "min(p_percentile,strong_percentile)",
+    "PSE_MIN": "min(p_percentile,strong_percentile,extreme_percentile)",
+    "PSE_MEAN_LCB": "mean(p_percentile,strong_percentile,extreme_percentile) - lambda * (std(p_percentile,strong_percentile,extreme_percentile) + specialist_disagreement)"
+  },
+  "selection_gate": "behavior_score >= training-reference quantile for the selected retention fraction AND p_percentile >= selected probability-percentile threshold",
+  "probability_threshold_zero_for_single_component": true,
+  "dedup_after_gate": "highest proposal_strength_label_free then lexical candidate_id at the same decision_time and direction",
+  "one_position_after_dedup": "separate candidate_id state, next entry allowed only when prior admitted exit_time <= current decision_time"
+}
