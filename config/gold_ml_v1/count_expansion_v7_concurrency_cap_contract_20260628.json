@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-V7",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_CONCURRENCY_RESULTS",
+  "source": "Independent planned one-position streams of A_CORE, B_STATE, P18 and W024A.",
+  "caps": [1,2,3,4],
+  "algorithm": "Sort by decision_time and benchmark name. Remove expired planned intervals before each decision. Admit an event when active planned positions are below the cap. Same-decision ties use lexical benchmark order only for deterministic counting.",
+  "planned_horizons_hours": {"A_CORE":6,"B_STATE":48,"P18":12,"W024A":6},
+  "outcomes_used": false,
+  "purpose": "Measure how much structural count can be retained with bounded simultaneous exposure. This does not authorize a runtime or risk change.",
+  "audit_only": true
+}
