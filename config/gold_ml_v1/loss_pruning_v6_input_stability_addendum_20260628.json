@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6",
+  "date": "2026-06-28",
+  "status": "RISK_INPUT_SET_FROZEN_BEFORE_COMPLETED_RISK_RESULTS",
+  "reason": "The V5 primary score scale changed materially across annual refits. Feeding that score back into the loss model would couple the risk layer to the same unstable calibration and requires row-aligned 2023 primary OOF inputs.",
+  "risk_model_inputs": [
+    "Frozen V5 compact direction-normalized M1 microstructure features",
+    "Frozen closed M15/H1/H4/D1 context features",
+    "server-hour and weekday cyclic features",
+    "one-hot sleeve identity"
+  ],
+  "excluded_from_risk_model": [
+    "primary p_pred",
+    "primary predicted Strong R",
+    "primary predicted Extreme R",
+    "primary score",
+    "primary score minus threshold"
+  ],
+  "primary_gate_unchanged": "The original V5 primary gate still determines which target-year proposals are eligible before loss-risk pruning.",
+  "unchanged": [
+    "loss targets",
+    "risk model grid",
+    "OOF chronology",
+    "prune fraction grid",
+    "2024 selection",
+    "2025 confirmation",
+    "2026 diagnostic"
+  ],
+  "controls": {
+    "audit_only": true,
+    "future_results_read_before_freeze": false,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
