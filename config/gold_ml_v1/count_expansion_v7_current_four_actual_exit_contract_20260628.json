@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-V7-CURRENT-FOUR",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_ACTUAL_EXIT_RESULTS",
+  "source_contract": "Merged live research challenger contract from PR 64.",
+  "contracts": {
+    "A_CORE": {"direction":"LONG","target_r":1.0,"stop_r":1.0,"horizon_hours":6,"hit_time":"M1_CLOSE","time_exit":"M1_CLOSE","atr":"M15_SIMPLE_ATR14"},
+    "B_STATE": {"direction":"LONG","target_r":1.0,"stop_r":1.0,"horizon_hours":48,"hit_time":"M1_OPEN","time_exit":"M1_OPEN","atr":"H1_WILDER_ATR14"},
+    "P18": {"direction":"LONG","target_r":1.0,"stop_r":1.0,"horizon_hours":12,"hit_time":"M1_CLOSE","time_exit":"M1_CLOSE","atr":"M15_SIMPLE_ATR14"},
+    "W024A": {"direction":"SHORT","target_r":1.5,"stop_r":1.0,"horizon_hours":6,"hit_time":"M1_CLOSE","time_exit":"M1_CLOSE","atr":"M15_WILDER_ATR14"}
+  },
+  "entry_and_touch": "LONG enters exact M1 ask; SHORT enters exact M1 bid and evaluates stop/target on reconstructed ask. Same-M1 collision is stop first.",
+  "first_layer": "Apply actual resolved one-position independently within each sleeve.",
+  "portfolio_caps": [1,2,3,4],
+  "cap_algorithm": "At each decision remove positions with exit_time <= decision_time, then admit when active positions are below the cap. Same-decision ties use lexical sleeve order.",
+  "reported": ["count","positive_rate","PF","R","year","sleeve","overlap","rejected_by_cap"],
+  "selection": "All caps are reported. No cap is promoted from this retrospective audit.",
+  "audit_only": true,
+  "runtime_unchanged": true
+}
