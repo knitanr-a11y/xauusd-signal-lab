@@ -1,0 +1,68 @@
+{
+  "formal_status": "GML1_LIVE_AUDIT_4_SLEEVES_READY_P16_P19_HISTORICAL_ONLY_NEW_DISCOVERY_NEXT",
+  "date": "2026-06-28",
+  "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md",
+  "next_action": "config/gold_ml_v1/next_action_20260628.json",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "historical_research_challenger": {
+    "sleeves": ["A_CORE", "B_STATE", "P16", "P18", "P19", "W024A"],
+    "runtime_contract": "config/gold_ml_v1/research_challenger/runtime_20260628/runtime_contract.json",
+    "p16_pre_ml": 287,
+    "p16_frozen_exclusions": 40,
+    "p16_retained": 247,
+    "p19_pre_ml": 96,
+    "p19_frozen_exclusions": 14,
+    "p19_retained": 82,
+    "fresh_p16_inference": false,
+    "fresh_p19_inference": false
+  },
+  "live_audit_runtime": {
+    "enabled_sleeves": ["A_CORE", "B_STATE", "P18", "W024A"],
+    "disabled_sleeves": ["P16", "P19"],
+    "launcher": "scripts/gold_ml_v1/live_research_challenger/run_live_loop.bat",
+    "runtime_contract": "config/gold_ml_v1/live_research_challenger/live_runtime_contract_20260628.json",
+    "poll_interval_seconds": 2,
+    "poll_phase": "wall_clock_anchored",
+    "heavy_runtime_only_on_file_change": true,
+    "exact_m1_entry_required": true,
+    "first_run_no_backfill": true,
+    "historical_replay_parity": "PASS_FOR_KNOWN_INTERVAL",
+    "user_pc_market_open_observation_after_pr66": false
+  },
+  "p16_p19_recovery": {
+    "trained_models_recovered": false,
+    "scalers_recovered": false,
+    "feature_order_recovered": false,
+    "score_registries_recovered": false,
+    "numeric_thresholds_recovered": false,
+    "training_code_recovered": false,
+    "inference_code_recovered": false,
+    "historical_exclusion_times_available": true,
+    "policy": "HISTORICAL_RECONSTRUCTION_ONLY_NO_FRESH_INFERENCE_NO_UNRELATED_MODEL_SUBSTITUTION"
+  },
+  "mlr1": {
+    "ml05a_density_v2_already_completed": true,
+    "do_not_repeat_ml05a_v2": true,
+    "candidate_eligibility_contract": "config/gold_ml_v1/mlr1_candidate_ml_eligibility_20260627.json"
+  },
+  "next_research_stage": "GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY",
+  "controls": {
+    "audit_only": true,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "absolute_exclusions": [
+    "GOLD_V2",
+    "OLD_GOLD",
+    "DISC8",
+    "STAGE41",
+    "BATCH024_RESTART",
+    "GML1_PROV_030_A",
+    "ML04_AS_P16_P19_SUBSTITUTE",
+    "FROZEN_P16_P19_EXCLUSION_TIMES_FOR_FUTURE_INFERENCE"
+  ]
+}
