@@ -3,8 +3,11 @@
   "mode": "audit_only_closed_bar_prospective",
   "runner": {
     "type": "persistent_bat_loop",
-    "default_interval_seconds": 60,
+    "default_interval_seconds": 2,
     "interval_environment_variable": "GML1_LIVE_INTERVAL_SECONDS",
+    "lightweight_probe_only_when_unchanged": true,
+    "heavy_runtime_only_on_file_change": true,
+    "idle_heartbeat_ticks_default": 30,
     "loop_log_max_bytes_default": 5242880,
     "loop_log_max_bytes_environment_variable": "GML1_LIVE_LOOP_MAX_LOG_BYTES"
   },
@@ -12,6 +15,7 @@
     "directory": "MT5 MQL5/Files",
     "directory_environment_variable": "GML1_LIVE_DIR",
     "csv_latest_row_contract": "closed",
+    "fixed_export_delay_assumption_seconds": null,
     "files": [
       "goldsharp_m1.csv",
       "goldsharp_m5.csv",
@@ -20,6 +24,22 @@
       "goldsharp_h4.csv",
       "goldsharp_d1.csv"
     ]
+  },
+  "performance_contract": {
+    "m1_read_mode": "tail_only_from_earliest_required_cursor_or_open_position",
+    "m5_read_mode": "latest_rows_only_for_contract_visibility",
+    "m15_h1_h4_d1_feature_rules": "unchanged_full_history",
+    "candidate_rules_simplified": false,
+    "unchanged_market_behavior": "IDLE_NO_CHANGE"
+  },
+  "synchronization_contract": {
+    "source_cursor_advances_only_when_source_row_exists": true,
+    "exact_m1_entry_row_required": true,
+    "m15_four_hour_boundary_waits_for_h4": true,
+    "h1_daily_boundary_waits_for_d1": true,
+    "weekend_gap_boundary_absence_does_not_block": true,
+    "input_mutation_during_probe_or_read": "DEFERRED",
+    "late_file_write": "retry_until_file_signature_changes_and_required_rows_exist"
   },
   "live_sleeves": {
     "A_CORE": {
@@ -68,8 +88,7 @@
     "one_position_per_sleeve": true,
     "same_m1_priority": "SL",
     "requires_exact_m1_entry_row": true,
-    "duplicate_candidate_keys_forbidden": true,
-    "input_mutation_during_read": "DEFERRED"
+    "duplicate_candidate_keys_forbidden": true
   },
   "controls": {
     "audit_only": true,
