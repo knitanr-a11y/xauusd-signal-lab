@@ -12,38 +12,22 @@ P16 and P19 remain historical-only. Their frozen historical exclusion times are 
 
 ## What this stage adds
 
-The existing closed-bar candidate runtime is unchanged. The one-shot runner now attaches a separate delivery/execution cycle after the candidate registry has been written.
+The existing closed-bar candidate runtime is unchanged. The one-shot runner attaches a separate delivery/execution cycle after the candidate registry has been written.
 
 For each newly accepted candidate, the adapter can:
 
 1. send one Discord entry message;
-2. display the candidate sleeve's historical automatic-execution win rate and sample count;
-3. display the candidate sleeve's realized live-MT5 win rate and closed-order count;
-4. send one current-market MT5 order with ATR-derived server-side SL and TP;
-5. enforce one position per sleeve and a total GML1 position limit;
-6. force a market close at the sleeve's wall-clock horizon if SL or TP has not already closed the order;
-7. send a Discord exit message after the actual MT5 position is confirmed closed.
+2. display the candidate sleeve's realized live-MT5 win rate and closed-order count;
+3. send one current-market MT5 order with ATR-derived server-side SL and TP;
+4. enforce one position per sleeve and a total GML1 position limit;
+5. force a market close at the sleeve's wall-clock horizon if SL or TP has not already closed the order;
+6. send a Discord exit message after the actual MT5 position is confirmed closed.
 
-The adapter never sends an order at the old historical M1 entry price. If a candidate is observed after the configured entry-lag limit, it is recorded as `SKIPPED_STALE`.
+The adapter never sends an order at an old historical M1 entry price. If a candidate is observed after the configured entry-lag limit, it is recorded as `SKIPPED_STALE`.
 
-## Win-rate definitions
+## Win-rate definition
 
-### Historical automatic-execution win rate
-
-Source files:
-
-```text
-outputs/gold_ml_v1/research_challenger_local_runtime/
-  research_challenger_local_2024.csv
-  research_challenger_local_2025.csv
-  research_challenger_local_2026.csv
-```
-
-Rows are grouped by `comp`, so A_CORE, B_STATE, P18 and W024A each receive a separate value. A historical trade is a win when its resolved `r` is greater than zero. The displayed period is 2024 through the available 2026 partial snapshot.
-
-The value is calculated from the local frozen replay output rather than copied into notification code. By default, a missing or invalid historical output blocks an MT5 order with `SKIPPED_WIN_RATE_UNAVAILABLE`; the notification reports `N/A`.
-
-### Realized live-MT5 win rate
+Discord uses only realized live MT5 results. Historical replay performance is not read, displayed or used to permit or block an order.
 
 Source:
 
@@ -51,17 +35,29 @@ Source:
 outputs/gold_ml_v1/live_research_challenger/live_execution_ledger.csv
 ```
 
-The result is candidate-sleeve specific. A closed actual MT5 position is a win when:
+The win rate is calculated separately for each sleeve: A_CORE, B_STATE, P18 and W024A.
+
+A closed actual MT5 position is a win when:
 
 ```text
 profit + commission + swap + fee > 0
 ```
 
-Dry-run rows and signal-only rows are not counted as live trades.
+Dry-run rows, signal-only rows and still-open positions are not counted. Before a sleeve has its first closed live order, Discord displays:
+
+```text
+実運用WR（この軸）: 集計前（決済済み0件）
+```
+
+After live positions have closed, the format is:
+
+```text
+実運用WR（この軸）: 60.00%（3/5）
+```
 
 ## Files/.env
 
-The adapter reads only:
+The adapter reads:
 
 ```text
 MT5 MQL5\Files\.env
@@ -84,6 +80,8 @@ The repository example is:
 scripts/gold_ml_v1/live_research_challenger/live_execution.env.example
 ```
 
+No historical-results path or historical-WR switch is required.
+
 ## Safe activation order
 
 ### 1. Discord only
@@ -105,7 +103,7 @@ GML1_MT5_ORDER_ENABLED=true
 GML1_MT5_DRY_RUN=true
 ```
 
-A new candidate is recorded as `DRY_RUN`. No `order_send` call occurs.
+A new candidate is recorded as `DRY_RUN`. No `order_send` call occurs. Dry-run results are not included in the live win rate.
 
 ### 3. Real orders
 
@@ -120,7 +118,7 @@ GML1_MT5_SYMBOL=<the broker's exact gold symbol>
 
 A positive global volume or positive sleeve-specific volumes must also exist. Missing or invalid values produce `CONFIG_ERROR`; no order is sent.
 
-The default total GML1 position limit is one. A hedging account is required by default so the four sleeves remain independently traceable. This can be changed only through the explicit `.env` controls.
+The default total GML1 position limit is one. A hedging account is required by default so the four sleeves remain independently traceable.
 
 ## Duplicate and recovery controls
 
@@ -131,6 +129,7 @@ The default total GML1 position limit is one. A hedging account is required by d
 - Before a new order, the adapter checks the ledger, open MT5 positions and recent MT5 deal history.
 - A pipeline lock prevents two one-shot runners from advancing candidate state or entering the delivery/order section simultaneously.
 - If the terminal changes an order comment, a unique open position with the sleeve magic is recovered rather than duplicated.
+- Existing real positions remain managed even if new-entry settings are later disabled or `.env` is removed.
 
 ## Outputs
 
@@ -147,7 +146,7 @@ The existing `live_candidates.csv`, `live_state.json` and candidate-audit output
 
 ## Current validation boundary
 
-Code-level tests cover fail-closed settings, candidate-specific historical win rates, no-backfill initialization, stale-candidate rejection, Discord idempotency, order idempotency, horizon close, live win-rate update, partial time-exit tracking and management of an already-open position after new entries are disabled.
+Code-level tests cover fail-closed settings, live-only candidate-specific win-rate display, no-backfill initialization, stale-candidate rejection, Discord idempotency, order idempotency, horizon close, live win-rate update, partial time-exit tracking and management of an already-open position after new entries are disabled.
 
 This stage is not considered production-verified until the user's Windows/MT5 environment has completed:
 
