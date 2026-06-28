@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-CONSENSUS-V6",
+  "date": "2026-06-28",
+  "status": "SELECTION_GATE_PASSED_CONFIRMATION_FAILED_NO_PROMOTION",
+  "selected": {
+    "form": "MEAN_DIS_RULE",
+    "disagreement_penalty": 0.25,
+    "rule_risk_penalty": 0.10,
+    "threshold_mode": "GLOBAL",
+    "retention_fraction": 0.10,
+    "probability_agreement_threshold": 0.30,
+    "numeric_score_threshold": 0.734222944521
+  },
+  "selection_2024": {"count":120,"strong_positive_rate":0.6583333333333333,"strong_pf":2.2649371408404306,"strong_r":55.37553574308271,"extreme_pf":1.8329065511254945,"extreme_r":40.87673317435162,"gate_pass":true},
+  "confirmation_2025": {"count":193,"strong_positive_rate":0.40932642487046633,"strong_pf":0.8749397494338104,"strong_r":-15.101487836203033,"extreme_pf":0.7586761963440573,"extreme_r":-31.495843894919794,"gate_pass":false},
+  "diagnostic_2026": {"count":60,"strong_positive_rate":0.3333333333333333,"strong_pf":0.6629640138707447,"strong_r":-13.972978752402001,"extreme_pf":0.6212359067396259,"extreme_r":-16.255356379669003},
+  "finding": "Static and stateful models can agree on a high-performing 2024 subset, but their errors remain correlated after the regime changes. Model consensus alone does not generalize.",
+  "controls": {"audit_only":true,"model_promoted":false,"live_runtime_modified":false,"automatic_retraining":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
