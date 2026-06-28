@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3C",
+  "date": "2026-06-28",
+  "status": "2025_CONFIRMATION_REFIT_AND_CALIBRATION_FROZEN_BEFORE_2025_RESULTS",
+  "candidate_id": "GML1-MN3-LOW_VOL-L",
+  "model_id": "CATBOOST_SPECIALIST",
+  "score_form": "P_STRONG_MIN",
+  "retention_fraction": 0.02,
+  "training_2025_model": "All LOW_VOL-L rows with decision_time before 2025-01-01 and exit_time at or before 2025-01-01.",
+  "overlap_weight": "Unchanged 30-minute bucket inverse-count weighting multiplied by clipped absolute Strong R.",
+  "reference_distribution": {
+    "component_reference": "The complete 2024 LOW_VOL-L out-of-sample raw predictions from the frozen 2023 CatBoost specialist model.",
+    "reference_is_future_free_for_2025": true,
+    "component_percentiles": "Convert 2024 reference predictions and 2025 refit-model predictions to percentiles using the 2024 raw prediction distribution separately for probability and Strong-R prediction.",
+    "score": "minimum(probability_percentile,strong_R_prediction_percentile)",
+    "threshold": "98th percentile of the 2024 reference score distribution, preserving the frozen two-percent retention fraction.",
+    "2025_prediction_distribution_used_to_set_threshold": false
+  },
+  "confirmation_gate": {
+    "minimum_one_position_trades": 60,
+    "strong_positive_rate_minimum": 0.50,
+    "strong_pf_minimum": 1.5,
+    "strong_r_positive": true,
+    "extreme_pf_minimum": 1.1,
+    "extreme_r_positive": true
+  },
+  "if_confirmation_fails": "Reject the sleeve and do not use 2026 to rescue, retune or change retention.",
+  "if_confirmation_passes": "Freeze the candidate and run 2026 as diagnostic only before any portfolio or live decision.",
+  "controls": {"audit_only": true, "automatic_promotion": false, "live_runtime_modified": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
