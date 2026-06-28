@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-ML-HEALTH-SYNERGY-V7",
+  "date": "2026-06-28",
+  "status": "SELECTION_IMPROVED_CONFIRMATION_FAILED_NO_PROMOTION",
+  "selected_health_variant": "EWMA_STRONG_ALPHA_0p10_GT_0",
+  "selection_2024": {"count":109,"strong_positive_rate":0.6788990825688074,"strong_pf":2.5026964470585518,"strong_r":55.44272152253271,"extreme_pf":2.02898599988692,"extreme_r":42.51110473320162,"gate_pass":true},
+  "confirmation_2025": {"count":76,"strong_positive_rate":0.40789473684210525,"strong_pf":0.8827578679432605,"strong_r":-5.525744109422005,"extreme_pf":0.751647999931717,"extreme_r":-12.697491087227002,"gate_pass":false},
+  "diagnostic_2026": {"count":14,"strong_positive_rate":0.2857142857142857,"strong_pf":0.5106116814404474,"strong_r":-5.073140262558999,"extreme_pf":0.4820056637764319,"extreme_r":-5.559413599167001},
+  "strict_beta_variant_observation": {"2025_count":30,"2025_strong_positive_rate":0.4666666666666667,"2025_strong_pf":1.2136826221003845,"2025_strong_r":3.3890197246849976,"2025_extreme_pf":0.9950602527211373,"2026_count":0,"interpretation":"The strict gate limits damage but removes too many trades and does not create the requested edge."},
+  "finding": "Resolved-only model health can reduce exposure after deterioration, but it cannot repair unstable candidate ranking. It acts as a safety brake, not an alpha source.",
+  "controls": {"audit_only":true,"health_gate_live_enabled":false,"model_promoted":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
