@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 
 from live_data import probe_latest_bars
-from live_execution import process_execution_cycle
+from live_execution_supervisor import process_execution_cycle
 from live_store import DeferredRun, append_jsonl, atomic_write_text, load_registry
 from live_runtime import run_live_once
 from live_runtime_base import acquire_lock, find_live_dir
