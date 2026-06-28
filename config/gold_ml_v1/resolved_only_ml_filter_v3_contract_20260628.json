@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-RESOLVED-ONLY-ML-FILTER-V3",
+  "date": "2026-06-28",
+  "status": "MODEL_GRID_AND_CHRONOLOGY_FROZEN_BEFORE_V3_TRAINING",
+  "purpose": "Test whether a fixed interpretable feature set and annually versioned manual model artifacts can remove loss-heavy proposals while preserving live-time causality.",
+  "target": {
+    "primary_return": "strong_r",
+    "positive_rate_minimum": 0.60,
+    "profit_factor_minimum": 2.0,
+    "extreme_profit_factor_minimum": 1.0,
+    "minimum_full_year_trades": 100,
+    "target_is_not_guaranteed": true
+  },
+  "chronology": {
+    "model_and_threshold_selection": "Train on 2023 resolved rows and select model plus numeric probability threshold on 2024 only.",
+    "confirmation_2025": "Refit the selected model family on rows with exit_time <= 2025-01-01 and apply the unchanged numeric threshold to 2025.",
+    "diagnostic_2026": "Refit the selected model family on rows with exit_time <= 2026-01-01 and apply the unchanged numeric threshold to 2026 closed-bar proposals.",
+    "resolved_only": true,
+    "open_result_early_insertion": false,
+    "2026_used_for_selection": false,
+    "limitation": "Earlier V1 and V2 aggregate 2026 results were already observed. V3 code remains 2026-blind, but 2026 cannot be described as analyst-blind pristine validation."
+  },
+  "training_universe": "Cross-family deduplicated resolved proposals. Scores are generated for every raw proposal before score filtering, then deduplication and candidate one-position are applied.",
+  "target_definition": "strong_r > 0",
+  "sample_weight": "clip(abs(strong_r), 0.25, 2.0)",
+  "numeric_features": [
+    "proposal_strength_label_free",
+    "m15_atr_pct_lag1_256",
+    "h1_gap_atr",
+    "h4_gap_atr",
+    "m15_signed_body_atr14",
+    "m15_range_atr14",
+    "m15_close_location",
+    "m15_ema20_ema50_gap_atr14",
+    "m15_bb20_width_atr14",
+    "m15_bb20_close_location",
+    "m15_log_return_4",
+    "m15_log_return_16",
+    "m15_rsi14_centered",
+    "m15_macd_hist_atr14",
+    "m15_tick_volume_ratio20_lagbase",
+    "m15_spread_atr14",
+    "time_server_hour_sin",
+    "time_server_hour_cos",
+    "time_weekday_sin",
+    "time_weekday_cos"
+  ],
+  "categorical_features": [
+    "candidate_id",
+    "direction",
+    "volatility_regime",
+    "trend_regime"
+  ],
+  "preprocessing": {
+    "numeric": "median imputation then StandardScaler",
+    "categorical": "OneHotEncoder(handle_unknown=ignore)",
+    "fit_on_training_rows_only": true
+  },
+  "model_grid": [
+    {"id":"LOGREG_C001","type":"LogisticRegression","C":0.01,"penalty":"l2","max_iter":2000,"random_state":20260628},
+    {"id":"LOGREG_C01","type":"LogisticRegression","C":0.1,"penalty":"l2","max_iter":2000,"random_state":20260628},
+    {"id":"LOGREG_C1","type":"LogisticRegression","C":1.0,"penalty":"l2","max_iter":2000,"random_state":20260628},
+    {"id":"HGB_7_30","type":"HistGradientBoostingClassifier","learning_rate":0.05,"max_iter":200,"max_leaf_nodes":7,"min_samples_leaf":30,"l2_regularization":1.0,"random_state":20260628},
+    {"id":"HGB_15_60","type":"HistGradientBoostingClassifier","learning_rate":0.05,"max_iter":200,"max_leaf_nodes":15,"min_samples_leaf":60,"l2_regularization":1.0,"random_state":20260628},
+    {"id":"RF_3_20","type":"RandomForestClassifier","n_estimators":500,"max_depth":3,"min_samples_leaf":20,"max_features":"sqrt","n_jobs":-1,"random_state":20260628},
+    {"id":"RF_5_40","type":"RandomForestClassifier","n_estimators":500,"max_depth":5,"min_samples_leaf":40,"max_features":"sqrt","n_jobs":-1,"random_state":20260628}
+  ],
+  "probability_thresholds": [0.4,0.425,0.45,0.475,0.5,0.525,0.55,0.575,0.6,0.625,0.65,0.675,0.7,0.725,0.75,0.775,0.8,0.825,0.85,0.875,0.9],
+  "selection_2024": {
+    "evaluation_layer": "score_filter_then_cross_family_dedup_then_candidate_one_position",
+    "minimum_trades": 100,
+    "objective": [
+      "gate_pass_positive_rate_60_and_strong_pf_2_and_extreme_pf_1",
+      "higher_strong_pf",
+      "higher_positive_rate",
+      "higher_total_strong_r",
+      "more_trades",
+      "lower_model_complexity_order_as_listed",
+      "lower_numeric_threshold"
+    ]
+  },
+  "confirmation_2025": {
+    "unchanged_model_family_and_threshold": true,
+    "minimum_trades": 100,
+    "positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "strong_total_r_positive": true,
+    "extreme_pf_minimum": 1.0,
+    "extreme_total_r_positive": true
+  },
+  "artifact_requirements": [
+    "model_pipeline_for_each_year_version",
+    "exact_feature_order",
+    "numeric_probability_threshold",
+    "all_raw_proposal_score_registry",
+    "resolved_training_cutoff_manifest",
+    "metrics_by_layer_year_direction_volatility_and_month",
+    "artifact_hashes"
+  ],
+  "controls": {
+    "audit_only": true,
+    "manual_research_refit_only": true,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
