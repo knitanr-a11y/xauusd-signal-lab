@@ -4,32 +4,67 @@
 
 Read first:
 
-- `START_HERE_GOLD_ML_V1_NEXT_CHAT.md`
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_031_COMPLETE_20260626.md`
-- `config/gold_ml_v1/current_state_20260626.json`
-- `config/gold_ml_v1/local_execution_status_20260626.json`
-- `config/gold_ml_v1/next_local_action.json`
-- `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
-- `config/gold_ml_v1/prov030a_rejection_20260626.json`
+1. `START_HERE_GOLD_ML_V1_NEXT_CHAT.md`
+2. `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md`
+3. `config/gold_ml_v1/current_state_20260628.json`
+4. `config/gold_ml_v1/next_action_20260628.json`
+5. `config/gold_ml_v1/live_research_challenger/live_runtime_contract_20260628.json`
+6. `config/gold_ml_v1/research_challenger/runtime_20260628/runtime_contract.json`
+7. `docs/gold_ml_v1/CURRENT_GML1_HANDOFF_20260627.md`
+8. `config/gold_ml_v1/mlr1_candidate_ml_eligibility_20260627.json`
 
-The GitHub handoff document is authoritative. Do not ask the user to download or paste another handoff.
+The 2026-06-28 GitHub handoff is authoritative. Do not ask the user to download or paste another handoff.
 
-The local execution status file is authoritative. Do not confuse user-PC completed runs with historical code or CI-only validation.
+Older Stage031/current-state documents remain audit history only and must not be used to restart from the 2026-06-26 status.
 
-Batch024 local reproduction is closed and not pending. Do not run, recreate, repair, reorganize, refactor, repackage or restart it.
+### Current formal status
 
-GML1-PROV-030-A and its reproducer are rejected and closed. Do not run, recreate, repair, reorganize, refactor, rescue, re-evaluate, monitor or use them as fallback. Restart requires an explicit user reversal that names this candidate.
+`GML1_LIVE_AUDIT_4_SLEEVES_READY_P16_P19_HISTORICAL_ONLY_NEW_DISCOVERY_NEXT`
 
-Use GOLD_ML_V1 only. CSV `time` is MT5 server bar-open time.
+### Required distinctions
 
-The existing accumulated pool remains nine. There is no active new candidate.
+Do not mix:
 
-Do not start research, local runs, monitoring, promotion or registration without a new explicit user instruction.
+- the historical accumulated candidate stack;
+- the six-sleeve historical research-challenger portfolio;
+- the four-sleeve live audit runtime.
 
-GOLD V2, old GOLD, DISC8, Stage41 and quarantined legacy artifacts remain excluded.
+The four live-capable sleeves are:
 
-Audit-only. Live signals, MT5 orders, Discord, AI API and automatic actions remain off.
+- `A_CORE / GML1-WATCH-022-C`
+- `B_STATE / GML1-H1D1-STATEFUL-REENTRY24-C`
+- `P18 / GML1-PROV-018-APPROX`
+- `W024A / GML1-WATCH-024-A`
 
-Current status: `GOLD_ML_V1_031_HANDOFF_READY_AUDIT_ONLY`
+P16 and P19 remain historical-only. Their trained models, scalers, feature order, score registries, numeric thresholds and original training/inference code were not recovered. Frozen exclusion decision times are historical-reconstruction truth only and are forbidden for future inference. Do not substitute ML-04 or another model.
 
-Next action: `WAIT_FOR_EXPLICIT_USER_DIRECTION`
+ML-05A density v2 was already completed in PR #41. Do not repeat it.
+
+The next authorized research stage is:
+
+`GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY`
+
+Freeze definitions and label-free density before inspecting labels, WR, PF, R or outcomes.
+
+### Live runtime state
+
+- Persistent BAT loop exists.
+- Polling is wall-clock anchored every 2 seconds by default.
+- Heavy processing runs only after CSV file change.
+- Exact M1 decision-entry row is required.
+- Delayed M15/H1/H4/D1 writes are synchronized fail-closed.
+- Candidate formulas were not simplified.
+- User-PC market-open observation after PR #65/#66 is still unverified.
+
+### Absolute exclusions
+
+- GOLD_ML_V1 only.
+- Do not read or use GOLD V2, old GOLD, DISC8 or Stage41.
+- Batch024 is closed; do not run, recreate, repair, reorganize, refactor or restart it.
+- `GML1-PROV-030-A` is rejected; do not run, recreate, repair, rescue, re-evaluate or use it as fallback.
+- Do not use P16/P19 frozen exclusions for new bars.
+- Do not retune after inspecting 2025 or 2026.
+- Do not modify the live runtime during discovery except to fix a demonstrated defect.
+- No final signal, Discord, MT5 order, automatic retraining, promotion or registration.
+
+CSV `time` is MT5 server naive bar-open time. The latest valid CSV row is closed by contract. Do not convert decision logic to JST. Same-M1 target/protective collision resolves protective first. No next-M1 fallback.
