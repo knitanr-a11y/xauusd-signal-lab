@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-V7",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_RESULTS",
+  "benchmarks": ["A_CORE", "B_STATE", "P18", "W024A"],
+  "planned_horizon_hours": {"A_CORE": 6, "B_STATE": 48, "P18": 12, "W024A": 6},
+  "stages": [
+    "structural events",
+    "exact M1 available",
+    "portfolio same-decision unique events",
+    "independent sleeve planned one-position",
+    "global planned one-position",
+    "recoverable count from independent handling"
+  ],
+  "limitation": "The frozen structural-event registry does not include rows rejected before structural detection, cooldown, or health gates. Missing stages will be marked unavailable and will not be reconstructed.",
+  "audit_only": true,
+  "current_sleeves_unchanged": true
+}
