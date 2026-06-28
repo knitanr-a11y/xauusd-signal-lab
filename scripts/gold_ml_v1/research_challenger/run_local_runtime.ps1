@@ -53,14 +53,12 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
   $OutputDir = Join-Path $RepoRoot "outputs\gold_ml_v1\research_challenger_local_runtime"
 }
 
-$artifactDir = Join-Path $RepoRoot "config\gold_ml_v1\research_challenger\final_20260627\artifacts"
 $truthDir = Join-Path $RepoRoot "config\gold_ml_v1\research_challenger\runtime_20260628\registries"
 $script = Join-Path $RepoRoot "scripts\gold_ml_v1\research_challenger\build_local_runtime.py"
 
-Write-Host "RawDir:      $RawDir"
-Write-Host "ArtifactDir: $artifactDir"
-Write-Host "TruthDir:    $truthDir"
-Write-Host "OutputDir:   $OutputDir"
+Write-Host "RawDir:    $RawDir"
+Write-Host "TruthDir:  $truthDir"
+Write-Host "OutputDir: $OutputDir"
 
 $parts = $Python -split ' '
 $exe = $parts[0]
@@ -69,7 +67,6 @@ if ($parts.Count -gt 1) { $prefix = $parts[1..($parts.Count - 1)] }
 $args = $prefix + @(
   $script,
   "--raw-dir", $RawDir,
-  "--artifact-dir", $artifactDir,
   "--truth-dir", $truthDir,
   "--output-dir", $OutputDir
 )
@@ -79,4 +76,4 @@ if ($LASTEXITCODE -ne 0) {
   throw "Research challenger local runtime failed with exit code $LASTEXITCODE"
 }
 
-Write-Host "PASS: final research challenger matches the frozen 2024-2026 artifacts."
+Write-Host "PASS: final research challenger matches the frozen 2024-2026 row hashes and metrics."
