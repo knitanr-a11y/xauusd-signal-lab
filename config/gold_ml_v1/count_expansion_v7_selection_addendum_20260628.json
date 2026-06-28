@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "SELECTION_PROCEDURE_FROZEN_BEFORE_2024_SCORE_RESULTS",
+  "per_sleeve_2024_gate": {
+    "minimum_one_position_trades": 60,
+    "strong_positive_rate_minimum": 0.50,
+    "strong_pf_minimum": 1.5,
+    "strong_R_positive": true,
+    "extreme_pf_minimum": 1.1,
+    "extreme_R_positive": true
+  },
+  "per_sleeve_order": [
+    "strict gate pass",
+    "higher minimum of Strong PF and Extreme PF",
+    "higher Strong PF",
+    "higher Strong positive rate",
+    "higher Strong R",
+    "more trades",
+    "higher retention fraction",
+    "lower model complexity",
+    "simpler score form"
+  ],
+  "strict_portfolio": "Combine one best strict-passing option per sleeve using independent sleeve one-position. Promotion still requires unchanged 2025 individual and portfolio gates.",
+  "fallback_when_fewer_than_three_strict_sleeves": {
+    "promotable": false,
+    "per_sleeve_minimum_trades": 60,
+    "per_sleeve_choice": "Best non-strict option using the same order without the strict flag.",
+    "sleeve_rank": "Higher minimum PF, Strong PF, positive rate, Strong R, count, then sleeve ID.",
+    "candidate_portfolios": "Ranked prefixes from three sleeves through all eligible sleeves.",
+    "minimum_combined_trades": 200,
+    "final_order": "Higher minimum of combined Strong and Extreme PF, then Strong PF, positive rate, Strong R, more trades and more sleeves."
+  },
+  "same_decision_handling": "Independent sleeve entries are preserved. Simultaneous and holding overlap are reported separately.",
+  "2025_or_2026_used_for_selection": false,
+  "audit_only": true
+}
