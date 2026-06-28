@@ -100,29 +100,13 @@ def acquire_lock(path: Path, stale_seconds: int = 900) -> None:
 def ready_source_times(
     probe: dict[str, dict[str, pd.Timestamp]],
 ) -> tuple[pd.Timestamp, pd.Timestamp, list[str]]:
-    m15_h4_limit = probe["H4"]["close"] + pd.Timedelta(hours=3, minutes=45)
-    h1_d1_limit = probe["D1"]["close"] + pd.Timedelta(hours=23)
-    ready_m15 = min(
-        probe["M15"]["close"],
-        probe["M1"]["open"],
-        m15_h4_limit,
-    )
-    ready_h1 = min(
-        probe["H1"]["close"],
-        probe["M1"]["open"],
-        h1_d1_limit,
-    )
+    ready_m15 = min(probe["M15"]["close"], probe["M1"]["open"])
+    ready_h1 = min(probe["H1"]["close"], probe["M1"]["open"])
     waiting: list[str] = []
-    if ready_m15 < probe["M15"]["close"]:
-        if probe["M1"]["open"] < probe["M15"]["close"]:
-            waiting.append("M15_WAIT_M1_ENTRY_ROW")
-        if m15_h4_limit < probe["M15"]["close"]:
-            waiting.append("M15_WAIT_H4_ASOF")
-    if ready_h1 < probe["H1"]["close"]:
-        if probe["M1"]["open"] < probe["H1"]["close"]:
-            waiting.append("H1_WAIT_M1_ENTRY_ROW")
-        if h1_d1_limit < probe["H1"]["close"]:
-            waiting.append("H1_WAIT_D1_ASOF")
+    if probe["M1"]["open"] < probe["M15"]["close"]:
+        waiting.append("M15_WAIT_M1_ENTRY_ROW")
+    if probe["M1"]["open"] < probe["H1"]["close"]:
+        waiting.append("H1_WAIT_M1_ENTRY_ROW")
     return pd.Timestamp(ready_m15), pd.Timestamp(ready_h1), waiting
 
 
@@ -165,8 +149,8 @@ def observed_times(
 ) -> dict[str, dict[str, str]]:
     return {
         timeframe: {
-            key: value.strftime("%Y-%m-%d %H:%M:%S")
-            for key, value in values.items()
+            "open": values["open"].strftime("%Y-%m-%d %H:%M:%S"),
+            "close": values["close"].strftime("%Y-%m-%d %H:%M:%S"),
         }
         for timeframe, values in probe.items()
     }
