@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "data_through": "2026-06-19 19:55:00 MT5 server decision time",
+  "status": "M1_MICROSTRUCTURE_EVALUATION_COMPLETE_NO_PROMOTION",
+  "label_free": {
+    "feature_rows": 245327,
+    "event_rows": 201964,
+    "event_families": 12,
+    "directional_event_candidates": 24,
+    "all_event_candidates_passed_density_gate": true
+  },
+  "structural_events": {
+    "strict_2024_2025_survivors": 0,
+    "2026_best_observed": [
+      {"candidate_id":"GML1-MN5-MS09-S","count":199,"strong_positive_rate":0.4522613065,"strong_pf":1.2292827,"strong_r":24.897489,"extreme_pf":1.091805,"extreme_r":10.527371},
+      {"candidate_id":"GML1-MN5-MS12-S","count":266,"strong_positive_rate":0.4473684211,"strong_pf":1.167081,"strong_r":24.509322,"extreme_pf":1.073882,"extreme_r":11.329440},
+      {"candidate_id":"GML1-MN5-MS02-S","count":475,"strong_positive_rate":0.4189473684,"strong_pf":1.071628,"strong_r":19.660507,"extreme_pf":1.015413,"extreme_r":4.345930}
+    ],
+    "interpretation": "Several SHORT event families were positive in 2026 but remained far below the frozen Strong PF 1.5 admission requirement and were not promoted."
+  },
+  "model_selection_2024": {
+    "strict_sleeves": 0,
+    "strict_combined_gate_pass": false,
+    "fallback_non_promotable_sleeves": 5,
+    "count": 335,
+    "strong_positive_rate": 0.4567164179,
+    "strong_pf": 1.1288496967,
+    "strong_r": 22.9914429449,
+    "extreme_pf": 1.0017729502,
+    "extreme_r": 0.3329628981
+  },
+  "unchanged_2025_replay": {
+    "raw_rows_above_gate": 9359,
+    "one_position_count": 2259,
+    "strong_positive_rate": 0.3629924745,
+    "strong_pf": 0.8146965078,
+    "strong_r": -268.0609215486,
+    "extreme_pf": 0.7460457144,
+    "extreme_r": -381.2055448464
+  },
+  "unchanged_2026_diagnostic": {
+    "raw_rows_above_gate": 3642,
+    "one_position_count": 726,
+    "base_positive_rate": 0.4035812672,
+    "base_pf": 1.0068778573,
+    "base_r": 2.9368381969,
+    "strong_positive_rate": 0.3925619835,
+    "strong_pf": 0.9536859215,
+    "strong_r": -20.2506140076,
+    "extreme_positive_rate": 0.3856749311,
+    "extreme_pf": 0.9130656817,
+    "extreme_r": -38.7316122336,
+    "monthly_strong_r": {
+      "2026-01": -17.546420,
+      "2026-02": 2.803139,
+      "2026-03": -8.729173,
+      "2026-04": 15.887105,
+      "2026-05": 6.491049,
+      "2026-06_through_19": -19.156314
+    },
+    "direction": {
+      "LONG": {"count":416,"strong_pf":0.922466,"strong_r":-19.561023},
+      "SHORT": {"count":310,"strong_pf":0.996272,"strong_r":-0.689591}
+    }
+  },
+  "data_quality_2026": {
+    "long_short_label_rows": 65788,
+    "exact_m1_missing": 240,
+    "strong_unresolved": 294
+  },
+  "finding": "M1 path, spread, tick-volume, sweep and volatility features increased candidate density but did not create a stable confirmed edge. Causal annual calibration also showed severe score-distribution drift: the frozen configuration admitted 9359 raw rows in 2025 and 3642 in 2026 versus a sparse 2024 selection.",
+  "decision": {
+    "event_candidate_promoted": false,
+    "model_candidate_promoted": false,
+    "2026_used_for_selection_or_rescue": false,
+    "current_four_sleeves_changed": false
+  },
+  "controls": {
+    "audit_only": true,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
