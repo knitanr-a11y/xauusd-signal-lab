@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-STATEFUL-ONLINE-ML-V5",
+  "date": "2026-06-28",
+  "status": "STATEFUL_MONTHLY_REPLAY_COMPLETE_CONFIRMATION_FAILED_NO_PROMOTION",
+  "selected": {
+    "model_id": "LOGISTIC_RIDGE",
+    "training_mode": "MONTHLY_ROLLING_365D_RESOLVED",
+    "architecture": "GLOBAL_PLUS_DIRECTION_SHRINK_0p35",
+    "behavior": "PSE_MEAN_LCB",
+    "penalty": 0.5,
+    "retention_fraction": 0.10,
+    "probability_percentile_threshold": 0.4
+  },
+  "selection_2024": {"count":145,"strong_positive_rate":0.5862068965517241,"strong_pf":1.6663949387132864,"strong_r":43.51357432366031,"extreme_pf":1.3441940143748736,"extreme_r":25.228322897262103,"negative_months":1,"gate_pass":false},
+  "confirmation_2025": {"count":237,"strong_positive_rate":0.46835443037974683,"strong_pf":1.1179579146469112,"strong_r":15.703932514031363,"extreme_pf":0.9679098421480199,"extreme_r":-4.620904136422499,"negative_months":5,"gate_pass":false},
+  "diagnostic_2026": {"count":57,"strong_positive_rate":0.3333333333333333,"strong_pf":0.6397246704789846,"strong_r":-14.233044855342,"extreme_pf":0.5994704552482705,"extreme_r":-16.426534781764,"negative_months":4},
+  "extra_trees_status": "NOT_EVALUATED_COMPUTE_LIMIT_NO_PARAMETERS_CHANGED",
+  "finding": "Resolved-only history state and monthly rolling refits improved adaptation relative to a static annual model in 2025 Strong R, but did not provide stable high-confidence separation and deteriorated in 2026.",
+  "artifact_hashes": {
+    "state_features": "2bbafcf781618694447295e992d7b97cf0eb306505b70ae22aa60bad31807478",
+    "scores": "dfab95197550aa18eb00a5ec815bde145ae438178bd149c2d5242d2d67d11d8a",
+    "models_2024": "0dd391473e77bd6cea7e2532854fd8b70f0841d571e082b709babfe657282cee",
+    "models_2025": "bd6ee715e1db0e481dcb4306b8080dc729ba8a6af67a88899a8ce649e50664a1",
+    "models_2026": "aefd5b3aa536f605b632bccbcf0ae00503bd1eb3836ee531adc674805891a8dd",
+    "selection_grid": "112c564dbb54ca592be764ebb71e95c70a342555e9f37d0313b305119bce0db6",
+    "result": "f315a44064ca3e38a81470a7d6dbcbd79d6375013f48e103fd05577ec6e714df"
+  },
+  "controls": {"audit_only":true,"scheduled_refit_live_enabled":false,"model_promoted":false,"live_runtime_modified":false,"automatic_retraining":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
