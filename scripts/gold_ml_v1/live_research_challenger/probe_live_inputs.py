@@ -7,21 +7,21 @@ import sys
 from pathlib import Path
 from typing import Any
 
-FILE_NAMES = (
-    "goldsharp_m1.csv",
-    "goldsharp_m5.csv",
-    "goldsharp_m15.csv",
-    "goldsharp_h1.csv",
-    "goldsharp_h4.csv",
-    "goldsharp_d1.csv",
-)
+FILE_BY_TF = {
+    "M1": "goldsharp_m1.csv",
+    "M5": "goldsharp_m5.csv",
+    "M15": "goldsharp_m15.csv",
+    "H1": "goldsharp_h1.csv",
+    "H4": "goldsharp_h4.csv",
+    "D1": "goldsharp_d1.csv",
+}
 EXIT_CHANGED = 0
 EXIT_ERROR = 2
 EXIT_UNCHANGED = 10
 
 
 def has_files(path: Path) -> bool:
-    return path.is_dir() and all((path / name).is_file() for name in FILE_NAMES)
+    return path.is_dir() and all((path / name).is_file() for name in FILE_BY_TF.values())
 
 
 def find_live_dir(output_dir: Path) -> Path:
@@ -68,9 +68,9 @@ def find_live_dir(output_dir: Path) -> Path:
 
 def signatures(root: Path) -> dict[str, dict[str, int]]:
     result: dict[str, dict[str, int]] = {}
-    for name in FILE_NAMES:
+    for timeframe, name in FILE_BY_TF.items():
         stat = (root / name).stat()
-        result[name] = {"size": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns)}
+        result[timeframe] = {"size": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns)}
     return result
 
 
