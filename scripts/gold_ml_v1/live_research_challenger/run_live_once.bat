@@ -2,9 +2,10 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 set "LOOP_MODE=0"
+set "EXTRA_ARGS=%*"
 if /I "%~1"=="--loop" (
   set "LOOP_MODE=1"
-  shift
+  set "EXTRA_ARGS="
 )
 
 set "SCRIPT_DIR=%~dp0"
@@ -29,7 +30,7 @@ if not exist "%PYTHON_SCRIPT%" (
 )
 
 >"%RUN_LOG%" echo [%date% %time%] RUN_LIVE_ONCE_START
-py -3.12 "%PYTHON_SCRIPT%" --output-dir "%OUTPUT_DIR%" %* >>"%RUN_LOG%" 2>&1
+py -3.12 "%PYTHON_SCRIPT%" --output-dir "%OUTPUT_DIR%" !EXTRA_ARGS! >>"%RUN_LOG%" 2>&1
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if "%LOOP_MODE%"=="0" (
