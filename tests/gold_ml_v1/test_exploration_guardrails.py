@@ -52,21 +52,23 @@ class ExplorationGuardrailTests(unittest.TestCase):
         )
 
     def test_candidate_is_provisional_not_accumulated(self) -> None:
-        self.assertEqual(self.stack["accumulated_candidate_total"], 9)
         self.assertIn(
-            "GML1-PROV-030-A", self.stack["provisional_research_only_ids"]
+            "GML1-PROV-030-A",
+            self.historical_state["candidate_pool"][
+                "provisional_research_only_ids"
+            ],
         )
-        accumulated = (
-            self.stack["core_accumulated_ids"]
-            + self.stack["user_authorized_accumulated_ids"]
-            + self.stack["validation_admitted_accumulated_ids"]
+        self.assertEqual(self.stack["accumulated_candidate_total"], 15)
+        self.assertNotIn("GML1-PROV-030-A", self.stack["accumulated_ids"])
+        self.assertIn(
+            "GML1_PROV_030_A", self.current_state["absolute_exclusions"]
         )
-        self.assertNotIn("GML1-PROV-030-A", accumulated)
         self.assertFalse(
             self.historical_state["candidate_pool"][
                 "existing_frozen_nine_modified"
             ]
         )
+        self.assertFalse(self.stack["existing_frozen_nine_modified"])
 
     def test_corrected_pre_admission_contract(self) -> None:
         self.assertEqual(
