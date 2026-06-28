@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-FEATURE-PRUNING-V2",
+  "date": "2026-06-28",
+  "status": "CONFIRMATION_FAILED_NO_PROMOTION_AUDIT_ONLY",
+  "selected_rules": 12,
+  "selection_2024": {
+    "count": 377,
+    "strong_positive_rate": 0.5702917771883289,
+    "strong_pf": 1.5329814760832665,
+    "strong_r": 95.46330746316427,
+    "target_60pct_pf2": false
+  },
+  "confirmation_2025": {
+    "count": 448,
+    "base_positive_rate": 0.42410714285714285,
+    "base_pf": 1.0500370434040713,
+    "base_r": 12.747570461386399,
+    "strong_positive_rate": 0.4174107142857143,
+    "strong_pf": 0.9139721309536643,
+    "strong_r": -23.747467643219423,
+    "extreme_pf": 0.7976065545764476,
+    "extreme_r": -60.24250574756301,
+    "gate_pass": false
+  },
+  "diagnostic_2026": {
+    "count": 191,
+    "strong_positive_rate": 0.36649214659685864,
+    "strong_pf": 0.8105016438761075,
+    "strong_r": -23.579282014262,
+    "extreme_pf": 0.7566266337850435,
+    "extreme_r": -31.526277389236
+  },
+  "interpretation": "The composite loss regions improved 2024 but did not remain loss-specific in later periods. The filter is not stable enough for live use.",
+  "controls": {
+    "audit_only": true,
+    "rules_promoted": false,
+    "live_runtime_modified": false,
+    "candidate_stack_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
