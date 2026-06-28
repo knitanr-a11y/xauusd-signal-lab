@@ -165,6 +165,7 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
         short_cont = row.gap_h1_atr < 0 and row.gap_h4_atr <= 0.10
         long_failed = row.gap_h1_atr >= -0.15
         short_failed = row.gap_h1_atr <= 0.15
+        cleared_this_bar: set[str] = set()
 
         for candidate_id, maximum_age in (("GML1-NCD-001-L", 8), ("GML1-NCD-001-S", 8)):
             state = pending[candidate_id]
@@ -173,6 +174,7 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
             age = index - state.setup_index
             if age > maximum_age:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
                 continue
             if candidate_id.endswith("-L"):
                 invalid = row.close < state.level - 0.20 * atr
@@ -184,9 +186,11 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
                 strength = (state.level - row.close) / atr
             if invalid:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
             elif confirmed:
                 output.append(proposal_record(row, candidate_id, strength, exact_m1))
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
 
         for candidate_id, maximum_age in (("GML1-NCD-002-L", 6), ("GML1-NCD-002-S", 6)):
             state = pending[candidate_id]
@@ -195,6 +199,7 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
             age = index - state.setup_index
             if age > maximum_age:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
                 continue
             if candidate_id.endswith("-L"):
                 invalid = row.close < state.level - 0.20 * atr
@@ -206,9 +211,11 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
                 strength = (state.level - row.close) / atr
             if invalid:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
             elif confirmed:
                 output.append(proposal_record(row, candidate_id, strength, exact_m1))
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
 
         for candidate_id, maximum_age in (("GML1-NCD-003-L", 12), ("GML1-NCD-003-S", 12)):
             state = pending[candidate_id]
@@ -217,6 +224,7 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
             age = index - state.setup_index
             if age > maximum_age:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
                 continue
             if candidate_id.endswith("-L"):
                 invalid = row.close < state.level - 0.25 * atr
@@ -228,9 +236,11 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
                 strength = float(state.setup_range_atr or 0) + max(0.0, 0.5 - row.close_location)
             if invalid:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
             elif confirmed:
                 output.append(proposal_record(row, candidate_id, strength, exact_m1))
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
 
         for candidate_id, maximum_age in (("GML1-NCD-005-L", 4), ("GML1-NCD-005-S", 4)):
             state = pending[candidate_id]
@@ -239,6 +249,7 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
             age = index - state.setup_index
             if age > maximum_age:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
                 continue
             if candidate_id.endswith("-L"):
                 invalid = row.close < state.level - 0.20 * atr
@@ -250,9 +261,11 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
                 strength = (float(state.opposite) - row.close) / atr
             if invalid:
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
             elif confirmed:
                 output.append(proposal_record(row, candidate_id, strength, exact_m1))
                 pending[candidate_id] = None
+                cleared_this_bar.add(candidate_id)
 
         active_long = row.ema20 > row.ema50 and long_cont and row.prior_long_touch4 and row.close >= row.band_upper + 0.10 * atr and row.signed_body >= 0.25 * atr and row.close_location >= 0.65
         active_short = row.ema20 < row.ema50 and short_cont and row.prior_short_touch4 and row.close <= row.band_lower - 0.10 * atr and row.signed_body <= -0.25 * atr and row.close_location <= 0.35
@@ -263,21 +276,21 @@ def generate_raw_proposals(joined: pd.DataFrame, exact_m1: pd.DatetimeIndex) -> 
         active_004_long = bool(active_long)
         active_004_short = bool(active_short)
 
-        if pending["GML1-NCD-001-L"] is None and long_cont and np.isfinite(row.prev_high_20) and row.close > row.prev_high_20 + 0.10 * atr and row.signed_body >= 0.35 * atr:
+        if "GML1-NCD-001-L" not in cleared_this_bar and pending["GML1-NCD-001-L"] is None and long_cont and np.isfinite(row.prev_high_20) and row.close > row.prev_high_20 + 0.10 * atr and row.signed_body >= 0.35 * atr:
             pending["GML1-NCD-001-L"] = Pending(index, float(row.prev_high_20))
-        if pending["GML1-NCD-001-S"] is None and short_cont and np.isfinite(row.prev_low_20) and row.close < row.prev_low_20 - 0.10 * atr and row.signed_body <= -0.35 * atr:
+        if "GML1-NCD-001-S" not in cleared_this_bar and pending["GML1-NCD-001-S"] is None and short_cont and np.isfinite(row.prev_low_20) and row.close < row.prev_low_20 - 0.10 * atr and row.signed_body <= -0.35 * atr:
             pending["GML1-NCD-001-S"] = Pending(index, float(row.prev_low_20))
-        if pending["GML1-NCD-002-L"] is None and long_cont and np.isfinite(row.prev_high_50) and row.close > row.prev_high_50 + 0.05 * atr and row.signed_body >= 0.25 * atr:
+        if "GML1-NCD-002-L" not in cleared_this_bar and pending["GML1-NCD-002-L"] is None and long_cont and np.isfinite(row.prev_high_50) and row.close > row.prev_high_50 + 0.05 * atr and row.signed_body >= 0.25 * atr:
             pending["GML1-NCD-002-L"] = Pending(index, float(row.prev_high_50))
-        if pending["GML1-NCD-002-S"] is None and short_cont and np.isfinite(row.prev_low_50) and row.close < row.prev_low_50 - 0.05 * atr and row.signed_body <= -0.25 * atr:
+        if "GML1-NCD-002-S" not in cleared_this_bar and pending["GML1-NCD-002-S"] is None and short_cont and np.isfinite(row.prev_low_50) and row.close < row.prev_low_50 - 0.05 * atr and row.signed_body <= -0.25 * atr:
             pending["GML1-NCD-002-S"] = Pending(index, float(row.prev_low_50))
-        if pending["GML1-NCD-003-L"] is None and long_cont and np.isfinite(row.bb_width_pct_lag1_256) and row.bb_width_pct_lag1_256 <= 0.25 and row.close > row.prev_high_20 and row.close > row.bb_upper and row.candle_range >= atr and row.signed_body > 0:
+        if "GML1-NCD-003-L" not in cleared_this_bar and pending["GML1-NCD-003-L"] is None and long_cont and np.isfinite(row.bb_width_pct_lag1_256) and row.bb_width_pct_lag1_256 <= 0.25 and row.close > row.prev_high_20 and row.close > row.bb_upper and row.candle_range >= atr and row.signed_body > 0:
             pending["GML1-NCD-003-L"] = Pending(index, float(row.prev_high_20), setup_range_atr=float(row.candle_range / atr))
-        if pending["GML1-NCD-003-S"] is None and short_cont and np.isfinite(row.bb_width_pct_lag1_256) and row.bb_width_pct_lag1_256 <= 0.25 and row.close < row.prev_low_20 and row.close < row.bb_lower and row.candle_range >= atr and row.signed_body < 0:
+        if "GML1-NCD-003-S" not in cleared_this_bar and pending["GML1-NCD-003-S"] is None and short_cont and np.isfinite(row.bb_width_pct_lag1_256) and row.bb_width_pct_lag1_256 <= 0.25 and row.close < row.prev_low_20 and row.close < row.bb_lower and row.candle_range >= atr and row.signed_body < 0:
             pending["GML1-NCD-003-S"] = Pending(index, float(row.prev_low_20), setup_range_atr=float(row.candle_range / atr))
-        if pending["GML1-NCD-005-L"] is None and long_failed and np.isfinite(row.prev_low_20) and row.low < row.prev_low_20 - 0.10 * atr and row.close > row.prev_low_20:
+        if "GML1-NCD-005-L" not in cleared_this_bar and pending["GML1-NCD-005-L"] is None and long_failed and np.isfinite(row.prev_low_20) and row.low < row.prev_low_20 - 0.10 * atr and row.close > row.prev_low_20:
             pending["GML1-NCD-005-L"] = Pending(index, float(row.prev_low_20), opposite=float(row.high))
-        if pending["GML1-NCD-005-S"] is None and short_failed and np.isfinite(row.prev_high_20) and row.high > row.prev_high_20 + 0.10 * atr and row.close < row.prev_high_20:
+        if "GML1-NCD-005-S" not in cleared_this_bar and pending["GML1-NCD-005-S"] is None and short_failed and np.isfinite(row.prev_high_20) and row.high > row.prev_high_20 + 0.10 * atr and row.close < row.prev_high_20:
             pending["GML1-NCD-005-S"] = Pending(index, float(row.prev_high_20), opposite=float(row.low))
 
     frame = pd.DataFrame(output)
