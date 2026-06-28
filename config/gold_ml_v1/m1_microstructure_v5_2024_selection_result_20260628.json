@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "NO_STRICT_2024_SURVIVOR_NON_PROMOTABLE_FALLBACK_FROZEN_BEFORE_LATER_YEARS",
+  "strict_sleeves": 0,
+  "strict_combined_gate_pass": false,
+  "fallback_combined_2024": {
+    "enabled_sleeves": 5,
+    "count": 335,
+    "strong_positive_rate": 0.45671641791044776,
+    "strong_pf": 1.1288496967164607,
+    "strong_r": 22.991442944923676,
+    "extreme_pf": 1.0017729502072752,
+    "extreme_r": 0.33296289810943636,
+    "promotable": false
+  },
+  "selected_sleeves": [
+    {"sleeve":"MICRO_DIRECTIONAL_LONG","model":"CATBOOST_MICRO","score_form":"STRONG_EXTREME_MIN","retention_fraction":0.005},
+    {"sleeve":"MICRO_CHAOTIC_SHORT","model":"LGBM_MICRO","score_form":"STRONG_ONLY","retention_fraction":0.10},
+    {"sleeve":"MICRO_CHAOTIC_LONG","model":"LINEAR_MICRO","score_form":"EXTREME_ONLY","retention_fraction":0.005},
+    {"sleeve":"MICRO_LOW_VOL_LONG","model":"LGBM_MICRO","score_form":"MEAN_LCB_10","retention_fraction":0.02},
+    {"sleeve":"MICRO_HIGH_VOL_SHORT","model":"CATBOOST_MICRO","score_form":"EXTREME_ONLY","retention_fraction":0.005}
+  ],
+  "later_year_policy": {
+    "2025_model_family_score_form_sleeve_set_and_retention_unchanged": true,
+    "2026_model_family_score_form_sleeve_set_and_retention_unchanged": true,
+    "2025_used_for_rescue_or_selection": false,
+    "2026_used_for_rescue_or_selection": false,
+    "all_later_results_non_promotable_diagnostics": true
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_promoted": false,
+    "model_promoted": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
