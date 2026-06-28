@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-V7-CURRENT-FOUR-SHORT-HORIZON",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_VARIANT_RESULTS",
+  "purpose": "Test whether earlier time release can add entries to the four exact current sleeve streams without changing their entry definitions, target R, protective R, direction, ATR or filter formulas.",
+  "variants": {
+    "A_CORE_SHORT": {"parent":"A_CORE","direction":"LONG","target_r":1.0,"protective_r":1.0,"horizon_hours":3,"original_horizon_hours":6},
+    "B_STATE_SHORT": {"parent":"B_STATE","direction":"LONG","target_r":1.0,"protective_r":1.0,"horizon_hours":24,"original_horizon_hours":48},
+    "P18_SHORT": {"parent":"P18","direction":"LONG","target_r":1.0,"protective_r":1.0,"horizon_hours":6,"original_horizon_hours":12},
+    "W024A_SHORT": {"parent":"W024A","direction":"SHORT","target_r":1.5,"protective_r":1.0,"horizon_hours":3,"original_horizon_hours":6}
+  },
+  "A_CORE_rule": "The shorter horizon applies to the parent one-position state before the unchanged P7/WATCH filtering, matching the original processing order.",
+  "other_sleeves_rule": "The shorter horizon applies to the unchanged final structural event stream before sleeve one-position admission.",
+  "admission_gate": {
+    "count_increase_2024": true,
+    "count_increase_2025": true,
+    "strong_pf_2024_minimum": 1.5,
+    "strong_pf_2025_minimum": 1.5,
+    "combined_strong_pf_minimum": 1.7,
+    "R_each_year_positive": true
+  },
+  "2026": "Diagnostic only and not used to select or modify a variant.",
+  "selection": "Each variant is evaluated only against its own original parent sleeve. No cross-variant optimization or partial time search is allowed.",
+  "audit_only": true,
+  "runtime_unchanged": true
+}
