@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "FALLBACK_DIAGNOSTIC_SELECTION_FROZEN_BEFORE_MODEL_RESULTS",
+  "purpose": "Ensure that 2025 and 2026 performance can be reported even when no model configuration passes the strict promotion gate, without using either later year to choose the configuration.",
+  "strict_selection": "Unchanged V5 per-sleeve and combined profitability gates take priority.",
+  "fallback_used_only_when_strict_survivor_count_is_zero": true,
+  "fallback_2024_requirements": {
+    "minimum_combined_one_position_trades": 300,
+    "minimum_enabled_sleeves": 3,
+    "minimum_one_position_trades_per_enabled_sleeve": 40,
+    "combined_strong_r_positive_not_required": true,
+    "promotion_allowed": false
+  },
+  "fallback_order": [
+    "higher minimum of combined Strong PF and Extreme PF",
+    "higher combined Strong PF",
+    "higher combined positive rate",
+    "higher combined Strong R",
+    "more enabled sleeves",
+    "more combined trades",
+    "lower model complexity in the frozen model list",
+    "simpler score form",
+    "higher retention fraction"
+  ],
+  "later_year_replay": {
+    "model family, score form, sleeve set and retention fractions frozen from 2024": true,
+    "2025_used_for_selection_or_rescue": false,
+    "2026_used_for_selection_or_rescue": false,
+    "report_2025": true,
+    "report_2026": true,
+    "fallback_result_must_be_labeled_non_promotable": true
+  },
+  "controls": {
+    "audit_only": true,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
