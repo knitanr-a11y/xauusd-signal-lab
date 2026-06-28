@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_LABEL_RESULTS",
+  "mapping": {
+    "SWEEP_RECLAIM": ["MS05", "MS07"],
+    "WICK_EXHAUSTION": ["MS04", "MS10", "MS12"],
+    "FLOW_CONTINUATION": ["MS01", "MS02", "MS06", "MS11"],
+    "VOL_RELEASE_BREAKOUT": ["MS03", "MS08", "MS09"]
+  },
+  "exit_contracts": [
+    {"id":"SWEEP_FAST","structure":"SWEEP_RECLAIM","minutes":90,"tp_atr":0.75,"sl_atr":0.75},
+    {"id":"SWEEP_MEDIUM","structure":"SWEEP_RECLAIM","minutes":180,"tp_atr":1.0,"sl_atr":0.75},
+    {"id":"WICK_FAST","structure":"WICK_EXHAUSTION","minutes":90,"tp_atr":0.75,"sl_atr":0.75},
+    {"id":"WICK_MEDIUM","structure":"WICK_EXHAUSTION","minutes":180,"tp_atr":1.0,"sl_atr":0.75},
+    {"id":"FLOW_MEDIUM","structure":"FLOW_CONTINUATION","minutes":180,"tp_atr":1.0,"sl_atr":0.75},
+    {"id":"FLOW_STANDARD","structure":"FLOW_CONTINUATION","minutes":360,"tp_atr":1.5,"sl_atr":1.0},
+    {"id":"VOL_STANDARD","structure":"VOL_RELEASE_BREAKOUT","minutes":360,"tp_atr":1.5,"sl_atr":1.0},
+    {"id":"VOL_EXTENDED","structure":"VOL_RELEASE_BREAKOUT","minutes":720,"tp_atr":2.0,"sl_atr":1.0}
+  ],
+  "directions": ["LONG", "SHORT"],
+  "sleeve_count": 16,
+  "exact_m1_required": true,
+  "next_m1_fallback": false,
+  "same_bar_priority": "protective",
+  "one_position": "independent within each sleeve using its Strong exit time",
+  "minimum_retention_fraction": 0.20,
+  "retention_grid": [0.20,0.30,0.40,0.50,0.60,0.75,1.00],
+  "individual_gate": {
+    "trades_2024_min": 60,
+    "trades_2025_min": 60,
+    "trades_2024_2025_min": 150,
+    "strong_pf_each_year_min": 1.5,
+    "strong_pf_combined_min": 1.7,
+    "strong_positive_rate_each_year_min": 0.50,
+    "strong_positive_rate_combined_min": 0.55,
+    "extreme_pf_each_year_min": 1.1
+  },
+  "chronology": {"train":2023,"select":2024,"confirm":2025,"diagnostic":2026},
+  "audit_only": true,
+  "current_sleeves_unchanged": true
+}
