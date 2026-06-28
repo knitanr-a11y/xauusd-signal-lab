@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-FEATURE-PRUNING-V2",
+  "date": "2026-06-28",
+  "status": "RULE_SET_FROZEN_AFTER_2024_BEFORE_2025_CONFIRMATION",
+  "baseline_2024": {"count": 1144, "positive_rate": 0.3811188811188811, "strong_pf": 0.703963617053854, "strong_r": -235.2942760246527},
+  "filtered_2024": {"count": 377, "positive_rate": 0.5702917771883289, "strong_pf": 1.5329814760832665, "strong_r": 95.46330746316427, "target_reached": false},
+  "rules": [
+    {"id":"GML1-LFP2-31bf058ace7d","scope":"SHORT","conditions":[["h4_gap_atr","<=",-0.239550727325],["m15_bb20_width_atr14",">",3.77420205444],["m15_range_atr14","<=",1.58489798541]]},
+    {"id":"GML1-LFP2-c2daa7ba32ac","scope":"GML1-NCD-004-L","conditions":[["m15_log_return_16","<=",0.0007945725007],["m15_macd_hist_atr14","<=",0.0542622578674],["m15_tick_volume_ratio20_lagbase","<=",0.993477170095]]},
+    {"id":"GML1-LFP2-d9d697c05540","scope":"LONG","conditions":[["h4_gap_atr",">",0.389515067733],["m15_log_return_16",">",0.000141467309814],["m15_signed_body_atr14",">",0.810306414311]]},
+    {"id":"GML1-LFP2-148455e32fb2","scope":"SHORT","conditions":[["m15_log_return_4","<=",-0.000867751111706],["m15_macd_hist_atr14",">",-0.158269338033],["m15_range_atr14",">",1.00316388444]]},
+    {"id":"GML1-LFP2-23047bfca368","scope":"SHORT","conditions":[["h4_gap_atr",">",-1.23507439141],["m15_log_return_4",">",-0.00161255570326],["server_weekday","==",3]]},
+    {"id":"GML1-LFP2-35ed3892b755","scope":"LONG","conditions":[["h4_gap_atr",">",0.389515067733],["m15_close_location","<=",0.745099852071],["m15_spread_atr14",">",0.0477926502644]]},
+    {"id":"GML1-LFP2-6fd601f10a82","scope":"GML1-NCD-005-L","conditions":[["m15_log_return_16","<=",-0.000664289823687],["m15_signed_body_atr14","<=",1.19828528642],["m15_spread_atr14",">",0.0459224130264]]},
+    {"id":"GML1-LFP2-b83a0b435ca5","scope":"SHORT","conditions":[["m15_bb20_close_location",">",0.0148768407849],["m15_range_atr14","<=",1.00316388444],["m15_tick_volume_ratio20_lagbase","<=",0.7592473745]]},
+    {"id":"GML1-LFP2-ea60e14bfa91","scope":"LONG","conditions":[["m15_bb20_width_atr14","<=",4.7934185573],["m15_rsi14_centered",">",0.0922066232174],["m15_spread_atr14","<=",0.0635216291213]]},
+    {"id":"GML1-LFP2-ab0904560447","scope":"LONG","conditions":[["m15_atr_pct_lag1_256",">",0.12890625],["m15_bb20_close_location",">",0.445697354119],["volatility_regime","==","LOW"]]},
+    {"id":"GML1-LFP2-05e101a401e3","scope":"GML1-NCD-004-S","conditions":[["m15_bb20_width_atr14","<=",3.20840363733],["m15_range_atr14",">",0.946684757051],["m15_signed_body_atr14","<=",-0.78832039683]]},
+    {"id":"GML1-LFP2-386821822a04","scope":"SHORT","conditions":[["h1_gap_atr","<=",-0.848558945653],["m15_bb20_width_atr14",">",3.06079351185],["trend_regime","==","DOWN_TREND"]]}
+  ],
+  "controls": {"rules_frozen": true, "2025_used_for_selection": false, "2026_used_for_selection": false, "audit_only": true, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
