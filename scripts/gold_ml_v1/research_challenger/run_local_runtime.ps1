@@ -5,7 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 
 function Test-RawDir([string]$Path) {
   $required = @(
@@ -56,6 +56,14 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
 $truthDir = Join-Path $RepoRoot "config\gold_ml_v1\research_challenger\runtime_20260628\registries"
 $script = Join-Path $RepoRoot "scripts\gold_ml_v1\research_challenger\build_local_runtime.py"
 
+if (-not (Test-Path $script -PathType Leaf)) {
+  throw "Runtime script was not found: $script"
+}
+if (-not (Test-Path $truthDir -PathType Container)) {
+  throw "Historical exclusion registry directory was not found: $truthDir"
+}
+
+Write-Host "RepoRoot:  $RepoRoot"
 Write-Host "RawDir:    $RawDir"
 Write-Host "TruthDir:  $truthDir"
 Write-Host "OutputDir: $OutputDir"
