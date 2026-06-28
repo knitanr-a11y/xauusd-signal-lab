@@ -171,6 +171,47 @@ def probe_latest_bars(root: Path) -> dict[str, dict[str, pd.Timestamp]]:
     return result
 
 
+def _cap_source_at_missing_higher_boundary(
+    source: pd.DataFrame,
+    higher: pd.DataFrame,
+    source_timeframe: str,
+    higher_timeframe: str,
+) -> tuple[pd.DataFrame, str | None]:
+    source_close = source["bar_close_time"]
+    higher_latest = pd.Timestamp(higher["bar_close_time"].iloc[-1])
+    if higher_timeframe == "H4":
+        boundary_mask = (
+            source_close.dt.minute.eq(0)
+            & source_close.dt.hour.mod(4).eq(0)
+            & (source_close > higher_latest)
+        )
+        step = pd.Timedelta(minutes=15)
+        reason = "M15_WAIT_H4_BOUNDARY"
+    elif higher_timeframe == "D1":
+        boundary_mask = (
+            source_close.dt.hour.eq(0)
+            & source_close.dt.minute.eq(0)
+            & (source_close > higher_latest)
+        )
+        step = pd.Timedelta(hours=1)
+        reason = "H1_WAIT_D1_BOUNDARY"
+    else:
+        raise ValueError(f"Unsupported higher timeframe: {higher_timeframe}")
+
+    boundaries = source_close[boundary_mask]
+    if boundaries.empty:
+        return source, None
+    first_missing_boundary = pd.Timestamp(boundaries.iloc[0])
+    capped = source[source_close <= first_missing_boundary - step].copy()
+    if capped.empty:
+        raise ValueError(
+            f"{source_timeframe}: no rows remain before missing {higher_timeframe} boundary"
+        )
+    capped.attrs["sync_waiting"] = reason
+    capped.attrs["missing_boundary"] = first_missing_boundary.strftime("%Y-%m-%d %H:%M:%S")
+    return capped, reason
+
+
 def read_live_bars(
     root: Path,
     m1_since: pd.Timestamp | None = None,
@@ -194,6 +235,15 @@ def read_live_bars(
         "H4": read_closed_bars(root / FILE_BY_TF["H4"], "H4"),
         "D1": read_closed_bars(root / FILE_BY_TF["D1"], "D1"),
     }
+    bars["M15"], m15_wait = _cap_source_at_missing_higher_boundary(
+        bars["M15"], bars["H4"], "M15", "H4"
+    )
+    bars["H1"], h1_wait = _cap_source_at_missing_higher_boundary(
+        bars["H1"], bars["D1"], "H1", "D1"
+    )
+    bars["M15"].attrs["sync_waiting"] = m15_wait
+    bars["H1"].attrs["sync_waiting"] = h1_wait
+
     minimums = {"M1": 2, "M5": 2, "M15": 500, "H1": 200, "H4": 200, "D1": 100}
     for timeframe, minimum in minimums.items():
         if len(bars[timeframe]) < minimum:
