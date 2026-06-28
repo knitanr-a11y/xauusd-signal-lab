@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3",
+  "date": "2026-06-28",
+  "status": "ALL_M5_DIRECTION_WIDE_AND_SPECIALIST_EVALUATION_COMPLETE_NO_CONFIRMED_SURVIVOR",
+  "universe": {
+    "m5_feature_rows": 243036,
+    "long_short_resolved_labels": 484218,
+    "feature_registry_sha256": "e86a14934cec9282b2b3d353d9cfeafdba0372cc24a24d46c95b72bd6ec9a154",
+    "label_registry_sha256": "2186aa58ebc71cf1e324ec612d0a97a8ee201e6c1d9ec6b948bd32f2d1d036df"
+  },
+  "direction_wide_models": {
+    "models": ["LGBM_SMALL","LGBM_MEDIUM","XGB_SMALL","LINEAR_BASELINE"],
+    "purged_2023_oof_calibration": true,
+    "three_component_consensus_individual_sleeves_passing_2024": 0,
+    "decomposed_score_forms_individual_sleeves_passing_2024": 0,
+    "best_2024_option_with_at_least_60_trades": {
+      "candidate_id": "GML1-MN3-LOW_VOL-L",
+      "model_id": "LGBM_SMALL",
+      "score_form": "P_ONLY",
+      "count": 90,
+      "strong_positive_rate": 0.5222222222222223,
+      "strong_pf": 1.2595184332613782,
+      "strong_r": 12.114975038748,
+      "extreme_pf": 0.966999450981521
+    }
+  },
+  "sleeve_specialists": {
+    "models": ["LGBM_SPECIALIST","XGB_SPECIALIST","CATBOOST_SPECIALIST","LINEAR_SPECIALIST"],
+    "separate_direction_regime_models": 8,
+    "overlap_weighting": "inverse row count within each 30-minute sleeve bucket multiplied by clipped absolute Strong R",
+    "purged_2023_oof_calibration": true,
+    "individual_sleeves_passing_2024": 1,
+    "combined_minimum_three_sleeve_gate_pass": false,
+    "2024_survivor": {
+      "candidate_id": "GML1-MN3-LOW_VOL-L",
+      "model_id": "CATBOOST_SPECIALIST",
+      "score_form": "P_STRONG_MIN",
+      "retention_fraction": 0.02,
+      "count": 66,
+      "strong_positive_rate": 0.5606060606060606,
+      "strong_pf": 1.7349497832932212,
+      "strong_r": 20.336490968017593,
+      "extreme_pf": 1.3682417718106543,
+      "extreme_r": 11.579762592866105
+    },
+    "2025_unchanged_confirmation": {
+      "training_rows_resolved_through_2024": 47898,
+      "raw_rows_above_frozen_two_percent_gate": 131,
+      "one_position_count": 23,
+      "strong_positive_rate": 0.34782608695652173,
+      "strong_pf": 0.7073041901506726,
+      "strong_r": -4.747199588257055,
+      "extreme_pf": 0.6342501118367742,
+      "extreme_r": -6.3106593929085975,
+      "confirmation_pass": false
+    }
+  },
+  "artifact_hashes": {
+    "specialist_2024_selection": "9d7e952f5b08ccc89a0f282270fba733191ce3669352e120a3cd3e07e23fe107",
+    "specialist_2025_result": "95b7ea9fd0388fa3da3e661199bebac8bbb1fa867ecb47b64a2d61d8b4af0db2",
+    "specialist_2025_models": "7fda34c40edbe55c0be5a5b401b1a222cb4f1998f0507a292b6c038a4f5aff12",
+    "specialist_2025_predictions": "7015516907f803bcfc00db8ccd42d7a6372daccc6dacbba357ba56a0a356ea73"
+  },
+  "2026_policy": {
+    "evaluated_for_failed_candidate": false,
+    "used_for_rescue_or_retuning": false
+  },
+  "interpretation": "Broad all-M5 tabular models and sleeve specialists can create one attractive 2024 low-volatility LONG subset, but it does not preserve density or profitability in unchanged 2025 confirmation. The current aggregated technical feature representation is not sufficient for a useful confirmed candidate.",
+  "next_action": "Evaluate a separately versioned sequence-native model that consumes normalized M5 bar paths rather than only aggregated indicators. Keep 2025 unavailable until the sequence architecture and 2024 selection are frozen.",
+  "controls": {"audit_only": true, "candidate_promoted": false, "model_promoted": false, "live_runtime_modified": false, "automatic_retraining": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
