@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3B",
+  "date": "2026-06-28",
+  "status": "SCORE_DECOMPOSITION_GRID_FROZEN_BEFORE_EVALUATION",
+  "parent": "GML1-MODEL-NATIVE-M5-V3",
+  "reason": "The pre-registered three-component consensus produced no 2024 sleeve passing the strict per-sleeve gate after causal OOF calibration. Before reading 2025, test whether one weak component is suppressing useful ranking information from another component.",
+  "unchanged": [
+    "all-M5 universe and exact-M1 labels",
+    "causal features and direction normalization",
+    "four fitted model families and parameters",
+    "2023 training and purged expanding OOF calibration",
+    "2024-only selection",
+    "retention fractions",
+    "one-position handling",
+    "strict per-sleeve and combined gates",
+    "2025 confirmation gate",
+    "2026 diagnostic-only policy"
+  ],
+  "score_forms": [
+    "P_ONLY",
+    "STRONG_ONLY",
+    "EXTREME_ONLY",
+    "P_STRONG_MIN",
+    "P_EXTREME_MIN",
+    "STRONG_EXTREME_MIN",
+    "P_STRONG_MEAN",
+    "P_EXTREME_MEAN",
+    "STRONG_EXTREME_MEAN",
+    "TWO_OF_THREE_MEDIAN"
+  ],
+  "component_scale": "Each component is an empirical percentile against the same direction-and-sleeve purged 2023 OOF prediction distribution.",
+  "selection": "Use the frozen V3 per-sleeve retention and gate procedure without modification.",
+  "future_data": {"2025_used": false, "2026_used": false},
+  "controls": {"audit_only": true, "automatic_promotion": false, "live_runtime_modified": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
