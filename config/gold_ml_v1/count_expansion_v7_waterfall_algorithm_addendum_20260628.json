@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-V7",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_WATERFALL_COMPUTE",
+  "exact_m1": "decision_time must exactly match an M1 bar-open timestamp",
+  "independent_one_position": "Sort each benchmark by decision_time. Admit when decision_time is at or after the prior admitted decision_time plus that benchmark's fixed planned horizon.",
+  "global_same_decision": "Collapse all benchmarks at one decision_time into one simultaneous group.",
+  "global_one_position": "When free, admit the simultaneous group and block until decision_time plus the longest planned horizon among benchmarks in that group. This is a conservative deterministic count, not a performance selection.",
+  "year_attribution": "Count an admitted event in the year of its decision_time.",
+  "outcomes_used": false
+}
