@@ -33,22 +33,22 @@
       "GML1_MT5_LIVE_CONFIRM=I_UNDERSTAND_THIS_SENDS_REAL_MT5_ORDERS",
       "GML1_MT5_SYMBOL is set",
       "positive volume exists for every enabled sleeve",
-      "no configuration error",
-      "historical candidate win-rate profile is available by default"
+      "no configuration error"
     ]
   },
   "win_rate_contract": {
-    "historical_source": "outputs/gold_ml_v1/research_challenger_local_runtime/research_challenger_local_2024.csv through research_challenger_local_2026.csv",
-    "historical_scope": "candidate-specific component rows for 2024, 2025 and 2026 partial",
-    "historical_win_definition": "r > 0",
-    "live_source": "live_execution_ledger.csv closed MT5 positions",
-    "live_net_profit": "profit + commission + swap + fee",
-    "live_win_definition": "net_profit > 0",
-    "notification_fields": [
-      "historical auto-execution win rate and sample count for the candidate sleeve",
-      "live MT5 realized win rate and closed-order count for the candidate sleeve"
-    ],
-    "missing_historical_default": "skip MT5 order and report SKIPPED_WIN_RATE_UNAVAILABLE"
+    "scope": "realized live MT5 closed orders only",
+    "grouping": "candidate sleeve comp",
+    "source": "live_execution_ledger.csv closed MT5 positions",
+    "net_profit": "profit + commission + swap + fee",
+    "win_definition": "net_profit > 0",
+    "notification_field": "live MT5 realized win rate and closed-order count for the candidate sleeve",
+    "before_first_close": "display 集計前（決済済み0件）",
+    "dry_run_counted": false,
+    "signal_only_counted": false,
+    "historical_results_read": false,
+    "historical_results_displayed": false,
+    "historical_results_used_as_order_gate": false
   },
   "execution_contract": {
     "order_type": "current-market order only",
