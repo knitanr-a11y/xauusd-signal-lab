@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3",
+  "date": "2026-06-28",
+  "status": "UNIVERSE_FEATURE_MODEL_AND_SELECTION_CONTRACT_FROZEN_BEFORE_LABEL_GENERATION",
+  "purpose": "Generate useful higher-density candidate sleeves directly from every causal M5 decision row rather than attempting to rescue failed hand-written structural candidates.",
+  "universe": {
+    "decision_rows": "every completed M5 bar after full causal feature warmup",
+    "decision_time": "M5 bar-open plus five minutes",
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "risk_unit": "ATR14 from last closed M15 bar",
+    "directions": ["LONG","SHORT"],
+    "label": "unchanged 6-hour TP1.5 SL1.0 exact-M1 bid/ask label with Strong and Extreme costs"
+  },
+  "mutually_exclusive_sleeves": {
+    "HIGH_VOL": "lagged M5 ATR percentile >= 0.67",
+    "LOW_VOL": "lagged M5 ATR percentile <= 0.33",
+    "TREND": "remaining rows with abs(H1 EMA20-EMA50 gap / H1 ATR14) >= 0.25 and H4 gap has the same sign or is within 0.10 ATR of neutral",
+    "RANGE_TRANSITION": "all remaining rows",
+    "candidate_ids": [
+      "GML1-MN3-HIGH_VOL-L","GML1-MN3-HIGH_VOL-S",
+      "GML1-MN3-LOW_VOL-L","GML1-MN3-LOW_VOL-S",
+      "GML1-MN3-TREND-L","GML1-MN3-TREND-S",
+      "GML1-MN3-RANGE_TRANSITION-L","GML1-MN3-RANGE_TRANSITION-S"
+    ]
+  },
+  "causal_feature_groups": {
+    "m5": ["returns_1_2_4_8_16_32","ATR14_and_ATR_percentile","EMA20_50_200_gaps_and_slopes","RSI14","MACD_histogram","Bollinger_width_and_location","Donchian_20_50_distances","body_range_wicks_close_location","tick_volume_ratios","spread_over_ATR","time_sin_cos"],
+    "m15": ["returns_1_4_16","ATR14","EMA20_50_200_gaps_and_slopes","RSI14","MACD_histogram","Bollinger_width_and_location","Donchian_20_distances","body_range_wicks_close_location"],
+    "h1": ["returns_1_4_12","ATR14","EMA20_50_200_gaps_and_slopes","RSI14","Bollinger_width_and_location","Donchian_20_distances"],
+    "h4": ["returns_1_6_24","ATR14","EMA20_50_200_gaps_and_slopes","RSI14","Bollinger_width_and_location"],
+    "d1": ["returns_1_5_20","ATR14","EMA20_50_200_gaps_and_slopes","RSI14","previous_closed_day_high_low_mid_distances"]
+  },
+  "direction_normalization": "Price-directional features are multiplied by +1 for LONG and -1 for SHORT; absolute volatility and shape features are unchanged.",
+  "model_grid": [
+    {"id":"LGBM_SMALL","classifier":"LGBMClassifier n_estimators=300 learning_rate=0.03 num_leaves=15 min_child_samples=100 reg_lambda=2","strong_regressor":"LGBMRegressor same","extreme_regressor":"LGBMRegressor same"},
+    {"id":"LGBM_MEDIUM","classifier":"LGBMClassifier n_estimators=500 learning_rate=0.025 num_leaves=31 min_child_samples=150 reg_lambda=5","strong_regressor":"LGBMRegressor same","extreme_regressor":"LGBMRegressor same"},
+    {"id":"XGB_SMALL","classifier":"XGBClassifier n_estimators=400 max_depth=3 learning_rate=0.03 min_child_weight=20 subsample=0.8 colsample_bytree=0.8 reg_lambda=5","strong_regressor":"XGBRegressor same","extreme_regressor":"XGBRegressor same"},
+    {"id":"LINEAR_BASELINE","classifier":"LogisticRegression C=0.1 l2","strong_regressor":"Ridge alpha=10","extreme_regressor":"Ridge alpha=10"}
+  ],
+  "score": {
+    "components": ["positive_Strong_R_probability_percentile","predicted_Strong_R_percentile","predicted_Extreme_R_percentile"],
+    "forms": ["minimum_of_three","mean_minus_0.5_standard_deviation","mean_minus_1.0_standard_deviation"],
+    "reference_distribution": "training-period prediction distribution for the same direction and sleeve",
+    "future_distribution_used": false
+  },
+  "chronology": {
+    "training": "2023 resolved rows only",
+    "model_score_and_retention_selection": "2024 only",
+    "confirmation": "refit selected unchanged algorithm on all rows resolved by 2025-01-01, apply unchanged score formula and percentile retention to 2025",
+    "diagnostic": "refit selected unchanged algorithm on all rows resolved by 2026-01-01, apply unchanged configuration to 2026",
+    "2026_used_for_selection": false,
+    "analyst_blind_2026_claim": false
+  },
+  "retention_fractions_per_sleeve": [0.0025,0.005,0.01,0.02,0.03,0.05,0.075,0.10],
+  "one_position": {
+    "scope": "separate candidate sleeve",
+    "entry_rule": "admit only when prior admitted exit_time <= current decision_time",
+    "same_decision_cross_sleeve": "regimes are mutually exclusive per direction",
+    "long_short_simultaneous": "reported separately and portfolio-arbitrated only after confirmation"
+  },
+  "selection_gate_2024": {
+    "minimum_trades_per_sleeve": 60,
+    "minimum_total_trades_all_sleeves": 300,
+    "strong_positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "strong_total_r_positive": true,
+    "extreme_pf_minimum": 1.1,
+    "extreme_total_r_positive": true,
+    "objective_after_gate": "maximize minimum of Strong and Extreme PF, then Strong PF, positive rate, Strong R, count and lower complexity"
+  },
+  "confirmation_gate_2025": {
+    "minimum_total_trades": 300,
+    "strong_positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "strong_total_r_positive": true,
+    "extreme_pf_minimum": 1.1,
+    "extreme_total_r_positive": true,
+    "maximum_negative_months": 6
+  },
+  "artifact_requirements": ["all_M5_feature_registry","all_direction_labels","training_split_manifest","every_model_and_preprocessor","all_scores","selected_configuration","per_sleeve_and_combined_metrics","artifact_hashes"],
+  "controls": {"audit_only":true,"automatic_retraining":false,"automatic_promotion":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
