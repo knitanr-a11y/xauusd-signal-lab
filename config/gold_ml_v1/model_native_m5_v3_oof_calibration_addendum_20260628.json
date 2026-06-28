@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3",
+  "date": "2026-06-28",
+  "status": "PURGED_EXPANDING_OOF_REFERENCE_FROZEN_BEFORE_OOF_RESULTS",
+  "reason": "In-sample 2023 prediction percentiles were too optimistic relative to 2024 predictions, causing the selected retention fractions to admit far fewer rows than intended. The models and 2024 predictions remain unchanged; only the training-reference score distribution is replaced with causal out-of-fold predictions.",
+  "folds": [
+    {"train_end":"2023-04-01 00:00:00","validation_start":"2023-04-01 06:00:00","validation_end":"2023-07-01 00:00:00"},
+    {"train_end":"2023-07-01 00:00:00","validation_start":"2023-07-01 06:00:00","validation_end":"2023-10-01 00:00:00"},
+    {"train_end":"2023-10-01 00:00:00","validation_start":"2023-10-01 06:00:00","validation_end":"2024-01-01 00:00:00"}
+  ],
+  "purge": "Six wall-clock hours between each training end and validation start.",
+  "reference_distribution": "Concatenated OOF predictions from the three validation blocks, separately by direction and sleeve.",
+  "unchanged": ["feature registry","labels","model families and parameters","score formulas","retention fractions","per-sleeve gates","2024 selection objective","2025 confirmation gate"],
+  "2025_or_2026_used": false,
+  "controls": {"audit_only":true,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
