@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-RAWPATH-V4",
+  "date": "2026-06-28",
+  "status": "RAW_PATH_SPECIALIST_EVALUATION_COMPLETE_NO_CONFIRMED_SURVIVOR",
+  "representation": {
+    "sequence_bars": 32,
+    "sequence_minutes": 160,
+    "channels_per_bar": 10,
+    "valid_rows": 215531,
+    "invalid_gap_or_warmup_rows": 27505,
+    "raw_path_matrix_sha256": "5f5bc6d3c705dbb435794ff467c885896a40e4295014cf6560b6b945725afe49",
+    "valid_mask_sha256": "9cbfb9f8ef4ac58b794d7702bfec4490ebae01a21ea785088fe1e00f8b49a4cd"
+  },
+  "models": ["LGBM_RAWPATH","CATBOOST_RAWPATH","LINEAR_RAWPATH"],
+  "sleeves": 8,
+  "2024_individual_survivors": 1,
+  "2024_selected": {
+    "candidate_id": "GML1-MN4-LOW_VOL-L",
+    "model_id": "LINEAR_RAWPATH",
+    "score_form": "MEAN_LCB_10",
+    "retention_fraction": 0.01,
+    "count": 63,
+    "strong_positive_rate": 0.5873015873015873,
+    "strong_pf": 1.8655818006381302,
+    "strong_r": 21.501911998023072,
+    "extreme_pf": 1.5259025687084777,
+    "extreme_r": 14.49128410184819,
+    "combined_minimum_three_sleeve_gate_pass": false
+  },
+  "2025_unchanged_confirmation": {
+    "training_rows_resolved_through_2024": 34907,
+    "reference": "complete 2024 out-of-sample raw prediction distribution",
+    "frozen_retention_fraction": 0.01,
+    "raw_rows_above_gate": 1,
+    "one_position_count": 1,
+    "strong_positive_rate": 0.0,
+    "strong_pf": 0.0,
+    "strong_r": -1.037736029512304,
+    "extreme_pf": 0.0,
+    "extreme_r": -1.0754720590245925,
+    "confirmation_pass": false
+  },
+  "artifact_hashes": {
+    "2024_selection": "e93daeb180b6637ff929e71e0be3dcc27738b588fd277c357d17e4f58ac3b44f",
+    "2025_result": "162bf77dbe7f2f7d0799aeeab464b199d6398237cb17fa755e9aa9e545671806",
+    "2025_models": "6aa82e033dea5a8697bc28f427ef5f7aa5c02fa4208ab0574b41cc36ace67742",
+    "2025_predictions": "2b636593b701f599d4e95809559a38c91c2cdc5422bba279d59e1a86357435e2"
+  },
+  "2026_policy": {"evaluated": false, "used_for_rescue_or_retuning": false},
+  "interpretation": "Raw M5 path ordering improves 2024 LOW_VOL-L separation, but the selected score distribution does not remain calibrated or dense in 2025. The candidate is not useful enough for promotion.",
+  "next_action": "Do not continue threshold search on the same OHLCV representation. The next separately versioned research should add causal M1 microstructure features such as spread distribution, tick-volume bursts, realized-volatility path, directional efficiency and sub-bar rejection before considering another candidate search.",
+  "controls": {"audit_only": true, "candidate_promoted": false, "model_promoted": false, "live_runtime_modified": false, "automatic_retraining": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
