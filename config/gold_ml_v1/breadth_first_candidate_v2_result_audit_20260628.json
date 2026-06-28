@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-BREADTH-FIRST-CANDIDATE-V2",
+  "date": "2026-06-28",
+  "status": "STRUCTURAL_BREADTH_EVALUATION_COMPLETE_NO_STRICT_SURVIVOR",
+  "raw_rows": 53645,
+  "resolved_rows": 53501,
+  "candidate_one_position_rows": 38682,
+  "directional_candidates": 52,
+  "density_qualified_candidates": 33,
+  "strict_survivors": [],
+  "premium_survivors": [],
+  "best_observed_candidate": {
+    "candidate_id": "GML1-BF2B-16-L",
+    "2024": {"count": 101, "strong_positive_rate": 0.45544554455445546, "strong_pf": 0.9584164151023427, "strong_r": -2.5798491817420013, "extreme_pf": 0.7664027497325158},
+    "2025": {"count": 131, "strong_positive_rate": 0.48854961832061067, "strong_pf": 1.2511460122777414, "strong_r": 17.57223675732171, "extreme_pf": 1.0812879668617215},
+    "combined_strong_pf": 1.1135715565688438,
+    "admission_pass": false
+  },
+  "artifact_hashes": {
+    "raw_registry": "5e6fe84f1a426df38ad319ed69dd4031a64cd99b3375b5387a33e5b63b9561b1",
+    "labeled_resolved": "TO_BE_RECORDED_IN_LOCAL_MANIFEST",
+    "candidate_admission_table": "TO_BE_RECORDED_IN_LOCAL_MANIFEST"
+  },
+  "interpretation": "M5 entry breadth increased proposal density, but the pre-registered structural families do not contain enough stable standalone edge to justify ML rescue or portfolio admission.",
+  "next_action": "Preserve V2 as rejected structural breadth research. Start a separately versioned all-M5 model-native candidate generator with fixed causal features, 2023 training, 2024 threshold selection, unchanged 2025 confirmation, and 2026 diagnostic only.",
+  "controls": {"audit_only":true,"candidate_promoted":false,"ml_run_on_failed_structures":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
