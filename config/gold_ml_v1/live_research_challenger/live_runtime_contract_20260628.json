@@ -5,6 +5,9 @@
     "type": "persistent_bat_loop",
     "default_interval_seconds": 2,
     "interval_environment_variable": "GML1_LIVE_INTERVAL_SECONDS",
+    "poll_phase": "wall_clock_anchored",
+    "sleep_from_previous_completion": false,
+    "missed_poll_behavior": "skip_to_next_wall_clock_boundary",
     "lightweight_probe_only_when_unchanged": true,
     "heavy_runtime_only_on_file_change": true,
     "idle_heartbeat_ticks_default": 30,
@@ -35,6 +38,8 @@
   "synchronization_contract": {
     "source_cursor_advances_only_when_source_row_exists": true,
     "exact_m1_entry_row_required": true,
+    "m1_written_before_m15": "retain_m15_cursor_and_process_when_m15_signature_later_changes",
+    "multiple_delayed_source_rows": "process_all_rows_after_cursor_in_time_order",
     "m15_four_hour_boundary_waits_for_h4": true,
     "h1_daily_boundary_waits_for_d1": true,
     "weekend_gap_boundary_absence_does_not_block": true,

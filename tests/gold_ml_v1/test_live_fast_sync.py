@@ -99,7 +99,15 @@ def test_weekend_gap_without_boundary_does_not_wait() -> None:
     assert len(uncapped) == len(source)
 
 
-def test_contract_uses_two_second_lightweight_poll() -> None:
+def test_wall_clock_boundary_wait_does_not_accumulate_runtime() -> None:
+    probe = live_module("probe_live_inputs")
+    period = 2_000_000_000
+    assert probe.wait_nanoseconds_to_next_boundary(10_250_000_000, period) == 1_750_000_000
+    assert probe.wait_nanoseconds_to_next_boundary(13_900_000_000, period) == 100_000_000
+    assert probe.wait_nanoseconds_to_next_boundary(14_005_000_000, period) == 1_995_000_000
+
+
+def test_contract_uses_two_second_anchored_lightweight_poll() -> None:
     repo = Path(__file__).resolve().parents[2]
     contract = json.loads(
         (
@@ -108,6 +116,9 @@ def test_contract_uses_two_second_lightweight_poll() -> None:
         ).read_text(encoding="utf-8")
     )
     assert contract["runner"]["default_interval_seconds"] == 2
+    assert contract["runner"]["poll_phase"] == "wall_clock_anchored"
+    assert contract["runner"]["sleep_from_previous_completion"] is False
     assert contract["runner"]["lightweight_probe_only_when_unchanged"] is True
     assert contract["performance_contract"]["candidate_rules_simplified"] is False
     assert contract["synchronization_contract"]["weekend_gap_boundary_absence_does_not_block"] is True
+    assert contract["synchronization_contract"]["m1_written_before_m15"].startswith("retain_m15_cursor")
