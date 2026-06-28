@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-ML-HEALTH-SYNERGY-V7",
+  "date": "2026-06-28",
+  "status": "HEALTH_VARIANTS_FROZEN_BEFORE_REPLAY",
+  "base_filter": "V6 selected static-stateful consensus with fixed 2024 thresholds",
+  "shadow_history": "All base-filter-passing proposals after same-decision direction dedup, including proposals blocked by the health gate.",
+  "history_update": "Only shadow rows with exit_time <= current decision_time enter health state.",
+  "warmup_resolved_rows": 10,
+  "health_scope": "global shadow model health",
+  "variants": [
+    "NONE",
+    "LAST20_MEAN_STRONG_GT_0",
+    "EWMA_STRONG_ALPHA_0p10_GT_0",
+    "LAST20_AND_EWMA_BOTH_GT_0",
+    "BETA_POSTERIOR_20PCT_WIN_PROB_GT_0p45"
+  ],
+  "selection": "2024 only, minimum 80 admitted trades, target gate first, then Strong PF, positive rate, Strong R, count and simpler variant",
+  "confirmation": "2025 unchanged",
+  "diagnostic": "2026 unchanged",
+  "2026_used_for_selection": false,
+  "controls": {"audit_only":true,"health_gate_live_enabled":false,"model_promoted":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
