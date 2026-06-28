@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-RAWPATH-V4",
+  "date": "2026-06-28",
+  "status": "RAW_PATH_REPRESENTATION_AND_MODEL_CONTRACT_FROZEN_BEFORE_MATRIX_BUILD",
+  "parent": "GML1-MODEL-NATIVE-M5-V3C",
+  "hypothesis": "Aggregated indicators lose the ordering and shape of recent price movement. Preserve the last 32 completed M5 bars as a direction-normalized raw path and train separate direction-regime specialist models.",
+  "time_and_sequence": {
+    "decision_time": "M5 bar-open plus five minutes",
+    "sequence_length_bars": 32,
+    "sequence_duration_minutes": 160,
+    "lag_zero": "the M5 bar that has just closed at decision_time",
+    "gap_rule": "A sequence is valid only when all 32 decision timestamps are exactly five minutes apart. No sequence crosses a weekend, data gap or missing bar.",
+    "future_or_open_bar": false,
+    "exact_m1_required": true,
+    "next_m1_fallback": false
+  },
+  "per_bar_channels": [
+    "directional_log_return_1",
+    "directional_signed_body_over_ATR14",
+    "range_over_ATR14",
+    "directionally_favorable_wick_over_ATR14",
+    "directionally_adverse_wick_over_ATR14",
+    "directional_close_location",
+    "directional_close_minus_EMA20_over_ATR14",
+    "tick_volume_ratio20",
+    "spread_over_ATR14",
+    "lagged_ATR_percentile_256"
+  ],
+  "direction_normalization": {
+    "LONG": "direction sign +1; favorable wick is lower wick; close location is close_location",
+    "SHORT": "direction sign -1; favorable wick is upper wick; close location is 1-close_location",
+    "absolute_channels": "range, volume, spread and ATR percentile are not sign-flipped"
+  },
+  "context": "Append the unchanged V3 causal M5/M15/H1/H4/D1 context vector available at decision_time.",
+  "sleeves": [
+    "GML1-MN4-HIGH_VOL-L","GML1-MN4-HIGH_VOL-S",
+    "GML1-MN4-LOW_VOL-L","GML1-MN4-LOW_VOL-S",
+    "GML1-MN4-TREND-L","GML1-MN4-TREND-S",
+    "GML1-MN4-RANGE_TRANSITION-L","GML1-MN4-RANGE_TRANSITION-S"
+  ],
+  "training": {
+    "separate_model_per_sleeve": true,
+    "targets": ["strong_r_positive_probability","strong_r","extreme_r"],
+    "base_sample_weight": "clip(abs(strong_r),0.25,2.0)",
+    "overlap_weight": "divide by the number of same-sleeve training decisions in the same 30-minute bucket",
+    "training_rows_removed_for_overlap": false,
+    "minimum_2023_training_rows": 3000,
+    "purged_oof": "three expanding 2023 folds with six-hour purge, unchanged from V3"
+  },
+  "model_grid": [
+    {"id":"LGBM_RAWPATH","classifier":"LGBMClassifier 350 trees learning_rate 0.025 leaves 15 min_child 100 L2 5","regressors":"LGBMRegressor same"},
+    {"id":"CATBOOST_RAWPATH","classifier":"CatBoostClassifier 300 iterations depth 5 learning_rate 0.03 L2 7 random_strength 1","regressors":"CatBoostRegressor same"},
+    {"id":"LINEAR_RAWPATH","classifier":"LogisticRegression C 0.05 L2","regressors":"Ridge alpha 20"}
+  ],
+  "score_forms": [
+    "P_ONLY","STRONG_ONLY","EXTREME_ONLY",
+    "P_STRONG_MIN","P_EXTREME_MIN","STRONG_EXTREME_MIN",
+    "P_STRONG_MEAN","P_EXTREME_MEAN","STRONG_EXTREME_MEAN",
+    "TWO_OF_THREE_MEDIAN","MIN3","MEAN_LCB_05","MEAN_LCB_10"
+  ],
+  "retention_fractions": [0.0025,0.005,0.01,0.02,0.03,0.05,0.075,0.10,0.15,0.20],
+  "selection_2024": {
+    "per_sleeve_minimum_trades": 60,
+    "per_sleeve_strong_positive_rate_minimum": 0.50,
+    "per_sleeve_strong_pf_minimum": 1.5,
+    "per_sleeve_strong_r_positive": true,
+    "per_sleeve_extreme_pf_minimum": 1.0,
+    "per_sleeve_extreme_r_positive": true,
+    "combined_minimum_enabled_sleeves": 3,
+    "combined_minimum_trades": 300,
+    "combined_strong_positive_rate_minimum": 0.60,
+    "combined_strong_pf_minimum": 2.0,
+    "combined_extreme_pf_minimum": 1.1
+  },
+  "confirmation_2025": {
+    "architecture_model_score_and_retention_unchanged": true,
+    "each_enabled_sleeve_strong_pf_minimum": 1.5,
+    "combined_strong_pf_minimum": 2.0,
+    "combined_strong_positive_rate_minimum": 0.60,
+    "2025_used_for_selection": false
+  },
+  "2026_used_for_selection": false,
+  "controls": {"audit_only": true, "automatic_promotion": false, "live_runtime_modified": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
