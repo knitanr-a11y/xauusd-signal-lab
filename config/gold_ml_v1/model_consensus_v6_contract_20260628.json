@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-CONSENSUS-V6",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_EVALUATION",
+  "inputs": ["V4 static annual score","V5 stateful monthly score","V2 matched-rule count"],
+  "score_forms": ["minimum","mean","minimum_minus_disagreement","mean_minus_disagreement_and_rule_risk"],
+  "disagreement_penalties": [0.0,0.25,0.5,1.0],
+  "rule_penalties": [0.0,0.05,0.1,0.2],
+  "probability_agreement_thresholds": [0.3,0.4,0.5,0.6,0.7],
+  "retention_fractions": [0.05,0.1,0.15,0.2,0.25,0.35,0.5],
+  "threshold_modes": ["GLOBAL","SEPARATE_LONG_SHORT"],
+  "selection_year": 2024,
+  "confirmation_year": 2025,
+  "diagnostic_year": 2026,
+  "minimum_trades": 100,
+  "target_positive_rate": 0.6,
+  "target_strong_pf": 2.0,
+  "target_extreme_pf": 1.0,
+  "2026_used_for_selection": false,
+  "controls": {"audit_only":true,"model_promoted":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
