@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-BREADTH-FIRST-CANDIDATE-V2",
+  "date": "2026-06-28",
+  "status": "M5_DECISION_LABEL_EXTENSION_FROZEN_BEFORE_LABEL_GENERATION",
+  "parent_label_contract": {
+    "path": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+    "blob_sha": "30ab773d1ba01047469eb9a0a661480bc634ae31",
+    "label_id": "MLR1_LABEL_6H_TP1P5_SL1P0_ATR14"
+  },
+  "extension_label_id": "GML1_BF2_M5_DECISION_6H_TP1P5_SL1P0_LAST_CLOSED_M15_ATR14",
+  "reason": "Breadth-first candidates decide every five minutes, while the original frozen registry contained M15 decision rows. The execution and outcome definitions remain unchanged; only new exact-M1 decision timestamps are evaluated.",
+  "entry": {
+    "decision_time": "M5 bar-open plus five minutes",
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "long": "exact M1 bid open plus exact M1 spread times 0.01",
+    "short": "exact M1 bid open"
+  },
+  "risk_unit": {
+    "source": "ATR14 from the most recent M15 bar whose close time is less than or equal to decision_time",
+    "future_or_open_m15_allowed": false,
+    "target_atr": 1.5,
+    "protective_atr": 1.0,
+    "horizon_hours": 6
+  },
+  "execution": {
+    "same_m1_priority": "PROTECTIVE",
+    "long_touch": "M1 bid high and low",
+    "short_touch": "M1 ask high and low reconstructed from contemporaneous spread",
+    "protective_gap_fill": true,
+    "target_gap_fill": true,
+    "time_exit": "last M1 close whose bar closes at or before the six-hour wall-clock horizon"
+  },
+  "costs": {
+    "base": {"spread_multiplier": 1.0, "entry_slippage_price": 0.0, "exit_slippage_price": 0.0},
+    "strong": {"spread_multiplier": 2.0, "entry_slippage_price": 0.1, "exit_slippage_price": 0.1},
+    "extreme": {"spread_multiplier": 3.0, "entry_slippage_price": 0.2, "exit_slippage_price": 0.2}
+  },
+  "resolved_only": true,
+  "unresolved_rule": "No-hit proposal whose six-hour horizon extends beyond the final observed M1 close remains UNRESOLVED and is excluded from performance.",
+  "evaluation_scope": {
+    "labels_generated_for_all_frozen_raw_rows_with_exact_m1": true,
+    "candidate_selection_limited_to_density_qualified_candidates": true,
+    "2024_and_2025_used_for_candidate_admission": true,
+    "2026_diagnostic_only": true
+  },
+  "controls": {
+    "audit_only": true,
+    "labels_generated_at_contract_creation": false,
+    "outcomes_read_at_contract_creation": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
