@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-HYBRID-META-ML-V4",
+  "date": "2026-06-28",
+  "status": "MODEL_BEHAVIOR_AND_SELECTION_CONTRACT_FROZEN_BEFORE_TRAINING",
+  "purpose": "Search for synergy between direction-normalized causal features, global and specialist models, classification and expected-return prediction, uncertainty filtering, and prior loss-rule risk flags.",
+  "chronology": {
+    "train_and_behavior_fit": "2023 resolved rows only",
+    "configuration_and_threshold_selection": "2024 only",
+    "confirmation": "refit selected fixed configuration through 2024 resolved rows and apply unchanged thresholds to 2025",
+    "2026": "refit selected fixed configuration through 2025 resolved rows and apply unchanged thresholds as diagnostic only",
+    "resolved_only": true,
+    "2026_used_for_selection": false,
+    "automatic_retraining": false
+  },
+  "new_causal_features": {
+    "direction_sign": "LONG=+1 SHORT=-1",
+    "direction_normalized": ["h1_gap_atr","h4_gap_atr","m15_signed_body_atr14","m15_close_location_centered","m15_ema20_ema50_gap_atr14","m15_bb20_close_location","m15_log_return_4","m15_log_return_16","m15_rsi14_centered","m15_macd_hist_atr14"],
+    "absolute_state": ["abs_h1_gap_atr","abs_h4_gap_atr","abs_m15_return_4","abs_m15_return_16","abs_m15_body_atr14"],
+    "rule_risk": "twelve frozen V2 rule flags plus total matched-rule count; used as input only, never hard exclusion"
+  },
+  "model_components": [
+    "global probability classifier",
+    "global Strong-R regressor",
+    "global Extreme-R regressor",
+    "direction-specific classifier and regressors",
+    "candidate-specific classifier and regressors when training support is at least 80 rows"
+  ],
+  "specialist_shrinkage": {
+    "direction_weight": 0.35,
+    "candidate_weight_formula": "min(0.45, training_rows/(training_rows+250))",
+    "remaining_weight": "global",
+    "missing_specialist": "global fallback"
+  },
+  "component_models": [
+    {"id":"LOGISTIC_RIDGE","classifier":"LogisticRegression C=0.1 l2","regressor":"Ridge alpha=10"},
+    {"id":"HGB_SMALL","classifier":"HistGradientBoostingClassifier leaf_nodes=7 min_leaf=40","regressor":"HistGradientBoostingRegressor leaf_nodes=7 min_leaf=40"},
+    {"id":"EXTRA_TREES","classifier":"ExtraTreesClassifier 400 trees max_depth=5 min_leaf=20","regressor":"ExtraTreesRegressor 400 trees max_depth=5 min_leaf=20"}
+  ],
+  "score_behaviors": [
+    "probability_only",
+    "expected_strong_r_only",
+    "expected_extreme_r_only",
+    "probability_and_expected_strong_consensus",
+    "probability_strong_extreme_consensus",
+    "lower_confidence_consensus_using_disagreement_penalty"
+  ],
+  "selection_2024": {
+    "layer": "score_filter_then_cross_family_dedup_then_candidate_one_position",
+    "minimum_trades": 100,
+    "probability_thresholds": [0.4,0.45,0.5,0.55,0.6,0.65,0.7],
+    "score_retention_fractions": [0.1,0.15,0.2,0.25,0.35,0.5,0.65],
+    "disagreement_penalties": [0.0,0.25,0.5,1.0],
+    "objective_order": ["Strong positive rate >= 0.60 and Strong PF >= 2 and Extreme PF >= 1","higher minimum of Strong PF and Extreme PF","higher Strong PF","higher positive rate","higher total Strong R","more trades","simpler model and behavior"]
+  },
+  "confirmation_2025": {
+    "minimum_trades": 100,
+    "positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "strong_total_r_positive": true,
+    "extreme_pf_minimum": 1.0,
+    "extreme_total_r_positive": true
+  },
+  "controls": {"audit_only":true,"live_runtime_modified":false,"model_promoted":false,"automatic_retraining":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
