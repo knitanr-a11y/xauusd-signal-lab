@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "FROZEN_BEFORE_2024_SELECTION_RESULTS",
+  "rule": "The two exit contracts attached to the same structure and direction are alternative executions of the same entry stream. A portfolio may contain at most one of them.",
+  "mutual_exclusion_groups": [
+    ["SWEEP_FAST-L","SWEEP_MEDIUM-L"],
+    ["SWEEP_FAST-S","SWEEP_MEDIUM-S"],
+    ["WICK_FAST-L","WICK_MEDIUM-L"],
+    ["WICK_FAST-S","WICK_MEDIUM-S"],
+    ["FLOW_MEDIUM-L","FLOW_STANDARD-L"],
+    ["FLOW_MEDIUM-S","FLOW_STANDARD-S"],
+    ["VOL_STANDARD-L","VOL_EXTENDED-L"],
+    ["VOL_STANDARD-S","VOL_EXTENDED-S"]
+  ],
+  "portfolio_choice": "Within each group, keep only the higher-ranked sleeve option under the frozen per-sleeve ordering before constructing strict or fallback portfolios.",
+  "individual_reporting": "All sixteen sleeves remain individually reported.",
+  "audit_only": true
+}
