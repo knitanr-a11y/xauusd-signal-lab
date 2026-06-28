@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6",
+  "date": "2026-06-28",
+  "status": "NON_PROMOTABLE_FALLBACK_RULE_FROZEN_BEFORE_2024_OPTION_RESULTS",
+  "strict_gate_priority": true,
+  "fallback_used_only_if_no_strict_2024_option_passes": true,
+  "fallback_eligibility": {
+    "minimum_combined_trades": 100,
+    "minimum_active_sleeves": 3,
+    "minimum_remaining_fraction_of_base": 0.30
+  },
+  "fallback_order": [
+    "higher minimum of Strong PF and Extreme PF",
+    "higher Strong PF",
+    "higher Strong positive rate",
+    "higher Strong R",
+    "more trades",
+    "smaller prune fraction",
+    "lower model complexity",
+    "simpler risk score form"
+  ],
+  "later_replay": {
+    "selected model, risk score form and prune fraction unchanged": true,
+    "2025 reported": true,
+    "2026 reported": true,
+    "promotion_allowed": false,
+    "2025_or_2026_used_for_rescue": false
+  },
+  "controls": {
+    "audit_only": true,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
