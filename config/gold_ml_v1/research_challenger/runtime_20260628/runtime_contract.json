@@ -1,0 +1,49 @@
+{
+  "system_id": "GML1-RESEARCH-CHALLENGER-LOCAL-RUNTIME-20260628",
+  "mode": "historical_parity_audit_only",
+  "historical_input": {
+    "directory_name": "gold_v3_2023_2026",
+    "files": [
+      "gold_v3_2023_2026_m1.csv",
+      "gold_v3_2023_2026_m5.csv",
+      "gold_v3_2023_2026_m15.csv",
+      "gold_v3_2023_2026_h1.csv",
+      "gold_v3_2023_2026_h4.csv",
+      "gold_v3_2023_2026_d1.csv"
+    ]
+  },
+  "live_input": {
+    "directory": "MT5 MQL5/Files",
+    "files": [
+      "goldsharp_m1.csv",
+      "goldsharp_m5.csv",
+      "goldsharp_m15.csv",
+      "goldsharp_h1.csv",
+      "goldsharp_h4.csv",
+      "goldsharp_d1.csv"
+    ],
+    "used_by_this_runtime": false
+  },
+  "sleeves": {
+    "A_CORE": {"candidate_id": "GML1-WATCH-022-C", "source": "raw", "live_eligible": false},
+    "B_STATE": {"candidate_id": "GML1-H1D1-STATEFUL-REENTRY24-C", "source": "raw", "live_eligible": false},
+    "P16": {"candidate_id": "GML1-PROV-016-APPROX", "source": "raw_pre_ml_plus_historical_truth_gate", "live_eligible": false},
+    "P18": {"candidate_id": "GML1-PROV-018-APPROX", "source": "raw", "live_eligible": false},
+    "P19": {"candidate_id": "GML1-PROV-019-APPROX", "source": "raw_pre_ml_plus_historical_truth_gate", "live_eligible": false},
+    "W024A": {"candidate_id": "GML1-WATCH-024-A", "source": "raw", "live_eligible": false}
+  },
+  "expected_final": {
+    "2024": {"trades": 271, "profit_factor": 2.494488621652696, "total_r": 137.48083552627205, "max_drawdown_r": 5.907692307692287},
+    "2025": {"trades": 402, "profit_factor": 2.0121618989110295, "total_r": 148.09279029902123, "max_drawdown_r": 7.384615384615387},
+    "2026_partial": {"trades": 101, "profit_factor": 1.8772867024210496, "total_r": 42.055774842215214, "max_drawdown_r": 6.7997924973867985}
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "p16_live": false,
+    "p19_live": false
+  }
+}
