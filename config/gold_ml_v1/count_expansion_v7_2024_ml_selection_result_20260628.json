@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "NO_STRICT_2024_ML_SURVIVOR_FALLBACK_FROZEN_BEFORE_2025_2026",
+  "strict_sleeves": 0,
+  "minimum_retention_fraction": 0.20,
+  "best_2024_individual": {
+    "sleeve_id": "VOL_EXTENDED-L",
+    "model": "LINEAR_V7",
+    "score_form": "STRONG_ONLY",
+    "retention": 0.20,
+    "count": 837,
+    "strong_positive_rate": 0.350060,
+    "strong_pf": 0.979485,
+    "strong_R": -11.408066,
+    "extreme_pf": 0.807336
+  },
+  "fallback_diagnostic_portfolio": {
+    "sleeves": ["VOL_EXTENDED-L", "FLOW_STANDARD-L", "FLOW_STANDARD-S"],
+    "count": 4206,
+    "strong_positive_rate": 0.358298,
+    "strong_pf": 0.813017,
+    "strong_R": -510.408236,
+    "extreme_pf": 0.670242,
+    "promotable": false
+  },
+  "2025_or_2026_read_before_freeze": false,
+  "audit_only": true,
+  "current_sleeves_unchanged": true
+}
