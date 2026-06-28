@@ -4,6 +4,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..\..") do set "REPO_ROOT=%%~fI"
 set "RUN_ONCE=%SCRIPT_DIR%run_live_once.bat"
+set "ROTATE_LOG=%SCRIPT_DIR%rotate_live_loop_log.bat"
 set "STOP_FILE=%SCRIPT_DIR%STOP_LIVE_LOOP"
 set "LOCK_DIR=%SCRIPT_DIR%live_loop.lock"
 set "OUTPUT_DIR=%REPO_ROOT%\outputs\gold_ml_v1\live_research_challenger"
@@ -40,6 +41,7 @@ if errorlevel 1 (
 )
 
 if exist "%STOP_FILE%" del /q "%STOP_FILE%" >nul 2>&1
+if exist "%ROTATE_LOG%" call "%ROTATE_LOG%" "%OUTPUT_DIR%"
 
 >>"%LOOP_LOG%" echo [%date% %time%] LOOP_START interval_seconds=%GML1_LIVE_INTERVAL_SECONDS%
 echo ============================================================
@@ -54,6 +56,7 @@ echo.
 
 :LOOP
 if exist "%STOP_FILE%" goto STOPPED
+if exist "%ROTATE_LOG%" call "%ROTATE_LOG%" "%OUTPUT_DIR%"
 
 set "RUN_STARTED=%date% %time%"
 >>"%LOOP_LOG%" echo [!RUN_STARTED!] RUN_ONCE_START
