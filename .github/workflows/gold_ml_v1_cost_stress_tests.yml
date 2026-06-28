@@ -64,12 +64,15 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_discord.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_mt5.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_execution.py
+          python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_execution_supervisor.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/run_live_once.py
           python -m py_compile scripts/gold_ml_v1/run_next_local.py
       - name: Test governance guardrails
         run: python -m unittest tests/gold_ml_v1/test_exploration_guardrails.py -v
       - name: Test live Discord and MT5 execution adapter
-        run: python -m pytest tests/gold_ml_v1/test_live_execution_delivery.py -q
+        run: |
+          python -m pytest tests/gold_ml_v1/test_live_execution_delivery.py -q
+          python -m pytest tests/gold_ml_v1/test_live_execution_supervisor.py -q
       - name: Test cost stress contract
         run: python -m unittest tests/gold_ml_v1/test_cost_stress_contract.py -v
       - name: Test cost stress core registry
