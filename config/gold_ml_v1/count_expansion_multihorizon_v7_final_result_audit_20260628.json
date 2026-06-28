@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "CURRENT_DATA_ONLY_COUNT_EXPANSION_COMPLETE_NO_NEW_SLEEVE_PROMOTION",
+  "current_four_exact_reconstruction": {
+    "source": "Official PR63 raw-engine builders and PR64 live position contracts",
+    "known_2026_after_april_parity": {"A_CORE":"6/6","B_STATE":"4/4","P18":"2/2","W024A":"2/2"},
+    "independent_one_position": {
+      "all_years": {"count":532,"positive_rate":0.6578947368,"pf":1.9936317565,"R":178.8916220929,"max_dd":5.0},
+      "2023": {"count":87,"positive_rate":0.6666666667,"pf":2.1458606064,"R":32.0674380112},
+      "2024": {"count":136,"positive_rate":0.6764705882,"pf":2.1501062136,"R":50.6046733993},
+      "2025": {"count":245,"positive_rate":0.6408163265,"pf":1.8342803184,"R":72.6263436396},
+      "2026_through_0619": {"count":64,"positive_rate":0.671875,"pf":2.1234841449,"R":23.5931670428}
+    },
+    "sleeve_counts": {
+      "2024":{"A_CORE":18,"B_STATE":62,"P18":47,"W024A":9},
+      "2025":{"A_CORE":59,"B_STATE":86,"P18":81,"W024A":19},
+      "2026_through_0619":{"A_CORE":22,"B_STATE":27,"P18":6,"W024A":9}
+    },
+    "portfolio_concurrency": {
+      "cap_1":{"count":494,"pf":1.9289835230,"R":158.8916220929},
+      "cap_2":{"count":531,"pf":1.9880773781,"R":177.8916220929,"rejected":1},
+      "cap_3":{"count":532,"pf":1.9936317565,"R":178.8916220929,"rejected":0},
+      "cap_4":{"count":532,"pf":1.9936317565,"R":178.8916220929,"rejected":0}
+    },
+    "interpretation": "The live runtime already uses independent one-position per sleeve. The four current sleeves are not reduced by a global one-position gate. A portfolio cap of two would have removed only one historical trade, but no runtime change is authorized."
+  },
+  "shorter_horizon_variants": {
+    "A_CORE_SHORT":{"2024_count_delta":1,"2024_pf":2.789882,"2025_count_delta":1,"2025_pf":1.962488,"combined_pf":2.129403,"meaningful_count_gain":false},
+    "B_STATE_SHORT":{"2024_count_delta":0,"2025_count_delta":0},
+    "P18_SHORT":{"2024_count_delta":0,"2025_count_delta":0},
+    "W024A_SHORT":{"2024_count_delta":0,"2025_count_delta":0},
+    "decision":"No shorter-horizon variant is promoted. A_CORE adds only two trades across 2024-2025 and lowers the full-period four-sleeve R."
+  },
+  "new_multihorizon_sleeves": {
+    "raw_rows":332432,
+    "directional_sleeves":16,
+    "exact_m1_missing":0,
+    "raw_strict_survivors":0,
+    "best_raw":"VOL_EXTENDED-L; 2024 PF 0.8295, 2025 PF 0.8903",
+    "ml_minimum_retention":0.20,
+    "ml_strict_2024_survivors":0,
+    "best_ml_2024":"VOL_EXTENDED-L; 837 trades, PF 0.9795",
+    "fallback_2025":{"count":6519,"strong_pf":0.851779,"strong_R":-628.515},
+    "fallback_2026":{"count":3497,"strong_pf":0.896294,"strong_R":-230.465},
+    "decision":"No new multi-horizon or ML-ranked sleeve is promoted."
+  },
+  "artifact_hashes": {
+    "current_four_official_independent_csv":"60afe513b2dfea4ad1a9c39d9e739cd40f2cfcfb58856b47d85c221e7c9c87e2",
+    "current_four_official_metrics_csv":"56e730ffb13649f3fa5ace2b2f7637ec9542b8ab230b3092eeac0138229b5468",
+    "multihorizon_labeled_csv_gz":"0d1be984ced78a0da4a3ca2e374f5acd983fd1b3e9a59cea243b9165a61e046a",
+    "ml_metrics_2025_2026_csv":"07d7ba309811fbe9f1dd2206afcd743fdc67f5aa0b16846a68cbc55e95257e79",
+    "short_variant_comparison_csv":"30778106c7a1909276a77d29096e69c3dc4da97882c0669ca58b2f25d4554e6b"
+  },
+  "decision": {
+    "new_candidate_promoted":false,
+    "current_four_modified":false,
+    "old_data_required_immediately":false,
+    "recommended_next":"Run the exact current four prospectively on post-2026-06-19 closed data. Add 2021-2022 only if more independent research sleeves are still required after prospective accumulation."
+  },
+  "controls": {
+    "audit_only":true,
+    "automatic_retraining":false,
+    "automatic_promotion":false,
+    "live_runtime_modified":false,
+    "live_ready":false,
+    "final_signal":false,
+    "discord":false,
+    "mt5_order":false
+  }
+}
