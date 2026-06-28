@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-HYBRID-META-ML-V4",
+  "date": "2026-06-28",
+  "status": "SELECTION_IMPROVED_CONFIRMATION_FAILED_NO_PROMOTION",
+  "selected": {
+    "model_id": "LOGISTIC_RIDGE",
+    "architecture": "GLOBAL_ONLY",
+    "behavior": "PSE_MEAN_LCB",
+    "disagreement_penalty": 1.0,
+    "retention_fraction": 0.10,
+    "numeric_score_threshold": 0.8600426863174562,
+    "probability_percentile_threshold": 0.4
+  },
+  "selection_2024": {
+    "count": 159,
+    "strong_positive_rate": 0.610062893081761,
+    "strong_pf": 1.900437124726884,
+    "strong_r": 58.147124283014996,
+    "extreme_pf": 1.5534631349113805,
+    "extreme_r": 39.6593768291399,
+    "negative_months": 0,
+    "target_60pct_pf2_reached": false
+  },
+  "confirmation_2025": {
+    "count": 354,
+    "strong_positive_rate": 0.4124293785310734,
+    "strong_pf": 0.8944092658324879,
+    "strong_r": -23.137198393403942,
+    "extreme_pf": 0.7898720282185753,
+    "extreme_r": -49.29442495565602,
+    "negative_months": 7,
+    "gate_pass": false
+  },
+  "diagnostic_2026": {
+    "count": 182,
+    "strong_positive_rate": 0.4010989010989011,
+    "strong_pf": 0.9297808546651138,
+    "strong_r": -7.951750671853002,
+    "extreme_pf": 0.8719426572113899,
+    "extreme_r": -15.040498372961991,
+    "negative_months": 3
+  },
+  "finding": "Direction-normalized features and multi-objective confidence scoring materially improved 2024, but specialist models were not selected and the fixed annual model did not generalize. The next valid hypothesis is causal resolved-history state plus scheduled refitting, not greater static model capacity.",
+  "artifact_hashes": {
+    "scores": "a41dd2b40523f78ddd6138eb1a38efc0325ccf84347aa72808173b96566ca3b3",
+    "selection_model": "d88f64e8a6544779ac9d66a34560aca06476b5b732a44e50d04cf766bfacfd02",
+    "confirmation_model": "006da8bf70f53d44ffe4eaad8a88e7b3e0ec78cba03ebc399a0619a31d785605",
+    "diagnostic_model": "c08afbf19258789e960e4b055e4059ed8602b7c339317c5bcb07f1e88812d11e",
+    "selection_grid": "9845862bc243b74262a15dbbd34f5220015d5b1061f1c96f0810080e4a526819",
+    "result": "73646a8fddefc790795636d191e4a11080b63317a4bdda1dbc299a3e0754725b"
+  },
+  "controls": {"audit_only":true,"model_promoted":false,"live_runtime_modified":false,"automatic_retraining":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
