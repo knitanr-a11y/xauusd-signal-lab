@@ -1,147 +1,79 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
-  "date": "2026-06-28",
-  "status": "POST_FREEZE_EVALUATION_METHOD_FROZEN_BEFORE_LABEL_JOIN_AND_PERFORMANCE_REVIEW",
+  "date": "2026-06-29",
+  "status": "INVALIDATED_METHOD_NOT_COMPLIANT_AND_RAW_REGISTRY_REBUILD_PENDING",
+  "invalidation_reasons": [
+    "The prior raw proposal registry was generated with a state-machine implementation that violated the frozen no-same-bar-rearm rule.",
+    "The prior evaluation chronology was a fixed 2023 train, 2024 threshold, 2025 confirmation and 2026 shadow split, not the expanding purged walk-forward required by the authoritative handoff and initial discovery contract.",
+    "No deterministic label-join/evaluation implementation, purge logic, split manifest, all-proposal score registry or model pipeline artifact was committed with the summaries."
+  ],
   "label_source": {
     "contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
     "contract_blob_sha": "30ab773d1ba01047469eb9a0a661480bc634ae31",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
     "label_id": "MLR1_LABEL_6H_TP1P5_SL1P0_ATR14",
     "join_keys": ["decision_time", "direction"],
     "resolved_only": true,
     "exact_m1_required": true,
     "next_m1_fallback": false,
-    "target_atr": 1.5,
-    "protective_atr": 1.0,
-    "horizon_hours": 6,
     "same_m1_priority": "PROTECTIVE"
   },
-  "reporting_layers": {
-    "raw_resolved": "All frozen raw proposals with exact M1 and a resolved ML-03 label; cross-family simultaneity remains present.",
-    "cross_family_dedup": {
-      "key": ["decision_time", "direction"],
-      "selection": "highest proposal_strength_label_free",
-      "tie_break": "lexicographically smallest candidate_id",
-      "performance_not_used": true
-    },
-    "candidate_one_position": {
-      "scope": "separately within each candidate_id",
-      "sort": ["decision_time", "candidate_id"],
-      "admit_rule": "admit only when prior admitted exit_time <= current decision_time",
-      "open_trade_future_result_early_use": false
-    },
-    "health_gate": {
-      "enabled": false,
-      "report_label": "NOT_APPLIED",
-      "future_rule_if_later_added": "Only labels with exit_time <= current decision_time may enter history."
-    },
-    "resolved_only_live_replay": "Every admission or model decision at time t uses only source features at t and results whose exit_time <= t."
+  "label_join_blocked_until": [
+    "repaired raw proposal registry is persisted and hash-frozen",
+    "complete label-free density and overlap audit is persisted and hash-frozen",
+    "2026 closed-bar prefix replay passes on the repaired generator",
+    "a separate reproducible expanding purged walk-forward contract is frozen without using performance to choose its folds, purge, features, model or thresholds",
+    "the evaluation implementation and tests are committed"
+  ],
+  "mandatory_reporting_layers": {
+    "raw_resolved": true,
+    "cross_family_dedup": true,
+    "candidate_one_position": true,
+    "dedup_then_one_position": true,
+    "health_gate": "REPORT_SEPARATELY_OR_EXPLICITLY_NOT_APPLIED",
+    "resolved_only_live_replay": "Every decision at time t may use only source features available at t and prior outcomes with exit_dt <= t."
   },
-  "robustness_slices": [
+  "mandatory_robustness_slices": [
     "full_period",
-    "2024",
-    "2025",
-    "2026_prospective",
     "recent_months",
     "high_volatility",
     "low_volatility",
     "long",
     "short",
     "month_by_month",
-    "negative_month_count"
+    "negative_month_count",
+    "Strong cost",
+    "Extreme cost",
+    "incremental portfolio value against A_CORE, B_STATE, P18 and W024A"
   ],
   "machine_learning": {
-    "allowed": true,
-    "role": "candidate-quality ranking after deterministic structural proposal generation",
-    "training_universe": "cross_family_dedup resolved proposals only",
-    "target": "strong_r",
-    "categorical_features": [
-      "candidate_id",
-      "direction",
-      "volatility_regime",
-      "trend_regime"
+    "allowed_now": false,
+    "reason": "Definitions and label-free artifacts must be rebuilt and frozen first, and a compliant reproducible walk-forward contract must be committed before training.",
+    "required_future_artifacts": [
+      "model pipeline",
+      "scaler or preprocessing pipeline",
+      "exact feature order",
+      "calibration if used",
+      "numeric threshold",
+      "all-proposal score registry",
+      "split and purge manifest",
+      "model manifest",
+      "artifact hashes"
     ],
-    "numeric_feature_order": [
-      "proposal_strength_label_free",
-      "m15_atr_pct_lag1_256",
-      "h1_gap_atr",
-      "h4_gap_atr",
-      "m15_signed_body_atr14",
-      "m15_range_atr14",
-      "m15_close_location",
-      "m15_ema20_ema50_gap_atr14",
-      "m15_bb20_width_atr14",
-      "m15_bb20_close_location",
-      "m15_log_return_4",
-      "m15_log_return_16",
-      "m15_rsi14_centered",
-      "m15_macd_hist_atr14",
-      "m15_tick_volume_ratio20_lagbase",
-      "m15_spread_atr14",
-      "time_server_hour_sin",
-      "time_server_hour_cos",
-      "time_weekday_sin",
-      "time_weekday_cos"
-    ],
-    "pipeline": {
-      "numeric": "SimpleImputer(strategy=median) then StandardScaler",
-      "categorical": "OneHotEncoder(handle_unknown=ignore,sparse_output=false)",
-      "model": "HistGradientBoostingRegressor",
-      "model_parameters": {
-        "loss": "squared_error",
-        "learning_rate": 0.05,
-        "max_iter": 200,
-        "max_leaf_nodes": 15,
-        "min_samples_leaf": 30,
-        "l2_regularization": 1.0,
-        "random_state": 20260628
-      }
-    },
-    "chronology": {
-      "train": "2023 resolved proposals only",
-      "threshold_selection": "2024 resolved proposals only",
-      "confirmation": "2025 resolved proposals only with model and threshold unchanged",
-      "prospective": "2026 proposals in timestamp order with model and threshold unchanged",
-      "2026_used_for_tuning": false,
-      "automatic_retraining": false
-    },
-    "threshold_search": {
-      "candidate_retention_fractions": [0.25, 0.35, 0.5, 0.65, 0.8, 1.0],
-      "numeric_threshold_source": "2024 prediction quantile corresponding to each retention fraction",
-      "selection_objective": "maximum 2024 total strong_r after cross-family dedup and one-position",
-      "minimum_2024_kept_rows": 100,
-      "tie_break": "higher retention fraction, then lower numeric threshold"
-    },
-    "confirmation_gate_2025": {
-      "strong_total_r_gt": 0.0,
-      "strong_pf_gt": 1.0,
-      "extreme_total_r_gt": 0.0,
-      "extreme_pf_gt": 1.0,
-      "minimum_kept_rows": 100,
-      "if_failed": "ML_FILTER_REJECTED; report 2026 shadow diagnostics but do not use it as selected candidate policy"
-    },
-    "required_artifacts": [
-      "model_pipeline",
-      "exact_feature_order",
-      "numeric_threshold",
-      "retention_fraction",
-      "all_proposal_score_registry",
-      "split_manifest",
-      "model_manifest",
-      "artifact_hashes"
-    ]
+    "automatic_retraining": false
   },
   "controls": {
     "audit_only": true,
-    "labels_joined_at_contract_creation": false,
-    "performance_reviewed_at_contract_creation": false,
-    "model_trained_at_contract_creation": false,
-    "automatic_retraining": false,
+    "labels_joined_after_invalidation": false,
+    "performance_review_authorized": false,
+    "model_training_authorized": false,
     "automatic_promotion": false,
     "automatic_registration": false,
     "live_ready": false,
     "final_signal": false,
     "discord": false,
     "mt5_order": false
-  }
+  },
+  "next_action": "Freeze a separate compliant expanding purged walk-forward evaluation contract only after the repaired label-free registry is complete."
 }
