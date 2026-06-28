@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-M5-V3C",
+  "date": "2026-06-28",
+  "status": "ONE_INDIVIDUAL_SLEEVE_PASSED_2024_COMBINED_GATE_FAILED_BEFORE_2025",
+  "evaluated_models": ["LGBM_SPECIALIST","XGB_SPECIALIST","CATBOOST_SPECIALIST","LINEAR_SPECIALIST"],
+  "evaluated_sleeves": 8,
+  "score_forms": 13,
+  "retention_fractions": 10,
+  "combined_gate": {
+    "minimum_enabled_sleeves": 3,
+    "enabled_sleeves": 1,
+    "pass": false
+  },
+  "individual_2024_survivor": {
+    "candidate_id": "GML1-MN3-LOW_VOL-L",
+    "model_id": "CATBOOST_SPECIALIST",
+    "score_form": "P_STRONG_MIN",
+    "retention_fraction": 0.02,
+    "selection_reference_threshold": 0.9697452645329848,
+    "raw_rows_above_threshold": 430,
+    "one_position": {
+      "count": 66,
+      "strong_positive_rate": 0.5606060606060606,
+      "strong_pf": 1.7349497832932212,
+      "strong_r": 20.336490968017593,
+      "strong_negative_months": 3,
+      "extreme_positive_rate": 0.5454545454545454,
+      "extreme_pf": 1.3682417718106543,
+      "extreme_r": 11.579762592866105,
+      "extreme_negative_months": 4
+    }
+  },
+  "other_sleeves_passing_individual_gate": 0,
+  "2025_read_before_freeze": false,
+  "2026_used": false,
+  "controls": {"audit_only": true, "candidate_promoted": false, "live_runtime_modified": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
