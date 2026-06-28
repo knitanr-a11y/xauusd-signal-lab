@@ -14,7 +14,6 @@ if not defined GML1_LIVE_INTERVAL_SECONDS set "GML1_LIVE_INTERVAL_SECONDS=60"
 if not exist "%RUN_ONCE%" (
   echo ERROR: run_live_once.bat was not found.
   echo Expected: "%RUN_ONCE%"
-  echo The BAT loop exists, but the live one-shot runtime must be installed before use.
   echo.
   pause
   exit /b 2
@@ -65,6 +64,12 @@ set "RUN_ENDED=%date% %time%"
 if "!RUN_EXIT!"=="0" (
   echo [!RUN_ENDED!] PASS
   >>"%LOOP_LOG%" echo [!RUN_ENDED!] RUN_ONCE_PASS
+) else if "!RUN_EXIT!"=="5" (
+  echo [!RUN_ENDED!] DEFERRED - MT5 files or M1 entry row are not ready
+  >>"%LOOP_LOG%" echo [!RUN_ENDED!] RUN_ONCE_DEFERRED
+) else if "!RUN_EXIT!"=="4" (
+  echo [!RUN_ENDED!] BUSY - another one-shot process is running
+  >>"%LOOP_LOG%" echo [!RUN_ENDED!] RUN_ONCE_BUSY
 ) else (
   echo [!RUN_ENDED!] FAIL exit_code=!RUN_EXIT! - loop continues
   >>"%LOOP_LOG%" echo [!RUN_ENDED!] RUN_ONCE_FAIL exit_code=!RUN_EXIT!
