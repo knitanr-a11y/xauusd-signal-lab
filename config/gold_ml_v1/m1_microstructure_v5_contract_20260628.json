@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "FEATURE_EVENT_MODEL_AND_CHRONOLOGY_CONTRACT_FROZEN_BEFORE_BUILD",
+  "purpose": "Add causal M1 intrabar-path, spread and tick-volume information that is lost in M5 OHLCV aggregation, then search for sufficiently dense and stable event candidates without lowering the profitability gate.",
+  "time_contract": {
+    "csv_time": "MT5_SERVER_NAIVE_BAR_OPEN_TIME",
+    "m5_decision_time": "M5 bar-open plus five minutes",
+    "m1_feature_cutoff": "M1 bar-open plus one minute must be less than or equal to M5 decision_time",
+    "latest_valid_csv_row": "CLOSED_BY_CONTRACT",
+    "exact_entry_m1_required": true,
+    "next_m1_fallback": false,
+    "higher_timeframe_context": "Only bars whose close time is less than or equal to decision_time",
+    "same_m1_target_protective_priority": "PROTECTIVE"
+  },
+  "label": {
+    "entry": "Exact decision-time M1 bid open; LONG adds contemporaneous spread times 0.01",
+    "risk_unit": "ATR14 from the most recent closed M15 bar",
+    "target_atr": 1.5,
+    "protective_atr": 1.0,
+    "horizon_hours": 6,
+    "strong_cost": "2x spread plus 0.10 price entry and exit slippage",
+    "extreme_cost": "3x spread plus 0.20 price entry and exit slippage",
+    "resolved_only": true
+  },
+  "m1_windows_minutes": [5, 15, 30, 60],
+  "m1_feature_groups": {
+    "price_path": [
+      "net_log_return",
+      "sum_absolute_log_returns",
+      "realized_volatility",
+      "directional_efficiency",
+      "positive_return_fraction",
+      "sign_entropy",
+      "maximum_favorable_and_adverse_excursion_from_window_open",
+      "time_to_window_high_and_low",
+      "longest_same-sign_run",
+      "stagnant_return_fraction"
+    ],
+    "bar_shape": [
+      "mean_and_max_range",
+      "mean_absolute_body",
+      "upper_and_lower_wick_share",
+      "mean_close_location",
+      "directional_body_fraction",
+      "large_range_bar_count"
+    ],
+    "spread": [
+      "median",
+      "mean",
+      "maximum",
+      "90th_percentile",
+      "last_to_median_ratio",
+      "current_minus_median",
+      "expansion_count",
+      "normalization_after_burst_flag"
+    ],
+    "tick_volume": [
+      "sum",
+      "mean",
+      "maximum",
+      "90th_percentile",
+      "last_to_median_ratio",
+      "top_three_share",
+      "burst_count",
+      "volume_price_alignment"
+    ],
+    "micro_events": [
+      "prior_five_minute_high_sweep_reclaim_count",
+      "prior_five_minute_low_sweep_reclaim_count",
+      "consecutive_rejection_count",
+      "failed_break_count",
+      "inside_minute_count"
+    ],
+    "cross_window": [
+      "rv5_to_rv30",
+      "rv15_to_rv60",
+      "efficiency5_minus_efficiency30",
+      "volume5_to_volume30_rate",
+      "spread5_to_spread30_rate",
+      "return5_minus_scaled_return30"
+    ]
+  },
+  "label_free_event_families": [
+    "MS01_SPREAD_NORMALIZATION_CONTINUATION",
+    "MS02_VOLUME_BURST_CONTINUATION",
+    "MS03_LOW_VOLATILITY_RELEASE",
+    "MS04_HIGH_VOLATILITY_EXHAUSTION_RECLAIM",
+    "MS05_MICRO_SWEEP_RECLAIM",
+    "MS06_HIGH_EFFICIENCY_CONTINUATION",
+    "MS07_LOW_EFFICIENCY_FAILED_MOVE_REVERSAL",
+    "MS08_REALIZED_VOLATILITY_ACCELERATION",
+    "MS09_STAGNATION_BREAKOUT",
+    "MS10_REPEATED_REJECTION_REVERSAL",
+    "MS11_SPREAD_VOLUME_NORMALIZED_REENTRY",
+    "MS12_INTRABAR_WICK_IMBALANCE_REVERSAL"
+  ],
+  "event_threshold_source": "Rolling 256 completed M5 decisions of the same feature, excluding the current decision; thresholds use only fixed percentile bands 20, 33, 67, 80 and 90.",
+  "event_density_gate_before_labels": {
+    "minimum_2024": 60,
+    "minimum_2025": 60,
+    "minimum_combined_2024_2025": 200,
+    "maximum_single_month_share": 0.25,
+    "outcomes_used": false
+  },
+  "candidate_gate_after_labels": {
+    "minimum_2024": 60,
+    "minimum_2025": 60,
+    "minimum_combined_2024_2025": 150,
+    "strong_pf_2024_minimum": 1.5,
+    "strong_pf_2025_minimum": 1.5,
+    "strong_pf_combined_minimum": 1.7,
+    "strong_positive_rate_each_year_minimum": 0.50,
+    "strong_positive_rate_combined_minimum": 0.55,
+    "strong_r_each_year_positive": true,
+    "extreme_pf_each_year_minimum": 1.1,
+    "extreme_r_each_year_positive": true
+  },
+  "model_native_sleeves": [
+    "MICRO_HIGH_VOL_LONG","MICRO_HIGH_VOL_SHORT",
+    "MICRO_LOW_VOL_LONG","MICRO_LOW_VOL_SHORT",
+    "MICRO_DIRECTIONAL_LONG","MICRO_DIRECTIONAL_SHORT",
+    "MICRO_CHAOTIC_LONG","MICRO_CHAOTIC_SHORT"
+  ],
+  "model_grid": [
+    {"id":"LGBM_MICRO","classifier":"300 trees learning_rate 0.03 leaves 15 min_child 100 L2 5","regressors":"same"},
+    {"id":"CATBOOST_MICRO","classifier":"300 iterations depth 5 learning_rate 0.03 L2 7","regressors":"same"},
+    {"id":"LINEAR_MICRO","classifier":"LogisticRegression C 0.05 L2","regressors":"Ridge alpha 20"}
+  ],
+  "model_training": {
+    "separate_direction_sleeve_models": true,
+    "targets": ["strong_r_positive_probability","strong_r","extreme_r"],
+    "overlap_weight": "Clipped absolute Strong R divided by same-sleeve rows in each 30-minute decision bucket",
+    "purged_oof": "Three expanding 2023 folds with six-hour purge",
+    "score_forms": ["P_ONLY","STRONG_ONLY","EXTREME_ONLY","P_STRONG_MIN","P_EXTREME_MIN","STRONG_EXTREME_MIN","TWO_OF_THREE_MEDIAN","MIN3","MEAN_LCB_05","MEAN_LCB_10"],
+    "retention_fractions": [0.005,0.01,0.02,0.03,0.05,0.075,0.10,0.15,0.20],
+    "minimum_retention_fraction_for_confirmed_live_candidate": 0.02
+  },
+  "chronology": {
+    "feature_and_event_build": "2023 through 2026 closed data, without labels used for event definitions",
+    "training": "2023 resolved rows only",
+    "selection": "2024 only",
+    "confirmation": "2025 unchanged model family, event definition, score form and retention",
+    "diagnostic": "2026-01-01 through final closed data, unchanged after 2025 result",
+    "2026_used_for_selection_or_rescue": false,
+    "analyst_blind_2026_claim": false
+  },
+  "2026_reporting_required": [
+    "full-period count positive-rate Strong PF Strong R Extreme PF Extreme R",
+    "monthly metrics",
+    "LONG and SHORT",
+    "microstructure sleeve",
+    "candidate family",
+    "raw score distribution and admitted density",
+    "exact-M1 missing and unresolved counts"
+  ],
+  "controls": {
+    "audit_only": true,
+    "live_runtime_modified": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
