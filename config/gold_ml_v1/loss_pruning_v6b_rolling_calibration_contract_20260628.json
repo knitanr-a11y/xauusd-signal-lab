@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6B",
+  "date": "2026-06-28",
+  "status": "ROLLING_SCORE_CALIBRATION_GRID_FROZEN_BEFORE_RESULTS",
+  "parent_risk_model": "V6 selected CatBoost FULL_PROTECTIVE_LOSS probability model",
+  "purpose": "Separate loss-identification quality from annual risk-score scale drift by ranking each current risk score only against earlier candidate risk scores.",
+  "causal_rank": {
+    "scope": "global across the frozen five primary sleeves",
+    "history_windows_in_candidate_scores": [250,500,1000,2000],
+    "same_decision_rule": "All candidates sharing one decision_time are scored against history ending before that decision. Current scores are appended only after every candidate at that decision has been ranked.",
+    "history_contains_outcomes": false,
+    "history_contains": "Risk model probabilities for prior primary-gated candidates, including candidates later pruned.",
+    "2024_initial_history": "Frozen concatenated 2023 purged OOF full-loss probability predictions.",
+    "2025_initial_history": "Trailing selected-window primary candidate risk probabilities from 2024.",
+    "2026_initial_history": "Trailing selected-window primary candidate risk probabilities from 2025."
+  },
+  "prune_fractions": [0.20,0.30,0.40,0.50,0.60],
+  "2024_selection": {
+    "minimum_one_position_trades": 100,
+    "minimum_active_sleeves": 3,
+    "minimum_remaining_fraction": 0.30,
+    "target_strong_positive_rate": 0.60,
+    "target_strong_pf": 2.0,
+    "target_extreme_pf": 1.1,
+    "selection_order": [
+      "target gate pass",
+      "higher minimum of Strong PF and Extreme PF",
+      "higher Strong PF",
+      "higher positive rate",
+      "higher Strong R",
+      "more trades",
+      "smaller prune fraction",
+      "longer history window"
+    ]
+  },
+  "later_years": {
+    "selected window and prune fraction unchanged": true,
+    "2025_used_for_rescue": false,
+    "2026_used_for_rescue": false,
+    "promotion_allowed_only_if_2025_gate_passes": true
+  },
+  "controls": {
+    "audit_only": true,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
