@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-BREADTH-FIRST-CANDIDATE-V2",
+  "date": "2026-06-28",
+  "status": "RAW_REGISTRY_AND_DENSITY_QUALIFICATION_FROZEN_BEFORE_LABEL_JOIN",
+  "raw_registry": {
+    "rows": 53645,
+    "candidate_count": 52,
+    "long_rows": 33737,
+    "short_rows": 19908,
+    "first_decision": "2023-01-05 05:00:00",
+    "last_decision": "2026-06-19 19:05:00",
+    "exact_m1_missing": 141,
+    "sha256": "5e6fe84f1a426df38ad319ed69dd4031a64cd99b3375b5387a33e5b63b9561b1",
+    "dedup_applied": false,
+    "one_position_applied": false,
+    "labels_joined": false,
+    "outcomes_read": false
+  },
+  "density_rule": {
+    "minimum_2024": 60,
+    "minimum_2025": 60,
+    "minimum_combined_2024_2025": 200,
+    "qualified_count": 33,
+    "unqualified_count": 19
+  },
+  "density_qualified_candidates": [
+    "GML1-BF2-01-L","GML1-BF2-01-S","GML1-BF2-02-L","GML1-BF2-02-S",
+    "GML1-BF2-03-L","GML1-BF2-03-S","GML1-BF2-04-L","GML1-BF2-04-S",
+    "GML1-BF2-05-L","GML1-BF2-05-S","GML1-BF2-06-L",
+    "GML1-BF2-08-L","GML1-BF2-08-S","GML1-BF2-09-L",
+    "GML1-BF2-10-L","GML1-BF2-10-S","GML1-BF2-11-L","GML1-BF2-11-S",
+    "GML1-BF2-12-L","GML1-BF2-12-S","GML1-BF2-13-L","GML1-BF2-13-S",
+    "GML1-BF2-15-L",
+    "GML1-BF2B-06-L","GML1-BF2B-06-S","GML1-BF2B-09-L","GML1-BF2B-09-S",
+    "GML1-BF2B-14-L","GML1-BF2B-15-L","GML1-BF2B-16-L",
+    "GML1-BF2B-17-L","GML1-BF2B-17-S","GML1-BF2B-18-L"
+  ],
+  "density_unqualified_policy": "Preserve raw rows for audit, but do not use these candidates for performance selection, ML rescue, or promotion in this version.",
+  "overlap_audit": {
+    "same_decision_direction_groups_with_multiple_candidates": 13934,
+    "maximum_same_decision_direction_multiplicity": 10,
+    "cross_family_dedup_required_after_label_join": true
+  },
+  "concentration": {
+    "maximum_single_month_share": 0.20930232558139536,
+    "maximum_single_server_hour_share": 0.3548387096774194,
+    "hour_concentration_must_be_reported_per_candidate_after_label_join": true
+  },
+  "controls": {
+    "audit_only": true,
+    "no_more_density_revision_after_label_join": true,
+    "live_runtime_modified": false,
+    "candidate_stack_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
