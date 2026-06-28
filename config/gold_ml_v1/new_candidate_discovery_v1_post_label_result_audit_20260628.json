@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-28",
+  "status": "POST_FREEZE_LABEL_AND_ML_AUDIT_COMPLETE_NO_PROMOTION_AUDIT_ONLY",
+  "provenance": {
+    "raw_proposal_registry_sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
+    "evaluation_contract": "config/gold_ml_v1/new_candidate_discovery_v1_evaluation_contract_20260628.json",
+    "label_contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+    "label_builder_blob_sha": "0e64671c1f67490064e16d05570ceefd560a7c62",
+    "2026_role": "PROSPECTIVE_REPLAY_ONLY_NOT_USED_FOR_DEFINITION_THRESHOLD_OR_MODEL_SELECTION"
+  },
+  "resolved_join": {
+    "raw_proposals": 5180,
+    "resolved_labeled_rows": 5153,
+    "missing_exact_m1_or_unresolved": 27
+  },
+  "aggregate": {
+    "raw_resolved": {
+      "count": 5153,
+      "base": {"pf": 0.9681753202, "total_r": -97.113283, "max_dd_r": 257.569642},
+      "strong": {"pf": 0.7782240949, "total_r": -768.230836, "max_dd_r": 807.992146},
+      "extreme": {"pf": 0.6288710999, "total_r": -1439.34839, "max_dd_r": 1462.067298}
+    },
+    "cross_family_dedup": {
+      "count": 4725,
+      "base": {"pf": 0.9546692809, "total_r": -127.365861, "max_dd_r": 275.228568},
+      "strong": {"pf": 0.766496151, "total_r": -745.455431, "max_dd_r": 780.671969},
+      "extreme": {"pf": 0.6188088189, "total_r": -1363.545, "max_dd_r": 1383.41232}
+    },
+    "candidate_one_position": {
+      "count": 4424,
+      "base": {"pf": 0.9811382074, "total_r": -49.270343, "max_dd_r": 217.88456},
+      "strong": {"pf": 0.7904399987, "total_r": -620.648487, "max_dd_r": 670.359762},
+      "extreme": {"pf": 0.64014567, "total_r": -1192.026631, "max_dd_r": 1214.871031}
+    },
+    "dedup_then_candidate_one_position": {
+      "count": 4063,
+      "base": {"pf": 0.9685875338, "total_r": -75.652893, "max_dd_r": 229.42254},
+      "strong": {"pf": 0.7795647721, "total_r": -602.339534, "max_dd_r": 647.207696},
+      "extreme": {"pf": 0.6307940367, "total_r": -1129.026175, "max_dd_r": 1149.018986}
+    },
+    "health_gate": "NOT_APPLIED"
+  },
+  "validation_observation": {
+    "all_ten_candidates_negative_strong_r_in_2024": true,
+    "all_ten_candidates_strong_pf_below_one_in_2024": true,
+    "no_candidate_recommended_for_incremental_portfolio_admission": true,
+    "small_sample_warning": "NCD-003 became positive later but had negative 2024 validation and very small samples; 2025 or 2026 may not be used to rescue or retune it."
+  },
+  "machine_learning": {
+    "train_2023_rows": 1344,
+    "selected_2024_retention_fraction": 0.25,
+    "selected_numeric_threshold": 0.001823125891921401,
+    "selection_2024": {"kept": 311, "strong_pf": 0.7227714006, "strong_r": -58.27774, "extreme_pf": 0.5652068123, "extreme_r": -103.910102},
+    "confirmation_2025": {"kept": 404, "strong_pf": 1.0958429417, "strong_r": 22.182433, "extreme_pf": 0.94894578, "extreme_r": -12.802922, "gate_pass": false},
+    "prospective_2026_shadow": {"kept": 146, "strong_pf": 0.7190883681, "strong_r": -28.074404, "extreme_pf": 0.6724782833, "extreme_r": -34.012516},
+    "decision": "REJECT_ML_FILTER_NO_PROMOTION_NO_LIVE_USE"
+  },
+  "artifact_hashes": {
+    "labeled_raw_resolved_csv_gz": "7cf62f24adc40f1e935e7e5da2bb46e1ecf53876c627085f3606789f233bdc64",
+    "all_proposal_scores_csv_gz": "a2ee3465ded12ed0fe90cebc92150822327d8ed322fdcd17fa6b1bd9a27ea0d4",
+    "ml_pipeline_joblib": "e3b32e5dfc79f8bb9db1ad391bab1a1ac913f45a69a4cbb33173fc14750be705",
+    "evaluation_result_json": "2f3deae73bc094e1d7c12395b7f89d884109a311ef6e420ee1ef76e3c2a36dbc",
+    "evaluation_manifest_json": "22b17a0ac0560354b60c54a76d8d1c4b33fa405e26e01c62cb0595782faf70ca"
+  },
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_modified": false,
+    "live_runtime_modified": false,
+    "model_promoted": false,
+    "automatic_retraining": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  },
+  "next_action": "Do not add V1 candidates to the four-sleeve benchmark. Any later discovery must be separately versioned and may not use observed 2026 V1 outcomes for tuning."
+}
