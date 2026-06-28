@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6",
+  "date": "2026-06-28",
+  "status": "CAUSAL_LOSS_PRUNING_COMPLETE_NO_PROMOTION",
+  "theoretical_oracle": {
+    "interpretation": "Perfectly removing the worst actual Strong losses demonstrates that loss reduction could mathematically create PF2, but this uses future outcomes and is non-tradable.",
+    "2025_prune_40_percent": {"remaining":1356,"strong_positive_rate":0.604720,"strong_pf":2.259493,"strong_r":656.947272},
+    "2026_prune_40_percent": {"remaining":436,"strong_positive_rate":0.653670,"strong_pf":2.894046,"strong_r":272.907580}
+  },
+  "risk_discrimination": {
+    "target": "FULL_PROTECTIVE_LOSS strong_r <= -0.80",
+    "2024": {"rows":1316,"roc_auc":0.469001,"average_precision":0.533694},
+    "2025": {"rows":9359,"roc_auc":0.522148,"average_precision":0.637611},
+    "2026": {"rows":3642,"roc_auc":0.494152,"average_precision":0.584577},
+    "interpretation": "Risk ranking is near random and does not generalize."
+  },
+  "v6_prior_year_calibration": {
+    "selected_2024": {
+      "risk_model":"CATBOOST_RISK",
+      "risk_form":"FULL_LOSS_PROBABILITY",
+      "nominal_prune_fraction":0.50,
+      "count":326,
+      "strong_positive_rate":0.466258,
+      "strong_pf":1.178634,
+      "strong_r":30.519980,
+      "extreme_pf":1.045838,
+      "loss_r_capture":0.047505,
+      "winner_r_removed":0.016432,
+      "strict_pass":false
+    },
+    "2025": {
+      "base_count":2259,"base_strong_pf":0.814697,"base_strong_r":-268.060922,
+      "pruned_count":1609,"pruned_strong_pf":0.806480,"pruned_strong_r":-200.715369,
+      "pruned_extreme_pf":0.730382,"loss_r_capture":0.311590,"winner_r_removed":0.292448
+    },
+    "2026": {
+      "base_count":726,"base_strong_pf":0.953686,"base_strong_r":-20.250614,
+      "pruned_count":718,"pruned_strong_pf":0.948739,"pruned_strong_r":-22.207547,
+      "pruned_extreme_pf":0.907936,"loss_r_capture":0.005893,"winner_r_removed":0.013934
+    }
+  },
+  "v6b_rolling_calibration": {
+    "selected_2024": {
+      "history_window":2000,"prune_fraction":0.20,"count":336,
+      "strong_positive_rate":0.458333,"strong_pf":1.137196,"strong_r":24.480087,
+      "extreme_pf":1.009640,"strict_pass":false
+    },
+    "2025": {
+      "base_count":2259,"base_strong_pf":0.814697,
+      "pruned_count":1811,"pruned_strong_pf":0.843513,"pruned_strong_r":-179.536983,
+      "pruned_extreme_pf":0.767567,"loss_r_capture":0.218849,"winner_r_removed":0.192659
+    },
+    "2026": {
+      "base_count":726,"base_strong_pf":0.953686,
+      "pruned_count":633,"pruned_strong_pf":0.919603,"pruned_strong_r":-31.014071,
+      "pruned_extreme_pf":0.881386,"loss_r_capture":0.143941,"winner_r_removed":0.200758
+    }
+  },
+  "conclusion": "Loss pruning is mathematically capable of raising PF only if losses can be predicted with high precision. The available causal M1-to-D1 features cannot do so: the model removes winners at roughly the same or a higher rate than losses. Loss pruning may be retained only as a conservative exposure brake, not as an alpha or candidate-rescue mechanism.",
+  "decision": {
+    "loss_filter_promoted":false,
+    "candidate_promoted":false,
+    "current_four_sleeves_changed":false,
+    "2025_or_2026_used_for_retuning":false
+  },
+  "controls": {
+    "audit_only":true,
+    "automatic_retraining":false,
+    "automatic_promotion":false,
+    "live_runtime_modified":false,
+    "live_ready":false,
+    "final_signal":false,
+    "discord":false,
+    "mt5_order":false
+  }
+}
