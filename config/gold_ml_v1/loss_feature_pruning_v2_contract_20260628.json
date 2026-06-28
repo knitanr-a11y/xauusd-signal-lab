@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-FEATURE-PRUNING-V2",
+  "date": "2026-06-28",
+  "status": "RULE_SEARCH_CONTRACT_FROZEN_BEFORE_COMPOSITE_LOSS_RULE_MINING",
+  "parent": {
+    "stage": "GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY",
+    "raw_proposal_registry_sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
+    "labeled_resolved_registry_sha256": "7cf62f24adc40f1e935e7e5da2bb46e1ecf53876c627085f3606789f233bdc64",
+    "v1_modified": false
+  },
+  "purpose": "Find stable composite live-observable conditions that disproportionately contain losing proposals, remove only those conditions, and test whether the remaining strategy pool can reach at least 60 percent positive Strong-R trades and Strong PF at least 2.0 without using future information.",
+  "primary_target": {
+    "metric_layer": "cross_family_dedup_then_candidate_one_position",
+    "return_column": "strong_r",
+    "positive_rate_minimum": 0.60,
+    "profit_factor_minimum": 2.0,
+    "minimum_annual_confirmed_trades": 100,
+    "extreme_cost_required": true,
+    "extreme_profit_factor_minimum": 1.0,
+    "target_is_gate_not_guarantee": true
+  },
+  "chronology": {
+    "rule_discovery": "2023 resolved proposals only",
+    "rule_validation_and_subset_selection": "2024 resolved proposals only",
+    "confirmation": "2025 resolved proposals only with rules unchanged",
+    "2026": "fixed-rule closed-bar sequential diagnostic only",
+    "2026_used_for_rule_generation": false,
+    "2026_used_for_threshold_selection": false,
+    "2026_used_for_rule_subset_selection": false,
+    "important_limitation": "V1 aggregate 2026 outcomes were already observed before V2. Therefore V2 may replay 2026 mechanically but must not describe 2026 as a pristine analyst-blind holdout."
+  },
+  "universe": {
+    "entry": "V1 raw proposals with exact M1 and resolved frozen ML-03 labels",
+    "dedup_before_rule_mining": false,
+    "one_position_before_rule_mining": false,
+    "outcome_label": "strong_r > 0",
+    "loss_definition": "strong_r <= 0",
+    "live_observable_features_only": true,
+    "forbidden_features": [
+      "outcome",
+      "exit_time",
+      "holding_minutes",
+      "base_r",
+      "strong_r",
+      "extreme_r",
+      "future_price_or_indicator",
+      "future_confirmed_zigzag"
+    ]
+  },
+  "allowed_rule_features": {
+    "numeric": [
+      "proposal_strength_label_free",
+      "m15_atr_pct_lag1_256",
+      "h1_gap_atr",
+      "h4_gap_atr",
+      "m15_signed_body_atr14",
+      "m15_range_atr14",
+      "m15_close_location",
+      "m15_ema20_ema50_gap_atr14",
+      "m15_bb20_width_atr14",
+      "m15_bb20_close_location",
+      "m15_log_return_4",
+      "m15_log_return_16",
+      "m15_rsi14_centered",
+      "m15_macd_hist_atr14",
+      "m15_tick_volume_ratio20_lagbase",
+      "m15_spread_atr14"
+    ],
+    "categorical": [
+      "candidate_id",
+      "direction",
+      "volatility_regime",
+      "trend_regime",
+      "server_hour_bucket",
+      "server_weekday"
+    ]
+  },
+  "rule_generation": {
+    "numeric_thresholds": "20th 40th 60th and 80th percentiles computed from 2023 only, separately within candidate_id when support is sufficient and otherwise within direction",
+    "atomic_numeric_conditions": ["feature <= threshold", "feature > threshold"],
+    "atomic_categorical_conditions": ["feature == value"],
+    "conjunction_size": [2, 3],
+    "scope": ["candidate_specific", "direction_pooled"],
+    "discovery_minimum_rows": 20,
+    "discovery_minimum_loss_rate": 0.70,
+    "discovery_maximum_strong_pf": 0.60,
+    "discovery_total_strong_r_must_be_negative": true,
+    "duplicate_rule_resolution": "keep the simpler rule, then the larger discovery support, then lexical rule id"
+  },
+  "validation_gate_2024": {
+    "minimum_rule_hits": 12,
+    "minimum_loss_rate": 0.60,
+    "maximum_strong_pf": 0.90,
+    "total_strong_r_must_be_negative": true,
+    "same_direction_required": true,
+    "same_candidate_required_for_candidate_specific_rules": true
+  },
+  "rule_subset_selection_2024": {
+    "method": "deterministic forward greedy exclusion",
+    "starting_pool": "all validation-passing composite loss rules",
+    "maximum_rules": 12,
+    "minimum_remaining_rows": 100,
+    "minimum_remaining_fraction": 0.25,
+    "step_requirement": "Each added exclusion must improve both Strong positive rate and Strong PF on 2024 after cross-family dedup and candidate one-position.",
+    "objective_order": [
+      "reach Strong positive rate >= 0.60 and Strong PF >= 2.0",
+      "higher Strong PF",
+      "higher Strong positive rate",
+      "higher total Strong R",
+      "more remaining trades",
+      "fewer rules",
+      "lexical rule id"
+    ],
+    "stop": "Stop when no rule satisfies the step requirement or maximum_rules is reached."
+  },
+  "confirmation_2025": {
+    "rules_frozen": true,
+    "positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "strong_total_r_must_be_positive": true,
+    "extreme_pf_minimum": 1.0,
+    "extreme_total_r_must_be_positive": true,
+    "minimum_remaining_trades": 100,
+    "negative_month_count_reported": true
+  },
+  "reporting": {
+    "required_layers": [
+      "raw_resolved_before_filter",
+      "raw_resolved_after_filter",
+      "cross_family_dedup_after_filter",
+      "candidate_one_position_after_filter",
+      "dedup_then_candidate_one_position_after_filter",
+      "resolved_only_sequential_replay"
+    ],
+    "required_slices": [
+      "full_period",
+      "2023",
+      "2024",
+      "2025",
+      "2026_diagnostic",
+      "long",
+      "short",
+      "high_volatility",
+      "low_volatility",
+      "month_by_month",
+      "negative_month_count"
+    ],
+    "rule_registry_required": true,
+    "all_removed_proposal_registry_required": true,
+    "artifact_hashes_required": true
+  },
+  "controls": {
+    "audit_only": true,
+    "live_runtime_modified": false,
+    "candidate_stack_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
