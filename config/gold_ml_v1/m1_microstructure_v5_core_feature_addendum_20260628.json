@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "COMPACT_CORE_FEATURE_SET_FROZEN_BEFORE_COMPLETED_MODEL_RESULTS",
+  "reason": "The first full-feature LightGBM sleeve did not complete within the bounded run and produced no score or performance artifact.",
+  "per_window_features_for_5_15_30_60_minutes": [
+    "directional net return",
+    "realized volatility",
+    "directional efficiency",
+    "sign entropy",
+    "stagnant-return fraction",
+    "directional close location",
+    "favorable-minus-adverse wick share",
+    "spread last-to-median ratio",
+    "tick-volume last-to-median ratio",
+    "tick-volume maximum share",
+    "directional volume/return alignment",
+    "favorable and adverse sweep/reclaim counts"
+  ],
+  "cross_window_features": [
+    "five-to-thirty-minute realized-volatility rate",
+    "fifteen-to-sixty-minute realized-volatility ratio",
+    "five-minus-thirty-minute efficiency",
+    "five-to-thirty-minute volume rate",
+    "five-to-thirty-minute spread rate"
+  ],
+  "higher_timeframe_features_for_M15_H1_H4_D1": [
+    "ATR14",
+    "directional EMA20-minus-EMA50 gap over ATR",
+    "directional one-bar return",
+    "directional four-bar return",
+    "directional RSI14",
+    "directional body over ATR"
+  ],
+  "time_features": ["server-hour sine and cosine", "weekday sine and cosine"],
+  "excluded_from_model_but_retained_in_audit_registry": "All remaining causal V5 feature columns.",
+  "unchanged": [
+    "events",
+    "labels",
+    "model parameters and model grid",
+    "OOF folds",
+    "selection and confirmation gates",
+    "2026 diagnostic policy"
+  ],
+  "controls": {
+    "audit_only": true,
+    "future_performance_read_before_freeze": false,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
