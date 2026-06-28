@@ -4,27 +4,45 @@ Repository: `knitanr-a11y/xauusd-signal-lab`
 
 Current status:
 
-`GOLD_ML_V1_031_HANDOFF_READY_AUDIT_ONLY`
+`GML1_LIVE_AUDIT_4_SLEEVES_READY_P16_P19_HISTORICAL_ONLY_NEW_DISCOVERY_NEXT`
 
 Read `AGENTS.md` first, then:
 
-- `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GOLD_ML_V1_031_COMPLETE_20260626.md`
-- `config/gold_ml_v1/current_state_20260626.json`
-- `config/gold_ml_v1/local_execution_status_20260626.json`
-- `config/gold_ml_v1/next_local_action.json`
-- `config/gold_ml_v1/provisional_candidate_stack_20260624.json`
-- `config/gold_ml_v1/prov030a_rejection_20260626.json`
+1. `docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md`
+2. `config/gold_ml_v1/current_state_20260628.json`
+3. `config/gold_ml_v1/next_action_20260628.json`
+4. `config/gold_ml_v1/live_research_challenger/live_runtime_contract_20260628.json`
+5. `config/gold_ml_v1/research_challenger/runtime_20260628/runtime_contract.json`
+6. `docs/gold_ml_v1/CURRENT_GML1_HANDOFF_20260627.md`
+7. `config/gold_ml_v1/mlr1_candidate_ml_eligibility_20260627.json`
 
-The GitHub handoff document above is authoritative. Do not ask the user to download or paste a separate handoff file.
+The 2026-06-28 GitHub handoff is authoritative. Do not ask the user to paste or download another handoff.
 
-The local execution status file is authoritative for what was completed on the user PC and what is historical code or CI only.
+Current live audit runtime:
 
-Batch024 local reproduction is closed, not pending. Do not run, recreate, repair, reorganize, refactor or restart it.
+- A_CORE / WATCH-022-C
+- B_STATE / H1-D1 REENTRY24-C
+- P18 / PROV-018-APPROX
+- W024A / WATCH-024-A
 
-PROV-030-A local reproduction is rejected and closed, not pending. Do not run, recreate, repair, reorganize, refactor, rescue, re-evaluate or use it as fallback.
+P16 and P19 remain historical-only because their original fresh-inference ML artifacts were not recovered. Frozen exclusion times must never be used for future bars.
 
-The accumulated pool remains nine. There is no active new candidate.
+ML-05A density v2 is already completed. Do not repeat it.
 
-`RUN_GOLD_ML_V1_NEXT.bat` is status-only. No local action is active. Wait for explicit user direction.
+Next stage:
 
-CSV `time` is MT5 server bar-open time. Audit-only remains active. Live signals, MT5 orders, Discord, AI API, promotion and registration remain off.
+`GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY`
+
+Start by auditing current main and writing the new discovery contract before inspecting labels or candidate performance.
+
+Absolute restrictions:
+
+- GOLD_ML_V1 only
+- no GOLD V2 / old GOLD / DISC8 / Stage41
+- no Batch024 restart
+- no PROV-030-A restart or fallback
+- no P16/P19 model substitution
+- no final signal / Discord / MT5 order
+- audit-only remains active
+
+CSV `time` is MT5 server bar-open time. The latest valid row is closed by contract. Exact M1 entry is required and same-M1 collision resolves protective first.
