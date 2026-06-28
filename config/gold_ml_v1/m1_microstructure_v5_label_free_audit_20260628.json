@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "FEATURE_AND_RAW_EVENT_REGISTRIES_FROZEN_BEFORE_LABEL_JOIN",
+  "feature_registry": {
+    "rows": 245327,
+    "columns": 206,
+    "sha256": "7f1a146756469efe19bfb6c3efe33d5a1b9973c55047382e2313bfb5e3f1e339",
+    "exact_entry_m1_missing_rows": 908
+  },
+  "raw_event_registry": {
+    "rows": 201964,
+    "directional_candidates": 24,
+    "families": 12,
+    "sha256": "2175d0edadd55d87b7180df4e40b43b3296156d0eebc9eff432b70c3dfc356e7",
+    "labels_joined": false,
+    "outcomes_read": false,
+    "dedup_applied": false,
+    "one_position_applied": false
+  },
+  "density_gate": {
+    "minimum_2024": 60,
+    "minimum_2025": 60,
+    "minimum_combined_2024_2025": 200,
+    "qualified_candidates": 24,
+    "unqualified_candidates": 0,
+    "maximum_single_month_share_2024_2025": 0.08902275769745649
+  },
+  "year_totals": {
+    "2023": 55783,
+    "2024": 57990,
+    "2025": 57935,
+    "2026_through_final_closed_data": 30256
+  },
+  "2026_policy": {
+    "raw_events_generated": true,
+    "used_for_event_definition": false,
+    "used_for_density_revision": false,
+    "used_for_model_or_threshold_selection": false,
+    "performance_reporting_required_after_freeze": true
+  },
+  "controls": {
+    "audit_only": true,
+    "no_event_threshold_revision_after_label_join": true,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
