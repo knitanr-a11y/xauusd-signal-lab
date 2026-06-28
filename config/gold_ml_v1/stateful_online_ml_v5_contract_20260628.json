@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-STATEFUL-ONLINE-ML-V5",
+  "date": "2026-06-28",
+  "status": "CAUSAL_STATE_AND_SCHEDULED_REFIT_CONTRACT_FROZEN_BEFORE_REPLAY",
+  "hypothesis": "Static annual models fail because candidate quality changes through time. Add resolved-only virtual-history state and scheduled refitting while keeping all entry features causal.",
+  "history_source": {
+    "registry": "cross-family deduplicated V1 structural proposals",
+    "virtual_outcomes_allowed": true,
+    "update_rule": "A historical row enters state only when exit_time <= current decision_time.",
+    "same_decision_update": "All outcomes eligible at the decision time are applied before current features; current proposals are scheduled only after all current features are emitted.",
+    "future_or_open_outcomes": false
+  },
+  "state_scopes": ["global","direction","candidate_id","direction_x_volatility","candidate_x_volatility","candidate_x_trend"],
+  "state_features_per_scope": [
+    "log1p_resolved_count",
+    "beta_smoothed_positive_rate_last20",
+    "mean_strong_r_last10",
+    "mean_strong_r_last20",
+    "mean_strong_r_last50",
+    "mean_extreme_r_last20",
+    "ewma_strong_r_alpha_0p10",
+    "recent10_minus_recent50_strong_r",
+    "current_loss_streak_clipped10"
+  ],
+  "base_features": "V4 causal market features, direction-normalized features, and twelve V2 rule-risk flags",
+  "model_families": [
+    {"id":"LOGISTIC_RIDGE","classifier":"LogisticRegression C=0.1","strong_regressor":"Ridge alpha=10","extreme_regressor":"Ridge alpha=10"},
+    {"id":"EXTRA_TREES_STABLE","classifier":"ExtraTreesClassifier 300 trees depth=4 min_leaf=30","regressors":"ExtraTreesRegressor same parameters"}
+  ],
+  "architectures": ["GLOBAL_ONLY","GLOBAL_PLUS_DIRECTION_SHRINK_0p35"],
+  "scheduled_training_modes": [
+    "MONTHLY_EXPANDING_ALL_RESOLVED",
+    "MONTHLY_ROLLING_365D_RESOLVED",
+    "MONTHLY_EXPANDING_DECAY_HALF_LIFE_180D"
+  ],
+  "score_behaviors": ["PSE_MIN","PSE_MEAN_LCB"],
+  "retention_fractions": [0.05,0.10,0.15,0.20,0.25,0.35,0.50],
+  "probability_percentile_thresholds": [0.40,0.50,0.60,0.70],
+  "lcb_penalties": [0.0,0.5,1.0],
+  "chronology": {
+    "configuration_selection": "2024 monthly live-like replay",
+    "confirmation": "2025 monthly live-like replay with selected algorithm unchanged",
+    "diagnostic": "2026 monthly live-like replay only",
+    "2026_used_for_selection": false,
+    "minimum_initial_training_rows": 500
+  },
+  "selection_gate": {
+    "layer": "score_filter_then_cross_family_dedup_then_candidate_one_position",
+    "minimum_annual_trades": 100,
+    "strong_positive_rate": 0.60,
+    "strong_pf": 2.0,
+    "extreme_pf": 1.0,
+    "objective_after_gate": "maximize min(Strong PF, Extreme PF), then Strong PF, positive rate, total Strong R, count, simplicity"
+  },
+  "controls": {"audit_only":true,"scheduled_refit_live_enabled":false,"automatic_retraining":false,"model_promoted":false,"live_runtime_modified":false,"live_ready":false,"final_signal":false,"discord":false,"mt5_order":false}
+}
