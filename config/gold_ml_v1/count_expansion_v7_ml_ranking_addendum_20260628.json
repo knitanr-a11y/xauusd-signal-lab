@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "ML_GRID_FROZEN_BEFORE_TRAINING_RESULTS",
+  "scope": "Sixteen frozen multi-horizon sleeves only.",
+  "features": "Frozen compact causal M1 microstructure plus closed M15/H1/H4/D1 context and cyclic time features.",
+  "targets": ["Strong R positive probability", "Strong R", "Extreme R"],
+  "models": [
+    {"id":"LGBM_V7","trees":250,"learning_rate":0.03,"leaves":15,"min_child":100,"l2":5},
+    {"id":"CATBOOST_V7","iterations":250,"depth":4,"learning_rate":0.03,"l2":7},
+    {"id":"LINEAR_V7","classifier_C":0.05,"ridge_alpha":20}
+  ],
+  "training": "2023 resolved rows only with 30-minute overlap weighting.",
+  "calibration": "Three expanding 2023 folds with a six-hour purge. Concatenated OOF predictions are the fixed reference distribution.",
+  "frozen_model_replay": "The final model trained on all resolved 2023 rows is not refit for 2025 or 2026. The model and numeric gate selected in 2024 are replayed unchanged.",
+  "score_forms": ["P_ONLY","STRONG_ONLY","EXTREME_ONLY","P_STRONG_MIN","STRONG_EXTREME_MIN","MEDIAN3","MIN3","MEAN_LCB_05","MEAN_LCB_10"],
+  "retention_grid": [0.20,0.30,0.40,0.50,0.60,0.75,1.00],
+  "selection": "Choose within each sleeve using 2024 only. A setting must retain at least 60 one-position trades. Strict sleeve admission still requires unchanged 2025 confirmation.",
+  "minimum_retention": 0.20,
+  "2025_or_2026_retuning": false,
+  "audit_only": true,
+  "current_sleeves_unchanged": true
+}
