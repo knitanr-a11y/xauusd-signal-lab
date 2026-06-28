@@ -1,0 +1,82 @@
+{
+  "system_id": "GML1-LIVE-RESEARCH-CHALLENGER-20260628",
+  "mode": "audit_only_closed_bar_prospective",
+  "runner": {
+    "type": "persistent_bat_loop",
+    "default_interval_seconds": 60,
+    "interval_environment_variable": "GML1_LIVE_INTERVAL_SECONDS",
+    "loop_log_max_bytes_default": 5242880,
+    "loop_log_max_bytes_environment_variable": "GML1_LIVE_LOOP_MAX_LOG_BYTES"
+  },
+  "input": {
+    "directory": "MT5 MQL5/Files",
+    "directory_environment_variable": "GML1_LIVE_DIR",
+    "csv_latest_row_contract": "closed",
+    "files": [
+      "goldsharp_m1.csv",
+      "goldsharp_m5.csv",
+      "goldsharp_m15.csv",
+      "goldsharp_h1.csv",
+      "goldsharp_h4.csv",
+      "goldsharp_d1.csv"
+    ]
+  },
+  "live_sleeves": {
+    "A_CORE": {
+      "candidate_id": "GML1-WATCH-022-C",
+      "direction": "LONG",
+      "source_timeframe": "M15",
+      "higher_timeframe": "H4",
+      "target_r": 1.0,
+      "horizon_hours": 6
+    },
+    "B_STATE": {
+      "candidate_id": "GML1-H1D1-STATEFUL-REENTRY24-C",
+      "direction": "LONG",
+      "source_timeframe": "H1",
+      "higher_timeframe": "D1",
+      "target_r": 1.0,
+      "horizon_hours": 48
+    },
+    "P18": {
+      "candidate_id": "GML1-PROV-018-APPROX",
+      "direction": "LONG",
+      "source_timeframe": "M15",
+      "higher_timeframe": "H4",
+      "target_r": 1.0,
+      "horizon_hours": 12
+    },
+    "W024A": {
+      "candidate_id": "GML1-WATCH-024-A",
+      "direction": "SHORT",
+      "source_timeframe": "M15",
+      "higher_timeframe": "H4",
+      "target_r": 1.5,
+      "horizon_hours": 6
+    }
+  },
+  "disabled_live_sleeves": {
+    "P16": "candidate-specific ML gate unavailable for new decisions",
+    "P19": "candidate-specific ML gate unavailable for new decisions"
+  },
+  "initialization": {
+    "historical_notifications": false,
+    "status": "INITIALIZED_NO_BACKFILL",
+    "state_hydration_hours": 72
+  },
+  "execution_contract": {
+    "one_position_per_sleeve": true,
+    "same_m1_priority": "SL",
+    "requires_exact_m1_entry_row": true,
+    "duplicate_candidate_keys_forbidden": true,
+    "input_mutation_during_read": "DEFERRED"
+  },
+  "controls": {
+    "audit_only": true,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "p16_live": false,
+    "p19_live": false
+  }
+}
