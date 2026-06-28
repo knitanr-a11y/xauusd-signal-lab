@@ -1,0 +1,84 @@
+{
+  "system_id": "GML1-LIVE-DISCORD-MT5-EXECUTION-V1-20260629",
+  "status": "IMPLEMENTED_DRAFT_USER_PC_DRY_RUN_AND_MARKET_OPEN_VERIFICATION_REQUIRED",
+  "scope": {
+    "upstream_runtime": "GML1-LIVE-RESEARCH-CHALLENGER-20260628",
+    "live_sleeves": [
+      "A_CORE",
+      "B_STATE",
+      "P18",
+      "W024A"
+    ],
+    "p16_live": false,
+    "p19_live": false,
+    "csv_latest_row_contract": "closed",
+    "time_basis": "MT5 server naive"
+  },
+  "configuration": {
+    "source": "MT5 MQL5/Files/.env",
+    "discord_webhook_keys": [
+      "GML1_DISCORD_WEBHOOK_URL",
+      "GML1_DISCORD_WEBHOOK",
+      "DISCORD_WEBHOOK_URL",
+      "DISCORD_WEBHOOK",
+      "WEBHOOK_URL",
+      "WEBHOOK"
+    ],
+    "discord_default": "enabled only when a webhook key is present unless GML1_DISCORD_ENABLED overrides it",
+    "mt5_order_default": false,
+    "mt5_dry_run_default": true,
+    "real_order_requirements": [
+      "GML1_MT5_ORDER_ENABLED=true",
+      "GML1_MT5_DRY_RUN=false",
+      "GML1_MT5_LIVE_CONFIRM=I_UNDERSTAND_THIS_SENDS_REAL_MT5_ORDERS",
+      "GML1_MT5_SYMBOL is set",
+      "positive volume exists for every enabled sleeve",
+      "no configuration error"
+    ]
+  },
+  "win_rate_contract": {
+    "scope": "realized live MT5 closed orders only",
+    "grouping": "candidate sleeve comp",
+    "source": "live_execution_ledger.csv closed MT5 positions",
+    "net_profit": "profit + commission + swap + fee",
+    "win_definition": "net_profit > 0",
+    "notification_field": "live MT5 realized win rate and closed-order count for the candidate sleeve",
+    "before_first_close": "display 集計前（決済済み0件）",
+    "dry_run_counted": false,
+    "signal_only_counted": false,
+    "historical_results_read": false,
+    "historical_results_displayed": false,
+    "historical_results_used_as_order_gate": false
+  },
+  "execution_contract": {
+    "order_type": "current-market order only",
+    "historical_entry_price_replay_forbidden": true,
+    "sl_distance": "1.0 ATR from actual requested market price",
+    "tp_distance": "target_r times ATR from actual requested market price",
+    "one_position_per_sleeve": true,
+    "default_total_gml1_position_limit": 1,
+    "default_max_entry_lag_seconds": 180,
+    "stale_candidate_order": false,
+    "server_side_sl_tp": true,
+    "wall_clock_time_exit": true,
+    "hedging_account_required_by_default": true,
+    "duplicate_guard": "candidate_key ledger plus deterministic MT5 magic/comment recovery",
+    "first_activation": "INITIALIZED_NO_BACKFILL",
+    "concurrency_guard": "live_pipeline.lock covers candidate-state advancement and execution delivery"
+  },
+  "outputs": [
+    "live_execution_state.json",
+    "live_execution_ledger.csv",
+    "live_execution_audit.jsonl",
+    "latest_status.json"
+  ],
+  "controls": {
+    "core_candidate_runtime_modified": false,
+    "discord_available": true,
+    "mt5_order_available": true,
+    "real_orders_enabled_in_repository": false,
+    "user_pc_dry_run_verified": false,
+    "market_open_real_order_verified": false,
+    "merge_or_promotion_allowed": false
+  }
+}

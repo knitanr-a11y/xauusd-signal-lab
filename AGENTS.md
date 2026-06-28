@@ -21,6 +21,21 @@ Older Stage031/current-state documents remain audit history only and must not be
 
 `GML1_LIVE_AUDIT_4_SLEEVES_READY_P16_P19_HISTORICAL_ONLY_NEW_DISCOVERY_NEXT`
 
+### 2026-06-29 user-authorized execution branch override
+
+On branch `gml1-live-discord-mt5-execution-v1-20260629`, the user explicitly authorized continuation of the existing four-sleeve runtime into Discord delivery and MT5 automatic execution.
+
+Read additionally:
+
+1. `docs/gold_ml_v1/GML1_LIVE_DISCORD_MT5_EXECUTION_V1_20260629.md`
+2. `config/gold_ml_v1/live_research_challenger/live_execution_contract_20260629.json`
+
+This branch-specific instruction supersedes the general Discord/MT5 prohibition below only for the dedicated delivery/execution adapter. It does not authorize changing the four candidate formulas, enabling P16/P19, retuning historical rules, merging the draft before user-PC verification, or claiming production readiness.
+
+Discord win rate is live-only. Display only realized closed MT5 orders, grouped by sleeve. Do not display, read, or use historical replay performance as an execution gate. Before a sleeve has a closed live order, display that live WR is not yet available with zero resolved live trades.
+
+Repository defaults must remain fail-closed: real orders are off unless the Files-root `.env` contains every explicit arming control. The first adapter run is no-backfill. User-PC Discord, dry-run and market-open execution validation are still required.
+
 ### Required distinctions
 
 Do not mix:
@@ -65,6 +80,6 @@ Freeze definitions and label-free density before inspecting labels, WR, PF, R or
 - Do not use P16/P19 frozen exclusions for new bars.
 - Do not retune after inspecting 2025 or 2026.
 - Do not modify the live runtime during discovery except to fix a demonstrated defect.
-- No final signal, Discord, MT5 order, automatic retraining, promotion or registration.
+- Unless a later explicit user instruction authorizes a dedicated branch, no final signal, Discord, MT5 order, automatic retraining, promotion or registration.
 
 CSV `time` is MT5 server naive bar-open time. The latest valid CSV row is closed by contract. Do not convert decision logic to JST. Same-M1 target/protective collision resolves protective first. No next-M1 fallback.
