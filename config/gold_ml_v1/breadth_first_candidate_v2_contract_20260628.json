@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-BREADTH-FIRST-CANDIDATE-V2",
+  "date": "2026-06-28",
+  "status": "DISCOVERY_AND_ADMISSION_CONTRACT_FROZEN_BEFORE_RAW_GENERATION",
+  "purpose": "Increase useful candidate density by creating many structurally distinct M5-entry families with closed M15/H1/H4/D1 context, while keeping strict profitability and robustness admission gates.",
+  "source_data": {
+    "m1_sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "m5_sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "m15_sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "h1_sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "h4_sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "d1_sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "time_contract": {
+    "csv_time": "MT5_SERVER_NAIVE_BAR_OPEN_TIME",
+    "latest_valid_row": "CLOSED_BY_CONTRACT",
+    "m5_decision_time": "bar_open_plus_5_minutes",
+    "m15_context_available_when": "m15_bar_open_plus_15_minutes_le_decision_time",
+    "h1_context_available_when": "h1_bar_open_plus_1_hour_le_decision_time",
+    "h4_context_available_when": "h4_bar_open_plus_4_hours_le_decision_time",
+    "d1_context_available_when": "d1_bar_open_plus_1_day_le_decision_time",
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "same_m1_priority": "PROTECTIVE",
+    "wall_clock_horizon": true
+  },
+  "discovery_order": [
+    "freeze contract and family rules",
+    "build all causal raw proposals",
+    "save raw proposals before dedup or outcomes",
+    "run label-free density time regime and overlap audits",
+    "permit density-only revision only as a new definition version before any label join",
+    "freeze definitions and raw registry hashes",
+    "join frozen ML03 exact-M1 labels",
+    "evaluate raw dedup one-position and resolved-only layers",
+    "apply strict candidate admission gates",
+    "train family-ranked ML only on admitted or near-admitted structurally valid pools",
+    "evaluate incremental portfolio value"
+  ],
+  "family_count": 18,
+  "directional_candidate_count": 36,
+  "label_free_density_targets": {
+    "preferred_raw_proposals_per_direction_per_year": [150, 2000],
+    "minimum_raw_proposals_combined_2024_2025": 200,
+    "maximum_single_month_share": 0.25,
+    "maximum_single_server_hour_share": 0.20,
+    "direction_symmetry_required_unless_predeclared": true,
+    "performance_not_used": true
+  },
+  "candidate_admission_gate": {
+    "evaluation_layer": "candidate_one_position_after_exact_m1_and_resolved_only_label_join",
+    "minimum_trades_2024": 60,
+    "minimum_trades_2025": 60,
+    "minimum_trades_combined_2024_2025": 150,
+    "strong_pf_2024_minimum": 1.5,
+    "strong_pf_2025_minimum": 1.5,
+    "strong_pf_combined_minimum": 1.7,
+    "strong_total_r_each_year_positive": true,
+    "strong_positive_rate_each_year_minimum": 0.50,
+    "strong_positive_rate_combined_minimum": 0.55,
+    "extreme_pf_2024_minimum": 1.1,
+    "extreme_pf_2025_minimum": 1.1,
+    "extreme_total_r_each_year_positive": true,
+    "maximum_negative_months_per_full_year": 6,
+    "high_and_low_volatility_results_must_be_reported": true,
+    "long_and_short_results_must_be_reported": true,
+    "no_pf_1p1_or_1p3_admission_exception": true
+  },
+  "premium_candidate_gate": {
+    "strong_pf_each_year_minimum": 1.7,
+    "strong_pf_combined_minimum": 2.0,
+    "strong_positive_rate_combined_minimum": 0.60,
+    "extreme_pf_each_year_minimum": 1.2
+  },
+  "portfolio_admission_gate": {
+    "benchmark": "current four live-capable sleeves",
+    "candidate_must_pass_individual_gate_first": true,
+    "incremental_strong_r_positive": true,
+    "incremental_extreme_r_positive": true,
+    "portfolio_strong_pf_not_lower": true,
+    "portfolio_extreme_pf_not_lower": true,
+    "maximum_drawdown_increase_fraction": 0.10,
+    "annual_trade_count_increase_required": true,
+    "same_decision_and_holding_overlap_reported": true
+  },
+  "machine_learning_policy": {
+    "role": "family-internal ranking and portfolio arbitration, not rescuing structurally failed candidates",
+    "eligible_only_after_candidate_definition_and_raw_registry_freeze": true,
+    "global_threshold_only_forbidden": true,
+    "family_internal_percentile_required": true,
+    "direction_and_regime_ranks_separate": true,
+    "minimum_retention_fraction_per_family": 0.20,
+    "resolved_only_training": true,
+    "2026_used_for_model_or_threshold_selection": false,
+    "promotion_requires_unchanged_2025_confirmation": true
+  },
+  "2026_policy": {
+    "role": "closed-bar diagnostic replay only",
+    "used_for_definition": false,
+    "used_for_density_revision": false,
+    "used_for_candidate_selection": false,
+    "used_for_ml_selection": false,
+    "analyst_blind_claim_allowed": false,
+    "reason": "2026 aggregate outcomes were observed in earlier V1 through V7 research"
+  },
+  "controls": {
+    "audit_only": true,
+    "live_runtime_modified": false,
+    "candidate_stack_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  }
+}
