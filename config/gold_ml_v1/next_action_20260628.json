@@ -1,23 +1,44 @@
 {
-  "schema_version": 1,
-  "action_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
-  "date": "2026-06-28",
+  "schema_version": 2,
+  "action_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1-PARITY-REBUILD",
+  "date": "2026-06-29",
   "mode": "assistant_research_and_implementation_audit_only",
-  "status": "COMPLETE_NO_PROMOTION",
-  "title": "Preserve V1 audit result",
-  "result_audit": "config/gold_ml_v1/new_candidate_discovery_v1_post_label_result_audit_20260628.json",
-  "conclusion": {
-    "candidate_promotion": false,
-    "model_promotion": false,
-    "live_runtime_change": false,
-    "reason": "All ten candidates were negative under Strong cost in 2024 validation and the ML confirmation gate failed."
+  "status": "USER_PC_HISTORICAL_REBUILD_REQUIRED",
+  "title": "Rebuild V1 after state-machine parity repair",
+  "reason": "The frozen state-machine addendum forbids rearming the same candidate on a confirmation, invalidation or expiry clearing bar. The prior generator violated that rule, so its proposal registry and all downstream summaries are invalidated.",
+  "repair": {
+    "generator_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "candidate_definition_changed": false,
+    "threshold_changed": false,
+    "performance_guided_change": false
   },
-  "next_research_rule": "Any later exploration must be separately versioned. Do not alter V1 using observed 2025 or 2026 outcomes.",
-  "local_user_action_required_now": false,
+  "required_order": [
+    "run the new synthetic state-machine tests",
+    "rerun the deterministic raw proposal generator on the authorized historical CSV root",
+    "persist the complete raw registry before deduplication or outcome handling",
+    "rebuild and hash-freeze the full label-free audit",
+    "verify 2026 prefix replay parity",
+    "freeze reproducible expanding purged walk-forward evaluation code and split manifest",
+    "only then join the pinned frozen ML-03 labels and recompute reporting layers"
+  ],
+  "invalidated_outputs_must_not_be_used": [
+    "previous 5180 raw proposal count",
+    "previous label-free registry hash",
+    "previous labeled performance summaries",
+    "previous ML threshold and score summary",
+    "previous no-survivor conclusion"
+  ],
+  "local_user_action_required_now": true,
+  "local_action": "Run the repaired audit branch against the historical source that exists only on the user PC; do not run the live runtime as part of this rebuild.",
   "live_runtime_may_continue_separately": true,
   "live_runtime_modification_allowed": false,
   "audit_only": true,
+  "live_ready": false,
   "final_signal": false,
   "discord": false,
-  "mt5_order": false
+  "mt5_order": false,
+  "automatic_retraining": false,
+  "automatic_promotion": false,
+  "automatic_registration": false
 }
