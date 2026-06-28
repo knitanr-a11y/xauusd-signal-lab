@@ -32,6 +32,8 @@ Read additionally:
 
 This branch-specific instruction supersedes the general Discord/MT5 prohibition below only for the dedicated delivery/execution adapter. It does not authorize changing the four candidate formulas, enabling P16/P19, retuning historical rules, merging the draft before user-PC verification, or claiming production readiness.
 
+Discord win rate is live-only. Display only realized closed MT5 orders, grouped by sleeve. Do not display, read, or use historical replay performance as an execution gate. Before a sleeve has a closed live order, display that live WR is not yet available with zero resolved live trades.
+
 Repository defaults must remain fail-closed: real orders are off unless the Files-root `.env` contains every explicit arming control. The first adapter run is no-backfill. User-PC Discord, dry-run and market-open execution validation are still required.
 
 ### Required distinctions
