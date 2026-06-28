@@ -112,7 +112,10 @@ def _unique_errors(values: Iterable[str]) -> tuple[str, ...]:
 
 
 def _always_on_settings(settings: RuntimeSettings) -> RuntimeSettings:
-    """Keep delivery/execution requested while retaining fail-closed validation."""
+    """Keep configured delivery/execution on while preserving emergency recovery."""
+
+    if not settings.env_path.is_file():
+        return replace(settings, require_historical_win_rate=False)
 
     errors = list(settings.config_errors)
     if not settings.discord_webhook_url:
