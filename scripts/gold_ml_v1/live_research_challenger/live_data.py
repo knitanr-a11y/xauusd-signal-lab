@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import sys
 from pathlib import Path
 
@@ -42,38 +43,66 @@ def canonical_column(value: str) -> str:
     )
 
 
-def _delimiter(path: Path, encoding: str) -> str:
-    with path.open("r", encoding=encoding, errors="strict") as handle:
-        line = handle.readline()
-    counts = {",": line.count(","), ";": line.count(";"), "\t": line.count("\t")}
-    delimiter, count = max(counts.items(), key=lambda item: item[1])
-    if count <= 0:
-        raise ValueError(f"Could not detect delimiter for {path}")
-    return delimiter
-
-
-def _read_delimited(path: Path) -> pd.DataFrame:
+def _header_format(path: Path) -> tuple[str, str, str]:
     errors: list[str] = []
     for encoding in ("utf-8-sig", "utf-16", "cp932"):
         try:
-            return pd.read_csv(
-                path,
-                sep=_delimiter(path, encoding),
-                encoding=encoding,
-                engine="c",
-            )
+            with path.open("r", encoding=encoding, errors="strict") as handle:
+                header = handle.readline().rstrip("\r\n")
+            counts = {",": header.count(","), ";": header.count(";"), "\t": header.count("\t")}
+            delimiter, count = max(counts.items(), key=lambda item: item[1])
+            if count <= 0:
+                raise ValueError("delimiter not detected")
+            return encoding, delimiter, header
         except Exception as exc:
             errors.append(f"{encoding}:{type(exc).__name__}:{exc}")
-    raise ValueError(f"Could not parse {path}: {' | '.join(errors)}")
+    raise ValueError(f"Could not inspect {path}: {' | '.join(errors)}")
 
 
-def read_closed_bars(path: Path, timeframe: str) -> pd.DataFrame:
+def _read_delimited(path: Path) -> pd.DataFrame:
+    encoding, delimiter, _ = _header_format(path)
+    return pd.read_csv(path, sep=delimiter, encoding=encoding, engine="c")
+
+
+def _last_binary_lines(path: Path, line_count: int) -> list[bytes]:
+    if line_count <= 0:
+        return []
+    chunk_size = 1024 * 1024
+    with path.open("rb") as handle:
+        handle.seek(0, 2)
+        position = handle.tell()
+        payload = b""
+        while position > 0 and payload.count(b"\n") <= line_count:
+            read_size = min(chunk_size, position)
+            position -= read_size
+            handle.seek(position)
+            payload = handle.read(read_size) + payload
+    lines = payload.splitlines()
+    if position > 0 and lines:
+        lines = lines[1:]
+    return lines[-line_count:]
+
+
+def _read_delimited_tail(path: Path, max_rows: int) -> pd.DataFrame:
+    encoding, delimiter, header = _header_format(path)
+    if encoding == "utf-16":
+        return pd.read_csv(path, sep=delimiter, encoding=encoding, engine="c").tail(max_rows)
+    lines = _last_binary_lines(path, max_rows)
+    decoded = [line.decode(encoding, errors="strict") for line in lines]
+    decoded = [line for line in decoded if line.strip()]
+    if decoded and canonical_column(decoded[0].split(delimiter)[0]) == canonical_column(header.split(delimiter)[0]):
+        decoded = decoded[1:]
+    text = header + "\n" + "\n".join(decoded)
+    return pd.read_csv(io.StringIO(text), sep=delimiter, engine="c")
+
+
+def read_closed_bars(path: Path, timeframe: str, max_rows: int | None = None) -> pd.DataFrame:
     if timeframe not in TF_DELTA:
         raise ValueError(f"Unsupported timeframe: {timeframe}")
     if not path.is_file():
         raise FileNotFoundError(path)
 
-    raw = _read_delimited(path)
+    raw = _read_delimited(path) if max_rows is None else _read_delimited_tail(path, max_rows)
     raw.columns = [canonical_column(column) for column in raw.columns]
     aliases = {
         "tickvol": "tick_volume",
@@ -131,10 +160,39 @@ def read_closed_bars(path: Path, timeframe: str) -> pd.DataFrame:
     return frame
 
 
-def read_live_bars(root: Path) -> dict[str, pd.DataFrame]:
+def probe_latest_bars(root: Path) -> dict[str, dict[str, pd.Timestamp]]:
+    result: dict[str, dict[str, pd.Timestamp]] = {}
+    for timeframe, filename in FILE_BY_TF.items():
+        frame = read_closed_bars(root / filename, timeframe, max_rows=4)
+        result[timeframe] = {
+            "open": pd.Timestamp(frame["bar_open_time"].iloc[-1]),
+            "close": pd.Timestamp(frame["bar_close_time"].iloc[-1]),
+        }
+    return result
+
+
+def read_live_bars(
+    root: Path,
+    m1_since: pd.Timestamp | None = None,
+    latest_probe: dict[str, dict[str, pd.Timestamp]] | None = None,
+) -> dict[str, pd.DataFrame]:
+    probe = latest_probe or probe_latest_bars(root)
+    if m1_since is None:
+        m1_rows = 20000
+    else:
+        elapsed_minutes = max(
+            0,
+            int((probe["M1"]["open"] - pd.Timestamp(m1_since)) / pd.Timedelta(minutes=1)),
+        )
+        m1_rows = max(2000, elapsed_minutes + 5000)
+
     bars = {
-        timeframe: read_closed_bars(root / filename, timeframe)
-        for timeframe, filename in FILE_BY_TF.items()
+        "M1": read_closed_bars(root / FILE_BY_TF["M1"], "M1", max_rows=m1_rows),
+        "M5": read_closed_bars(root / FILE_BY_TF["M5"], "M5", max_rows=4),
+        "M15": read_closed_bars(root / FILE_BY_TF["M15"], "M15"),
+        "H1": read_closed_bars(root / FILE_BY_TF["H1"], "H1"),
+        "H4": read_closed_bars(root / FILE_BY_TF["H4"], "H4"),
+        "D1": read_closed_bars(root / FILE_BY_TF["D1"], "D1"),
     }
     minimums = {"M1": 2, "M5": 2, "M15": 500, "H1": 200, "H4": 200, "D1": 100}
     for timeframe, minimum in minimums.items():
