@@ -7,7 +7,9 @@ on:
       - "scripts/gold_ml_v1/live_research_challenger/live_deal_archive.py"
       - "scripts/gold_ml_v1/live_research_challenger/live_deal_archive_strict.py"
       - "scripts/gold_ml_v1/live_research_challenger/live_execution_deal_safe.py"
+      - "scripts/gold_ml_v1/live_research_challenger/live_autotrade_profile.py"
       - "scripts/gold_ml_v1/live_research_challenger/run_live_connected_once.py"
+      - "scripts/gold_ml_v1/live_research_challenger/run_live_gold_hash_once.py"
       - "scripts/gold_ml_v1/live_research_challenger/verify_deal_archive_contract.py"
       - ".github/workflows/gml1_deal_archive_compile.yml"
 
@@ -26,7 +28,9 @@ jobs:
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_deal_archive.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_deal_archive_strict.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_execution_deal_safe.py
+          python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_autotrade_profile.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/run_live_connected_once.py
+          python -m py_compile scripts/gold_ml_v1/live_research_challenger/run_live_gold_hash_once.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/verify_deal_archive_contract.py
       - name: Verify archive contract
         run: python scripts/gold_ml_v1/live_research_challenger/verify_deal_archive_contract.py
