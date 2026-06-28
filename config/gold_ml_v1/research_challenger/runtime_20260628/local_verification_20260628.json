@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "verification_date": "2026-06-28",
+  "raw_input_rows": {
+    "M1": 1225431,
+    "M5": 245327,
+    "M15": 81781,
+    "H1": 20459,
+    "H4": 5352,
+    "D1": 894
+  },
+  "raw_counts_all_available": {
+    "A_CORE": 116,
+    "B_STATE": 204,
+    "P16_pre_ml_2024_2026": 287,
+    "P16_historical_keep": 247,
+    "P18": 166,
+    "P19_pre_ml_2024_2026": 96,
+    "P19_historical_keep": 82,
+    "W024A": 46
+  },
+  "final_parity": {
+    "2024": {"rows": 271, "missing": 0, "extra": 0, "max_r_difference": 1.247890679678676e-13},
+    "2025": {"rows": 402, "missing": 0, "extra": 0, "max_r_difference": 4.0217829067046296e-13},
+    "2026_partial": {"rows": 101, "missing": 0, "extra": 0, "max_r_difference": 7.238654120556021e-14}
+  },
+  "controls": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
