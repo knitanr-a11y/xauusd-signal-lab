@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-MODEL-NATIVE-RAWPATH-V4",
+  "date": "2026-06-28",
+  "status": "2025_CONFIRMATION_REFIT_AND_REFERENCE_FROZEN_BEFORE_2025_RESULTS",
+  "candidate_id": "GML1-MN4-LOW_VOL-L",
+  "model_id": "LINEAR_RAWPATH",
+  "score_form": "MEAN_LCB_10",
+  "retention_fraction": 0.01,
+  "model_components": ["positive Strong-R logistic probability","predicted Strong R Ridge","predicted Extreme R Ridge"],
+  "training": "Refit the unchanged linear raw-path models on valid LOW_VOL-L rows with decision_time before 2025-01-01 and exit_time at or before 2025-01-01.",
+  "overlap_weight": "Unchanged clipped absolute Strong-R weight divided by the number of same-sleeve decisions in the same 30-minute bucket.",
+  "reference_distribution": {
+    "source": "Complete 2024 LOW_VOL-L out-of-sample raw predictions from the frozen 2023 V4 models.",
+    "component_percentiles": "Each 2025 component prediction is ranked against the corresponding 2024 raw prediction distribution.",
+    "score": "mean of probability, Strong-R and Extreme-R percentiles minus one standard deviation of those three percentiles.",
+    "threshold": "99th percentile of the 2024 reference score distribution, preserving the frozen one-percent retention fraction.",
+    "2025_distribution_used_to_set_threshold": false
+  },
+  "confirmation_gate": {
+    "minimum_one_position_trades": 60,
+    "strong_positive_rate_minimum": 0.50,
+    "strong_pf_minimum": 1.5,
+    "strong_r_positive": true,
+    "extreme_pf_minimum": 1.1,
+    "extreme_r_positive": true
+  },
+  "failure_policy": "Reject without 2026 rescue or threshold change.",
+  "controls": {"audit_only": true, "automatic_promotion": false, "live_runtime_modified": false, "live_ready": false, "final_signal": false, "discord": false, "mt5_order": false}
+}
