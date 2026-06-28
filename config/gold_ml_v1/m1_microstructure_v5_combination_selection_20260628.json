@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-M1-MICROSTRUCTURE-V5",
+  "date": "2026-06-28",
+  "status": "DETERMINISTIC_SLEEVE_COMBINATION_SELECTION_FROZEN_BEFORE_SCORE_RESULTS",
+  "per_sleeve_option_order": [
+    "option passes strict per-sleeve gate",
+    "higher minimum of Strong PF and Extreme PF",
+    "higher Strong PF",
+    "higher Strong positive rate",
+    "higher Strong R",
+    "more one-position trades",
+    "lower model complexity in frozen order LGBM, CatBoost, Linear",
+    "simpler score form in frozen list order",
+    "higher retention fraction"
+  ],
+  "strict_combination": "Select one best strict-passing option per sleeve and combine every sleeve with such an option. Apply the frozen combined gate.",
+  "fallback_when_fewer_than_three_strict_sleeves": {
+    "per_sleeve_eligibility": "At least 40 one-position trades in 2024.",
+    "per_sleeve_choice": "Choose the best option by the same order with the strict-pass flag omitted.",
+    "sleeve_rank": "Higher minimum of Strong PF and Extreme PF, then Strong PF, positive rate, Strong R, count and lexical sleeve ID.",
+    "candidate_combinations": "Evaluate only ranked prefixes containing the top 3, 4, 5, 6, 7 and 8 eligible sleeves.",
+    "final_choice": "Use the frozen fallback diagnostic objective. The result is non-promotable regardless of metrics."
+  },
+  "same_decision_handling": "Preserve simultaneous LONG and SHORT sleeves in the audit. One-position is applied independently within each sleeve before combination.",
+  "controls": {
+    "audit_only": true,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
