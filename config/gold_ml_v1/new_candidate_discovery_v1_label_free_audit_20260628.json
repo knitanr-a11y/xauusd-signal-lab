@@ -1,106 +1,44 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
-  "date": "2026-06-28",
-  "status": "LABEL_FREE_DEFINITION_AND_RAW_PROPOSAL_FREEZE_COMPLETE_2026_PREFIX_REPLAY_PASS_AUDIT_ONLY",
-  "definition_artifacts": {
-    "family_spec": {
-      "path": "docs/gold_ml_v1/GML1_NEW_CANDIDATE_DISCOVERY_V1_FAMILY_SPEC_20260628.md",
-      "blob_sha": "9a54e6509397e137b9b15c6fbd36376a284fc567"
-    },
-    "state_machine_addendum": {
-      "path": "docs/gold_ml_v1/GML1_NEW_CANDIDATE_DISCOVERY_V1_STATE_MACHINE_ADDENDUM_20260628.md",
-      "blob_sha": "65506a716cb19a0ca7ab6d7b758a45cc5d6f42b7"
-    },
-    "generator": {
-      "path": "scripts/gold_ml_v1/new_candidate_discovery/build_raw_proposals_v1.py",
-      "blob_sha": "a099779c1193751430abaaf6017132b5f1883750"
-    },
-    "frozen_label_profile_for_later_use": {
-      "path": "config/gold_ml_v1/new_candidate_discovery_v1_label_profile_20260628.json",
-      "blob_sha": "558a56c61bfe2206fdbc5a0315a411436719e90a"
-    }
+  "date": "2026-06-29",
+  "status": "INVALIDATED_BY_STATE_MACHINE_PARITY_DEFECT_REBUILD_REQUIRED",
+  "reason": "The prior raw proposal generator could rearm a candidate on the same M15 bar that confirmed, invalidated or expired its prior pending setup, contrary to the frozen state-machine addendum.",
+  "invalidated_registry": {
+    "previous_sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
+    "previous_rows": 5180,
+    "may_be_used_as_current_truth": false,
+    "may_be_used_for_candidate_selection": false,
+    "may_be_joined_to_labels": false
   },
-  "source_sha256": {
-    "m1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
-    "m5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
-    "m15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
-    "h1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
-    "h4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
-    "d1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  "repair": {
+    "generator_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "definition_or_threshold_change": false,
+    "same_bar_rearm_blocked_after": ["expiry", "invalidation", "confirmation"]
   },
-  "raw_proposal_registry": {
-    "sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
-    "format": "deterministic_csv_gzip_mtime_zero",
-    "rows": 5180,
-    "first_decision": "2023-04-18 01:15:00",
-    "last_decision": "2026-06-19 20:00:00",
-    "duplicate_decision_candidate_keys": 0,
-    "exact_m1_missing_rows": 26,
-    "dedup_applied": false,
-    "one_position_applied": false,
-    "outcome_filter_applied": false,
-    "labels_joined": false
-  },
-  "candidate_counts": {
-    "GML1-NCD-001-L": {"total": 578, "2023": 106, "2024": 172, "2025": 243, "2026": 57},
-    "GML1-NCD-001-S": {"total": 291, "2023": 110, "2024": 74, "2025": 46, "2026": 61},
-    "GML1-NCD-002-L": {"total": 266, "2023": 43, "2024": 83, "2025": 117, "2026": 23},
-    "GML1-NCD-002-S": {"total": 119, "2023": 48, "2024": 22, "2025": 27, "2026": 22},
-    "GML1-NCD-003-L": {"total": 58, "2023": 14, "2024": 14, "2025": 24, "2026": 6},
-    "GML1-NCD-003-S": {"total": 37, "2023": 9, "2024": 9, "2025": 10, "2026": 9},
-    "GML1-NCD-004-L": {"total": 1633, "2023": 397, "2024": 476, "2025": 598, "2026": 162},
-    "GML1-NCD-004-S": {"total": 875, "2023": 361, "2024": 207, "2025": 142, "2026": 165},
-    "GML1-NCD-005-L": {"total": 725, "2023": 180, "2024": 211, "2025": 239, "2026": 95},
-    "GML1-NCD-005-S": {"total": 598, "2023": 196, "2024": 174, "2025": 147, "2026": 81}
-  },
-  "direction_counts": {
-    "LONG": 3260,
-    "SHORT": 1920
-  },
-  "density_observation_only": {
-    "NCD_003_below_100_per_direction": true,
-    "action": "KEEP_V1_FROZEN_DO_NOT_SILENTLY_RELAX; ANY_DENSITY_REVISION_REQUIRES_NEW_VERSION_AND_NEW_CANDIDATE_IDS",
-    "cross_family_same_direction_duplicate_timestamps": 421,
-    "largest_overlap_pairs": {
-      "GML1-NCD-001-L__GML1-NCD-002-L": 165,
-      "GML1-NCD-004-L__GML1-NCD-005-L": 85,
-      "GML1-NCD-001-S__GML1-NCD-002-S": 68,
-      "GML1-NCD-004-S__GML1-NCD-005-S": 45
-    }
-  },
-  "same_decision_overlap_with_frozen_benchmark_structures": {
-    "GML1-NCD-001-L": {"A_CORE": 0, "B_STATE": 10, "P18": 15, "W024A": 3},
-    "GML1-NCD-001-S": {"A_CORE": 0, "B_STATE": 0, "P18": 0, "W024A": 0},
-    "GML1-NCD-002-L": {"A_CORE": 0, "B_STATE": 3, "P18": 8, "W024A": 1},
-    "GML1-NCD-002-S": {"A_CORE": 0, "B_STATE": 0, "P18": 0, "W024A": 0},
-    "GML1-NCD-003-L": {"A_CORE": 0, "B_STATE": 3, "P18": 0, "W024A": 0},
-    "GML1-NCD-003-S": {"A_CORE": 0, "B_STATE": 0, "P18": 0, "W024A": 0},
-    "GML1-NCD-004-L": {"A_CORE": 1, "B_STATE": 4, "P18": 7, "W024A": 0},
-    "GML1-NCD-004-S": {"A_CORE": 0, "B_STATE": 0, "P18": 0, "W024A": 0},
-    "GML1-NCD-005-L": {"A_CORE": 0, "B_STATE": 0, "P18": 1, "W024A": 0},
-    "GML1-NCD-005-S": {"A_CORE": 0, "B_STATE": 0, "P18": 0, "W024A": 0}
-  },
-  "prospective_2026_prefix_replay": {
-    "rule": "At each cutoff, rerun the state machines using only source rows closed at or before the cutoff and exact M1 rows available at or before the cutoff.",
-    "checks": [
-      {"cutoff": "2026-01-31 00:00:00", "rows": 4649, "keys_equal": true},
-      {"cutoff": "2026-02-28 00:00:00", "rows": 4758, "keys_equal": true},
-      {"cutoff": "2026-03-31 23:45:00", "rows": 4874, "keys_equal": true},
-      {"cutoff": "2026-04-30 23:45:00", "rows": 4992, "keys_equal": true},
-      {"cutoff": "2026-05-30 00:00:00", "rows": 5103, "keys_equal": true},
-      {"cutoff": "2026-06-19 20:00:00", "rows": 5180, "keys_equal": true}
-    ],
-    "all_pass": true,
-    "2026_exact_m1_missing_rows": 4
+  "required_rebuild_outputs": [
+    "complete deterministic raw proposal CSV.GZ before deduplication, one-position handling or outcome filtering",
+    "generator and source snapshot hashes",
+    "candidate and direction counts",
+    "yearly and monthly density",
+    "server-hour and weekday distributions",
+    "volatility, trend and range regime distributions",
+    "same-decision overlap with each of A_CORE, B_STATE, P18 and W024A",
+    "holding-interval overlap with each frozen benchmark sleeve",
+    "within-family and cross-family duplication",
+    "exact-M1 availability",
+    "2026 closed-bar prefix replay parity"
+  ],
+  "label_embargo": {
+    "active": true,
+    "release_condition": "The repaired raw registry and complete label-free audit are persisted and hash-frozen.",
+    "labels_joined": false,
+    "outcomes_may_be_read": false,
+    "wr_pf_r_may_be_read": false
   },
   "controls": {
     "audit_only": true,
-    "labels_joined": false,
-    "candidate_performance_reviewed": false,
-    "outcomes_read": false,
-    "wr_pf_r_read": false,
-    "model_trained": false,
     "live_runtime_modified": false,
     "live_ready": false,
     "final_signal": false,
@@ -110,5 +48,5 @@
     "automatic_promotion": false,
     "automatic_registration": false
   },
-  "next_authorized_step": "JOIN_FROZEN_ML03_LABELS_TO_THE_FROZEN_RAW_PROPOSAL_KEYS_THEN_RUN_EXPANDING_PURGED_WALK_FORWARD_WITH_2026_PROSPECTIVE_ONLY"
+  "next_authorized_step": "RUN_REPAIRED_RAW_PROPOSAL_AND_COMPLETE_LABEL_FREE_AUDIT_ON_USER_PC_HISTORICAL_SOURCE"
 }
