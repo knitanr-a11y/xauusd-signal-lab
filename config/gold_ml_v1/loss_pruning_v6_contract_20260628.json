@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-LOSS-PRUNING-V6",
+  "date": "2026-06-28",
+  "status": "LOSS_TARGET_MODEL_GRID_AND_CHRONOLOGY_FROZEN_BEFORE_RESULTS",
+  "purpose": "Test whether losses in the frozen non-promotable V5 candidate stream can be identified before entry and removed at sufficient precision to create a stable high-PF strategy.",
+  "base_candidate_stream": {
+    "source": "The five-sleeve V5 fallback configuration frozen from 2024 before 2025 and 2026 were read.",
+    "sleeves": [
+      "MICRO_DIRECTIONAL_LONG",
+      "MICRO_CHAOTIC_SHORT",
+      "MICRO_CHAOTIC_LONG",
+      "MICRO_LOW_VOL_LONG",
+      "MICRO_HIGH_VOL_SHORT"
+    ],
+    "primary_score_gate_unchanged": true,
+    "loss_filter_applied": "After the frozen primary score gate and before sleeve-level one-position handling.",
+    "base_configuration_promotable": false
+  },
+  "causal_inputs": {
+    "features": "Frozen V5 compact M1 microstructure core features available at decision_time.",
+    "additional_inputs": [
+      "frozen primary model raw probability prediction",
+      "frozen primary predicted Strong R",
+      "frozen primary predicted Extreme R",
+      "frozen primary score minus numeric gate threshold",
+      "sleeve identity"
+    ],
+    "future_outcome_or_exit_features": false
+  },
+  "loss_targets": [
+    {"id":"ANY_STRONG_LOSS","definition":"strong_r < 0","model_type":"classifier"},
+    {"id":"FULL_PROTECTIVE_LOSS","definition":"strong_r <= -0.80","model_type":"classifier"},
+    {"id":"DOWNSIDE_R","definition":"minimum(strong_r,0)","model_type":"regressor"},
+    {"id":"EXTREME_DOWNSIDE_R","definition":"minimum(extreme_r,0)","model_type":"regressor"}
+  ],
+  "risk_score_forms": [
+    "ANY_LOSS_PROBABILITY",
+    "FULL_LOSS_PROBABILITY",
+    "NEGATIVE_PREDICTED_DOWNSIDE",
+    "NEGATIVE_PREDICTED_EXTREME_DOWNSIDE",
+    "MAX_OF_TWO_LOSS_PROBABILITIES",
+    "MEAN_OF_ALL_FOUR_RISK_PERCENTILES",
+    "MINIMUM_SAFETY_PERCENTILE_ACROSS_ALL_FOUR"
+  ],
+  "models": [
+    {"id":"LGBM_RISK","classifier":"300 trees learning_rate 0.03 leaves 15 min_child 100 L2 5","regressor":"same"},
+    {"id":"CATBOOST_RISK","classifier":"300 iterations depth 5 learning_rate 0.03 L2 7","regressor":"same"},
+    {"id":"LINEAR_RISK","classifier":"LogisticRegression C 0.05 L2","regressor":"Ridge alpha 20"}
+  ],
+  "training": {
+    "2024_risk_model": "2023 resolved rows only from the five selected sleeves, regardless of whether they passed the later 2024 primary gate.",
+    "2025_risk_model": "Rows with decision_time before 2025-01-01 and relevant exit_time at or before 2025-01-01.",
+    "2026_risk_model": "Rows with decision_time before 2026-01-01 and relevant exit_time at or before 2026-01-01.",
+    "sample_weight": "clip(abs(strong_r),0.25,2.0) divided by same-sleeve rows in the same 30-minute decision bucket",
+    "purged_2023_oof": "Three expanding folds with six-hour purge",
+    "resolved_only": true
+  },
+  "causal_score_calibration": {
+    "2024": "Risk predictions ranked against matching 2023 purged OOF risk predictions.",
+    "2025": "Risk predictions ranked against complete 2024 out-of-sample risk predictions from the frozen through-2023 risk model.",
+    "2026": "Risk predictions ranked against complete 2025 out-of-sample risk predictions from the frozen through-2024 risk model.",
+    "target_year_distribution_used_to_set_gate": false
+  },
+  "prune_fractions": [0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80],
+  "2024_selection": {
+    "evaluation_order": "Primary score gate, loss-risk pruning, then independent sleeve one-position.",
+    "minimum_combined_trades": 100,
+    "minimum_remaining_fraction_of_base_one_position_count": 0.30,
+    "minimum_active_sleeves": 3,
+    "target_positive_rate": 0.60,
+    "target_strong_pf": 2.0,
+    "target_extreme_pf": 1.1,
+    "target_strong_and_extreme_r_positive": true,
+    "selection_order": [
+      "target gate pass",
+      "higher minimum of Strong PF and Extreme PF",
+      "higher Strong PF",
+      "higher positive rate",
+      "higher Strong R",
+      "more trades",
+      "smaller prune fraction",
+      "lower model complexity",
+      "simpler risk score form"
+    ]
+  },
+  "2025_confirmation": {
+    "model family, risk score form and prune fraction unchanged": true,
+    "minimum_combined_trades": 300,
+    "minimum_active_sleeves": 3,
+    "positive_rate_minimum": 0.60,
+    "strong_pf_minimum": 2.0,
+    "extreme_pf_minimum": 1.1,
+    "strong_and_extreme_r_positive": true,
+    "2025_used_for_rescue_or_retuning": false
+  },
+  "2026_diagnostic": {
+    "required": true,
+    "unchanged_configuration": true,
+    "monthly_direction_sleeve_and_removed_loss_capture_reporting": true,
+    "2026_used_for_selection_or_rescue": false
+  },
+  "oracle_diagnostic": {
+    "allowed": true,
+    "promotable": false,
+    "purpose": "Quantify the theoretical PF ceiling if the same prune fraction removed the worst actual losses first, showing how much loss-identification precision is required."
+  },
+  "controls": {
+    "audit_only": true,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}
