@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "system_id": "GML1-COUNT-EXPANSION-MULTIHORIZON-V7",
+  "date": "2026-06-28",
+  "status": "RAW_MULTIHORIZON_COMPLETE_NO_RAW_SURVIVOR_BEFORE_ML",
+  "raw_rows": 332432,
+  "directional_sleeves": 16,
+  "exact_m1_missing": 0,
+  "strong_unresolved": 37,
+  "one_position_rows_all_years": 212670,
+  "raw_gate_survivors": 0,
+  "best_minimum_year_pf": {
+    "sleeve_id": "VOL_EXTENDED-L",
+    "2024_count": 2104,
+    "2024_strong_pf": 0.829497,
+    "2025_count": 2135,
+    "2025_strong_pf": 0.890253,
+    "combined_strong_pf": 0.859714
+  },
+  "interpretation": "Changing the holding horizon and TP/SL contract alone did not create a profitable sleeve. Candidate density is ample, so only the frozen within-sleeve ranking test with retention of at least 20 percent remains admissible.",
+  "raw_registry_sha256": "3e528f043a34ffe8e8a97f329cf78abca6fefc4c5495a5f668b3c2fcaebbaf15",
+  "labeled_sha256": "0d1be984ced78a0da4a3ca2e374f5acd983fd1b3e9a59cea243b9165a61e046a",
+  "audit_only": true,
+  "current_sleeves_unchanged": true
+}
