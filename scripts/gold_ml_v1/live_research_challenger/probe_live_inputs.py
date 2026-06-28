@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -81,12 +82,32 @@ def saved_signatures(state_path: Path) -> dict[str, Any] | None:
     return payload.get("input_signatures")
 
 
+def wait_nanoseconds_to_next_boundary(now_ns: int, period_ns: int) -> int:
+    if period_ns <= 0:
+        raise ValueError("poll interval must be greater than zero")
+    wait_ns = period_ns - (now_ns % period_ns)
+    if wait_ns < 10_000_000:
+        wait_ns += period_ns
+    return wait_ns
+
+
+def align_to_wall_clock(period_seconds: float) -> None:
+    period_ns = int(period_seconds * 1_000_000_000)
+    if period_ns <= 0:
+        raise ValueError("--align-seconds must be greater than zero")
+    wait_ns = wait_nanoseconds_to_next_boundary(time.time_ns(), period_ns)
+    time.sleep(wait_ns / 1_000_000_000)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--align-seconds", type=float, default=0.0)
     args = parser.parse_args()
     output_dir = args.output_dir.expanduser().resolve()
     try:
+        if args.align_seconds > 0:
+            align_to_wall_clock(args.align_seconds)
         live_dir = find_live_dir(output_dir)
         current = signatures(live_dir)
         previous = saved_signatures(output_dir / "live_state.json")
