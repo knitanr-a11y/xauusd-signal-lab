@@ -1,6 +1,14 @@
 {
-  "stage": "BTC6_VIDEO_M15_EMA200_NWAVE_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "stage": "BTC6_VIDEO_M15_EMA200_NWAVE_ADOPTED_YOUTUBE_CANDIDATE_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
+  "candidate_family": "YOUTUBE_CANDIDATES",
+  "adoption": {
+    "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+    "adopted_on": "2026-07-02",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER",
+    "supersedes_previous_status": "CHART_AUDIT_REQUIRED_NOT_ADOPTED"
+  },
   "timeframe": "M15",
   "source_contract": "same user-confirmed video rules as BTC5, with time windows preserved in hours",
   "indicators": {
@@ -37,9 +45,9 @@
     "combined_profit_factor": 1.838095,
     "decision": "insufficient validation count"
   },
-  "provisional_candidate": {
+  "adopted_candidate": {
     "id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
-    "status": "CHART_AUDIT_REQUIRED_NOT_ADOPTED",
+    "status": "ADOPTED_CANDIDATE_NOT_LIVE",
     "pivot_width": 3,
     "n_retracement": "0.236 <= BC/AB <= 0.886",
     "spread_usd": 30,
@@ -87,10 +95,22 @@
   },
   "overlap": {
     "btc4_risk_cap_400_within_24h": 1,
-    "btc5_m5_provisional_within_24h": 1,
+    "btc5_m5_adopted_within_24h": 1,
     "simultaneous_holding_with_btc4": 0,
     "simultaneous_holding_with_btc5": 0,
     "self_overlap_pairs": 0
+  },
+  "gold_transfer": {
+    "required": true,
+    "status": "NOT_YET_TESTED_ON_GOLD",
+    "do_not_copy_btc_price_contract": true,
+    "must_redefine_for_gold": [
+      "pip value",
+      "spread assumption",
+      "30-pip C-point stop buffer",
+      "minimum 50-pip reward",
+      "lot size"
+    ]
   },
   "post2026_outcomes_evaluated": false,
   "orders_enabled": false,
