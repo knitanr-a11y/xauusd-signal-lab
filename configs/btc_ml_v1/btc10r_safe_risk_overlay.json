@@ -1,0 +1,46 @@
+{
+  "profile_id": "BTC10R_DEMO_FIXED_LOT_002_001_AFTER_2L_V1",
+  "parent_candidate": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
+  "status": "adopted_candidate_demo_forward_policy",
+  "candidate_adopted": true,
+  "portfolio_adopted": false,
+  "demo_forward_approved": true,
+  "signal_changes": false,
+  "exit_changes": false,
+  "position_sizing": {
+    "method": "fixed lot state machine",
+    "normal_lot": 0.02,
+    "throttled_lot": 0.01,
+    "loss_streak_trigger": 2,
+    "reset": "return to 0.02 lot after the next resolved BTC10R win",
+    "maximum_allowed_lot": 0.05,
+    "currently_used_lots": [0.01, 0.02],
+    "decision_information": "only exits strictly earlier than the new entry may update the loss streak"
+  },
+  "exact_142_trade_result": {
+    "lot_0_02_count": 98,
+    "lot_0_01_count": 44,
+    "average_lot": 0.016901408450704227,
+    "profit_factor": 1.9932189450645272,
+    "total_pnl_usd_assumed": 1060.9136333200515,
+    "max_drawdown_usd_assumed": 83.53042294791794,
+    "constant_0_02_comparison": {
+      "profit_factor": 1.9491308107796064,
+      "total_pnl_usd_assumed": 1208.2764165836886,
+      "max_drawdown_usd_assumed": 124.43823581782385,
+      "profit_reduction_pct": 12.19611516380452,
+      "drawdown_reduction_pct": 32.873989735594186
+    },
+    "pip_value_assumption": "USD 10 per strategy pip at 1.00 lot",
+    "warning": "MT5 symbol specification is authoritative for actual demo-account money values"
+  },
+  "local_verification": {
+    "compile_passed": true,
+    "tests_passed": 3,
+    "outcome_leakage_guard": "overlapping positions do not affect lot state until their exit is resolved"
+  },
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}

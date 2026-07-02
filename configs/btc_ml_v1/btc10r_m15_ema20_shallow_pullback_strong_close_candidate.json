@@ -1,0 +1,63 @@
+{
+  "candidate_id": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
+  "parent_candidate": "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R225",
+  "status": "adopted_candidate_demo_forward_monitoring",
+  "candidate_adopted": true,
+  "adopted_at_jst": "2026-07-02",
+  "adoption_scope": "candidate_pool_only_not_existing_five_candidate_stacking_reference",
+  "preferred_risk_overlay": "BTC10R_DEMO_FIXED_LOT_002_001_AFTER_2L_V1",
+  "demo_forward_approved": true,
+  "portfolio_adopted": false,
+  "filters": {
+    "maximum_pullback_depth_atr": 0.6,
+    "minimum_directional_close_location": 0.85
+  },
+  "target_r": 2.25,
+  "risk_cap_pips": 120.0,
+  "same_bar_priority": "SL_FIRST",
+  "lot_policy": {
+    "normal_lot": 0.02,
+    "after_two_resolved_consecutive_losses_lot": 0.01,
+    "reset": "return to 0.02 lot after the next resolved BTC10R win",
+    "maximum_allowed_lot": 0.05,
+    "currently_used_lots": [0.01, 0.02],
+    "decision_information": "only BTC10R exits strictly earlier than a new entry may update the consecutive-loss state"
+  },
+  "plan_fingerprint": "5cfa891e4547b780a66e1f3531e20ee77556ecc80c6de8f31a301e2c7235e21b",
+  "metrics": {
+    "train": {"trades": 36, "wins": 15, "losses": 21, "profit_factor": 1.7929623113833812, "total_pips": 1284.2498840407036, "max_drawdown_pips": 310.36373434601705},
+    "dev": {"trades": 39, "wins": 19, "losses": 20, "profit_factor": 2.071055752955044, "total_pips": 1824.2442870443094, "max_drawdown_pips": 320.25433642749135},
+    "validation": {"trades": 43, "wins": 19, "losses": 24, "profit_factor": 1.8795374847353241, "total_pips": 1809.0130927921928, "max_drawdown_pips": 426.1088335315653},
+    "opened_2026": {"trades": 24, "wins": 11, "losses": 13, "profit_factor": 2.14027758004495, "total_pips": 1123.874819041237, "max_drawdown_pips": 622.191179089119},
+    "all": {"trades": 142, "wins": 64, "losses": 78, "profit_factor": 1.9491308107796068, "total_pips": 6041.382082918443, "max_drawdown_pips": 622.1911790891172}
+  },
+  "adopted_lot_policy_backtest": {
+    "trades": 142,
+    "lot_0_02_count": 98,
+    "lot_0_01_count": 44,
+    "average_lot": 0.016901408450704227,
+    "profit_factor": 1.9932189450645272,
+    "total_pnl_usd_assumed": 1060.9136333200515,
+    "max_drawdown_usd_assumed": 83.53042294791794,
+    "comparison_constant_0_02": {
+      "total_pnl_usd_assumed": 1208.2764165836886,
+      "max_drawdown_usd_assumed": 124.43823581782385,
+      "profit_reduction_pct": 12.19611516380452,
+      "drawdown_reduction_pct": 32.873989735594186
+    },
+    "assumption": "1 lot has USD 10 value per strategy pip; broker MT5 symbol specification remains authoritative"
+  },
+  "loss_reduction_vs_parent": {
+    "train_pct": 57.14285714285714,
+    "dev_pct": 58.33333333333333,
+    "validation_pct": 57.89473684210527,
+    "opened_2026_pct": 65.78947368421053,
+    "all_pct": 59.375
+  },
+  "next_unused_forward_boundary": "after 2026-07-02 02:15:00 UTC",
+  "unresolved": 0,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}

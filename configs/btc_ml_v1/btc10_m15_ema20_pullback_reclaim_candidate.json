@@ -1,0 +1,53 @@
+{
+  "candidate_id": "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R225",
+  "status": "provisional_research_parent_candidate_not_in_stacking_portfolio",
+  "preferred_refinement": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
+  "portfolio_adopted": false,
+  "symbol": "BTCUSD#",
+  "pip_contract": "$10 price movement = 1 pip",
+  "spread_usd": 30.0,
+  "time_contract": {
+    "csv_time": "bar_open",
+    "closed_bars_only": true,
+    "decision_timeframe": "M15",
+    "higher_timeframe": "H1",
+    "entry": "next exact M5 open after the closed M15 signal bar",
+    "exit_timeframe": "M5",
+    "same_bar_priority": "SL_FIRST"
+  },
+  "selection_protocol": {
+    "entry_family_train": "2024-08-01 00:00:00 <= entry < 2025-02-01 00:00:00",
+    "entry_family_dev": "2025-02-01 00:00:00 <= entry < 2025-07-01 00:00:00",
+    "rr_refinement": "Post-hoc exit-only refinement after R0.8 had already been reviewed. Same 318 entries and original stops were frozen. Full-target RR 1.5 through 5.0 was tested in 0.25R steps using TRAIN and DEV numeric eligibility. This is not a new untouched holdout.",
+    "selected_rr": 2.25,
+    "validation_confirmation": "2025-07-01 00:00:00 <= entry < 2026-01-01 00:00:00",
+    "opened_2026_confirmation": "2026-01-01 00:00:00 <= entry <= 2026-07-02 02:15:00",
+    "next_unused_forward_boundary": "after 2026-07-02 02:15:00 UTC"
+  },
+  "rules": {
+    "h1_trend": "closed H1 EMA50/EMA200 direction; EMA200 slope versus previous closed H1 using shift(4) after M15 as-of merge; separation >= 0.5*H1 ATR14",
+    "long_signal": "previous M15 close <= previous EMA20; current close > EMA20 and > EMA50; current close location >= 0.6",
+    "short_signal": "previous M15 close >= previous EMA20; current close < EMA20 and < EMA50; current close location <= 0.4",
+    "cooldown": "12 M15 bars per direction, applied to raw signals before risk filtering",
+    "stop": "most recent 8 M15-bar extreme plus 0.1*M15 ATR14",
+    "minimum_risk_pips": 62.5,
+    "risk_cap_pips": 120.0,
+    "minimum_reward_pips": 140.625,
+    "target_r": 2.25
+  },
+  "metrics": {
+    "train": {"trades": 80, "win_rate_pct": 38.75, "profit_factor": 1.608078920673084, "total_pips": 2282.570419168366, "max_drawdown_pips": 468.0571814565262},
+    "dev": {"trades": 80, "win_rate_pct": 40.0, "profit_factor": 1.422666042352786, "total_pips": 1711.9124426511463, "max_drawdown_pips": 646.9114837214378},
+    "validation": {"trades": 94, "win_rate_pct": 39.361702127659576, "profit_factor": 1.518748177653784, "total_pips": 2498.8245555573883, "max_drawdown_pips": 673.7084139346259},
+    "pre2026": {"trades": 254, "win_rate_pct": 39.37007874015748, "profit_factor": 1.5144828270649848, "total_pips": 6493.307417376901, "max_drawdown_pips": 788.6968840682912},
+    "opened_2026": {"trades": 64, "win_rate_pct": 40.625, "profit_factor": 1.5947191651226882, "total_pips": 1857.562287480479, "max_drawdown_pips": 1051.7617391297808},
+    "all": {"trades": 318, "win_rate_pct": 39.62264150943396, "profit_factor": 1.5304003182924883, "total_pips": 8350.86970485738, "max_drawdown_pips": 1051.7617391297817}
+  },
+  "entry_risk_fingerprint": "8807525c5951e6681a1fd0cfdcf77f26ceb76e0671a7d8ee6cc051525fc6fbbf",
+  "r225_plan_fingerprint": "e1d82a5715b0b9ab93407dc0b685c1af57d59e70443b22f16e8aac8e55f6c08f",
+  "unresolved_opened_2026": 0,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
