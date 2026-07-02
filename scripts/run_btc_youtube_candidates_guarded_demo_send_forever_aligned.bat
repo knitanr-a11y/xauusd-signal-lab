@@ -5,11 +5,15 @@ cd /d "%~dp0\.."
 set CSV_DIR=Files
 set STATE_DIR=data\runtime_state\btc\youtube_candidates
 set LOG_BASE=data\runtime_logs\btc
+set STABLE_LOG_DIR=%LOG_BASE%\youtube_candidates_operational
 
 if not exist "%STATE_DIR%" mkdir "%STATE_DIR%"
+if not exist "%STABLE_LOG_DIR%" mkdir "%STABLE_LOG_DIR%"
 
 if not exist "Files\.env" (
   echo [ERROR] Files\.env is missing. DISCORD_WEBHOOK_URL must be available before starting.
+  echo Expected file: %CD%\Files\.env
+  pause
   exit /b 2
 )
 
@@ -19,6 +23,7 @@ for /f "usebackq tokens=1,* delims==" %%A in ("Files\.env") do (
 
 if "%DISCORD_WEBHOOK_URL%"=="" (
   echo [ERROR] DISCORD_WEBHOOK_URL is not set in Files\.env.
+  pause
   exit /b 3
 )
 
@@ -28,7 +33,7 @@ echo BTC4: 0.02 split TP1 0.01 / TP2 0.01, TP2 to BE after TP1
 echo BTC5: 0.01 demo order
 echo BTC6: Discord monitor only, no order
 echo Demo login required: 75539039
-echo Hedging account required for BTC4 split positions
+echo Stable logs: %STABLE_LOG_DIR%
 echo Stop with Ctrl+C
 echo ============================================================
 
@@ -42,6 +47,7 @@ python scripts\run_btc_youtube_candidates_operational_forever.py ^
   --broker-symbol BTCUSD# ^
   --max-symbol-positions 6 ^
   --max-symbol-lot 0.10 ^
+  --spread-cost-usd 30 ^
   --discord-webhook-env DISCORD_WEBHOOK_URL ^
   --discord-username "Mochipoyo BTC YouTube" ^
   --manager-interval-seconds 2 ^
@@ -50,4 +56,21 @@ python scripts\run_btc_youtube_candidates_operational_forever.py ^
 
 set EXITCODE=%ERRORLEVEL%
 echo BTC YouTube candidate loop exit code: %EXITCODE%
+
+if not "%EXITCODE%"=="0" (
+  echo.
+  echo [ERROR] Runtime stopped with an error.
+  echo Log directory: %CD%\%STABLE_LOG_DIR%
+  if exist "%STABLE_LOG_DIR%\latest_startup_error.log" (
+    echo -------- latest_startup_error.log --------
+    type "%STABLE_LOG_DIR%\latest_startup_error.log"
+  )
+  if exist "%STABLE_LOG_DIR%\latest_cycle_error.log" (
+    echo -------- latest_cycle_error.log --------
+    type "%STABLE_LOG_DIR%\latest_cycle_error.log"
+  )
+  echo.
+  pause
+)
+
 exit /b %EXITCODE%
