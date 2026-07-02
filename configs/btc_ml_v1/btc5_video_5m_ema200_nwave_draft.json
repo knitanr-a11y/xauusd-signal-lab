@@ -1,0 +1,34 @@
+{
+  "stage": "BTC5_VIDEO_5M_EMA200_NWAVE_DRAFT_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "source": "user-supplied YouTube screen recording reviewed on 2026-07-02",
+  "timeframe": "M5",
+  "indicators": {
+    "ema20": {"period": 20, "method": "EMA", "applied_price": "Close"},
+    "ema200": {"period": 200, "method": "EMA", "applied_price": "Close"}
+  },
+  "understood_rules": [
+    "EMA20 above EMA200 defines LONG direction; EMA20 below EMA200 defines SHORT direction",
+    "after the EMA cross, wait for price to return to and touch EMA200",
+    "after the EMA200 touch, enter on a clean counter-trend diagonal-line break or a double-bottom/double-top neckline break",
+    "place the stop beyond the C-point retracement swing",
+    "set the profit target by N-wave equality AB=CD",
+    "skip when reward-to-risk is 1.0 or lower",
+    "skip when reward-to-risk is 3.0 or higher because an excessively large measured reward indicates an unreliable diagonal structure"
+  ],
+  "unresolved_before_outcome_exploration": [
+    "whether only the first EMA200 touch after each cross is valid or every later touch while EMA order remains valid",
+    "whether an EMA200 wick touch alone is sufficient",
+    "whether entry requires an M5 close beyond the diagonal/neckline or triggers immediately on price break",
+    "objective pivot definition for the clean diagonal line and double-top/double-bottom neckline",
+    "exact stop buffer beyond the C swing",
+    "whether 1<RR<3 is strict or the endpoints are allowed",
+    "setup expiry in M5 bars after EMA200 touch"
+  ],
+  "candidate_selection_uses_future_outcomes": false,
+  "post2026_outcomes_evaluated": false,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
