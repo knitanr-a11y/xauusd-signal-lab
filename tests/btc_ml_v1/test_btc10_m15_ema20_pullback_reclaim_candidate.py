@@ -21,13 +21,15 @@ def test_fixed_contract() -> None:
     assert module.RECENT_STOP_BARS == 8
     assert module.H1_TREND_SEPARATION_ATR_MIN == 0.5
     assert module.CLOSE_LOCATION_MIN == 0.6
-    assert module.TARGET_R == 0.8
+    assert module.TARGET_R == 2.25
+    assert module.MIN_RISK_PIPS == 62.5
+    assert module.MIN_REWARD_PIPS == 140.625
     assert module.RISK_CAP_PIPS == 120.0
     assert module.COOLDOWN_M15_BARS == 12
 
 
 def test_candidate_id() -> None:
-    assert module.CANDIDATE_ID == "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R080"
+    assert module.CANDIDATE_ID == "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R225"
 
 
 def test_base_simulation_uses_sl_first() -> None:
@@ -45,7 +47,7 @@ def test_base_simulation_uses_sl_first() -> None:
             "stop_chart": 99.0,
             "target_chart": 101.0,
             "risk_pips": 10.0,
-            "reward_pips": 8.0,
+            "reward_pips": 22.5,
         }
     )
     result = module.base.simulate(frame, plan, pd.Timestamp("2025-02-01"))
