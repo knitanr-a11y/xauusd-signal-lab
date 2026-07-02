@@ -1,30 +1,84 @@
 {
-  "stage": "BTC5_VIDEO_5M_EMA200_NWAVE_DRAFT_RESEARCH_ONLY",
+  "stage": "BTC5_VIDEO_5M_EMA200_NWAVE_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
   "source": "user-supplied YouTube screen recording reviewed on 2026-07-02",
   "timeframe": "M5",
   "indicators": {
     "ema20": {"period": 20, "method": "EMA", "applied_price": "Close"},
-    "ema200": {"period": 200, "method": "EMA", "applied_price": "Close"}
+    "ema200": {"period": 200, "method": "EMA", "applied_price": "Close"},
+    "clear_cross_confirmation": "abs(EMA20-EMA200) >= 0.02*ATR14"
   },
-  "understood_rules": [
+  "user_confirmed_rules": [
     "EMA20 above EMA200 defines LONG direction; EMA20 below EMA200 defines SHORT direction",
-    "after the EMA cross, wait for price to return to and touch EMA200",
-    "after the EMA200 touch, enter on a clean counter-trend diagonal-line break or a double-bottom/double-top neckline break",
-    "place the stop beyond the C-point retracement swing",
-    "set the profit target by N-wave equality AB=CD",
-    "skip when reward-to-risk is 1.0 or lower",
-    "skip when reward-to-risk is 3.0 or higher because an excessively large measured reward indicates an unreliable diagonal structure"
+    "every separate EMA200 touch remains valid until EMA20 crosses back to the opposite side",
+    "a wick-only EMA200 touch is valid",
+    "consecutive touching bars are one touch episode; a later touch after at least one non-touch bar is another valid setup",
+    "entry requires an M5 close beyond the diagonal or neckline and executes at the next M5 open",
+    "A-B is the prior trend impulse and TP is N-wave equality AB=CD",
+    "stop is 30 pips beyond C; under the BTC contract 30 pips equals a $300 price distance",
+    "skip when net reward is below 50 pips",
+    "reward-to-risk is strictly greater than 1 and strictly less than 3"
   ],
-  "unresolved_before_outcome_exploration": [
-    "whether only the first EMA200 touch after each cross is valid or every later touch while EMA order remains valid",
-    "whether an EMA200 wick touch alone is sufficient",
-    "whether entry requires an M5 close beyond the diagonal/neckline or triggers immediately on price break",
-    "objective pivot definition for the clean diagonal line and double-top/double-bottom neckline",
-    "exact stop buffer beyond the C swing",
-    "whether 1<RR<3 is strict or the endpoints are allowed",
-    "setup expiry in M5 bars after EMA200 touch"
-  ],
+  "objective_pattern_comparison": {
+    "pivot_widths": [2, 3, 5],
+    "methods": [
+      "two confirmed pivots forming the counter-trend diagonal",
+      "three-or-more-pivot regression line with R-squared at least 0.70",
+      "double-top or double-bottom neckline with peak/trough difference at most 0.25 ATR14"
+    ],
+    "a_b_lookback_bars": 288,
+    "n_wave_retracement_bands_compared": [
+      "0.236-0.886",
+      "0.382-0.786",
+      "0.500-0.886"
+    ]
+  },
+  "provisional_candidate": {
+    "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+    "status": "CHART_AUDIT_REQUIRED_NOT_ADOPTED",
+    "line_method": "two confirmed pivots with pivot width 2",
+    "n_wave_retracement": "0.382 <= BC/AB <= 0.786",
+    "spread_usd": 30,
+    "discovery": {
+      "trades": 7,
+      "wins": 5,
+      "losses": 2,
+      "win_rate_pct": 71.428571,
+      "profit_factor": 5.260133,
+      "total_pips": 538.664,
+      "average_pips": 76.952,
+      "max_drawdown_pips": 92.19
+    },
+    "validation": {
+      "trades": 7,
+      "wins": 3,
+      "losses": 4,
+      "win_rate_pct": 42.857143,
+      "profit_factor": 1.648299,
+      "total_pips": 137.005,
+      "average_pips": 19.572143,
+      "max_drawdown_pips": 147.99
+    },
+    "combined": {
+      "trades": 14,
+      "wins": 8,
+      "losses": 6,
+      "win_rate_pct": 57.142857,
+      "profit_factor": 3.000364,
+      "total_pips": 675.669,
+      "average_pips": 48.262071,
+      "max_drawdown_pips": 147.99
+    },
+    "post2026_entry_only_candidates": 5,
+    "overlap_with_btc4_risk_cap_400_within_24h": 0,
+    "evaluated_trade_overlap_count": 0
+  },
+  "sensitivity": {
+    "spread_usd": [20, 25, 30],
+    "clear_cross_atr": [0.0, 0.02, 0.05],
+    "candidate_trade_count_unchanged": true,
+    "combined_profit_factor_range": [3.000364, 3.078738]
+  },
   "candidate_selection_uses_future_outcomes": false,
   "post2026_outcomes_evaluated": false,
   "orders_enabled": false,
