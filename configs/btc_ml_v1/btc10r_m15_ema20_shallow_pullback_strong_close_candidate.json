@@ -2,6 +2,7 @@
   "candidate_id": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
   "parent_candidate": "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R225",
   "status": "provisional_posthoc_quality_filter_research_candidate",
+  "preferred_risk_overlay": "BTC10R_SAFE_RISK_OVERLAY_V1",
   "portfolio_adopted": false,
   "filters": {
     "maximum_pullback_depth_atr": 0.6,
