@@ -59,6 +59,22 @@ def test_mt5_ema_uses_sma_seed_then_recursive_formula() -> None:
     np.testing.assert_allclose(actual, expected, equal_nan=True)
 
 
+def test_applied_price_formulas_are_explicit() -> None:
+    frame = pd.DataFrame({"high": [12.0], "low": [6.0], "close": [10.0]})
+    assert compat.applied_price(frame, "close").iloc[0] == 10.0
+    assert compat.applied_price(frame, "typical").iloc[0] == pytest.approx(28.0 / 3.0)
+    assert compat.applied_price(frame, "weighted").iloc[0] == 9.5
+    with pytest.raises(ValueError, match="unsupported EMA applied price"):
+        compat.applied_price(frame, "unknown")
+
+
+def test_runner_requires_explicit_applied_price() -> None:
+    with pytest.raises(SystemExit):
+        runner.parse_args([])
+    args = runner.parse_args(["--ema-applied-price", "typical"])
+    assert args.ema_applied_price == "typical"
+
+
 def test_mt5_atr_uses_wilder_sma_seed() -> None:
     actual = compat.mt5_atr(
         high=[10.0, 12.0, 13.0, 15.0],
@@ -66,7 +82,6 @@ def test_mt5_atr_uses_wilder_sma_seed() -> None:
         close=[9.0, 11.0, 12.0, 14.0],
         period=3,
     )
-    # TR = 2, 3, 3, 4; seed = 8/3; next = ((8/3)*2 + 4)/3 = 28/9.
     expected = np.array([np.nan, np.nan, 8.0 / 3.0, 28.0 / 9.0])
     np.testing.assert_allclose(actual, expected, equal_nan=True)
 
@@ -157,7 +172,7 @@ def test_structural_stop_uses_ema200_below_valid_long_touch() -> None:
     assert stop == 50.0
 
 
-def test_official_runner_patches_mt5_indicators_and_pre_entry_only_contract(monkeypatch) -> None:
+def test_official_runner_patches_selected_mt5_price_and_pre_entry_contract(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
     def fake_run(args: Namespace) -> dict[str, object]:
@@ -168,13 +183,17 @@ def test_official_runner_patches_mt5_indicators_and_pre_entry_only_contract(monk
         return {}
 
     monkeypatch.setattr(runner.engine, "run", fake_run)
-    args = Namespace(close_on_ema200_invalidation=True)
+    args = Namespace(
+        close_on_ema200_invalidation=True,
+        ema_applied_price="weighted",
+    )
     result = runner.run(args)
 
     assert captured["close_on_ema200_invalidation"] is False
-    assert captured["add_h4_features"] is runner._add_h4_features
+    assert callable(captured["add_h4_features"])
     assert captured["generate_setups"] is runner._generate_setups
     assert captured["build_plan"] is runner._build_plan
     assert result["indicator_contract"] == "MT5_SMA_SEEDED_EMA_AND_WILDER_ATR"
+    assert result["ema_applied_price"] == "weighted"
     assert result["pre_entry_ema200_invalidation_only"] is True
     assert result["post_entry_exit_contract"] == "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
