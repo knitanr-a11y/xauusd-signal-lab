@@ -16,6 +16,13 @@ def import_runner():
     return importlib.import_module("run_btcusdsharp_history")
 
 
+def import_packager():
+    path = str(script_dir())
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    return importlib.import_module("build_btcusd_chat_package")
+
+
 def test_failed_run_cleanup_removes_only_current_process_stage(tmp_path: Path) -> None:
     runner = import_runner()
     lock = tmp_path / "btcusdsharp_history_export.lock"
@@ -32,13 +39,26 @@ def test_failed_run_cleanup_removes_only_current_process_stage(tmp_path: Path) -
     assert other.exists()
 
 
-def test_root_launcher_is_lightweight_and_keeps_a_pasteable_log() -> None:
+def test_chat_package_defaults_keep_m1_short_and_m5_long() -> None:
+    packager = import_packager()
+    args = packager.parse_args([])
+
+    assert args.m1_days == 90
+    assert args.m5_days == 730
+    assert args.core_days == 730
+    assert args.package == "BTCUSD_HISTORY_CHAT_PACKAGE.zip"
+    assert packager.TIMEFRAME_ORDER == ("M1", "M5", "M15", "H1", "H4", "D1")
+
+
+def test_root_launcher_builds_one_zip_and_keeps_a_pasteable_log() -> None:
     launcher = Path(__file__).resolve().parents[2] / "RUN_BTCUSD_HISTORY_EXPORT.bat"
     text = launcher.read_text(encoding="utf-8")
 
-    assert "--start \"%START_DATE%\" --timeframes M15 H1 H4 D1" in text
-    assert "M1 and M5 are intentionally excluded" in text
+    assert "build_btcusd_chat_package.py" in text
+    assert "M1: latest 90 days" in text
+    assert "M5: latest 730 days" in text
+    assert "BTCUSD_HISTORY_CHAT_PACKAGE.zip" in text
     assert "BTCUSD_HISTORY_LAST_LOG.txt" in text
     assert "BTCUSD_HISTORY_PASTE_THIS.txt" in text
+    assert "temporary CSV files will be deleted" in text
     assert "pause" in text.lower()
-    assert "Select-Object -Skip 1" in text
