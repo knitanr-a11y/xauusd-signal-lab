@@ -6,12 +6,18 @@ on:
     paths:
       - "scripts/gold_ml_v1/live_research_challenger/**"
       - "tests/gold_ml_v1/test_live_always_on.py"
+      - "tests/gold_ml_v1/test_live_execution_live_wr.py"
+      - "tests/gold_ml_v1/test_live_execution_supervisor.py"
+      - "tests/gold_ml_v1/test_live_feature_archive.py"
       - "tests/gold_ml_v1/test_live_log_manager.py"
       - ".github/workflows/gml1_live_log_lifecycle_tests.yml"
   pull_request:
     paths:
       - "scripts/gold_ml_v1/live_research_challenger/**"
       - "tests/gold_ml_v1/test_live_always_on.py"
+      - "tests/gold_ml_v1/test_live_execution_live_wr.py"
+      - "tests/gold_ml_v1/test_live_execution_supervisor.py"
+      - "tests/gold_ml_v1/test_live_feature_archive.py"
       - "tests/gold_ml_v1/test_live_log_manager.py"
       - ".github/workflows/gml1_live_log_lifecycle_tests.yml"
 
@@ -30,11 +36,14 @@ jobs:
         run: |
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_log_manager.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_execution_live_wr.py
+          python -m py_compile scripts/gold_ml_v1/live_research_challenger/live_feature_archive.py
           python -m py_compile scripts/gold_ml_v1/live_research_challenger/rotate_live_loop_log.py
       - name: Test always-on policy
         run: python -m pytest tests/gold_ml_v1/test_live_always_on.py -q
       - name: Test log lifecycle
         run: python -m pytest tests/gold_ml_v1/test_live_log_manager.py -q
+      - name: Test permanent entry feature snapshots
+        run: python -m pytest tests/gold_ml_v1/test_live_feature_archive.py -q
       - name: Re-run existing live safety tests
         run: |
           python -m pytest tests/gold_ml_v1/test_live_execution_live_wr.py -q
