@@ -1,0 +1,74 @@
+{
+  "stage": "BTC_STACKING_PORTFOLIO_2026_OUTCOMES_EVALUATED_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "evaluated_at": "2026-07-02",
+  "data_cutoff_utc": "2026-07-02 02:15:00",
+  "selection_boundary": {
+    "candidate_rules_frozen_before_post2026_open": true,
+    "post2026_used_for_candidate_selection": false,
+    "post2026_used_for_filter_or_parameter_changes": false
+  },
+  "aggregation_contract": {
+    "unit": "pips per strategy-trade",
+    "monetary_total_calculated": false,
+    "reason_monetary_total_not_calculated": "only BTC4 has a fixed 0.02 lot; BTC5, BTC6, BTC7R and BTC9R lots are not specified",
+    "exact_time_overlaps_deduplicated": false,
+    "global_one_position_cap": false,
+    "maximum_simultaneous_positions_observed": 3,
+    "same_bar_order": "SL first; BTC4 after TP1 uses break-even first"
+  },
+  "candidates": [
+    {
+      "id": "BTC4_RISK_CAP_400",
+      "post2026": {"trades": 2, "wins": 2, "losses": 0, "win_rate_pct": 100.0, "profit_factor": "Infinity", "total_pips": 732.255000, "max_drawdown_pips": 0.0},
+      "all_evaluated": {"trades": 11, "wins": 9, "losses": 2, "win_rate_pct": 81.818182, "profit_factor": 4.291830, "total_pips": 1748.698617, "max_drawdown_pips": 289.132738}
+    },
+    {
+      "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "post2026": {"trades": 5, "wins": 3, "losses": 2, "win_rate_pct": 60.0, "profit_factor": 1.446380, "total_pips": 60.980000, "max_drawdown_pips": 55.000000},
+      "all_evaluated": {"trades": 19, "wins": 11, "losses": 8, "win_rate_pct": 57.894737, "profit_factor": 2.552857, "total_pips": 736.649000, "max_drawdown_pips": 229.600000}
+    },
+    {
+      "id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "post2026": {"trades": 1, "wins": 0, "losses": 1, "win_rate_pct": 0.0, "profit_factor": 0.0, "total_pips": -35.610000, "max_drawdown_pips": 0.0},
+      "all_evaluated": {"trades": 14, "wins": 8, "losses": 6, "win_rate_pct": 57.142857, "profit_factor": 1.521912, "total_pips": 269.523000, "max_drawdown_pips": 338.055000}
+    },
+    {
+      "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+      "post2026": {"trades": 22, "wins": 11, "losses": 11, "win_rate_pct": 50.0, "profit_factor": 1.044792, "total_pips": 35.508909, "max_drawdown_pips": 347.374394},
+      "all_evaluated": {"trades": 83, "wins": 56, "losses": 27, "win_rate_pct": 67.469880, "profit_factor": 2.176010, "total_pips": 2284.316908, "max_drawdown_pips": 347.374394}
+    },
+    {
+      "id": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080",
+      "post2026": {"trades": 13, "wins": 10, "losses": 3, "win_rate_pct": 76.923077, "profit_factor": 2.962619, "total_pips": 406.289448, "max_drawdown_pips": 207.013891},
+      "all_evaluated": {"trades": 58, "wins": 46, "losses": 12, "win_rate_pct": 79.310345, "profit_factor": 3.060425, "total_pips": 1928.557069, "max_drawdown_pips": 207.013891}
+    }
+  ],
+  "portfolio": {
+    "pre2026": {"trades": 142, "wins": 104, "losses": 38, "win_rate_pct": 73.239437, "profit_factor": 2.786708, "total_pips": 5768.321236, "average_pips": 40.621981, "max_drawdown_pips": 345.176061},
+    "post2026": {"trades": 43, "wins": 26, "losses": 17, "win_rate_pct": 60.465116, "profit_factor": 2.023410, "total_pips": 1199.423358, "average_pips": 27.893566, "max_drawdown_pips": 247.839574},
+    "all_evaluated": {"trades": 185, "wins": 130, "losses": 55, "win_rate_pct": 70.270270, "profit_factor": 2.583416, "total_pips": 6967.744594, "average_pips": 37.663484, "max_drawdown_pips": 345.176061},
+    "exact_unique_entry_times": {"pre2026": 137, "post2026": 40, "all": 177},
+    "exact_overlap_extra_trades": {"pre2026": 5, "post2026": 3, "all": 8}
+  },
+  "post2026_monthly": [
+    {"month": "2026-01", "trades": 10, "wins": 7, "losses": 3, "win_rate_pct": 70.0, "profit_factor": 3.743256, "total_pips": 635.553187},
+    {"month": "2026-02", "trades": 9, "wins": 5, "losses": 4, "win_rate_pct": 55.555556, "profit_factor": 1.194465, "total_pips": 54.426601},
+    {"month": "2026-03", "trades": 10, "wins": 5, "losses": 5, "win_rate_pct": 50.0, "profit_factor": 0.918872, "total_pips": -28.978719},
+    {"month": "2026-04", "trades": 7, "wins": 4, "losses": 3, "win_rate_pct": 57.142857, "profit_factor": 3.275331, "total_pips": 346.626054},
+    {"month": "2026-05", "trades": 3, "wins": 2, "losses": 1, "win_rate_pct": 66.666667, "profit_factor": 2.011446, "total_pips": 68.395665},
+    {"month": "2026-06", "trades": 4, "wins": 3, "losses": 1, "win_rate_pct": 75.0, "profit_factor": 2.481900, "total_pips": 123.400569}
+  ],
+  "current_state": {
+    "orders_enabled": false,
+    "discord_enabled": false,
+    "live_ready": false,
+    "final_signal": false,
+    "lots_pending": [
+      "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+      "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080"
+    ]
+  }
+}
