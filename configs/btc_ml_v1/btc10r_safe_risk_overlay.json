@@ -1,66 +1,44 @@
 {
-  "profile_id": "BTC10R_SAFE_RISK_OVERLAY_V1",
+  "profile_id": "BTC10R_DEMO_FIXED_LOT_002_001_AFTER_2L_V1",
   "parent_candidate": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
-  "status": "provisional_research_risk_overlay_not_live",
+  "status": "adopted_candidate_demo_forward_policy",
+  "candidate_adopted": true,
+  "portfolio_adopted": false,
+  "demo_forward_approved": true,
   "signal_changes": false,
   "exit_changes": false,
   "position_sizing": {
-    "method": "fixed account-risk sizing inverse to actual stop monetary distance",
-    "normal_relative_weight": 0.20,
-    "throttled_relative_weight": 0.10,
+    "method": "fixed lot state machine",
+    "normal_lot": 0.02,
+    "throttled_lot": 0.01,
     "loss_streak_trigger": 2,
-    "reset": "return to normal weight after the next BTC10R win"
+    "reset": "return to 0.02 lot after the next resolved BTC10R win",
+    "maximum_allowed_lot": 0.05,
+    "currently_used_lots": [0.01, 0.02],
+    "decision_information": "only exits strictly earlier than the new entry may update the loss streak"
   },
-  "standalone_r_metrics": {
-    "fixed_risk": {
-      "total_r": 66.0,
-      "max_drawdown_r": 8.0,
-      "weighted_profit_factor": 1.8461538461538463
+  "exact_142_trade_result": {
+    "lot_0_02_count": 98,
+    "lot_0_01_count": 44,
+    "average_lot": 0.016901408450704227,
+    "profit_factor": 1.9932189450645272,
+    "total_pnl_usd_assumed": 1060.9136333200515,
+    "max_drawdown_usd_assumed": 83.53042294791794,
+    "constant_0_02_comparison": {
+      "profit_factor": 1.9491308107796064,
+      "total_pnl_usd_assumed": 1208.2764165836886,
+      "max_drawdown_usd_assumed": 124.43823581782385,
+      "profit_reduction_pct": 12.19611516380452,
+      "drawdown_reduction_pct": 32.873989735594186
     },
-    "half_after_two_losses": {
-      "total_r": 59.875,
-      "max_drawdown_r": 5.875,
-      "weighted_profit_factor": 1.9211538461538462
-    },
-    "change_pct": {
-      "total_r": -9.280303030303031,
-      "max_drawdown_r": -26.5625
-    }
+    "pip_value_assumption": "USD 10 per strategy pip at 1.00 lot",
+    "warning": "MT5 symbol specification is authoritative for actual demo-account money values"
   },
-  "portfolio_normalized_risk_diagnostic": {
-    "existing_five": {
-      "total_r": 82.253038,
-      "realized_drawdown_r": 5.107377,
-      "profit_factor": 2.495510,
-      "maximum_concurrent_risk_units": 3.0
-    },
-    "plus_btc10r_overlay": {
-      "total_r": 94.228038,
-      "realized_drawdown_r": 5.457377,
-      "profit_factor": 2.385706,
-      "maximum_concurrent_risk_units": 3.2
-    },
-    "relative_change_pct": {
-      "total_r": 14.558,
-      "realized_drawdown_r": 6.853
-    }
+  "local_verification": {
+    "compile_passed": true,
+    "tests_passed": 3,
+    "outcome_leakage_guard": "overlapping positions do not affect lot state until their exit is resolved"
   },
-  "simple_permutation_stress_50000": {
-    "warning": "IID/random-order stress only; not a forecast and does not preserve market-regime dependence.",
-    "fixed_risk_drawdown_r": {
-      "median": 8.0,
-      "p90": 11.5,
-      "p95": 12.75,
-      "p99": 15.75
-    },
-    "half_after_two_losses_drawdown_r": {
-      "median": 6.625,
-      "p90": 9.125,
-      "p95": 10.0,
-      "p99": 12.125
-    }
-  },
-  "portfolio_adopted": false,
   "orders_enabled": false,
   "discord_enabled": false,
   "live_ready": false,
