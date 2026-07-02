@@ -1,0 +1,56 @@
+{
+  "candidate_id": "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R080",
+  "status": "provisional_research_candidate_not_in_stacking_portfolio",
+  "portfolio_adopted": false,
+  "symbol": "BTCUSD#",
+  "pip_contract": "$10 price movement = 1 pip",
+  "spread_usd": 30.0,
+  "time_contract": {
+    "csv_time": "bar_open",
+    "closed_bars_only": true,
+    "decision_timeframe": "M15",
+    "higher_timeframe": "H1",
+    "entry": "next exact M5 open after the closed M15 signal bar",
+    "exit_timeframe": "M5",
+    "same_bar_priority": "SL_FIRST"
+  },
+  "selection_protocol": {
+    "train": "2024-08-01 00:00:00 <= entry < 2025-02-01 00:00:00",
+    "dev": "2025-02-01 00:00:00 <= entry < 2025-07-01 00:00:00",
+    "parameter_selection_used": ["TRAIN", "DEV"],
+    "validation_opened_after_freeze": "2025-07-01 00:00:00 <= entry < 2026-01-01 00:00:00",
+    "opened_2026_evaluation": "2026-01-01 00:00:00 <= entry <= 2026-07-02 02:15:00"
+  },
+  "rules": {
+    "h1_trend": "closed H1 EMA50/EMA200 direction; EMA200 slope versus previous closed H1 using shift(4) after M15 as-of merge; separation >= 0.5*H1 ATR14",
+    "long_signal": "previous M15 close <= previous EMA20; current close > EMA20 and > EMA50; current close location >= 0.6",
+    "short_signal": "previous M15 close >= previous EMA20; current close < EMA20 and < EMA50; current close location <= 0.4",
+    "cooldown": "12 M15 bars per direction, applied to raw signals before risk filtering",
+    "stop": "most recent 8 M15-bar extreme plus 0.1*M15 ATR14",
+    "risk_cap_pips": 120.0,
+    "minimum_reward_pips": 50.0,
+    "target_r": 0.8
+  },
+  "metrics": {
+    "train": {"trades": 80, "win_rate_pct": 58.75, "profit_factor": 1.230306217731627, "total_pips": 584.0999490059241, "max_drawdown_pips": 558.8568436483419},
+    "dev": {"trades": 80, "win_rate_pct": 61.25, "profit_factor": 1.2117347425858376, "total_pips": 556.6654661078092, "max_drawdown_pips": 418.07538501696746},
+    "validation": {"trades": 94, "win_rate_pct": 61.702127659574465, "profit_factor": 1.354364526981226, "total_pips": 1061.7313410815716, "max_drawdown_pips": 391.9040739032238},
+    "pre2026": {"trades": 254, "win_rate_pct": 60.629921259842526, "profit_factor": 1.269867047319391, "total_pips": 2202.496756195305, "max_drawdown_pips": 558.8568436483419},
+    "opened_2026": {"trades": 64, "win_rate_pct": 57.8125, "profit_factor": 1.14042056109819, "total_pips": 308.985698862027, "max_drawdown_pips": 790.2334820579908},
+    "all": {"trades": 318, "win_rate_pct": 60.062893081761004, "profit_factor": 1.2423779260331207, "total_pips": 2511.482455057332, "max_drawdown_pips": 790.2334820579908}
+  },
+  "portfolio_diagnostics": {
+    "exact_entry_overlap_with_existing_all": 15,
+    "daily_entry_pnl_correlation_with_existing": 0.06357520530006366,
+    "candidate_maximum_simultaneous_positions": 2,
+    "existing_portfolio_maximum_simultaneous_positions": 3,
+    "combined_maximum_simultaneous_positions": 3,
+    "equal_signal_pips_warning": "Adding BTC10 at equal signal weight lowers full-period portfolio PF from 2.5834 to 1.6421 and raises max DD from 345.18 to 725.77 pips. Lot sizing must be completed before portfolio adoption."
+  },
+  "entry_fingerprint_all_planned": "6ac8d4424d20a3e31874b3a036a52c396857fd3b4746db97d3b4e255669f7158",
+  "unresolved_opened_2026": 0,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
