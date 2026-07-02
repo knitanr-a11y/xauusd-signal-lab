@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0\.."
 
-set CSV_DIR=C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files
+set CSV_DIR=Files
 set STATE_DIR=data\runtime_state\btc\youtube_candidates
 set LOG_BASE=data\runtime_logs\btc
 
@@ -32,8 +32,8 @@ echo Hedging account required for BTC4 split positions
 echo Stop with Ctrl+C
 echo ============================================================
 
-python scripts\run_btc_youtube_candidates_guarded_demo_send_forever_aligned.py ^
-  --csv-dir "%CSV_DIR%" ^
+python scripts\run_btc_youtube_candidates_operational_forever.py ^
+  --files-dir "%CSV_DIR%" ^
   --log-base "%LOG_BASE%" ^
   --state-dir "%STATE_DIR%" ^
   --interval-minutes 1 ^
