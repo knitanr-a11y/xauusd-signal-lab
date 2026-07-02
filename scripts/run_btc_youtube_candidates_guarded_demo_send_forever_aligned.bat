@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0\.."
 
 set CSV_DIR=Files
@@ -9,10 +9,16 @@ set STABLE_LOG_DIR=%LOG_BASE%\youtube_candidates_operational
 
 if not exist "%STATE_DIR%" mkdir "%STATE_DIR%"
 if not exist "%STABLE_LOG_DIR%" mkdir "%STABLE_LOG_DIR%"
+if not exist "Files" mkdir "Files"
 
-if not exist "Files\.env" (
-  echo [ERROR] Files\.env is missing. DISCORD_WEBHOOK_URL must be available before starting.
-  echo Expected file: %CD%\Files\.env
+python scripts\ensure_discord_webhook_env.py ^
+  --repo-root "%CD%" ^
+  --target-env "Files\.env"
+
+if errorlevel 1 (
+  echo.
+  echo [ERROR] Discord Webhook configuration could not be completed.
+  echo Please paste the webhook URL when prompted, then run this BAT again.
   pause
   exit /b 2
 )
@@ -21,8 +27,8 @@ for /f "usebackq tokens=1,* delims==" %%A in ("Files\.env") do (
   if /I "%%A"=="DISCORD_WEBHOOK_URL" set "DISCORD_WEBHOOK_URL=%%B"
 )
 
-if "%DISCORD_WEBHOOK_URL%"=="" (
-  echo [ERROR] DISCORD_WEBHOOK_URL is not set in Files\.env.
+if not defined DISCORD_WEBHOOK_URL (
+  echo [ERROR] DISCORD_WEBHOOK_URL could not be loaded from Files\.env.
   pause
   exit /b 3
 )
