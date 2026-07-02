@@ -17,11 +17,11 @@
     "official_validation": "2025-07-01 to before 2026-01-01",
     "validation_opened_after_rule_freeze": true,
     "post2026_outcomes_used": false,
-    "broad_families_compared": [
+    "completed_families_compared": [
       "previous-day high/low continuation breakout",
-      "previous-day high/low sweep reversal",
-      "UTC session opening-range breakout"
+      "previous-day high/low sweep reversal"
     ],
+    "not_used_in_selection": "UTC session opening-range breakout was drafted but the broad grid did not complete within the exploration runtime; no session-ORB result or metric was used for BTC9 selection",
     "selection_gate": "TRAIN and DEV each have sufficient trades and PF > 1.1; total pre-validation sample >= 50; choose by TRAIN/DEV robustness before opening official validation"
   },
   "entry_contract": {
