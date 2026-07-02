@@ -9,9 +9,12 @@
   "spread_sensitivity_usd": [20, 25, 30],
   "indicator_contract": {
     "ema": "MT5-compatible SMA seed over the first period, followed by recursive EMA with alpha=2/(period+1)",
+    "ema_applied_price": "MUST_BE_EXPLICITLY_CONFIRMED_FROM_MT5_SETTINGS",
+    "allowed_applied_prices": ["close", "typical", "weighted"],
     "atr": "MT5/Wilder ATR with SMA true-range seed followed by Wilder recursion",
     "minimum_h4_warmup_bars_before_research": 1500,
-    "required_h4_export_start": "2017-01-01"
+    "received_h4_warmup_bars_before_research": 12895,
+    "h4_export_start": "2017-01-02 04:00:00"
   },
   "rules": {
     "cross": "H4 EMA20 crosses EMA200",
@@ -35,7 +38,7 @@
   ],
   "trend_variants_not_frozen_as_winner": true,
   "previous_results_valid": false,
-  "recalculation_status": "WAITING_FOR_LONG_H4_WARMUP_EXPORT",
+  "recalculation_status": "H4_WARMUP_VALIDATED_PENDING_EXACT_MT5_EMA_APPLIED_PRICE",
   "orders_enabled": false,
   "discord_enabled": false,
   "live_ready": false,
