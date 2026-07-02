@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 SCRIPT_DIR = Path(__file__).resolve().parents[2] / "scripts/btc_ml_v1/research"
@@ -61,3 +63,28 @@ def test_post_2026_outcomes_remain_entry_only() -> None:
 
     assert period == "POST_2026_ENTRY_ONLY"
     assert end is None
+
+
+def test_main_serializes_cli_result_and_returns_zero(monkeypatch, capsys, tmp_path: Path) -> None:
+    expected = {
+        "summary": [
+            {
+                "trades": np.int64(3),
+                "profit_factor": np.float64(2.5),
+                "generated_at": pd.Timestamp("2026-07-02 02:15:00"),
+            }
+        ],
+        "contract": {"orders_enabled": False},
+    }
+    monkeypatch.setattr(module, "run", lambda _m15, _out: expected)
+
+    return_code = module.main(
+        ["--m15", str(tmp_path / "m15.csv"), "--out", str(tmp_path / "out")]
+    )
+    payload = json.loads(capsys.readouterr().out)
+
+    assert return_code == 0
+    assert payload["summary"][0]["trades"] == 3
+    assert payload["summary"][0]["profit_factor"] == 2.5
+    assert payload["summary"][0]["generated_at"] == "2026-07-02T02:15:00"
+    assert payload["contract"]["orders_enabled"] is False
