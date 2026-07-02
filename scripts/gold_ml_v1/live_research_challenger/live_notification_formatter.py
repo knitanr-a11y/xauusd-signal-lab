@@ -17,6 +17,7 @@ STRATEGY_NAMES = {
 }
 
 DIRECTION_NAMES = {"LONG": "買い", "SHORT": "売り"}
+DIRECTION_TITLES = {"LONG": "LONG", "SHORT": "SELL"}
 
 EXECUTION_STATUS_NAMES = {
     "PENDING": "処理待ち",
@@ -85,11 +86,6 @@ def _price(value: Any) -> str | None:
     return None if number is None else f"{number:,.3f}"
 
 
-def _volume(value: Any) -> str | None:
-    number = _number(value)
-    return None if number is None else f"{number:g}"
-
-
 def _strategy_name(row: pd.Series | Mapping[str, Any]) -> str:
     explicit = _text(_value(row, "strategy_name"))
     if explicit:
@@ -98,14 +94,21 @@ def _strategy_name(row: pd.Series | Mapping[str, Any]) -> str:
     return STRATEGY_NAMES.get(comp, "GOLD自動売買戦略")
 
 
+def _direction_raw(row: pd.Series | Mapping[str, Any]) -> str:
+    return _text(_value(row, "direction")).upper()
+
+
 def _direction(row: pd.Series | Mapping[str, Any]) -> str:
-    raw = _text(_value(row, "direction")).upper()
-    return DIRECTION_NAMES.get(raw, "不明")
+    return DIRECTION_NAMES.get(_direction_raw(row), "不明")
 
 
-def _status(row: pd.Series | Mapping[str, Any]) -> str:
-    raw = _text(_value(row, "execution_status")).upper()
-    return EXECUTION_STATUS_NAMES.get(raw, "処理状態を確認中")
+def _direction_title(row: pd.Series | Mapping[str, Any]) -> str:
+    return DIRECTION_TITLES.get(_direction_raw(row), "UNKNOWN")
+
+
+def _direction_icon(row: pd.Series | Mapping[str, Any]) -> str:
+    raw = _direction_raw(row)
+    return "🟢" if raw == "LONG" else "🔴" if raw == "SHORT" else "⚪"
 
 
 def _live_performance(summary: WinRateSummary) -> str:
@@ -138,24 +141,20 @@ def _horizon_text(row: pd.Series | Mapping[str, Any]) -> str | None:
 
 
 def _entry_title(row: pd.Series | Mapping[str, Any]) -> str:
-    direction = _direction(row)
+    icon = _direction_icon(row)
+    direction = _direction_title(row)
     status = _text(_value(row, "execution_status")).upper()
-    icon = "🟢" if direction == "買い" else "🔴" if direction == "売り" else "⚪"
-    if status == "ORDER_FILLED":
-        return f"{icon} **GOLD {direction}注文が約定しました**"
     if status == "ORDER_RECOVERED_OPEN":
-        return f"♻️ **GOLD {direction}ポジションを復旧しました**"
+        return f"{icon} **GOLD {direction}（復旧）**"
     if status == "ORDER_RECOVERED_HISTORY":
-        return "♻️ **GOLD 決済済み注文を復旧しました**"
+        return f"{icon} **GOLD {direction}（決済済み復旧）**"
     if status == "DRY_RUN":
-        return f"🧪 **GOLD {direction}注文テスト**"
-    if status == "SIGNAL_ONLY":
-        return f"🔔 **GOLD {direction}シグナルを検出しました**"
+        return f"{icon} **GOLD {direction}（テスト）**"
     if status.startswith("SKIPPED_"):
-        return "⚪ **GOLD シグナルを見送りました**"
+        return "⚪ **GOLD 見送り**"
     if status in {"CONFIG_ERROR", "MT5_ERROR", "TIME_EXIT_REJECTED"}:
-        return "⚠️ **GOLD 注文処理を完了できませんでした**"
-    return f"{icon} **GOLD {direction}シグナル**"
+        return "⚠️ **GOLD 注文エラー**"
+    return f"{icon} **GOLD {direction}**"
 
 
 def _close_reason(row: pd.Series | Mapping[str, Any]) -> tuple[str, str]:
@@ -182,54 +181,44 @@ def format_entry_message(
     live: WinRateSummary,
 ) -> str:
     status_raw = _text(_value(row, "execution_status")).upper()
-    lines = [
-        _entry_title(row),
-        "",
-        f"戦略　　　：{_strategy_name(row)}",
-        f"売買方向　：{_direction(row)}",
-        f"判定時刻　：{_time_text(_value(row, 'decision_time'))}（MT5サーバー時刻）",
-    ]
-    symbol = _text(_value(row, "symbol"))
-    volume = _volume(_value(row, "volume"))
-    if symbol:
-        lines.append(f"銘柄　　　：{symbol}")
-    if volume is not None:
-        lines.append(f"ロット　　：{volume}")
+    lines = [_entry_title(row)]
 
     fill = _price(_value(row, "fill_price"))
     stop = _price(_value(row, "stop_price"))
     target = _price(_value(row, "target_price"))
-    if any(value is not None for value in (fill, stop, target)):
+    if any(value is not None for value in (fill, target, stop)):
         lines.append("")
         if fill is not None:
-            label = "予定価格　" if status_raw == "DRY_RUN" else "約定価格　"
+            label = "予定価格" if status_raw in {"DRY_RUN", "SIGNAL_ONLY"} else "約定価格"
             lines.append(f"{label}：{fill}")
-        if stop is not None:
-            lines.append(f"損切り価格：{stop}")
         if target is not None:
-            lines.append(f"利益確定　：{target}")
-        horizon = _horizon_text(row)
-        if horizon:
-            lines.append(f"保有期限　：{horizon}")
+            lines.append(f"TP　　　：{target}")
+        if stop is not None:
+            lines.append(f"SL　　　：{stop}")
+
+    lines.extend(
+        [
+            "",
+            f"戦略　　：{_strategy_name(row)}",
+            f"判定時刻：{_time_text(_value(row, 'decision_time'))}（MT5サーバー時刻）",
+        ]
+    )
+    horizon = _horizon_text(row)
+    if horizon:
+        lines.append(f"保有期限：{horizon}")
 
     signal_reason = _text(_value(row, "signal_reason"))
     higher_context = _text(_value(row, "higher_timeframe_context"))
     if signal_reason or higher_context:
         lines.append("")
         if signal_reason:
-            lines.append(f"検出条件　：{signal_reason}")
+            lines.append(f"検出条件：{signal_reason}")
         if higher_context:
-            lines.append(f"上位環境　：{higher_context}")
+            lines.append(f"上位環境：{higher_context}")
 
-    lines.extend(
-        [
-            "",
-            f"実運用成績：{_live_performance(live)}",
-            f"注文状態　：{_status(row)}",
-        ]
-    )
+    lines.extend(["", f"実運用成績：{_live_performance(live)}"])
     if status_raw in {"CONFIG_ERROR", "MT5_ERROR", "TIME_EXIT_REJECTED"}:
-        lines.append("確認事項　：詳細は実行ログを確認してください。")
+        lines.append("確認事項：詳細は実行ログを確認してください。")
     return _bounded(lines)
 
 
@@ -237,37 +226,30 @@ def format_exit_message(
     row: pd.Series | Mapping[str, Any],
     live: WinRateSummary,
 ) -> str:
-    reason_raw, reason_label = _close_reason(row)
-    result = _text(_value(row, "live_result")).upper()
-    if reason_raw in {"SL", "STOP_LOSS"}:
-        icon = "❌"
-    elif reason_raw in {"TP", "TAKE_PROFIT"}:
-        icon = "✅"
-    elif reason_raw in {"TIME", "TIME_EXIT"}:
-        icon = "⏰"
-    elif reason_raw in {"MANUAL", "CLIENT", "MOBILE", "WEB"}:
-        icon = "👤"
-    else:
-        icon = "✅" if result == "WIN" else "➖" if result == "BREAKEVEN" else "⚪"
+    _reason_raw, reason_label = _close_reason(row)
+    title = (
+        f"{_direction_icon(row)} **GOLD {_direction_title(row)} "
+        f"決済：{reason_label}**"
+    )
+    lines = [title]
 
-    lines = [
-        f"{icon} **GOLD 決済：{reason_label}**",
-        "",
-        f"戦略　　　：{_strategy_name(row)}",
-        f"売買方向　：{_direction(row)}",
-        f"決済時刻　：{_time_text(_value(row, 'closed_at'))}（MT5サーバー時刻）",
-    ]
     fill = _price(_value(row, "fill_price"))
     close = _price(_value(row, "close_price"))
-    if fill is not None:
-        lines.append(f"約定価格　：{fill}")
-    if close is not None:
-        lines.append(f"決済価格　：{close}")
+    if fill is not None or close is not None:
+        lines.append("")
+        if fill is not None:
+            lines.append(f"約定価格：{fill}")
+        if close is not None:
+            lines.append(f"決済価格：{close}")
+
     net = _number(_value(row, "net_profit"))
     net_text = "不明" if net is None else f"{net:+,.2f}"
     lines.extend(
         [
-            f"実損益　　：{net_text}（口座通貨）",
+            "",
+            f"戦略　　：{_strategy_name(row)}",
+            f"決済時刻：{_time_text(_value(row, 'closed_at'))}（MT5サーバー時刻）",
+            f"実損益　：{net_text}（口座通貨）",
             "",
             f"実運用成績：{_live_performance(live)}",
         ]
