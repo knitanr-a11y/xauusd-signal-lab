@@ -1,0 +1,33 @@
+{
+  "schema_version": "btc6_shadow_live_runtime_v1",
+  "candidate_id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+  "mode": "SHADOW_LIVE_NO_BROKER_ORDER",
+  "live_candle_directory": "Files",
+  "live_candle_pattern": "btcusdsharp_*.csv",
+  "required_timeframes": ["m5", "m15", "h4"],
+  "virtual_lot": 0.01,
+  "spread_usd": 30.0,
+  "entry": "first closed M5 bar open at or after the planned M15 entry time",
+  "exit_evaluation": "closed M5 bars",
+  "same_bar_priority": "SL_FIRST",
+  "discord_events": ["SHADOW_OPEN", "SHADOW_CLOSED_TP", "SHADOW_CLOSED_SL"],
+  "persistent_outputs": {
+    "state": "data/runtime_state/btc/youtube_candidates/btc6_shadow_state.json",
+    "trade_ledger": "data/runtime_state/btc/youtube_candidates/btc6_shadow_trade_ledger.csv",
+    "event_ledger": "data/runtime_state/btc/youtube_candidates/btc6_shadow_events.csv",
+    "discord_ledger": "data/runtime_state/btc/youtube_candidates/btc6_shadow_discord_send_ledger.csv"
+  },
+  "recorded_metrics": [
+    "planned and actual entry time",
+    "actual entry bid",
+    "SL and TP",
+    "effective spread-adjusted risk and reward",
+    "unrealized pips and R",
+    "MFE and MAE",
+    "exit reason and exit time",
+    "realized pips and R",
+    "MT5 account-currency P/L when symbol valuation is available"
+  ],
+  "broker_order_enabled": false,
+  "retrospective_review_enabled": true
+}
