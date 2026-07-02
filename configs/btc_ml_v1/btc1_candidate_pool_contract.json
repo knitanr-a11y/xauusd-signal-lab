@@ -1,0 +1,41 @@
+{
+  "stage": "BTC1_DATA_AUDIT_AND_LABEL_FREE_CANDIDATE_POOL",
+  "symbol": "BTCUSD#",
+  "source_timeframe": "M15",
+  "decision_time": "M15_OPEN_PLUS_15_MINUTES",
+  "higher_timeframe_policy": "LAST_HIGHER_BAR_WITH_CLOSE_TIME_LE_DECISION_TIME",
+  "event_policy": "FALSE_TO_TRUE_EDGE_WITH_4_M15_BAR_COOLDOWN_PER_FAMILY_DIRECTION",
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false,
+  "outcome_evaluation_started": false,
+  "candidate_pool_frozen_for_next_stage": true,
+  "outcomes_used_to_select_conditions": false,
+  "future_prices_used": false,
+  "open_bars_used": false,
+  "families": {
+    "TREND_PULLBACK": {
+      "long": "H1 EMA20>EMA50; H4 EMA20>EMA50; M15 EMA20>EMA50>EMA200; low<=EMA20+0.15*ATR14; close>=EMA20; bullish body; RSI14 42..62",
+      "short": "directional mirror; RSI14 38..58"
+    },
+    "BREAKOUT_EXPANSION": {
+      "long": "H1 and H4 up; close above prior 96 M15-bar high; body>=0.55*ATR14; bullish body",
+      "short": "directional mirror"
+    },
+    "COMPRESSION_RELEASE": {
+      "long": "H1 up; prior BB width<0.75*trailing 672-bar EMA width; current width>1.15*prior width; close above prior 20-bar high; bullish body",
+      "short": "directional mirror"
+    },
+    "RANGE_REVERSION": {
+      "long": "H1 EMA20/EMA50 separation<=0.45*H1 ATR14; M15 zscore20<=-2; RSI14<=30; bullish body",
+      "short": "directional mirror"
+    }
+  },
+  "observed_label_free_density": {
+    "TREND_PULLBACK": {"long": 1362, "short": 1190, "total": 2552, "monthly_median": 108},
+    "BREAKOUT_EXPANSION": {"long": 362, "short": 339, "total": 701, "monthly_median": 28},
+    "COMPRESSION_RELEASE": {"long": 397, "short": 336, "total": 733, "monthly_median": 30},
+    "RANGE_REVERSION": {"long": 33, "short": 53, "total": 86, "monthly_median": 3}
+  }
+}
