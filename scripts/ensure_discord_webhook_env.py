@@ -10,6 +10,7 @@ from typing import Iterable
 KEY = "DISCORD_WEBHOOK_URL"
 ALLOWED_PREFIXES = (
     "https://discord.com/api/webhooks/",
+    "https://discordapp.com/api/webhooks/",
     "https://canary.discord.com/api/webhooks/",
     "https://ptb.discord.com/api/webhooks/",
 )
