@@ -50,6 +50,8 @@ def test_base_simulation_uses_sl_first() -> None:
             "reward_pips": 22.5,
         }
     )
+
     result = module.base.simulate(frame, plan, pd.Timestamp("2025-02-01"))
+
     assert result["exit_reason"] == "SL"
     assert result["pnl_pips"] == -10.0
