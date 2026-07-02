@@ -13,6 +13,7 @@ from live_deal_archive import (
     archive_captures,
     completed_position_tickets,
 )
+from live_feature_archive import update_trade_feature_index
 from live_log_manager import maintain_logs_and_trades as base_maintain_logs
 from live_mt5 import MetaTrader5Client
 from live_settings import RuntimeSettings, load_runtime_settings
@@ -100,6 +101,10 @@ def _restore_pending_states(
     return restored
 
 
+def _read_frame(path: Path) -> pd.DataFrame:
+    return pd.read_csv(path, dtype=object) if path.is_file() else pd.DataFrame()
+
+
 def process_execution_cycle(
     *,
     live_dir: Path,
@@ -170,6 +175,19 @@ def process_execution_cycle(
             client_factory=factory,
             webhook_sender=webhook_sender,
         )
+        operational = _read_frame(output_dir / "live_execution_ledger.csv")
+        feature_index = update_trade_feature_index(
+            output_dir,
+            registry=registry,
+            operational=operational,
+            now_text=now_text,
+        )
+        result["trade_feature_index"] = {
+            "path": "trades/trade_feature_index.csv",
+            "rows": int(len(feature_index)),
+            "entry_snapshot": "CLOSED_ENTRY_TIME_ONLY",
+            "live_gate_usage": False,
+        }
         result["deal_archive"] = deal_status
         result["autotrading_connection"] = "CONNECTED_WITH_EXISTING_FAIL_CLOSED_CONTROLS"
         if maintenance_warning:
