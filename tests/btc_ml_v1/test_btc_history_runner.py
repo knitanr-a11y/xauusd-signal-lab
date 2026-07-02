@@ -39,24 +39,28 @@ def test_failed_run_cleanup_removes_only_current_process_stage(tmp_path: Path) -
     assert other.exists()
 
 
-def test_chat_package_defaults_keep_m1_short_and_m5_long() -> None:
+def test_chat_package_defaults_keep_execution_short_and_h4_warmup_long() -> None:
     packager = import_packager()
     args = packager.parse_args([])
 
     assert args.m1_days == 90
     assert args.m5_days == 730
     assert args.core_days == 730
+    assert args.higher_start == "2017-01-01"
     assert args.package == "BTCUSD_HISTORY_CHAT_PACKAGE.zip"
     assert packager.TIMEFRAME_ORDER == ("M1", "M5", "M15", "H1", "H4", "D1")
 
 
-def test_root_launcher_builds_one_zip_and_keeps_a_pasteable_log() -> None:
+def test_root_launcher_builds_one_zip_with_long_h4_history() -> None:
     launcher = Path(__file__).resolve().parents[2] / "RUN_BTCUSD_HISTORY_EXPORT.bat"
     text = launcher.read_text(encoding="utf-8")
 
     assert "build_btcusd_chat_package.py" in text
     assert "M1: latest 90 days" in text
     assert "M5: latest 730 days" in text
+    assert "M15 H1: latest 730 days" in text
+    assert "H4 D1: from 2017-01-01" in text
+    assert "MT5 EMA warm-up" in text
     assert "BTCUSD_HISTORY_CHAT_PACKAGE.zip" in text
     assert "BTCUSD_HISTORY_LAST_LOG.txt" in text
     assert "BTCUSD_HISTORY_PASTE_THIS.txt" in text
