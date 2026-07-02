@@ -76,11 +76,53 @@ def test_post_2026_period_is_entry_only() -> None:
     assert end is None
 
 
+def test_wick_through_ema200_discards_basis_and_waits_for_next_valid_touch() -> None:
+    frame = pd.DataFrame(
+        {
+            "time": pd.date_range("2024-10-04 12:00:00", periods=4, freq="4h"),
+            "open": [110.0, 114.0, 112.0, 116.0],
+            "high": [115.0, 120.0, 118.0, 121.0],
+            "low": [108.0, 95.0, 105.0, 114.0],
+            "close": [114.0, 115.0, 112.0, 119.0],
+            "ema20": [110.0, 110.0, 110.0, 112.0],
+            "ema200": [100.0, 100.0, 100.0, 101.0],
+            "atr14": [500.0] * 4,
+            "cross_long": [True, False, False, False],
+            "cross_short": [False, False, False, False],
+        }
+    )
+
+    setup = runner._generate_setups(frame)[0]
+
+    assert setup.status == "TRIGGERED"
+    assert setup.touch_idx == 2
+    assert setup.trigger_idx == 3
+
+
+def test_structural_stop_uses_ema200_below_valid_long_touch() -> None:
+    frame = pd.DataFrame(
+        {
+            "low": [105.0],
+            "high": [120.0],
+            "ema200": [100.0],
+            "atr14": [500.0],
+        }
+    )
+
+    anchor, buffer_usd, stop = runner._structural_stop(frame, 0, "LONG")
+
+    assert anchor == 100.0
+    assert buffer_usd == 50.0
+    assert stop == 50.0
+
+
 def test_official_runner_forces_pre_entry_only_ema200_invalidation(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
     def fake_run(args: Namespace) -> dict[str, object]:
         captured["close_on_ema200_invalidation"] = args.close_on_ema200_invalidation
+        captured["generate_setups"] = runner.engine._generate_setups
+        captured["build_plan"] = runner.engine._build_plan
         return {}
 
     monkeypatch.setattr(runner.engine, "run", fake_run)
@@ -88,5 +130,7 @@ def test_official_runner_forces_pre_entry_only_ema200_invalidation(monkeypatch) 
     result = runner.run(args)
 
     assert captured["close_on_ema200_invalidation"] is False
+    assert captured["generate_setups"] is runner._generate_setups
+    assert captured["build_plan"] is runner._build_plan
     assert result["pre_entry_ema200_invalidation_only"] is True
     assert result["post_entry_exit_contract"] == "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
