@@ -5,17 +5,28 @@ import sys
 from argparse import Namespace
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pytest
 
 SCRIPT_DIR = Path(__file__).resolve().parents[2] / "scripts/btc_ml_v1/research"
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 MODULE_PATH = SCRIPT_DIR / "btc3_video_ema_method_exploration.py"
 RUNNER_PATH = SCRIPT_DIR / "run_btc3_video_ema_user_contract.py"
+COMPAT_PATH = SCRIPT_DIR / "mt5_indicator_compat.py"
 
 spec = importlib.util.spec_from_file_location("btc3_video_ema_method_exploration", MODULE_PATH)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+compat_spec = importlib.util.spec_from_file_location("mt5_indicator_compat", COMPAT_PATH)
+assert compat_spec and compat_spec.loader
+compat = importlib.util.module_from_spec(compat_spec)
+sys.modules[compat_spec.name] = compat
+compat_spec.loader.exec_module(compat)
 
 runner_spec = importlib.util.spec_from_file_location("run_btc3_video_ema_user_contract", RUNNER_PATH)
 assert runner_spec and runner_spec.loader
@@ -40,6 +51,36 @@ def test_h4_decision_uses_bar_close_not_open() -> None:
     )
     output = module._add_h4_features(frame)
     assert output.loc[0, "decision_time"] == frame.loc[0, "time"] + pd.Timedelta(hours=4)
+
+
+def test_mt5_ema_uses_sma_seed_then_recursive_formula() -> None:
+    actual = compat.mt5_ema([1.0, 2.0, 3.0, 4.0, 5.0], 3)
+    expected = np.array([np.nan, np.nan, 2.0, 3.0, 4.0])
+    np.testing.assert_allclose(actual, expected, equal_nan=True)
+
+
+def test_mt5_atr_uses_wilder_sma_seed() -> None:
+    actual = compat.mt5_atr(
+        high=[10.0, 12.0, 13.0, 15.0],
+        low=[8.0, 9.0, 10.0, 11.0],
+        close=[9.0, 11.0, 12.0, 14.0],
+        period=3,
+    )
+    # TR = 2, 3, 3, 4; seed = 8/3; next = ((8/3)*2 + 4)/3 = 28/9.
+    expected = np.array([np.nan, np.nan, 8.0 / 3.0, 28.0 / 9.0])
+    np.testing.assert_allclose(actual, expected, equal_nan=True)
+
+
+def test_h4_warmup_is_mandatory() -> None:
+    frame = pd.DataFrame(
+        {"time": pd.date_range("2024-01-01", periods=100, freq="4h")}
+    )
+    with pytest.raises(ValueError, match="Insufficient H4 EMA warm-up"):
+        compat.require_h4_warmup(
+            frame,
+            research_start=pd.Timestamp("2024-07-03"),
+            minimum_closed_bars=1500,
+        )
 
 
 def test_target_selection_skips_near_and_sub_rr_levels() -> None:
@@ -116,11 +157,12 @@ def test_structural_stop_uses_ema200_below_valid_long_touch() -> None:
     assert stop == 50.0
 
 
-def test_official_runner_forces_pre_entry_only_ema200_invalidation(monkeypatch) -> None:
+def test_official_runner_patches_mt5_indicators_and_pre_entry_only_contract(monkeypatch) -> None:
     captured: dict[str, object] = {}
 
     def fake_run(args: Namespace) -> dict[str, object]:
         captured["close_on_ema200_invalidation"] = args.close_on_ema200_invalidation
+        captured["add_h4_features"] = runner.engine._add_h4_features
         captured["generate_setups"] = runner.engine._generate_setups
         captured["build_plan"] = runner.engine._build_plan
         return {}
@@ -130,7 +172,9 @@ def test_official_runner_forces_pre_entry_only_ema200_invalidation(monkeypatch) 
     result = runner.run(args)
 
     assert captured["close_on_ema200_invalidation"] is False
+    assert captured["add_h4_features"] is runner._add_h4_features
     assert captured["generate_setups"] is runner._generate_setups
     assert captured["build_plan"] is runner._build_plan
+    assert result["indicator_contract"] == "MT5_SMA_SEEDED_EMA_AND_WILDER_ATR"
     assert result["pre_entry_ema200_invalidation_only"] is True
     assert result["post_entry_exit_contract"] == "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
