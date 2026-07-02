@@ -1,4 +1,4 @@
-# NEXT CHAT HANDOFF — BTC積み重ね候補・2026評価完了
+# NEXT CHAT HANDOFF — BTC積み重ね候補・2026評価・再現性監査完了
 
 作成日: 2026-07-02
 
@@ -7,12 +7,56 @@ repo: `knitanr-a11y/xauusd-signal-lab`
 ## 次チャットで最初に読む順番
 
 1. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_STACKING_2026_EVALUATED_20260702.md`
-2. `docs/btc_ml_v1/BTC_STACKING_PORTFOLIO_2026_EVALUATION_20260702.md`
-3. `configs/btc_ml_v1/btc_candidate_master_catalog.json`
-4. `configs/btc_ml_v1/btc_stacking_portfolio_2026_evaluation.json`
-5. 各候補の個別config・研究文書
+2. `docs/btc_ml_v1/BTC_STACKING_REPRODUCTION_AUDIT_AND_RUNBOOK_20260702.md`
+3. `docs/btc_ml_v1/BTC_STACKING_PORTFOLIO_2026_EVALUATION_20260702.md`
+4. `configs/btc_ml_v1/btc_candidate_master_catalog.json`
+5. `configs/btc_ml_v1/btc_stacking_portfolio_2026_evaluation.json`
+6. `configs/btc_ml_v1/btc_stacking_reproduction_reference.json`
+7. 各候補の個別config・研究文書
 
-古いentry-onlyファイルに残る `post2026_outcomes_evaluated=false` より、上記のマスターカタログと2026評価configを現在の正本として扱う。
+古いentry-onlyファイルに残る `post2026_outcomes_evaluated=false` より、上記のマスターカタログ、2026評価config、再現referenceを現在の正本として扱う。
+
+## 新チャットへ必ず添付する入力
+
+GitHubには大容量の履歴CSVをコミットしていない。候補条件コードだけでは取引位置・成績を再計算できない。
+
+必須パッケージ:
+
+```text
+BTCUSD_HISTORY_CHAT_PACKAGE.zip
+SHA256: 9b0b74e9937eca05e895047f5737c6794332af7ec25f2a30b64d9440c9e0dd22
+
+BTCUSD_H4_WARMUP_PACKAGE.zip
+SHA256: d150eaee0c126e2eb4c4aecb667ff0ad181a9a0a6e060cc5c1613b60e0a8019a
+```
+
+H4 warmupは2017年開始。BTC4では通常履歴パッケージ内の2024年開始H4を代用しない。
+
+## 一括再現
+
+パッケージ展開後、リポジトリルートから:
+
+```bat
+RUN_BTC_STACKING_REPRODUCTION.bat ^
+  "C:\BTC_REPRO\history" ^
+  "C:\BTC_REPRO\h4_warmup\btcusdsharp_h4.csv" ^
+  "outputs\btc_ml_v1\btc_stacking_reproduction_20260702"
+```
+
+正本スクリプト:
+
+```text
+scripts/btc_ml_v1/research/reproduce_btc_stacking_portfolio.py
+```
+
+入力の行数・期間・SHA256、候補エントリー指紋、2026年決着、全体指標を照合し、すべて一致した場合のみ:
+
+```text
+btc_stacking_reproduction_report.json
+reproduction_pass = true
+```
+
+個別コマンド・入力SHA・成功条件は再現runbookを参照する。
 
 ## 現在の積み重ね採用候補
 
@@ -24,7 +68,7 @@ repo: `knitanr-a11y/xauusd-signal-lab`
 | `BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110` | M15 | 採用・未ライブ | 未設定 |
 | `BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080` | M15 | 採用・未ライブ | 未設定 |
 
-BTC9Rは今回、ユーザー判断により積み重ね採用候補へ昇格した。
+BTC9Rはユーザー判断により積み重ね採用候補へ昇格した。
 
 ## 2026年以前の全体成績
 
@@ -105,17 +149,33 @@ BTC4・BTC6は件数不足。BTC7Rは2026年に大きく弱化したが僅かに
 - 2026年を開封済みなので、今後この期間を再びholdoutと呼ばない。
 - 次の未使用フォワード境界は `2026-07-02 02:15:00 UTC` より後。
 
+## 再現性の現在の判定
+
+- 候補条件コード: mainに存在
+- 個別config: mainに存在
+- 個別契約テスト: mainに存在
+- 一括再現スクリプト: mainに存在
+- 入力SHA・候補指紋・期待成績: mainに存在
+- 生CSV: GitHub外。新チャットへの添付が必須
+- GitHub Actionsの大容量golden-data再計算: 未実施
+
+したがって、**新チャットへ2つの入力パッケージを添付すれば再現可能**。GitHubだけでは取引再計算は不可能。
+
+新チャットでは、説明だけで「再現できた」と判断せず、一括スクリプトを実行し `reproduction_pass=true` を確認する。
+
 ## 金額成績をまだ出していない理由
 
 BTC4以外のロットが未設定。現在の全体成績は1候補シグナルを1取引としてpips集計したもの。ロットを勝手に0.02へ統一しない。
 
 ## 次に行うこと
 
-1. BTC5・BTC6・BTC7R・BTC9Rのロットと、最大3ポジション同時時の総口座リスクを決める。
-2. ロット決定後、同時保有を含む金額ベースのポートフォリオDDを計算する。
-3. 既存候補を2026年結果で再調整せず、2026-07-02以降の新規データをフォワード監視する。
-4. 新候補探索を続ける場合も、既存5候補を置換せず別candidate IDで追加する。
-5. GOLD横展開ではBTCのpip・スプレッド・SL幅・ロットを流用しない。
+1. 新チャット開始直後に2つの入力パッケージを添付し、一括再現を実行する。
+2. `reproduction_pass=true` を確認するまで、新しい候補探索やロット設定へ進まない。
+3. BTC5・BTC6・BTC7R・BTC9Rのロットと、最大3ポジション同時時の総口座リスクを決める。
+4. ロット決定後、同時保有を含む金額ベースのポートフォリオDDを計算する。
+5. 既存候補を2026年結果で再調整せず、2026-07-02以降の新規データをフォワード監視する。
+6. 新候補探索を続ける場合も、既存5候補を置換せず別candidate IDで追加する。
+7. GOLD横展開ではBTCのpip・スプレッド・SL幅・ロットを流用しない。
 
 ## 現在の禁止状態
 
@@ -124,4 +184,4 @@ BTC4以外のロットが未設定。現在の全体成績は1候補シグナル
 - `live_ready=false`
 - `final_signal=false`
 
-候補採用はライブ稼働許可ではない。
+候補採用・再現成功はライブ稼働許可ではない。
