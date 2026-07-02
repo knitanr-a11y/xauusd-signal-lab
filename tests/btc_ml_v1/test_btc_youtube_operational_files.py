@@ -37,9 +37,9 @@ def test_resolve_case_and_alias_files(tmp_path: Path) -> None:
     assert module.resolve_live_csv(tmp_path, "h4").name == "btcusdsharp_240.csv"
 
 
-def test_ambiguous_timeframe_is_rejected(tmp_path: Path) -> None:
-    write_candle(tmp_path / "btcusdsharp_m5.csv")
+def test_ambiguous_alias_timeframe_is_rejected(tmp_path: Path) -> None:
     write_candle(tmp_path / "btcusdsharp_5m.csv")
+    write_candle(tmp_path / "btcusdsharp_5min.csv")
     with pytest.raises(RuntimeError, match="Multiple m5 CSV files matched"):
         module.resolve_live_csv(tmp_path, "m5")
 
