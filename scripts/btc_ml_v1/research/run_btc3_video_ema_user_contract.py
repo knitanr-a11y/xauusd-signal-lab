@@ -14,20 +14,32 @@ MINIMUM_H4_WARMUP_BARS = 1500
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    args = engine.parse_args(argv)
+    applied_parser = argparse.ArgumentParser(add_help=False)
+    applied_parser.add_argument(
+        "--ema-applied-price",
+        choices=mt5_compat.EMA_APPLIED_PRICE_CHOICES,
+        required=True,
+        help="Use the exact MT5 EMA Applied to setting; do not choose from backtest performance.",
+    )
+    applied, remaining = applied_parser.parse_known_args(argv)
+    args = engine.parse_args(remaining)
+    args.ema_applied_price = applied.ema_applied_price
     # User contract: EMA200 invalidation exists only before entry.
     # After entry, exits are the structural SL, TP1, break-even after TP1, and TP2.
     args.close_on_ema200_invalidation = False
     return args
 
 
-def _add_h4_features(h4: pd.DataFrame) -> pd.DataFrame:
+def _add_h4_features(h4: pd.DataFrame, *, ema_applied_price: str) -> pd.DataFrame:
     mt5_compat.require_h4_warmup(
         h4,
         research_start=engine.DISCOVERY_START,
         minimum_closed_bars=MINIMUM_H4_WARMUP_BARS,
     )
-    return mt5_compat.add_h4_features_mt5(h4)
+    return mt5_compat.add_h4_features_mt5(
+        h4,
+        ema_applied_price=ema_applied_price,
+    )
 
 
 def _setup_invalid_before_entry(row: pd.Series, direction: str, *, invalidate_on_wick: bool) -> bool:
@@ -77,9 +89,6 @@ def _generate_setups(h4: pd.DataFrame, *, invalidate_on_wick: bool = False) -> l
 
             wick_crossed_ema200 = not _wick_respects_ema200(row, direction)
             if touch_idx is not None and wick_crossed_ema200:
-                # A wick through EMA200 does not cancel the whole cross setup when the
-                # candle closes back on the valid side. It invalidates only the current
-                # EMA20 basis candle, so wait for the next valid EMA20 touch.
                 touch_idx = None
                 touch_high = np.nan
                 touch_low = np.nan
@@ -225,12 +234,17 @@ def _build_plan(
 
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
+    if not hasattr(args, "ema_applied_price"):
+        raise ValueError("ema_applied_price must be explicitly supplied from the MT5 indicator setting")
     args.close_on_ema200_invalidation = False
     original_add_h4_features = engine._add_h4_features
     original_generate_setups = engine._generate_setups
     original_build_plan = engine._build_plan
     try:
-        engine._add_h4_features = _add_h4_features
+        engine._add_h4_features = lambda h4: _add_h4_features(
+            h4,
+            ema_applied_price=args.ema_applied_price,
+        )
         engine._generate_setups = _generate_setups
         engine._build_plan = _build_plan
         result = engine.run(args)
@@ -240,6 +254,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         engine._build_plan = original_build_plan
 
     result["indicator_contract"] = "MT5_SMA_SEEDED_EMA_AND_WILDER_ATR"
+    result["ema_applied_price"] = args.ema_applied_price
     result["minimum_h4_warmup_bars"] = MINIMUM_H4_WARMUP_BARS
     result["pre_entry_ema200_invalidation_only"] = True
     result["post_entry_exit_contract"] = "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
