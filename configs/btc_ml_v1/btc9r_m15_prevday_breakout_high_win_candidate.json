@@ -1,0 +1,83 @@
+{
+  "stage": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "candidate_family": "DAILY_LEVEL_BREAKOUT_CANDIDATES",
+  "candidate": {
+    "id": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080",
+    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "base_candidate": "BTC9_M15_PREVDAY_BREAKOUT_H1_CLV85_RISK100_R110",
+    "timeframe": "M15",
+    "entry_execution_timeframe": "M5",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER"
+  },
+  "selection_protocol": {
+    "entry_known_information_only": true,
+    "train": "2024-08-01 to before 2025-02-01",
+    "development": "2025-02-01 to before 2025-07-01",
+    "official_validation": "2025-07-01 to before 2026-01-01",
+    "validation_opened_after_rule_freeze": true,
+    "post2026_outcomes_used": false,
+    "target_r_grid": [0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1],
+    "eligibility_gate": "at least 15 TRAIN trades and 10 DEV trades, with PF > 1.1 in both",
+    "selected_reason": "R=0.80 had the highest minimum TRAIN/DEV win rate among eligible settings; R=0.75 was rejected because DEV had only 9 trades"
+  },
+  "entry_contract": {
+    "previous_day_levels": "closed D1 high and low become available at the next 00:00 UTC",
+    "h1_trend_long": "closed H1 EMA50 > EMA200, EMA200 higher than the prior closed H1 value, and EMA separation >= 0.5*H1 ATR14",
+    "h1_trend_short": "closed H1 EMA50 < EMA200, EMA200 lower than the prior closed H1 value, and EMA separation >= 0.5*H1 ATR14",
+    "long_signal": "first M15 close of the UTC day above the previous-day high while H1 LONG trend is true and M15 close is in the top 15 percent of the candle range",
+    "short_signal": "first M15 close of the UTC day below the previous-day low while H1 SHORT trend is true and M15 close is in the bottom 15 percent of the candle range",
+    "one_signal_per_utc_day": true,
+    "entry": "after the M15 signal closes, enter at the exact next M5 open"
+  },
+  "risk_and_exit_contract": {
+    "spread_usd": 30,
+    "pip_contract": "$10 price movement = 1 pip",
+    "long_stop": "signal-bar low minus 0.1*M15 ATR14",
+    "short_stop": "signal-bar high plus 0.1*M15 ATR14",
+    "minimum_planned_net_risk_pips": 62.5,
+    "maximum_planned_net_risk_pips": 100,
+    "minimum_net_reward_pips": 50,
+    "target": "0.8R net of spread",
+    "same_m5_order": "SL first"
+  },
+  "pre2026_result": {
+    "train": {"trades": 17, "wins": 13, "losses": 4, "win_rate_pct": 76.470588, "profit_factor": 2.408836, "total_pips": 478.653277, "average_pips": 28.156075, "max_drawdown_pips": 90.710363},
+    "development": {"trades": 10, "wins": 9, "losses": 1, "win_rate_pct": 90.0, "profit_factor": 8.993772, "total_pips": 520.123900, "average_pips": 52.012390, "max_drawdown_pips": 65.066140},
+    "discovery": {"trades": 27, "wins": 22, "losses": 5, "win_rate_pct": 81.481481, "profit_factor": 3.467231, "total_pips": 998.777178, "average_pips": 36.991747, "max_drawdown_pips": 90.710363},
+    "validation": {"trades": 18, "wins": 14, "losses": 4, "win_rate_pct": 77.777778, "profit_factor": 2.614870, "total_pips": 523.490443, "average_pips": 29.082802, "max_drawdown_pips": 92.682666},
+    "combined": {"trades": 45, "wins": 36, "losses": 9, "win_rate_pct": 80.0, "profit_factor": 3.088199, "total_pips": 1522.267621, "average_pips": 33.828169, "max_drawdown_pips": 92.682666}
+  },
+  "base_to_refined_change": {
+    "base_trades": 81,
+    "base_wins": 48,
+    "base_losses": 33,
+    "refined_trades": 45,
+    "refined_wins": 36,
+    "refined_losses": 9,
+    "losses_removed": 24,
+    "wins_removed_net": 12,
+    "loss_count_reduction_pct": 72.727273,
+    "win_rate_change_points": 20.740741,
+    "max_drawdown_reduction_pct": 53.919169,
+    "total_pips_change_pct": -10.555232,
+    "mechanism": "36 low-reward trades were skipped by the 50-pip minimum under 0.8R; those skipped trades contained 22 losses and 14 wins. Among retained trades, two former 1.1R losses reached 0.8R first and became wins."
+  },
+  "direction_result": {
+    "long": {"trades": 19, "wins": 15, "losses": 4, "win_rate_pct": 78.947368, "profit_factor": 2.929064, "total_pips": 625.610572},
+    "short": {"trades": 26, "wins": 21, "losses": 5, "win_rate_pct": 80.769231, "profit_factor": 3.215730, "total_pips": 896.657048}
+  },
+  "target_sensitivity": {
+    "r_080": {"trades": 45, "win_rate_pct": 80.0, "profit_factor": 3.088199, "validation_trades": 18, "validation_win_rate_pct": 77.777778, "validation_profit_factor": 2.614870},
+    "r_085": {"trades": 52, "win_rate_pct": 76.923077, "profit_factor": 2.848228, "validation_trades": 21, "validation_win_rate_pct": 76.190476, "validation_profit_factor": 2.604807},
+    "r_090": {"trades": 58, "win_rate_pct": 70.689655, "profit_factor": 2.327050, "validation_trades": 22, "validation_win_rate_pct": 72.727273, "validation_profit_factor": 2.404170}
+  },
+  "post2026_entry_only_candidates": 13,
+  "post2026_outcomes_evaluated": false,
+  "candidate_selection_uses_future_outcomes": false,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
