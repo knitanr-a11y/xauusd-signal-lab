@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 H4_HOURS = 4
+EMA_APPLIED_PRICE_CHOICES = ("close", "typical", "weighted")
 
 
 def mt5_ema(values: Sequence[float] | pd.Series, period: int) -> np.ndarray:
@@ -26,6 +27,18 @@ def mt5_ema(values: Sequence[float] | pd.Series, period: int) -> np.ndarray:
             raise ValueError(f"EMA input is non-finite at index {index}")
         output[index] = alpha * value + (1.0 - alpha) * output[index - 1]
     return output
+
+
+def applied_price(h4: pd.DataFrame, name: str) -> pd.Series:
+    if name == "close":
+        return h4["close"].astype(float)
+    if name == "typical":
+        return (h4["high"] + h4["low"] + h4["close"]) / 3.0
+    if name == "weighted":
+        return (h4["high"] + h4["low"] + 2.0 * h4["close"]) / 4.0
+    raise ValueError(
+        f"unsupported EMA applied price: {name}; choose one of {EMA_APPLIED_PRICE_CHOICES}"
+    )
 
 
 def mt5_true_range(high: Sequence[float], low: Sequence[float], close: Sequence[float]) -> np.ndarray:
@@ -68,15 +81,16 @@ def mt5_atr(
     return output
 
 
-def add_h4_features_mt5(h4: pd.DataFrame) -> pd.DataFrame:
+def add_h4_features_mt5(h4: pd.DataFrame, *, ema_applied_price: str) -> pd.DataFrame:
     required = {"time", "open", "high", "low", "close"}
     missing = sorted(required.difference(h4.columns))
     if missing:
         raise ValueError(f"H4 data is missing columns: {missing}")
     frame = h4.copy()
+    price = applied_price(frame, ema_applied_price)
     frame["decision_time"] = frame["time"] + pd.Timedelta(hours=H4_HOURS)
-    frame["ema20"] = mt5_ema(frame["close"], 20)
-    frame["ema200"] = mt5_ema(frame["close"], 200)
+    frame["ema20"] = mt5_ema(price, 20)
+    frame["ema200"] = mt5_ema(price, 200)
     frame["atr14"] = mt5_atr(frame["high"], frame["low"], frame["close"], 14)
     frame["cross_long"] = (
         (frame["ema20"] > frame["ema200"])
@@ -86,6 +100,7 @@ def add_h4_features_mt5(h4: pd.DataFrame) -> pd.DataFrame:
         (frame["ema20"] < frame["ema200"])
         & (frame["ema20"].shift(1) >= frame["ema200"].shift(1))
     )
+    frame["ema_applied_price"] = ema_applied_price
     return frame
 
 
