@@ -44,6 +44,7 @@ python scripts\run_btc_youtube_candidates_guarded_demo_send_forever_aligned.py ^
   --max-symbol-lot 0.10 ^
   --discord-webhook-env DISCORD_WEBHOOK_URL ^
   --discord-username "Mochipoyo BTC YouTube" ^
+  --manager-interval-seconds 2 ^
   --allow-demo-send ^
   --send
 
