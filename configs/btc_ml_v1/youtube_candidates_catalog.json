@@ -1,0 +1,112 @@
+{
+  "catalog": "YOUTUBE_CANDIDATES_V1",
+  "created_on": "2026-07-02",
+  "source_asset": "BTCUSD#",
+  "target_asset_for_next_exploration": "GOLD",
+  "candidates": [
+    {
+      "id": "BTC4_RISK_CAP_400",
+      "youtube_candidate_no": 1,
+      "timeframe": "H4",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "fixed_lot_btc": 0.02,
+      "core_method": "EMA20/EMA200 cross, valid EMA20 touch, H4 close breakout of basis candle, structural stop, left-side swing targets",
+      "btc_specific_filter": "planned structural risk must be 400 pips or less",
+      "btc_pre2026_result": {
+        "trades": 9,
+        "wins": 7,
+        "losses": 2,
+        "win_rate_pct": 77.777778,
+        "profit_factor": 2.913,
+        "total_pips": 1016.444,
+        "max_drawdown_pips": 289.133
+      },
+      "gold_transfer": {
+        "retest_required": true,
+        "do_not_copy": ["400-pip risk cap", "BTC pip definition", "BTC spread", "0.02 lot"],
+        "preserve_structure": ["EMA20/EMA200 direction", "valid touch selection", "basis breakout", "structural stop", "causal targets"]
+      }
+    },
+    {
+      "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "youtube_candidate_no": 2,
+      "timeframe": "M5",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "fixed_lot_btc": null,
+      "lot_status": "NOT_YET_SPECIFIED_BY_USER",
+      "core_method": "EMA20/EMA200 direction, repeated EMA200 wick touches, two-pivot counter-trend diagonal break, AB=CD N-wave target",
+      "rules": {
+        "pivot_width": 2,
+        "bc_ab_retracement": "0.382 to 0.786",
+        "entry": "M5 close beyond line then next M5 open",
+        "btc_stop": "30 pips beyond C = $300 price distance",
+        "minimum_reward_pips": 50,
+        "rr": "1 < RR < 3"
+      },
+      "btc_pre2026_result": {
+        "trades": 14,
+        "wins": 8,
+        "losses": 6,
+        "win_rate_pct": 57.142857,
+        "profit_factor": 3.000364,
+        "total_pips": 675.669,
+        "max_drawdown_pips": 147.99
+      },
+      "gold_transfer": {
+        "retest_required": true,
+        "do_not_copy": ["BTC pip definition", "$300 stop distance", "50-pip minimum", "BTC spread", "lot size"],
+        "preserve_structure": ["EMA direction", "repeated touch episodes", "wick touch validity", "two-pivot line", "AB=CD", "RR band"]
+      }
+    },
+    {
+      "id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "youtube_candidate_no": 3,
+      "timeframe": "M15",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "fixed_lot_btc": null,
+      "lot_status": "NOT_YET_SPECIFIED_BY_USER",
+      "core_method": "M15 adaptation of the EMA200-touch N-wave method with timeframe-specific pivot width and retracement band",
+      "rules": {
+        "pivot_width": 3,
+        "bc_ab_retracement": "0.236 to 0.886",
+        "a_b_lookback": "24 hours = 96 M15 bars",
+        "entry": "M15 close beyond line then next M15 open",
+        "btc_stop": "30 pips beyond C = $300 price distance",
+        "minimum_reward_pips": 50,
+        "rr": "1 < RR < 3"
+      },
+      "btc_pre2026_result": {
+        "trades": 13,
+        "wins": 8,
+        "losses": 5,
+        "win_rate_pct": 61.538462,
+        "profit_factor": 1.634629,
+        "total_pips": 305.133,
+        "max_drawdown_pips": 338.055
+      },
+      "gold_transfer": {
+        "retest_required": true,
+        "do_not_copy": ["BTC pip definition", "$300 stop distance", "50-pip minimum", "BTC spread", "lot size"],
+        "preserve_structure": ["EMA direction", "repeated touch episodes", "wick touch validity", "two-pivot line", "AB=CD", "RR band", "24-hour A-B window"]
+      }
+    }
+  ],
+  "portfolio_notes": {
+    "evaluated_trade_count_sum": 36,
+    "do_not_sum_profit_factors": true,
+    "global_one_position_cap": false,
+    "btc4_btc5_simultaneous_holding_count": 0,
+    "btc4_btc6_simultaneous_holding_count": 0,
+    "btc5_btc6_simultaneous_holding_count": 0
+  },
+  "gold_v3_boundary": {
+    "audit_only": true,
+    "do_not_read_or_use": ["GOLD V2", "old GOLD", "DISC8", "Stage41 feature-only snapshot"],
+    "candidate_selection_must_use_entry_known_information_only": true,
+    "future_outcomes_must_not_define_candidate_rules": true
+  },
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
