@@ -1,7 +1,15 @@
 {
-  "stage": "BTC5_VIDEO_5M_EMA200_NWAVE_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "stage": "BTC5_VIDEO_5M_EMA200_NWAVE_ADOPTED_YOUTUBE_CANDIDATE_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
   "source": "user-supplied YouTube screen recording reviewed on 2026-07-02",
+  "candidate_family": "YOUTUBE_CANDIDATES",
+  "adoption": {
+    "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+    "adopted_on": "2026-07-02",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER",
+    "supersedes_previous_status": "CHART_AUDIT_REQUIRED_NOT_ADOPTED"
+  },
   "timeframe": "M5",
   "indicators": {
     "ema20": {"period": 20, "method": "EMA", "applied_price": "Close"},
@@ -33,9 +41,9 @@
       "0.500-0.886"
     ]
   },
-  "provisional_candidate": {
+  "adopted_candidate": {
     "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
-    "status": "CHART_AUDIT_REQUIRED_NOT_ADOPTED",
+    "status": "ADOPTED_CANDIDATE_NOT_LIVE",
     "line_method": "two confirmed pivots with pivot width 2",
     "n_wave_retracement": "0.382 <= BC/AB <= 0.786",
     "spread_usd": 30,
@@ -78,6 +86,18 @@
     "clear_cross_atr": [0.0, 0.02, 0.05],
     "candidate_trade_count_unchanged": true,
     "combined_profit_factor_range": [3.000364, 3.078738]
+  },
+  "gold_transfer": {
+    "required": true,
+    "status": "NOT_YET_TESTED_ON_GOLD",
+    "do_not_copy_btc_price_contract": true,
+    "must_redefine_for_gold": [
+      "pip value",
+      "spread assumption",
+      "30-pip C-point stop buffer",
+      "minimum 50-pip reward",
+      "lot size"
+    ]
   },
   "candidate_selection_uses_future_outcomes": false,
   "post2026_outcomes_evaluated": false,
