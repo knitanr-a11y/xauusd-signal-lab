@@ -1,6 +1,7 @@
 {
   "stage": "BTC3_VIDEO_EMA_METHOD_EXPLORATION_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
+  "official_runner": "scripts/btc_ml_v1/research/run_btc3_video_ema_user_contract.py",
   "time_contract": "CSV time is OPEN; H4 decision=open+4h; entry=exact M5 open at decision",
   "pip_contract": "$10 price movement = 1 pip",
   "minimum_profit_pips": 50,
@@ -9,10 +10,11 @@
   "rules": {
     "cross": "H4 EMA20 crosses EMA200",
     "touch": "first later H4 bar that touches EMA20; body close beyond EMA20 allowed",
-    "pre_entry_invalidation": "H4 close beyond EMA200 or EMA20 recrosses EMA200",
+    "pre_entry_invalidation_only": "Before entry, H4 close beyond EMA200 or EMA20 recrossing EMA200 cancels the setup and skips entry",
+    "post_entry_ema200_policy": "After entry, EMA200 is not an exit and does not move the stop",
     "trigger": "any later H4 close beyond first-touch bar high/low; no bar expiry",
     "one_shot": "first setup only per EMA cross",
-    "stop": "pullback extreme plus max($30, 0.1*H4 ATR14)",
+    "stop": "pullback extreme plus max($30, 0.1*H4 ATR14), fixed until TP1 unless the structural SL is hit",
     "target": "causally confirmed left-side H4 swing levels",
     "target_filter": "skip levels until net >=50 pips and RR>=1",
     "partial": "50% at TP1; remaining stop to net break-even; rest at next farther swing",
