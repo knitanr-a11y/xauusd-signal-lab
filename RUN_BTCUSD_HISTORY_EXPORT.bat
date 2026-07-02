@@ -29,11 +29,11 @@ if not defined START_DATE (
 >> "%LOG%" echo Start date UTC: %START_DATE%
 
 set "PYTHON_CMD="
-where py >nul 2>&1
-if not errorlevel 1 set "PYTHON_CMD=py -3"
+where python >nul 2>&1
+if not errorlevel 1 set "PYTHON_CMD=python"
 if not defined PYTHON_CMD (
-  where python >nul 2>&1
-  if not errorlevel 1 set "PYTHON_CMD=python"
+  where py >nul 2>&1
+  if not errorlevel 1 set "PYTHON_CMD=py -3"
 )
 
 if not defined PYTHON_CMD (
