@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 SCRIPT_DIR = Path(__file__).resolve().parents[2] / "scripts/btc_ml_v1/research"
 if str(SCRIPT_DIR) not in sys.path:
@@ -81,9 +82,9 @@ def test_refinement_uses_age_impulse_and_minimum_reward() -> None:
 
     assert len(refined) == 1
     row = refined.iloc[0]
-    assert row["reward_pips"] == 55.0
-    assert row["rr"] == 1.1
-    assert row["target_chart"] == 10580.0
+    assert row["reward_pips"] == pytest.approx(55.0)
+    assert row["rr"] == pytest.approx(1.1)
+    assert row["target_chart"] == pytest.approx(10580.0)
 
 
 def test_post_2026_remains_entry_only() -> None:
