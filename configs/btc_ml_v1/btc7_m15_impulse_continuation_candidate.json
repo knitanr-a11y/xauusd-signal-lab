@@ -1,10 +1,10 @@
 {
-  "stage": "BTC7_M15_IMPULSE_CONTINUATION_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "stage": "BTC7_M15_IMPULSE_CONTINUATION_REFINED_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
   "candidate_family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
-  "candidate": {
+  "base_candidate": {
     "id": "BTC7_M15_IMPULSE_CONTINUATION_RISK100",
-    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "status": "RESEARCH_BASELINE_SUPERSEDED_FOR_HIGH_WIN_MONITORING",
     "timeframe": "M15",
     "entry_execution_timeframe": "M5",
     "fixed_lot": null,
@@ -29,55 +29,16 @@
     "same_m5_order": "SL first"
   },
   "pre2026_result": {
-    "discovery": {
-      "trades": 151,
-      "wins": 65,
-      "losses": 86,
-      "win_rate_pct": 43.046358,
-      "profit_factor": 1.676420,
-      "total_pips": 3422.766144,
-      "average_pips": 22.667325,
-      "max_drawdown_pips": 443.860558
-    },
-    "validation": {
-      "trades": 87,
-      "wins": 36,
-      "losses": 51,
-      "win_rate_pct": 41.379310,
-      "profit_factor": 1.479645,
-      "total_pips": 1520.929931,
-      "average_pips": 17.481953,
-      "max_drawdown_pips": 457.966203
-    },
-    "combined": {
-      "trades": 238,
-      "wins": 101,
-      "losses": 137,
-      "win_rate_pct": 42.436975,
-      "profit_factor": 1.600614,
-      "total_pips": 4943.696075,
-      "average_pips": 20.771832,
-      "max_drawdown_pips": 457.966203
-    }
+    "discovery": {"trades": 151, "wins": 65, "losses": 86, "win_rate_pct": 43.046358, "profit_factor": 1.676420, "total_pips": 3422.766144, "average_pips": 22.667325, "max_drawdown_pips": 443.860558},
+    "validation": {"trades": 87, "wins": 36, "losses": 51, "win_rate_pct": 41.379310, "profit_factor": 1.479645, "total_pips": 1520.929931, "average_pips": 17.481953, "max_drawdown_pips": 457.966203},
+    "combined": {"trades": 238, "wins": 101, "losses": 137, "win_rate_pct": 42.436975, "profit_factor": 1.600614, "total_pips": 4943.696075, "average_pips": 20.771832, "max_drawdown_pips": 457.966203}
   },
-  "direction_result": {
-    "long": {"trades": 141, "profit_factor": 1.692841, "total_pips": 3142.756690},
-    "short": {"trades": 97, "profit_factor": 1.487395, "total_pips": 1800.939385}
+  "refined_successor": {
+    "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+    "config": "configs/btc_ml_v1/btc7r_m15_impulse_high_win_candidate.json",
+    "purpose": "reduce loss count and raise win rate without using post-2026 outcomes"
   },
-  "risk_cap_comparison_note": "The uncapped impulse setup was the only broad multi-vector survivor. Risk caps 75/100/125/150 pips all remained positive in discovery and validation; 100 pips is kept as the central provisional risk-control variant, not a confirmed optimum.",
-  "spread_sensitivity": {
-    "spread_usd": [20, 25, 30],
-    "combined_profit_factor_range": [1.600614, 1.628185],
-    "combined_trade_count_range": [238, 240]
-  },
-  "portfolio_characteristics": {
-    "maximum_simultaneous_btc7_positions_observed": 4,
-    "entries_while_another_btc7_position_was_open": 37,
-    "global_one_position_cap": false,
-    "exact_entry_time_overlap_with_btc4_btc5_btc6": 0,
-    "prior_candidate_unique_entries": 36,
-    "combined_unique_entries_with_btc7": 274
-  },
+  "risk_cap_comparison_note": "The uncapped impulse setup was the only broad multi-vector survivor. Risk caps 75/100/125/150 pips all remained positive in discovery and validation; 100 pips is retained as the common maximum-risk contract, not a confirmed optimum.",
   "post2026_entry_only_candidates": 102,
   "post2026_outcomes_evaluated": false,
   "candidate_selection_uses_future_outcomes": false,
