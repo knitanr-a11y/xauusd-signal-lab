@@ -14,7 +14,8 @@ if not exist "Files" mkdir "Files"
 > "%LOG%" echo BTCUSD# compressed chat package export
 >> "%LOG%" echo Started: %DATE% %TIME%
 >> "%LOG%" echo Repository: %CD%
->> "%LOG%" echo M1=90 days, M5=730 days, M15/H1/H4/D1=730 days
+>> "%LOG%" echo M1=90 days, M5=730 days, M15/H1=730 days, H4/D1=from 2017-01-01
+>> "%LOG%" echo H4 long history is required for mature MT5 EMA20/EMA200 parity
 >> "%LOG%" echo Output=standard ZIP DEFLATE level 9, no password
 
 set "PYTHON_CMD="
@@ -41,7 +42,8 @@ echo.
 echo BTCUSD# compressed package is starting.
 echo M1: latest 90 days
 echo M5: latest 730 days
-echo M15 H1 H4 D1: latest 730 days
+echo M15 H1: latest 730 days
+echo H4 D1: from 2017-01-01 for MT5 EMA warm-up
 echo The temporary CSV files will be deleted after ZIP creation.
 echo.
 
