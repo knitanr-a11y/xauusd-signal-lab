@@ -149,6 +149,126 @@ def _base_row_with_optional(record: dict[str, Any], now_text: str) -> dict[str, 
     return row
 
 
+def _deal_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return dict(value)
+    method = getattr(value, "_asdict", None)
+    if callable(method):
+        return dict(method())
+    return {
+        name: getattr(value, name)
+        for name in ("ticket", "time_msc", "entry", "reason", "price")
+        if hasattr(value, name)
+    }
+
+
+def _closing_deals(client: Any, position_ticket: int) -> list[dict[str, Any]]:
+    try:
+        capture = getattr(client, "capture_position", None)
+        if callable(capture):
+            raw = capture(int(position_ticket)) or ()
+        else:
+            custom = getattr(client, "position_deal_records", None)
+            if callable(custom):
+                raw = custom(int(position_ticket)) or ()
+            else:
+                mt5 = getattr(client, "mt5", None)
+                raw = (
+                    mt5.history_deals_get(position=int(position_ticket)) or ()
+                    if mt5 is not None
+                    else ()
+                )
+    except Exception:
+        return []
+    result: list[dict[str, Any]] = []
+    for value in raw:
+        deal = _deal_dict(value)
+        try:
+            entry = int(deal.get("entry", -1))
+        except (TypeError, ValueError):
+            continue
+        if entry in {1, 2, 3}:
+            result.append(deal)
+    return result
+
+
+def _deal_close_reason(client: Any, deal: dict[str, Any]) -> str:
+    raw = deal.get("reason")
+    text = str(raw).strip().upper() if raw is not None else ""
+    text_aliases = {
+        "SL": "SL",
+        "STOP_LOSS": "SL",
+        "TP": "TP",
+        "TAKE_PROFIT": "TP",
+        "CLIENT": "MANUAL",
+        "MOBILE": "MANUAL",
+        "WEB": "MANUAL",
+        "MANUAL": "MANUAL",
+        "EXPERT": "EXPERT",
+    }
+    if text in text_aliases:
+        return text_aliases[text]
+    try:
+        reason = int(raw)
+    except (TypeError, ValueError):
+        return ""
+    mt5 = getattr(client, "mt5", None)
+    if mt5 is None:
+        return ""
+    for label, names in (
+        ("SL", ("DEAL_REASON_SL",)),
+        ("TP", ("DEAL_REASON_TP",)),
+        (
+            "MANUAL",
+            ("DEAL_REASON_CLIENT", "DEAL_REASON_MOBILE", "DEAL_REASON_WEB"),
+        ),
+        ("EXPERT", ("DEAL_REASON_EXPERT",)),
+    ):
+        for name in names:
+            value = getattr(mt5, name, None)
+            if value is not None and int(value) == reason:
+                return label
+    return ""
+
+
+def _enrich_closed_deal_metadata(ledger: pd.DataFrame, client: Any) -> None:
+    required = {"trade_state", "execution_status", "close_reason", "close_price"}
+    if ledger.empty or not required.issubset(ledger.columns):
+        return
+    closed = ledger[ledger["trade_state"].astype(str).eq("CLOSED")]
+    for index, row in closed.iterrows():
+        if core._text(row.get("close_reason")) and core._text(
+            row.get("close_price")
+        ):
+            continue
+        status = core._text(row.get("execution_status"))
+        if status == "TIME_EXIT_FILLED" and not core._text(
+            row.get("close_reason")
+        ):
+            ledger.loc[index, "close_reason"] = "TIME"
+        ticket = core._ticket(row.get("position_ticket"))
+        if ticket is None:
+            continue
+        deals = _closing_deals(client, ticket)
+        if not deals:
+            continue
+        latest = max(
+            deals,
+            key=lambda deal: (
+                int(deal.get("time_msc") or 0),
+                int(deal.get("deal_ticket") or deal.get("ticket") or 0),
+            ),
+        )
+        if not core._text(ledger.loc[index, "close_price"]):
+            price = core._number(latest.get("price"))
+            if price is not None:
+                ledger.loc[index, "close_price"] = price
+        if not core._text(ledger.loc[index, "close_reason"]):
+            reason = _deal_close_reason(client, latest)
+            if reason:
+                ledger.loc[index, "close_reason"] = reason
+
+
 def _unique_errors(values: Iterable[str]) -> tuple[str, ...]:
     result: list[str] = []
     for value in values:
@@ -235,6 +355,7 @@ def process_execution_cycle(
     original_ledger_columns = core.LEDGER_COLUMNS
     original_ledger_loader = core._load_ledger
     original_base_row = core._base_row
+    original_supervisor_reconcile = supervisor._safe_reconcile_open_orders
 
     ledger_path = output_dir / "live_execution_ledger.csv"
     effective_ledger_columns = _ledger_columns(ledger_path)
@@ -252,6 +373,18 @@ def process_execution_cycle(
 
     def additive_ledger_loader(path: Path) -> pd.DataFrame:
         return _load_ledger_additive(path, effective_ledger_columns)
+
+    def reconcile_with_notification_metadata(
+        ledger: pd.DataFrame,
+        client: MetaTrader5Client,
+        latest_close: pd.Timestamp,
+        check_time: str,
+    ) -> list[str]:
+        events = original_supervisor_reconcile(
+            ledger, client, latest_close, check_time
+        )
+        _enrich_closed_deal_metadata(ledger, client)
+        return events
 
     def logged_webhook_sender(
         url: str,
@@ -286,6 +419,7 @@ def process_execution_cycle(
         core._base_row = _base_row_with_optional
         core.load_runtime_settings = always_on_loader
         supervisor.load_runtime_settings = always_on_loader
+        supervisor._safe_reconcile_open_orders = reconcile_with_notification_metadata
         core.load_historical_win_rates = _unused_history
         core.load_live_win_rates = permanent_live_rates
         core._format_entry_message = _entry_message
@@ -321,6 +455,7 @@ def process_execution_cycle(
     finally:
         core.load_runtime_settings = original_core_settings_loader
         supervisor.load_runtime_settings = original_supervisor_loader
+        supervisor._safe_reconcile_open_orders = original_supervisor_reconcile
         core.load_historical_win_rates = original_history
         core.load_live_win_rates = original_live_rates
         core._format_entry_message = original_entry
