@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 
 import btc3_video_ema_method_exploration as engine
+import mt5_indicator_compat as mt5_compat
+
+MINIMUM_H4_WARMUP_BARS = 1500
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -16,6 +19,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     # After entry, exits are the structural SL, TP1, break-even after TP1, and TP2.
     args.close_on_ema200_invalidation = False
     return args
+
+
+def _add_h4_features(h4: pd.DataFrame) -> pd.DataFrame:
+    mt5_compat.require_h4_warmup(
+        h4,
+        research_start=engine.DISCOVERY_START,
+        minimum_closed_bars=MINIMUM_H4_WARMUP_BARS,
+    )
+    return mt5_compat.add_h4_features_mt5(h4)
 
 
 def _setup_invalid_before_entry(row: pd.Series, direction: str, *, invalidate_on_wick: bool) -> bool:
@@ -192,6 +204,9 @@ def _build_plan(
         "entry_bid": entry_bid,
         "spread_usd": spread_usd,
         "atr14": trigger_atr14,
+        "touch_atr14": float(h4.iloc[touch_idx]["atr14"]),
+        "touch_ema20": float(h4.iloc[touch_idx]["ema20"]),
+        "touch_ema200": float(h4.iloc[touch_idx]["ema200"]),
         "stop_anchor": stop_anchor,
         "stop_anchor_rule": "VALID_TOUCH_EMA200_SIDE_PLUS_BUFFER",
         "buffer_usd": buffer_usd,
@@ -211,16 +226,21 @@ def _build_plan(
 
 def run(args: argparse.Namespace) -> dict[str, Any]:
     args.close_on_ema200_invalidation = False
+    original_add_h4_features = engine._add_h4_features
     original_generate_setups = engine._generate_setups
     original_build_plan = engine._build_plan
     try:
+        engine._add_h4_features = _add_h4_features
         engine._generate_setups = _generate_setups
         engine._build_plan = _build_plan
         result = engine.run(args)
     finally:
+        engine._add_h4_features = original_add_h4_features
         engine._generate_setups = original_generate_setups
         engine._build_plan = original_build_plan
 
+    result["indicator_contract"] = "MT5_SMA_SEEDED_EMA_AND_WILDER_ATR"
+    result["minimum_h4_warmup_bars"] = MINIMUM_H4_WARMUP_BARS
     result["pre_entry_ema200_invalidation_only"] = True
     result["post_entry_exit_contract"] = "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
     result["valid_touch_contract"] = (
