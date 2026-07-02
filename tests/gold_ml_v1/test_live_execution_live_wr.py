@@ -38,6 +38,8 @@ def registry_row() -> pd.DataFrame:
                 "comp": "A_CORE",
                 "decision_time": "2026-06-29 10:00:00",
                 "direction": "LONG",
+                "source_timeframe": "M15",
+                "higher_timeframe": "H4",
                 "horizon_hours": 6,
                 "position_state": "OPEN",
                 "first_seen_at": "2026-06-29 10:01:00",
@@ -47,6 +49,7 @@ def registry_row() -> pd.DataFrame:
                 "stop_price": 90.0,
                 "target_price": 110.0,
                 "current_price": 100.5,
+                "features_json": '{"bb_break":true,"atr_ratio":1.25}',
             }
         ]
     )
@@ -82,9 +85,7 @@ def empty_live() -> WinRateSummary:
     )
 
 
-def test_dry_run_ignores_missing_history_and_displays_only_live_wr(
-    tmp_path: Path,
-) -> None:
+def test_dry_run_is_short_japanese_and_restart_idempotent(tmp_path: Path) -> None:
     live_dir = tmp_path / "live"
     output_dir = tmp_path / "output"
     live_dir.mkdir()
@@ -116,17 +117,26 @@ def test_dry_run_ignores_missing_history_and_displays_only_live_wr(
         webhook_sender=sender,
     )
     assert second["new_execution_statuses"] == {"DRY_RUN": 1}
-    assert second["controls"]["require_historical_win_rate"] is False
-    assert "historical_win_rate" not in second
     assert len(messages) == 1
-    assert "実運用成績" in messages[0]
-    assert "集計前（決済済み0件）" in messages[0]
-    assert "テスト実行（注文なし）" in messages[0]
-    assert "LONG" not in messages[0]
-    assert "DRY_RUN" not in messages[0]
-    assert "GML1-WATCH" not in messages[0]
-    assert "過去" not in messages[0]
-    assert "historical" not in messages[0].lower()
+    message = messages[0]
+    assert message.splitlines()[0] == "🟢 **GOLD LONG（テスト）**"
+    assert "予定価格：100.500" in message
+    assert "TP　　　：110.000" in message
+    assert "SL　　　：90.000" in message
+    assert "実運用成績：集計前（決済済み0件）" in message
+    assert "売買方向" not in message
+    assert "注文状態" not in message
+    assert "ロット" not in message
+    assert "DRY_RUN" not in message
+    assert "GML1-WATCH" not in message
+    assert "過去" not in message
+
+    ledger = pd.read_csv(output_dir / "live_execution_ledger.csv", dtype=object)
+    assert ledger.loc[0, "source_timeframe"] == "M15"
+    assert ledger.loc[0, "higher_timeframe"] == "H4"
+    assert ledger.loc[0, "features_json"] == '{"bb_break":true,"atr_ratio":1.25}'
+    assert float(ledger.loc[0, "atr"]) == 10.0
+    assert float(ledger.loc[0, "target_r"]) == 1.0
 
     third = process_execution_cycle(
         live_dir=live_dir,
@@ -141,7 +151,7 @@ def test_dry_run_ignores_missing_history_and_displays_only_live_wr(
     assert len(messages) == 1
 
 
-def test_live_only_message_uses_sleeve_realized_results() -> None:
+def test_filled_long_and_sell_titles_and_price_order() -> None:
     live = WinRateSummary(
         trades=5,
         wins=3,
@@ -171,18 +181,27 @@ def test_live_only_message_uses_sleeve_realized_results() -> None:
         "message": "done",
     }
     message = live_wr._entry_message(row, unused, live)
+    lines = message.splitlines()
+    assert lines[0] == "🟢 **GOLD LONG**"
+    assert lines[2] == "約定価格：3,300.000"
+    assert lines[3] == "TP　　　：3,310.000"
+    assert lines[4] == "SL　　　：3,290.000"
     assert "3勝2敗 / 勝率 60.00%" in message
-    assert "99勝" not in message
-    assert "買い注文が約定しました" in message
     assert "4時間足環境＋15分足コア" in message
-    assert "LONG" not in message
+    assert "売買方向" not in message
+    assert "注文状態" not in message
+    assert "ロット" not in message
     assert "ORDER_FILLED" not in message
     assert "GML1-WATCH-022-C" not in message
     assert "done" not in message
-    assert "過去" not in message
+    assert "99勝" not in message
+
+    sell = dict(row, direction="SHORT")
+    sell_message = live_wr._entry_message(sell, unused, live)
+    assert sell_message.splitlines()[0] == "🔴 **GOLD SELL**"
 
 
-def test_exit_message_updates_live_wr_only() -> None:
+def test_exit_title_contains_short_direction_without_direction_row() -> None:
     live = WinRateSummary(
         trades=1,
         wins=1,
@@ -201,23 +220,30 @@ def test_exit_message_updates_live_wr_only() -> None:
         "comp": "P18",
         "candidate_id": "GML1-PROV-018-APPROX",
         "direction": "LONG",
-        "decision_time": "2026-06-29 10:00:00",
         "closed_at": "2026-06-29 16:00:00",
         "execution_status": "CLOSED_BY_SL_TP_OR_MANUAL",
         "live_result": "WIN",
         "net_profit": 12.5,
     }
     message = live_wr._exit_message(row, unused, live)
+    assert message.splitlines()[0] == (
+        "🟢 **GOLD LONG 決済：SL・TP・手動決済のいずれか**"
+    )
     assert "1勝0敗 / 勝率 100.00%" in message
-    assert "0勝100敗" not in message
-    assert "SL・TP・手動決済のいずれか" in message
+    assert "売買方向" not in message
     assert "GML1-PROV-018-APPROX" not in message
-    assert "過去" not in message
+    assert "0勝100敗" not in message
 
 
-def test_japanese_direction_status_and_close_reason_mappings() -> None:
-    assert formatter.DIRECTION_NAMES == {"LONG": "買い", "SHORT": "売り"}
-    for raw, japanese in formatter.EXECUTION_STATUS_NAMES.items():
+def test_exceptional_statuses_are_not_exposed_as_raw_status_fields() -> None:
+    cases = {
+        "ORDER_RECOVERED_OPEN": "🔴 **GOLD SELL（復旧）**",
+        "ORDER_RECOVERED_HISTORY": "🔴 **GOLD SELL（決済済み復旧）**",
+        "DRY_RUN": "🔴 **GOLD SELL（テスト）**",
+        "SKIPPED_STALE": "⚪ **GOLD 見送り**",
+        "MT5_ERROR": "⚠️ **GOLD 注文エラー**",
+    }
+    for raw, expected_title in cases.items():
         message = formatter.format_entry_message(
             {
                 "comp": "A_CORE",
@@ -227,9 +253,14 @@ def test_japanese_direction_status_and_close_reason_mappings() -> None:
             },
             empty_live(),
         )
-        assert japanese in message
+        assert message.splitlines()[0] == expected_title
         assert raw not in message
+        assert "注文状態" not in message
+        assert "売買方向" not in message
+        assert "ロット" not in message
 
+
+def test_close_reason_display_mappings() -> None:
     expected = {
         "SL": "損切り",
         "TP": "利益確定",
@@ -249,7 +280,7 @@ def test_japanese_direction_status_and_close_reason_mappings() -> None:
             },
             empty_live(),
         )
-        assert f"決済：{japanese}" in message
+        assert message.splitlines()[0] == f"🔴 **GOLD SELL 決済：{japanese}**"
         assert raw not in message
 
     time_message = formatter.format_exit_message(
@@ -263,7 +294,7 @@ def test_japanese_direction_status_and_close_reason_mappings() -> None:
         },
         empty_live(),
     )
-    assert "決済：保有期限による決済" in time_message
+    assert "GOLD LONG 決済：保有期限による決済" in time_message
 
 
 def test_old_ledger_is_extended_additively_without_reset(tmp_path: Path) -> None:
@@ -286,7 +317,6 @@ def test_old_ledger_is_extended_additively_without_reset(tmp_path: Path) -> None
         ]
     )
     old.to_csv(path, index=False)
-
     columns = live_wr._ledger_columns(path)
     migrated = live_wr._load_ledger_additive(path, columns)
     assert migrated.loc[0, "candidate_key"] == "old-key"
@@ -296,16 +326,9 @@ def test_old_ledger_is_extended_additively_without_reset(tmp_path: Path) -> None
         assert column in migrated.columns
 
 
-def test_optional_signal_fields_are_copied_without_changing_trade_contract() -> None:
+def test_optional_signal_fields_do_not_change_trade_contract() -> None:
     record = registry_row().iloc[0].to_dict()
-    record.update(
-        {
-            "source_timeframe": "M15",
-            "higher_timeframe": "H4",
-            "features_json": {"bb_break": True},
-            "signal_reason": "M15ボリンジャーバンド上抜け",
-        }
-    )
+    record["signal_reason"] = "M15ボリンジャーバンド上抜け"
     row = live_wr._base_row_with_optional(record, "2026-06-29 10:01:05")
     assert row["direction"] == record["direction"]
     assert row["stop_price"] == ""
@@ -316,7 +339,7 @@ def test_optional_signal_fields_are_copied_without_changing_trade_contract() -> 
     assert row["atr"] == 10.0
     assert row["target_r"] == 1.0
     assert row["horizon_hours"] == 6
-    assert '"bb_break":true' in row["features_json"]
+    assert row["features_json"] == '{"bb_break":true,"atr_ratio":1.25}'
 
 
 def test_missing_optional_fields_and_discord_limit() -> None:
