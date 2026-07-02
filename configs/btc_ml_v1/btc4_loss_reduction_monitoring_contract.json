@@ -1,36 +1,34 @@
 {
-  "stage": "BTC4_LOSS_REDUCTION_EXPLORATION_RESEARCH_ONLY",
+  "stage": "BTC4_RISK_CAP_400_ADOPTED_CANDIDATE_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
-  "base_contract": {
+  "adopted_candidate": {
+    "id": "BTC4_RISK_CAP_400",
+    "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+    "fixed_lot": 0.02,
     "timeframe": "H4",
     "ema20_ema200_applied_price": "Close",
     "entry": "exact M5 open after H4 trigger bar closes",
     "spread_usd": 30,
     "pip_contract": "$10 price movement = 1 pip",
+    "minimum_profit_pips": 50,
+    "maximum_planned_structural_risk_pips": 400,
     "post_entry_ema200_exit": false,
-    "minimum_profit_pips": 50
-  },
-  "variants": [
-    {
-      "id": "BTC4_RISK_CAP_400",
-      "purpose": "balanced loss reduction while retaining more candidates",
-      "rules": [
-        "keep the BTC3 setup unchanged",
-        "skip entry when planned net structural risk exceeds 400 pips"
-      ],
-      "pre2026_result": {
-        "trades": 9,
-        "losses": 2,
-        "wins": 7,
-        "profit_factor": 2.913,
-        "total_pips": 1016.444,
-        "max_drawdown_pips": 289.133
-      },
-      "post2026_entry_only_candidates": 2
+    "pre2026_result": {
+      "trades": 9,
+      "wins": 7,
+      "losses": 2,
+      "win_rate_pct": 77.777778,
+      "profit_factor": 2.913,
+      "total_pips": 1016.444,
+      "max_drawdown_pips": 289.133
     },
+    "post2026_entry_only_candidates": 2,
+    "post2026_outcomes_evaluated": false
+  },
+  "secondary_research_variants": [
     {
       "id": "BTC4_FRESHNESS_12_8",
-      "purpose": "aggressive stale-setup rejection",
+      "status": "RESEARCH_ONLY_NOT_ADOPTED",
       "rules": [
         "valid EMA20 touch must occur within 12 H4 bars after clear cross confirmation",
         "H4 close trigger must occur within 8 H4 bars after the valid touch"
@@ -42,12 +40,11 @@
         "profit_factor": 9.026,
         "total_pips": 1943.080,
         "max_drawdown_pips": 242.091
-      },
-      "post2026_entry_only_candidates": 0
+      }
     },
     {
       "id": "BTC4_FRESHNESS_14_10_MONITOR",
-      "purpose": "slightly looser forward-monitoring variant; selected from entry-known density only, not outcomes",
+      "status": "RESEARCH_ONLY_NOT_ADOPTED",
       "rules": [
         "valid EMA20 touch must occur within 14 H4 bars after clear cross confirmation",
         "H4 close trigger must occur within 10 H4 bars after the valid touch"
@@ -59,19 +56,11 @@
         "profit_factor": 9.026,
         "total_pips": 1943.080,
         "max_drawdown_pips": 242.091
-      },
-      "post2026_entry_only_candidates": 1
+      }
     },
     {
       "id": "BTC4_FRESHNESS_M5_RETEST_24H",
-      "purpose": "strict low-loss subset",
-      "rules": [
-        "apply freshness filter first",
-        "after H4 trigger, wait up to 24 hours for M5 to retest the valid-touch high/low within max($30, 0.05*H4 ATR14)",
-        "the M5 candle must close back beyond the basis level",
-        "enter at the next M5 open",
-        "keep the same structural stop and recompute RR-valid targets"
-      ],
+      "status": "RESEARCH_ONLY_NOT_ADOPTED",
       "pre2026_result": {
         "trades": 4,
         "losses": 0,
@@ -81,14 +70,7 @@
     },
     {
       "id": "BTC4_FRESHNESS_M5_RETEST_48H",
-      "purpose": "strict low-loss subset with longer retest window",
-      "rules": [
-        "apply freshness filter first",
-        "after H4 trigger, wait up to 48 hours for M5 to retest the valid-touch high/low within max($30, 0.05*H4 ATR14)",
-        "the M5 candle must close back beyond the basis level",
-        "enter at the next M5 open",
-        "keep the same structural stop and recompute RR-valid targets"
-      ],
+      "status": "RESEARCH_ONLY_NOT_ADOPTED",
       "pre2026_result": {
         "trades": 5,
         "losses": 0,
@@ -101,19 +83,6 @@
     "minimum_separation_atr": 0.02,
     "result": "no BTC3 Close entry location or outcome changed in the pre-2026 sample"
   },
-  "sensitivity": {
-    "grid": "spread $20/$25/$30 x pivot 2/3/5 x lookback 250/500",
-    "freshness_12_8": "18/18 positive runs; exactly one historical loss in every run",
-    "risk_cap_400": "18/18 positive runs; exactly two historical losses in every run",
-    "freshness_m5_retest_24h": "18/18 positive runs; zero historical losses; four trades per run",
-    "freshness_m5_retest_48h": "18/18 positive runs; zero historical losses; five trades per run"
-  },
-  "recommendation": {
-    "primary_monitor": "BTC4_RISK_CAP_400",
-    "low_loss_secondary_monitor": "BTC4_FRESHNESS_14_10_MONITOR with 24h and 48h retest variants recorded separately",
-    "reason": "the zero-loss variants have only four to five evaluated trades and cannot be treated as confirmed"
-  },
-  "post_2026_outcomes_evaluated": false,
   "orders_enabled": false,
   "discord_enabled": false,
   "live_ready": false,
