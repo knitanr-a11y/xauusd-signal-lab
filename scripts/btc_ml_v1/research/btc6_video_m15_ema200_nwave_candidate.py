@@ -105,10 +105,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _json_default(value: Any) -> Any:
+    if hasattr(value, "item"):
+        return value.item()
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     result = run(Path(args.m15), Path(args.out))
-    print(json.dumps(result, ensure_ascii=False, indent=2, default=engine._json_default))
+    print(json.dumps(result, ensure_ascii=False, indent=2, default=_json_default))
     return 0
 
 
