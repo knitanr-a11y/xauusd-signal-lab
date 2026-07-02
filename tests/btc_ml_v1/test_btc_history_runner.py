@@ -30,3 +30,15 @@ def test_failed_run_cleanup_removes_only_current_process_stage(tmp_path: Path) -
     assert not lock.exists()
     assert not current.exists()
     assert other.exists()
+
+
+def test_root_launcher_is_lightweight_and_keeps_a_pasteable_log() -> None:
+    launcher = Path(__file__).resolve().parents[2] / "RUN_BTCUSD_HISTORY_EXPORT.bat"
+    text = launcher.read_text(encoding="utf-8")
+
+    assert "--start \"%START_DATE%\" --timeframes M15 H1 H4 D1" in text
+    assert "M1 and M5 are intentionally excluded" in text
+    assert "BTCUSD_HISTORY_LAST_LOG.txt" in text
+    assert "BTCUSD_HISTORY_PASTE_THIS.txt" in text
+    assert "pause" in text.lower()
+    assert "Select-Object -Skip 1" in text
