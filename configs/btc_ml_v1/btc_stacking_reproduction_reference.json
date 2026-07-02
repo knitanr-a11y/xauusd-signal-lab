@@ -1,0 +1,103 @@
+{
+  "reference_id": "BTC_STACKING_REPRODUCTION_REFERENCE_20260702",
+  "symbol": "BTCUSD#",
+  "data_cutoff_utc": "2026-07-02 02:15:00",
+  "python": "3.12",
+  "dependencies": {
+    "numpy": "2.1.3",
+    "pandas": "2.2.3",
+    "pytest": "8.4.1"
+  },
+  "input_packages": {
+    "BTCUSD_HISTORY_CHAT_PACKAGE.zip": {
+      "sha256": "9b0b74e9937eca05e895047f5737c6794332af7ec25f2a30b64d9440c9e0dd22",
+      "committed_to_repo": false
+    },
+    "BTCUSD_H4_WARMUP_PACKAGE.zip": {
+      "sha256": "d150eaee0c126e2eb4c4aecb667ff0ad181a9a0a6e060cc5c1613b60e0a8019a",
+      "committed_to_repo": false
+    }
+  },
+  "required_csv": {
+    "btcusdsharp_m5.csv": {
+      "rows": 209588,
+      "first_time": "2024-07-02 02:25:00",
+      "last_time": "2026-07-02 02:15:00",
+      "sha256": "2871723be0df6b27c9ba49c378280671c26f7e8ff2504d873058bc74a4a8a604"
+    },
+    "btcusdsharp_m15.csv": {
+      "rows": 69969,
+      "first_time": "2024-07-02 02:30:00",
+      "last_time": "2026-07-02 02:00:00",
+      "sha256": "201f9c77565e458bf3206e1e7f3bf725c361ef388b34217175de3a3eebe7c419"
+    },
+    "btcusdsharp_h1.csv": {
+      "rows": 17519,
+      "first_time": "2024-07-02 03:00:00",
+      "last_time": "2026-07-02 01:00:00",
+      "sha256": "2ca5178255943496c897a71ccc8720dad19e9b71dd4518db0c3b4e400ca99a43"
+    },
+    "btcusdsharp_d1.csv": {
+      "rows": 729,
+      "first_time": "2024-07-03 00:00:00",
+      "last_time": "2026-07-01 00:00:00",
+      "sha256": "fc992f14d2680f6ce2f16466472d38091b8153db5abbe01fa887164af990b0ed"
+    },
+    "btcusdsharp_h4_warmup.csv": {
+      "source_filename": "btcusdsharp_h4.csv",
+      "rows": 17270,
+      "first_time": "2017-01-02 04:00:00",
+      "last_time": "2026-07-02 00:00:00",
+      "sha256": "61c9ce1a5bbda80614d4d25597ffe6ec1d7c4e450baacea307fa2161bd945caa"
+    }
+  },
+  "candidate_entry_fingerprints": {
+    "BTC4_RISK_CAP_400_PRE2026": "eee8da989f8f40c2912e488cb5091c9d38dac4bd70eee1c40a4b4092692f469b",
+    "BTC4_RISK_CAP_400_POST2026": "0d9cfe53224c0820f2e41a3e7746cb30ec94d556ca9c7d096993c8ef4b4cb236",
+    "BTC5_ALL_PLANNED": "64f32da4ab109afacbbc7af829d26b2a154c6e6826e91c7f6bd1f67d121cdfc1",
+    "BTC6_ALL_PLANNED": "b138a7bce5e197c1c6158f51c9041e99748e15f4b9c4fb8e0dfdfe08e57383dc",
+    "BTC7R_ALL_PLANNED": "aad62e6d4931ace6da649fec95e3144cf79d93a16f81d89059b167b1d952810f",
+    "BTC9R_ALL_PLANNED": "c10da17d9b1b2e9704baccb5b29dbef60ad774ca3d4bd11abad0ae8eb77d07cd"
+  },
+  "expected_portfolio": {
+    "pre2026": {
+      "trades": 142,
+      "wins": 104,
+      "losses": 38,
+      "win_rate_pct": 73.239437,
+      "profit_factor": 2.786708,
+      "total_pips": 5768.321236,
+      "max_drawdown_pips": 345.176061
+    },
+    "post2026": {
+      "trades": 43,
+      "wins": 26,
+      "losses": 17,
+      "win_rate_pct": 60.465116,
+      "profit_factor": 2.023410,
+      "total_pips": 1199.423358,
+      "max_drawdown_pips": 247.839574
+    },
+    "all": {
+      "trades": 185,
+      "wins": 130,
+      "losses": 55,
+      "win_rate_pct": 70.270270,
+      "profit_factor": 2.583416,
+      "total_pips": 6967.744594,
+      "max_drawdown_pips": 345.176061
+    }
+  },
+  "controls": {
+    "ema_applied_price_btc4": "close",
+    "btc4_risk_cap_pips": 400,
+    "spread_usd": 30,
+    "pip_usd": 10,
+    "global_one_position_cap": false,
+    "post2026_used_for_rule_selection": false,
+    "orders_enabled": false,
+    "discord_enabled": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
