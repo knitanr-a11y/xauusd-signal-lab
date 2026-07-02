@@ -1,0 +1,79 @@
+{
+  "stage": "BTC9_M15_PREVDAY_BREAKOUT_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "candidate_family": "DAILY_LEVEL_BREAKOUT_CANDIDATES",
+  "candidate": {
+    "id": "BTC9_M15_PREVDAY_BREAKOUT_H1_CLV85_RISK100_R110",
+    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "timeframe": "M15",
+    "entry_execution_timeframe": "M5",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER"
+  },
+  "selection_protocol": {
+    "entry_known_information_only": true,
+    "train": "2024-08-01 to before 2025-02-01",
+    "development": "2025-02-01 to before 2025-07-01",
+    "official_validation": "2025-07-01 to before 2026-01-01",
+    "validation_opened_after_rule_freeze": true,
+    "post2026_outcomes_used": false,
+    "broad_families_compared": [
+      "previous-day high/low continuation breakout",
+      "previous-day high/low sweep reversal",
+      "UTC session opening-range breakout"
+    ],
+    "selection_gate": "TRAIN and DEV each have sufficient trades and PF > 1.1; total pre-validation sample >= 50; choose by TRAIN/DEV robustness before opening official validation"
+  },
+  "entry_contract": {
+    "previous_day_levels": "closed D1 high and low become available at the next 00:00 UTC",
+    "h1_trend_long": "closed H1 EMA50 > EMA200, EMA200 higher than four H1 bars earlier, and EMA separation >= 0.5*H1 ATR14",
+    "h1_trend_short": "closed H1 EMA50 < EMA200, EMA200 lower than four H1 bars earlier, and EMA separation >= 0.5*H1 ATR14",
+    "long_signal": "first M15 close of the UTC day above the previous-day high while H1 LONG trend is true and M15 close is in the top 15 percent of the candle range",
+    "short_signal": "first M15 close of the UTC day below the previous-day low while H1 SHORT trend is true and M15 close is in the bottom 15 percent of the candle range",
+    "one_signal_per_utc_day": true,
+    "entry": "after the M15 signal closes, enter at the exact next M5 open"
+  },
+  "risk_and_exit_contract": {
+    "spread_usd": 30,
+    "pip_contract": "$10 price movement = 1 pip",
+    "long_stop": "signal-bar low minus 0.1*M15 ATR14",
+    "short_stop": "signal-bar high plus 0.1*M15 ATR14",
+    "maximum_planned_net_risk_pips": 100,
+    "minimum_net_reward_pips": 50,
+    "target": "1.1R net of spread",
+    "same_m5_order": "SL first"
+  },
+  "pre2026_result": {
+    "train": {"trades": 29, "wins": 18, "losses": 11, "win_rate_pct": 62.068966, "profit_factor": 1.881034, "total_pips": 657.852565, "average_pips": 22.684571, "max_drawdown_pips": 201.130630},
+    "development": {"trades": 21, "wins": 11, "losses": 10, "win_rate_pct": 52.380952, "profit_factor": 1.697298, "total_pips": 377.175737, "average_pips": 17.960749, "max_drawdown_pips": 164.397044},
+    "discovery": {"trades": 50, "wins": 29, "losses": 21, "win_rate_pct": 58.0, "profit_factor": 1.803848, "total_pips": 1035.028302, "average_pips": 20.700566, "max_drawdown_pips": 201.130630},
+    "validation": {"trades": 31, "wins": 19, "losses": 12, "win_rate_pct": 61.290323, "profit_factor": 1.860323, "total_pips": 666.879654, "average_pips": 21.512247, "max_drawdown_pips": 178.935642},
+    "combined": {"trades": 81, "wins": 48, "losses": 33, "win_rate_pct": 59.259259, "profit_factor": 1.825070, "total_pips": 1701.907956, "average_pips": 21.011209, "max_drawdown_pips": 201.130630}
+  },
+  "direction_result": {
+    "long": {"trades": 37, "wins": 23, "losses": 14, "win_rate_pct": 62.162162, "profit_factor": 2.055460, "total_pips": 921.077693},
+    "short": {"trades": 44, "wins": 25, "losses": 19, "win_rate_pct": 56.818182, "profit_factor": 1.656125, "total_pips": 780.830263}
+  },
+  "parameter_robustness": {
+    "nearby_variants": "zero or 0.1 ATR breakout buffer, 0.85 close-location threshold, 100-pip cap, and 1.1R or 1.25R all remained positive in TRAIN, DEV, and validation",
+    "selected_reason": "highest minimum PF across TRAIN and DEV among the sufficient-sample previous-day breakout variants; validation was not used to select the rule"
+  },
+  "portfolio_characteristics": {
+    "maximum_simultaneous_btc9_positions_observed": 1,
+    "entries_while_another_btc9_position_was_open": 0,
+    "exact_entry_overlap_with_btc4": 0,
+    "exact_entry_overlap_with_btc5": 0,
+    "exact_entry_overlap_with_btc6": 0,
+    "exact_entry_overlap_with_btc7r": 8,
+    "new_exact_entry_times_beyond_existing_references": 73,
+    "combined_unique_entry_times_with_btc4_btc5_btc6_btc7r": 171,
+    "global_one_position_cap": false
+  },
+  "post2026_entry_only_candidates": 26,
+  "post2026_outcomes_evaluated": false,
+  "candidate_selection_uses_future_outcomes": false,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
