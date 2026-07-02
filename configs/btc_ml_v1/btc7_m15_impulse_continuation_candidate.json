@@ -1,0 +1,88 @@
+{
+  "stage": "BTC7_M15_IMPULSE_CONTINUATION_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "candidate_family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
+  "candidate": {
+    "id": "BTC7_M15_IMPULSE_CONTINUATION_RISK100",
+    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "timeframe": "M15",
+    "entry_execution_timeframe": "M5",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER"
+  },
+  "entry_contract": {
+    "h1_trend": "LONG when H1 EMA50 > EMA200 and EMA200 is rising; SHORT when EMA50 < EMA200 and EMA200 is falling",
+    "minimum_h1_trend_separation": "abs(H1 EMA50-H1 EMA200) / H1 ATR14 >= 0.5",
+    "m15_impulse": "M15 high-low range >= 2.0 * M15 ATR14",
+    "close_location": "LONG close in top 15 percent of M15 range; SHORT close in bottom 15 percent",
+    "m15_ema20": "LONG close above EMA20; SHORT close below EMA20",
+    "episode_rule": "consecutive same-direction impulse candles are one episode; only the first is eligible",
+    "entry": "after the M15 signal closes, enter at the exact next M5 open"
+  },
+  "risk_and_exit_contract": {
+    "spread_usd": 30,
+    "pip_contract": "$10 price movement = 1 pip",
+    "stop": "LONG below signal-bar low by 0.1*M15 ATR14; SHORT above signal-bar high by 0.1*M15 ATR14",
+    "maximum_planned_net_risk_pips": 100,
+    "minimum_net_reward_pips": 50,
+    "target": "2.0R net of spread",
+    "same_m5_order": "SL first"
+  },
+  "pre2026_result": {
+    "discovery": {
+      "trades": 151,
+      "wins": 65,
+      "losses": 86,
+      "win_rate_pct": 43.046358,
+      "profit_factor": 1.676420,
+      "total_pips": 3422.766144,
+      "average_pips": 22.667325,
+      "max_drawdown_pips": 443.860558
+    },
+    "validation": {
+      "trades": 87,
+      "wins": 36,
+      "losses": 51,
+      "win_rate_pct": 41.379310,
+      "profit_factor": 1.479645,
+      "total_pips": 1520.929931,
+      "average_pips": 17.481953,
+      "max_drawdown_pips": 457.966203
+    },
+    "combined": {
+      "trades": 238,
+      "wins": 101,
+      "losses": 137,
+      "win_rate_pct": 42.436975,
+      "profit_factor": 1.600614,
+      "total_pips": 4943.696075,
+      "average_pips": 20.771832,
+      "max_drawdown_pips": 457.966203
+    }
+  },
+  "direction_result": {
+    "long": {"trades": 141, "profit_factor": 1.692841, "total_pips": 3142.756690},
+    "short": {"trades": 97, "profit_factor": 1.487395, "total_pips": 1800.939385}
+  },
+  "risk_cap_comparison_note": "The uncapped impulse setup was the only broad multi-vector survivor. Risk caps 75/100/125/150 pips all remained positive in discovery and validation; 100 pips is kept as the central provisional risk-control variant, not a confirmed optimum.",
+  "spread_sensitivity": {
+    "spread_usd": [20, 25, 30],
+    "combined_profit_factor_range": [1.600614, 1.628185],
+    "combined_trade_count_range": [238, 240]
+  },
+  "portfolio_characteristics": {
+    "maximum_simultaneous_btc7_positions_observed": 4,
+    "entries_while_another_btc7_position_was_open": 37,
+    "global_one_position_cap": false,
+    "exact_entry_time_overlap_with_btc4_btc5_btc6": 0,
+    "prior_candidate_unique_entries": 36,
+    "combined_unique_entries_with_btc7": 274
+  },
+  "post2026_entry_only_candidates": 102,
+  "post2026_outcomes_evaluated": false,
+  "candidate_selection_uses_future_outcomes": false,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
