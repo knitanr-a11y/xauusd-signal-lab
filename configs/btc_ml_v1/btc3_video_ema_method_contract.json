@@ -7,6 +7,12 @@
   "minimum_profit_pips": 50,
   "spread_primary_usd": 30,
   "spread_sensitivity_usd": [20, 25, 30],
+  "indicator_contract": {
+    "ema": "MT5-compatible SMA seed over the first period, followed by recursive EMA with alpha=2/(period+1)",
+    "atr": "MT5/Wilder ATR with SMA true-range seed followed by Wilder recursion",
+    "minimum_h4_warmup_bars_before_research": 1500,
+    "required_h4_export_start": "2017-01-01"
+  },
   "rules": {
     "cross": "H4 EMA20 crosses EMA200",
     "touch": "Use the first valid later H4 EMA20 touch whose wick stays on the trend side of EMA200",
@@ -28,6 +34,8 @@
     "V4_BALANCED_2OF3"
   ],
   "trend_variants_not_frozen_as_winner": true,
+  "previous_results_valid": false,
+  "recalculation_status": "WAITING_FOR_LONG_H4_WARMUP_EXPORT",
   "orders_enabled": false,
   "discord_enabled": false,
   "live_ready": false,
