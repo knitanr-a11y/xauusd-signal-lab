@@ -1,0 +1,78 @@
+{
+  "stage": "BTC7R_M15_IMPULSE_HIGH_WIN_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "candidate_family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
+  "candidate": {
+    "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "timeframe": "M15",
+    "entry_execution_timeframe": "M5",
+    "fixed_lot": null,
+    "lot_status": "NOT_YET_SPECIFIED_BY_USER"
+  },
+  "selection_protocol": {
+    "entry_known_information_only": true,
+    "train": "2024-08-01 to before 2025-02-01",
+    "development": "2025-02-01 to before 2025-07-01",
+    "official_validation": "2025-07-01 to before 2026-01-01",
+    "validation_opened_after_rule_freeze": true,
+    "post2026_outcomes_used": false
+  },
+  "base_entry_contract": {
+    "h1_trend": "LONG when H1 EMA50 > EMA200 and EMA200 is rising; SHORT when EMA50 < EMA200 and EMA200 is falling",
+    "minimum_h1_trend_separation": "abs(H1 EMA50-H1 EMA200) / H1 ATR14 >= 0.5",
+    "close_location": "LONG close in top 15 percent of M15 range; SHORT close in bottom 15 percent",
+    "m15_ema20": "LONG close above EMA20; SHORT close below EMA20",
+    "episode_rule": "consecutive same-direction impulse candles are one episode; only the first is eligible",
+    "entry": "after the M15 signal closes, enter at the exact next M5 open"
+  },
+  "loss_reduction_filters": {
+    "h1_trend_age_hours": "24 <= age <= 96",
+    "minimum_m15_impulse_atr": 2.2,
+    "maximum_planned_net_risk_pips": 100,
+    "minimum_net_reward_pips": 50,
+    "target": "1.1R net of spread"
+  },
+  "stop_contract": {
+    "spread_usd": 30,
+    "pip_contract": "$10 price movement = 1 pip",
+    "long": "signal-bar low minus 0.1*M15 ATR14",
+    "short": "signal-bar high plus 0.1*M15 ATR14",
+    "same_m5_order": "SL first"
+  },
+  "pre2026_result": {
+    "discovery": {"trades": 43, "wins": 30, "losses": 13, "win_rate_pct": 69.767442, "profit_factor": 2.482349, "total_pips": 1347.473532, "average_pips": 31.336594, "max_drawdown_pips": 230.339604},
+    "validation": {"trades": 18, "wins": 15, "losses": 3, "win_rate_pct": 83.333333, "profit_factor": 4.745203, "total_pips": 901.334467, "average_pips": 50.074137, "max_drawdown_pips": 95.776820},
+    "combined": {"trades": 61, "wins": 45, "losses": 16, "win_rate_pct": 73.770492, "profit_factor": 2.956036, "total_pips": 2248.807999, "average_pips": 36.865705, "max_drawdown_pips": 230.339604}
+  },
+  "base_to_refined_change": {
+    "base_trades": 238,
+    "base_losses": 137,
+    "refined_trades": 61,
+    "refined_losses": 16,
+    "losses_removed": 121,
+    "wins_removed": 56,
+    "loss_count_reduction_pct": 88.321168,
+    "win_rate_change_points": 31.333517,
+    "max_drawdown_reduction_pct": 49.704667
+  },
+  "direction_result": {
+    "long": {"trades": 41, "wins": 32, "losses": 9, "win_rate_pct": 78.048780, "profit_factor": 3.902886, "total_pips": 1790.004333, "max_drawdown_pips": 157.080659},
+    "short": {"trades": 20, "wins": 13, "losses": 7, "win_rate_pct": 65.0, "profit_factor": 1.860719, "total_pips": 458.803666, "max_drawdown_pips": 197.738482}
+  },
+  "portfolio_characteristics": {
+    "maximum_simultaneous_positions_observed": 2,
+    "entries_while_another_btc7r_position_was_open": 7,
+    "global_one_position_cap": false,
+    "exact_entry_time_overlap_with_btc4_btc5_btc6": 0,
+    "prior_candidate_unique_entries": 36,
+    "combined_unique_entries_with_btc7r": 97
+  },
+  "post2026_entry_only_candidates": 22,
+  "post2026_outcomes_evaluated": false,
+  "candidate_selection_uses_future_outcomes": false,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false
+}
