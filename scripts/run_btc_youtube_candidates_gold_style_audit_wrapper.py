@@ -18,7 +18,7 @@ SUMMARY_NAME = "btc_youtube_operational_audit_summary.json"
 PASTE_ME_NAME = "btc_youtube_PASTE_ME_OPERATIONAL_SUMMARY.txt"
 LEDGER_NAME = "btc_youtube_operational_audit_cycle_ledger.csv"
 LEDGER_COLUMNS = [
-    "cycle_index", "cycle_start_utc", "cycle_end_utc", "cycle_ok", "classification",
+    "cycle_key", "cycle_index", "cycle_start_utc", "cycle_end_utc", "cycle_ok", "classification",
     "btc6_open_trades", "btc6_closed_trades", "btc6_total_r", "btc6_total_pips",
     "btc6_discord_status", "trade_ledger_rows", "event_ledger_rows", "status",
 ]
@@ -72,16 +72,23 @@ def csv_row_count(path: Path) -> int:
         return 0
 
 
+def cycle_key(row: dict[str, Any]) -> str:
+    return f"{row.get('cycle_start_utc', '')}::{row.get('cycle_index', '')}"
+
+
 def append_cycle_once(path: Path, row: dict[str, Any]) -> None:
-    existing_cycles: set[str] = set()
+    key = str(row.get("cycle_key", "")) or cycle_key(row)
+    if not key or key == "::":
+        return
+    existing_keys: set[str] = set()
     if path.exists():
         try:
             with path.open("r", encoding="utf-8-sig", newline="") as handle:
-                existing_cycles = {str(item.get("cycle_index", "")) for item in csv.DictReader(handle)}
+                for item in csv.DictReader(handle):
+                    existing_keys.add(str(item.get("cycle_key", "")) or cycle_key(item))
         except Exception:
-            existing_cycles = set()
-    cycle_index = str(row.get("cycle_index", ""))
-    if not cycle_index or cycle_index in existing_cycles:
+            existing_keys = set()
+    if key in existing_keys:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     exists = path.exists()
@@ -89,15 +96,21 @@ def append_cycle_once(path: Path, row: dict[str, Any]) -> None:
         writer = csv.DictWriter(handle, fieldnames=LEDGER_COLUMNS)
         if not exists:
             writer.writeheader()
-        writer.writerow({column: row.get(column, "") for column in LEDGER_COLUMNS})
+        output = {column: row.get(column, "") for column in LEDGER_COLUMNS}
+        output["cycle_key"] = key
+        writer.writerow(output)
+
+
+def nested_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
 
 
 def build_summary(
     latest_state: dict[str, Any], *, state_dir: Path, log_base: Path,
     discord_env_name: str, child_running: bool,
 ) -> dict[str, Any]:
-    last_cycle = latest_state.get("last_cycle", {}) if isinstance(latest_state.get("last_cycle"), dict) else {}
-    metrics = latest_state.get("btc6_metrics", {}) if isinstance(latest_state.get("btc6_metrics"), dict) else {}
+    last_cycle = nested_dict(latest_state.get("last_cycle"))
+    metrics = nested_dict(latest_state.get("btc6_metrics"))
     cycle_ok = bool(last_cycle.get("cycle_ok")) if last_cycle else False
     status = (
         "BTC_YOUTUBE_OPERATIONAL_READY_DEMO_ONLY"
@@ -106,6 +119,12 @@ def build_summary(
         if child_running and not last_cycle
         else "BTC_YOUTUBE_OPERATIONAL_ATTENTION_REQUIRED_DEMO_ONLY"
     )
+    once_summary_path_text = str(last_cycle.get("once_summary_json", ""))
+    once_summary = read_json(Path(once_summary_path_text)) if once_summary_path_text else {}
+    dry_run = nested_dict(once_summary.get("dry_run"))
+    latest_closed = nested_dict(dry_run.get("latest_closed"))
+    cycle_rows = nested_dict(once_summary.get("rows"))
+
     trade_ledger = state_dir / "btc6_shadow_trade_ledger.csv"
     event_ledger = state_dir / "btc6_shadow_events.csv"
     discord_trade_ledger = state_dir / "discord_trade_send_ledger.csv"
@@ -123,6 +142,8 @@ def build_summary(
         "cycle_start_utc": last_cycle.get("cycle_start_utc"),
         "cycle_end_utc": last_cycle.get("cycle_end_utc"),
         "csv_contract": "open/in-progress candles are not written to CSV; latest row is closed",
+        "latest_closed": latest_closed,
+        "cycle_rows": cycle_rows,
         "open_asof_allowed": False,
         "contract_mutated": False,
         "manual_candidate_demotion_or_removal": False,
@@ -160,15 +181,18 @@ def build_summary(
             "btc6_shadow_trade_ledger": str(trade_ledger),
             "btc6_shadow_event_ledger": str(event_ledger),
             "demo_order_ledger": str(order_ledger),
+            "once_summary_json": once_summary_path_text,
         },
     }
     return summary
 
 
 def paste_me_text(summary: dict[str, Any]) -> str:
-    metrics = summary.get("btc6_metrics", {}) if isinstance(summary.get("btc6_metrics"), dict) else {}
-    counts = summary.get("row_counts", {}) if isinstance(summary.get("row_counts"), dict) else {}
-    discord = summary.get("discord", {}) if isinstance(summary.get("discord"), dict) else {}
+    metrics = nested_dict(summary.get("btc6_metrics"))
+    counts = nested_dict(summary.get("row_counts"))
+    discord = nested_dict(summary.get("discord"))
+    latest_closed = nested_dict(summary.get("latest_closed"))
+    cycle_rows = nested_dict(summary.get("cycle_rows"))
     lines = [
         "BTC YOUTUBE OPERATIONAL AUDIT SUMMARY",
         f"generated_at_utc: {summary.get('generated_at_utc')}",
@@ -187,6 +211,12 @@ def paste_me_text(summary: dict[str, Any]) -> str:
         f"discord_enabled: {discord.get('enabled')}",
         f"discord_webhook_configured: {discord.get('webhook_configured')}",
         f"discord_webhook_value_logged: {discord.get('webhook_value_logged')}",
+        f"latest_closed_m5: {latest_closed.get('m5', latest_closed.get('M5', ''))}",
+        f"latest_closed_m15: {latest_closed.get('m15', latest_closed.get('M15', ''))}",
+        f"latest_closed_h4: {latest_closed.get('h4', latest_closed.get('H4', ''))}",
+        f"trade_notification_rows: {cycle_rows.get('trade_notifications', 0)}",
+        f"monitor_notification_rows: {cycle_rows.get('monitor_notifications', 0)}",
+        f"order_payload_rows: {cycle_rows.get('order_payloads', 0)}",
         "BTC4_mode: MT5_DEMO_ORDER_0.02_SPLIT",
         "BTC5_mode: MT5_DEMO_ORDER_0.01",
         "BTC6_mode: SHADOW_LIVE_REFERENCE_LOT_0.01_NO_BROKER_ORDER",
@@ -213,9 +243,10 @@ def write_audit_artifacts(
     )
     atomic_write_json(audit_dir / SUMMARY_NAME, summary)
     atomic_write_text(audit_dir / PASTE_ME_NAME, paste_me_text(summary))
-    last_cycle = summary.get("last_cycle", {}) if isinstance(summary.get("last_cycle"), dict) else {}
-    counts = summary.get("row_counts", {}) if isinstance(summary.get("row_counts"), dict) else {}
+    last_cycle = nested_dict(summary.get("last_cycle"))
+    counts = nested_dict(summary.get("row_counts"))
     ledger_row = {
+        "cycle_key": cycle_key(last_cycle),
         "cycle_index": last_cycle.get("cycle_index", ""),
         "cycle_start_utc": last_cycle.get("cycle_start_utc", ""),
         "cycle_end_utc": last_cycle.get("cycle_end_utc", ""),
