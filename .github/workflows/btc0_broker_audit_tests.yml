@@ -44,9 +44,10 @@ jobs:
           python -m py_compile scripts/btc_ml_v1/broker_audit/btc0_mt5_audit.py
           python -m py_compile scripts/btc_ml_v1/data_history/export_btcusdsharp_history.py
           python -m py_compile scripts/btc_ml_v1/data_history/run_btcusdsharp_history.py
+          python -m py_compile scripts/btc_ml_v1/data_history/build_btcusd_chat_package.py
       - name: Test read-only broker and data audit
         run: python -m pytest tests/btc_ml_v1/test_btc0_mt5_audit.py -q
       - name: Test staged closed-only history export
         run: python -m pytest tests/btc_ml_v1/test_btc_history_export.py -q
-      - name: Test failed-run cleanup
+      - name: Test compressed package and failed-run cleanup
         run: python -m pytest tests/btc_ml_v1/test_btc_history_runner.py -q
