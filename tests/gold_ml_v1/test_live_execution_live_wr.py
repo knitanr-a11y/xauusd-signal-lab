@@ -331,3 +331,83 @@ def test_missing_optional_fields_and_discord_limit() -> None:
     assert "GOLD自動売買戦略" in message
     assert len(message) <= formatter.DISCORD_CONTENT_LIMIT
     assert "表示上限のため一部を省略しました" in message
+
+
+class DealReasonConstants:
+    DEAL_REASON_CLIENT = 0
+    DEAL_REASON_EXPERT = 3
+    DEAL_REASON_SL = 4
+    DEAL_REASON_TP = 5
+    DEAL_REASON_MOBILE = 6
+    DEAL_REASON_WEB = 7
+
+
+class ClosingDealClient:
+    mt5 = DealReasonConstants()
+
+    def __init__(self, reason: int, price: float = 3290.0) -> None:
+        self.reason = reason
+        self.price = price
+        self.capture_calls = 0
+
+    def capture_position(self, position_ticket: int):
+        assert position_ticket == 12345
+        self.capture_calls += 1
+        return (
+            {
+                "position_ticket": position_ticket,
+                "deal_ticket": 50001,
+                "time_msc": 1_750_000_000_000,
+                "entry": 0,
+                "reason": self.reason,
+                "price": 3300.0,
+            },
+            {
+                "position_ticket": position_ticket,
+                "deal_ticket": 50002,
+                "time_msc": 1_750_000_060_000,
+                "entry": 1,
+                "reason": self.reason,
+                "price": self.price,
+            },
+        )
+
+
+def closed_ledger(status: str = "CLOSED_BY_SL_TP_OR_MANUAL") -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "candidate_key": "closed-key",
+                "trade_state": "CLOSED",
+                "execution_status": status,
+                "position_ticket": 12345,
+                "close_reason": "",
+                "close_price": "",
+            }
+        ]
+    )
+
+
+def test_mt5_closing_deal_enriches_sl_tp_and_manual_before_notification() -> None:
+    cases = [
+        (DealReasonConstants.DEAL_REASON_SL, "SL"),
+        (DealReasonConstants.DEAL_REASON_TP, "TP"),
+        (DealReasonConstants.DEAL_REASON_CLIENT, "MANUAL"),
+        (DealReasonConstants.DEAL_REASON_MOBILE, "MANUAL"),
+        (DealReasonConstants.DEAL_REASON_WEB, "MANUAL"),
+    ]
+    for raw_reason, expected in cases:
+        ledger = closed_ledger()
+        client = ClosingDealClient(raw_reason)
+        live_wr._enrich_closed_deal_metadata(ledger, client)
+        assert ledger.loc[0, "close_reason"] == expected
+        assert float(ledger.loc[0, "close_price"]) == 3290.0
+        assert client.capture_calls == 1
+
+
+def test_time_exit_reason_is_not_overwritten_by_expert_deal_reason() -> None:
+    ledger = closed_ledger("TIME_EXIT_FILLED")
+    client = ClosingDealClient(DealReasonConstants.DEAL_REASON_EXPERT, 3305.0)
+    live_wr._enrich_closed_deal_metadata(ledger, client)
+    assert ledger.loc[0, "close_reason"] == "TIME"
+    assert float(ledger.loc[0, "close_price"]) == 3305.0
