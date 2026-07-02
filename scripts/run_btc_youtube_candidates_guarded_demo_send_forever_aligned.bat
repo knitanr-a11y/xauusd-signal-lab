@@ -14,6 +14,7 @@ if defined LOCALAPPDATA (
 set "STATE_DIR=%RUNTIME_ROOT%\state"
 set "LOG_BASE=%RUNTIME_ROOT%\logs"
 set "STABLE_LOG_DIR=%LOG_BASE%\youtube_candidates_operational"
+set "AUDIT_DIR=%STABLE_LOG_DIR%\gold_v3_style_audit"
 
 if not exist "%RUNTIME_ROOT%" mkdir "%RUNTIME_ROOT%"
 if not exist "%STATE_DIR%" (
@@ -25,6 +26,7 @@ if not exist "%STATE_DIR%" (
 )
 if not exist "%LOG_BASE%" mkdir "%LOG_BASE%"
 if not exist "%STABLE_LOG_DIR%" mkdir "%STABLE_LOG_DIR%"
+if not exist "%AUDIT_DIR%" mkdir "%AUDIT_DIR%"
 if not exist "Files" mkdir "Files"
 
 python scripts\ensure_discord_webhook_env.py ^
@@ -57,10 +59,11 @@ echo BTC6: 0.01 reference-lot monitoring, no broker order
 echo Demo login required: 75539039
 echo Runtime root: %RUNTIME_ROOT%
 echo Stable logs: %STABLE_LOG_DIR%
+echo GOLD-style audit: %AUDIT_DIR%
 echo Stop with Ctrl+C
 echo ============================================================
 
-python scripts\run_btc_youtube_candidates_operational_forever.py ^
+python scripts\run_btc_youtube_candidates_gold_style_audit_wrapper.py ^
   --files-dir "%CSV_DIR%" ^
   --log-base "%LOG_BASE%" ^
   --state-dir "%STATE_DIR%" ^
