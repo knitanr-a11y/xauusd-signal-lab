@@ -167,7 +167,8 @@ def run(m5_path: Path, m15_path: Path, h1_path: Path, output_dir: Path) -> dict[
 
     contract = {
         "candidate": CANDIDATE_ID,
-        "status": "provisional_research_candidate_not_in_stacking_portfolio",
+        "status": "provisional_research_parent_candidate_not_in_stacking_portfolio",
+        "preferred_refinement": "BTC10R_M15_EMA20_SHALLOW_PULLBACK_STRONG_CLOSE_R225",
         "selection_protocol": (
             "The entry family was selected with TRAIN and DEV. After the R0.8 result was reviewed, "
             "an exit-only RR grid from 1.5R to 5.0R in 0.25R steps was evaluated while freezing "
