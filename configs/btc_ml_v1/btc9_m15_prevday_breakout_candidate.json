@@ -1,10 +1,10 @@
 {
-  "stage": "BTC9_M15_PREVDAY_BREAKOUT_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "stage": "BTC9_M15_PREVDAY_BREAKOUT_REFINED_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
   "candidate_family": "DAILY_LEVEL_BREAKOUT_CANDIDATES",
   "candidate": {
     "id": "BTC9_M15_PREVDAY_BREAKOUT_H1_CLV85_RISK100_R110",
-    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "status": "RESEARCH_BASELINE_SUPERSEDED_FOR_HIGH_WIN_MONITORING",
     "timeframe": "M15",
     "entry_execution_timeframe": "M5",
     "fixed_lot": null,
@@ -26,8 +26,8 @@
   },
   "entry_contract": {
     "previous_day_levels": "closed D1 high and low become available at the next 00:00 UTC",
-    "h1_trend_long": "closed H1 EMA50 > EMA200, EMA200 higher than four H1 bars earlier, and EMA separation >= 0.5*H1 ATR14",
-    "h1_trend_short": "closed H1 EMA50 < EMA200, EMA200 lower than four H1 bars earlier, and EMA separation >= 0.5*H1 ATR14",
+    "h1_trend_long": "closed H1 EMA50 > EMA200, EMA200 higher than the prior closed H1 value, and EMA separation >= 0.5*H1 ATR14",
+    "h1_trend_short": "closed H1 EMA50 < EMA200, EMA200 lower than the prior closed H1 value, and EMA separation >= 0.5*H1 ATR14",
     "long_signal": "first M15 close of the UTC day above the previous-day high while H1 LONG trend is true and M15 close is in the top 15 percent of the candle range",
     "short_signal": "first M15 close of the UTC day below the previous-day low while H1 SHORT trend is true and M15 close is in the bottom 15 percent of the candle range",
     "one_signal_per_utc_day": true,
@@ -50,24 +50,10 @@
     "validation": {"trades": 31, "wins": 19, "losses": 12, "win_rate_pct": 61.290323, "profit_factor": 1.860323, "total_pips": 666.879654, "average_pips": 21.512247, "max_drawdown_pips": 178.935642},
     "combined": {"trades": 81, "wins": 48, "losses": 33, "win_rate_pct": 59.259259, "profit_factor": 1.825070, "total_pips": 1701.907956, "average_pips": 21.011209, "max_drawdown_pips": 201.130630}
   },
-  "direction_result": {
-    "long": {"trades": 37, "wins": 23, "losses": 14, "win_rate_pct": 62.162162, "profit_factor": 2.055460, "total_pips": 921.077693},
-    "short": {"trades": 44, "wins": 25, "losses": 19, "win_rate_pct": 56.818182, "profit_factor": 1.656125, "total_pips": 780.830263}
-  },
-  "parameter_robustness": {
-    "nearby_variants": "zero or 0.1 ATR breakout buffer, 0.85 close-location threshold, 100-pip cap, and 1.1R or 1.25R all remained positive in TRAIN, DEV, and validation",
-    "selected_reason": "highest minimum PF across TRAIN and DEV among the sufficient-sample previous-day breakout variants; validation was not used to select the rule"
-  },
-  "portfolio_characteristics": {
-    "maximum_simultaneous_btc9_positions_observed": 1,
-    "entries_while_another_btc9_position_was_open": 0,
-    "exact_entry_overlap_with_btc4": 0,
-    "exact_entry_overlap_with_btc5": 0,
-    "exact_entry_overlap_with_btc6": 0,
-    "exact_entry_overlap_with_btc7r": 8,
-    "new_exact_entry_times_beyond_existing_references": 73,
-    "combined_unique_entry_times_with_btc4_btc5_btc6_btc7r": 170,
-    "global_one_position_cap": false
+  "refined_successor": {
+    "id": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080",
+    "config": "configs/btc_ml_v1/btc9r_m15_prevday_breakout_high_win_candidate.json",
+    "purpose": "reduce loss count and raise win rate without using post-2026 outcomes"
   },
   "post2026_entry_only_candidates": 26,
   "post2026_outcomes_evaluated": false,
