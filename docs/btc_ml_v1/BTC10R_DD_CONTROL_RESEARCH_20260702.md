@@ -27,6 +27,8 @@ BTC10R_SAFE_RISK_OVERLAY_V1
 
 期間別でもTRAIN、DEV、VALIDATION、開封済み2026のすべてでDDが低下した。
 
+実際の推奨0.20倍ウェイトへ換算すると、142取引の合計は11.975標準R、最大DDは1.175標準R。
+
 ## 既存5候補との正規化リスク診断
 
 | 構成 | 合計R | 実現DD | PF | 最大同時リスク単位 |
@@ -57,6 +59,22 @@ BTC10R_SAFE_RISK_OVERLAY_V1
 142取引の勝敗順をランダムに並べ替えた50,000回の単純ストレスでは、連敗半減時の最大DDは中央値6.625R、95%点10R、99%点12.125Rだった。
 
 これは相場レジームを再現しない参考値であり、将来予測ではない。
+
+## 検証
+
+```text
+python -m py_compile scripts/btc_ml_v1/research/btc10r_safe_risk_overlay.py
+pytest -q tests/btc_ml_v1/test_btc10r_safe_risk_overlay.py
+3 passed
+```
+
+142取引の実台帳へ適用した結果:
+
+```text
+weighted PF = 1.9211538461538464
+total weighted R = 11.975
+max drawdown weighted R = 1.175
+```
 
 ## 現在の状態
 
