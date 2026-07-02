@@ -1,18 +1,20 @@
-name: BTC-0 Broker Audit Tests
+name: BTC-0 Broker and History Tests
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - "scripts/btc_ml_v1/broker_audit/**"
+      - "scripts/btc_ml_v1/**"
       - "tests/btc_ml_v1/test_btc0_mt5_audit.py"
-      - "docs/btc_ml_v1/BTC0_BROKER_DATA_AUDIT.md"
+      - "tests/btc_ml_v1/test_btc_history_export.py"
+      - "docs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
   pull_request:
     paths:
-      - "scripts/btc_ml_v1/broker_audit/**"
+      - "scripts/btc_ml_v1/**"
       - "tests/btc_ml_v1/test_btc0_mt5_audit.py"
-      - "docs/btc_ml_v1/BTC0_BROKER_DATA_AUDIT.md"
+      - "tests/btc_ml_v1/test_btc_history_export.py"
+      - "docs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
 
 jobs:
@@ -26,14 +28,18 @@ jobs:
           python-version: "3.12"
       - name: Install test dependencies
         run: python -m pip install numpy==2.1.3 pandas==2.2.3 pytest==8.4.1
-      - name: Enforce read-only boundary
+      - name: Enforce no-order no-Discord boundary
         shell: bash
         run: |
-          if grep -R -n -E "\.order_send[[:space:]]*\(|send_webhook[[:space:]]*\(" scripts/btc_ml_v1/broker_audit; then
-            echo "BTC-0 audit must not contain order or Discord send calls"
+          if grep -R -n -E "\.order_send[[:space:]]*\(|send_webhook[[:space:]]*\(" scripts/btc_ml_v1; then
+            echo "BTC audit/history code must not contain order or Discord send calls"
             exit 1
           fi
-      - name: Compile BTC-0 audit
-        run: python -m py_compile scripts/btc_ml_v1/broker_audit/btc0_mt5_audit.py
+      - name: Compile BTC tools
+        run: |
+          python -m py_compile scripts/btc_ml_v1/broker_audit/btc0_mt5_audit.py
+          python -m py_compile scripts/btc_ml_v1/data_history/export_btcusdsharp_history.py
       - name: Test read-only broker and data audit
         run: python -m pytest tests/btc_ml_v1/test_btc0_mt5_audit.py -q
+      - name: Test staged closed-only history export
+        run: python -m pytest tests/btc_ml_v1/test_btc_history_export.py -q
