@@ -91,15 +91,26 @@
     {
       "id": "BTC9_M15_PREVDAY_BREAKOUT_H1_CLV85_RISK100_R110",
       "family": "DAILY_LEVEL_BREAKOUT_CANDIDATES",
-      "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+      "status": "RESEARCH_BASELINE_SUPERSEDED_FOR_HIGH_WIN_MONITORING",
       "timeframe": "M15",
       "fixed_lot": null,
       "trades": 81,
       "win_rate_pct": 59.259259,
       "profit_factor": 1.825070,
       "max_drawdown_pips": 201.130630,
-      "post2026_entry_only_candidates": 26,
-      "new_exact_entry_times_beyond_btc4_btc5_btc6_btc7r": 73
+      "post2026_entry_only_candidates": 26
+    },
+    {
+      "id": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080",
+      "family": "DAILY_LEVEL_BREAKOUT_CANDIDATES",
+      "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+      "timeframe": "M15",
+      "fixed_lot": null,
+      "trades": 45,
+      "win_rate_pct": 80.0,
+      "profit_factor": 3.088199,
+      "max_drawdown_pips": 92.682666,
+      "post2026_entry_only_candidates": 13
     }
   ],
   "lot_status": {
@@ -107,6 +118,6 @@
     "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786": null,
     "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886": null,
     "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110": null,
-    "BTC9_M15_PREVDAY_BREAKOUT_H1_CLV85_RISK100_R110": null
+    "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080": null
   }
 }
