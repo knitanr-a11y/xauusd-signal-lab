@@ -32,8 +32,8 @@ echo Hedging account required for BTC4 split positions
 echo Stop with Ctrl+C
 echo ============================================================
 
-python scripts\run_btc_youtube_candidates_guarded_demo_send_forever_aligned.py ^
-  --csv-dir "%CSV_DIR%" ^
+python scripts\run_btc_youtube_candidates_operational_forever.py ^
+  --files-dir "%CSV_DIR%" ^
   --log-base "%LOG_BASE%" ^
   --state-dir "%STATE_DIR%" ^
   --interval-minutes 1 ^
