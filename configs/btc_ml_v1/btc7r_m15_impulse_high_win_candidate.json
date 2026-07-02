@@ -1,10 +1,11 @@
 {
-  "stage": "BTC7R_M15_IMPULSE_HIGH_WIN_PROVISIONAL_CANDIDATE_RESEARCH_ONLY",
+  "stage": "BTC7R_M15_IMPULSE_HIGH_WIN_ADOPTED_STACKING_CANDIDATE_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
   "candidate_family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
   "candidate": {
     "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
-    "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+    "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE",
+    "adopted_on": "2026-07-02",
     "timeframe": "M15",
     "entry_execution_timeframe": "M5",
     "fixed_lot": null,
