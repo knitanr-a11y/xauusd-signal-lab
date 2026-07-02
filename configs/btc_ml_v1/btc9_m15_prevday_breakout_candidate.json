@@ -66,7 +66,7 @@
     "exact_entry_overlap_with_btc6": 0,
     "exact_entry_overlap_with_btc7r": 8,
     "new_exact_entry_times_beyond_existing_references": 73,
-    "combined_unique_entry_times_with_btc4_btc5_btc6_btc7r": 171,
+    "combined_unique_entry_times_with_btc4_btc5_btc6_btc7r": 170,
     "global_one_position_cap": false
   },
   "post2026_entry_only_candidates": 26,
