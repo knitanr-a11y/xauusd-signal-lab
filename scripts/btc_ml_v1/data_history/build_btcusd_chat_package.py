@@ -19,6 +19,7 @@ DEFAULT_SUMMARY = Path("BTCUSD_HISTORY_PASTE_THIS.txt")
 DEFAULT_M1_DAYS = 90
 DEFAULT_M5_DAYS = 730
 DEFAULT_CORE_DAYS = 730
+DEFAULT_HIGHER_START = "2017-01-01"
 TIMEFRAME_ORDER = ("M1", "M5", "M15", "H1", "H4", "D1")
 
 
@@ -31,6 +32,13 @@ def _sha256(path: Path) -> str:
                 break
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _parse_utc(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _export_args(
@@ -64,7 +72,8 @@ def _summary_lines(manifest: dict[str, Any]) -> list[str]:
         "PURPOSE",
         "M1: short execution, spread and same-bar audit window",
         "M5: candidate timing and later TP/SL first-touch evaluation",
-        "M15/H1/H4/D1: candidate discovery and higher-timeframe context",
+        "M15/H1: two-year candidate research context",
+        "H4/D1: long indicator warm-up from 2017 for MT5 EMA20/EMA200 parity",
         "",
         "TIMEFRAMES",
     ]
@@ -92,14 +101,23 @@ def build_package(mt5: Any, args: argparse.Namespace) -> dict[str, Any]:
     summary_path.parent.mkdir(parents=True, exist_ok=True)
 
     snapshot = datetime.now(timezone.utc).replace(microsecond=0)
-    profiles = [
-        ("m1", ("M1",), int(args.m1_days)),
-        ("m5", ("M5",), int(args.m5_days)),
-        ("core", ("M15", "H1", "H4", "D1"), int(args.core_days)),
-    ]
-    for name, _timeframes, days in profiles:
+    m1_days = int(args.m1_days)
+    m5_days = int(args.m5_days)
+    core_days = int(args.core_days)
+    for name, days in (("m1", m1_days), ("m5", m5_days), ("core", core_days)):
         if days <= 0:
             raise ValueError(f"{name} days must be greater than zero")
+
+    higher_start = _parse_utc(args.higher_start)
+    if higher_start >= snapshot:
+        raise ValueError("higher-start must be earlier than the snapshot time")
+
+    profiles = [
+        ("m1", ("M1",), snapshot - timedelta(days=m1_days)),
+        ("m5", ("M5",), snapshot - timedelta(days=m5_days)),
+        ("core", ("M15", "H1"), snapshot - timedelta(days=core_days)),
+        ("higher_warmup", ("H4", "D1"), higher_start),
+    ]
 
     stage_parent = Path(args.stage_parent).expanduser().resolve()
     stage_parent.mkdir(parents=True, exist_ok=True)
@@ -111,10 +129,9 @@ def build_package(mt5: Any, args: argparse.Namespace) -> dict[str, Any]:
     manifests: list[dict[str, Any]] = []
     csv_sources: dict[str, Path] = {}
     try:
-        for profile_name, timeframes, days in profiles:
+        for profile_name, timeframes, start in profiles:
             output_dir = stage_root / profile_name
             output_dir.mkdir(parents=True, exist_ok=False)
-            start = snapshot - timedelta(days=days)
             manifest = exporter.run_export(
                 mt5,
                 _export_args(
@@ -146,8 +163,8 @@ def build_package(mt5: Any, args: argparse.Namespace) -> dict[str, Any]:
             for warning in (manifest.get("warnings") or [])
         ]
         combined = {
-            "schema_version": 1,
-            "stage": "BTC_CHAT_UPLOAD_PACKAGE_BEFORE_CANDIDATE_DISCOVERY",
+            "schema_version": 2,
+            "stage": "BTC_CHAT_UPLOAD_PACKAGE_WITH_LONG_H4_WARMUP",
             "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             "snapshot_end_utc": snapshot.strftime("%Y-%m-%d %H:%M:%S"),
             "symbol": exporter.SYMBOL,
@@ -160,14 +177,18 @@ def build_package(mt5: Any, args: argparse.Namespace) -> dict[str, Any]:
             "final_signal": False,
             "candidate_discovery_started": False,
             "profile_days": {
-                "M1": int(args.m1_days),
-                "M5": int(args.m5_days),
-                "M15_H1_H4_D1": int(args.core_days),
+                "M1": m1_days,
+                "M5": m5_days,
+                "M15_H1": core_days,
+            },
+            "profile_start": {
+                "H4_D1": higher_start.strftime("%Y-%m-%d %H:%M:%S"),
             },
             "intended_use": {
                 "M1": "execution_spread_and_same_bar_audit_only",
                 "M5": "candidate_timing_and_future_first_touch_evaluation",
-                "M15_H1_H4_D1": "candidate_discovery_and_higher_timeframe_context",
+                "M15_H1": "candidate_research_context",
+                "H4_D1": "long_MT5_indicator_warmup_and_higher_timeframe_context",
             },
             "csv_uncompressed_bytes": uncompressed_bytes,
             "timeframes": exports,
@@ -233,8 +254,8 @@ def build_package(mt5: Any, args: argparse.Namespace) -> dict[str, Any]:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Build one lightweight standard ZIP for chat upload: M1 90 days, "
-            "M5 730 days, and M15/H1/H4/D1 730 days by default."
+            "Build one standard ZIP for chat upload: M1 90 days, M5 730 days, "
+            "M15/H1 730 days, and H4/D1 from 2017 for mature MT5 EMA warm-up."
         )
     )
     parser.add_argument("--package", default=str(DEFAULT_PACKAGE))
@@ -243,6 +264,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--m1-days", type=int, default=DEFAULT_M1_DAYS)
     parser.add_argument("--m5-days", type=int, default=DEFAULT_M5_DAYS)
     parser.add_argument("--core-days", type=int, default=DEFAULT_CORE_DAYS)
+    parser.add_argument("--higher-start", default=DEFAULT_HIGHER_START)
     parser.add_argument("--terminal-path")
     parser.add_argument("--login")
     parser.add_argument("--password")
