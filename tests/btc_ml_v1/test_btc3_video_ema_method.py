@@ -2,19 +2,26 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 import pandas as pd
 
-MODULE_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "scripts/btc_ml_v1/research/btc3_video_ema_method_exploration.py"
-)
+SCRIPT_DIR = Path(__file__).resolve().parents[2] / "scripts/btc_ml_v1/research"
+MODULE_PATH = SCRIPT_DIR / "btc3_video_ema_method_exploration.py"
+RUNNER_PATH = SCRIPT_DIR / "run_btc3_video_ema_user_contract.py"
+
 spec = importlib.util.spec_from_file_location("btc3_video_ema_method_exploration", MODULE_PATH)
 assert spec and spec.loader
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+runner_spec = importlib.util.spec_from_file_location("run_btc3_video_ema_user_contract", RUNNER_PATH)
+assert runner_spec and runner_spec.loader
+runner = importlib.util.module_from_spec(runner_spec)
+sys.modules[runner_spec.name] = runner
+runner_spec.loader.exec_module(runner)
 
 
 def test_h4_decision_uses_bar_close_not_open() -> None:
@@ -67,3 +74,19 @@ def test_post_2026_period_is_entry_only() -> None:
     period, end = module._period_for_entry(pd.Timestamp("2026-01-01 00:00:00"))
     assert period == "POST_2026_ENTRY_ONLY"
     assert end is None
+
+
+def test_official_runner_forces_pre_entry_only_ema200_invalidation(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run(args: Namespace) -> dict[str, object]:
+        captured["close_on_ema200_invalidation"] = args.close_on_ema200_invalidation
+        return {}
+
+    monkeypatch.setattr(runner.engine, "run", fake_run)
+    args = Namespace(close_on_ema200_invalidation=True)
+    result = runner.run(args)
+
+    assert captured["close_on_ema200_invalidation"] is False
+    assert result["pre_entry_ema200_invalidation_only"] is True
+    assert result["post_entry_exit_contract"] == "STRUCTURAL_SL_TP_ONLY_NO_EMA200_EXIT"
