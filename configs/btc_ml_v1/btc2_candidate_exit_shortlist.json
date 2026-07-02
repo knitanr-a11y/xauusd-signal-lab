@@ -1,0 +1,94 @@
+{
+  "stage": "BTC2_CANDIDATE_EXIT_EXPLORATION_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "pip_contract": "1 pip = $10 price movement",
+  "minimum_net_take_profit_pips": 50,
+  "time_contract": "CSV time is bar OPEN; M15 decision=open+15m; entry uses exact M5 open at decision; M5 exits only after bar close",
+  "spread_model": {
+    "primary_usd": 30,
+    "sensitivity_usd": [20, 25, 30],
+    "historical_observed_note": "Recent M1 is $22.50; M5 was $30 until 2025-10 and $22.50 afterward; older history reached $74.66."
+  },
+  "same_m5_both_touch_rule": "SL_FIRST_CONSERVATIVE",
+  "discovery_period": "2024-07-03 through 2025-06-30",
+  "validation_period": "2025-07-01 through 2025-12-31",
+  "untouched_holdout_start": "2026-01-01",
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false,
+  "holdout_outcomes_evaluated": false,
+  "shortlist": [
+    {
+      "id": "BTC2_CR_SHORT_LOW_VOL",
+      "tier": "PRIMARY",
+      "family": "COMPRESSION_RELEASE",
+      "direction": "SHORT",
+      "filter": "atr_fraction < 0.80 * EMA672(atr_fraction)",
+      "tp_net_usd": 1250.0,
+      "tp_pips": 125.0,
+      "sl_net_usd": 375.0,
+      "sl_pips": 37.5,
+      "horizon_h": 48
+    },
+    {
+      "id": "BTC2_CR_SHORT_UTC16_23",
+      "tier": "SECONDARY",
+      "family": "COMPRESSION_RELEASE",
+      "direction": "SHORT",
+      "filter": "decision_hour_utc in 16..23",
+      "tp_net_usd": 1250.0,
+      "tp_pips": 125.0,
+      "sl_net_usd": 375.0,
+      "sl_pips": 37.5,
+      "horizon_h": 48
+    },
+    {
+      "id": "BTC2_TP_LONG_HIGH_VOL",
+      "tier": "PRIMARY",
+      "family": "TREND_PULLBACK",
+      "direction": "LONG",
+      "filter": "atr_fraction > 1.25 * EMA672(atr_fraction)",
+      "tp_net_usd": 1000.0,
+      "tp_pips": 100.0,
+      "sl_net_usd": 750.0,
+      "sl_pips": 75.0,
+      "horizon_h": 48
+    },
+    {
+      "id": "BTC2_TP_LONG_RSI54",
+      "tier": "SECONDARY",
+      "family": "TREND_PULLBACK",
+      "direction": "LONG",
+      "filter": "RSI14 >= 54.22047006970092",
+      "filter_origin": "discovery-period median frozen before validation",
+      "tp_net_usd": 1000.0,
+      "tp_pips": 100.0,
+      "sl_net_usd": 1000.0,
+      "sl_pips": 100.0,
+      "horizon_h": 36
+    },
+    {
+      "id": "BTC2_BO_LONG_WEEKDAY_HIGH_VOL",
+      "tier": "SECONDARY",
+      "family": "BREAKOUT_EXPANSION",
+      "direction": "LONG",
+      "filter": "weekday and high_volatility",
+      "tp_net_usd": 1250.0,
+      "tp_pips": 125.0,
+      "sl_net_usd": 750.0,
+      "sl_pips": 75.0,
+      "horizon_h": 24
+    },
+    {
+      "id": "BTC2_RR_SHORT_ATR",
+      "tier": "WATCH_SPARSE",
+      "family": "RANGE_REVERSION",
+      "direction": "SHORT",
+      "sl_formula": "max($250, 2.5 * entry_ATR14)",
+      "tp_formula": "max($500, 1.5 * SL)",
+      "minimum_tp_pips": 50.0,
+      "horizon_h": 36
+    }
+  ]
+}
