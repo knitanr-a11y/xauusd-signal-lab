@@ -12,6 +12,7 @@ on:
       - "tests/btc_ml_v1/test_btc_history_runner.py"
       - "tests/btc_ml_v1/test_btc3_video_ema_method.py"
       - "tests/btc_ml_v1/test_btc5_video_5m_ema200_nwave_candidate.py"
+      - "tests/btc_ml_v1/test_btc6_video_m15_ema200_nwave_candidate.py"
       - "docs/btc_ml_v1/**"
       - "configs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
@@ -25,6 +26,7 @@ on:
       - "tests/btc_ml_v1/test_btc_history_runner.py"
       - "tests/btc_ml_v1/test_btc3_video_ema_method.py"
       - "tests/btc_ml_v1/test_btc5_video_5m_ema200_nwave_candidate.py"
+      - "tests/btc_ml_v1/test_btc6_video_m15_ema200_nwave_candidate.py"
       - "docs/btc_ml_v1/**"
       - "configs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
@@ -58,6 +60,7 @@ jobs:
           python -m py_compile scripts/btc_ml_v1/research/mt5_indicator_compat.py
           python -m py_compile scripts/btc_ml_v1/research/run_btc3_video_ema_user_contract.py
           python -m py_compile scripts/btc_ml_v1/research/btc5_video_5m_ema200_nwave_candidate.py
+          python -m py_compile scripts/btc_ml_v1/research/btc6_video_m15_ema200_nwave_candidate.py
       - name: Test read-only broker and data audit
         run: python -m pytest tests/btc_ml_v1/test_btc0_mt5_audit.py -q
       - name: Test staged closed-only history export
@@ -68,3 +71,5 @@ jobs:
         run: python -m pytest tests/btc_ml_v1/test_btc3_video_ema_method.py -q
       - name: Test BTC-5 five-minute N-wave candidate
         run: python -m pytest tests/btc_ml_v1/test_btc5_video_5m_ema200_nwave_candidate.py -q
+      - name: Test BTC-6 fifteen-minute N-wave candidate
+        run: python -m pytest tests/btc_ml_v1/test_btc6_video_m15_ema200_nwave_candidate.py -q
