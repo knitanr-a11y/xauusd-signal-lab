@@ -102,6 +102,31 @@ def build_cmd(args: argparse.Namespace, out_dir: Path) -> list[str]:
     return cmd
 
 
+def run_fast_manager(args: argparse.Namespace, root: Path) -> dict[str, Any]:
+    report_path = root / "latest_fast_position_manager_report.json"
+    cmd = [
+        sys.executable, str(REPO_ROOT / "scripts" / "manage_btc_youtube_positions.py"),
+        "--state-json", str(args.state_dir / "btc4_split_position_state.json"),
+        "--report-json", str(report_path),
+        "--symbol", args.broker_symbol,
+        "--expected-login", str(args.expected_login),
+        "--require-demo-account",
+        "--require-hedging",
+    ]
+    if args.send and args.allow_demo_send:
+        cmd.append("--send")
+    proc = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    report = read_json(report_path)
+    if proc.returncode != 0 or not report.get("cycle_ok", False):
+        error_log = root / "fast_manager_errors.log"
+        mkdirp(error_log.parent)
+        with error_log.open("a", encoding="utf-8") as handle:
+            handle.write(f"[{utc_text()}] rc={proc.returncode} report={json.dumps(report, ensure_ascii=False, default=str)}\n")
+            if proc.stderr:
+                handle.write(proc.stderr + "\n")
+    return report
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Persistent aligned YouTube BTC candidate Discord/demo-autotrade loop.")
     parser.add_argument("--log-base", type=Path, default=DEFAULT_LOG_BASE)
@@ -120,6 +145,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--discord-webhook-url", default="")
     parser.add_argument("--discord-webhook-env", default="DISCORD_WEBHOOK_URL")
     parser.add_argument("--discord-username", default="Mochipoyo BTC YouTube")
+    parser.add_argument("--manager-interval-seconds", type=float, default=2.0)
     parser.add_argument("--send", action="store_true")
     parser.add_argument("--allow-demo-send", action="store_true")
     parser.add_argument("--max-cycles", type=int, default=0)
@@ -184,7 +210,12 @@ def main(argv: list[str] | None = None) -> int:
             )
             if args.max_cycles > 0 and cycle_index >= args.max_cycles:
                 return 0 if row["cycle_ok"] else 1
-            time.sleep(max(1.0, (next_run - utc_now()).total_seconds()))
+            while utc_now() < next_run:
+                run_fast_manager(args, root)
+                remaining = (next_run - utc_now()).total_seconds()
+                if remaining <= 0:
+                    break
+                time.sleep(max(0.2, min(float(args.manager_interval_seconds), remaining)))
     except KeyboardInterrupt:
         return 130
 
