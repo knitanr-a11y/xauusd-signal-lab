@@ -28,6 +28,7 @@ from btc_youtube_candidate_signals import (  # noqa: E402
 DEFAULT_CSV_DIR = Path(r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files")
 DEFAULT_OUT_DIR = Path("data/research_results/btc_youtube_candidates_dry_run_cycle")
 SUMMARY_NAME = "latest_btc_youtube_candidates_dry_run_cycle_result.json"
+MAX_SIGNAL_AGE_MINUTES = 20
 
 
 def windows_long_path(path: str | Path) -> str:
@@ -66,6 +67,18 @@ def utc_text() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def filter_fresh(frame: pd.DataFrame, *, max_age_minutes: int = MAX_SIGNAL_AGE_MINUTES, now_utc: pd.Timestamp | None = None) -> pd.DataFrame:
+    if frame.empty or "entry_time" not in frame.columns:
+        return frame.copy()
+    now = now_utc if now_utc is not None else pd.Timestamp.now(tz="UTC")
+    if now.tzinfo is not None:
+        now = now.tz_convert("UTC").tz_localize(None)
+    entries = pd.to_datetime(frame["entry_time"], errors="coerce", utc=True).dt.tz_convert(None)
+    age_minutes = (now - entries).dt.total_seconds() / 60.0
+    mask = entries.notna() & age_minutes.between(-2.0, float(max_age_minutes), inclusive="both")
+    return frame.loc[mask].copy().reset_index(drop=True)
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Detect YouTube-derived BTC4/5/6 candidates. No Discord or MT5 calls.")
     parser.add_argument("--csv-dir", type=Path, default=DEFAULT_CSV_DIR)
@@ -92,10 +105,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         result = detect_youtube_candidates(
             m5_csv=paths["m5_csv"], m15_csv=paths["m15_csv"], h4_csv=paths["h4_csv"]
         )
-        notifications = result.notification_candidates
+        raw_notifications = result.notification_candidates
+        notifications = filter_fresh(raw_notifications)
         trade_notifications = notifications[notifications["trade_enabled"].astype(bool)].copy() if not notifications.empty else pd.DataFrame(columns=NOTIFICATION_COLUMNS)
         monitor_notifications = notifications[~notifications["trade_enabled"].astype(bool)].copy() if not notifications.empty else pd.DataFrame(columns=NOTIFICATION_COLUMNS)
-        orders = result.order_payloads
+        fresh_signal_keys = set(trade_notifications.get("signal_key", pd.Series(dtype=str)).astype(str))
+        raw_orders = result.order_payloads
+        orders = raw_orders[raw_orders.get("parent_signal_key", pd.Series(dtype=str)).astype(str).isin(fresh_signal_keys)].copy() if not raw_orders.empty else raw_orders
+        stale_filtered = {
+            "notifications": int(len(raw_notifications) - len(notifications)),
+            "order_payloads": int(len(raw_orders) - len(orders)),
+        }
         validation_errors = validate_order_group(orders)
         cycle_ok = not validation_errors
         reason = "BTC_YOUTUBE_DRY_RUN_PASS" if cycle_ok else "BTC_YOUTUBE_ORDER_CONTRACT_FAILED"
@@ -106,6 +126,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         monitor_notifications = pd.DataFrame(columns=NOTIFICATION_COLUMNS)
         orders = pd.DataFrame(columns=ORDER_COLUMNS)
         result = None
+        stale_filtered = {"notifications": 0, "order_payloads": 0}
         validation_errors = [repr(exc)]
         cycle_ok = False
         reason = "BTC_YOUTUBE_DRY_RUN_FAILED"
@@ -134,6 +155,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "order_payloads": int(len(orders)),
         },
         "candidate_counts": {} if result is None else result.counts,
+        "max_signal_age_minutes": MAX_SIGNAL_AGE_MINUTES,
+        "stale_rows_filtered": stale_filtered,
         "latest_closed": {} if result is None else result.latest_closed,
         "synthetic_entry_times": {} if result is None else result.synthetic_entry_times,
         "order_contract_errors": validation_errors,
