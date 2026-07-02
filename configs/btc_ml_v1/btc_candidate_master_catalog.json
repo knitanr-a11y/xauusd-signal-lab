@@ -1,0 +1,98 @@
+{
+  "catalog": "BTC_CANDIDATE_MASTER_CATALOG_20260702",
+  "symbol": "BTCUSD#",
+  "global_contract": {
+    "time_is_bar_open": true,
+    "closed_bars_only": true,
+    "entry_uses_first_exact_lower_timeframe_open_after_decision": true,
+    "pip_contract": "$10 price movement = 1 pip",
+    "primary_spread_usd": 30,
+    "same_lower_bar_order": "SL first",
+    "post2026_outcomes_evaluated": false,
+    "global_one_position_cap": false,
+    "orders_enabled": false,
+    "discord_enabled": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "candidate_pool": [
+    {
+      "id": "BTC2_CR_SHORT_LOW_VOL",
+      "family": "BTC2_LABELLED_CANDIDATE_POOL",
+      "status": "PROVISIONAL_PRIMARY_NOT_LIVE",
+      "timeframe": "M15",
+      "discovery_trades": 62,
+      "discovery_pf": 1.707,
+      "validation_trades": 32,
+      "validation_pf": 1.746
+    },
+    {
+      "id": "BTC2_TP_LONG_HIGH_VOL",
+      "family": "BTC2_LABELLED_CANDIDATE_POOL",
+      "status": "PROVISIONAL_PRIMARY_NOT_LIVE",
+      "timeframe": "M15",
+      "discovery_trades": 122,
+      "discovery_pf": 1.378,
+      "validation_trades": 60,
+      "validation_pf": 1.630
+    },
+    {
+      "id": "BTC4_RISK_CAP_400",
+      "family": "YOUTUBE_CANDIDATES",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "timeframe": "H4",
+      "fixed_lot": 0.02,
+      "trades": 9,
+      "win_rate_pct": 77.777778,
+      "profit_factor": 2.913
+    },
+    {
+      "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "family": "YOUTUBE_CANDIDATES",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "timeframe": "M5",
+      "fixed_lot": null,
+      "trades": 14,
+      "win_rate_pct": 57.142857,
+      "profit_factor": 3.000364
+    },
+    {
+      "id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "family": "YOUTUBE_CANDIDATES",
+      "status": "ADOPTED_CANDIDATE_NOT_LIVE",
+      "timeframe": "M15",
+      "fixed_lot": null,
+      "trades": 13,
+      "win_rate_pct": 61.538462,
+      "profit_factor": 1.634629
+    },
+    {
+      "id": "BTC7_M15_IMPULSE_CONTINUATION_RISK100",
+      "family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
+      "status": "RESEARCH_BASELINE_SUPERSEDED_FOR_HIGH_WIN_MONITORING",
+      "timeframe": "M15",
+      "fixed_lot": null,
+      "trades": 238,
+      "win_rate_pct": 42.436975,
+      "profit_factor": 1.600614
+    },
+    {
+      "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+      "family": "SYSTEMATIC_MOMENTUM_CANDIDATES",
+      "status": "PROVISIONAL_CANDIDATE_NOT_ADOPTED",
+      "timeframe": "M15",
+      "fixed_lot": null,
+      "trades": 61,
+      "win_rate_pct": 73.770492,
+      "profit_factor": 2.956036,
+      "max_drawdown_pips": 230.339604,
+      "post2026_entry_only_candidates": 22
+    }
+  ],
+  "lot_status": {
+    "BTC4_RISK_CAP_400": 0.02,
+    "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786": null,
+    "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886": null,
+    "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110": null
+  }
+}
