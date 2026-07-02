@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -15,9 +16,26 @@ from live_log_manager import (
     maintain_logs_and_trades,
 )
 from live_mt5 import MetaTrader5Client
+from live_notification_formatter import format_entry_message, format_exit_message
 from live_settings import RuntimeSettings, SLEEVES
-from live_store import atomic_write_csv
+from live_store import atomic_write_csv, json_value
 from live_win_rate import WinRateSummary
+
+_BASE_LEDGER_COLUMNS = tuple(core.LEDGER_COLUMNS)
+_OPTIONAL_LEDGER_COLUMNS = (
+    "source_timeframe",
+    "higher_timeframe",
+    "features_json",
+    "atr",
+    "target_r",
+    "horizon_hours",
+    "strategy_name",
+    "signal_reason",
+    "higher_timeframe_context",
+    "close_reason",
+    "close_price",
+)
+_BASE_ROW_FACTORY = core._base_row
 
 
 def _unused_history(
@@ -38,46 +56,12 @@ def _unused_history(
     }
 
 
-def _live_text(summary: WinRateSummary) -> str:
-    if not summary.available or summary.win_rate is None or summary.trades <= 0:
-        return "集計前（決済済み0件）"
-    return f"{summary.win_rate * 100:.2f}%（{summary.wins}/{summary.trades}）"
-
-
 def _entry_message(
     row: pd.Series | dict[str, Any],
     _historical: WinRateSummary,
     live: WinRateSummary,
 ) -> str:
-    direction = core._text(row["direction"])
-    icon = "🟢" if direction == "LONG" else "🔴"
-    status = core._text(row["execution_status"])
-    lines = [
-        f"{icon} **GML1 XAUUSD 候補 / {status}**",
-        f"軸: `{core._text(row['comp'])}`",
-        f"候補: `{core._text(row['candidate_id'])}`",
-        f"方向: **{direction}**",
-        f"判定時刻（MT5 server）: `{core._text(row['decision_time'])}`",
-        f"発注状態: **{status}**",
-    ]
-    volume = core._number(row.get("volume"))
-    if volume is not None:
-        lines.append(f"ロット: `{volume:g}`")
-    if status in {"ORDER_FILLED", "ORDER_RECOVERED_OPEN", "DRY_RUN"}:
-        lines.extend(
-            [
-                f"約定/予定価格: `{core._format_price(row['fill_price'])}`",
-                f"SL: `{core._format_price(row['stop_price'])}`",
-                f"TP: `{core._format_price(row['target_price'])}`",
-            ]
-        )
-    lines.extend(
-        [
-            f"実運用WR（この軸）: **{_live_text(live)}**",
-            f"注記: `{core._text(row['message'])[:300] or 'none'}`",
-        ]
-    )
-    return "\n".join(lines)
+    return format_entry_message(row, live)
 
 
 def _exit_message(
@@ -85,21 +69,204 @@ def _exit_message(
     _historical: WinRateSummary,
     live: WinRateSummary,
 ) -> str:
-    result = core._text(row["live_result"])
-    icon = "✅" if result == "WIN" else "➖" if result == "BREAKEVEN" else "❌"
-    net = core._number(row["net_profit"])
-    net_text = "N/A" if net is None else f"{net:.2f}"
-    return "\n".join(
-        [
-            f"{icon} **GML1 XAUUSD 決済 / {result or 'CLOSED'}**",
-            f"軸: `{core._text(row['comp'])}`",
-            f"候補: `{core._text(row['candidate_id'])}`",
-            f"判定時刻（MT5 server）: `{core._text(row['decision_time'])}`",
-            f"決済時刻: `{core._text(row['closed_at']) or 'unknown'}`",
-            f"実損益（口座通貨）: **{net_text}**",
-            f"実運用WR（この軸・更新後）: **{_live_text(live)}**",
+    return format_exit_message(row, live)
+
+
+def _ledger_columns(path: Path) -> list[str]:
+    existing: list[str] = []
+    if path.is_file():
+        existing = list(pd.read_csv(path, nrows=0).columns)
+        missing_required = [
+            column for column in _BASE_LEDGER_COLUMNS if column not in existing
         ]
+        if missing_required:
+            raise core.ExecutionCycleError(
+                f"execution ledger missing columns: {missing_required}"
+            )
+    extras = [
+        column
+        for column in existing
+        if column not in _BASE_LEDGER_COLUMNS
+        and column not in _OPTIONAL_LEDGER_COLUMNS
+    ]
+    return [*_BASE_LEDGER_COLUMNS, *_OPTIONAL_LEDGER_COLUMNS, *extras]
+
+
+def _load_ledger_additive(
+    path: Path,
+    columns: Iterable[str] | None = None,
+) -> pd.DataFrame:
+    effective_columns = list(columns or _ledger_columns(path))
+    if not path.is_file():
+        return pd.DataFrame(columns=effective_columns)
+    frame = pd.read_csv(path, dtype=object)
+    missing_required = [
+        column for column in _BASE_LEDGER_COLUMNS if column not in frame.columns
+    ]
+    if missing_required:
+        raise core.ExecutionCycleError(
+            f"execution ledger missing columns: {missing_required}"
+        )
+    for column in effective_columns:
+        if column not in frame.columns:
+            frame[column] = ""
+    if frame["candidate_key"].duplicated().any():
+        raise core.ExecutionCycleError(
+            "execution ledger contains duplicate candidate_key values"
+        )
+    return frame[effective_columns].copy()
+
+
+def _json_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, float) and pd.isna(value):
+        return ""
+    if isinstance(value, (dict, list, tuple)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    return str(value)
+
+
+def _base_row_with_optional(record: dict[str, Any], now_text: str) -> dict[str, Any]:
+    row = _BASE_ROW_FACTORY(record, now_text)
+    row.update(
+        {
+            "source_timeframe": str(record.get("source_timeframe") or ""),
+            "higher_timeframe": str(record.get("higher_timeframe") or ""),
+            "features_json": _json_text(record.get("features_json")),
+            "atr": json_value(record.get("atr")),
+            "target_r": json_value(record.get("target_r")),
+            "horizon_hours": json_value(record.get("horizon_hours")),
+            "strategy_name": str(record.get("strategy_name") or ""),
+            "signal_reason": str(record.get("signal_reason") or ""),
+            "higher_timeframe_context": str(
+                record.get("higher_timeframe_context") or ""
+            ),
+            "close_reason": "",
+            "close_price": "",
+        }
     )
+    return row
+
+
+def _deal_dict(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return dict(value)
+    method = getattr(value, "_asdict", None)
+    if callable(method):
+        return dict(method())
+    return {
+        name: getattr(value, name)
+        for name in ("ticket", "time_msc", "entry", "reason", "price")
+        if hasattr(value, name)
+    }
+
+
+def _closing_deals(client: Any, position_ticket: int) -> list[dict[str, Any]]:
+    try:
+        capture = getattr(client, "capture_position", None)
+        if callable(capture):
+            raw = capture(int(position_ticket)) or ()
+        else:
+            custom = getattr(client, "position_deal_records", None)
+            if callable(custom):
+                raw = custom(int(position_ticket)) or ()
+            else:
+                mt5 = getattr(client, "mt5", None)
+                raw = (
+                    mt5.history_deals_get(position=int(position_ticket)) or ()
+                    if mt5 is not None
+                    else ()
+                )
+    except Exception:
+        return []
+    result: list[dict[str, Any]] = []
+    for value in raw:
+        deal = _deal_dict(value)
+        try:
+            entry = int(deal.get("entry", -1))
+        except (TypeError, ValueError):
+            continue
+        if entry in {1, 2, 3}:
+            result.append(deal)
+    return result
+
+
+def _deal_close_reason(client: Any, deal: dict[str, Any]) -> str:
+    raw = deal.get("reason")
+    text = str(raw).strip().upper() if raw is not None else ""
+    text_aliases = {
+        "SL": "SL",
+        "STOP_LOSS": "SL",
+        "TP": "TP",
+        "TAKE_PROFIT": "TP",
+        "CLIENT": "MANUAL",
+        "MOBILE": "MANUAL",
+        "WEB": "MANUAL",
+        "MANUAL": "MANUAL",
+        "EXPERT": "EXPERT",
+    }
+    if text in text_aliases:
+        return text_aliases[text]
+    try:
+        reason = int(raw)
+    except (TypeError, ValueError):
+        return ""
+    mt5 = getattr(client, "mt5", None)
+    if mt5 is None:
+        return ""
+    for label, names in (
+        ("SL", ("DEAL_REASON_SL",)),
+        ("TP", ("DEAL_REASON_TP",)),
+        (
+            "MANUAL",
+            ("DEAL_REASON_CLIENT", "DEAL_REASON_MOBILE", "DEAL_REASON_WEB"),
+        ),
+        ("EXPERT", ("DEAL_REASON_EXPERT",)),
+    ):
+        for name in names:
+            value = getattr(mt5, name, None)
+            if value is not None and int(value) == reason:
+                return label
+    return ""
+
+
+def _enrich_closed_deal_metadata(ledger: pd.DataFrame, client: Any) -> None:
+    required = {"trade_state", "execution_status", "close_reason", "close_price"}
+    if ledger.empty or not required.issubset(ledger.columns):
+        return
+    closed = ledger[ledger["trade_state"].astype(str).eq("CLOSED")]
+    for index, row in closed.iterrows():
+        if core._text(row.get("close_reason")) and core._text(
+            row.get("close_price")
+        ):
+            continue
+        status = core._text(row.get("execution_status"))
+        if status == "TIME_EXIT_FILLED" and not core._text(
+            row.get("close_reason")
+        ):
+            ledger.loc[index, "close_reason"] = "TIME"
+        ticket = core._ticket(row.get("position_ticket"))
+        if ticket is None:
+            continue
+        deals = _closing_deals(client, ticket)
+        if not deals:
+            continue
+        latest = max(
+            deals,
+            key=lambda deal: (
+                int(deal.get("time_msc") or 0),
+                int(deal.get("deal_ticket") or deal.get("ticket") or 0),
+            ),
+        )
+        if not core._text(ledger.loc[index, "close_price"]):
+            price = core._number(latest.get("price"))
+            if price is not None:
+                ledger.loc[index, "close_price"] = price
+        if not core._text(ledger.loc[index, "close_reason"]):
+            reason = _deal_close_reason(client, latest)
+            if reason:
+                ledger.loc[index, "close_reason"] = reason
 
 
 def _unique_errors(values: Iterable[str]) -> tuple[str, ...]:
@@ -179,12 +346,19 @@ def process_execution_cycle(
     client_factory: Callable[[RuntimeSettings], MetaTrader5Client] | None = None,
     webhook_sender: Callable[..., Any] = core.send_webhook,
 ) -> dict[str, Any]:
-    original_core_loader = core.load_runtime_settings
+    original_core_settings_loader = core.load_runtime_settings
     original_supervisor_loader = supervisor.load_runtime_settings
     original_history = core.load_historical_win_rates
     original_live_rates = core.load_live_win_rates
     original_entry = core._format_entry_message
     original_exit = core._format_exit_message
+    original_ledger_columns = core.LEDGER_COLUMNS
+    original_ledger_loader = core._load_ledger
+    original_base_row = core._base_row
+    original_supervisor_reconcile = supervisor._safe_reconcile_open_orders
+
+    ledger_path = output_dir / "live_execution_ledger.csv"
+    effective_ledger_columns = _ledger_columns(ledger_path)
 
     def always_on_loader(*args: Any, **kwargs: Any) -> RuntimeSettings:
         settings = original_supervisor_loader(*args, **kwargs)
@@ -196,6 +370,21 @@ def process_execution_cycle(
     ) -> dict[str, WinRateSummary]:
         combined = combined_live_trade_frame(output_dir, operational)
         return original_live_rates(combined, comps)
+
+    def additive_ledger_loader(path: Path) -> pd.DataFrame:
+        return _load_ledger_additive(path, effective_ledger_columns)
+
+    def reconcile_with_notification_metadata(
+        ledger: pd.DataFrame,
+        client: MetaTrader5Client,
+        latest_close: pd.Timestamp,
+        check_time: str,
+    ) -> list[str]:
+        events = original_supervisor_reconcile(
+            ledger, client, latest_close, check_time
+        )
+        _enrich_closed_deal_metadata(ledger, client)
+        return events
 
     def logged_webhook_sender(
         url: str,
@@ -225,8 +414,12 @@ def process_execution_cycle(
         return result
 
     try:
+        core.LEDGER_COLUMNS = effective_ledger_columns
+        core._load_ledger = additive_ledger_loader
+        core._base_row = _base_row_with_optional
         core.load_runtime_settings = always_on_loader
         supervisor.load_runtime_settings = always_on_loader
+        supervisor._safe_reconcile_open_orders = reconcile_with_notification_metadata
         core.load_historical_win_rates = _unused_history
         core.load_live_win_rates = permanent_live_rates
         core._format_entry_message = _entry_message
@@ -249,7 +442,6 @@ def process_execution_cycle(
         result["win_rate_scope"] = "LIVE_MT5_CLOSED_ORDERS_ONLY_BY_SLEEVE"
         result["service_mode"] = "ALWAYS_ON_FAIL_CLOSED"
 
-        ledger_path = output_dir / "live_execution_ledger.csv"
         if ledger_path.is_file():
             ledger = core._load_ledger(ledger_path)
             compacted, manifest = maintain_logs_and_trades(
@@ -261,9 +453,13 @@ def process_execution_cycle(
             result["log_management"] = manifest
         return result
     finally:
-        core.load_runtime_settings = original_core_loader
+        core.load_runtime_settings = original_core_settings_loader
         supervisor.load_runtime_settings = original_supervisor_loader
+        supervisor._safe_reconcile_open_orders = original_supervisor_reconcile
         core.load_historical_win_rates = original_history
         core.load_live_win_rates = original_live_rates
         core._format_entry_message = original_entry
         core._format_exit_message = original_exit
+        core.LEDGER_COLUMNS = original_ledger_columns
+        core._load_ledger = original_ledger_loader
+        core._base_row = original_base_row
