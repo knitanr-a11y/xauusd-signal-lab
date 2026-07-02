@@ -6,6 +6,7 @@ on:
     paths:
       - "RUN_BTCUSD_HISTORY_EXPORT.bat"
       - "RUN_BTCUSD_H4_WARMUP_EXPORT.bat"
+      - "RUN_BTC_STACKING_REPRODUCTION.bat"
       - "scripts/btc_ml_v1/**"
       - "tests/btc_ml_v1/test_btc0_mt5_audit.py"
       - "tests/btc_ml_v1/test_btc_history_export.py"
@@ -17,6 +18,7 @@ on:
       - "tests/btc_ml_v1/test_btc7r_m15_impulse_high_win_candidate.py"
       - "tests/btc_ml_v1/test_btc9_m15_prevday_breakout_candidate.py"
       - "tests/btc_ml_v1/test_btc9r_m15_prevday_breakout_high_win_candidate.py"
+      - "tests/btc_ml_v1/test_btc_stacking_reproduction.py"
       - "docs/btc_ml_v1/**"
       - "configs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
@@ -24,6 +26,7 @@ on:
     paths:
       - "RUN_BTCUSD_HISTORY_EXPORT.bat"
       - "RUN_BTCUSD_H4_WARMUP_EXPORT.bat"
+      - "RUN_BTC_STACKING_REPRODUCTION.bat"
       - "scripts/btc_ml_v1/**"
       - "tests/btc_ml_v1/test_btc0_mt5_audit.py"
       - "tests/btc_ml_v1/test_btc_history_export.py"
@@ -35,6 +38,7 @@ on:
       - "tests/btc_ml_v1/test_btc7r_m15_impulse_high_win_candidate.py"
       - "tests/btc_ml_v1/test_btc9_m15_prevday_breakout_candidate.py"
       - "tests/btc_ml_v1/test_btc9r_m15_prevday_breakout_high_win_candidate.py"
+      - "tests/btc_ml_v1/test_btc_stacking_reproduction.py"
       - "docs/btc_ml_v1/**"
       - "configs/btc_ml_v1/**"
       - ".github/workflows/btc0_broker_audit_tests.yml"
@@ -73,6 +77,7 @@ jobs:
           python -m py_compile scripts/btc_ml_v1/research/btc7r_m15_impulse_high_win_candidate.py
           python -m py_compile scripts/btc_ml_v1/research/btc9_m15_prevday_breakout_candidate.py
           python -m py_compile scripts/btc_ml_v1/research/btc9r_m15_prevday_breakout_high_win_candidate.py
+          python -m py_compile scripts/btc_ml_v1/research/reproduce_btc_stacking_portfolio.py
       - name: Test read-only broker and data audit
         run: python -m pytest tests/btc_ml_v1/test_btc0_mt5_audit.py -q
       - name: Test staged closed-only history export
@@ -93,3 +98,5 @@ jobs:
         run: python -m pytest tests/btc_ml_v1/test_btc9_m15_prevday_breakout_candidate.py -q
       - name: Test BTC-9R high-win refinement
         run: python -m pytest tests/btc_ml_v1/test_btc9r_m15_prevday_breakout_high_win_candidate.py -q
+      - name: Test BTC stacking reproduction contracts
+        run: python -m pytest tests/btc_ml_v1/test_btc_stacking_reproduction.py -q
