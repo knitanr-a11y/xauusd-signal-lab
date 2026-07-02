@@ -5,7 +5,6 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 SCRIPT = (
     Path(__file__).resolve().parents[2]
@@ -19,17 +18,13 @@ spec.loader.exec_module(module)
 
 
 def test_separate_touch_episodes_remain_valid_until_regime_end() -> None:
-    frame = pd.DataFrame(
-        {
-            "touch200": [False, True, True, False, True, False],
-        }
-    )
+    frame = pd.DataFrame({"touch200": [False, True, True, False, True, False]})
     regime = module.Regime("LONG", 0, 0, 6)
 
     assert module.touch_events(frame, regime) == [1, 4]
 
 
-def test_wick_only_touch_is_detected() -> None:
+def test_wick_only_touch_is_detected(tmp_path: Path) -> None:
     frame = pd.DataFrame(
         {
             "time": pd.date_range("2025-01-01", periods=220, freq="5min"),
@@ -39,7 +34,10 @@ def test_wick_only_touch_is_detected() -> None:
             "close": [100.0] * 220,
         }
     )
-    featured = module.read_m5_from_frame(frame)
+    path = tmp_path / "m5.csv"
+    frame.to_csv(path, index=False)
+
+    featured = module.read_m5(path)
 
     assert bool(featured.iloc[-1]["touch200"])
 
