@@ -1,7 +1,7 @@
 {
   "stage": "BTC3_VIDEO_EMA_METHOD_EXPLORATION_RESEARCH_ONLY",
   "symbol": "BTCUSD#",
-  "official_runner": "scripts/btc_ml_v1/research/run_btc3_video_ema_user_contract.py",
+  "official_runner": "scripts/btc_ml_v1/research/run_btc3_video_ema_user_contract.py --ema-applied-price close",
   "time_contract": "CSV time is OPEN; H4 decision=open+4h; entry=exact M5 open at decision",
   "pip_contract": "$10 price movement = 1 pip",
   "minimum_profit_pips": 50,
@@ -9,8 +9,7 @@
   "spread_sensitivity_usd": [20, 25, 30],
   "indicator_contract": {
     "ema": "MT5-compatible SMA seed over the first period, followed by recursive EMA with alpha=2/(period+1)",
-    "ema_applied_price": "MUST_BE_EXPLICITLY_CONFIRMED_FROM_MT5_SETTINGS",
-    "allowed_applied_prices": ["close", "typical", "weighted"],
+    "ema_applied_price": "CLOSE_CONFIRMED_BY_USER",
     "atr": "MT5/Wilder ATR with SMA true-range seed followed by Wilder recursion",
     "minimum_h4_warmup_bars_before_research": 1500,
     "received_h4_warmup_bars_before_research": 12895,
@@ -36,9 +35,13 @@
     "V3_SEPARATION_05ATR",
     "V4_BALANCED_2OF3"
   ],
-  "trend_variants_not_frozen_as_winner": true,
+  "close_recalculation": {
+    "discovery": {"trades": 9, "profit_factor": 1.321102, "average_pips": 44.612031, "total_pips": 401.508277, "win_rate_pct": 66.666667, "max_drawdown_pips": 524.850840},
+    "validation": {"trades": 3, "profit_factor": 1.844326, "average_pips": 81.374087, "total_pips": 244.122262, "win_rate_pct": 66.666667, "max_drawdown_pips": 289.132738},
+    "combined": {"trades": 12, "profit_factor": 1.419366, "average_pips": 53.802545, "total_pips": 645.630539, "win_rate_pct": 66.666667, "max_drawdown_pips": 524.850840}
+  },
   "previous_results_valid": false,
-  "recalculation_status": "H4_WARMUP_VALIDATED_PENDING_EXACT_MT5_EMA_APPLIED_PRICE",
+  "recalculation_status": "CLOSE_RECALCULATION_COMPLETE_NOT_CANDIDATE_FINAL",
   "orders_enabled": false,
   "discord_enabled": false,
   "live_ready": false,
