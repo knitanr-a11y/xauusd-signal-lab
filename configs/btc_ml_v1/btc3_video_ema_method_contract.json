@@ -1,0 +1,32 @@
+{
+  "stage": "BTC3_VIDEO_EMA_METHOD_EXPLORATION_RESEARCH_ONLY",
+  "symbol": "BTCUSD#",
+  "time_contract": "CSV time is OPEN; H4 decision=open+4h; entry=exact M5 open at decision",
+  "pip_contract": "$10 price movement = 1 pip",
+  "minimum_profit_pips": 50,
+  "spread_primary_usd": 30,
+  "spread_sensitivity_usd": [20, 25, 30],
+  "rules": {
+    "cross": "H4 EMA20 crosses EMA200",
+    "touch": "first later H4 bar that touches EMA20; body close beyond EMA20 allowed",
+    "pre_entry_invalidation": "H4 close beyond EMA200 or EMA20 recrosses EMA200",
+    "trigger": "any later H4 close beyond first-touch bar high/low; no bar expiry",
+    "one_shot": "first setup only per EMA cross",
+    "stop": "pullback extreme plus max($30, 0.1*H4 ATR14)",
+    "target": "causally confirmed left-side H4 swing levels",
+    "target_filter": "skip levels until net >=50 pips and RR>=1",
+    "partial": "50% at TP1; remaining stop to net break-even; rest at next farther swing",
+    "same_m5_order": "SL first before TP1; break-even first after TP1"
+  },
+  "trend_variants_kept": [
+    "V0_NO_FILTER",
+    "V3_SEPARATION_05ATR",
+    "V4_BALANCED_2OF3"
+  ],
+  "trend_variants_not_frozen_as_winner": true,
+  "orders_enabled": false,
+  "discord_enabled": false,
+  "live_ready": false,
+  "final_signal": false,
+  "selection_uses_post_2026_outcomes": false
+}
