@@ -9,18 +9,23 @@ def script_dir() -> Path:
     return Path(__file__).resolve().parents[2] / "scripts/btc_ml_v1/data_history"
 
 
-def import_runner():
+def _import(name: str):
     path = str(script_dir())
     if path not in sys.path:
         sys.path.insert(0, path)
-    return importlib.import_module("run_btcusdsharp_history")
+    return importlib.import_module(name)
+
+
+def import_runner():
+    return _import("run_btcusdsharp_history")
 
 
 def import_packager():
-    path = str(script_dir())
-    if path not in sys.path:
-        sys.path.insert(0, path)
-    return importlib.import_module("build_btcusd_chat_package")
+    return _import("build_btcusd_chat_package")
+
+
+def import_h4_packager():
+    return _import("build_btcusd_h4_warmup_package")
 
 
 def test_failed_run_cleanup_removes_only_current_process_stage(tmp_path: Path) -> None:
@@ -51,6 +56,15 @@ def test_chat_package_defaults_keep_execution_short_and_h4_warmup_long() -> None
     assert packager.TIMEFRAME_ORDER == ("M1", "M5", "M15", "H1", "H4", "D1")
 
 
+def test_h4_only_packager_is_small_and_starts_in_2017() -> None:
+    packager = import_h4_packager()
+    args = packager.parse_args([])
+
+    assert args.start == "2017-01-01"
+    assert args.package == "BTCUSD_H4_WARMUP_PACKAGE.zip"
+    assert args.summary == "BTCUSD_H4_WARMUP_PASTE_THIS.txt"
+
+
 def test_root_launcher_builds_one_zip_with_long_h4_history() -> None:
     launcher = Path(__file__).resolve().parents[2] / "RUN_BTCUSD_HISTORY_EXPORT.bat"
     text = launcher.read_text(encoding="utf-8")
@@ -65,4 +79,15 @@ def test_root_launcher_builds_one_zip_with_long_h4_history() -> None:
     assert "BTCUSD_HISTORY_LAST_LOG.txt" in text
     assert "BTCUSD_HISTORY_PASTE_THIS.txt" in text
     assert "temporary CSV files will be deleted" in text
+    assert "pause" in text.lower()
+
+
+def test_h4_warmup_launcher_exports_only_h4() -> None:
+    launcher = Path(__file__).resolve().parents[2] / "RUN_BTCUSD_H4_WARMUP_EXPORT.bat"
+    text = launcher.read_text(encoding="utf-8")
+
+    assert "build_btcusd_h4_warmup_package.py" in text
+    assert "Only H4 from 2017-01-01" in text
+    assert "BTCUSD_H4_WARMUP_PACKAGE.zip" in text
+    assert "BTCUSD_H4_WARMUP_LAST_LOG.txt" in text
     assert "pause" in text.lower()
