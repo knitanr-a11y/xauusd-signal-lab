@@ -10,13 +10,14 @@ import pandas as pd
 
 import btc7_m15_impulse_continuation_candidate as base
 
-CANDIDATE_ID = "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R080"
+CANDIDATE_ID = "BTC10_M15_EMA20_PULLBACK_RECLAIM_H1_TREND_R225"
 RECENT_STOP_BARS = 8
 H1_TREND_SEPARATION_ATR_MIN = 0.5
 CLOSE_LOCATION_MIN = 0.6
-TARGET_R = 0.8
+TARGET_R = 2.25
 RISK_CAP_PIPS = 120.0
-MIN_REWARD_PIPS = 50.0
+MIN_RISK_PIPS = 62.5
+MIN_REWARD_PIPS = TARGET_R * MIN_RISK_PIPS
 STOP_ATR_BUFFER = 0.1
 COOLDOWN_M15_BARS = 12
 
@@ -93,9 +94,8 @@ def generate_plans(m15: pd.DataFrame, h1: pd.DataFrame, m5: pd.DataFrame) -> pd.
         reward_pips = TARGET_R * risk_pips
         if (
             not np.isfinite(risk_pips)
-            or risk_pips <= 0.0
+            or risk_pips < MIN_RISK_PIPS
             or risk_pips > RISK_CAP_PIPS
-            or reward_pips < MIN_REWARD_PIPS
         ):
             continue
 
@@ -169,9 +169,11 @@ def run(m5_path: Path, m15_path: Path, h1_path: Path, output_dir: Path) -> dict[
         "candidate": CANDIDATE_ID,
         "status": "provisional_research_candidate_not_in_stacking_portfolio",
         "selection_protocol": (
-            "Coarse family grid selected using TRAIN 2024-08-01..2025-02-01 and "
-            "DEV 2025-02-01..2025-07-01 only. The selected rule was frozen before "
-            "opening its 2025-07-01..2026-01-01 validation and opened-2026 results."
+            "The entry family was selected with TRAIN and DEV. After the R0.8 result was reviewed, "
+            "an exit-only RR grid from 1.5R to 5.0R in 0.25R steps was evaluated while freezing "
+            "the same 318 entries and original stops. The revised RR is post-hoc research, not a "
+            "new untouched holdout result. R2.25 was chosen as the lower edge of a neighboring "
+            "eligible plateau; R2.75 and above had a DEV boundary-unresolved trade."
         ),
         "h1_trend": (
             "closed H1 EMA50/EMA200 direction, EMA200 slope versus previous closed H1 "
@@ -184,6 +186,7 @@ def run(m5_path: Path, m15_path: Path, h1_path: Path, output_dir: Path) -> dict[
         "entry": "next exact M5 open after the closed M15 signal bar",
         "stop": "extreme of the most recent 8 M15 bars plus 0.1*M15 ATR14",
         "cooldown": "12 M15 bars per direction, applied to raw signals before risk filtering",
+        "minimum_risk_pips": MIN_RISK_PIPS,
         "risk_cap_pips": RISK_CAP_PIPS,
         "target_r": TARGET_R,
         "minimum_reward_pips": MIN_REWARD_PIPS,
