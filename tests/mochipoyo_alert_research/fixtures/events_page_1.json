@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "latest_id": 4,
+  "events": [
+    {
+      "id": 2,
+      "event_key": "fixture-btcusd-long-20260715t083000z",
+      "received_at_utc": "2026-07-15T08:30:08.169Z",
+      "source": "tradingview",
+      "strategy": "mochipoyo",
+      "event": "LONG",
+      "exchange_name": "VANTAGE",
+      "ticker": "BTCUSD",
+      "timeframe": "15",
+      "bar_time_utc": "2026-07-15T08:30:00Z",
+      "fired_at_utc": "2026-07-15T08:30:00Z",
+      "open_price": null,
+      "high_price": null,
+      "low_price": null,
+      "close_price": 64636.06,
+      "message": "long sign 64636.06",
+      "raw_json": "{\"fixture\":true,\"event\":\"LONG\",\"ticker\":\"BTCUSD\"}"
+    },
+    {
+      "id": 3,
+      "event_key": "fixture-btcusd-long-exit-20260715t093000z",
+      "received_at_utc": "2026-07-15T09:30:05.506Z",
+      "source": "tradingview",
+      "strategy": "mochipoyo",
+      "event": "LONG_EXIT",
+      "exchange_name": "VANTAGE",
+      "ticker": "BTCUSD",
+      "timeframe": "15",
+      "bar_time_utc": "2026-07-15T09:30:00Z",
+      "fired_at_utc": "2026-07-15T09:30:00Z",
+      "open_price": null,
+      "high_price": null,
+      "low_price": null,
+      "close_price": 64822.96,
+      "message": "15 LONG EXIT 64822.96",
+      "raw_json": "{\"fixture\":true,\"event\":\"LONG_EXIT\",\"ticker\":\"BTCUSD\"}"
+    },
+    {
+      "id": 4,
+      "event_key": "fixture-xauusd-short-20260715t094500z",
+      "received_at_utc": "2026-07-15T09:45:03.249Z",
+      "source": "tradingview",
+      "strategy": "mochipoyo",
+      "event": "SHORT",
+      "exchange_name": "VANTAGE",
+      "ticker": "XAUUSD",
+      "timeframe": "15",
+      "bar_time_utc": "2026-07-15T09:45:00Z",
+      "fired_at_utc": "2026-07-15T09:45:00Z",
+      "open_price": null,
+      "high_price": null,
+      "low_price": null,
+      "close_price": 4027.37,
+      "message": "short sign 4027.37",
+      "raw_json": "{\"fixture\":true,\"event\":\"SHORT\",\"ticker\":\"XAUUSD\"}"
+    }
+  ]
+}
