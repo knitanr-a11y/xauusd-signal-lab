@@ -88,13 +88,16 @@ From the repository root:
 scripts\mochipoyo_alert_research\run_collect_events_once.bat
 ```
 
-For offline verification:
+For offline verification, double-click:
 
-```bat
-scripts\mochipoyo_alert_research\run_collect_events_once.bat --fixture tests\mochipoyo_alert_research\fixtures\events_page_1.json --after-id 0
+```text
+scripts\mochipoyo_alert_research\run_collect_events_fixture_test.bat
 ```
 
-The BAT does not start a permanent loop. A loop will be added only after the
+The fixture test writes only to a temporary test database under `%TEMP%`; it
+does not write fixture rows into the real Mochipoyo database.
+
+The production BAT does not start a permanent loop. A loop will be added only after the
 one-shot collector has been verified against real `/events` data.
 
 ## Response contract accepted by the collector
