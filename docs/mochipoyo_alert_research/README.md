@@ -62,43 +62,80 @@ logs\
 The database and secrets are local-only and are already covered by the
 repository `.gitignore` patterns for `.env`, `*.sqlite3`, and logs.
 
-## Setup
+## Offline verification
 
-Copy the example values into the local file:
-
-```text
-%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\.env
-```
-
-Required values:
-
-```text
-MOCHIPOYO_EVENTS_URL=https://YOUR_WORKER.workers.dev/events
-MOCHIPOYO_READ_TOKEN=SET_LOCALLY_ONLY
-```
-
-Never commit the real Worker URL when it contains secret information, and never
-commit or paste `READ_TOKEN`.
-
-## Run once on Windows
-
-From the repository root:
-
-```bat
-scripts\mochipoyo_alert_research\run_collect_events_once.bat
-```
-
-For offline verification, double-click:
+Double-click:
 
 ```text
 scripts\mochipoyo_alert_research\run_collect_events_fixture_test.bat
 ```
 
 The fixture test writes only to a temporary test database under `%TEMP%`; it
-does not write fixture rows into the real Mochipoyo database.
+does not write fixture rows into the real Mochipoyo database. It checks:
 
-The production BAT does not start a permanent loop. A loop will be added only after the
-one-shot collector has been verified against real `/events` data.
+1. initial insert and cursor advancement
+2. restart-safe cursor resume
+3. exact duplicate replay suppression
+
+## Configure the real Cloudflare read-only source
+
+Do not paste the Worker URL or `READ_TOKEN` into ChatGPT, GitHub, source code,
+issues, screenshots, or commit messages.
+
+Double-click:
+
+```text
+scripts\mochipoyo_alert_research\run_configure_cloudflare.bat
+```
+
+The helper asks for:
+
+- the Worker root URL or full `/events` URL
+- `READ_TOKEN` using hidden console input
+
+It writes only to:
+
+```text
+%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\.env
+```
+
+The helper never prints `READ_TOKEN`. It normalizes the Worker URL to `/events`
+and rejects non-HTTPS URLs, query parameters, fragments, or embedded
+credentials.
+
+## Run one real Cloudflare collection
+
+After local configuration, double-click:
+
+```text
+scripts\mochipoyo_alert_research\run_collect_events_cloudflare_once.bat
+```
+
+This performs one read-only request and then stops. It does not start a
+permanent loop. It does not send Discord notifications and does not call MT5.
+The local SQLite database is:
+
+```text
+%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\mochipoyo_alerts.sqlite3
+```
+
+Expected first real run with the three known events:
+
+```text
+source_mode: CLOUDFLARE
+after_id_before: 0
+response_count: 3
+inserted_count: 3
+duplicate_count: 0
+cursor_after: 4
+```
+
+The exact count may be larger if additional alerts have already accumulated.
+A second run should start from the saved cursor and normally return either new
+rows or `PASS_EMPTY`.
+
+The production BAT does not start a permanent loop. A loop will be added only
+after the one-shot collector has been verified against real `/events` data.
 
 ## Response contract accepted by the collector
 
