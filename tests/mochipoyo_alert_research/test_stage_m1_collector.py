@@ -77,13 +77,19 @@ class StageM1CollectorTests(unittest.TestCase):
         count = self.connection.execute("SELECT COUNT(*) FROM raw_alerts").fetchone()[0]
         self.assertEqual(count, 0)
 
-    def test_fixture_cli_writes_local_database_without_remote_secret(self) -> None:
+    def test_fixture_cli_writes_resumes_and_deduplicates_without_remote_secret(self) -> None:
         cli_db = Path(self.temp.name) / "cli.sqlite3"
         env_path = Path(self.temp.name) / ".env"
         env_path.write_text("", encoding="utf-8")
+        empty_fixture = Path(self.temp.name) / "events_empty_after_4.json"
+        empty_fixture.write_text(
+            json.dumps({"ok": True, "latest_id": 4, "events": []}),
+            encoding="utf-8",
+        )
         script = ROOT / "scripts" / "mochipoyo_alert_research" / "collect_events_once.py"
-        completed = subprocess.run(
-            [
+
+        def run_cli(fixture: Path, *, after_id: int | None = None) -> dict[str, object]:
+            command = [
                 sys.executable,
                 str(script),
                 "--env",
@@ -91,23 +97,48 @@ class StageM1CollectorTests(unittest.TestCase):
                 "--db",
                 str(cli_db),
                 "--fixture",
-                str(FIXTURE),
-                "--after-id",
-                "0",
-            ],
-            cwd=str(ROOT),
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-        self.assertEqual(completed.returncode, 0, completed.stderr)
-        payload = json.loads(completed.stdout)
-        self.assertEqual(payload["inserted_count"], 3)
-        self.assertFalse(payload["live_ready"])
-        self.assertFalse(payload["final_signal"])
+                str(fixture),
+            ]
+            if after_id is not None:
+                command.extend(["--after-id", str(after_id)])
+            completed = subprocess.run(
+                command,
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            return json.loads(completed.stdout)
+
+        first = run_cli(FIXTURE)
+        self.assertEqual(first["after_id_before"], 0)
+        self.assertEqual(first["inserted_count"], 3)
+        self.assertEqual(first["duplicate_count"], 0)
+        self.assertEqual(first["cursor_after"], 4)
+        self.assertFalse(first["live_ready"])
+        self.assertFalse(first["final_signal"])
+
+        resumed = run_cli(empty_fixture)
+        self.assertEqual(resumed["status"], "PASS_EMPTY")
+        self.assertEqual(resumed["after_id_before"], 4)
+        self.assertEqual(resumed["response_count"], 0)
+        self.assertEqual(resumed["inserted_count"], 0)
+        self.assertEqual(resumed["cursor_after"], 4)
+
+        replay = run_cli(FIXTURE, after_id=0)
+        self.assertEqual(replay["after_id_before"], 0)
+        self.assertEqual(replay["inserted_count"], 0)
+        self.assertEqual(replay["duplicate_count"], 3)
+        self.assertEqual(replay["cursor_after"], 4)
+
         with sqlite3.connect(cli_db) as connection:
             count = connection.execute("SELECT COUNT(*) FROM raw_alerts").fetchone()[0]
+            cursor = connection.execute(
+                "SELECT state_value FROM collector_state WHERE state_key = 'last_successful_id'"
+            ).fetchone()[0]
         self.assertEqual(count, 3)
+        self.assertEqual(int(cursor), 4)
 
     def test_redaction_does_not_expose_token(self) -> None:
         token = "very-secret-read-token"
