@@ -41,6 +41,19 @@ ON raw_alerts (ticker, bar_time_utc);
 CREATE INDEX IF NOT EXISTS idx_mochipoyo_raw_event_time
 ON raw_alerts (event, fired_at_utc);
 
+CREATE TABLE IF NOT EXISTS raw_alert_annotations (
+    raw_alert_id INTEGER PRIMARY KEY REFERENCES raw_alerts(cloudflare_id),
+    annotation_type TEXT NOT NULL
+        CHECK (annotation_type IN ('CONNECTION_TEST')),
+    confirmed_by TEXT NOT NULL
+        CHECK (confirmed_by IN ('USER')),
+    reason TEXT NOT NULL,
+    created_at_utc TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_mochipoyo_raw_annotation_type
+ON raw_alert_annotations (annotation_type, raw_alert_id);
+
 CREATE TABLE IF NOT EXISTS collection_runs (
     run_id TEXT PRIMARY KEY,
     started_at_utc TEXT NOT NULL,
