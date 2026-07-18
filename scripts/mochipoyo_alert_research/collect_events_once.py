@@ -62,7 +62,7 @@ def extract_events(payload: Any) -> tuple[list[Any], dict[str, Any]]:
     if payload.get("ok") is False:
         message = payload.get("error") or payload.get("message") or "unspecified error"
         raise ValueError(f"Cloudflare response reported ok=false: {message}")
-    for key in ("events", "data", "results"):
+    for key in ("rows", "events", "data", "results"):
         value = payload.get(key)
         if isinstance(value, list):
             metadata = {k: v for k, v in payload.items() if k != key}
