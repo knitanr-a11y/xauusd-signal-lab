@@ -73,6 +73,26 @@ def main(argv: list[str] | None = None) -> int:
                 """
             ).fetchall()
         ]
+        excluded_alerts = [
+            dict(row)
+            for row in connection.execute(
+                """
+                SELECT
+                    a.raw_alert_id,
+                    a.annotation_type,
+                    a.confirmed_by,
+                    a.reason,
+                    a.created_at_utc,
+                    r.ticker,
+                    r.event,
+                    r.message
+                FROM raw_alert_annotations a
+                JOIN raw_alerts r ON r.cloudflare_id = a.raw_alert_id
+                WHERE a.annotation_type = 'CONNECTION_TEST'
+                ORDER BY a.raw_alert_id
+                """
+            ).fetchall()
+        ]
         payload = {
             "status": "PASS_EMPTY_RAW" if result.raw_alert_count == 0 else "PASS",
             "stage": "M3_EPISODE_BUILD",
@@ -85,6 +105,8 @@ def main(argv: list[str] | None = None) -> int:
             "future_entry_fields_used": False,
             "built_at_utc": built_at_utc,
             "raw_alert_count": result.raw_alert_count,
+            "eligible_raw_alert_count": result.eligible_raw_alert_count,
+            "excluded_connection_test_count": result.excluded_connection_test_count,
             "episode_count": result.episode_count,
             "closed_episode_count": result.closed_episode_count,
             "open_episode_count": result.open_episode_count,
@@ -92,6 +114,7 @@ def main(argv: list[str] | None = None) -> int:
             "anomaly_count": result.anomaly_count,
             "ignored_opposite_count": result.ignored_opposite_count,
             "latest_raw_id": result.latest_raw_id,
+            "excluded_alerts": excluded_alerts,
             "by_ticker_direction": by_ticker_direction,
             "anomaly_reasons": anomaly_reasons,
             "database_path": str(config.database_path),
