@@ -11,7 +11,6 @@ from typing import Any, Iterable
 VALID_EVENTS = {"LONG", "SHORT", "LONG_EXIT", "SHORT_EXIT"}
 VALID_TICKERS = {"XAUUSD", "BTCUSD"}
 REQUIRED_TEXT_FIELDS = (
-    "event_key",
     "received_at_utc",
     "source",
     "strategy",
@@ -47,6 +46,26 @@ def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def _table_columns(connection: sqlite3.Connection, table: str) -> set[str]:
+    return {str(row["name"]) for row in connection.execute(f"PRAGMA table_info({table})")}
+
+
+def _migrate_raw_alerts_contract(connection: sqlite3.Connection) -> None:
+    """Add Stage M1 provenance columns to databases created by older collectors."""
+    columns = _table_columns(connection, "raw_alerts")
+    if "event_key_origin" not in columns:
+        connection.execute(
+            "ALTER TABLE raw_alerts ADD COLUMN event_key_origin "
+            "TEXT NOT NULL DEFAULT 'WORKER'"
+        )
+    if "worker_raw_json_origin" not in columns:
+        connection.execute(
+            "ALTER TABLE raw_alerts ADD COLUMN worker_raw_json_origin "
+            "TEXT NOT NULL DEFAULT 'WORKER_FIELD'"
+        )
+    connection.commit()
+
+
 def open_database(database_path: Path, schema_path: Path) -> sqlite3.Connection:
     database_path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(database_path)
@@ -55,6 +74,7 @@ def open_database(database_path: Path, schema_path: Path) -> sqlite3.Connection:
     connection.execute("PRAGMA journal_mode = WAL")
     connection.execute("PRAGMA synchronous = FULL")
     connection.executescript(schema_path.read_text(encoding="utf-8"))
+    _migrate_raw_alerts_contract(connection)
     return connection
 
 
@@ -93,6 +113,14 @@ def _required_text(row: dict[str, Any], key: str) -> str:
     return text
 
 
+def _optional_text(row: dict[str, Any], key: str) -> str | None:
+    value = row.get(key)
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
 def _number_or_none(value: Any, key: str) -> float | None:
     if value is None or value == "":
         return None
@@ -122,21 +150,33 @@ def normalize_event_row(row: Any) -> dict[str, Any]:
     if required["strategy"] != "mochipoyo":
         raise ContractError("strategy must be mochipoyo")
 
+    source_json = canonical_json(row)
+    source_event_key = _optional_text(row, "event_key")
+    if source_event_key is None:
+        event_key = f"cloudflare:{cloudflare_id}"
+        event_key_origin = "DERIVED_CLOUDFLARE_ID"
+    else:
+        event_key = source_event_key
+        event_key_origin = "WORKER"
+
     worker_raw = row.get("raw_json")
     if isinstance(worker_raw, str):
         worker_raw_json = worker_raw
+        worker_raw_json_origin = "WORKER_FIELD"
     elif worker_raw is None:
-        raise ContractError("raw_json is required")
+        worker_raw_json = source_json
+        worker_raw_json_origin = "COLLECTOR_SOURCE_ROW_FALLBACK"
     else:
         worker_raw_json = canonical_json(worker_raw)
+        worker_raw_json_origin = "WORKER_FIELD"
 
-    source_json = canonical_json(row)
     digest = hashlib.sha256(source_json.encode("utf-8")).hexdigest()
     exchange_name = row.get("exchange_name", row.get("exchange"))
     timeframe = row.get("timeframe", row.get("interval"))
     return {
         "cloudflare_id": cloudflare_id,
-        "event_key": required["event_key"],
+        "event_key": event_key,
+        "event_key_origin": event_key_origin,
         "received_at_utc": required["received_at_utc"],
         "source": required["source"],
         "strategy": required["strategy"],
@@ -152,6 +192,7 @@ def normalize_event_row(row: Any) -> dict[str, Any]:
         "close_price": _number_or_none(row.get("close_price", row.get("close")), "close_price"),
         "message": None if row.get("message") is None else str(row.get("message")),
         "worker_raw_json": worker_raw_json,
+        "worker_raw_json_origin": worker_raw_json_origin,
         "collector_source_row_json": source_json,
         "payload_sha256": digest,
     }
@@ -218,17 +259,17 @@ def store_page(
             connection.execute(
                 """
                 INSERT INTO raw_alerts (
-                    cloudflare_id, event_key, received_at_utc, source, strategy,
-                    event, exchange_name, ticker, timeframe, bar_time_utc,
-                    fired_at_utc, open_price, high_price, low_price, close_price,
-                    message, worker_raw_json, collector_source_row_json,
-                    payload_sha256, downloaded_at_utc
+                    cloudflare_id, event_key, event_key_origin, received_at_utc,
+                    source, strategy, event, exchange_name, ticker, timeframe,
+                    bar_time_utc, fired_at_utc, open_price, high_price, low_price,
+                    close_price, message, worker_raw_json, worker_raw_json_origin,
+                    collector_source_row_json, payload_sha256, downloaded_at_utc
                 ) VALUES (
-                    :cloudflare_id, :event_key, :received_at_utc, :source, :strategy,
-                    :event, :exchange_name, :ticker, :timeframe, :bar_time_utc,
-                    :fired_at_utc, :open_price, :high_price, :low_price, :close_price,
-                    :message, :worker_raw_json, :collector_source_row_json,
-                    :payload_sha256, :downloaded_at_utc
+                    :cloudflare_id, :event_key, :event_key_origin, :received_at_utc,
+                    :source, :strategy, :event, :exchange_name, :ticker, :timeframe,
+                    :bar_time_utc, :fired_at_utc, :open_price, :high_price, :low_price,
+                    :close_price, :message, :worker_raw_json, :worker_raw_json_origin,
+                    :collector_source_row_json, :payload_sha256, :downloaded_at_utc
                 )
                 """,
                 {**row, "downloaded_at_utc": downloaded},
