@@ -61,7 +61,6 @@ CREATE TABLE IF NOT EXISTS collection_runs (
     error_message_redacted TEXT
 );
 
--- Reserved Stage M3+ tables. They intentionally remain empty in M1.
 CREATE TABLE IF NOT EXISTS episodes (
     episode_id TEXT PRIMARY KEY,
     ticker TEXT NOT NULL,
@@ -70,17 +69,63 @@ CREATE TABLE IF NOT EXISTS episodes (
     started_at_utc TEXT NOT NULL,
     exit_alert_id INTEGER REFERENCES raw_alerts(cloudflare_id),
     exited_at_utc TEXT,
-    episode_status TEXT NOT NULL,
+    episode_status TEXT NOT NULL CHECK (episode_status IN ('OPEN', 'CLOSED')),
     exit_missing INTEGER NOT NULL DEFAULT 0 CHECK (exit_missing IN (0, 1)),
     sequence_anomaly INTEGER NOT NULL DEFAULT 0 CHECK (sequence_anomaly IN (0, 1))
 );
 
+CREATE INDEX IF NOT EXISTS idx_mochipoyo_episodes_ticker_start
+ON episodes (ticker, started_at_utc);
+
+CREATE INDEX IF NOT EXISTS idx_mochipoyo_episodes_status
+ON episodes (episode_status, ticker, direction);
+
 CREATE TABLE IF NOT EXISTS episode_events (
     episode_id TEXT NOT NULL REFERENCES episodes(episode_id),
     raw_alert_id INTEGER NOT NULL REFERENCES raw_alerts(cloudflare_id),
-    event_role TEXT NOT NULL,
+    event_role TEXT NOT NULL CHECK (
+        event_role IN (
+            'PRIMARY_ALERT',
+            'REENTRY_ALERT',
+            'EXIT_ALERT',
+            'OPPOSITE_ALERT_IGNORED',
+            'OPPOSITE_EXIT_IGNORED'
+        )
+    ),
     reentry_index INTEGER,
     PRIMARY KEY (episode_id, raw_alert_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_mochipoyo_episode_events_raw
+ON episode_events (raw_alert_id);
+
+CREATE TABLE IF NOT EXISTS episode_build_anomalies (
+    anomaly_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    raw_alert_id INTEGER NOT NULL UNIQUE REFERENCES raw_alerts(cloudflare_id),
+    ticker TEXT NOT NULL,
+    event TEXT NOT NULL,
+    state_before TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    related_episode_id TEXT REFERENCES episodes(episode_id),
+    created_at_utc TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_mochipoyo_episode_anomaly_reason
+ON episode_build_anomalies (reason, ticker);
+
+CREATE TABLE IF NOT EXISTS episode_build_runs (
+    build_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    built_at_utc TEXT NOT NULL,
+    raw_alert_count INTEGER NOT NULL,
+    episode_count INTEGER NOT NULL,
+    closed_episode_count INTEGER NOT NULL,
+    open_episode_count INTEGER NOT NULL,
+    reentry_count INTEGER NOT NULL,
+    anomaly_count INTEGER NOT NULL,
+    ignored_opposite_count INTEGER NOT NULL,
+    latest_raw_id INTEGER NOT NULL,
+    audit_only INTEGER NOT NULL CHECK (audit_only = 1),
+    future_entry_fields_used INTEGER NOT NULL CHECK (future_entry_fields_used = 0)
 );
 
 CREATE TABLE IF NOT EXISTS mt5_alignment (
