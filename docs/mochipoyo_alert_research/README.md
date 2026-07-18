@@ -1,6 +1,6 @@
 # Mochipoyo Alert Research
 
-Status: `MOCHIPOYO_M1_RAW_COLLECTOR_AUDIT_ONLY`
+Status: `MOCHIPOYO_M2_CONTINUOUS_RAW_COLLECTOR_AUDIT_ONLY`
 
 This directory is the independent research path for real TradingView Mochipoyo
 alerts. It must not modify or share runtime state with the existing GOLD or BTC
@@ -21,16 +21,27 @@ operational systems.
 - MT5/CSV latest rows are treated as closed by contract, but future exits,
   MFE, MAE, TP/SL outcomes, and future higher-timeframe states remain unknown.
 
-## Current Stage M1 scope
+## Current scope
 
-Stage M1 only:
+Stage M1 completed:
 
 1. Reads `GET /events?after_id=...&limit=...` with `Bearer READ_TOKEN`.
 2. Validates the Cloudflare event contract.
-3. Stores the original row immutably in a local SQLite database.
+3. Stores each returned row immutably in a local SQLite database.
 4. Advances `last_successful_id` only inside the same successful transaction.
 5. Records a redacted collection-run audit.
 6. Supports an offline JSON fixture for repeatable tests.
+7. Verified the real Worker with 42 stored rows and a restart-safe empty resume.
+
+Stage M2 adds:
+
+1. A 60-second read-only collection loop.
+2. An exclusive lock that blocks a second collector process.
+3. A stop file checked at least once per second while waiting.
+4. Continued polling after a failed cycle; the one-shot collector still
+   preserves the cursor on each failure.
+5. A local append-only loop log and latest loop-status JSON.
+6. A bounded three-cycle smoke test before the permanent loop is used.
 
 Not implemented yet:
 
@@ -56,11 +67,16 @@ Default files:
 ```text
 .env
 mochipoyo_alerts.sqlite3
-logs\
+collector_loop.lock
+STOP_COLLECTOR_LOOP
+logs\latest_collection_result.json
+logs\latest_collection_error.json
+logs\latest_loop_status.json
+logs\collector_forever.log
 ```
 
-The database and secrets are local-only and are already covered by the
-repository `.gitignore` patterns for `.env`, `*.sqlite3`, and logs.
+The database, secrets, lock, stop request, and logs are local-only. Repository
+`.gitignore` patterns already exclude `.env`, SQLite databases, and logs.
 
 ## Offline verification
 
@@ -105,67 +121,110 @@ credentials.
 
 ## Run one real Cloudflare collection
 
-After local configuration, double-click:
+Double-click:
 
 ```text
 scripts\mochipoyo_alert_research\run_collect_events_cloudflare_once.bat
 ```
 
-This performs one read-only request and then stops. It does not start a
-permanent loop. It does not send Discord notifications and does not call MT5.
-The local SQLite database is:
+This performs one read-only request and then stops. It does not send Discord
+notifications and does not call MT5. The local SQLite database is:
 
 ```text
 %LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\mochipoyo_alerts.sqlite3
 ```
 
-Expected first real run with the three known events:
+The verified real run stored 42 rows, advanced the cursor from 0 to 42, and the
+second run returned `PASS_EMPTY` from cursor 42.
+
+## Test the repeated collector
+
+Before starting the permanent loop, double-click:
 
 ```text
-source_mode: CLOUDFLARE
-after_id_before: 0
-response_count: 3
-inserted_count: 3
-duplicate_count: 0
-cursor_after: 4
+scripts\mochipoyo_alert_research\run_collect_events_cloudflare_loop_test.bat
 ```
 
-The exact count may be larger if additional alerts have already accumulated.
-A second run should start from the saved cursor and normally return either new
-rows or `PASS_EMPTY`.
+This runs exactly three read-only cycles at ten-second intervals and exits. It
+uses the real local database and cursor, so normally each cycle will be
+`PASS_EMPTY` unless a new TradingView alert arrives during the test.
 
-The production BAT does not start a permanent loop. A loop will be added only
-after the one-shot collector has been verified against real `/events` data.
+Expected final line:
+
+```text
+[PASS] Three-cycle collector loop test completed.
+```
+
+## Start the permanent read-only collector
+
+After the three-cycle test succeeds, double-click:
+
+```text
+scripts\mochipoyo_alert_research\run_collect_events_cloudflare_forever.bat
+```
+
+Behavior:
+
+- immediate first collection
+- one collection every 60 seconds
+- one active process only
+- no cursor advancement on a failed collection
+- failed cycles are logged and later cycles continue
+- Discord, MT5 orders, `live_ready`, and `final_signal` remain OFF
+
+Do not close this window while continuous collection is required.
+
+## Stop the permanent collector safely
+
+Double-click:
+
+```text
+scripts\mochipoyo_alert_research\stop_collect_events_cloudflare_forever.bat
+```
+
+This creates the local `STOP_COLLECTOR_LOOP` file. The loop detects it while
+waiting and exits cleanly. If an HTTP request is currently active, shutdown can
+take until that request finishes or reaches its timeout.
+
+Closing the collector window forcibly can leave `collector_loop.lock`. A stale
+lock must only be deleted after confirming that no Mochipoyo collector window
+or Python collector process is still running. Never delete the lock merely to
+start a second collector.
 
 ## Response contract accepted by the collector
 
-The endpoint may return either:
+The endpoint may return a direct JSON array or a JSON object containing one of:
 
-```json
-{"ok": true, "events": [...]}
+```text
+rows
+events
+data
+results
 ```
 
-or a direct JSON array:
+The verified Worker returns:
 
 ```json
-[...]
+{"ok": true, "rows": [...]}
 ```
 
-`events`, `data`, and `results` are accepted list keys. Event rows must be in
-strict ascending `id` order, must be unique, and must be greater than the
-requested `after_id`. ID gaps are allowed because D1 AUTOINCREMENT values are
-not required to be contiguous.
+Rows must be in strict ascending `id` order, must be unique, and must be greater
+than the requested `after_id`. ID gaps are allowed because D1 AUTOINCREMENT
+values are not required to be contiguous.
 
 ## Immutable raw-event contract
 
-`raw_alerts` stores:
+The real Worker projection includes the D1 row ID and event fields but omits
+`event_key` and `raw_json`. Therefore:
 
-- Cloudflare row ID and `event_key`
-- event/ticker/timeframe/timestamps/prices
-- the Worker `raw_json` field without semantic rewriting
-- the complete returned event row as canonical JSON
-- a SHA-256 digest used to detect ID/key collisions
+- the D1 `id` remains the immutable primary source identity
+- the collector derives `event_key` as `cloudflare:<id>` when the Worker omits it
+- `event_key_origin` records `DERIVED_CLOUDFLARE_ID` or `WORKER`
+- the complete returned row is always stored as canonical source JSON
+- when `raw_json` is absent, that canonical row is stored as the fallback and
+  `worker_raw_json_origin` records `COLLECTOR_SOURCE_ROW_FALLBACK`
+- a SHA-256 digest detects any later content change for an existing ID/key
 
-Re-downloading the exact same row is idempotent. Reusing an existing
-Cloudflare ID or `event_key` for different content fails closed and does not
-advance the cursor.
+Re-downloading an identical row is idempotent. Reusing an existing Cloudflare
+ID or event key for different content fails closed and does not advance the
+cursor.
