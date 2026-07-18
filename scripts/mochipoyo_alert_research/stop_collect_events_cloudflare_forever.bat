@@ -18,9 +18,9 @@ echo Stop file: %STOP_FILE%
 echo ============================================================
 echo The collector checks this file at least once per second while waiting.
 echo If a Cloudflare request is currently running, shutdown may take up to
- echo the request timeout to complete.
+echo the request timeout to complete.
 echo Discord send: OFF
- echo MT5 orders  : OFF
- echo.
+echo MT5 orders  : OFF
+echo.
 pause
 exit /b 0
