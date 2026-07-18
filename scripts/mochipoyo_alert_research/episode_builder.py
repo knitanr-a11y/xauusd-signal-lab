@@ -10,6 +10,8 @@ EXIT_EVENTS = {"LONG_EXIT", "SHORT_EXIT"}
 @dataclass(frozen=True)
 class EpisodeBuildResult:
     raw_alert_count: int
+    eligible_raw_alert_count: int
+    excluded_connection_test_count: int
     episode_count: int
     closed_episode_count: int
     open_episode_count: int
@@ -101,19 +103,12 @@ def _record_anomaly(
 def rebuild_episodes(
     connection: sqlite3.Connection, *, built_at_utc: str
 ) -> EpisodeBuildResult:
-    """Rebuild source-alert episodes from immutable raw alerts.
+    """Rebuild clean source-alert episodes from immutable raw alerts.
 
-    This is chronology labelling only. Exit information is stored as a later event
+    Rows explicitly annotated as CONNECTION_TEST are retained in ``raw_alerts`` but
+    do not participate in state transitions. Exit information is chronology only
     and must never be used by entry-time feature filters.
     """
-    rows = connection.execute(
-        """
-        SELECT cloudflare_id, ticker, event, fired_at_utc
-        FROM raw_alerts
-        ORDER BY cloudflare_id ASC
-        """
-    ).fetchall()
-
     active_by_ticker: dict[str, ActiveEpisode] = {}
     reentry_count = 0
     anomaly_count = 0
@@ -121,6 +116,37 @@ def rebuild_episodes(
 
     connection.execute("BEGIN IMMEDIATE")
     try:
+        total_row = connection.execute(
+            """
+            SELECT COUNT(*) AS raw_alert_count,
+                   COALESCE(MAX(cloudflare_id), 0) AS latest_raw_id
+            FROM raw_alerts
+            """
+        ).fetchone()
+        excluded_connection_test_count = int(
+            connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM raw_alert_annotations
+                WHERE annotation_type = 'CONNECTION_TEST'
+                """
+            ).fetchone()[0]
+            or 0
+        )
+        rows = connection.execute(
+            """
+            SELECT r.cloudflare_id, r.ticker, r.event, r.fired_at_utc
+            FROM raw_alerts r
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM raw_alert_annotations a
+                WHERE a.raw_alert_id = r.cloudflare_id
+                  AND a.annotation_type = 'CONNECTION_TEST'
+            )
+            ORDER BY r.cloudflare_id ASC
+            """
+        ).fetchall()
+
         connection.execute("DELETE FROM episode_events")
         connection.execute("DELETE FROM episode_build_anomalies")
         connection.execute("DELETE FROM episodes")
@@ -287,16 +313,17 @@ def rebuild_episodes(
             FROM episodes
             """
         ).fetchone()
-        latest_raw_id = max((int(row["cloudflare_id"]) for row in rows), default=0)
         result = EpisodeBuildResult(
-            raw_alert_count=len(rows),
+            raw_alert_count=int(total_row["raw_alert_count"] or 0),
+            eligible_raw_alert_count=len(rows),
+            excluded_connection_test_count=excluded_connection_test_count,
             episode_count=int(counts["episode_count"] or 0),
             closed_episode_count=int(counts["closed_count"] or 0),
             open_episode_count=int(counts["open_count"] or 0),
             reentry_count=reentry_count,
             anomaly_count=anomaly_count,
             ignored_opposite_count=ignored_opposite_count,
-            latest_raw_id=latest_raw_id,
+            latest_raw_id=int(total_row["latest_raw_id"] or 0),
         )
         connection.execute(
             """
