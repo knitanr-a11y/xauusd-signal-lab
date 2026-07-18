@@ -22,9 +22,21 @@ from mochipoyo_alert_research.db import (  # noqa: E402
     store_page,
     utc_now_text,
 )
-from mochipoyo_alert_research.redact import redact_text, redact_url  # noqa: E402
+from mochipoyo_alert_research.redact import redact_text  # noqa: E402
 
 SCHEMA_PATH = SCRIPT_DIR / "schema.sql"
+LATEST_RESULT_NAME = "latest_collection_result.json"
+LATEST_ERROR_NAME = "latest_collection_error.json"
+
+
+def atomic_write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(path)
 
 
 def build_events_url(base_url: str, after_id: int, limit: int) -> str:
@@ -38,19 +50,43 @@ def build_events_url(base_url: str, after_id: int, limit: int) -> str:
     return urlunsplit((parts.scheme, parts.netloc, path, urlencode(query), ""))
 
 
+def request_label(after_id: int, limit: int) -> str:
+    return f"<configured-worker>/events?after_id={after_id}&limit={limit}"
+
+
 def extract_events(payload: Any) -> tuple[list[Any], dict[str, Any]]:
     if isinstance(payload, list):
         return payload, {}
     if not isinstance(payload, dict):
         raise ValueError("Cloudflare response must be a JSON object or array")
     if payload.get("ok") is False:
-        raise ValueError("Cloudflare response reported ok=false")
+        message = payload.get("error") or payload.get("message") or "unspecified error"
+        raise ValueError(f"Cloudflare response reported ok=false: {message}")
     for key in ("events", "data", "results"):
         value = payload.get(key)
         if isinstance(value, list):
             metadata = {k: v for k, v in payload.items() if k != key}
             return value, metadata
-    raise ValueError("Cloudflare response does not contain an event list")
+    raise ValueError(
+        "Cloudflare response does not contain an event list; "
+        f"top_level_keys={sorted(str(key) for key in payload.keys())}"
+    )
+
+
+def _http_failure(code: int, body: str) -> RuntimeError:
+    if code in {401, 403}:
+        guidance = "READ_TOKEN was rejected. Re-run the local configuration and verify the Worker secret."
+    elif code == 404:
+        guidance = "The Worker URL or /events path was not found. Re-run the local configuration with the Worker root URL."
+    elif code == 429:
+        guidance = "Cloudflare rate-limited the request. Wait and retry the one-shot collector."
+    elif 500 <= code <= 599:
+        guidance = "The Worker or D1 returned a server error. Check the Worker deployment and D1 binding."
+    else:
+        guidance = "The Worker rejected the request. Check the URL, token, and Worker route."
+    compact_body = " ".join(body.split())[:500]
+    suffix = f" Response body: {compact_body}" if compact_body else ""
+    return RuntimeError(f"Cloudflare HTTP {code}. {guidance}{suffix}")
 
 
 def fetch_json(url: str, read_token: str, timeout_seconds: float) -> Any:
@@ -70,9 +106,16 @@ def fetch_json(url: str, read_token: str, timeout_seconds: float) -> Any:
             return json.loads(raw.decode(charset))
     except HTTPError as exc:
         body = exc.read(1000).decode("utf-8", errors="replace")
-        raise RuntimeError(f"Cloudflare HTTP {exc.code}: {body}") from exc
+        raise _http_failure(int(exc.code), body) from exc
     except URLError as exc:
-        raise RuntimeError(f"Cloudflare connection failed: {exc.reason}") from exc
+        raise RuntimeError(
+            "Cloudflare connection failed. Check the internet connection and Worker URL. "
+            f"Reason: {exc.reason}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            "Cloudflare returned a non-JSON response. Check that the configured URL points to the Worker /events endpoint."
+        ) from exc
 
 
 def load_fixture(path: Path) -> Any:
@@ -111,6 +154,8 @@ def main(argv: list[str] | None = None) -> int:
         print(redact_text(exc), file=sys.stderr)
         return 2
 
+    latest_result_path = config.logs_dir / LATEST_RESULT_NAME
+    latest_error_path = config.logs_dir / LATEST_ERROR_NAME
     run_id = uuid.uuid4().hex
     started = utc_now_text()
     after_id_before = (
@@ -129,12 +174,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.fixture is not None
         else build_events_url(config.events_url, after_id_before, args.limit)
     )
-    safe_url = (
+    safe_target = (
         str(args.fixture.resolve())
         if args.fixture is not None
-        else redact_url(request_url)
+        else request_label(after_id_before, args.limit)
     )
-    secret_values = (config.read_token, config.events_url)
+    secret_values = (config.read_token, config.events_url, request_url)
 
     response_count = 0
     inserted_count = 0
@@ -181,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
             cursor_after=cursor_after,
             status=status,
             source_mode=source_mode,
-            events_url_redacted=safe_url,
+            events_url_redacted=safe_target,
         )
         result = {
             "status": status,
@@ -198,12 +243,16 @@ def main(argv: list[str] | None = None) -> int:
             "duplicate_count": duplicate_count,
             "cursor_after": cursor_after,
             "database_path": str(config.database_path),
+            "diagnostic_path": str(latest_result_path),
         }
+        atomic_write_json(latest_result_path, result)
+        latest_error_path.unlink(missing_ok=True)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except Exception as exc:
         finished = utc_now_text()
         safe_error = redact_text(exc, secret_values)
+        preserved_cursor = state_int(connection, "last_successful_id", after_id_before)
         try:
             record_collection_run(
                 connection,
@@ -216,16 +265,40 @@ def main(argv: list[str] | None = None) -> int:
                 inserted_count=0,
                 duplicate_count=0,
                 max_response_id=None,
-                cursor_after=state_int(connection, "last_successful_id", after_id_before),
+                cursor_after=preserved_cursor,
                 status="FAIL",
                 source_mode=source_mode,
-                events_url_redacted=safe_url,
+                events_url_redacted=safe_target,
                 error_type=type(exc).__name__,
                 error_message_redacted=safe_error,
             )
         except Exception:
             pass
-        print(safe_error, file=sys.stderr)
+        error_payload = {
+            "status": "FAIL",
+            "audit_only": True,
+            "dry_run": True,
+            "live_ready": False,
+            "final_signal": False,
+            "discord_send": False,
+            "mt5_order": False,
+            "source_mode": source_mode,
+            "failed_at_utc": finished,
+            "error_type": type(exc).__name__,
+            "error_message_redacted": safe_error,
+            "request_target": safe_target,
+            "after_id_before": after_id_before,
+            "cursor_preserved_at": preserved_cursor,
+            "database_path": str(config.database_path),
+            "diagnostic_path": str(latest_error_path),
+            "secrets_logged": False,
+        }
+        try:
+            atomic_write_json(latest_error_path, error_payload)
+        except Exception:
+            pass
+        print(f"[ERROR] {safe_error}", file=sys.stderr)
+        print(f"[ERROR] Diagnostic: {latest_error_path}", file=sys.stderr)
         return 1
     finally:
         connection.close()
