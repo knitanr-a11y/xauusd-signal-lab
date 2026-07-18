@@ -1,6 +1,6 @@
 # Mochipoyo Alert Research
 
-Status: `MOCHIPOYO_M2_CONTINUOUS_RAW_COLLECTOR_AUDIT_ONLY`
+Status: `MOCHIPOYO_M3_EPISODE_BUILDER_AUDIT_ONLY`
 
 This directory is the independent research path for real TradingView Mochipoyo
 alerts. It must not modify or share runtime state with the existing GOLD or BTC
@@ -33,7 +33,7 @@ Stage M1 completed:
 6. Supports an offline JSON fixture for repeatable tests.
 7. Verified the real Worker with 42 stored rows and a restart-safe empty resume.
 
-Stage M2 adds:
+Stage M2 completed:
 
 1. A 60-second read-only collection loop.
 2. An exclusive lock that blocks a second collector process.
@@ -41,11 +41,22 @@ Stage M2 adds:
 4. Continued polling after a failed cycle; the one-shot collector still
    preserves the cursor on each failure.
 5. A local append-only loop log and latest loop-status JSON.
-6. A bounded three-cycle smoke test before the permanent loop is used.
+6. A three-cycle real-Worker smoke test completed with three successful
+   `PASS_EMPTY` cycles from cursor 42.
+
+Stage M3 adds:
+
+1. Deterministic source-alert episode construction from immutable raw rows.
+2. Separate state machines for `XAUUSD` and `BTCUSD`.
+3. Repeated same-direction entries before exit as `REENTRY_ALERT`.
+4. Opposite-direction alerts before the active exit are recorded but do not
+   switch the source state.
+5. Orphan and opposite events are retained as explicit build anomalies.
+6. Derived episode tables are rebuilt atomically; raw alerts are never changed.
+7. Build-run history records that no future entry fields were used.
 
 Not implemented yet:
 
-- episode construction
 - MT5 M5/M15/H1/H4 alignment
 - feature snapshots
 - virtual entries
@@ -73,6 +84,7 @@ logs\latest_collection_result.json
 logs\latest_collection_error.json
 logs\latest_loop_status.json
 logs\collector_forever.log
+logs\latest_episode_build_result.json
 ```
 
 The database, secrets, lock, stop request, and logs are local-only. Repository
@@ -145,15 +157,8 @@ Before starting the permanent loop, double-click:
 scripts\mochipoyo_alert_research\run_collect_events_cloudflare_loop_test.bat
 ```
 
-This runs exactly three read-only cycles at ten-second intervals and exits. It
-uses the real local database and cursor, so normally each cycle will be
-`PASS_EMPTY` unless a new TradingView alert arrives during the test.
-
-Expected final line:
-
-```text
-[PASS] Three-cycle collector loop test completed.
-```
+This runs exactly three read-only cycles at ten-second intervals and exits. The
+verified test completed three successful `PASS_EMPTY` cycles from cursor 42.
 
 ## Start the permanent read-only collector
 
@@ -172,7 +177,9 @@ Behavior:
 - failed cycles are logged and later cycles continue
 - Discord, MT5 orders, `live_ready`, and `final_signal` remain OFF
 
-Do not close this window while continuous collection is required.
+Do not close this window while continuous collection is required. Before a
+future GitHub pull that changes Mochipoyo collector files, stop this loop safely,
+pull the branch, and restart it.
 
 ## Stop the permanent collector safely
 
@@ -190,6 +197,43 @@ Closing the collector window forcibly can leave `collector_loop.lock`. A stale
 lock must only be deleted after confirming that no Mochipoyo collector window
 or Python collector process is still running. Never delete the lock merely to
 start a second collector.
+
+## Build source-alert episodes once
+
+After collecting the latest rows, double-click:
+
+```text
+scripts\mochipoyo_alert_research\run_build_episodes_once.bat
+```
+
+The builder reads `raw_alerts` in ascending Cloudflare ID order. It never edits
+or deletes raw rows. It atomically rebuilds only the derived episode tables.
+
+State is independent for each ticker:
+
+```text
+IDLE + LONG       -> ACTIVE_LONG
+ACTIVE_LONG + LONG -> REENTRY_ALERT
+ACTIVE_LONG + LONG_EXIT -> IDLE
+IDLE + SHORT      -> ACTIVE_SHORT
+ACTIVE_SHORT + SHORT -> REENTRY_ALERT
+ACTIVE_SHORT + SHORT_EXIT -> IDLE
+```
+
+An opposite-direction alert or exit does not switch the active source state
+before the matching exit. It is attached to the current episode as an ignored
+opposite event and recorded in `episode_build_anomalies`. An exit while idle is
+recorded as an orphan anomaly. An episode still active at the newest raw row is
+stored as `OPEN` with `exit_missing = 1`.
+
+The latest redacted summary is written to:
+
+```text
+%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\logs\latest_episode_build_result.json
+```
+
+Episode construction labels chronology only. Later exit information must not be
+used by entry-time filters, feature snapshots, or candidate gates.
 
 ## Response contract accepted by the collector
 
