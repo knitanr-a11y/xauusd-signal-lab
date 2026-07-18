@@ -9,6 +9,8 @@ if defined LOCALAPPDATA (
 )
 set "LOCAL_ENV=%LOCAL_ROOT%\.env"
 set "LOCAL_DB=%LOCAL_ROOT%\mochipoyo_alerts.sqlite3"
+set "ERROR_JSON=%LOCAL_ROOT%\logs\latest_collection_error.json"
+set "RESULT_JSON=%LOCAL_ROOT%\logs\latest_collection_result.json"
 
 if not exist "%LOCAL_ENV%" (
   echo [ERROR] Local Cloudflare configuration was not found.
@@ -38,10 +40,24 @@ if "%EXITCODE%"=="0" (
   echo [PASS] One-shot Cloudflare collection completed.
   echo No permanent loop was started.
   echo Local database: "%LOCAL_DB%"
+  if exist "%RESULT_JSON%" (
+    echo Diagnostic result: "%RESULT_JSON%"
+  )
   echo.
   pause
 ) else (
   echo [FAIL] One-shot Cloudflare collection failed. Exit code: %EXITCODE%
+  echo No cursor was advanced.
+  if exist "%ERROR_JSON%" (
+    echo.
+    echo -------- REDACTED DIAGNOSTIC --------
+    type "%ERROR_JSON%"
+    echo -------- END DIAGNOSTIC ------------
+  ) else (
+    echo Redacted diagnostic file was not created.
+  )
+  echo.
+  pause
 )
 
 exit /b %EXITCODE%
