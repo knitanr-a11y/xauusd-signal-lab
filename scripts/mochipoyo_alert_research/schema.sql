@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS collector_state (
 CREATE TABLE IF NOT EXISTS raw_alerts (
     cloudflare_id INTEGER PRIMARY KEY,
     event_key TEXT NOT NULL UNIQUE,
+    event_key_origin TEXT NOT NULL DEFAULT 'WORKER'
+        CHECK (event_key_origin IN ('WORKER', 'DERIVED_CLOUDFLARE_ID')),
     received_at_utc TEXT NOT NULL,
     source TEXT NOT NULL,
     strategy TEXT NOT NULL,
@@ -26,6 +28,8 @@ CREATE TABLE IF NOT EXISTS raw_alerts (
     close_price REAL,
     message TEXT,
     worker_raw_json TEXT NOT NULL,
+    worker_raw_json_origin TEXT NOT NULL DEFAULT 'WORKER_FIELD'
+        CHECK (worker_raw_json_origin IN ('WORKER_FIELD', 'COLLECTOR_SOURCE_ROW_FALLBACK')),
     collector_source_row_json TEXT NOT NULL,
     payload_sha256 TEXT NOT NULL,
     downloaded_at_utc TEXT NOT NULL
