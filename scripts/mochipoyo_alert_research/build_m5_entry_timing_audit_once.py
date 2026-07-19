@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from alert_entry_timing_builder import rebuild_m5_entry_timing_audit
+from alert_entry_timing_builder_boundary_safe import rebuild_m5_entry_timing_audit
 from db import open_database
 
 SCRIPT_DIR = Path(__file__).resolve().parent
