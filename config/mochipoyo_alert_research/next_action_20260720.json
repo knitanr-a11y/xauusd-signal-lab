@@ -1,107 +1,94 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M7A_DONE_M7B_NEXT",
-  "next_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
-  "purpose": "Freeze and validate the user-supported two-layer hypothesis that RCI9 local reversal is the timing trigger and EMA20/30/40 directional ordering is the primary direction-permission context, without using trade outcomes or further same-window threshold optimization.",
-  "required_inputs": [
-    "config/mochipoyo_alert_research/current_state_20260720.json",
-    "docs/mochipoyo_alert_research/M7A_USER_HYPOTHESIS_RCI9_TRIGGER_AND_EMA_ALIGNMENT_ADDENDUM_20260720.md",
-    "docs/mochipoyo_alert_research/STAGE_M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_CONTRACT.md",
-    "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py",
-    "local latest_alert_trigger_signature_audit.json",
-    "local latest_alert_trigger_event_features.csv",
-    "local latest_alert_trigger_candidate_rules.csv"
+  "status": "M7B_IMPLEMENTED_LOCAL_EXECUTION_NEXT",
+  "current_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
+  "next_action": "M7B_LOCAL_EXECUTION_AND_RESULT_REVIEW_AUDIT_ONLY",
+  "purpose": "Run the already frozen M7B kernels against the original verified 41-event, 472-decision M15 observation set, produce complete event misses and no-event false positives, and decide whether M7C prospective shadow reproduction may begin. Do not discover or retune rules during this run.",
+  "implementation_head": "f5b3be3277e31e9e1ebe8b76c5be3fb721a58699",
+  "required_files": [
+    "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
+    "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
+    "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
+    "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation_core.py",
+    "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py"
   ],
-  "user_hypothesis": {
-    "timing_trigger": "RCI9 local reversal",
-    "long_direction_permission": "EMA20 > EMA30 > EMA40",
-    "short_direction_permission": "EMA20 < EMA30 < EMA40",
-    "interpretation": "RCI9 likely determines timing while EMA20/30/40 ordering likely determines allowed direction",
-    "status": "STRONGLY_SUPPORTED_HYPOTHESIS_NOT_YET_EXACT_INTERNAL_FORMULA"
+  "local_inputs": {
+    "database": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\mochipoyo_alerts.sqlite3",
+    "mt5_files_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
+    "output_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs"
   },
-  "candidate_kernel_priority": [
-    {
-      "transition": "PRIMARY_LONG",
-      "core_only_id": "CORE-L0",
-      "core_only": "state_before == IDLE AND rci9_turn_up == True",
-      "directional_kernel_id": "KERNEL-L1",
-      "directional_kernel": "state_before == IDLE AND rci9_turn_up == True AND ema_alignment == BULLISH_STACK",
-      "support_observed": "Combined scope: RCI9 turn-up 8/9; bullish stack 8/9; combined pair 7/9 with 2 controls. XAUUSD bullish stack 6/6.",
-      "secondary_diagnostics": [
-        "rci14_delta1 <= -9.23077 for XAUUSD diagnostic only",
-        "EMA slope, spread/compression, and price location diagnostics"
-      ]
-    },
-    {
-      "transition": "PRIMARY_SHORT",
-      "core_only_id": "CORE-S0",
-      "core_only": "state_before == IDLE AND rci9_turn_down == True",
-      "directional_kernel_id": "KERNEL-S1",
-      "directional_kernel": "state_before == IDLE AND rci9_turn_down == True AND ema_alignment == BEARISH_STACK",
-      "support_observed": "Combined scope: RCI9 turn-down 10/10; all 10 observed primary SHORT events had bearish EMA stack. Exact false-positive reduction of the combined pair must be audited.",
-      "secondary_diagnostics": [
-        "rci9 >= 25",
-        "macd_zero_proximity_atr <= 0.218057 for XAUUSD diagnostic only",
-        "EMA slope, spread/compression, and price location diagnostics"
-      ]
-    },
-    {
-      "transition": "LONG_EXIT",
-      "core": "state_before == ACTIVE_LONG AND rci9 >= 78.3333",
-      "context_candidates": [
-        "rci14_delta1 >= 10.1099",
-        "macd_signal_bps >= 1.37003 for XAUUSD diagnostic only"
-      ],
-      "reason": "Opposite RCI upper extreme was the stable exit signature, but exact secondary condition differs by scope. EMA ordering is not assumed for EXIT without separate evidence."
-    },
-    {
-      "transition": "SHORT_EXIT",
-      "core": "state_before == ACTIVE_SHORT AND rci9 <= -75",
-      "context_candidates": [
-        "rci14_delta1 <= -29.3187",
-        "macd_line_bps <= -0.0673285 for XAUUSD diagnostic only"
-      ],
-      "reason": "Opposite RCI lower extreme was the stable exit signature, but two of ten combined events were missed by the best strict pair. EMA ordering is not assumed for EXIT without separate evidence."
-    }
+  "run_from_repository_root_cmd": [
+    "py -3.12 scripts\\mochipoyo_alert_research\\frozen_trigger_kernel_validation.py ^",
+    "  --database \"%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\mochipoyo_alerts.sqlite3\" ^",
+    "  --mt5-files-root \"C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\" ^",
+    "  --manifest \"config\\mochipoyo_alert_research\\m7b_frozen_trigger_kernel_manifest_v1.json\" ^",
+    "  --output-dir \"%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\""
   ],
-  "required_primary_comparisons": [
-    "CORE-L0 versus KERNEL-L1 event recall and no-event false positives",
-    "CORE-S0 versus KERNEL-S1 event recall and no-event false positives",
-    "Every genuine primary event where EMA ordering is mixed or opposite",
-    "Every no-event boundary where EMA ordering is correct but RCI9 does not turn",
-    "Whether EMA ordering alone, slope, spread/compression, or price relative to EMA20/40 explains residual false positives",
-    "Cross-symbol stability between BTCUSD and XAUUSD"
+  "expected_outputs": [
+    "latest_frozen_trigger_kernel_validation.json",
+    "latest_frozen_trigger_event_audit.csv",
+    "latest_frozen_trigger_false_positives.csv",
+    "latest_frozen_trigger_event_collisions.csv",
+    "latest_frozen_trigger_false_positive_clusters.csv",
+    "latest_frozen_trigger_cross_symbol.csv",
+    "latest_frozen_trigger_sensitivity.csv",
+    "latest_frozen_trigger_ema_residuals.csv",
+    "latest_frozen_trigger_jackknife.csv"
   ],
-  "reentry_policy": {
-    "REENTRY_LONG": "DO_NOT_FREEZE_RULE; only one combined event and zero XAUUSD positives",
-    "REENTRY_SHORT": "OBSERVE_ONLY; four combined events and one XAUUSD event are insufficient",
-    "ema_alignment_assumption": "DO_NOT_COPY_PRIMARY EMA RULE TO REENTRY WITHOUT EVIDENCE"
+  "frozen_kernel_ids": [
+    "CORE-L0",
+    "KERNEL-L1",
+    "CORE-S0",
+    "KERNEL-S1",
+    "EXIT-L0",
+    "EXIT-S0"
+  ],
+  "frozen_observation_contract": {
+    "decision_sample_count": 472,
+    "event_decision_count": 41,
+    "no_event_decision_count": 431,
+    "post_freeze_events_used_in_m7b": false,
+    "delayed_event_inside_frozen_window_policy": "FAIL_CLOSED",
+    "later_event_policy": "EXCLUDE_FROM_M7B_AND_RESERVE_FOR_M7C"
   },
-  "m7b_required_outputs": [
-    "Frozen candidate-rule manifest with separate CORE and RCI9-plus-EMA kernel IDs and no trade-outcome fields",
-    "Event-by-event true-positive and false-negative table",
-    "No-event false-positive table and clustering by ticker/time",
-    "Per-ticker cross-check showing which core signatures survive BTCUSD/XAUUSD separation",
-    "Leave-one-event-out or equivalent sensitivity audit for threshold dependence",
-    "EMA ordering residual audit: mixed/opposite genuine events and aligned no-event controls",
-    "Explicit list of rules rejected as one-sample or scope-specific artifacts",
-    "PASS/BLOCKED decision for prospective M7C shadow reproduction"
+  "required_result_review": [
+    "Confirm each genuine event is marked TRUE_POSITIVE or FALSE_NEGATIVE for every eligible frozen kernel.",
+    "Review all verified-window no-event false positives, not only summary counts.",
+    "Review 15-minute and 30-minute false-positive clusters by ticker and kernel.",
+    "Review BTCUSD and XAUUSD unchanged-formula results and both cross-symbol directions.",
+    "Review raw alert 5, the BTCUSD PRIMARY_LONG with RCI9 turn-up and MIXED EMA alignment.",
+    "Review raw alert 35, the XAUUSD PRIMARY_LONG with bullish EMA stack but no RCI9 turn-up.",
+    "Confirm derived strict EMA ordering matches stored ema_alignment on every eligible IDLE decision.",
+    "Treat EMA tolerance and EXIT threshold tables as sensitivity diagnostics only; do not select a replacement formula from them.",
+    "Use the generated M7C PASS/BLOCKED result only to authorize or block prospective shadow reproduction."
   ],
-  "m7b_guardrails": [
-    "Do not use M6A/M6B/M6C returns, MFE, MAE, win/loss, or EXIT profitability to select trigger conditions.",
-    "Do not use alert-bar high, low, or close.",
-    "Use only the last fully closed M15 bar and the new M15 open available at decision time.",
-    "Do not treat pre-collector history as verified no-alert data.",
-    "Do not claim exact proprietary formula reconstruction.",
-    "Do not assume EMA ordering is sufficient; explicitly test slope, spread/compression, and price location as residual diagnostics.",
-    "Do not assume the primary-entry EMA rule also applies to EXIT or reentry.",
-    "Do not approve historical full-scan, cross-timeframe extraction, entry gates, alerts, orders, live readiness, or final signals.",
-    "Preserve source event identity from Webhook/SQLite; chart label redraw is not required for reentries."
-  ],
-  "after_m7b": [
-    "M7C prospective shadow reproduction against newly collected genuine alerts",
-    "Only after M7C stability: historical candidate extraction on full CSV as independent proxy candidates",
-    "Only after historical audit: M5/H1 and other timeframe mapping with timeframe-specific recalculation and validation"
+  "new_webhook_event_policy": {
+    "before_running_when_upstream_is_stale": [
+      "M3 episodes",
+      "M4 alignment",
+      "M5 feature snapshots",
+      "M6A source outcomes",
+      "M6B context map",
+      "M6C entry timing",
+      "M7A trigger signature audit"
+    ],
+    "m7b_formula_policy": "Do not modify the frozen manifest, kernel formulas, thresholds, tolerance values, or PASS criteria after inspecting new events.",
+    "m7b_data_policy": "The official M7B runner enforces the original frozen event IDs and windows. Later events are excluded from M7B and reserved for M7C. A delayed/new event inside the frozen window fails closed."
+  },
+  "after_local_execution": {
+    "when_m7c_decision_is_pass": "Create M7C prospective shadow reproduction using the unchanged frozen manifest. Do not historical-scan or enable delivery/execution.",
+    "when_m7c_decision_is_blocked": "Document the explicit blocking reasons. Do not rescue, retune, or select a different same-window threshold without a separately approved audit design."
+  },
+  "prohibited_actions": [
+    "Do not use M6A/M6B/M6C returns, MFE, MAE, win/loss, source EXIT profit, PF, or future outcomes to choose trigger conditions.",
+    "Do not use the alert bar high, low, or close.",
+    "Do not treat pre-collector history as verified no-event data.",
+    "Do not call independent proxy matches genuine historical Mochipoyo alerts.",
+    "Do not scan the full historical CSV.",
+    "Do not extract M5, H1, or other timeframes.",
+    "Do not freeze REENTRY rules.",
+    "Do not claim the proprietary internal formula has been reconstructed.",
+    "Do not enable entry gate, Discord, MT5 orders, live-ready, or final signal."
   ],
   "safety_state": {
     "audit_only": true,
@@ -109,6 +96,8 @@
     "discord": false,
     "mt5_orders": false,
     "live_ready": false,
-    "final_signal": false
+    "final_signal": false,
+    "historical_scan_approved": false,
+    "cross_timeframe_scan_approved": false
   }
 }
