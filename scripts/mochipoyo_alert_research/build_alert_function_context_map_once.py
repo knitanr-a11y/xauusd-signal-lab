@@ -10,6 +10,7 @@ from typing import Any
 
 from alert_function_context_builder import rebuild_alert_function_context_map
 from db import open_database
+from source_outcome_builder import validate_current_stage_coverage
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = SCRIPT_DIR / "schema.sql"
@@ -74,6 +75,10 @@ def main() -> int:
         return 2
 
     try:
+        # This validates current raw alerts against M3 episodes and complete M4/M5
+        # coverage. A newly collected alert cannot be silently omitted merely
+        # because M6A still reflects the previous upstream build.
+        upstream_stage_counts = validate_current_stage_coverage(connection)
         result = rebuild_alert_function_context_map(
             connection,
             built_at_utc=built_at_utc,
@@ -103,6 +108,7 @@ def main() -> int:
             "live_ready": False,
             "final_signal": False,
             "built_at_utc": built_at_utc,
+            "upstream_stage_counts": upstream_stage_counts,
             **result,
             "context_usage": "AUDIT_CONTEXT_ONLY",
             "database_path": str(args.db),
