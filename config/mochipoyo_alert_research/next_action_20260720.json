@@ -4,10 +4,11 @@
   "current_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
   "next_action": "M7B_LOCAL_EXECUTION_AND_RESULT_REVIEW_AUDIT_ONLY",
   "purpose": "Run the already frozen M7B kernels against the original verified 41-event, 472-decision M15 observation set, produce complete event misses and no-event false positives, and decide whether M7C prospective shadow reproduction may begin. Do not discover or retune rules during this run.",
-  "implementation_head": "f5b3be3277e31e9e1ebe8b76c5be3fb721a58699",
-  "bat_launcher_commit": "bd4c5a77490a59efdc84178b0668edf3ebfae72f",
+  "implementation_head": "4c6da2a2471ea4138afe9d604c2bfbdcd27f5734",
+  "bat_launcher_commit": "7eeeb9fcd15e0847267c2762c1d9d146fb061e05",
   "required_files": [
-    "RUN_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY.bat",
+    "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat",
+    "scripts/mochipoyo_alert_research/build_frozen_trigger_kernel_validation_once.py",
     "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
     "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
     "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
@@ -15,15 +16,17 @@
     "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py"
   ],
   "local_inputs": {
+    "env": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\.env",
     "database": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\mochipoyo_alerts.sqlite3",
-    "mt5_files_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
+    "mt5_files_root": "Read from MT5_FILES_ROOT in the existing local Mochipoyo .env.",
     "output_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs"
   },
   "run_method": {
-    "type": "DOUBLE_CLICK_BAT",
-    "file": "RUN_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY.bat",
-    "instruction": "Pull the feature/mochipoyo-alert-research branch, then double-click the BAT at the repository root. No command entry is required.",
-    "window_behavior": "The BAT keeps the window open on both success and failure so the result or error can be reviewed."
+    "type": "DOUBLE_CLICK_EXISTING_MOCHIPOYO_STYLE_BAT",
+    "file": "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat",
+    "instruction": "Pull feature/mochipoyo-alert-research, open scripts/mochipoyo_alert_research, and double-click run_build_frozen_trigger_kernel_validation_once.bat. This follows the same location and local .env / SQLite one-shot launcher pattern as M7A and the earlier Mochipoyo stages.",
+    "window_behavior": "The BAT keeps the window open on both success and failure so the result or error can be reviewed.",
+    "repository_root_bat": false
   },
   "expected_outputs": [
     "latest_frozen_trigger_kernel_validation.json",
