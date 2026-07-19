@@ -2,33 +2,48 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "status": "M7A_DONE_M7B_NEXT",
   "next_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
-  "purpose": "Turn M7A exploratory trigger signatures into a small frozen independent proxy kernel and test stability without using trade outcomes or further same-window threshold optimization.",
+  "purpose": "Freeze and validate the user-supported two-layer hypothesis that RCI9 local reversal is the timing trigger and EMA20/30/40 directional ordering is the primary direction-permission context, without using trade outcomes or further same-window threshold optimization.",
   "required_inputs": [
     "config/mochipoyo_alert_research/current_state_20260720.json",
+    "docs/mochipoyo_alert_research/M7A_USER_HYPOTHESIS_RCI9_TRIGGER_AND_EMA_ALIGNMENT_ADDENDUM_20260720.md",
     "docs/mochipoyo_alert_research/STAGE_M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_CONTRACT.md",
     "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py",
     "local latest_alert_trigger_signature_audit.json",
     "local latest_alert_trigger_event_features.csv",
     "local latest_alert_trigger_candidate_rules.csv"
   ],
+  "user_hypothesis": {
+    "timing_trigger": "RCI9 local reversal",
+    "long_direction_permission": "EMA20 > EMA30 > EMA40",
+    "short_direction_permission": "EMA20 < EMA30 < EMA40",
+    "interpretation": "RCI9 likely determines timing while EMA20/30/40 ordering likely determines allowed direction",
+    "status": "STRONGLY_SUPPORTED_HYPOTHESIS_NOT_YET_EXACT_INTERNAL_FORMULA"
+  },
   "candidate_kernel_priority": [
     {
       "transition": "PRIMARY_LONG",
-      "core": "state_before == IDLE AND rci9_turn_up == True",
-      "context_candidates": [
-        "ema_alignment == BULLISH_STACK",
-        "rci14_delta1 <= -9.23077 for XAUUSD diagnostic only"
-      ],
-      "reason": "RCI9 turn-up recurred across ALL, BTCUSD and XAUUSD reports. Context filter differs by scope and must not be selected by outcome."
+      "core_only_id": "CORE-L0",
+      "core_only": "state_before == IDLE AND rci9_turn_up == True",
+      "directional_kernel_id": "KERNEL-L1",
+      "directional_kernel": "state_before == IDLE AND rci9_turn_up == True AND ema_alignment == BULLISH_STACK",
+      "support_observed": "Combined scope: RCI9 turn-up 8/9; bullish stack 8/9; combined pair 7/9 with 2 controls. XAUUSD bullish stack 6/6.",
+      "secondary_diagnostics": [
+        "rci14_delta1 <= -9.23077 for XAUUSD diagnostic only",
+        "EMA slope, spread/compression, and price location diagnostics"
+      ]
     },
     {
       "transition": "PRIMARY_SHORT",
-      "core": "state_before == IDLE AND rci9_turn_down == True",
-      "context_candidates": [
+      "core_only_id": "CORE-S0",
+      "core_only": "state_before == IDLE AND rci9_turn_down == True",
+      "directional_kernel_id": "KERNEL-S1",
+      "directional_kernel": "state_before == IDLE AND rci9_turn_down == True AND ema_alignment == BEARISH_STACK",
+      "support_observed": "Combined scope: RCI9 turn-down 10/10; all 10 observed primary SHORT events had bearish EMA stack. Exact false-positive reduction of the combined pair must be audited.",
+      "secondary_diagnostics": [
         "rci9 >= 25",
-        "macd_zero_proximity_atr <= 0.218057 for XAUUSD diagnostic only"
-      ],
-      "reason": "RCI9 turn-down captured all 10 primary SHORT events in the combined observation window."
+        "macd_zero_proximity_atr <= 0.218057 for XAUUSD diagnostic only",
+        "EMA slope, spread/compression, and price location diagnostics"
+      ]
     },
     {
       "transition": "LONG_EXIT",
@@ -37,7 +52,7 @@
         "rci14_delta1 >= 10.1099",
         "macd_signal_bps >= 1.37003 for XAUUSD diagnostic only"
       ],
-      "reason": "Opposite RCI upper extreme was the stable exit signature, but exact secondary condition differs by scope."
+      "reason": "Opposite RCI upper extreme was the stable exit signature, but exact secondary condition differs by scope. EMA ordering is not assumed for EXIT without separate evidence."
     },
     {
       "transition": "SHORT_EXIT",
@@ -46,19 +61,29 @@
         "rci14_delta1 <= -29.3187",
         "macd_line_bps <= -0.0673285 for XAUUSD diagnostic only"
       ],
-      "reason": "Opposite RCI lower extreme was the stable exit signature, but two of ten combined events were missed by the best strict pair."
+      "reason": "Opposite RCI lower extreme was the stable exit signature, but two of ten combined events were missed by the best strict pair. EMA ordering is not assumed for EXIT without separate evidence."
     }
+  ],
+  "required_primary_comparisons": [
+    "CORE-L0 versus KERNEL-L1 event recall and no-event false positives",
+    "CORE-S0 versus KERNEL-S1 event recall and no-event false positives",
+    "Every genuine primary event where EMA ordering is mixed or opposite",
+    "Every no-event boundary where EMA ordering is correct but RCI9 does not turn",
+    "Whether EMA ordering alone, slope, spread/compression, or price relative to EMA20/40 explains residual false positives",
+    "Cross-symbol stability between BTCUSD and XAUUSD"
   ],
   "reentry_policy": {
     "REENTRY_LONG": "DO_NOT_FREEZE_RULE; only one combined event and zero XAUUSD positives",
-    "REENTRY_SHORT": "OBSERVE_ONLY; four combined events and one XAUUSD event are insufficient"
+    "REENTRY_SHORT": "OBSERVE_ONLY; four combined events and one XAUUSD event are insufficient",
+    "ema_alignment_assumption": "DO_NOT_COPY_PRIMARY EMA RULE TO REENTRY WITHOUT EVIDENCE"
   },
   "m7b_required_outputs": [
-    "Frozen candidate-rule manifest with IDs and no trade-outcome fields",
+    "Frozen candidate-rule manifest with separate CORE and RCI9-plus-EMA kernel IDs and no trade-outcome fields",
     "Event-by-event true-positive and false-negative table",
     "No-event false-positive table and clustering by ticker/time",
     "Per-ticker cross-check showing which core signatures survive BTCUSD/XAUUSD separation",
     "Leave-one-event-out or equivalent sensitivity audit for threshold dependence",
+    "EMA ordering residual audit: mixed/opposite genuine events and aligned no-event controls",
     "Explicit list of rules rejected as one-sample or scope-specific artifacts",
     "PASS/BLOCKED decision for prospective M7C shadow reproduction"
   ],
@@ -68,8 +93,9 @@
     "Use only the last fully closed M15 bar and the new M15 open available at decision time.",
     "Do not treat pre-collector history as verified no-alert data.",
     "Do not claim exact proprietary formula reconstruction.",
+    "Do not assume EMA ordering is sufficient; explicitly test slope, spread/compression, and price location as residual diagnostics.",
+    "Do not assume the primary-entry EMA rule also applies to EXIT or reentry.",
     "Do not approve historical full-scan, cross-timeframe extraction, entry gates, alerts, orders, live readiness, or final signals.",
-    "Do not tune a large rule family until it reproduces the current genuine events with stable false-positive behavior.",
     "Preserve source event identity from Webhook/SQLite; chart label redraw is not required for reentries."
   ],
   "after_m7b": [
