@@ -1,0 +1,191 @@
+{
+  "contract_version": "MOCHIPOYO_M7B_FROZEN_TRIGGER_KERNEL_V1",
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "frozen_at_utc": "2026-07-19T18:14:50Z",
+  "frozen_before_new_forward_events": true,
+  "m7a_source_result_built_at_utc": "2026-07-19T17:45:00Z",
+  "source_commits": {
+    "m7a_implementation": "31c815fcdff82401cb1d02c54b1abb6b83ec84ef",
+    "current_state_snapshot": "fea0b8570d57964049d711c3db6eadc7ab7fe993",
+    "m7b_next_action_initial": "7522ea65b9a659ce92b12a78dd07cadeea6ca5c2",
+    "complete_handoff": "26205912059c6386bee0de5fccf3efb24d156165",
+    "rci9_ema_addendum": "9531c20b7d597366128d218176e5babc967cc7b2",
+    "ema_hypothesis_next_action": "f2727ee98f170a3bcffd1cbde61e12025a610e22"
+  },
+  "observation_contract": {
+    "timeframe": "M15",
+    "positive_source": "genuine Webhook/SQLite source event IDs only",
+    "negative_source": "NO_EVENT boundaries inside each ticker's verified first-to-last genuine-event window only",
+    "decision_time": "new M15 bar open",
+    "feature_cutoff": "last fully closed M15 bar plus current M15 open only",
+    "alert_bar_high_low_close_used": false,
+    "future_bars_used": false,
+    "trade_outcomes_used": false,
+    "ticker_windows": {
+      "BTCUSD": {
+        "start_utc": "2026-07-15T08:30:00Z",
+        "end_utc": "2026-07-17T23:30:00Z",
+        "offset_hours": 3.0
+      },
+      "XAUUSD": {
+        "start_utc": "2026-07-15T09:45:00Z",
+        "end_utc": "2026-07-17T18:15:00Z",
+        "offset_hours": 3.0
+      }
+    }
+  },
+  "kernels": [
+    {
+      "kernel_id": "CORE-L0",
+      "family": "PRIMARY_LONG_BASELINE",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "IDLE",
+      "target_transition": "PRIMARY_LONG",
+      "conditions": [
+        {
+          "feature": "rci9_turn_up",
+          "operator": "==",
+          "value": true
+        }
+      ],
+      "interpretation": "RCI9 local upward turn is the timing-only baseline."
+    },
+    {
+      "kernel_id": "KERNEL-L1",
+      "family": "PRIMARY_LONG_DIRECTIONAL",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "IDLE",
+      "target_transition": "PRIMARY_LONG",
+      "conditions": [
+        {
+          "feature": "rci9_turn_up",
+          "operator": "==",
+          "value": true
+        },
+        {
+          "feature": "ema_alignment",
+          "operator": "==",
+          "value": "BULLISH_STACK"
+        }
+      ],
+      "interpretation": "RCI9 local upward turn plus EMA20 > EMA30 > EMA40 direction permission."
+    },
+    {
+      "kernel_id": "CORE-S0",
+      "family": "PRIMARY_SHORT_BASELINE",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "IDLE",
+      "target_transition": "PRIMARY_SHORT",
+      "conditions": [
+        {
+          "feature": "rci9_turn_down",
+          "operator": "==",
+          "value": true
+        }
+      ],
+      "interpretation": "RCI9 local downward turn is the timing-only baseline."
+    },
+    {
+      "kernel_id": "KERNEL-S1",
+      "family": "PRIMARY_SHORT_DIRECTIONAL",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "IDLE",
+      "target_transition": "PRIMARY_SHORT",
+      "conditions": [
+        {
+          "feature": "rci9_turn_down",
+          "operator": "==",
+          "value": true
+        },
+        {
+          "feature": "ema_alignment",
+          "operator": "==",
+          "value": "BEARISH_STACK"
+        }
+      ],
+      "interpretation": "RCI9 local downward turn plus EMA20 < EMA30 < EMA40 direction permission."
+    },
+    {
+      "kernel_id": "EXIT-L0",
+      "family": "LONG_EXIT_RCI9_EXTREME",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "ACTIVE_LONG",
+      "target_transition": "LONG_EXIT",
+      "conditions": [
+        {
+          "feature": "rci9",
+          "operator": ">=",
+          "value": 78.333333333333
+        }
+      ],
+      "interpretation": "Observed upper RCI9 extreme candidate; no EMA condition is assumed."
+    },
+    {
+      "kernel_id": "EXIT-S0",
+      "family": "SHORT_EXIT_RCI9_EXTREME",
+      "status": "FROZEN_AUDIT_ONLY",
+      "eligible_state": "ACTIVE_SHORT",
+      "target_transition": "SHORT_EXIT",
+      "conditions": [
+        {
+          "feature": "rci9",
+          "operator": "<=",
+          "value": -75.0
+        }
+      ],
+      "interpretation": "Observed lower RCI9 extreme candidate; no EMA condition is assumed."
+    }
+  ],
+  "sensitivity_diagnostics": {
+    "formula_selection_from_sensitivity_forbidden": true,
+    "ema_tolerance_bps": [0.0, 0.25, 0.5, 1.0, 2.0],
+    "long_exit_rci9_thresholds": [75.0, 77.5, 78.333333333333, 80.0, 82.5],
+    "short_exit_rci9_thresholds": [-82.5, -80.0, -77.5, -75.0, -72.5],
+    "false_positive_cluster_gap_minutes": [15, 30]
+  },
+  "m7c_pass_criteria": {
+    "minimum_primary_kernel_recall": 0.7,
+    "maximum_extra_missed_events_vs_core": 1,
+    "primary_kernel_must_not_increase_no_event_false_positives_vs_core": true,
+    "primary_kernel_must_match_at_least_one_event_in_each_ticker_when_positive_support_exists": true,
+    "primary_kernel_other_event_collision_must_be_zero": true,
+    "minimum_exit_core_recall": 0.7,
+    "recorded_vs_derived_ema_alignment_mismatch_must_be_zero": true,
+    "decision_scope": "prospective M7C shadow only"
+  },
+  "rejected_artifacts": [
+    {
+      "artifact": "REENTRY_LONG discovered pair rules",
+      "reason": "Only one combined positive and zero XAUUSD positives."
+    },
+    {
+      "artifact": "REENTRY_SHORT fixed rule",
+      "reason": "Only four combined positives and one XAUUSD positive; observation only."
+    },
+    {
+      "artifact": "XAUUSD rci14_delta1 PRIMARY_LONG threshold",
+      "reason": "Scope-specific same-window exploratory threshold; diagnostic only."
+    },
+    {
+      "artifact": "XAUUSD macd_zero_proximity PRIMARY_SHORT threshold",
+      "reason": "Scope-specific same-window exploratory threshold; diagnostic only."
+    },
+    {
+      "artifact": "M7A best pair rules selected by score",
+      "reason": "Same-window discovery scores are not frozen internal-formula claims."
+    }
+  ],
+  "audit_only": true,
+  "entry_gate_enabled": false,
+  "discord_send": false,
+  "mt5_order": false,
+  "live_ready": false,
+  "final_signal": false,
+  "historical_scan_approved": false,
+  "cross_timeframe_scan_approved": false,
+  "exact_proprietary_formula_claimed": false,
+  "independent_proxy_only": true
+}
