@@ -1,0 +1,88 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "status": "M7A_DONE_M7B_NEXT",
+  "next_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
+  "purpose": "Turn M7A exploratory trigger signatures into a small frozen independent proxy kernel and test stability without using trade outcomes or further same-window threshold optimization.",
+  "required_inputs": [
+    "config/mochipoyo_alert_research/current_state_20260720.json",
+    "docs/mochipoyo_alert_research/STAGE_M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_CONTRACT.md",
+    "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py",
+    "local latest_alert_trigger_signature_audit.json",
+    "local latest_alert_trigger_event_features.csv",
+    "local latest_alert_trigger_candidate_rules.csv"
+  ],
+  "candidate_kernel_priority": [
+    {
+      "transition": "PRIMARY_LONG",
+      "core": "state_before == IDLE AND rci9_turn_up == True",
+      "context_candidates": [
+        "ema_alignment == BULLISH_STACK",
+        "rci14_delta1 <= -9.23077 for XAUUSD diagnostic only"
+      ],
+      "reason": "RCI9 turn-up recurred across ALL, BTCUSD and XAUUSD reports. Context filter differs by scope and must not be selected by outcome."
+    },
+    {
+      "transition": "PRIMARY_SHORT",
+      "core": "state_before == IDLE AND rci9_turn_down == True",
+      "context_candidates": [
+        "rci9 >= 25",
+        "macd_zero_proximity_atr <= 0.218057 for XAUUSD diagnostic only"
+      ],
+      "reason": "RCI9 turn-down captured all 10 primary SHORT events in the combined observation window."
+    },
+    {
+      "transition": "LONG_EXIT",
+      "core": "state_before == ACTIVE_LONG AND rci9 >= 78.3333",
+      "context_candidates": [
+        "rci14_delta1 >= 10.1099",
+        "macd_signal_bps >= 1.37003 for XAUUSD diagnostic only"
+      ],
+      "reason": "Opposite RCI upper extreme was the stable exit signature, but exact secondary condition differs by scope."
+    },
+    {
+      "transition": "SHORT_EXIT",
+      "core": "state_before == ACTIVE_SHORT AND rci9 <= -75",
+      "context_candidates": [
+        "rci14_delta1 <= -29.3187",
+        "macd_line_bps <= -0.0673285 for XAUUSD diagnostic only"
+      ],
+      "reason": "Opposite RCI lower extreme was the stable exit signature, but two of ten combined events were missed by the best strict pair."
+    }
+  ],
+  "reentry_policy": {
+    "REENTRY_LONG": "DO_NOT_FREEZE_RULE; only one combined event and zero XAUUSD positives",
+    "REENTRY_SHORT": "OBSERVE_ONLY; four combined events and one XAUUSD event are insufficient"
+  },
+  "m7b_required_outputs": [
+    "Frozen candidate-rule manifest with IDs and no trade-outcome fields",
+    "Event-by-event true-positive and false-negative table",
+    "No-event false-positive table and clustering by ticker/time",
+    "Per-ticker cross-check showing which core signatures survive BTCUSD/XAUUSD separation",
+    "Leave-one-event-out or equivalent sensitivity audit for threshold dependence",
+    "Explicit list of rules rejected as one-sample or scope-specific artifacts",
+    "PASS/BLOCKED decision for prospective M7C shadow reproduction"
+  ],
+  "m7b_guardrails": [
+    "Do not use M6A/M6B/M6C returns, MFE, MAE, win/loss, or EXIT profitability to select trigger conditions.",
+    "Do not use alert-bar high, low, or close.",
+    "Use only the last fully closed M15 bar and the new M15 open available at decision time.",
+    "Do not treat pre-collector history as verified no-alert data.",
+    "Do not claim exact proprietary formula reconstruction.",
+    "Do not approve historical full-scan, cross-timeframe extraction, entry gates, alerts, orders, live readiness, or final signals.",
+    "Do not tune a large rule family until it reproduces the current genuine events with stable false-positive behavior.",
+    "Preserve source event identity from Webhook/SQLite; chart label redraw is not required for reentries."
+  ],
+  "after_m7b": [
+    "M7C prospective shadow reproduction against newly collected genuine alerts",
+    "Only after M7C stability: historical candidate extraction on full CSV as independent proxy candidates",
+    "Only after historical audit: M5/H1 and other timeframe mapping with timeframe-specific recalculation and validation"
+  ],
+  "safety_state": {
+    "audit_only": true,
+    "entry_gate": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
