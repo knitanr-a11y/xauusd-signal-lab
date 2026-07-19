@@ -35,7 +35,17 @@
         "end_utc": "2026-07-17T18:15:00Z",
         "offset_hours": 3.0
       }
-    }
+    },
+    "expected_counts": {
+      "decision_sample_count": 472,
+      "event_decision_count": 41,
+      "no_event_decision_count": 431
+    },
+    "frozen_raw_alert_ids": {
+      "BTCUSD": [2, 3, 5, 8, 13, 14, 15, 16, 20, 21, 24, 25, 26, 34, 36, 37, 39, 41, 42],
+      "XAUUSD": [4, 6, 7, 9, 10, 11, 12, 17, 18, 19, 22, 23, 27, 28, 29, 30, 31, 32, 33, 35, 38, 40]
+    },
+    "post_freeze_event_policy": "Events after each frozen observation end are excluded from M7B and reserved for M7C; any delayed/new event at or before a frozen end fails closed."
   },
   "kernels": [
     {
