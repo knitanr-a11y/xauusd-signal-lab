@@ -5,12 +5,14 @@
   "status": "M7B_FROZEN_TRIGGER_KERNEL_IMPLEMENTED_PENDING_LOCAL_EXECUTION_AUDIT_ONLY",
   "previous_status": "M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_DONE_AUDIT_ONLY",
   "m7a_implementation_commit": "31c815fcdff82401cb1d02c54b1abb6b83ec84ef",
-  "m7b_implementation_head": "f5b3be3277e31e9e1ebe8b76c5be3fb721a58699",
+  "m7b_implementation_head": "4c6da2a2471ea4138afe9d604c2bfbdcd27f5734",
   "m7b_files": {
     "frozen_manifest": "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
     "audit_contract": "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
     "official_runner": "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
-    "audit_core": "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation_core.py"
+    "audit_core": "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation_core.py",
+    "local_one_shot_wrapper": "scripts/mochipoyo_alert_research/build_frozen_trigger_kernel_validation_once.py",
+    "bat_launcher": "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat"
   },
   "m7a_audit_result": {
     "status": "PASS",
@@ -113,7 +115,8 @@
     "Audits derived EMA pair ordering and pre-frozen near-cross tolerances without promoting a better tolerance.",
     "Audits pre-frozen EXIT threshold sensitivity without replacing the frozen threshold.",
     "Runs a no-refit leave-one-event-out stability diagnostic.",
-    "Returns PASS or BLOCKED only for starting M7C prospective shadow reproduction."
+    "Returns PASS or BLOCKED only for starting M7C prospective shadow reproduction.",
+    "Uses the same scripts/mochipoyo_alert_research one-shot BAT and local .env layout as the prior Mochipoyo stages."
   ],
   "formal_result_state": {
     "m7b_local_execution_completed": false,
