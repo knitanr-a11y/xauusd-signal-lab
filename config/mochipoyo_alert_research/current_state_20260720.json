@@ -1,0 +1,174 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_DONE_AUDIT_ONLY",
+  "m7a_implementation_commit": "31c815fcdff82401cb1d02c54b1abb6b83ec84ef",
+  "audit_result": {
+    "status": "PASS",
+    "stage": "M7A_ALERT_TRIGGER_SIGNATURE_AUDIT",
+    "contract_version": "MOCHIPOYO_M7A_TRIGGER_SIGNATURE_V1",
+    "built_at_utc": "2026-07-19T17:45:00Z",
+    "eligible_raw_alert_count": 41,
+    "eligible_event_count": 41,
+    "decision_sample_count": 472,
+    "event_decision_count": 41,
+    "no_event_decision_count": 431,
+    "transition_counts": {
+      "PRIMARY_LONG": 9,
+      "PRIMARY_SHORT": 10,
+      "REENTRY_LONG": 1,
+      "REENTRY_SHORT": 4,
+      "LONG_EXIT": 7,
+      "SHORT_EXIT": 10
+    },
+    "ticker_coverage": {
+      "BTCUSD": {
+        "observation_start_utc": "2026-07-15T08:30:00Z",
+        "observation_end_utc": "2026-07-17T23:30:00Z",
+        "decision_count": 253,
+        "event_count": 19,
+        "no_event_count": 234,
+        "offset_hours": 3.0
+      },
+      "XAUUSD": {
+        "observation_start_utc": "2026-07-15T09:45:00Z",
+        "observation_end_utc": "2026-07-17T18:15:00Z",
+        "decision_count": 219,
+        "event_count": 22,
+        "no_event_count": 197,
+        "offset_hours": 3.0
+      }
+    }
+  },
+  "best_exploratory_rules_all_scope": {
+    "PRIMARY_LONG": {
+      "rule": "rci9_turn_up == True AND ema_alignment == BULLISH_STACK",
+      "matched_positive": 7,
+      "positive_total": 9,
+      "matched_control": 2,
+      "precision": 0.7777777777777778,
+      "recall": 0.7777777777777778,
+      "lift": 18.580246913580247
+    },
+    "PRIMARY_SHORT": {
+      "rule": "rci9_turn_down == True AND rci9 >= 25",
+      "matched_positive": 10,
+      "positive_total": 10,
+      "matched_control": 6,
+      "precision": 0.625,
+      "recall": 1.0,
+      "lift": 13.4375
+    },
+    "REENTRY_LONG": {
+      "rule": "body_to_range <= 0.0593513 AND tick_volume_ratio20 <= 0.476933",
+      "matched_positive": 1,
+      "positive_total": 1,
+      "matched_control": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "lift": 125.0,
+      "sample_warning": "ONE_POSITIVE_ONLY"
+    },
+    "REENTRY_SHORT": {
+      "rule": "rci9_turn_down == True AND rci9 >= 65",
+      "matched_positive": 4,
+      "positive_total": 4,
+      "matched_control": 2,
+      "precision": 0.6666666666666666,
+      "recall": 1.0,
+      "lift": 22.0,
+      "sample_warning": "VERY_SMALL_SAMPLE"
+    },
+    "LONG_EXIT": {
+      "rule": "rci9 >= 78.3333 AND rci14_delta1 >= 10.1099",
+      "matched_positive": 7,
+      "positive_total": 7,
+      "matched_control": 1,
+      "precision": 0.875,
+      "recall": 1.0,
+      "lift": 15.625
+    },
+    "SHORT_EXIT": {
+      "rule": "rci9 <= -75 AND rci14_delta1 <= -29.3187",
+      "matched_positive": 8,
+      "positive_total": 10,
+      "matched_control": 0,
+      "precision": 1.0,
+      "recall": 0.8,
+      "lift": 13.2
+    }
+  },
+  "xauusd_exploratory_rules": {
+    "PRIMARY_LONG": {
+      "rule": "rci9_turn_up == True AND rci14_delta1 <= -9.23077",
+      "matched_positive": 4,
+      "positive_total": 6,
+      "matched_control": 0,
+      "precision": 1.0,
+      "recall": 0.6666666666666666
+    },
+    "PRIMARY_SHORT": {
+      "rule": "rci9_turn_down == True AND macd_zero_proximity_atr <= 0.218057",
+      "matched_positive": 5,
+      "positive_total": 5,
+      "matched_control": 3,
+      "precision": 0.625,
+      "recall": 1.0
+    },
+    "REENTRY_LONG": {
+      "positive_total": 0,
+      "status": "NO_POSITIVES"
+    },
+    "REENTRY_SHORT": {
+      "rule": "medium_latest_pivot_bars_ago >= 19 AND rci9_turn_down == True",
+      "matched_positive": 1,
+      "positive_total": 1,
+      "matched_control": 0,
+      "sample_warning": "ONE_POSITIVE_ONLY"
+    },
+    "LONG_EXIT": {
+      "rule": "rci9 >= 78.3333 AND macd_signal_bps >= 1.37003",
+      "matched_positive": 5,
+      "positive_total": 5,
+      "matched_control": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "SHORT_EXIT": {
+      "rule": "rci9 <= -75 AND macd_line_bps <= -0.0673285",
+      "matched_positive": 5,
+      "positive_total": 5,
+      "matched_control": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "contracts": {
+    "audit_only": true,
+    "dry_run": true,
+    "genuine_alert_labels_only": true,
+    "no_event_controls_inside_verified_window_only": true,
+    "alert_bar_ohlc_used": false,
+    "closed_m15_features_only": true,
+    "future_fields_used": false,
+    "exact_proprietary_condition_claimed": false,
+    "independent_proxy_only": true,
+    "historical_candidate_extraction_approved": false,
+    "cross_timeframe_candidate_extraction_approved": false,
+    "entry_gate_enabled": false,
+    "automatic_trading_rule_approved": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "important_interpretation": [
+    "M7A found strong exploratory signatures, especially RCI9 local turns for primary LONG/SHORT and opposite RCI extremes for EXIT.",
+    "These rules were discovered and scored on the same short observation window and are not validated replay detectors.",
+    "REENTRY_LONG and ticker-specific reentry samples are too small for rule freezing.",
+    "Do not scan full history or other timeframes as if matches were genuine Mochipoyo alerts until M7B/M7C validation is complete.",
+    "Do not claim the proprietary internal formula has been identified."
+  ],
+  "next_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY"
+}
