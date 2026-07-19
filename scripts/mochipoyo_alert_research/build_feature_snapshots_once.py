@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from db import open_database
-from feature_snapshot_builder import rebuild_feature_snapshots
+from feature_snapshot_stage import rebuild_current_feature_snapshots
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SCHEMA_PATH = SCRIPT_DIR / "schema.sql"
@@ -96,7 +96,7 @@ def main() -> int:
         return 2
 
     try:
-        result = rebuild_feature_snapshots(
+        result = rebuild_current_feature_snapshots(
             connection,
             mt5_files_root=mt5_root,
             built_at_utc=built_at_utc,
