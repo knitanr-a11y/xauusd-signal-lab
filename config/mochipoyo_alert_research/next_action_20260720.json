@@ -5,7 +5,9 @@
   "next_action": "M7B_LOCAL_EXECUTION_AND_RESULT_REVIEW_AUDIT_ONLY",
   "purpose": "Run the already frozen M7B kernels against the original verified 41-event, 472-decision M15 observation set, produce complete event misses and no-event false positives, and decide whether M7C prospective shadow reproduction may begin. Do not discover or retune rules during this run.",
   "implementation_head": "f5b3be3277e31e9e1ebe8b76c5be3fb721a58699",
+  "bat_launcher_commit": "bd4c5a77490a59efdc84178b0668edf3ebfae72f",
   "required_files": [
+    "RUN_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY.bat",
     "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
     "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
     "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
@@ -17,13 +19,12 @@
     "mt5_files_root": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files",
     "output_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs"
   },
-  "run_from_repository_root_cmd": [
-    "py -3.12 scripts\\mochipoyo_alert_research\\frozen_trigger_kernel_validation.py ^",
-    "  --database \"%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\mochipoyo_alerts.sqlite3\" ^",
-    "  --mt5-files-root \"C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\" ^",
-    "  --manifest \"config\\mochipoyo_alert_research\\m7b_frozen_trigger_kernel_manifest_v1.json\" ^",
-    "  --output-dir \"%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\""
-  ],
+  "run_method": {
+    "type": "DOUBLE_CLICK_BAT",
+    "file": "RUN_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY.bat",
+    "instruction": "Pull the feature/mochipoyo-alert-research branch, then double-click the BAT at the repository root. No command entry is required.",
+    "window_behavior": "The BAT keeps the window open on both success and failure so the result or error can be reviewed."
+  },
   "expected_outputs": [
     "latest_frozen_trigger_kernel_validation.json",
     "latest_frozen_trigger_event_audit.csv",
