@@ -2,12 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from scripts.mochipoyo_alert_research.m7c_prospective_shadow import (
-    ProxySignal,
-    SourceTransition,
-    compare,
-    readiness,
-)
+from m7c_prospective_shadow import ProxySignal, SourceTransition, compare, readiness
 
 
 def manifest() -> dict:
