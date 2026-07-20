@@ -72,6 +72,25 @@
     "folder_opener": "scripts/mochipoyo_alert_research/open_mochipoyo_monitor_folders.bat",
     "legacy_root_files": "May remain as historical files. New launches write to the dedicated folders."
   },
+  "operator_run_file_convention": {
+    "status": "MANDATORY_FOR_NEXT_OPERATOR_FILE_MIGRATION_AND_ALL_FUTURE_HANDOFFS",
+    "contract": "docs/mochipoyo_alert_research/OPERATOR_NUMBERED_RUN_FILES_AND_HANDOFF_CONVENTION_20260720.md",
+    "physical_numbered_rename_applied": false,
+    "current_unnumbered_files_remain_in_use": true,
+    "next_safe_stage_transition_must_apply_numbered_physical_filenames": true,
+    "canonical_numbered_order": [
+      "01_run_collect_events_cloudflare_forever.bat",
+      "02_run_initialize_m7c_prospective_shadow_runtime_once.bat",
+      "03_run_build_m7c_prospective_shadow_once.bat",
+      "04_run_m7c_prospective_shadow_forever.bat",
+      "05_stop_m7c_prospective_shadow_forever.bat",
+      "06_open_mochipoyo_monitor_folders.bat"
+    ],
+    "handoff_must_include_section": "実行ファイルと実行順",
+    "handoff_must_state_old_to_new_mapping": true,
+    "handoff_must_state_required_upload_files_upfront": true,
+    "silent_old_new_name_mixing_forbidden": true
+  },
   "m7c_implementation": {
     "core": "scripts/mochipoyo_alert_research/m7c_prospective_shadow.py",
     "runner": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow.py",
