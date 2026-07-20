@@ -15,10 +15,7 @@ from alert_trigger_signature_audit import (
     TriggerSignatureContractError,
     flatten_features,
     floor_15,
-    read_alert_events,
     transition_for,
-    validate_event_roles,
-    validate_upstream_coverage,
 )
 from feature_snapshot_builder import MINIMUM_WARMUP_BARS, build_feature_payload, load_indicator_series
 from mt5_csv_contract import FILE_MAP, parse_utc
@@ -28,6 +25,7 @@ CONTRACT_VERSION = "MOCHIPOYO_M7C_PROSPECTIVE_SHADOW_V1"
 TIMEFRAME = "M15"
 SUPPORTED = ("PRIMARY_LONG", "PRIMARY_SHORT", "LONG_EXIT", "SHORT_EXIT")
 REENTRIES = ("REENTRY_LONG", "REENTRY_SHORT")
+IGNORED_ROLES = ("OPPOSITE_ALERT_IGNORED", "OPPOSITE_EXIT_IGNORED")
 
 
 class M7CContractError(RuntimeError):
@@ -108,12 +106,88 @@ def _matches(features: dict[str, Any], conditions: list[dict[str, Any]]) -> bool
 
 
 def _validate_upstream(connection: sqlite3.Connection) -> dict[str, int]:
-    try:
-        return validate_upstream_coverage(connection)
-    except TriggerSignatureContractError as exc:
-        if "stale relative to raw alerts" in str(exc):
-            raise M7CUpstreamStaleError(str(exc)) from exc
-        raise M7CContractError(str(exc)) from exc
+    eligible = [
+        int(row[0])
+        for row in connection.execute(
+            """
+            SELECT r.cloudflare_id
+            FROM raw_alerts r
+            WHERE NOT EXISTS (
+                SELECT 1 FROM raw_alert_annotations a
+                WHERE a.raw_alert_id = r.cloudflare_id
+                  AND a.annotation_type = 'CONNECTION_TEST'
+            )
+            ORDER BY r.cloudflare_id
+            """
+        ).fetchall()
+    ]
+    assigned = [
+        int(row[0])
+        for row in connection.execute(
+            "SELECT raw_alert_id FROM episode_events ORDER BY raw_alert_id"
+        ).fetchall()
+    ]
+    aligned_rows = connection.execute(
+        """
+        SELECT raw_alert_id, alignment_status
+        FROM mt5_alignment
+        WHERE timeframe = 'M15'
+        ORDER BY raw_alert_id
+        """
+    ).fetchall()
+    aligned = [int(row[0]) for row in aligned_rows]
+    if assigned != eligible or aligned != eligible:
+        raise M7CUpstreamStaleError("M3/M4 derived tables are stale relative to raw alerts")
+    invalid = [int(row[0]) for row in aligned_rows if str(row[1]) != "ALIGNED_CLOSED_BAR"]
+    if invalid:
+        raise M7CContractError(f"invalid M15 alignment rows: {invalid}")
+    return {"eligible_raw_alert_count": len(eligible)}
+
+
+def read_source_events(connection: sqlite3.Connection) -> list[AlertEvent]:
+    rows = connection.execute(
+        """
+        SELECT
+            r.cloudflare_id,
+            r.ticker,
+            r.event,
+            r.bar_time_utc,
+            r.fired_at_utc,
+            ee.event_role,
+            a.selected_offset_hours,
+            a.mt5_server_time,
+            a.alignment_status
+        FROM raw_alerts r
+        JOIN episode_events ee ON ee.raw_alert_id = r.cloudflare_id
+        JOIN mt5_alignment a
+          ON a.raw_alert_id = r.cloudflare_id AND a.timeframe = 'M15'
+        WHERE NOT EXISTS (
+            SELECT 1 FROM raw_alert_annotations x
+            WHERE x.raw_alert_id = r.cloudflare_id
+              AND x.annotation_type = 'CONNECTION_TEST'
+        )
+        ORDER BY r.fired_at_utc, r.cloudflare_id
+        """
+    ).fetchall()
+    result: list[AlertEvent] = []
+    for row in rows:
+        if str(row["alignment_status"]) != "ALIGNED_CLOSED_BAR":
+            raise M7CContractError(f"invalid M15 alignment for raw alert {row['cloudflare_id']}")
+        result.append(
+            AlertEvent(
+                raw_id=int(row["cloudflare_id"]),
+                ticker=str(row["ticker"]),
+                event=str(row["event"]),
+                event_role=str(row["event_role"]),
+                bar_time_utc=parse_utc(str(row["bar_time_utc"])),
+                fired_at_utc=parse_utc(str(row["fired_at_utc"])),
+                selected_offset_hours=float(row["selected_offset_hours"]),
+                selected_server_open=datetime.strptime(
+                    str(row["mt5_server_time"]), "%Y.%m.%d %H:%M:%S"
+                ),
+            )
+        )
+    return result
 
 
 def replay(events: list[AlertEvent]) -> list[SourceTransition]:
@@ -125,10 +199,13 @@ def replay(events: list[AlertEvent]) -> list[SourceTransition]:
         state = "IDLE"
         for event in sorted(rows, key=lambda row: (row.bar_time_utc, row.fired_at_utc, row.raw_id)):
             before = state
-            try:
-                transition, state = transition_for(event, before)
-            except TriggerSignatureContractError as exc:
-                raise M7CContractError(str(exc)) from exc
+            if event.event_role in IGNORED_ROLES:
+                transition = event.event_role
+            else:
+                try:
+                    transition, state = transition_for(event, before)
+                except TriggerSignatureContractError as exc:
+                    raise M7CContractError(str(exc)) from exc
             result.append(
                 SourceTransition(
                     event.raw_id,
@@ -340,6 +417,9 @@ def compare(
         if source.transition in REENTRIES:
             comparisons.append({**base, "classification": "UNSUPPORTED_REENTRY_NOT_SCORED"})
             continue
+        if source.transition in IGNORED_ROLES:
+            comparisons.append({**base, "classification": "UNSUPPORTED_OPPOSITE_EVENT_NOT_SCORED"})
+            continue
         if source.transition not in SUPPORTED:
             raise M7CContractError(f"unexpected source transition: {source.transition}")
         if latest.get(source.ticker) is None or source.decision_time_utc > latest[source.ticker]:
@@ -422,7 +502,11 @@ def compare(
     extras.sort(key=lambda row: (row["proxy_decision_time_utc"], row["ticker"]))
     scored = [
         row for row in comparisons
-        if row["classification"] not in ("UNSUPPORTED_REENTRY_NOT_SCORED", "PENDING_CSV_COVERAGE")
+        if row["classification"] not in (
+            "UNSUPPORTED_REENTRY_NOT_SCORED",
+            "UNSUPPORTED_OPPOSITE_EVENT_NOT_SCORED",
+            "PENDING_CSV_COVERAGE",
+        )
     ]
     exact = sum(row["classification"] == "EXACT_MATCH" for row in scored)
     within = sum(
@@ -436,6 +520,7 @@ def compare(
             row["classification"] == "PENDING_CSV_COVERAGE" for row in comparisons
         ),
         "unsupported_reentry_count": sum(row.transition in REENTRIES for row in sources),
+        "unsupported_opposite_event_count": sum(row.transition in IGNORED_ROLES for row in sources),
         "exact_match_count": exact,
         "within_one_bar_match_count": within,
         "missed_count": sum(row["classification"] == "MISSED" for row in scored),
@@ -503,8 +588,7 @@ def audit_m7c(
     built_at_utc: str,
 ) -> dict[str, Any]:
     upstream = _validate_upstream(connection)
-    events = read_alert_events(connection)
-    validate_event_roles(events)
+    events = read_source_events(connection)
     states, offsets, all_source = bootstrap(events, manifest)
     decisions, signals, final_states, latest = build_proxy(
         mt5_files_root, manifest, dict(states), offsets, built_at_utc
