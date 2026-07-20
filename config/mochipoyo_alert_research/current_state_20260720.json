@@ -2,148 +2,139 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M7B_FROZEN_TRIGGER_KERNEL_IMPLEMENTED_PENDING_LOCAL_EXECUTION_AUDIT_ONLY",
-  "previous_status": "M7A_ALERT_TRIGGER_SIGNATURE_AUDIT_DONE_AUDIT_ONLY",
-  "m7a_implementation_commit": "31c815fcdff82401cb1d02c54b1abb6b83ec84ef",
-  "m7b_implementation_head": "4c6da2a2471ea4138afe9d604c2bfbdcd27f5734",
-  "m7b_files": {
-    "frozen_manifest": "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
-    "audit_contract": "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
-    "official_runner": "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
-    "audit_core": "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation_core.py",
-    "local_one_shot_wrapper": "scripts/mochipoyo_alert_research/build_frozen_trigger_kernel_validation_once.py",
-    "bat_launcher": "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat"
-  },
-  "m7a_audit_result": {
+  "status": "M7C_PROSPECTIVE_SHADOW_IMPLEMENTED_PENDING_LOCAL_BOOTSTRAP_AUDIT_ONLY",
+  "previous_status": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_PASS_AUDIT_ONLY",
+  "m7b_result": {
     "status": "PASS",
-    "stage": "M7A_ALERT_TRIGGER_SIGNATURE_AUDIT",
-    "contract_version": "MOCHIPOYO_M7A_TRIGGER_SIGNATURE_V1",
-    "built_at_utc": "2026-07-19T17:45:00Z",
-    "eligible_raw_alert_count": 41,
-    "eligible_event_count": 41,
+    "built_at_utc": "2026-07-19T18:50:47Z",
     "decision_sample_count": 472,
     "event_decision_count": 41,
     "no_event_decision_count": 431,
-    "transition_counts": {
-      "PRIMARY_LONG": 9,
-      "PRIMARY_SHORT": 10,
-      "REENTRY_LONG": 1,
-      "REENTRY_SHORT": 4,
-      "LONG_EXIT": 7,
-      "SHORT_EXIT": 10
-    },
-    "ticker_coverage": {
-      "BTCUSD": {
-        "observation_start_utc": "2026-07-15T08:30:00Z",
-        "observation_end_utc": "2026-07-17T23:30:00Z",
-        "decision_count": 253,
-        "event_count": 19,
-        "no_event_count": 234,
-        "offset_hours": 3.0
-      },
-      "XAUUSD": {
-        "observation_start_utc": "2026-07-15T09:45:00Z",
-        "observation_end_utc": "2026-07-17T18:15:00Z",
-        "decision_count": 219,
-        "event_count": 22,
-        "no_event_count": 197,
-        "offset_hours": 3.0
-      }
-    }
+    "m7c_decision": "PASS_FOR_PROSPECTIVE_SHADOW_ONLY",
+    "blocking_reasons": [],
+    "result_file": "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_result_20260720.json",
+    "source_report_sha256": "6739f33737c776b3f2f87e9c001d02d9d89ebb3002775904cb6829e547d6eb83"
   },
-  "m7b_frozen_kernels": {
-    "CORE-L0": "state_before == IDLE AND rci9_turn_up == True",
-    "KERNEL-L1": "state_before == IDLE AND rci9_turn_up == True AND ema_alignment == BULLISH_STACK",
-    "CORE-S0": "state_before == IDLE AND rci9_turn_down == True",
-    "KERNEL-S1": "state_before == IDLE AND rci9_turn_down == True AND ema_alignment == BEARISH_STACK",
-    "EXIT-L0": "state_before == ACTIVE_LONG AND rci9 >= 78.333333333333",
-    "EXIT-S0": "state_before == ACTIVE_SHORT AND rci9 <= -75"
+  "m7b_selected_forward_kernels": {
+    "PRIMARY_LONG": "KERNEL-L1: IDLE AND rci9_turn_up AND BULLISH_STACK",
+    "PRIMARY_SHORT": "KERNEL-S1: IDLE AND rci9_turn_down AND BEARISH_STACK",
+    "LONG_EXIT": "EXIT-L0: ACTIVE_LONG AND rci9 >= 78.333333333333",
+    "SHORT_EXIT": "EXIT-S0: ACTIVE_SHORT AND rci9 <= -75"
   },
-  "m7b_frozen_observation": {
-    "decision_sample_count": 472,
-    "event_decision_count": 41,
-    "no_event_decision_count": 431,
-    "frozen_raw_alert_ids": {
-      "BTCUSD": [2, 3, 5, 8, 13, 14, 15, 16, 20, 21, 24, 25, 26, 34, 36, 37, 39, 41, 42],
-      "XAUUSD": [4, 6, 7, 9, 10, 11, 12, 17, 18, 19, 22, 23, 27, 28, 29, 30, 31, 32, 33, 35, 38, 40]
-    },
-    "post_freeze_policy": "Later events after the frozen observation end are excluded from M7B and reserved for M7C. A delayed or new event at or before a frozen observation end fails closed."
-  },
-  "event_only_preliminary_check": {
-    "scope_warning": "These counts use the 41 attached genuine-event feature rows only. They do not include the 431 no-event controls and therefore are not the formal M7B result.",
-    "CORE-L0": {
-      "matched_positive": 8,
-      "positive_total": 9,
-      "missed_raw_alert_ids": [35]
-    },
+  "m7b_key_metrics": {
     "KERNEL-L1": {
       "matched_positive": 7,
       "positive_total": 9,
-      "missed_raw_alert_ids": [5, 35]
-    },
-    "CORE-S0": {
-      "matched_positive": 10,
-      "positive_total": 10,
-      "missed_raw_alert_ids": []
+      "event_recall": 0.7777777777777778,
+      "no_event_false_positive": 2,
+      "other_event_collision": 0
     },
     "KERNEL-S1": {
       "matched_positive": 10,
       "positive_total": 10,
-      "missed_raw_alert_ids": []
+      "event_recall": 1.0,
+      "no_event_false_positive": 11,
+      "other_event_collision": 0
     },
     "EXIT-L0": {
       "matched_positive": 7,
       "positive_total": 7,
-      "missed_raw_alert_ids": []
+      "event_recall": 1.0,
+      "no_event_false_positive": 5,
+      "other_event_collision": 0
     },
     "EXIT-S0": {
       "matched_positive": 10,
       "positive_total": 10,
-      "missed_raw_alert_ids": []
-    },
-    "individual_primary_long_cases": {
-      "raw_alert_id_5": "BTCUSD; RCI9 turn-up is true but EMA alignment is MIXED.",
-      "raw_alert_id_35": "XAUUSD; EMA alignment is BULLISH_STACK but RCI9 turn-up is false."
+      "event_recall": 1.0,
+      "no_event_false_positive": 0,
+      "other_event_collision": 0
     }
   },
-  "m7b_implementation_scope": [
-    "Reuses the M7A causal build_decision_samples implementation.",
-    "Produces event-by-event true-positive and false-negative rows.",
-    "Produces the complete verified-window no-event false-positive rows.",
-    "Produces 15-minute contiguous and 30-minute gap-tolerant false-positive clusters.",
-    "Applies each frozen formula unchanged to BTCUSD and XAUUSD.",
-    "Audits derived EMA pair ordering and pre-frozen near-cross tolerances without promoting a better tolerance.",
-    "Audits pre-frozen EXIT threshold sensitivity without replacing the frozen threshold.",
-    "Runs a no-refit leave-one-event-out stability diagnostic.",
-    "Returns PASS or BLOCKED only for starting M7C prospective shadow reproduction.",
-    "Uses the same scripts/mochipoyo_alert_research one-shot BAT and local .env layout as the prior Mochipoyo stages."
+  "m7c_contract": {
+    "stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+    "contract_version": "MOCHIPOYO_M7C_PROSPECTIVE_SHADOW_V1",
+    "prospective_start_utc": "2026-07-19T18:50:47Z",
+    "first_eligible_decision": "first M15 decision boundary strictly after prospective_start_utc",
+    "manifest": "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
+    "audit_contract": "docs/mochipoyo_alert_research/STAGE_M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_CONTRACT.md"
+  },
+  "m7c_bootstrap": {
+    "BTCUSD": {
+      "state_at_start": "ACTIVE_LONG",
+      "latest_raw_alert_id": 42,
+      "offset_hours": 3.0
+    },
+    "XAUUSD": {
+      "state_at_start": "ACTIVE_LONG",
+      "latest_raw_alert_id": 40,
+      "offset_hours": 3.0
+    },
+    "policy": "A delayed or new event at or before prospective_start_utc fails closed. A changed M4 offset requires a new DST segment review."
+  },
+  "m7c_implementation": {
+    "core": "scripts/mochipoyo_alert_research/m7c_prospective_shadow.py",
+    "runner": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow.py",
+    "one_shot_wrapper": "scripts/mochipoyo_alert_research/build_m7c_prospective_shadow_once.py",
+    "one_shot_bat": "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
+    "forever_loop": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.py",
+    "forever_bat": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
+    "stop_bat": "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat",
+    "tests": "tests/mochipoyo_alert_research/test_stage_m7c_prospective_shadow.py"
+  },
+  "m7c_runtime_behavior": [
+    "Uses independent proxy state after the frozen bootstrap; source state is not reused at each M15 decision.",
+    "Compares exact same-M15, one bar early, one bar late, wrong nearby transition, miss, and unmatched proxy signals.",
+    "Applies a 120-minute source-arrival grace before finalizing an extra proxy signal.",
+    "Does not model or score REENTRY because no REENTRY rule was frozen.",
+    "Refreshes only existing M3/M4 derived tables when new raw alerts make them stale.",
+    "Keeps the existing Cloudflare collector as a separate process and never starts a second collector."
   ],
+  "m7c_expected_outputs": [
+    "latest_m7c_prospective_shadow.json",
+    "latest_m7c_proxy_decisions.csv",
+    "latest_m7c_proxy_signals.csv",
+    "latest_m7c_source_event_comparisons.csv",
+    "latest_m7c_extra_proxy_signals.csv",
+    "latest_m7c_shadow_loop_status.json",
+    "m7c_shadow_forever.log"
+  ],
+  "m7c_review_gates": {
+    "operational_checkpoint_supported_events": 5,
+    "interim_checkpoint_supported_events": 15,
+    "formal_minimum_supported_events": 30,
+    "formal_minimum_events_per_ticker": 10,
+    "formal_minimum_primary_long": 5,
+    "formal_minimum_primary_short": 5,
+    "formal_minimum_total_exits": 10,
+    "automatic_reproduction_claim": false,
+    "maximum_program_output": "READY_FOR_MANUAL_REPRODUCTION_REVIEW"
+  },
   "formal_result_state": {
-    "m7b_local_execution_completed": false,
-    "no_event_false_positive_audit_completed": false,
-    "cross_symbol_audit_completed": false,
-    "m7c_decision": "PENDING_LOCAL_M7B_EXECUTION",
-    "reason": "The required SQLite database and MT5 M15 CSV files are available only on the user PC and were not available in the GitHub execution environment."
+    "m7b_local_execution_completed": true,
+    "m7b_result_review_completed": true,
+    "m7c_implementation_completed": true,
+    "m7c_local_bootstrap_completed": false,
+    "m7c_forward_sample_count": 0,
+    "independent_forward_reproduction_established": false,
+    "reason": "M7C code is implemented, but it must be pulled and run on the user PC against the local SQLite and MT5 M15 CSVs before forward collection begins."
   },
   "contracts": {
     "audit_only": true,
-    "dry_run": true,
-    "genuine_alert_labels_only": true,
-    "no_event_controls_inside_verified_window_only": true,
-    "alert_bar_ohlc_used": false,
+    "alert_bar_high_low_close_used": false,
     "closed_m15_features_only": true,
+    "current_m15_open_only": true,
     "future_fields_used": false,
     "trade_outcome_fields_used": false,
-    "exact_proprietary_condition_claimed": false,
-    "independent_proxy_only": true,
+    "formula_refit_allowed": false,
+    "reentry_rule_used": false,
     "historical_candidate_extraction_approved": false,
     "cross_timeframe_candidate_extraction_approved": false,
     "entry_gate_enabled": false,
-    "automatic_trading_rule_approved": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
     "final_signal": false
   },
-  "next_stage": "M7B_LOCAL_EXECUTION_AND_RESULT_REVIEW_AUDIT_ONLY"
+  "next_stage": "M7C_LOCAL_BOOTSTRAP_AND_PROSPECTIVE_SHADOW_COLLECTION_AUDIT_ONLY"
 }
