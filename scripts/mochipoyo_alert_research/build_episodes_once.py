@@ -50,6 +50,10 @@ def main(argv: list[str] | None = None) -> int:
     built_at_utc = utc_now_text()
     report_path = config.logs_dir / REPORT_NAME
     try:
+        # Existing M5/M6 rows can reference deterministic episode IDs. M3 deletes
+        # and recreates those same IDs inside one transaction, so defer FK checking
+        # until commit instead of disabling constraints or deleting downstream data.
+        connection.execute("PRAGMA defer_foreign_keys = ON")
         result = rebuild_episodes(connection, built_at_utc=built_at_utc)
         by_ticker_direction = [
             dict(row)
@@ -103,6 +107,8 @@ def main(argv: list[str] | None = None) -> int:
             "discord_send": False,
             "mt5_order": False,
             "future_entry_fields_used": False,
+            "foreign_key_check_deferred_until_commit": True,
+            "downstream_rows_deleted_for_rebuild": False,
             "built_at_utc": built_at_utc,
             "raw_alert_count": result.raw_alert_count,
             "eligible_raw_alert_count": result.eligible_raw_alert_count,
