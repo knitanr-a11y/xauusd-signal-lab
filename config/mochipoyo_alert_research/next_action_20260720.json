@@ -15,6 +15,7 @@
   "required_files": [
     "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
     "docs/mochipoyo_alert_research/M7C_RUNTIME_BOOTSTRAP_AND_LOG_FOLDER_CORRECTION_20260720.md",
+    "docs/mochipoyo_alert_research/OPERATOR_NUMBERED_RUN_FILES_AND_HANDOFF_CONVENTION_20260720.md",
     "scripts/mochipoyo_alert_research/initialize_m7c_prospective_shadow_runtime.py",
     "scripts/mochipoyo_alert_research/run_initialize_m7c_prospective_shadow_runtime_once.bat",
     "scripts/mochipoyo_alert_research/build_m7c_prospective_shadow_once.py",
@@ -61,6 +62,36 @@
       "action": "Run run_m7c_prospective_shadow_forever.bat in a separate window."
     }
   ],
+  "operator_filename_and_handoff_requirement": {
+    "contract": "docs/mochipoyo_alert_research/OPERATOR_NUMBERED_RUN_FILES_AND_HANDOFF_CONVENTION_20260720.md",
+    "current_physical_files_are_numbered": false,
+    "current_unnumbered_files_remain_valid_until_safe_migration": true,
+    "next_safe_stage_transition_must_rename_operator_bat_files": true,
+    "number_is_part_of_physical_filename": true,
+    "canonical_numbered_order": [
+      "01_run_collect_events_cloudflare_forever.bat",
+      "02_run_initialize_m7c_prospective_shadow_runtime_once.bat",
+      "03_run_build_m7c_prospective_shadow_once.bat",
+      "04_run_m7c_prospective_shadow_forever.bat",
+      "05_stop_m7c_prospective_shadow_forever.bat",
+      "06_open_mochipoyo_monitor_folders.bat"
+    ],
+    "future_handoff_required_section": "実行ファイルと実行順",
+    "future_handoff_must_include": [
+      "exact numbered physical filenames",
+      "one-shot versus continuous versus stop-only role",
+      "execution order",
+      "simultaneous separate-window requirements",
+      "exact output folders",
+      "all files that may need upload and the exact trigger for uploading",
+      "expected success text",
+      "stop and fail-closed conditions",
+      "old-to-new filename mapping",
+      "whether old unnumbered names remain valid"
+    ],
+    "piecemeal_required_file_disclosure_after_monitoring_starts": "FORBIDDEN",
+    "silent_old_new_filename_mixing": "FORBIDDEN"
+  },
   "runtime_initialization_contract": {
     "m7c_monitor_must_be_stopped": true,
     "collector_must_be_caught_up": true,
