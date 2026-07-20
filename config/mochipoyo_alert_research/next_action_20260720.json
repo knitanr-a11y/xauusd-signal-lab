@@ -1,39 +1,82 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M7C_IMPLEMENTED_LOCAL_BOOTSTRAP_NEXT",
+  "status": "M7C_OLD_START_INVALIDATED_RUNTIME_INITIALIZATION_NEXT",
   "current_stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
-  "next_action": "M7C_LOCAL_BOOTSTRAP_AND_START_PROSPECTIVE_SHADOW_COLLECTION_AUDIT_ONLY",
-  "purpose": "Start the frozen independent proxy shadow after the M7B PASS without changing the formulas, then compare future proxy signals with newly arriving genuine Webhook/SQLite alerts.",
-  "prospective_start_utc": "2026-07-19T18:50:47Z",
+  "next_action": "M7C_POST_CATCHUP_RUNTIME_BOOTSTRAP_AND_VALID_FORWARD_COLLECTION_AUDIT_ONLY",
+  "purpose": "Discard the invalid pre-catchup M7C start, freeze a new local runtime start only after the Cloudflare collector is caught up, then begin valid forward comparison with unchanged M7B kernels.",
+  "old_start": {
+    "prospective_start_utc": "2026-07-19T18:50:47Z",
+    "valid": false,
+    "reason": "Collector backlog inserted raw alert IDs 43 through 54 after the start was frozen; BTCUSD IDs 43 through 50 belonged to the pre-start sequence.",
+    "old_m7c_outputs_are_formal_forward_evidence": false,
+    "old_successful_cycles": 0,
+    "old_failed_cycles": 141
+  },
   "required_files": [
     "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
-    "docs/mochipoyo_alert_research/STAGE_M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_CONTRACT.md",
-    "scripts/mochipoyo_alert_research/m7c_prospective_shadow.py",
-    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow.py",
+    "docs/mochipoyo_alert_research/M7C_RUNTIME_BOOTSTRAP_AND_LOG_FOLDER_CORRECTION_20260720.md",
+    "scripts/mochipoyo_alert_research/initialize_m7c_prospective_shadow_runtime.py",
+    "scripts/mochipoyo_alert_research/run_initialize_m7c_prospective_shadow_runtime_once.bat",
     "scripts/mochipoyo_alert_research/build_m7c_prospective_shadow_once.py",
     "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
-    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.py",
+    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever_safe.py",
     "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
-    "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat"
+    "scripts/mochipoyo_alert_research/collect_events_once_organized.py",
+    "scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat",
+    "scripts/mochipoyo_alert_research/open_mochipoyo_monitor_folders.bat"
   ],
-  "local_inputs": {
-    "env": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\.env",
-    "database": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\mochipoyo_alerts.sqlite3",
-    "mt5_files_root": "Read from MT5_FILES_ROOT in the existing local Mochipoyo .env.",
-    "output_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs"
+  "local_paths": {
+    "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m7c_runtime\\m7c_prospective_shadow_manifest_runtime.json",
+    "collector_logs": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\collector",
+    "m7c_logs": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c",
+    "derived_logs": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\derived"
   },
-  "first_run": {
-    "file": "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
-    "instruction": "Pull feature/mochipoyo-alert-research, open scripts/mochipoyo_alert_research, and double-click run_build_m7c_prospective_shadow_once.bat. Upload or paste the console result before relying on the forever loop.",
-    "expected_status": "COLLECTING",
-    "safety": "The first run may refresh only M3/M4 derived tables when new raw alerts make them stale. It does not change raw alerts, CSVs, formulas, Discord, MT5 orders, entry gate, live-ready, or final signal."
+  "required_run_order": [
+    {
+      "step": 1,
+      "action": "Stop the currently running M7C window using Ctrl+C or stop_m7c_prospective_shadow_forever.bat."
+    },
+    {
+      "step": 2,
+      "action": "Keep the Cloudflare collector running while pulling the feature branch update."
+    },
+    {
+      "step": 3,
+      "action": "Restart run_collect_events_cloudflare_forever.bat from the updated branch so new collector files are written under logs\\collector."
+    },
+    {
+      "step": 4,
+      "action": "Wait until at least three consecutive collector cycles are PASS_EMPTY at the latest cursor."
+    },
+    {
+      "step": 5,
+      "action": "Run scripts\\mochipoyo_alert_research\\run_initialize_m7c_prospective_shadow_runtime_once.bat exactly once."
+    },
+    {
+      "step": 6,
+      "action": "Run run_build_m7c_prospective_shadow_once.bat and confirm status COLLECTING from the new runtime start."
+    },
+    {
+      "step": 7,
+      "action": "Run run_m7c_prospective_shadow_forever.bat in a separate window."
+    }
+  ],
+  "runtime_initialization_contract": {
+    "m7c_monitor_must_be_stopped": true,
+    "collector_must_be_caught_up": true,
+    "required_consecutive_pass_empty_runs": 3,
+    "collector_cursor_must_equal_latest_raw_id": true,
+    "m3_must_be_current": true,
+    "m4_m15_must_be_current": true,
+    "new_raw_alert_during_freeze": "FAIL_CLOSED_AND_RERUN",
+    "runtime_manifest_reinitialization_after_creation": "FORBIDDEN"
   },
   "continuous_run": {
-    "collector": "Keep the existing scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat process running. Do not start a second collector if it is already running.",
-    "m7c_monitor": "After the one-shot bootstrap passes, double-click scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat in a separate window.",
-    "interval_seconds": 300,
-    "stop_file": "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat",
-    "lock_policy": "Only one M7C shadow loop may run. A second instance fails closed."
+    "collector_interval_seconds": 60,
+    "m7c_interval_seconds": 300,
+    "contract_exit_2_behavior": "STOP_WITH_FAIL_CLOSED_CONTRACT_BLOCK",
+    "repeat_same_contract_error_indefinitely": false,
+    "collector_and_m7c_run_in_separate_windows": true
   },
   "frozen_proxy": {
     "PRIMARY_LONG": "KERNEL-L1: IDLE AND rci9_turn_up AND BULLISH_STACK",
@@ -42,47 +85,24 @@
     "SHORT_EXIT": "EXIT-S0: ACTIVE_SHORT AND rci9 <= -75",
     "reentry": "NOT_MODELED_OR_SCORED"
   },
-  "comparison_classes": [
-    "EXACT_MATCH",
-    "EARLY_1_BAR",
-    "LATE_1_BAR",
-    "WRONG_TRANSITION_NEARBY",
-    "MISSED",
-    "PENDING_CSV_COVERAGE",
-    "UNSUPPORTED_REENTRY_NOT_SCORED",
-    "PENDING_SOURCE_ARRIVAL_GRACE",
-    "FINALIZED_EXTRA_PROXY_SIGNAL"
-  ],
-  "expected_outputs": [
-    "latest_m7c_prospective_shadow.json",
-    "latest_m7c_proxy_decisions.csv",
-    "latest_m7c_proxy_signals.csv",
-    "latest_m7c_source_event_comparisons.csv",
-    "latest_m7c_extra_proxy_signals.csv",
-    "latest_m7c_shadow_loop_status.json",
-    "m7c_shadow_forever.log"
-  ],
   "review_schedule": {
-    "operational_checkpoint": "Review when 5 supported new source events have been scored.",
-    "interim_checkpoint": "Review when 15 supported new source events have been scored.",
-    "formal_manual_review": {
-      "minimum_supported_source_events": 30,
-      "minimum_supported_events_per_ticker": 10,
-      "minimum_primary_long_events": 5,
-      "minimum_primary_short_events": 5,
-      "minimum_total_exit_events": 10
-    },
+    "operational_checkpoint": 5,
+    "interim_checkpoint": 15,
+    "formal_minimum_supported_events": 30,
+    "formal_minimum_supported_events_per_ticker": 10,
+    "formal_minimum_primary_long": 5,
+    "formal_minimum_primary_short": 5,
+    "formal_minimum_total_exits": 10,
     "automatic_reproduction_claim": false
   },
-  "important_interpretation": "M7C is the first independent forward reproduction test. Until forward events are scored, the proprietary alert formula has not been reproduced. Even after the formal count gate is reached, the program only marks the sample ready for manual review.",
   "prohibited_actions": [
-    "Do not change the frozen M7C formulas, thresholds, EMA stack conditions, bootstrap, start time, matching window, grace period, or review gates after seeing forward results.",
-    "Do not score M7C decisions at or before prospective_start_utc.",
+    "Do not reuse the invalid old prospective start or its 46 proxy decisions and 3 proxy signals as formal forward evidence.",
+    "Do not change frozen formulas, thresholds, grace period, matching window, or review gates.",
+    "Do not reset the runtime manifest after valid forward results begin.",
     "Do not use current M15 high, low, or close.",
     "Do not use returns, MFE, MAE, win/loss, source EXIT profit, PF, or future outcomes.",
     "Do not freeze or score REENTRY rules.",
     "Do not historical-scan or extract other timeframes.",
-    "Do not claim the proprietary internal formula has been reconstructed.",
     "Do not enable entry gate, Discord, MT5 orders, live-ready, or final signal."
   ],
   "safety_state": {
