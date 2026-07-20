@@ -1,19 +1,20 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M7B_IMPLEMENTED_LOCAL_EXECUTION_NEXT",
-  "current_stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
-  "next_action": "M7B_LOCAL_EXECUTION_AND_RESULT_REVIEW_AUDIT_ONLY",
-  "purpose": "Run the already frozen M7B kernels against the original verified 41-event, 472-decision M15 observation set, produce complete event misses and no-event false positives, and decide whether M7C prospective shadow reproduction may begin. Do not discover or retune rules during this run.",
-  "implementation_head": "4c6da2a2471ea4138afe9d604c2bfbdcd27f5734",
-  "bat_launcher_commit": "7eeeb9fcd15e0847267c2762c1d9d146fb061e05",
+  "status": "M7C_IMPLEMENTED_LOCAL_BOOTSTRAP_NEXT",
+  "current_stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+  "next_action": "M7C_LOCAL_BOOTSTRAP_AND_START_PROSPECTIVE_SHADOW_COLLECTION_AUDIT_ONLY",
+  "purpose": "Start the frozen independent proxy shadow after the M7B PASS without changing the formulas, then compare future proxy signals with newly arriving genuine Webhook/SQLite alerts.",
+  "prospective_start_utc": "2026-07-19T18:50:47Z",
   "required_files": [
-    "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat",
-    "scripts/mochipoyo_alert_research/build_frozen_trigger_kernel_validation_once.py",
-    "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_manifest_v1.json",
-    "docs/mochipoyo_alert_research/STAGE_M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_CONTRACT.md",
-    "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation.py",
-    "scripts/mochipoyo_alert_research/frozen_trigger_kernel_validation_core.py",
-    "scripts/mochipoyo_alert_research/alert_trigger_signature_audit.py"
+    "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
+    "docs/mochipoyo_alert_research/STAGE_M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_CONTRACT.md",
+    "scripts/mochipoyo_alert_research/m7c_prospective_shadow.py",
+    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow.py",
+    "scripts/mochipoyo_alert_research/build_m7c_prospective_shadow_once.py",
+    "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
+    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.py",
+    "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
+    "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat"
   ],
   "local_inputs": {
     "env": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\.env",
@@ -21,87 +22,78 @@
     "mt5_files_root": "Read from MT5_FILES_ROOT in the existing local Mochipoyo .env.",
     "output_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs"
   },
-  "run_method": {
-    "type": "DOUBLE_CLICK_EXISTING_MOCHIPOYO_STYLE_BAT",
-    "file": "scripts/mochipoyo_alert_research/run_build_frozen_trigger_kernel_validation_once.bat",
-    "instruction": "Pull feature/mochipoyo-alert-research, open scripts/mochipoyo_alert_research, and double-click run_build_frozen_trigger_kernel_validation_once.bat. This follows the same location and local .env / SQLite one-shot launcher pattern as M7A and the earlier Mochipoyo stages.",
-    "window_behavior": "The BAT keeps the window open on both success and failure so the result or error can be reviewed.",
-    "repository_root_bat": false
+  "first_run": {
+    "file": "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
+    "instruction": "Pull feature/mochipoyo-alert-research, open scripts/mochipoyo_alert_research, and double-click run_build_m7c_prospective_shadow_once.bat. Upload or paste the console result before relying on the forever loop.",
+    "expected_status": "COLLECTING",
+    "safety": "The first run may refresh only M3/M4 derived tables when new raw alerts make them stale. It does not change raw alerts, CSVs, formulas, Discord, MT5 orders, entry gate, live-ready, or final signal."
   },
+  "continuous_run": {
+    "collector": "Keep the existing scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat process running. Do not start a second collector if it is already running.",
+    "m7c_monitor": "After the one-shot bootstrap passes, double-click scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat in a separate window.",
+    "interval_seconds": 300,
+    "stop_file": "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat",
+    "lock_policy": "Only one M7C shadow loop may run. A second instance fails closed."
+  },
+  "frozen_proxy": {
+    "PRIMARY_LONG": "KERNEL-L1: IDLE AND rci9_turn_up AND BULLISH_STACK",
+    "PRIMARY_SHORT": "KERNEL-S1: IDLE AND rci9_turn_down AND BEARISH_STACK",
+    "LONG_EXIT": "EXIT-L0: ACTIVE_LONG AND rci9 >= 78.333333333333",
+    "SHORT_EXIT": "EXIT-S0: ACTIVE_SHORT AND rci9 <= -75",
+    "reentry": "NOT_MODELED_OR_SCORED"
+  },
+  "comparison_classes": [
+    "EXACT_MATCH",
+    "EARLY_1_BAR",
+    "LATE_1_BAR",
+    "WRONG_TRANSITION_NEARBY",
+    "MISSED",
+    "PENDING_CSV_COVERAGE",
+    "UNSUPPORTED_REENTRY_NOT_SCORED",
+    "PENDING_SOURCE_ARRIVAL_GRACE",
+    "FINALIZED_EXTRA_PROXY_SIGNAL"
+  ],
   "expected_outputs": [
-    "latest_frozen_trigger_kernel_validation.json",
-    "latest_frozen_trigger_event_audit.csv",
-    "latest_frozen_trigger_false_positives.csv",
-    "latest_frozen_trigger_event_collisions.csv",
-    "latest_frozen_trigger_false_positive_clusters.csv",
-    "latest_frozen_trigger_cross_symbol.csv",
-    "latest_frozen_trigger_sensitivity.csv",
-    "latest_frozen_trigger_ema_residuals.csv",
-    "latest_frozen_trigger_jackknife.csv"
+    "latest_m7c_prospective_shadow.json",
+    "latest_m7c_proxy_decisions.csv",
+    "latest_m7c_proxy_signals.csv",
+    "latest_m7c_source_event_comparisons.csv",
+    "latest_m7c_extra_proxy_signals.csv",
+    "latest_m7c_shadow_loop_status.json",
+    "m7c_shadow_forever.log"
   ],
-  "frozen_kernel_ids": [
-    "CORE-L0",
-    "KERNEL-L1",
-    "CORE-S0",
-    "KERNEL-S1",
-    "EXIT-L0",
-    "EXIT-S0"
-  ],
-  "frozen_observation_contract": {
-    "decision_sample_count": 472,
-    "event_decision_count": 41,
-    "no_event_decision_count": 431,
-    "post_freeze_events_used_in_m7b": false,
-    "delayed_event_inside_frozen_window_policy": "FAIL_CLOSED",
-    "later_event_policy": "EXCLUDE_FROM_M7B_AND_RESERVE_FOR_M7C"
+  "review_schedule": {
+    "operational_checkpoint": "Review when 5 supported new source events have been scored.",
+    "interim_checkpoint": "Review when 15 supported new source events have been scored.",
+    "formal_manual_review": {
+      "minimum_supported_source_events": 30,
+      "minimum_supported_events_per_ticker": 10,
+      "minimum_primary_long_events": 5,
+      "minimum_primary_short_events": 5,
+      "minimum_total_exit_events": 10
+    },
+    "automatic_reproduction_claim": false
   },
-  "required_result_review": [
-    "Confirm each genuine event is marked TRUE_POSITIVE or FALSE_NEGATIVE for every eligible frozen kernel.",
-    "Review all verified-window no-event false positives, not only summary counts.",
-    "Review 15-minute and 30-minute false-positive clusters by ticker and kernel.",
-    "Review BTCUSD and XAUUSD unchanged-formula results and both cross-symbol directions.",
-    "Review raw alert 5, the BTCUSD PRIMARY_LONG with RCI9 turn-up and MIXED EMA alignment.",
-    "Review raw alert 35, the XAUUSD PRIMARY_LONG with bullish EMA stack but no RCI9 turn-up.",
-    "Confirm derived strict EMA ordering matches stored ema_alignment on every eligible IDLE decision.",
-    "Treat EMA tolerance and EXIT threshold tables as sensitivity diagnostics only; do not select a replacement formula from them.",
-    "Use the generated M7C PASS/BLOCKED result only to authorize or block prospective shadow reproduction."
-  ],
-  "new_webhook_event_policy": {
-    "before_running_when_upstream_is_stale": [
-      "M3 episodes",
-      "M4 alignment",
-      "M5 feature snapshots",
-      "M6A source outcomes",
-      "M6B context map",
-      "M6C entry timing",
-      "M7A trigger signature audit"
-    ],
-    "m7b_formula_policy": "Do not modify the frozen manifest, kernel formulas, thresholds, tolerance values, or PASS criteria after inspecting new events.",
-    "m7b_data_policy": "The official M7B runner enforces the original frozen event IDs and windows. Later events are excluded from M7B and reserved for M7C. A delayed/new event inside the frozen window fails closed."
-  },
-  "after_local_execution": {
-    "when_m7c_decision_is_pass": "Create M7C prospective shadow reproduction using the unchanged frozen manifest. Do not historical-scan or enable delivery/execution.",
-    "when_m7c_decision_is_blocked": "Document the explicit blocking reasons. Do not rescue, retune, or select a different same-window threshold without a separately approved audit design."
-  },
+  "important_interpretation": "M7C is the first independent forward reproduction test. Until forward events are scored, the proprietary alert formula has not been reproduced. Even after the formal count gate is reached, the program only marks the sample ready for manual review.",
   "prohibited_actions": [
-    "Do not use M6A/M6B/M6C returns, MFE, MAE, win/loss, source EXIT profit, PF, or future outcomes to choose trigger conditions.",
-    "Do not use the alert bar high, low, or close.",
-    "Do not treat pre-collector history as verified no-event data.",
-    "Do not call independent proxy matches genuine historical Mochipoyo alerts.",
-    "Do not scan the full historical CSV.",
-    "Do not extract M5, H1, or other timeframes.",
-    "Do not freeze REENTRY rules.",
+    "Do not change the frozen M7C formulas, thresholds, EMA stack conditions, bootstrap, start time, matching window, grace period, or review gates after seeing forward results.",
+    "Do not score M7C decisions at or before prospective_start_utc.",
+    "Do not use current M15 high, low, or close.",
+    "Do not use returns, MFE, MAE, win/loss, source EXIT profit, PF, or future outcomes.",
+    "Do not freeze or score REENTRY rules.",
+    "Do not historical-scan or extract other timeframes.",
     "Do not claim the proprietary internal formula has been reconstructed.",
     "Do not enable entry gate, Discord, MT5 orders, live-ready, or final signal."
   ],
   "safety_state": {
     "audit_only": true,
+    "formula_refit": false,
+    "historical_scan_approved": false,
+    "cross_timeframe_scan_approved": false,
     "entry_gate": false,
     "discord": false,
     "mt5_orders": false,
     "live_ready": false,
-    "final_signal": false,
-    "historical_scan_approved": false,
-    "cross_timeframe_scan_approved": false
+    "final_signal": false
   }
 }
