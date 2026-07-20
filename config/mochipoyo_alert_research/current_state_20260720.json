@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M7C_PROSPECTIVE_SHADOW_IMPLEMENTED_PENDING_LOCAL_BOOTSTRAP_AUDIT_ONLY",
-  "previous_status": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_PASS_AUDIT_ONLY",
+  "status": "M7C_OLD_START_INVALIDATED_RUNTIME_REBOOTSTRAP_REQUIRED_AUDIT_ONLY",
+  "previous_status": "M7C_PROSPECTIVE_SHADOW_IMPLEMENTED_PENDING_LOCAL_BOOTSTRAP_AUDIT_ONLY",
   "m7b_result": {
     "status": "PASS",
     "built_at_utc": "2026-07-19T18:50:47Z",
@@ -15,90 +15,75 @@
     "result_file": "config/mochipoyo_alert_research/m7b_frozen_trigger_kernel_result_20260720.json",
     "source_report_sha256": "6739f33737c776b3f2f87e9c001d02d9d89ebb3002775904cb6829e547d6eb83"
   },
-  "m7b_selected_forward_kernels": {
+  "frozen_proxy": {
     "PRIMARY_LONG": "KERNEL-L1: IDLE AND rci9_turn_up AND BULLISH_STACK",
     "PRIMARY_SHORT": "KERNEL-S1: IDLE AND rci9_turn_down AND BEARISH_STACK",
     "LONG_EXIT": "EXIT-L0: ACTIVE_LONG AND rci9 >= 78.333333333333",
-    "SHORT_EXIT": "EXIT-S0: ACTIVE_SHORT AND rci9 <= -75"
+    "SHORT_EXIT": "EXIT-S0: ACTIVE_SHORT AND rci9 <= -75",
+    "reentry": "NOT_MODELED_OR_SCORED"
   },
-  "m7b_key_metrics": {
-    "KERNEL-L1": {
-      "matched_positive": 7,
-      "positive_total": 9,
-      "event_recall": 0.7777777777777778,
-      "no_event_false_positive": 2,
-      "other_event_collision": 0
+  "m7c_runtime_incident": {
+    "old_prospective_start_utc": "2026-07-19T18:50:47Z",
+    "old_start_valid": false,
+    "reason": "The collector had an uncollected backlog. On 2026-07-20T02:32Z it inserted raw alert IDs 43 through 54, and BTCUSD IDs 43 through 50 belonged at or before the old prospective start.",
+    "old_btc_expected_pre_start_ids_ended_at": 42,
+    "actual_btc_pre_start_ids_ended_at": 50,
+    "m7c_loop_cycles_observed": 141,
+    "m7c_successful_cycles": 0,
+    "m7c_failed_cycles": 141,
+    "old_output_policy": "Do not use the pre-catchup M7C report or its 46 decisions and 3 proxy signals as formal forward evidence.",
+    "formula_failure_claimed": false,
+    "classification": "RUNTIME_START_DESIGN_ERROR"
+  },
+  "corrections": {
+    "m3_foreign_key_rebuild": {
+      "status": "FIXED",
+      "commit": "27daa697d81c91749a778e54d21c4c6c79937f6c",
+      "policy": "Defer foreign-key checking to commit while deterministic episode IDs are rebuilt. Do not delete downstream rows."
     },
-    "KERNEL-S1": {
-      "matched_positive": 10,
-      "positive_total": 10,
-      "event_recall": 1.0,
-      "no_event_false_positive": 11,
-      "other_event_collision": 0
+    "m7c_runtime_bootstrap": {
+      "status": "IMPLEMENTED_PENDING_LOCAL_INITIALIZATION",
+      "template_manifest": "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
+      "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m7c_runtime\\m7c_prospective_shadow_manifest_runtime.json",
+      "initializer": "scripts/mochipoyo_alert_research/initialize_m7c_prospective_shadow_runtime.py",
+      "initializer_bat": "scripts/mochipoyo_alert_research/run_initialize_m7c_prospective_shadow_runtime_once.bat",
+      "requirements": [
+        "M7C monitor stopped",
+        "collector remains running",
+        "three consecutive Cloudflare PASS_EMPTY collection runs",
+        "collector cursor equals latest raw alert ID",
+        "M3 episode assignments current",
+        "M4 M15 alignment current",
+        "no new raw alert arrives during runtime freeze"
+      ],
+      "reset_after_creation_forbidden": true
     },
-    "EXIT-L0": {
-      "matched_positive": 7,
-      "positive_total": 7,
-      "event_recall": 1.0,
-      "no_event_false_positive": 5,
-      "other_event_collision": 0
-    },
-    "EXIT-S0": {
-      "matched_positive": 10,
-      "positive_total": 10,
-      "event_recall": 1.0,
-      "no_event_false_positive": 0,
-      "other_event_collision": 0
+    "m7c_contract_block_loop": {
+      "status": "FIXED",
+      "safe_loop": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever_safe.py",
+      "exit_code_2_behavior": "STOP_WITH_FAIL_CLOSED_CONTRACT_BLOCK",
+      "repeat_same_contract_error_forever": false
     }
   },
-  "m7c_contract": {
-    "stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
-    "contract_version": "MOCHIPOYO_M7C_PROSPECTIVE_SHADOW_V1",
-    "prospective_start_utc": "2026-07-19T18:50:47Z",
-    "first_eligible_decision": "first M15 decision boundary strictly after prospective_start_utc",
-    "manifest": "config/mochipoyo_alert_research/m7c_prospective_shadow_manifest_v1.json",
-    "audit_contract": "docs/mochipoyo_alert_research/STAGE_M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_CONTRACT.md"
-  },
-  "m7c_bootstrap": {
-    "BTCUSD": {
-      "state_at_start": "ACTIVE_LONG",
-      "latest_raw_alert_id": 42,
-      "offset_hours": 3.0
-    },
-    "XAUUSD": {
-      "state_at_start": "ACTIVE_LONG",
-      "latest_raw_alert_id": 40,
-      "offset_hours": 3.0
-    },
-    "policy": "A delayed or new event at or before prospective_start_utc fails closed. A changed M4 offset requires a new DST segment review."
+  "log_folder_contract": {
+    "collector": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\collector",
+    "m7c": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c",
+    "derived": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\derived",
+    "folder_opener": "scripts/mochipoyo_alert_research/open_mochipoyo_monitor_folders.bat",
+    "legacy_root_files": "May remain as historical files. New launches write to the dedicated folders."
   },
   "m7c_implementation": {
     "core": "scripts/mochipoyo_alert_research/m7c_prospective_shadow.py",
     "runner": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow.py",
     "one_shot_wrapper": "scripts/mochipoyo_alert_research/build_m7c_prospective_shadow_once.py",
     "one_shot_bat": "scripts/mochipoyo_alert_research/run_build_m7c_prospective_shadow_once.bat",
-    "forever_loop": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.py",
+    "forever_loop": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever_safe.py",
     "forever_bat": "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
     "stop_bat": "scripts/mochipoyo_alert_research/stop_m7c_prospective_shadow_forever.bat",
-    "tests": "tests/mochipoyo_alert_research/test_stage_m7c_prospective_shadow.py"
+    "collector_organized_wrapper": "scripts/mochipoyo_alert_research/collect_events_once_organized.py",
+    "collector_bat": "scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat",
+    "correction_doc": "docs/mochipoyo_alert_research/M7C_RUNTIME_BOOTSTRAP_AND_LOG_FOLDER_CORRECTION_20260720.md"
   },
-  "m7c_runtime_behavior": [
-    "Uses independent proxy state after the frozen bootstrap; source state is not reused at each M15 decision.",
-    "Compares exact same-M15, one bar early, one bar late, wrong nearby transition, miss, and unmatched proxy signals.",
-    "Applies a 120-minute source-arrival grace before finalizing an extra proxy signal.",
-    "Does not model or score REENTRY because no REENTRY rule was frozen.",
-    "Refreshes only existing M3/M4 derived tables when new raw alerts make them stale.",
-    "Keeps the existing Cloudflare collector as a separate process and never starts a second collector."
-  ],
-  "m7c_expected_outputs": [
-    "latest_m7c_prospective_shadow.json",
-    "latest_m7c_proxy_decisions.csv",
-    "latest_m7c_proxy_signals.csv",
-    "latest_m7c_source_event_comparisons.csv",
-    "latest_m7c_extra_proxy_signals.csv",
-    "latest_m7c_shadow_loop_status.json",
-    "m7c_shadow_forever.log"
-  ],
   "m7c_review_gates": {
     "operational_checkpoint_supported_events": 5,
     "interim_checkpoint_supported_events": 15,
@@ -113,11 +98,12 @@
   "formal_result_state": {
     "m7b_local_execution_completed": true,
     "m7b_result_review_completed": true,
-    "m7c_implementation_completed": true,
-    "m7c_local_bootstrap_completed": false,
-    "m7c_forward_sample_count": 0,
+    "old_m7c_start_invalidated": true,
+    "valid_runtime_manifest_created": false,
+    "valid_m7c_forward_collection_started": false,
+    "valid_m7c_forward_sample_count": 0,
     "independent_forward_reproduction_established": false,
-    "reason": "M7C code is implemented, but it must be pulled and run on the user PC against the local SQLite and MT5 M15 CSVs before forward collection begins."
+    "reason": "The old start was frozen before collector backlog catch-up. Create the local runtime manifest after catch-up, then restart M7C from zero valid forward samples."
   },
   "contracts": {
     "audit_only": true,
@@ -136,5 +122,5 @@
     "live_ready": false,
     "final_signal": false
   },
-  "next_stage": "M7C_LOCAL_BOOTSTRAP_AND_PROSPECTIVE_SHADOW_COLLECTION_AUDIT_ONLY"
+  "next_stage": "M7C_POST_CATCHUP_RUNTIME_BOOTSTRAP_AND_VALID_FORWARD_COLLECTION_AUDIT_ONLY"
 }
