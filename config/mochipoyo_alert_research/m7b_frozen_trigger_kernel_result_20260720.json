@@ -1,0 +1,120 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M7B_FROZEN_TRIGGER_KERNEL_VALIDATION_AUDIT_ONLY",
+  "status": "PASS",
+  "result_built_at_utc": "2026-07-19T18:50:47Z",
+  "reviewed_in_chat_date_jst": "2026-07-20",
+  "source_report_sha256": "6739f33737c776b3f2f87e9c001d02d9d89ebb3002775904cb6829e547d6eb83",
+  "source_files": {
+    "latest_frozen_trigger_false_positives.csv": "961deed31bb5535f0effec18aacb22e4f31c9a2a7993e0f0bd4e187299005cc2",
+    "latest_frozen_trigger_kernel_validation.json": "6739f33737c776b3f2f87e9c001d02d9d89ebb3002775904cb6829e547d6eb83",
+    "latest_frozen_trigger_sensitivity.csv": "efb29a9c7e8ace07e757a4d8160741f1cfcb2ffc1b96f54a2b34880bc8dca78d",
+    "latest_frozen_trigger_ema_residuals.csv": "e1ac4ad888543ecdd4c490abb54b48765248f738729e488df138bd3f30ea6046",
+    "latest_frozen_trigger_jackknife.csv": "1140fea21abe0827a3a24387ca94c995f161f7e41be9dcd023e72aa0c2dc41b9",
+    "latest_frozen_trigger_event_audit.csv": "43637d0e6e39c698dbb39de60ec068384c57a19718610cbf759f2098ff08a2c2",
+    "latest_frozen_trigger_cross_symbol.csv": "9b78819be0a203722e965c1c5afdf922a49008c3ff43c63abc69c9a02994fd0b",
+    "latest_frozen_trigger_false_positive_clusters.csv": "9eb588b9e932ba599f33d0a2ed4f90d13dc00a4cca79ae9ce223b36a22162feb"
+  },
+  "observation": {
+    "decision_sample_count": 472,
+    "event_decision_count": 41,
+    "no_event_decision_count": 431,
+    "frozen_observation_enforced": true,
+    "post_freeze_event_ids_excluded_from_m7b": []
+  },
+  "kernel_summary": {
+    "CORE-L0": {
+      "positive_total": 9,
+      "matched_positive": 8,
+      "false_negative": 1,
+      "event_recall": 0.8888888888888888,
+      "no_event_eligible": 196,
+      "no_event_false_positive": 23,
+      "no_event_false_positive_rate": 0.11734693877551021,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 0.25806451612903225
+    },
+    "KERNEL-L1": {
+      "positive_total": 9,
+      "matched_positive": 7,
+      "false_negative": 2,
+      "event_recall": 0.7777777777777778,
+      "no_event_eligible": 196,
+      "no_event_false_positive": 2,
+      "no_event_false_positive_rate": 0.01020408163265306,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 0.7777777777777778
+    },
+    "CORE-S0": {
+      "positive_total": 10,
+      "matched_positive": 10,
+      "false_negative": 0,
+      "event_recall": 1.0,
+      "no_event_eligible": 196,
+      "no_event_false_positive": 19,
+      "no_event_false_positive_rate": 0.09693877551020408,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 0.3448275862068966
+    },
+    "KERNEL-S1": {
+      "positive_total": 10,
+      "matched_positive": 10,
+      "false_negative": 0,
+      "event_recall": 1.0,
+      "no_event_eligible": 196,
+      "no_event_false_positive": 11,
+      "no_event_false_positive_rate": 0.05612244897959184,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 0.47619047619047616
+    },
+    "EXIT-L0": {
+      "positive_total": 7,
+      "matched_positive": 7,
+      "false_negative": 0,
+      "event_recall": 1.0,
+      "no_event_eligible": 117,
+      "no_event_false_positive": 5,
+      "no_event_false_positive_rate": 0.042735042735042736,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 0.5833333333333334
+    },
+    "EXIT-S0": {
+      "positive_total": 10,
+      "matched_positive": 10,
+      "false_negative": 0,
+      "event_recall": 1.0,
+      "no_event_eligible": 118,
+      "no_event_false_positive": 0,
+      "no_event_false_positive_rate": 0.0,
+      "other_event_collision": 0,
+      "precision_including_event_collisions": 1.0
+    }
+  },
+  "ema_residual_summary": {
+    "recorded_vs_derived_alignment_mismatch_count": 0,
+    "primary_event_near_ema_cross_within_2bps_count": 6,
+    "tradingview_ema_values_available": false,
+    "tradingview_mt5_direct_numeric_comparison_performed": false,
+    "interpretation": "M7B can audit MT5 EMA stack margins and near-cross sensitivity, but cannot measure a direct TradingView-vs-MT5 EMA numeric difference without exported TradingView EMA values."
+  },
+  "other_event_collision_count": 0,
+  "sensitivity_formula_promoted": false,
+  "jackknife_formula_refit": false,
+  "m7c_decision": {
+    "decision": "PASS",
+    "next_stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+    "scope_of_pass": "Approval to start prospective shadow comparison only. No historical scan, entry gate, Discord, MT5 order, live-ready, or final signal approval.",
+    "blocking_reasons": []
+  },
+  "formal_interpretation": "M7B approves only a prospective M7C shadow comparison. It does not establish independent forward reproduction and does not approve historical scanning, delivery, execution, live-ready, or final signal.",
+  "safety_state": {
+    "audit_only": true,
+    "historical_scan_approved": false,
+    "cross_timeframe_scan_approved": false,
+    "entry_gate": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
