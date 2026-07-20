@@ -9,9 +9,13 @@ if defined LOCALAPPDATA (
 )
 set "LOCAL_ENV=%LOCAL_ROOT%\.env"
 set "LOCAL_DB=%LOCAL_ROOT%\mochipoyo_alerts.sqlite3"
+set "RUNTIME_MANIFEST=%LOCAL_ROOT%\m7c_runtime\m7c_prospective_shadow_manifest_runtime.json"
 set "STOP_FILE=%LOCAL_ROOT%\STOP_M7C_SHADOW_LOOP"
-set "STATUS_FILE=%LOCAL_ROOT%\logs\latest_m7c_shadow_loop_status.json"
-set "SCRIPT=%SCRIPT_DIR%run_m7c_prospective_shadow_forever.py"
+set "M7C_DIR=%LOCAL_ROOT%\logs\m7c"
+set "DERIVED_DIR=%LOCAL_ROOT%\logs\derived"
+set "STATUS_FILE=%M7C_DIR%\latest_m7c_shadow_loop_status.json"
+set "LOG_FILE=%M7C_DIR%\m7c_shadow_forever.log"
+set "SCRIPT=%SCRIPT_DIR%run_m7c_prospective_shadow_forever_safe.py"
 
 if not exist "%LOCAL_DB%" (
   echo [ERROR] Mochipoyo SQLite database was not found.
@@ -25,22 +29,33 @@ if not exist "%LOCAL_ENV%" (
   pause
   exit /b 2
 )
+if not exist "%RUNTIME_MANIFEST%" (
+  echo [ERROR] Local M7C runtime manifest was not found.
+  echo Run this first:
+  echo "%SCRIPT_DIR%run_initialize_m7c_prospective_shadow_runtime_once.bat"
+  echo.
+  pause
+  exit /b 2
+)
 if not exist "%SCRIPT%" (
-  echo [ERROR] Stage M7C loop script was not found:
+  echo [ERROR] Stage M7C safe loop script was not found:
   echo "%SCRIPT%"
   echo.
   pause
   exit /b 2
 )
-if exist "%STOP_FILE%" (
-  echo [INFO] Removing the previous M7C stop request before startup.
-  del /q "%STOP_FILE%" >nul 2>&1
-)
+if not exist "%M7C_DIR%" mkdir "%M7C_DIR%"
+if not exist "%DERIVED_DIR%" mkdir "%DERIVED_DIR%"
+if exist "%STOP_FILE%" del /q "%STOP_FILE%" >nul 2>&1
 
 echo ============================================================
 echo Mochipoyo Stage M7C prospective shadow - AUDIT ONLY FOREVER
 echo Poll interval            : 300 seconds
+echo Runtime manifest         : %RUNTIME_MANIFEST%
+echo M7C folder               : %M7C_DIR%
+echo Derived folder           : %DERIVED_DIR%
 echo Existing collector       : MUST REMAIN RUNNING SEPARATELY
+echo Contract exit 2          : STOP INSTEAD OF REPEATING
 echo Formula refit            : OFF
 echo Historical replay        : OFF
 echo Reentry rule             : NOT USED
@@ -56,8 +71,13 @@ echo.
 py -3.12 "%SCRIPT%" ^
   --env "%LOCAL_ENV%" ^
   --db "%LOCAL_DB%" ^
+  --manifest "%RUNTIME_MANIFEST%" ^
+  --output-dir "%M7C_DIR%" ^
+  --derived-output-dir "%DERIVED_DIR%" ^
   --interval-seconds 300 ^
-  --max-cycles 0
+  --max-cycles 0 ^
+  --log "%LOG_FILE%" ^
+  --status "%STATUS_FILE%"
 set "EXITCODE=%ERRORLEVEL%"
 
 echo.
