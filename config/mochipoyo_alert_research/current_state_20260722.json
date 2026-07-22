@@ -1,0 +1,103 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "recorded_at_utc": "2026-07-22T07:55:44Z",
+  "status": "M7C_VALID_FORWARD_COLLECTION_24_SUPPORTED_EVENTS_CONTINUE_AUDIT_ONLY",
+  "stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+  "runtime": {
+    "status": "RUNNING",
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "runtime_manifest_reset_required": false,
+    "restart_from_zero_required": false,
+    "collector_must_continue": true,
+    "m7c_must_continue": true,
+    "chat_handoff_requires_process_restart": false,
+    "successful_m7c_cycles": 488,
+    "failed_m7c_cycles": 0,
+    "last_exit_code": 0
+  },
+  "latest_forward_snapshot": {
+    "new_source_event_count": 26,
+    "supported_source_event_count": 24,
+    "unsupported_reentry_count": 2,
+    "unsupported_opposite_event_count": 0,
+    "scored_source_event_count": 24,
+    "pending_csv_source_event_count": 0,
+    "exact_match_count": 15,
+    "within_one_bar_match_count": 17,
+    "missed_count": 7,
+    "wrong_transition_nearby_count": 0,
+    "exact_recall": 0.625,
+    "within_one_bar_recall": 0.7083333333333334,
+    "finalized_extra_proxy_signal_count": 24,
+    "pending_grace_proxy_signal_count": 0,
+    "proxy_decision_count": 318,
+    "proxy_signal_count": 41
+  },
+  "readiness": {
+    "supported_source_events_observed": 24,
+    "by_ticker": {
+      "BTCUSD": 13,
+      "XAUUSD": 11
+    },
+    "by_transition": {
+      "LONG_EXIT": 10,
+      "PRIMARY_LONG": 10,
+      "PRIMARY_SHORT": 2,
+      "SHORT_EXIT": 2
+    },
+    "operational_checkpoint_reached": true,
+    "interim_checkpoint_reached": true,
+    "formal_minimum_supported_source_events": 30,
+    "formal_minimum_events_per_ticker": 10,
+    "formal_minimum_events_per_primary_direction": 5,
+    "formal_minimum_exit_events": 10,
+    "remaining_supported_events_to_30": 6,
+    "remaining_primary_short_events_to_5": 3,
+    "formal_review_state": "INSUFFICIENT_FORWARD_SAMPLE",
+    "automatic_reproduction_claim": false
+  },
+  "user_objective": {
+    "exact_clone_is_not_final_goal": true,
+    "coverage_anchor": "DO_NOT_MISS_SUPPORTED_MOCHIPOYO_SOURCE_ALERTS",
+    "additional_proxy_alerts_allowed": true,
+    "preferred_value_add": "KEEP_USEFUL_EXTRA_ALERTS_AND_REMOVE_OR_SUPPRESS LOSING_EXTRA_ALERTS",
+    "source_matched_alert_suppression_default": "FORBIDDEN",
+    "reference_contract": "config/mochipoyo_alert_research/objective_coverage_plus_value_add_20260722.json"
+  },
+  "frozen_m7c_policy": {
+    "formula_refit_allowed": false,
+    "threshold_change_allowed": false,
+    "matching_rule_change_allowed": false,
+    "runtime_manifest_reset_allowed": false,
+    "historical_replay_allowed": false,
+    "reentry_scoring_enabled": false,
+    "entry_gate_enabled": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "interpretation": {
+    "missed_source_events": "COVERAGE_DEFECTS_TO_AUDIT_AFTER_FROZEN_M7C_REVIEW",
+    "extra_proxy_signals": "EXTRA_CANDIDATES_NOT_AUTOMATIC_FAILURES",
+    "current_24_extra_signals_are_trades": false,
+    "outcome_evaluation_completed": false,
+    "extra_signal_loss_filter_completed": false
+  },
+  "user_webhook_incident": {
+    "user_reported_personal_alert_sent_to_same_webhook": true,
+    "message_body_was_empty_or_missing": true,
+    "persisted_row_identified": false,
+    "sample_exclusion_applied": false,
+    "policy": "Do not exclude any raw alert ID by guess. Require concrete stored-row evidence before annotation or exclusion."
+  },
+  "next_stage_sequence": [
+    "M7C_FORMAL_MANUAL_REVIEW_AFTER_ALL_GATES",
+    "M8A_COVERAGE_GAP_AUDIT",
+    "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+    "M8C_EXTRA_LOSS_REDUCTION_GATE_SHADOW",
+    "M8D_INCREMENTAL_PORTFOLIO_REVIEW"
+  ]
+}
