@@ -39,8 +39,9 @@
     "Begin M8A coverage-gap audit on the frozen missed-source set.",
     "Freeze extra-candidate timestamps before any M8B future-outcome evaluation.",
     "Do not suppress source-matched Mochipoyo alerts by default.",
-    "From M8A onward, create actual numbered operator filenames and actual numbered user-output filenames inside stage-specific folders.",
-    "Create one 99_UPLOAD_PACKAGE folder or ZIP so the user does not search across multiple directories."
+    "From M8A onward, separate internal Python files and user-operated BAT files into different folders.",
+    "Number only the user-operated BAT physical filenames in launch order.",
+    "Create a LATEST results folder and a single 99_UPLOAD_PACKAGE.zip so the user does not search across directories."
   ],
   "required_upload_files_at_formal_trigger": [
     "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_prospective_shadow.json",
@@ -59,13 +60,20 @@
   "future_file_organization": {
     "existing_m7c_files_renamed": false,
     "applies_from_stage": "M8A",
-    "actual_operator_filenames_numbered": true,
-    "actual_user_output_filenames_numbered": true,
-    "stage_specific_operator_folder_required": true,
-    "single_run_output_folder_required": true,
+    "python_folder": "Internal Python files only; user never launches them directly.",
+    "bat_folder": "User-operated BAT files only.",
+    "actual_bat_filenames_numbered": true,
+    "python_filenames_numbered": false,
+    "instruction_style": "Tell the user which numbered BAT to launch, for example: launch 02 in the bat folder.",
+    "latest_output_folder_pattern": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\<STAGE>\\LATEST",
+    "archive_output_folder_pattern": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\<STAGE>\\archive\\<run_timestamp>",
+    "open_latest_results_bat_required": true,
+    "numbered_user_output_filenames_required": true,
     "read_me_first_required": true,
-    "single_upload_package_required": true,
-    "explanation_only_numbering_forbidden": true
+    "single_upload_package": "LATEST\\99_UPLOAD_PACKAGE.zip",
+    "multiple_folder_search_by_user": "FORBIDDEN",
+    "piecemeal_upload_requests": "FORBIDDEN",
+    "explanation_only_numbering": "FORBIDDEN"
   },
   "stop_and_escalate_conditions": [
     "M7C process exits with code 2.",
