@@ -1,0 +1,72 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "recorded_at": "2026-07-22",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "USER_OBJECTIVE_FROZEN_FOR_FUTURE_STAGES",
+  "user_objective": {
+    "exact_clone_is_not_the_final_goal": true,
+    "primary_priority": "DO_NOT_MISS_SUPPORTED_MOCHIPOYO_SOURCE_ALERTS",
+    "additional_proxy_alerts_allowed": true,
+    "preferred_value_add": "KEEP_USEFUL_EXTRA_ALERTS_WHILE_REMOVING_OR_SUPPRESSING LOSING_EXTRA_ALERTS",
+    "source_alert_suppression_default": "FORBIDDEN",
+    "interpretation": "Mochipoyo reproduction is the coverage anchor. The research system may add independent alerts, provided source-alert coverage is preserved and extras are evaluated separately for net value."
+  },
+  "current_m7c_policy": {
+    "continue_unchanged": true,
+    "formula_refit_during_forward_collection": false,
+    "runtime_manifest_reset": false,
+    "restart_from_zero_required": false,
+    "extra_proxy_signal_interpretation": "RESEARCH_CANDIDATE_NOT_AUTOMATIC_FAILURE",
+    "missed_source_event_interpretation": "PRIMARY_COVERAGE_DEFECT_TO_INVESTIGATE_AFTER_FROZEN_FORWARD_REVIEW"
+  },
+  "required_separation": {
+    "SOURCE_MATCHED": "Proxy transition corresponding to a supported Mochipoyo source event.",
+    "MISSED_SOURCE": "Supported Mochipoyo source event without an accepted proxy match.",
+    "EXTRA_CANDIDATE": "Proxy transition without a source match after grace expiry; permitted but not yet proven useful.",
+    "EXTRA_ACCEPTED": "Extra candidate proven useful under strictly forward or frozen walk-forward outcome evaluation.",
+    "EXTRA_REJECTED": "Extra candidate rejected by a pre-decision-only loss-reduction rule."
+  },
+  "post_m7c_research_sequence": [
+    {
+      "stage": "M8A_COVERAGE_GAP_AUDIT",
+      "purpose": "Investigate missed source events and design recall-first candidate extensions without using future outcomes."
+    },
+    {
+      "stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+      "purpose": "Freeze extra-signal timestamps first, then evaluate future outcomes separately with transaction costs and no lookahead."
+    },
+    {
+      "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_SHADOW",
+      "purpose": "Build and forward-test a gate that removes poor extra alerts only; do not suppress matched source alerts by default."
+    },
+    {
+      "stage": "M8D_INCREMENTAL_PORTFOLIO_REVIEW",
+      "purpose": "Compare source-anchor only versus source-anchor plus accepted extras on net profit, PF, drawdown, losing streak, and signal count."
+    }
+  ],
+  "success_metrics": {
+    "coverage_first": [
+      "supported source-event recall",
+      "exact M15 match rate",
+      "within-one-M15-bar match rate",
+      "missed source-event count"
+    ],
+    "extra_value": [
+      "extra candidate count",
+      "extra accepted count",
+      "extra win rate after costs",
+      "extra PF after costs",
+      "incremental net profit",
+      "incremental drawdown",
+      "incremental maximum losing streak"
+    ],
+    "prohibited_shortcut": "Do not tune the extra-signal gate on the same forward sample used to claim performance."
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
