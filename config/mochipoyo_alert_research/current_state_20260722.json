@@ -5,6 +5,8 @@
   "recorded_at_utc": "2026-07-22T07:55:44Z",
   "status": "M7C_VALID_FORWARD_COLLECTION_24_SUPPORTED_EVENTS_CONTINUE_AUDIT_ONLY",
   "stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+  "authoritative_handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_V2_20260722.md",
+  "file_organization_contract": "docs/mochipoyo_alert_research/FILE_ORGANIZATION_AND_NUMBERING_CONVENTION_20260722.md",
   "runtime": {
     "status": "RUNNING",
     "prospective_start_utc": "2026-07-20T14:54:15Z",
@@ -62,7 +64,7 @@
     "exact_clone_is_not_final_goal": true,
     "coverage_anchor": "DO_NOT_MISS_SUPPORTED_MOCHIPOYO_SOURCE_ALERTS",
     "additional_proxy_alerts_allowed": true,
-    "preferred_value_add": "KEEP_USEFUL_EXTRA_ALERTS_AND_REMOVE_OR_SUPPRESS LOSING_EXTRA_ALERTS",
+    "preferred_value_add": "KEEP_USEFUL_EXTRA_ALERTS_AND_REMOVE_OR_SUPPRESS_LOSING_EXTRA_ALERTS",
     "source_matched_alert_suppression_default": "FORBIDDEN",
     "reference_contract": "config/mochipoyo_alert_research/objective_coverage_plus_value_add_20260722.json"
   },
@@ -85,6 +87,18 @@
     "current_24_extra_signals_are_trades": false,
     "outcome_evaluation_completed": false,
     "extra_signal_loss_filter_completed": false
+  },
+  "future_file_organization": {
+    "user_intent": "NUMBER_THE_ACTUAL FILENAMES AND GROUP RELATED FILES SO THE USER DOES NOT SEARCH AMONG SIMILAR NAMES",
+    "existing_m7c_files_renamed_or_moved": false,
+    "applies_from_stage": "M8A",
+    "actual_operator_filenames_numbered": true,
+    "actual_user_output_filenames_numbered": true,
+    "stage_specific_operator_folder_required": true,
+    "single_run_output_folder_required": true,
+    "read_me_first_required": true,
+    "single_upload_package_required": true,
+    "explanation_only_numbering_forbidden": true
   },
   "user_webhook_incident": {
     "user_reported_personal_alert_sent_to_same_webhook": true,
