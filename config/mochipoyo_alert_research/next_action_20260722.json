@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "M7C_CONTINUE_UNCHANGED_UNTIL_FORMAL_GATES",
+  "current_stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+  "current_state_file": "config/mochipoyo_alert_research/current_state_20260722.json",
+  "authoritative_handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_20260722.md",
+  "immediate_action": "KEEP_EXISTING_COLLECTOR_AND_M7C_WINDOWS_RUNNING_UNCHANGED",
+  "do_not_do_now": [
+    "Do not stop processes solely because the ChatGPT conversation changes.",
+    "Do not rerun the runtime initializer.",
+    "Do not reset or recreate the runtime manifest.",
+    "Do not restart formal sample counting from zero.",
+    "Do not refit kernels or thresholds during M7C collection.",
+    "Do not treat extra proxy signals as automatic failures.",
+    "Do not evaluate or tune an extra-signal loss filter on the still-growing M7C sample.",
+    "Do not exclude a raw alert ID based only on suspicion about the user's empty-message webhook test."
+  ],
+  "formal_review_trigger": {
+    "all_conditions_required": true,
+    "minimum_supported_source_events": 30,
+    "minimum_btc_supported_events": 10,
+    "minimum_xau_supported_events": 10,
+    "minimum_primary_long_events": 5,
+    "minimum_primary_short_events": 5,
+    "minimum_total_exit_events": 10,
+    "current_supported_source_events": 24,
+    "current_primary_short_events": 2,
+    "remaining_supported_events_to_30": 6,
+    "remaining_primary_short_events_to_5": 3
+  },
+  "when_trigger_reached": [
+    "Freeze a copy of all required M7C output files before changing any code or formula.",
+    "Perform the M7C manual reproduction review without claiming exact proprietary formula reproduction.",
+    "Separate SOURCE_MATCHED, MISSED_SOURCE, unsupported REENTRY, and EXTRA_CANDIDATE records.",
+    "Begin M8A coverage-gap audit on the frozen missed-source set.",
+    "Freeze extra-candidate timestamps before any M8B future-outcome evaluation.",
+    "Do not suppress source-matched Mochipoyo alerts by default."
+  ],
+  "required_upload_files_at_formal_trigger": [
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_prospective_shadow.json",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_shadow_loop_status.json",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_source_event_comparisons.csv",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_extra_proxy_signals.csv",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_proxy_signals.csv",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_proxy_decisions.csv",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\m7c_shadow_forever.log"
+  ],
+  "collector_files_only_if_collection_problem_occurs": [
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\collector\\collector_forever.log",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\latest_collection_result.json",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\collector\\latest_loop_status.json"
+  ],
+  "stop_and_escalate_conditions": [
+    "M7C process exits with code 2.",
+    "M7C status changes from COLLECTING to a contract block or error.",
+    "prospective_start_utc changes from 2026-07-20T14:54:15Z.",
+    "failed_cycles becomes greater than zero.",
+    "A late event at or before prospective_start_utc is detected.",
+    "Collector stops, fails, or its cursor no longer advances after confirmed new source alerts."
+  ],
+  "post_m7c_objective": "Preserve supported Mochipoyo alert coverage, allow useful additional alerts, and reduce losing extras using pre-decision-only gates evaluated on a separate frozen or forward sample."
+}
