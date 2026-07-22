@@ -4,7 +4,9 @@
   "status": "M7C_CONTINUE_UNCHANGED_UNTIL_FORMAL_GATES",
   "current_stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
   "current_state_file": "config/mochipoyo_alert_research/current_state_20260722.json",
-  "authoritative_handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_20260722.md",
+  "authoritative_handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_V2_20260722.md",
+  "superseded_handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_20260722.md",
+  "file_organization_contract": "docs/mochipoyo_alert_research/FILE_ORGANIZATION_AND_NUMBERING_CONVENTION_20260722.md",
   "immediate_action": "KEEP_EXISTING_COLLECTOR_AND_M7C_WINDOWS_RUNNING_UNCHANGED",
   "do_not_do_now": [
     "Do not stop processes solely because the ChatGPT conversation changes.",
@@ -14,7 +16,8 @@
     "Do not refit kernels or thresholds during M7C collection.",
     "Do not treat extra proxy signals as automatic failures.",
     "Do not evaluate or tune an extra-signal loss filter on the still-growing M7C sample.",
-    "Do not exclude a raw alert ID based only on suspicion about the user's empty-message webhook test."
+    "Do not exclude a raw alert ID based only on suspicion about the user's empty-message webhook test.",
+    "Do not rename or move existing M7C files merely to add numbers."
   ],
   "formal_review_trigger": {
     "all_conditions_required": true,
@@ -35,7 +38,9 @@
     "Separate SOURCE_MATCHED, MISSED_SOURCE, unsupported REENTRY, and EXTRA_CANDIDATE records.",
     "Begin M8A coverage-gap audit on the frozen missed-source set.",
     "Freeze extra-candidate timestamps before any M8B future-outcome evaluation.",
-    "Do not suppress source-matched Mochipoyo alerts by default."
+    "Do not suppress source-matched Mochipoyo alerts by default.",
+    "From M8A onward, create actual numbered operator filenames and actual numbered user-output filenames inside stage-specific folders.",
+    "Create one 99_UPLOAD_PACKAGE folder or ZIP so the user does not search across multiple directories."
   ],
   "required_upload_files_at_formal_trigger": [
     "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\m7c\\latest_m7c_prospective_shadow.json",
@@ -51,6 +56,17 @@
     "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\latest_collection_result.json",
     "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\logs\\collector\\latest_loop_status.json"
   ],
+  "future_file_organization": {
+    "existing_m7c_files_renamed": false,
+    "applies_from_stage": "M8A",
+    "actual_operator_filenames_numbered": true,
+    "actual_user_output_filenames_numbered": true,
+    "stage_specific_operator_folder_required": true,
+    "single_run_output_folder_required": true,
+    "read_me_first_required": true,
+    "single_upload_package_required": true,
+    "explanation_only_numbering_forbidden": true
+  },
   "stop_and_escalate_conditions": [
     "M7C process exits with code 2.",
     "M7C status changes from COLLECTING to a contract block or error.",
