@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T07:05:00Z",
-  "status": "M8C_RUNNING_M9N_ADAPTIVE_GOLD_CANDIDATES_FOUND_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
+  "recorded_at_utc": "2026-07-24T07:45:00Z",
+  "status": "M8C_RUNNING_M9O_GOLD_DYNAMIC_CORE_ROBUSTNESS_PASS_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -18,7 +18,7 @@
     "status": "UPLOAD_SIDE_PRECHECK_COMPLETE_LOCAL_REPRODUCTION_OPTIONAL_PENDING",
     "local_path_fix": "MT5 Files\\gold_v3_2023_2026\\",
     "runner": "scripts/mochipoyo_alert_research/m9l/bat/01_run_gold_multiyear_holdout_audit.bat",
-    "note": "Local reproduction remains useful for audit but is not a blocker for assistant-side exploration."
+    "note": "M9L local reproduction is optional and not a blocker for M9P."
   },
   "m9m": {
     "status": "STATIC_CANDIDATES_FAILED_2025_HOLDOUT",
@@ -28,17 +28,29 @@
   "m9n": {
     "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY",
     "result": "config/mochipoyo_alert_research/m9n_gold_regime_adaptive_assistant_side_result_20260724.json",
-    "primary_population": "XAUUSD LONG first causal M1 turn",
-    "N1_m5_quiet_pullback": "1075 trades, WR 63.91%, PF 1.3346, about 25.6 trades/observed month",
-    "N2_m15_strong_momentum": "820 trades, WR 57.93%, PF 1.3748, about 19.5 trades/observed month",
-    "N3_broad_core": "N1 OR N2; 1496 trades, WR 62.23%, PF 1.3648, max DD 510.5 bps, about 35.6 trades/observed month",
-    "N4_premium": "D1 quiet-body AND N1; 248 trades, WR 66.94%, PF 2.1772, max DD 321.3 bps, low frequency and subperiod instability",
-    "short_decision": "Do not prioritize SHORT; 2023-2025 remains structurally weak.",
+    "decision": "RELATIVE_CAUSAL_FEATURES_ARE_MORE_STABLE_THAN_STATIC_THRESHOLDS"
+  },
+  "m9o": {
+    "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY",
+    "result": "config/mochipoyo_alert_research/m9o_gold_dynamic_core_robustness_result_20260724.json",
+    "canonical_N1": "M5 tick_volume_ratio20 <= full-window trailing-200 median",
+    "canonical_N2": "M15 MACD(6,13) line bps >= full-window trailing-200 75th percentile",
+    "canonical_N3": "N1 OR N2",
+    "canonical_N3_metrics": "1495 trades, WR 62.27%, PF 1.3659, max DD 510.5 bps, about 35.6 trades/month",
+    "canonical_N3_yearly_pf": {"2023": 1.1452954484881541, "2024": 1.357539497969303, "2025": 1.2422104302466985, "2026_to_0619": 1.756805217618165},
+    "robustness": "72 nearby W/q combinations; all 72 have PF>1 in every available calendar year and all 72 remain aggregate PF>1 after an extra 2 bps/trade stress deduction",
+    "N6_secondary_risk": "H4 RCI9 trailing-100 percentile >25% and <=50% is a descriptive loss-tail risk zone; report-only, not a gate",
     "promotion": false
+  },
+  "m9p": {
+    "status": "DESIGN_READY_IMPLEMENTATION_NEXT",
+    "contract": "config/mochipoyo_alert_research/m9p_gold_dynamic_core_reproduction_contract_20260724.json",
+    "purpose": "Deterministically reproduce canonical N1/N2/N3 and report-only N6 from the local GOLD folder before any new prospective GOLD shadow is considered.",
+    "user_bat_required_now": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
-    "current_best_research_direction": "RELATIVE_CAUSAL_REGIME_FEATURES_INSTEAD_OF_FIXED_THRESHOLDS",
+    "current_best_research_direction": "N3_RELATIVE_DYNAMIC_GOLD_LONG_CORE_WITH_SEPARATE_N6_RISK_OBSERVATION",
     "preserve_useful_frequency": true,
     "reduce_drawdown_and_loss_tail": true,
     "continue_forward_collection_in_parallel": true
