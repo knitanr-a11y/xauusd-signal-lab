@@ -1,0 +1,56 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9J_SOURCE_LIKE_RCI_LOCATION_HOLDOUT_AUDIT",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "hypothesis_origin": {
+    "source": "M9I2 timing-corrected genuine-source vs proxy-extra comparison",
+    "observation_window": "2026-07-15 through 2026-07-23 genuine-source window",
+    "key_structure": "All 43 genuine source PRIMARY decisions had M15 RCI9 on the pullback side of zero: LONG RCI9<0 and SHORT RCI9>0. Only 8 of 41 proxy extras did.",
+    "outcome_not_used_to_choose_zero": true,
+    "zero_is_natural_rci_sign_boundary": true
+  },
+  "validation_population": {
+    "source": "M9C_CONTEXT_WARMUP_FIX_V2",
+    "tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "time_relation": "STRICTLY_PRE_GENUINE_SOURCE_CUTOFF",
+    "expected_exact_m1_resolved": 952,
+    "expected_first_turn": 852,
+    "note": "This is a temporally separate retrospective holdout. It is not prospective validation and does not establish source truth."
+  },
+  "policies": {
+    "J0_CONTROL": "keep all M9C trades",
+    "J1_BTC_LONG_SIGN": "for BTCUSD LONG only require entry_m15_rci9<0; keep every other branch unchanged",
+    "J2_BTC_LONG_NEG50_SENSITIVITY": "for BTCUSD LONG only require entry_m15_rci9<=-50; keep every other branch unchanged; sensitivity only",
+    "J3_GLOBAL_SIGN_REFERENCE": "require LONG entry_m15_rci9<0 and SHORT entry_m15_rci9>0 for all tickers; reproduction-oriented reference only"
+  },
+  "evaluation": {
+    "panels": ["IMMEDIATE_M9C_EXACT_M1", "FIRST_CAUSAL_TURN_M9C"],
+    "metrics": ["count", "retention", "win_rate", "profit_factor_bps", "net_bps", "max_drawdown_bps", "max_losing_streak"],
+    "monthly_counts_and_metrics": true,
+    "ticker_direction_metrics": true,
+    "historical_spread_already_in_m9c_outcomes": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "decision_policy": {
+    "j1_is_primary_hypothesis": true,
+    "j2_is_sensitivity_only": true,
+    "j3_is_reproduction_reference_not_preferred_trading_policy": true,
+    "same_holdout_can_support_or_reject_hypothesis": true,
+    "automatic_live_or_forward_promotion": false,
+    "future_forward_confirmation_required": true,
+    "do_not_optimize_decimal_rci_thresholds": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m8c_keep_running": true
+  }
+}
