@@ -1,0 +1,66 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "recorded_at_utc": "2026-07-23T13:46:43Z",
+  "status": "M8A_COVERAGE_GAP_AUDIT_PASS_M8B_NEXT_AUDIT_ONLY",
+  "stage": "M8A_COVERAGE_GAP_AUDIT",
+  "formal_pre_m8a_baseline_commit": "c0bd4b9d20235422720b7c250e95a2e2c3f64b4d",
+  "prospective_start_utc": "2026-07-20T14:54:15Z",
+  "m7c_formal_gate": {
+    "supported_source_events": 35,
+    "BTCUSD": 19,
+    "XAUUSD": 16,
+    "PRIMARY_LONG": 12,
+    "PRIMARY_SHORT": 5,
+    "LONG_EXIT": 13,
+    "SHORT_EXIT": 5,
+    "formal_review_state": "READY_FOR_MANUAL_REPRODUCTION_REVIEW",
+    "automatic_reproduction_claim": false
+  },
+  "m7c_reproduction": {
+    "exact_match_count": 19,
+    "within_one_bar_match_count": 21,
+    "missed_count": 14,
+    "exact_recall": 0.5428571428571428,
+    "within_one_bar_recall": 0.6,
+    "unsupported_reentry_count": 10,
+    "finalized_extra_proxy_signal_count": 36,
+    "pending_grace_proxy_signal_count": 2
+  },
+  "m8a": {
+    "status": "PASS",
+    "source_matched_count": 21,
+    "missed_source_count": 14,
+    "unsupported_reentry_count": 10,
+    "extra_candidate_count": 36,
+    "pending_source_arrival_grace_count": 2,
+    "missed_gap_class_counts": {
+      "DIRECT_EXIT_THRESHOLD_GAP": 5,
+      "STATE_DIVERGENCE_AFTER_PRIOR_MISSED_SOURCE": 6,
+      "STATE_DIVERGENCE_AFTER_PRIOR_EXTRA_PROXY": 3
+    },
+    "direct_primary_kernel_gap_when_required_state_matched_count": 0,
+    "future_outcomes_used": false,
+    "formula_refit_performed": false,
+    "threshold_change_performed": false
+  },
+  "interpretation": {
+    "primary_kernel_direct_gap_dominant": false,
+    "dominant_observed_gap_family": "STATE_MACHINE_DIVERGENCE_PLUS_EXIT_THRESHOLD_GAPS",
+    "source_matched_alert_suppression_default": "FORBIDDEN",
+    "extra_candidates_are_automatic_failures": false,
+    "pending_grace_is_m8b_eligible": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_runtime_manifest_reset_allowed": false,
+    "prospective_start_change_allowed": false
+  },
+  "next_stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT"
+}
