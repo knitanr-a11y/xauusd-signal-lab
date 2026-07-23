@@ -1,0 +1,46 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "incident": "M9I_SOURCE_DECISION_TIMING_OFF_BY_ONE_M15_BAR",
+  "status": "CONFIRMED_IMPLEMENTATION_TIMING_ERROR",
+  "affected": [
+    "M9I source-vs-proxy match classification",
+    "M9I genuine-source feature snapshots",
+    "M9I genuine-source outcome timing",
+    "M9B genuine-source outcome metrics pending timing-corrected recomputation"
+  ],
+  "unaffected": [
+    "M9C-M9H frozen proxy replay decision boundaries",
+    "M7C frozen formula and thresholds",
+    "M8C prospective start and runtime"
+  ],
+  "evidence": {
+    "manifest_semantics": "entry_server_open is the open time of the M15 bar whose close produced the source alert; entry_utc is the alert/decision time at that bar close",
+    "example": {
+      "ticker": "BTCUSD",
+      "entry_server_open": "2026.07.15 11:15:00",
+      "entry_utc": "2026-07-15T08:30:00Z",
+      "july_server_offset_hours": 3,
+      "implied_decision_server_open": "2026.07.15 11:30:00"
+    },
+    "m9i_observed_old_classification": {"EXACT": 1, "WITHIN_ONE_BAR_LATE": 28, "MISSED": 14},
+    "diagnostic_after_plus_15_minute_source_decision_alignment": {"EXACT": 28, "WITHIN_ONE_BAR_EARLY": 1, "MISSED": 14},
+    "interpretation": "The systematic +15 minute offset confirms source bar-open timestamps were compared against proxy decision timestamps without advancing source timing to the next M15 open."
+  },
+  "correction_contract": {
+    "source_decision_server_open": "source_entry_server_open + 15 minutes",
+    "source_exit_decision_server_open": "source_exit_server_open + 15 minutes",
+    "source_features": "closed bars available by source_decision_server_open only",
+    "source_execution_entry": "exact M1 row at source_decision_server_open",
+    "source_execution_exit": "exact M1 row at source_exit_decision_server_open",
+    "proxy_timing": "UNCHANGED",
+    "nearest_or_future_fallback": false
+  },
+  "guardrails": {
+    "old_m9i_comparison_promotable": false,
+    "old_m9b_source_pf_promotable": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "audit_only": true
+  }
+}
