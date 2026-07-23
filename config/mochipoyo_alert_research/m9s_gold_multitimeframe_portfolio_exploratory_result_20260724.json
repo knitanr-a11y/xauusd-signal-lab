@@ -1,0 +1,116 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9S_GOLD_MULTI_TIMEFRAME_PORTFOLIO_BRANCH_EXPLORATION",
+  "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
+  "recorded_at_utc": "2026-07-24T09:00:00Z",
+  "population": "User-supplied XAUUSD M1/M5/M15/H1/H4/D1 history from 2023-01-03 through 2026-06-19; frozen M7C-style state machine replayed separately per signal timeframe; entries evaluated from first causal M1 turn with historical spread treatment.",
+  "evidence_warning": "All historical periods are research-exposed. M5/H1/H4 branch conditions below are exploratory and must not be promoted from these historical results. M15 N3 uses the already deterministic M9P canonical result.",
+  "cost_contract": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "raw_first_turn_long_baselines": {
+    "M5": {"count": 4708, "win_rate": 0.6401869158878505, "profit_factor_bps": 1.0278226667697203, "max_drawdown_bps": 2329.8350427700143},
+    "M15": {"count": 2068, "win_rate": 0.6247582205029013, "profit_factor_bps": 1.1171085623110528, "max_drawdown_bps": 1107.7027756650477},
+    "H1": {"count": 586, "win_rate": 0.6723549488054608, "profit_factor_bps": 1.3444146249393072, "max_drawdown_bps": 1327.7543802815603},
+    "H4": {"count": 125, "win_rate": 0.68, "profit_factor_bps": 1.4344255539327129, "max_drawdown_bps": 1470.8658070712277}
+  },
+  "short_baseline_decision": {
+    "M5_pf": 0.9070281711645491,
+    "M15_pf": 0.8869843085732072,
+    "H1_pf": 0.7585431658429277,
+    "H4_pf": 0.7784842357793761,
+    "decision": "DO_NOT_FORCE_GOLD_SHORT_INTO_PORTFOLIO; NO_STABLE_RAW_SHORT_EDGE_ACROSS_2023_2025"
+  },
+  "exploratory_long_branches": {
+    "S1_M5_STRICT_MULTI_TIMEFRAME_LONG": {
+      "definition": "M5 first-turn LONG where the M5 adaptive own-timeframe core is true (M5 tick-volume-ratio20 <= trailing-200 median OR M5 MACD(6,13) line bps >= trailing-200 75th percentile), AND latest fully closed M15 MACD line bps >= trailing-100 75th percentile, AND latest fully closed H1 MACD line bps >= trailing-100 median, AND latest fully closed H1 RCI9 >= trailing-100 median.",
+      "causal_closed_bar_only": true,
+      "count": 1256,
+      "average_candidates_per_42_months": 29.904761904761905,
+      "win_rate": 0.6544585987261147,
+      "profit_factor_bps": 1.3336981886264172,
+      "average_win_bps": 10.62549087600278,
+      "average_loss_bps": -15.089454137046827,
+      "max_drawdown_bps": 335.25502477738183,
+      "max_losing_streak": 6,
+      "yearly_pf": {"2023": 1.0646159276847817, "2024": 1.4504311258159523, "2025": 1.7264228207470844, "2026_to_0619": 1.1614292515381237},
+      "decision": "PROMISING_EXPLORATORY_ONLY; 2023 AND 2026 MARGINS ARE THIN"
+    },
+    "S2_M15_CANONICAL_N3": {
+      "source": "M9P deterministic local reproduction",
+      "definition": "Canonical strict-full-window M15 N3 = N1 quiet M5 pullback OR N2 strong M15 MACD momentum, as frozen in M9O/M9P.",
+      "count": 1495,
+      "average_candidates_per_42_months": 35.595238095238095,
+      "win_rate": 0.622742474916388,
+      "profit_factor_bps": 1.365884145048126,
+      "average_win_bps": 17.20361387298759,
+      "average_loss_bps": -20.865038385807825,
+      "max_drawdown_bps": 510.52434894848284,
+      "max_losing_streak": 11,
+      "yearly_pf": {"2023": 1.1452954484881541, "2024": 1.357539497969303, "2025": 1.2422104302466985, "2026_to_0619": 1.756805217618165},
+      "decision": "LEADING_REPRODUCIBLE_M15_RESEARCH_CORE_NOT_LIVE"
+    },
+    "S3_H1_HIGHER_TIMEFRAME_MOMENTUM_LONG": {
+      "definition": "H1 first-turn LONG where latest fully closed H4 MACD(6,13) line bps >= its trailing-100 75th percentile AND latest fully closed D1 MACD line bps >= its trailing-100 median.",
+      "causal_closed_bar_only": true,
+      "count": 191,
+      "average_candidates_per_42_months": 4.5476190476190474,
+      "win_rate": 0.7120418848167539,
+      "profit_factor_bps": 1.7802349633701025,
+      "average_win_bps": 35.13579185051415,
+      "average_loss_bps": -48.80323808109188,
+      "max_drawdown_bps": 532.3023910458769,
+      "max_losing_streak": 4,
+      "yearly_pf": {"2023": 2.7167056651995085, "2024": 2.265801881609745, "2025": 1.2938127605226448, "2026_to_0619": 2.370266552359069},
+      "decision": "HIGH_PRIORITY_EXPLORATORY_BRANCH; NEED PARAMETER_NEIGHBORHOOD_AND_PROSPECTIVE VALIDATION"
+    },
+    "S4_H4_DAILY_TREND_LONG": {
+      "definition": "H4 first-turn LONG where latest fully closed D1 RCI9 >= its trailing-100 median AND D1 EMA20 > EMA30 > EMA40.",
+      "causal_closed_bar_only": true,
+      "count": 70,
+      "average_candidates_per_42_months": 1.6666666666666667,
+      "win_rate": 0.7285714285714285,
+      "profit_factor_bps": 3.295562620459433,
+      "average_win_bps": 77.50087391006367,
+      "average_loss_bps": -63.123868518409296,
+      "max_drawdown_bps": 281.7143876704429,
+      "max_losing_streak": 2,
+      "yearly_pf": {"2023": 1.5400614142077957, "2024": 2.8991379244285462, "2025": 3.133736229387815, "2026_to_0619": 16.509734751444167},
+      "warning": "Very small yearly samples, especially 2023 and 2026. Aggregate PF is not trustworthy as a live expectation.",
+      "decision": "PREMIUM_EXPLORATORY_REFERENCE_ONLY"
+    }
+  },
+  "frequency_and_overlap": {
+    "raw_sum_candidates_per_month_before_dedup": 71.71428571428571,
+    "warning": "Do not sum branch counts as independent trades. Multiple timeframes can describe the same market move and should be deduplicated/used as confidence stacking.",
+    "M5_S1_with_M15_N3_within_15m": {"count": 96, "fraction_of_M5_S1": 0.07643312101910828},
+    "M5_S1_with_M15_N3_within_60m": {"count": 363, "fraction_of_M5_S1": 0.2890127388535032},
+    "H1_S3_with_M15_N3_within_60m": {"count": 37, "fraction_of_H1_S3": 0.193717277486911},
+    "H1_S3_with_M15_N3_within_240m": {"count": 107, "fraction_of_H1_S3": 0.5602094240837696},
+    "H4_S4_with_H1_S3_within_240m": {"count": 12, "fraction_of_H4_S4": 0.17142857142857143},
+    "H4_S4_with_M15_N3_within_240m": {"count": 34, "fraction_of_H4_S4": 0.4857142857142857}
+  },
+  "portfolio_direction": [
+    "Stop requiring every single branch to preserve high monthly frequency. Let portfolio breadth across timeframes/tickers supply frequency.",
+    "Use stricter quality filters per timeframe, then deduplicate overlapping LONG events rather than opening one position per timeframe.",
+    "When multiple timeframes agree, treat agreement as confidence/quality information first, not automatic pyramiding.",
+    "Keep M15 N3/Q1/Q2/Q3 risk-reward work as one branch, not the whole system.",
+    "Do not force GOLD SHORT until a stable branch exists.",
+    "BTC remains a separate research family. No 2023-2026 BTC historical dataset is currently available; continue genuine-source/M7C/M8C forward collection and do not transplant GOLD rules into BTC."
+  ],
+  "next_stage": "M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+  "guardrails": {
+    "audit_only": true,
+    "automatic_live_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m9r_gold_prospective_started": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
