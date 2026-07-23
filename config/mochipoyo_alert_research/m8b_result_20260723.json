@@ -1,0 +1,69 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+  "recorded_at_utc": "2026-07-23T14:55:42Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "frozen_scope": {
+    "finalized_extra_signals": 36,
+    "extra_entry_trades_evaluated": 18,
+    "extra_exit_actions_not_double_counted": 18,
+    "pending_grace_excluded": 2,
+    "trade_skeleton_sha256": "f42ce896f00b717320662ff1b64991718bf3e1ce7dfe0d671c62f362731f7acc"
+  },
+  "primary_spread_x1_0": {
+    "trade_count": 18,
+    "wins": 11,
+    "losses": 7,
+    "win_rate": 0.6111111111111112,
+    "profit_factor_bps": 1.1233074155203668,
+    "net_return_bps_sum": 20.26718175007738,
+    "average_return_bps": 1.1259545416709655,
+    "median_return_bps": 2.583154205123295,
+    "max_drawdown_bps": 109.44276759355812,
+    "maximum_losing_streak": 2,
+    "calendar_span_days": 2.7604166666666665,
+    "trades_per_calendar_day": 6.520754716981132
+  },
+  "cost_sensitivity": {
+    "spread_x1_5": {"win_rate": 0.6111111111111112, "profit_factor_bps": 1.0197569376845812, "net_return_bps_sum": 3.3991211493252833},
+    "spread_x2_0": {"win_rate": 0.6111111111111112, "profit_factor_bps": 0.9250795028223845, "net_return_bps_sum": -13.465352151156972}
+  },
+  "primary_splits": {
+    "XAUUSD": {"trade_count": 10, "win_rate": 0.7, "profit_factor_bps": 3.92514627495335, "net_return_bps_sum": 97.49155199395173},
+    "BTCUSD": {"trade_count": 8, "win_rate": 0.5, "profit_factor_bps": 0.4106551300601347, "net_return_bps_sum": -77.22437024387435},
+    "LONG": {"trade_count": 12, "win_rate": 0.5, "profit_factor_bps": 0.7341361616077974, "net_return_bps_sum": -41.21558936840321},
+    "SHORT": {"trade_count": 6, "win_rate": 0.8333333333333334, "profit_factor_bps": 7.5842458525067595, "net_return_bps_sum": 61.48277111848059},
+    "BTCUSD_LONG": {"trade_count": 6, "win_rate": 0.3333333333333333, "profit_factor_bps": 0.18184061065137128, "net_return_bps_sum": -107.20691198687707},
+    "BTCUSD_SHORT": {"trade_count": 2, "win_rate": 1.0, "profit_factor_bps": null, "net_return_bps_sum": 29.98254174300272},
+    "XAUUSD_LONG": {"trade_count": 6, "win_rate": 0.6666666666666666, "profit_factor_bps": 3.7506793886960432, "net_return_bps_sum": 65.99132261847386},
+    "XAUUSD_SHORT": {"trade_count": 4, "win_rate": 0.75, "profit_factor_bps": 4.373388200392281, "net_return_bps_sum": 31.50022937547787}
+  },
+  "exploratory_counterfactual_not_validation": {
+    "rule": "EXTRA_ONLY_BLOCK_BTCUSD_LONG",
+    "same_sample_warning": true,
+    "remaining_trade_count": 12,
+    "spread_x1_0": {"win_rate": 0.75, "profit_factor_bps": 4.824745455594343, "net_return_bps_sum": 127.47409373695446, "trades_per_calendar_day": 4.347169811320755},
+    "spread_x2_0": {"win_rate": 0.75, "profit_factor_bps": 4.246707898553572, "net_return_bps_sum": 114.10540412713958},
+    "interpretation": "HYPOTHESIS_GENERATION_ONLY. These 18 trades may not be reused as validation evidence for this rule."
+  },
+  "interpretation": {
+    "all_extra_promotable": false,
+    "aggregate_edge_robust_to_spread_x2": false,
+    "xau_extra_promising": true,
+    "btc_long_extra_observed_weakness": true,
+    "strict_rci_threshold_search_authorized": false,
+    "preferred_next_test": "MINIMAL_EXTRA_ONLY_TICKER_DIRECTION_GATE_FORWARD_SHADOW",
+    "exact_mochipoyo_replication_required": false
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m7c_runtime_manifest_changed": false
+  }
+}
