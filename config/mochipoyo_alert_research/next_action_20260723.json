@@ -1,48 +1,43 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_FORWARD_SHADOW_OPERATOR_RUN_NEXT",
+  "status": "M8C_RUNNING_M8BX_ONE_TIME_EXCURSION_AUDIT_NEXT",
   "current_stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
-  "immediate_action": "INITIALIZE_M8C_ONCE_THEN_RUN_PERSISTENT_FORWARD_SHADOW",
-  "operator_instruction": {
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BX_EXCURSION_PATH_AUDIT_ONCE",
+  "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
-    "step_1_once": "01_initialize_forward_shadow.bat",
-    "step_1_success": "[M8C INIT PASS]",
-    "step_1_stop": "[M8C INIT BLOCKED]",
-    "step_2_persistent": "02_run_forward_shadow_forever.bat",
-    "step_2_simultaneous_with_collector_and_m7c": "ALLOWED",
-    "step_2_interval_seconds": 300,
-    "step_2_stop": "[M8C LOOP BLOCKED]",
+    "persistent": "02_run_forward_shadow_forever.bat",
+    "keep_running": true,
     "results": "03_open_latest_results.bat",
-    "normal_submission_when_review_ready": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8C\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "review_submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8C\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m8b_result": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "trade_count": 18,
-    "win_rate": 0.6111111111111112,
-    "profit_factor_spread_x1_0": 1.1233074155203668,
-    "profit_factor_spread_x2_0": 0.9250795028223845,
-    "key_observed_weakness": "BTCUSD PRIMARY_LONG proxy extras: 6 trades, WR 33.33%, PF 0.1818, -107.21 bps at spread x1.0",
-    "key_observed_strength": "XAUUSD extras: 10 trades, WR 70%, PF 3.9251, +97.49 bps at spread x1.0"
+  "m8bx_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m8bx/bat",
+    "run_once": "01_run_excursion_path_audit.bat",
+    "success": "[M8BX PASS]",
+    "blocked": "[M8BX BLOCKED]",
+    "simultaneous_with_m8c_collector_m7c": "ALLOWED",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BX\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m8c_forward_hypothesis": {
-    "control": "accept all future proxy PRIMARY candidates",
-    "challenger": "reject only BTCUSD PRIMARY_LONG on proxy branch",
-    "strict_numeric_filtering": false,
-    "future_source_match_used_as_gate_input": false,
-    "source_anchor_separate_and_unsuppressed": true,
-    "m8b_18_reused_as_validation": false,
-    "review_gate": {
-      "total_future_proxy_primary_candidates": 30,
-      "future_btcusd_primary_long_proxy_candidates": 8,
-      "future_challenger_accepted_proxy_candidates": 15
-    }
+  "why_m8bx": {
+    "win_rate_alone_is_insufficient": true,
+    "xau_m8b_surface_result": "10 trades, WR 70%, PF 3.9251, +97.49 bps",
+    "unresolved_question": "Whether XAU winners experienced large MAE or large peak-to-exit giveback before finishing profitable.",
+    "metrics": ["MAE", "MFE", "time-to-MAE", "time-to-MFE", "underwater fraction", "peak-to-exit giveback"],
+    "same_18_is_validation": false
   },
+  "loss_reduction_research_order": [
+    "First identify the path signature of losses and dangerous winners with M8BX.",
+    "Do not invent an MAE/stop/RCI/EMA threshold from the same 18 trades as a validated rule.",
+    "Use M8C or a later new forward sample to validate any predecision loss-reduction gate.",
+    "Evaluate both win rate and adverse excursion/drawdown while preserving useful trade frequency."
+  ],
   "forbidden": [
-    "Do not tune RCI/EMA numeric thresholds on the M8B 18-trade sample and claim validation.",
-    "Do not use future source-match classification as an M8C entry gate input.",
+    "Do not stop or reset M8C while running M8BX.",
+    "Do not tune a stop or entry threshold on M8B 18 trades and claim validation.",
+    "Do not use future excursion information as an entry decision input.",
     "Do not modify M7C formulas, thresholds, runtime manifest, or prospective start.",
-    "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate.",
-    "Do not silently suppress the separate source-anchor branch."
+    "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate."
   ]
 }
