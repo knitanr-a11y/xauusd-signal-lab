@@ -1,27 +1,37 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
-  "contract_version": "MOCHIPOYO_M8C_MINIMAL_EXTRA_GATE_V1",
+  "contract_version": "MOCHIPOYO_M8C_MINIMAL_PROXY_BRANCH_GATE_V2",
   "recorded_at_utc": "2026-07-23T15:10:00Z",
+  "corrected_at_utc": "2026-07-23T15:20:00Z",
   "status": "HYPOTHESIS_FROZEN_BEFORE_FORWARD_VALIDATION",
   "audit_only": true,
   "design_basis": {
     "source": "M8B frozen 18 extra-entry trade exploratory audit",
     "same_sample_is_validation": false,
     "same_sample_may_only_generate_hypothesis": true,
-    "reason_for_minimalism": "User objective prioritizes robust after-cost edge, high win rate and useful frequency; do not collapse frequency by stacking strict thresholds."
+    "reason_for_minimalism": "User objective prioritizes robust after-cost edge, high win rate and useful frequency; do not collapse frequency by stacking strict thresholds.",
+    "causality_correction": "FINALIZED EXTRA classification is only known after source-arrival grace. Therefore no gate decision may depend on classification==EXTRA_CANDIDATE at entry time."
   },
-  "arms": {
-    "CONTROL_ALL_EXTRAS": {
-      "description": "Accept every finalized EXTRA_CANDIDATE entry exactly as produced by the frozen proxy state machine.",
-      "source_matched_policy": "UNCHANGED_OUTSIDE_EXTRA_GATE"
+  "branches": {
+    "SOURCE_ANCHOR": {
+      "description": "Supported Mochipoyo source alerts remain a separate anchor branch and are not suppressed by this proxy-branch gate.",
+      "gate_applied": false
     },
-    "CHALLENGER_BLOCK_BTCUSD_LONG_EXTRA": {
-      "description": "Reject only finalized EXTRA_CANDIDATE entries where ticker=BTCUSD and transition=PRIMARY_LONG. Accept all other finalized extra entries.",
+    "CONTROL_PROXY": {
+      "description": "Accept every future proxy PRIMARY_LONG/PRIMARY_SHORT candidate at its decision time, before any later source-match classification.",
+      "decision_time_information_only": true
+    },
+    "CHALLENGER_PROXY_BLOCK_BTCUSD_LONG": {
+      "description": "At proxy decision time, reject BTCUSD PRIMARY_LONG candidates and accept all other proxy PRIMARY entries. This decision does not use future source-match or outcome information.",
       "predecision_only": true,
-      "rule": "NOT (classification == EXTRA_CANDIDATE AND ticker == BTCUSD AND proxy_transition == PRIMARY_LONG)",
-      "source_matched_policy": "NEVER_SUPPRESSED_BY_THIS_RULE"
+      "rule": "NOT (ticker == BTCUSD AND proxy_transition == PRIMARY_LONG)",
+      "source_anchor_policy": "SOURCE_ANCHOR remains independent and may later provide a source alert even when the proxy branch was rejected."
     }
+  },
+  "later_attribution_only_not_gate_input": {
+    "source_match_classification": "After grace expiry, future candidates may be attributed as SOURCE_MATCHED or EXTRA for analysis/deduplication only.",
+    "may_change_original_gate_decision": false
   },
   "not_tested_as_primary_gate": [
     "RCI9 numeric threshold tuning",
@@ -36,12 +46,13 @@
     "prospective_start": "TO_BE_FROZEN_BY_M8C_RUNTIME_INITIALIZER_AT_FIRST_RUN",
     "historical_backfill_allowed": false,
     "reuse_m8b_18_for_validation_metrics": false,
-    "evaluate_control_and_challenger_on_same_future_candidates": true,
+    "evaluate_control_and_challenger_on_same_future_proxy_primary_candidates": true,
+    "source_anchor_evaluated_separately": true,
     "cost_views": ["historical_spread_x1_0", "historical_spread_x1_5", "historical_spread_x2_0"],
     "minimum_review_sample": {
-      "total_future_extra_entry_trades": 30,
-      "future_btcusd_long_extra_candidates": 8,
-      "future_non_btcusd_long_extra_trades": 15
+      "total_future_proxy_primary_candidates": 30,
+      "future_btcusd_primary_long_proxy_candidates": 8,
+      "future_challenger_accepted_proxy_candidates": 15
     },
     "review_dimensions": [
       "win_rate",
@@ -51,7 +62,8 @@
       "maximum_losing_streak",
       "trades_per_calendar_day",
       "accepted_fraction",
-      "ticker_direction_balance"
+      "ticker_direction_balance",
+      "source_anchor_plus_proxy_incremental_value"
     ]
   },
   "promotion_guardrails": {
@@ -59,7 +71,8 @@
     "frequency_must_remain_useful": true,
     "challenger_must_improve_after_cost_robustness_not_only_win_rate": true,
     "spread_x2_failure_is_material": true,
-    "source_matched_silent_suppression_forbidden": true,
+    "future_source_match_must_not_be_used_as_entry_gate_input": true,
+    "source_anchor_silent_suppression_forbidden": true,
     "final_promotion_requires_separate_forward_sample": true
   },
   "safety": {
