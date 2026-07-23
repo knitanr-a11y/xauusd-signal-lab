@@ -1,46 +1,46 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9P_IMPLEMENTED_ONE_TIME_LOCAL_REPRODUCTION_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR RUNNING UNCHANGED; PULL LATEST BRANCH AND RUN M9P ONCE",
+  "status": "M8C_RUNNING_M9P_PASS_M9Q_COMPLETE_M9R_GOLD_FOUR_ARM_PROSPECTIVE_DESIGN_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9R_GOLD_FOUR_ARM_RISK_REWARD_PROSPECTIVE_SHADOW_DESIGN",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; BUILD_AND_SELF-VERIFY M9R BEFORE ASKING USER TO RUN ANY NEW BAT",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9p_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9p/bat",
-    "run_once": "01_run_gold_dynamic_core_reproduction_audit.bat",
-    "success": "[M9P PASS]",
-    "blocked": "[M9P BLOCKED]",
-    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
-    "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9P\\LATEST\\99_UPLOAD_PACKAGE.zip"
+  "m9p_result": {
+    "file": "config/mochipoyo_alert_research/m9p_local_reproduction_result_20260724.json",
+    "decision": "DETERMINISTIC_LOCAL_REPRODUCTION_MATCHED_REFERENCE"
   },
-  "m9p_expected_reference": {
-    "N1_count": 1075,
-    "N2_count": 818,
-    "N3_count": 1495,
-    "N3_win_rate": 0.622742474916388,
-    "N3_profit_factor_bps": 1.365884145048126,
-    "N3_max_drawdown_bps": 510.52434894848284,
-    "N6_risk_count": 282,
-    "stress_combinations": 72,
-    "stress_all_min_year_pf_above_1": true,
-    "stress_all_extra_2bps_pf_above_1": true
+  "m9q_result": {
+    "file": "config/mochipoyo_alert_research/m9q_gold_loss_reduction_profit_extension_exploratory_result_20260724.json",
+    "Q1": "N6 half-risk accounting reduces historical loss magnitude/DD without reducing signal count",
+    "Q2": "Selective half-runner can extend profit when H1 MACD remains rising at the original M7C exit",
+    "Q3": "Combined historical exploratory profile PF 1.4703, DD 418.2 bps, average positive 17.64 bps vs average negative -17.26 bps",
+    "promotion": false
   },
-  "after_m9p": [
-    "Verify local output against the self-verified M9O/M9P references.",
-    "If deterministic reproduction matches, decide whether N3 deserves a new GOLD-specific prospective audit shadow with a fresh start.",
-    "Keep N6 separate as a report-only risk layer unless a future prospective test is explicitly frozen.",
-    "Do not reset or reuse M8C prospective start."
+  "m9r_design_order": [
+    "Freeze four independent accounting arms from a fresh GOLD-specific prospective start: base N3, risk-only, runner-only, combined.",
+    "Do not change the underlying N3 candidate timestamp or first-turn decision across arms.",
+    "R1 only changes virtual size: N6 entries 0.50x, other N3 entries 1.00x.",
+    "R2 only changes virtual exit accounting: at original M7C exit, if latest fully closed H1 MACD(6,13) line is rising, close 50% there and close the runner 50% at first subsequent fully closed M15 RCI9 turn-down; otherwise close 100% at original exit.",
+    "R3 combines R1 and R2 accounting without changing candidate generation.",
+    "Use a new prospective start after local initialization; never backfill historical rows into the prospective scoreboard.",
+    "Keep N6 itself reportable so risk-zone and complement behavior can be reviewed independently.",
+    "Do not enable real trading or Discord signals."
   ],
+  "user_side_policy": {
+    "bat_required_now": false,
+    "reason": "Assistant will implement and self-verify the M9R shadow first. User execution is requested only after the prospective contract and numbered BATs are ready."
+  },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not use N6 as an entry filter or stop.",
+    "Do not treat Q1/Q2/Q3 historical metrics as independent validation.",
+    "Do not reuse the M8C or M7C prospective start for M9R.",
+    "Do not backfill the M9R prospective scoreboard.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
