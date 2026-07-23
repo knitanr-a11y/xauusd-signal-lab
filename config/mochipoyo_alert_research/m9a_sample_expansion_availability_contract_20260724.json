@@ -1,0 +1,54 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT",
+  "contract_version": "MOCHIPOYO_M9A_SAMPLE_EXPANSION_AVAILABILITY_V1",
+  "recorded_at_utc": "2026-07-24T01:35:00Z",
+  "audit_only": true,
+  "objective": "Increase the evidence base for entry-timing and multi-timeframe feature research without pretending proxy replay events are genuine Mochipoyo alerts.",
+  "priority_order": [
+    "Inventory and reuse all genuine webhook PRIMARY alerts already collected in SQLite/M7C.",
+    "Verify MT5 M1/M15 history coverage needed to evaluate those genuine alerts.",
+    "Measure the available pre-source M15 history for a later frozen proxy replay.",
+    "Only after this audit, build genuine-source and proxy-replay research populations as separate labeled tiers."
+  ],
+  "population_tiers": {
+    "TIER_A_GENUINE_SOURCE": "Actual Cloudflare/SQLite webhook events only. Highest-trust population.",
+    "TIER_B_FROZEN_PROXY_REPLAY": "Historical replay of the already-frozen independent proxy on closed-bar MT5 data. Must be labeled PROXY_REPLAY_NOT_SOURCE_TRUTH.",
+    "mixing_for_source_replication_claim": false
+  },
+  "state_machine": {
+    "IDLE_LONG": "PRIMARY_LONG",
+    "ACTIVE_LONG_LONG": "REENTRY_LONG",
+    "ACTIVE_LONG_LONG_EXIT": "LONG_EXIT",
+    "IDLE_SHORT": "PRIMARY_SHORT",
+    "ACTIVE_SHORT_SHORT": "REENTRY_SHORT",
+    "ACTIVE_SHORT_SHORT_EXIT": "SHORT_EXIT",
+    "opposite_direction_auto_switch": false
+  },
+  "expected_from_existing_documents_not_hardcoded_as_pass_condition": {
+    "m7a_genuine_primary": 19,
+    "post_m7c_supported_genuine_primary": 17,
+    "approx_nonoverlapping_genuine_primary_total": 36
+  },
+  "audit_outputs": [
+    "genuine event/transition inventory",
+    "SQLite episode-role parity diagnostics",
+    "M7C source-comparison schema/count diagnostics",
+    "MT5 M1/M15 coverage by ticker",
+    "pre-source M15 replay-capacity estimate"
+  ],
+  "forbidden": [
+    "Do not change M7C formula or thresholds.",
+    "Do not reset M7C or M8C prospective starts.",
+    "Do not call proxy replay events genuine source alerts.",
+    "Do not use outcomes to change the frozen proxy before replay.",
+    "Do not enable Discord send, MT5 orders, live ready, final signal, or real entry gates."
+  ],
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false
+  }
+}
