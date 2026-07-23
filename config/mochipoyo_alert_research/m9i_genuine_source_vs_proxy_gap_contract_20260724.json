@@ -1,0 +1,80 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9I_GENUINE_SOURCE_VS_PROXY_GAP_AUDIT",
+  "contract": "MOCHIPOYO_M9I_SOURCE_PROXY_GAP_V1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "reason_for_stage": "M9H stopped historical filter stacking. The next question is why the 43 genuine source PRIMARY trades are much stronger than the unfiltered frozen-proxy population and why the proxy creates extra/missed PRIMARY states.",
+  "population": {
+    "tier_a_source_anchor": "43 frozen genuine source PRIMARY trades from m9b_frozen_genuine_primary_pairs_20260724.json",
+    "tier_b_proxy": "unchanged frozen M7C formula replayed only for diagnosis across each ticker's genuine-source observation window",
+    "tiers_must_remain_separate": true,
+    "source_truth_claim_for_proxy": false
+  },
+  "frozen_proxy_formula": {
+    "PRIMARY_LONG": "IDLE AND rci9_turn_up AND BULLISH_STACK",
+    "PRIMARY_SHORT": "IDLE AND rci9_turn_down AND BEARISH_STACK",
+    "LONG_EXIT": "ACTIVE_LONG AND rci9 >= 78.333333333333",
+    "SHORT_EXIT": "ACTIVE_SHORT AND rci9 <= -75",
+    "formula_change_allowed": false,
+    "threshold_change_allowed": false
+  },
+  "matching": {
+    "source_primary_exact": "same ticker, same direction, same M15 server_open",
+    "source_primary_within_one_bar": "same ticker, same direction, proxy PRIMARY within +/-15 minutes",
+    "missed": "no same-direction proxy PRIMARY within +/-15 minutes",
+    "wrong_direction_nearby_recorded_separately": true,
+    "direct_kernel_at_source_boundary_recorded_regardless_of_proxy_state": true,
+    "purpose": "Separate direct kernel failure from state-machine divergence."
+  },
+  "decision_time_features": {
+    "source_primary": "features frozen at the genuine source PRIMARY M15 boundary",
+    "proxy_extra": "features frozen at the proxy PRIMARY M15 boundary",
+    "timeframes": ["M5", "M15", "H1", "H4"],
+    "closed_bars_only": true,
+    "families": ["RCI9_14_18", "RCI_deltas_and_turns", "EMA20_30_40_alignment_and_spreads", "MACD_6_13_4", "ATR_and_range", "candle_shape", "volume_state"],
+    "fresh_divergence_context": {
+      "included": true,
+      "method": "reuse the M9E independent causal confirmed-pivot proxy",
+      "oscillators": ["RCI9", "RCI14", "RCI18", "MACD_LINE", "MACD_HISTOGRAM"],
+      "timeframes": ["M5", "M15", "H1", "H4"],
+      "age_windows_bars": [3, 5],
+      "future_pivot_confirmation_forbidden": true
+    }
+  },
+  "outcomes": {
+    "genuine_source": "spread-adjusted return from genuine source PRIMARY to its frozen genuine source EXIT",
+    "proxy_extra": "spread-adjusted return from frozen proxy PRIMARY to its frozen proxy EXIT when exact M1 entry and exit rows exist",
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "outcomes_never_used_to_create_features_or_matching": true
+  },
+  "analysis": {
+    "classes": ["GENUINE_SOURCE_PRIMARY", "PROXY_EXTRA_PRIMARY"],
+    "source_match_subclasses": ["EXACT", "WITHIN_ONE_BAR_EARLY", "WITHIN_ONE_BAR_LATE", "MISSED"],
+    "compare_numeric_feature_distributions": true,
+    "compare_categorical_alignment_states": true,
+    "compare_fresh_divergence_counts": true,
+    "separate_XAU_BTC": true,
+    "separate_LONG_SHORT": true,
+    "no_classifier_training": true,
+    "no_threshold_optimization": true,
+    "same_sample_can_generate_hypotheses": true,
+    "same_sample_can_validate_or_promote_gate": false
+  },
+  "decision_rule_after_review": {
+    "if_clear_source_vs_extra_structure_exists": "freeze at most a small interpretable hypothesis for later independent validation; do not retrofit M7C",
+    "if_no_clear_structure_exists": "do not continue filter mining; keep collecting genuine source and forward data"
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m8c_prospective_start_reused": false
+  }
+}
