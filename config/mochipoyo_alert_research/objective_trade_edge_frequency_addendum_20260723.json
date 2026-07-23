@@ -1,0 +1,43 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "recorded_at": "2026-07-23",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "USER_FINAL_OBJECTIVE_CLARIFIED_FOR_M8B_ONWARD",
+  "final_objective": {
+    "exact_mochipoyo_replication_required": false,
+    "core_goal": "Trade frequently enough at FX locations with positive edge, high win rate, acceptable drawdown and robust after-cost expectancy.",
+    "source_alerts": "Mochipoyo source alerts remain a valuable research and coverage reference, but source match itself is not the final promotion objective.",
+    "extra_alerts": "Independent extra trades are welcome when they add robust after-cost value.",
+    "frequency_tradeoff": "Do not maximize win rate by making the rules so strict that trade frequency collapses.",
+    "no_fixed_win_rate_threshold_invented": true
+  },
+  "promotion_dimensions": [
+    "after-cost positive expectancy",
+    "win rate",
+    "profit factor",
+    "trade frequency",
+    "drawdown",
+    "maximum losing streak",
+    "ticker/direction robustness",
+    "live-causal reproducibility"
+  ],
+  "source_suppression_policy": {
+    "silent_suppression_forbidden": true,
+    "absolute_keep_every_source_alert_forever": false,
+    "future_explicit_performance_based_portfolio_rule_may_be_researched": true,
+    "validation_required_before_any_suppression": "separate frozen or forward sample"
+  },
+  "anti_overfit": {
+    "do_not_tune_and_validate_on_same_sample": true,
+    "do_not_use_future_information_in_signal_decision": true,
+    "do_not_claim_small_sample_results_as_final": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false
+  }
+}
