@@ -1,0 +1,82 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
+  "contract": "MOCHIPOYO_M9D_CAUSAL_ADVERSE_PATH_STATE_V1",
+  "status": "FROZEN_BEFORE_M9D_EXECUTION",
+  "population": {
+    "tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "upstream": "M9C_CONTEXT_WARMUP_FIX_V2",
+    "expected_exact_m1_resolved_trades": 952,
+    "purpose": "Use the larger frozen proxy population only to study recoverable pullbacks versus failing adverse paths. Do not claim these replay trades are genuine Mochipoyo alerts."
+  },
+  "research_question": [
+    "When a frozen proxy trade moves adverse after the M15 signal, which causal market-state features distinguish a recoverable pullback from a failing reversal?",
+    "Can a later causal pullback/turn entry improve path quality without relying on a fixed bps entry rule?",
+    "Are the useful states stable by ticker, direction and time slice rather than being a single global RCI threshold?"
+  ],
+  "checkpoint_sampling": {
+    "reference_volatility": "ATR14_FROM_LAST_FULLY_CLOSED_M15_BAR_BEFORE_OR_AT_ORIGINAL_M15_SIGNAL_OPEN",
+    "adverse_atr_ratios": [0.25, 0.5, 0.75, 1.0, 1.5, 2.0],
+    "role_of_ratios": "OBSERVATION_GRID_ONLY_NOT_ENTRY_OR_STOP_RULE",
+    "long_crossing": "first fully closed M1 bar whose low <= signal_bid_open - ratio * signal_m15_atr14",
+    "short_crossing": "first fully closed M1 bar whose high >= signal_bid_open + ratio * signal_m15_atr14",
+    "checkpoint_decision_time": "next M1 open after the threshold-crossing M1 bar",
+    "future_relative_to_checkpoint_used_for_features": false,
+    "intrabar_extreme_is_known_only_after_crossing_bar_closes": true
+  },
+  "features_at_checkpoint": {
+    "timeframes": ["M1", "M5", "M15", "H1", "H4"],
+    "closed_bars_only": true,
+    "families": [
+      "RCI9_14_18_and_deltas_turns",
+      "EMA20_30_40_alignment_spread_and_slopes",
+      "MACD_6_13_4_line_signal_histogram_and_turns",
+      "ATR14_and_range_state",
+      "candle_body_and_wicks",
+      "tick_volume_ratio20",
+      "recent_range_position",
+      "elapsed_minutes_from_original_signal",
+      "adverse_depth_bps_and_atr_ratio",
+      "spread_at_checkpoint",
+      "recovery_distance_from_adverse_extreme"
+    ],
+    "missing_higher_timeframe_warmup_policy": "NULL_PLUS_EXPLICIT_AVAILABILITY_FLAG_DO_NOT_DROP_CHECKPOINT"
+  },
+  "outcome_labels_after_checkpoint": {
+    "allowed_only_after_checkpoint_is_frozen": true,
+    "labels": [
+      "return_from_checkpoint_to_frozen_proxy_exit_bps",
+      "mfe_from_checkpoint_to_proxy_exit_bps",
+      "mae_from_checkpoint_to_proxy_exit_bps",
+      "recovered_original_signal_bid_before_proxy_exit",
+      "positive_at_frozen_proxy_exit",
+      "directional_return_15m_30m_60m_120m_when_exact_future_M1_exists"
+    ],
+    "candidate_or_checkpoint_creation_must_not_use_labels": true
+  },
+  "first_turn_panel": {
+    "include_m9c_first_causal_turns": true,
+    "extract_same_rich_closed_bar_feature_families_at_turn_entry": true,
+    "purpose": "Study state, not merely pullback distance, at the causal turn that already improved the paired 852-trade population on average."
+  },
+  "analysis_policy": {
+    "separate_XAU_BTC": true,
+    "separate_LONG_SHORT": true,
+    "monthly_or_temporal_replication_required_before_any_feature_is_considered_stable": true,
+    "same_M9D_sample_can_generate_hypotheses": true,
+    "same_M9D_sample_can_validate_or_promote_gate": false,
+    "future_M8C_or_later_forward_sample_required_for_promotion": true,
+    "no_automatic_model_or_threshold_promotion": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
