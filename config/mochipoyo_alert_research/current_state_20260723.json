@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T07:45:00Z",
-  "status": "M8C_RUNNING_M9O_GOLD_DYNAMIC_CORE_ROBUSTNESS_PASS_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T08:00:00Z",
+  "status": "M8C_RUNNING_M9P_GOLD_DYNAMIC_CORE_IMPLEMENTED_SELF_VERIFIED_LOCAL_REPRODUCTION_NEXT_AUDIT_ONLY",
   "stage": "M8C_FORWARD_SHADOW_PLUS_M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
@@ -14,39 +14,38 @@
     "historical_backfill_allowed": false,
     "source_anchor_separate_and_unsuppressed": true
   },
-  "m9l": {
-    "status": "UPLOAD_SIDE_PRECHECK_COMPLETE_LOCAL_REPRODUCTION_OPTIONAL_PENDING",
-    "local_path_fix": "MT5 Files\\gold_v3_2023_2026\\",
-    "runner": "scripts/mochipoyo_alert_research/m9l/bat/01_run_gold_multiyear_holdout_audit.bat",
-    "note": "M9L local reproduction is optional and not a blocker for M9P."
-  },
-  "m9m": {
-    "status": "STATIC_CANDIDATES_FAILED_2025_HOLDOUT",
-    "result": "config/mochipoyo_alert_research/m9m_gold_2025_sealed_holdout_result_20260724.json",
-    "decision": "DO_NOT_PROMOTE_STATIC_INDICATOR_FILTERS"
-  },
-  "m9n": {
-    "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY",
-    "result": "config/mochipoyo_alert_research/m9n_gold_regime_adaptive_assistant_side_result_20260724.json",
-    "decision": "RELATIVE_CAUSAL_FEATURES_ARE_MORE_STABLE_THAN_STATIC_THRESHOLDS"
-  },
   "m9o": {
     "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY",
     "result": "config/mochipoyo_alert_research/m9o_gold_dynamic_core_robustness_result_20260724.json",
-    "canonical_N1": "M5 tick_volume_ratio20 <= full-window trailing-200 median",
-    "canonical_N2": "M15 MACD(6,13) line bps >= full-window trailing-200 75th percentile",
-    "canonical_N3": "N1 OR N2",
-    "canonical_N3_metrics": "1495 trades, WR 62.27%, PF 1.3659, max DD 510.5 bps, about 35.6 trades/month",
-    "canonical_N3_yearly_pf": {"2023": 1.1452954484881541, "2024": 1.357539497969303, "2025": 1.2422104302466985, "2026_to_0619": 1.756805217618165},
-    "robustness": "72 nearby W/q combinations; all 72 have PF>1 in every available calendar year and all 72 remain aggregate PF>1 after an extra 2 bps/trade stress deduction",
-    "N6_secondary_risk": "H4 RCI9 trailing-100 percentile >25% and <=50% is a descriptive loss-tail risk zone; report-only, not a gate",
+    "canonical_N3": "strict full-window N1 OR N2",
+    "robustness": "72/72 nearby W/q combinations clear PF>1 in every available year and remain aggregate PF>1 after extra 2bps/trade stress",
     "promotion": false
   },
   "m9p": {
-    "status": "DESIGN_READY_IMPLEMENTATION_NEXT",
+    "status": "IMPLEMENTED_AND_SELF_VERIFIED_ON_THE_SAME_UPLOADED_HASHED_CSVS",
     "contract": "config/mochipoyo_alert_research/m9p_gold_dynamic_core_reproduction_contract_20260724.json",
-    "purpose": "Deterministically reproduce canonical N1/N2/N3 and report-only N6 from the local GOLD folder before any new prospective GOLD shadow is considered.",
-    "user_bat_required_now": false
+    "implementation": "scripts/mochipoyo_alert_research/m9p/python/run_gold_dynamic_core_reproduction_audit.py",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9p/bat",
+    "run_once": "01_run_gold_dynamic_core_reproduction_audit.bat",
+    "open_results": "02_open_latest_results.bat",
+    "data_folder": "MT5 Files\\gold_v3_2023_2026\\",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9P\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "self_verified_reference": {
+      "N1_count": 1075,
+      "N1_pf": 1.3345697428719754,
+      "N2_count": 818,
+      "N2_pf": 1.3786136814608168,
+      "N3_count": 1495,
+      "N3_win_rate": 0.622742474916388,
+      "N3_pf": 1.365884145048126,
+      "N3_max_dd_bps": 510.52434894848284,
+      "N6_risk_count": 282,
+      "N6_risk_pf": 0.9086697052950484,
+      "stress_combinations": 72,
+      "stress_all_min_year_pf_above_1": true,
+      "stress_all_extra_2bps_pf_above_1": true
+    },
+    "live_promotion": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
