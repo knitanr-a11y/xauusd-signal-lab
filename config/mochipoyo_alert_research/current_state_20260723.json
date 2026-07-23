@@ -2,64 +2,52 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T00:10:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M8BX_EXCURSION_AUDIT_READY_AUDIT_ONLY",
-  "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
-  "formal_pre_m8a_baseline_commit": "c0bd4b9d20235422720b7c250e95a2e2c3f64b4d",
+  "recorded_at_utc": "2026-07-24T00:45:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M8BX_PASS_M8BY_PULLBACK_ENTRY_AUDIT_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M8BY_ENTRY_TIMING_RESEARCH",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8b": {
     "status": "PASS_EXPLORATORY_ONLY",
-    "result": "config/mochipoyo_alert_research/m8b_result_20260723.json",
-    "extra_entry_trade_count": 18,
+    "trade_count": 18,
     "win_rate": 0.6111111111111112,
     "profit_factor_spread_x1_0": 1.1233074155203668,
-    "net_return_bps_spread_x1_0": 20.26718175007738,
-    "profit_factor_spread_x2_0": 0.9250795028223845,
-    "net_return_bps_spread_x2_0": -13.465352151156972,
-    "trades_per_calendar_day": 6.520754716981132,
-    "observed_xau": {"trade_count": 10, "win_rate": 0.7, "profit_factor": 3.92514627495335, "net_return_bps": 97.49155199395173},
-    "observed_btc_long": {"trade_count": 6, "win_rate": 0.3333333333333333, "profit_factor": 0.18184061065137128, "net_return_bps": -107.20691198687707},
-    "same_sample_gate_validation_allowed": false
+    "observed_xau": {"trade_count": 10, "win_rate": 0.7, "profit_factor": 3.92514627495335},
+    "observed_btc_long": {"trade_count": 6, "win_rate": 0.3333333333333333, "profit_factor": 0.18184061065137128}
   },
   "m8c": {
-    "contract": "config/mochipoyo_alert_research/m8c_extra_gate_forward_shadow_contract_20260723.json",
-    "contract_version": "MOCHIPOYO_M8C_MINIMAL_PROXY_BRANCH_GATE_V2",
-    "hypothesis": "Minimal proxy-branch filter: reject BTCUSD PRIMARY_LONG only; no RCI/EMA numeric threshold tuning.",
+    "status": "RUNNING_FORWARD_SHADOW",
     "control": "ACCEPT_ALL_FUTURE_PROXY_PRIMARY_CANDIDATES",
     "challenger": "REJECT_BTCUSD_PRIMARY_LONG_ON_PROXY_BRANCH_ONLY",
-    "gate_uses_future_source_match": false,
-    "source_anchor_separate": true,
-    "source_anchor_suppressed_by_gate": false,
-    "generator_state_changed_by_gate": false,
+    "prospective_start_reset_allowed": false,
     "historical_backfill_allowed": false,
-    "m8b_18_reused_as_validation": false,
-    "minimum_review_sample": {
-      "total_future_proxy_primary_candidates": 30,
-      "future_btcusd_primary_long_proxy_candidates": 8,
-      "future_challenger_accepted_proxy_candidates": 15
-    },
-    "operator_folder": "scripts/mochipoyo_alert_research/m8c/bat",
-    "initialize_once": "01_initialize_forward_shadow.bat",
-    "run_persistent": "02_run_forward_shadow_forever.bat",
-    "open_results": "03_open_latest_results.bat"
+    "m8b_18_reused_as_validation": false
   },
   "m8bx": {
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m8bx_excursion_result_20260723.json",
+    "xau_trade_count": 10,
+    "xau_win_rate": 0.7,
+    "xau_win_mean_mae_bps": -12.826478687249665,
+    "xau_loss_mean_mae_bps": -13.76011735700761,
+    "xau_loss_cluster_note": "Three losses had MAE roughly -12.3 to -14.6 bps; two winners reached much deeper MAE around -28.5 and -33.8 bps and recovered.",
+    "simple_mae_stop_supported": false
+  },
+  "m8by": {
     "status": "READY_ONE_TIME_EXPLORATORY_AUDIT",
-    "purpose": "Measure MAE/MFE and path quality of the frozen M8B 18 trades, especially XAU winners with potentially large adverse excursion.",
-    "contract": "config/mochipoyo_alert_research/m8bx_excursion_path_audit_contract_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m8bx/bat",
-    "run_once": "01_run_excursion_path_audit.bat",
+    "contract": "config/mochipoyo_alert_research/m8by_pullback_entry_opportunity_contract_20260723.json",
+    "purpose": "Test causal delayed entry after real BID-price pullback, with touch and pullback-plus-rebound variants.",
+    "touch_pullback_bps": [2,5,8,10,12,15],
+    "rebound_variants": ["5+2","8+2","10+3","12+3","15+5"],
+    "operator_folder": "scripts/mochipoyo_alert_research/m8by/bat",
+    "run_once": "01_run_pullback_entry_opportunity_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "normal_submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BX\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "same_sample_threshold_promotion_allowed": false,
-    "m8c_can_continue_simultaneously": true
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BY\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "same_18_is_validation": false
   },
   "objective": {
-    "reference": "config/mochipoyo_alert_research/objective_trade_edge_frequency_addendum_20260723.json",
-    "exact_mochipoyo_replication_required": false,
-    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_ACCEPTABLE_ADVERSE_EXCURSION",
+    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
     "avoid_over_strict_frequency_collapse": true,
-    "win_rate_alone_is_not_sufficient": true
+    "research_better_pullback_entry": true
   },
   "safety": {
     "audit_only": true,
@@ -70,7 +58,6 @@
     "entry_gate_enabled": false,
     "m7c_formula_changed": false,
     "m7c_threshold_changed": false,
-    "m7c_runtime_manifest_reset_allowed": false,
-    "m7c_prospective_start_change_allowed": false
+    "m7c_runtime_manifest_reset_allowed": false
   }
 }
