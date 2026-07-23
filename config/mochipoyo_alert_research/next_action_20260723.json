@@ -1,48 +1,44 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9I_TIMING_INVALIDATED_M9I2_SOURCE_TIMING_CORRECTION_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9J_HOLDOUT_FAILED_M9K_BTC_LONG_CAUSAL_TAIL_STATE_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_AND_RUN_M9K_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "incident": {
-    "file": "config/mochipoyo_alert_research/m9i_source_decision_timing_correction_incident_20260724.json",
-    "old_m9i_match_counts": "EXACT 1 / WITHIN_ONE_BAR_LATE 28 / MISSED 14",
-    "diagnostic_after_source_plus_15_minutes": "EXACT 28 / WITHIN_ONE_BAR_EARLY 1 / MISSED 14",
-    "decision": "INVALIDATE_OLD_M9I_SOURCE_COMPARISON_AND_RECOMPUTE_SOURCE_TIMING",
-    "m9b_previous_source_metrics_promotable": false
+  "m9j_result": {
+    "population": "952 immediate / 852 first-turn pre-source Tier-B trades",
+    "J1": "BTC LONG RCI9<0 failed: higher WR but lower PF and worse large-loss tail",
+    "J2": "BTC LONG RCI9<=-50 sensitivity still PF<1 within BTC LONG",
+    "J3": "Global source-like sign rule not profitable",
+    "decision": "STOP_ENTRY_RCI_THRESHOLD_MINING"
   },
-  "m9i2_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9i2/bat",
-    "run_once": "01_run_source_timing_corrected_gap_audit.bat",
-    "success": "[M9I2 PASS]",
-    "blocked": "[M9I2 BLOCKED]",
+  "m9k_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9k/bat",
+    "run_once": "01_run_btc_long_causal_tail_loss_state_audit.bat",
+    "success": "[M9K PASS]",
+    "blocked": "[M9K BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I2\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9K\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9i2_research_order": [
-    "Treat each source entry_server_open as the open of the M15 bar whose close produced the alert; evaluate the source decision and executable entry at +15 minutes.",
-    "Apply the same +15-minute correction to source EXIT execution timing.",
-    "Keep frozen proxy decision timing unchanged.",
-    "Recompute genuine-source spread-adjusted outcomes and source-vs-proxy match classes before interpreting any feature contrast.",
-    "Use closed-bar M5/M15/H1/H4 features available by the corrected source decision time only.",
-    "Do not train a classifier, optimize thresholds, or promote a gate from the same 43 source observations."
-  ],
-  "after_m9i2": [
-    "If timing-corrected genuine-source performance remains materially stronger than proxy extras and an interpretable structural difference remains, freeze only a small hypothesis for later independent or forward validation.",
-    "If the corrected source edge weakens materially or no stable structure remains, stop historical mining and continue genuine-source/forward collection rather than forcing a rule."
+  "m9k_research_order": [
+    "Restrict the audit to the 113 BTCUSD LONG pre-source trades with frozen entry M15 RCI9 < 0.",
+    "Reuse M9D causal adverse checkpoints at 0.25/0.5/0.75/1.0/1.5/2.0 ATR; checkpoint depth is observation only, not a stop.",
+    "Use -50/-100/-200 bps only as future severity labels to compare causal checkpoint state; never use those values to construct a gate.",
+    "Compare closed-bar M1/M5/M15/H1/H4 RCI, EMA, MACD, range, volume, elapsed time and recovery-from-extreme state between large-tail losses and recoverable trades.",
+    "Do not select a decimal threshold or promote a rule from the same historical sample.",
+    "Only if a small interpretable causal failure state appears should it later be frozen for a new prospective risk-shadow with a fresh start; otherwise keep collecting forward/source data."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not use old M9I feature contrasts or old M9B source PF as validated evidence.",
-    "Do not call proxy replay events genuine Mochipoyo alerts.",
+    "Do not use checkpoint ATR depth itself as a stop rule.",
+    "Do not turn -50/-100/-200 bps evaluation labels into live stops.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
