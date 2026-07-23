@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T06:15:00Z",
-  "status": "M8C_RUNNING_M9M_GOLD_2025_HOLDOUT_FAILED_REGIME_ADAPTIVE_RESEARCH_NEXT_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T07:05:00Z",
+  "status": "M8C_RUNNING_M9N_ADAPTIVE_GOLD_CANDIDATES_FOUND_AUDIT_ONLY",
   "stage": "M8C_FORWARD_SHADOW_PLUS_M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
@@ -18,31 +18,30 @@
     "status": "UPLOAD_SIDE_PRECHECK_COMPLETE_LOCAL_REPRODUCTION_OPTIONAL_PENDING",
     "local_path_fix": "MT5 Files\\gold_v3_2023_2026\\",
     "runner": "scripts/mochipoyo_alert_research/m9l/bat/01_run_gold_multiyear_holdout_audit.bat",
-    "note": "Local reproduction remains useful for audit but is no longer a blocker for assistant-side exploratory research on the uploaded files."
+    "note": "Local reproduction remains useful for audit but is not a blocker for assistant-side exploration."
   },
   "m9m": {
-    "freeze": "config/mochipoyo_alert_research/m9m_gold_2023_2024_discovery_candidate_freeze_20260724.json",
-    "freeze_commit": "31d21edec97eb39ae0a56a52ac5759f7cffb1ef5",
-    "holdout_result": "config/mochipoyo_alert_research/m9m_gold_2025_sealed_holdout_result_20260724.json",
-    "status": "ALL_THREE_FROZEN_STATIC_CANDIDATES_FAILED_2025_PF1",
-    "baseline_2025_long_first_turn": "619 trades, WR 66.72%, PF 1.0357",
-    "L1": "221 trades, WR 65.61%, PF 0.9740",
-    "L2": "115 trades, WR 70.43%, PF 0.7987",
-    "L3": "39 trades, WR 66.67%, PF 0.9800",
+    "status": "STATIC_CANDIDATES_FAILED_2025_HOLDOUT",
+    "result": "config/mochipoyo_alert_research/m9m_gold_2025_sealed_holdout_result_20260724.json",
     "decision": "DO_NOT_PROMOTE_STATIC_INDICATOR_FILTERS"
   },
-  "next_research": {
-    "stage": "M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
-    "mode": "ASSISTANT_SIDE_EXPLORATION_ON_UPLOADED_2023_2026_GOLD_FILES",
-    "focus": [
-      "why 2023-2024 strong static filters failed in 2025",
-      "regime-adaptive relative features instead of fixed indicator thresholds",
-      "loss-tail control while preserving useful monthly frequency",
-      "walk-forward and cross-period stability rather than one-period PF optimization",
-      "LONG first-turn path first; SHORT remains structurally weak in 2023-2025"
-    ],
-    "operator_bat_required_for_each_exploration": false,
-    "github_policy": "Freeze only important reproducible checkpoints; do not force the user to run a BAT for every exploratory iteration."
+  "m9n": {
+    "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY",
+    "result": "config/mochipoyo_alert_research/m9n_gold_regime_adaptive_assistant_side_result_20260724.json",
+    "primary_population": "XAUUSD LONG first causal M1 turn",
+    "N1_m5_quiet_pullback": "1075 trades, WR 63.91%, PF 1.3346, about 25.6 trades/observed month",
+    "N2_m15_strong_momentum": "820 trades, WR 57.93%, PF 1.3748, about 19.5 trades/observed month",
+    "N3_broad_core": "N1 OR N2; 1496 trades, WR 62.23%, PF 1.3648, max DD 510.5 bps, about 35.6 trades/observed month",
+    "N4_premium": "D1 quiet-body AND N1; 248 trades, WR 66.94%, PF 2.1772, max DD 321.3 bps, low frequency and subperiod instability",
+    "short_decision": "Do not prioritize SHORT; 2023-2025 remains structurally weak.",
+    "promotion": false
+  },
+  "objective": {
+    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
+    "current_best_research_direction": "RELATIVE_CAUSAL_REGIME_FEATURES_INSTEAD_OF_FIXED_THRESHOLDS",
+    "preserve_useful_frequency": true,
+    "reduce_drawdown_and_loss_tail": true,
+    "continue_forward_collection_in_parallel": true
   },
   "safety": {
     "audit_only": true,
