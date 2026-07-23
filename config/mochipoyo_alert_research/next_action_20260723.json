@@ -1,36 +1,44 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9A_SAMPLE_EXPANSION",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9B_GENUINE_PRIMARY_EXPANDED_CONTEXT_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9B_GENUINE_PRIMARY_CONTEXT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9B_GENUINE_PRIMARY_EXPANDED_CONTEXT_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9a_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9a/bat",
-    "run_once": "01_run_sample_expansion_availability_audit.bat",
-    "success": "[M9A PASS]",
-    "blocked": "[M9A BLOCKED]",
+  "m9b_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9b/bat",
+    "run_once": "01_run_genuine_primary_expanded_context_audit.bat",
+    "success": "[M9B PASS]",
+    "blocked": "[M9B BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9A\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9B\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "why": [
-    "The current M8B/M8BZ2 feature sample is too small for threshold promotion.",
-    "Existing documents imply 19 genuine PRIMARY alerts in M7A plus 17 non-overlapping post-M7C genuine PRIMARY alerts, approximately 36 before any historical proxy replay.",
-    "M9A verifies the actual local SQLite count and MT5 coverage instead of relying on that estimate.",
-    "After M9A, Tier A will evaluate all genuine source PRIMARY alerts first.",
-    "Only then will Tier B replay the already-frozen proxy over older closed-bar history, labeled PROXY_REPLAY_NOT_SOURCE_TRUTH."
+  "m9a_verified_population": {
+    "genuine_primary_count": 43,
+    "PRIMARY_LONG": 25,
+    "PRIMARY_SHORT": 18,
+    "BTCUSD": 23,
+    "XAUUSD": 20,
+    "historical_m15_boundaries_available_for_later_frozen_proxy_replay": 58704
+  },
+  "research_order": [
+    "Evaluate the 43 frozen genuine source PRIMARY trades first.",
+    "Re-test signal-time M5 RCI overheat, first causal turn, and turn-time H1/H4 RCI context on genuine source trades.",
+    "Do not promote thresholds from the same 43-trade exploratory sample.",
+    "After M9B review, build Tier B historical replay from the already-frozen proxy over older closed M15 history.",
+    "Keep Tier B labeled PROXY_REPLAY_NOT_SOURCE_TRUTH and never mix it into genuine-source reproduction accuracy."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds before historical replay.",
-    "Do not mix genuine source alerts and proxy replay events in a source-reproduction accuracy claim.",
-    "Do not promote M5 RCI9>=80 or H1/H4 RCI rules from the current tiny sample.",
+    "Do not call proxy replay events genuine Mochipoyo alerts.",
+    "Do not mix Tier A and Tier B in a source-reproduction accuracy claim.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
