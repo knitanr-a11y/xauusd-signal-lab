@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9M_GOLD_2023_2024_DISCOVERY_CANDIDATE_FREEZE",
+  "status": "FROZEN_BEFORE_2025_FEATURE_OUTCOME_HOLDOUT_OPEN",
+  "population": "XAUUSD frozen-M7C LONG trades entered at first causal M1 turn; discovery uses 2023-2024 only",
+  "execution": {
+    "m7c_formula_changed": false,
+    "first_turn_definition_changed": false,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "discovery_baseline_2023_2024": {
+    "count": 1167,
+    "win_rate": 0.6083976006855184,
+    "profit_factor_bps": 1.0844764060945078,
+    "net_bps": 826.0386268858091
+  },
+  "frozen_candidates": [
+    {
+      "candidate_id": "GOLD_L1_D1_RCI14_RISING_AND_M5_BULLISH_STACK",
+      "role": "PRIMARY_FREQUENCY_BALANCED_CANDIDATE",
+      "definition": "At first-turn entry decision: last closed D1 RCI14 delta1 > 0 AND last closed M5 EMA20 > EMA30 > EMA40",
+      "discovery_2023_2024": {
+        "count": 427,
+        "win_rate": 0.6323185011709602,
+        "profit_factor_bps": 1.8226142080407852,
+        "net_bps": 1822.2545856652112,
+        "max_drawdown_bps": 157.3110069957014,
+        "2023": {"count": 186, "win_rate": 0.6182795698924731, "profit_factor_bps": 1.9397871092039856, "net_bps": 761.9946012773356},
+        "2024": {"count": 241, "win_rate": 0.6431535269709544, "profit_factor_bps": 1.7549648106534304, "net_bps": 1060.2599843878754}
+      }
+    },
+    {
+      "candidate_id": "GOLD_L2_M5_ATR_EXPANSION_1P2",
+      "role": "VOLATILITY_EXPANSION_SENSITIVITY_CANDIDATE",
+      "definition": "At first-turn entry decision: last closed M5 ATR14 / rolling 50-bar mean ATR14 >= 1.20",
+      "threshold_note": "1.20 was selected during 2023-2024 discovery and is frozen now; no adjustment after 2025 is opened",
+      "discovery_2023_2024": {
+        "count": 269,
+        "win_rate": 0.6394052044609665,
+        "profit_factor_bps": 2.126984922703398,
+        "net_bps": 1633.0634003337075,
+        "max_drawdown_bps": 152.80669245401964,
+        "2023": {"count": 121, "win_rate": 0.6115702479338843, "profit_factor_bps": 1.8614484929636732, "net_bps": 502.4187128309385},
+        "2024": {"count": 148, "win_rate": 0.6621621621621622, "profit_factor_bps": 2.305851047492607, "net_bps": 1130.6446875027689}
+      }
+    },
+    {
+      "candidate_id": "GOLD_L3_H1_MEDIUM_RCI9_BULLISH_REGULAR_DIV_RECENT10",
+      "role": "LOWER_FREQUENCY_PREMIUM_CONTEXT_CANDIDATE",
+      "definition": "At first-turn entry decision: latest two causally confirmed medium-scale H1 LOW pivots (depth=12,right_confirmation=3) form bullish regular divergence: second price low < first price low AND second RCI9 > first RCI9; second pivot confirmation age <= 10 H1 bars",
+      "discovery_2023_2024": {
+        "count": 106,
+        "win_rate": 0.6981132075471698,
+        "profit_factor_bps": 3.144255234566473,
+        "net_bps": 733.6687729297633,
+        "2023": {"count": 52, "win_rate": 0.6923076923076923, "profit_factor_bps": 2.77560134853664, "net_bps": 355.73265457407683},
+        "2024": {"count": 54, "win_rate": 0.7037037037037037, "profit_factor_bps": 3.6650759877478696, "net_bps": 377.9361183556865}
+      }
+    }
+  ],
+  "sealed_holdout": {
+    "year": 2025,
+    "policy": "Do not alter, add, remove, or retune these candidate definitions after inspecting 2025 outcomes. Evaluate all three exactly as frozen.",
+    "opened_at_freeze_time": false
+  },
+  "reference_only": "2026 is already research-exposed and must not be used as the primary validation decision",
+  "guardrails": {
+    "automatic_live_promotion": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "audit_only": true
+  }
+}
