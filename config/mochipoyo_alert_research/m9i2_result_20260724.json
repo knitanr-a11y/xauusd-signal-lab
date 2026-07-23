@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
+  "recorded_at_utc": "2026-07-24T05:00:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tiers_kept_separate": true,
+  "timing_correction": {
+    "source_entry_shift_minutes": 15,
+    "source_exit_shift_minutes": 15,
+    "proxy_timing_changed": false,
+    "old_m9i_invalidated": true,
+    "old_m9b_source_pf_replaced": true
+  },
+  "counts": {
+    "genuine_source_primary": 43,
+    "genuine_source_exact_m1_outcome": 42,
+    "proxy_primary_in_source_windows": 70,
+    "proxy_extra_primary": 41,
+    "source_exact": 28,
+    "source_within_one_bar_early": 1,
+    "source_missed": 14,
+    "source_direct_kernel_true": 40,
+    "missed_with_direct_kernel_true": 12,
+    "missed_with_direct_kernel_false": 2
+  },
+  "timing_corrected_genuine_source": {
+    "count": 42,
+    "win_rate": 0.6904761904761905,
+    "profit_factor_bps": 1.5147327367524606,
+    "net_bps": 290.3735032640644,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "proxy_extra": {
+    "count": 41,
+    "win_rate": 0.5609756097560976,
+    "profit_factor_bps": 1.2855391795653521,
+    "net_bps": 96.79681333221586
+  },
+  "branch_outcomes": {
+    "XAUUSD_LONG": {"source_count": 13, "source_pf": 1.952033, "extra_count": 10, "extra_pf": 5.645084},
+    "XAUUSD_SHORT": {"source_count": 7, "source_pf": 2.786035, "extra_count": 6, "extra_pf": 5.091246},
+    "BTCUSD_LONG": {"source_count": 11, "source_pf": 4.101736, "extra_count": 17, "extra_pf": 0.175005},
+    "BTCUSD_SHORT": {"source_count": 11, "source_pf": 0.515187, "extra_count": 8, "extra_pf": 12.758115}
+  },
+  "primary_kernel_interpretation": {
+    "direct_kernel_source_coverage_fraction": 0.9302325581395349,
+    "main_miss_mechanism": "STATE_DIVERGENCE_AFTER_PRIOR_PROXY_TRANSITIONS",
+    "note": "The frozen RCI9-turn plus EMA-stack PRIMARY kernel is present at 40 of 43 corrected genuine source decisions. Twelve of fourteen misses still have the direct kernel but proxy state is not IDLE."
+  },
+  "source_vs_extra_rci_location": {
+    "definition": "directional_pullback_rci9 = -M15_RCI9 for LONG and +M15_RCI9 for SHORT",
+    "source_all_positive": "43/43",
+    "source_ge_50": "34/43",
+    "extra_positive": "8/41",
+    "extra_ge_50": "2/41",
+    "source_median_directional_pullback_rci9": 70.0,
+    "extra_median_directional_pullback_rci9": -66.66666666666667,
+    "interpretation": "The proxy turn detector often fires on a local turn from the wrong RCI location. This is a source-structure hypothesis, not a validated trading gate."
+  },
+  "trading_objective_interpretation": [
+    "Do not suppress all proxy extras merely to increase source reproduction because XAU extras and BTC SHORT extras are profitable in this small corrected source window.",
+    "BTC LONG is the clearest branch where genuine source entries are strong and proxy extras are weak.",
+    "A source-like M15 RCI location may discriminate BTC LONG quality while preserving profitable extras in other branches; test it on the separate pre-source M9C population before any forward change."
+  ],
+  "guardrails": {
+    "classifier_trained": false,
+    "threshold_optimized": false,
+    "same_sample_gate_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "audit_only": true
+  }
+}
