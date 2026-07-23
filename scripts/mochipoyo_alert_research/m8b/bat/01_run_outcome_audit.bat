@@ -1,11 +1,16 @@
 @echo off
 setlocal
 set "ROOT=%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research"
-set "REPO=%~dp0..\..\..\.."
-set "SKELETON=%REPO%\config\mochipoyo_alert_research\m8b_frozen_trade_skeleton_20260723.csv"
+set "SKELETON=%~dp0..\data\m8b_frozen_trade_skeleton_20260723.csv"
 set "NORMALIZED=%ROOT%\runtime\m8b\m8b_frozen_trade_skeleton_20260723.normalized.csv"
 set "OUTPUT=%ROOT%\outputs\M8B"
 set "SCRIPT=%~dp0..\python\run_extra_signal_outcome_audit.py"
+
+if not exist "%SKELETON%" (
+  echo [M8B BLOCKED] bundled frozen trade skeleton is missing: %SKELETON%
+  pause
+  exit /b 2
+)
 
 rem Git may convert LF to CRLF on Windows. Normalize only BOM/newline bytes;
 rem the frozen CSV rows and values are not changed.
