@@ -1,45 +1,38 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9L_GOLD_MULTIYEAR_HOLDOUT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9L_GOLD_2023_2026_MULTIYEAR_HOLDOUT_AUDIT",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_AND_RUN_M9L_ONCE",
+  "status": "M8C_RUNNING_M9M_HOLDOUT_FAILED_M9N_ASSISTANT_SIDE_GOLD_RESEARCH_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; CONTINUE ASSISTANT_SIDE GOLD 2023-2026 ANALYSIS WITHOUT REQUIRING A BAT FOR EACH ITERATION",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9l_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9l/bat",
-    "run_once": "01_run_gold_multiyear_holdout_audit.bat",
-    "success": "[M9L PASS]",
-    "blocked": "[M9L BLOCKED]",
-    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
-    "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9L\\LATEST\\99_UPLOAD_PACKAGE.zip"
+  "m9l_path_correction": {
+    "data_folder": "MT5 Files\\gold_v3_2023_2026\\",
+    "fixed_bat": "scripts/mochipoyo_alert_research/m9l/bat/01_run_gold_multiyear_holdout_audit.bat",
+    "local_reproduction_required_before_m9n_exploration": false
   },
-  "m9l_research_order": [
-    "Verify the six supplied GOLD CSV SHA256 values and MT5 server-time contract.",
-    "Replay the unchanged frozen M7C XAUUSD state machine from 2023 through 2026-06-19 with exact M1 execution and historical spread.",
-    "Report yearly and LONG/SHORT immediate plus first-turn performance.",
-    "Validate only the already-frozen 2026 GOLD H2/H3 states on 2023-2025; do not tune them.",
-    "After M9L, use 2023-2024 only for new GOLD feature discovery. Do not inspect 2025 feature/outcome relationships while creating hypotheses.",
-    "Freeze new hypotheses before opening the 2025 holdout. Keep 2026 as reference only because it has already been heavily research-exposed."
+  "m9m_holdout": {
+    "freeze_commit": "31d21edec97eb39ae0a56a52ac5759f7cffb1ef5",
+    "result": "config/mochipoyo_alert_research/m9m_gold_2025_sealed_holdout_result_20260724.json",
+    "decision": "STATIC_2023_2024_DISCOVERY_FILTERS_FAILED_2025_DO_NOT_PROMOTE"
+  },
+  "m9n_research_order": [
+    "Use the uploaded GOLD multi-timeframe files directly for exploratory analysis; user-side BAT execution is reserved for important reproduction checkpoints.",
+    "Prioritize XAUUSD LONG first-turn because its PF is above 1 in every available year while SHORT is below 1 in 2023-2025.",
+    "Diagnose 2025 failure as a regime/tail-loss problem rather than mine another static RCI/EMA threshold.",
+    "Use rolling/walk-forward stability, monthly frequency, PF, DD, losing streak and loss-tail behavior together.",
+    "Explore relative volatility, trend persistence, multi-timeframe momentum, divergence and path-state interactions, but label all new findings exploratory because 2025 is now opened.",
+    "Freeze only small interpretable candidates that survive multiple chronological subperiods; any eventual live/prospective challenger must use a new start and cannot reset M8C."
   ],
-  "preliminary_upload_side_findings": {
-    "2023_2025_immediate": "3518 trades, WR 60.20%, PF 0.9251",
-    "2023_2025_first_turn": "3118 trades, WR 60.58%, PF 0.9361",
-    "prefrozen_H2": "PF 0.9509 on 2023-2025",
-    "prefrozen_H3": "PF 0.9632 on 2023-2025",
-    "long_first_turn": "PF above 1 in each available year: 2023 1.0246 / 2024 1.1330 / 2025 1.0357 / 2026-to-Jun19 1.3142",
-    "short_first_turn": "PF below 1 in 2023-2025; 2026 reference improves above 1"
-  },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not use the new 2023-2026 GOLD data as genuine Mochipoyo source truth.",
-    "Do not use 2025 feature/outcome relationships to create the next GOLD hypotheses before they are frozen from 2023-2024.",
+    "Do not describe 2025 as untouched holdout for hypotheses created after M9M.",
+    "Do not optimize for PF alone while frequency/DD/tail losses deteriorate.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
