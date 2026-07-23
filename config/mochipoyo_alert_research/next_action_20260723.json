@@ -1,42 +1,45 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9F_PASS_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9G_PASS_P2_REJECTED_M9H_RESIDUAL_STATE_BRANCH_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9H_RESIDUAL_STATE_BRANCH_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9H_RESIDUAL_STATE_BRANCH_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9f_result": {
-    "population": "852 independent first-turn Tier-B trades plus 3039 adverse checkpoints",
-    "pooled_any_divergence_rejected": true,
-    "fresh_btc_long_conflict": "within 3 bars BOTH: 92 trades, PF 0.616993, negative net in every available month Apr-Jul",
-    "interpretation": "Fresh divergence/state signatures can be used to generate loss-pruning hypotheses, but no same-sample gate is validated."
+  "m9g_result": {
+    "population": "852 independent first-turn Tier-B trades",
+    "p2": "740 kept, WR 59.05%, PF 1.2543, max DD 1224.01 bps, max losing streak 6",
+    "april": "146 kept, PF 0.7219, -793.37 bps",
+    "btc_long": "107 kept, PF 0.9883, -25.71 bps",
+    "xau_long": "209 kept, PF 1.1579",
+    "xau_short": "226 kept, PF 1.1533",
+    "decision": "REJECT_P2_AS_FORWARD_CANDIDATE"
   },
-  "m9g_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9g/bat",
-    "run_once": "01_run_minimal_loss_pruning_candidate_audit.bat",
-    "success": "[M9G PASS]",
-    "blocked": "[M9G BLOCKED]",
+  "m9h_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9h/bat",
+    "run_once": "01_run_residual_state_branch_audit.bat",
+    "success": "[M9H PASS]",
+    "blocked": "[M9H BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9G\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9H\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9g_research_order": [
-    "Compare P0 control, P1 BTC LONG fresh-conflict prune, P2 minimal two-branch prune, and P3 broader sensitivity only.",
-    "Judge PF, chronological max drawdown, max losing streak and monthly retained trade counts together with win rate.",
-    "Prefer minimal interpretable pruning with high frequency retention rather than maximum same-sample PF.",
-    "Do not treat P3 or any best-fitting policy as validated merely because it scores best on the same 852 trades.",
-    "After review, freeze at most one small candidate before starting any NEW prospective challenger. Do not reuse or reset M8C prospective start."
+  "m9h_research_order": [
+    "Use P2 only as the residual baseline; it is not a forward candidate.",
+    "Test only the three frozen natural state observations: BTC LONG M15 range >=1 ATR, XAU LONG H1 directional RCI9 >=80, XAU SHORT M1 RCI18 <=-80.",
+    "Compare each cumulative policy with PF, chronological DD, losing streak, monthly counts and ticker/direction results.",
+    "Do not tune decimal thresholds inside M9H and do not promote the best same-sample policy.",
+    "If residual performance remains weak, stop stacking filters and return to proxy/source reproduction quality rather than overfiltering."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
     "Do not call Tier-B replay events genuine Mochipoyo alerts.",
-    "Do not promote an M9G policy from the same historical sample.",
+    "Do not treat H1-H3 as validation or live gates.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
