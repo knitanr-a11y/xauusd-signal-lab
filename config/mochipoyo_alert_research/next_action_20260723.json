@@ -1,46 +1,55 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9P_PASS_M9Q_COMPLETE_M9R_GOLD_FOUR_ARM_PROSPECTIVE_DESIGN_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9R_GOLD_FOUR_ARM_RISK_REWARD_PROSPECTIVE_SHADOW_DESIGN",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; BUILD_AND_SELF-VERIFY M9R BEFORE ASKING USER TO RUN ANY NEW BAT",
+  "status": "M8C_RUNNING_M9S_MULTI_TIMEFRAME_PASS_M9T_ROBUSTNESS_AND_PORTFOLIO_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING UNCHANGED; CONTINUE ASSISTANT-SIDE M9T ROBUSTNESS/DEDUP WORK; DO NOT REQUIRE USER BAT YET",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9p_result": {
-    "file": "config/mochipoyo_alert_research/m9p_local_reproduction_result_20260724.json",
-    "decision": "DETERMINISTIC_LOCAL_REPRODUCTION_MATCHED_REFERENCE"
+  "m9r_status": {
+    "state": "FROZEN_DESIGN_NOT_STARTED",
+    "purpose": "Fresh prospective M15 N3 risk/reward comparison: base vs N6 half-risk vs selective half-runner vs combined.",
+    "policy": "Keep design available but do not start it before the M9T multi-timeframe portfolio structure is reviewed. Never reuse M7C/M8C prospective starts."
   },
-  "m9q_result": {
-    "file": "config/mochipoyo_alert_research/m9q_gold_loss_reduction_profit_extension_exploratory_result_20260724.json",
-    "Q1": "N6 half-risk accounting reduces historical loss magnitude/DD without reducing signal count",
-    "Q2": "Selective half-runner can extend profit when H1 MACD remains rising at the original M7C exit",
-    "Q3": "Combined historical exploratory profile PF 1.4703, DD 418.2 bps, average positive 17.64 bps vs average negative -17.26 bps",
-    "promotion": false
+  "m9s_result": {
+    "file": "config/mochipoyo_alert_research/m9s_gold_multitimeframe_portfolio_exploratory_result_20260724.json",
+    "M5": "Strict exploratory LONG: 1256, WR 65.45%, PF 1.3337, about 29.9 raw candidates/month",
+    "M15": "Canonical M9P N3: 1495, WR 62.27%, PF 1.3659, about 35.6 raw candidates/month",
+    "H1": "Exploratory HTF-momentum LONG: 191, WR 71.20%, PF 1.7802, about 4.55 raw candidates/month",
+    "H4": "Exploratory D1-aligned premium LONG: 70, WR 72.86%, PF 3.2956, about 1.67 raw candidates/month; very small samples",
+    "raw_sum_warning": "About 71.7/month before overlap; not independent trade count and must be deduplicated.",
+    "short": "No stable GOLD SHORT branch; do not force one."
   },
-  "m9r_design_order": [
-    "Freeze four independent accounting arms from a fresh GOLD-specific prospective start: base N3, risk-only, runner-only, combined.",
-    "Do not change the underlying N3 candidate timestamp or first-turn decision across arms.",
-    "R1 only changes virtual size: N6 entries 0.50x, other N3 entries 1.00x.",
-    "R2 only changes virtual exit accounting: at original M7C exit, if latest fully closed H1 MACD(6,13) line is rising, close 50% there and close the runner 50% at first subsequent fully closed M15 RCI9 turn-down; otherwise close 100% at original exit.",
-    "R3 combines R1 and R2 accounting without changing candidate generation.",
-    "Use a new prospective start after local initialization; never backfill historical rows into the prospective scoreboard.",
-    "Keep N6 itself reportable so risk-zone and complement behavior can be reviewed independently.",
-    "Do not enable real trading or Discord signals."
+  "m9t_research_order": [
+    "Stress the M5/H1/H4 exploratory definitions over nearby rolling windows/quantiles and reject one-point historical fits.",
+    "Require branch-level calendar-year and quarter stability, frequency, PF, DD, loss-tail and added-cost reporting together.",
+    "Measure cross-timeframe overlap at several windows and design one-market-position deduplication/confidence stacking rules.",
+    "Do not automatically open multiple positions because M5/M15/H1/H4 all signal LONG; agreement should initially increase confidence metadata, not exposure.",
+    "After robust branch definitions exist, estimate actual portfolio monthly candidate frequency after dedup.",
+    "Decide whether the M15 M9R risk/reward arms should be generalized to other timeframe branches or remain M15-only.",
+    "Keep BTC separate; no GOLD rule transfer. Continue genuine BTC source/M7C/M8C forward evidence while no long BTC history is available."
   ],
+  "handoff_policy": {
+    "maintain_next_chat_handoff": true,
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9S_DONE_M9T_MULTI_TIMEFRAME_PORTFOLIO_NEXT_20260724.md",
+    "update_when_material_state_changes": true
+  },
   "user_side_policy": {
     "bat_required_now": false,
-    "reason": "Assistant will implement and self-verify the M9R shadow first. User execution is requested only after the prospective contract and numbered BATs are ready."
+    "reason": "M9T remains assistant-side exploratory robustness work. Ask user for a BAT only at an important deterministic/fresh prospective checkpoint."
   },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not treat Q1/Q2/Q3 historical metrics as independent validation.",
-    "Do not reuse the M8C or M7C prospective start for M9R.",
-    "Do not backfill the M9R prospective scoreboard.",
+    "Do not treat M5/H1/H4 historical branch results as independent validation.",
+    "Do not sum raw multi-timeframe candidate counts as independent trades.",
+    "Do not pyramid overlapping timeframe signals by default.",
+    "Do not transplant GOLD branch rules into BTC.",
+    "Do not reuse M7C/M8C prospective starts for any new GOLD shadow.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
