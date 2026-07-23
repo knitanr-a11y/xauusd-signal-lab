@@ -1,38 +1,40 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9M_HOLDOUT_FAILED_M9N_ASSISTANT_SIDE_GOLD_RESEARCH_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; CONTINUE ASSISTANT_SIDE GOLD 2023-2026 ANALYSIS WITHOUT REQUIRING A BAT FOR EACH ITERATION",
+  "status": "M8C_RUNNING_M9N_PASS_M9O_GOLD_DYNAMIC_CORE_REPRODUCTION_DESIGN_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9O_GOLD_DYNAMIC_CORE_REPRODUCTION_DESIGN",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; CONTINUE ASSISTANT_SIDE ROBUSTNESS WORK; DO NOT REQUIRE USER BAT UNTIL N1_N2_N3 DEFINITIONS ARE FROZEN FOR REPRODUCTION",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9l_path_correction": {
-    "data_folder": "MT5 Files\\gold_v3_2023_2026\\",
-    "fixed_bat": "scripts/mochipoyo_alert_research/m9l/bat/01_run_gold_multiyear_holdout_audit.bat",
-    "local_reproduction_required_before_m9n_exploration": false
+  "m9n_result": {
+    "file": "config/mochipoyo_alert_research/m9n_gold_regime_adaptive_assistant_side_result_20260724.json",
+    "N1": "M5 tick_volume_ratio20 <= trailing-200 closed-M5 median; stable yearly PF >1 with useful frequency",
+    "N2": "M15 MACD(6,13) line bps >= trailing-200 closed-M15 75th percentile; stable yearly PF >1 with lower DD",
+    "N3": "N1 OR N2 broad core; 1496 historical/reference trades, WR 62.23%, PF 1.3648, max DD about 510.5 bps, around 35.6 trades per observed month",
+    "N4": "D1 body/range bottom quartile AND N1 premium; PF 2.177 historical/reference aggregate but low frequency and subperiod instability",
+    "promotion": false
   },
-  "m9m_holdout": {
-    "freeze_commit": "31d21edec97eb39ae0a56a52ac5759f7cffb1ef5",
-    "result": "config/mochipoyo_alert_research/m9m_gold_2025_sealed_holdout_result_20260724.json",
-    "decision": "STATIC_2023_2024_DISCOVERY_FILTERS_FAILED_2025_DO_NOT_PROMOTE"
-  },
-  "m9n_research_order": [
-    "Use the uploaded GOLD multi-timeframe files directly for exploratory analysis; user-side BAT execution is reserved for important reproduction checkpoints.",
-    "Prioritize XAUUSD LONG first-turn because its PF is above 1 in every available year while SHORT is below 1 in 2023-2025.",
-    "Diagnose 2025 failure as a regime/tail-loss problem rather than mine another static RCI/EMA threshold.",
-    "Use rolling/walk-forward stability, monthly frequency, PF, DD, losing streak and loss-tail behavior together.",
-    "Explore relative volatility, trend persistence, multi-timeframe momentum, divergence and path-state interactions, but label all new findings exploratory because 2025 is now opened.",
-    "Freeze only small interpretable candidates that survive multiple chronological subperiods; any eventual live/prospective challenger must use a new start and cannot reset M8C."
+  "next_research_order": [
+    "Recompute N1/N2/N3 through one deterministic repository implementation using only closed bars and rolling distributions available at decision time.",
+    "Audit warmup, percentile-window semantics, exact first-turn execution, spread treatment, year/month counts, DD and loss streak against the assistant-side reference metrics.",
+    "Stress N1/N2/N3 by quarter, added-cost sensitivity and small perturbations of rolling-window length so the result is not dependent on exactly 200 bars.",
+    "Do not tune N4 PREMIUM further; keep it as a reference until fresh evidence because its 2026Q2 sample was weak and small.",
+    "Continue examining loss-tail state for N3 without changing M7C or M8C.",
+    "Only after deterministic reproduction and robustness checks should a new GOLD-specific prospective shadow be considered; it must use a fresh start and must not reset M8C."
   ],
+  "user_side_policy": {
+    "bat_required_now": false,
+    "reason": "Exploration remains assistant-side. Ask the user to run a BAT only after the important N1/N2/N3 checkpoint is frozen and reproducible."
+  },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not describe 2025 as untouched holdout for hypotheses created after M9M.",
-    "Do not optimize for PF alone while frequency/DD/tail losses deteriorate.",
+    "Do not describe M9N as independent validation because 2025 and 2026 have already been research-exposed.",
+    "Do not optimize only for PF while frequency/DD/tail losses deteriorate.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
