@@ -1,44 +1,36 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M8BZ2_MULTITIMEFRAME_RCI_CONTEXT_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M8BZ2_MULTITIMEFRAME_RCI_RESEARCH",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BZ2_MULTITIMEFRAME_RCI_CONTEXT_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9A_SAMPLE_EXPANSION",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m8bz2_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m8bz2/bat",
-    "run_once": "01_run_multitimeframe_rci_context_audit.bat",
-    "success": "[M8BZ2 PASS]",
-    "blocked": "[M8BZ2 BLOCKED]",
-    "simultaneous_with_m8c_collector_m7c": "ALLOWED",
+  "m9a_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9a/bat",
+    "run_once": "01_run_sample_expansion_availability_audit.bat",
+    "success": "[M9A PASS]",
+    "blocked": "[M9A BLOCKED]",
+    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BZ2\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9A\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "research_questions": [
-    "At the original M15 proxy alert boundary, does completed-M5 direction-normalized RCI9 near its upper extreme predict a larger initial pullback before the first causal turn?",
-    "At the first causal pullback-turn entry boundary, do H1 and H4 RCI9 slopes moving in the trade direction predict stronger later return/MFE or smaller MAE?",
-    "Does H1+H4 agreement add information beyond local M1 pullback-turn features?",
-    "Do these relationships persist across XAUUSD/BTCUSD and LONG/SHORT rather than being driven by a tiny subgroup?"
-  ],
-  "important": [
-    "The user's M5/H1/H4 idea is a hypothesis, not a rule and not assumed correct.",
-    "M5/H1/H4 are derived from existing exact MT5 M1 using MT5 server-time buckets.",
-    "Only fully closed derived bars ending at or before each decision boundary are visible.",
-    "LONG and SHORT are evaluated symmetrically with direction-normalized RCI features.",
-    "The same M8B/M8BZ sample is hypothesis-generation only; no RCI threshold is promoted from it.",
-    "Any selected multi-timeframe signature requires a new forward validation sample without resetting existing M8C."
+  "why": [
+    "The current M8B/M8BZ2 feature sample is too small for threshold promotion.",
+    "Existing documents imply 19 genuine PRIMARY alerts in M7A plus 17 non-overlapping post-M7C genuine PRIMARY alerts, approximately 36 before any historical proxy replay.",
+    "M9A verifies the actual local SQLite count and MT5 coverage instead of relying on that estimate.",
+    "After M9A, Tier A will evaluate all genuine source PRIMARY alerts first.",
+    "Only then will Tier B replay the already-frozen proxy over older closed-bar history, labeled PROXY_REPLAY_NOT_SOURCE_TRUTH."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
-    "Do not assume M5 RCI9>=80 means wait without evidence.",
-    "Do not assume H1/H4 RCI9 rising guarantees continuation without evidence.",
-    "Do not use future or open higher-timeframe bars as feature inputs.",
-    "Do not modify M7C formulas, thresholds, runtime manifest, or prospective start.",
-    "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate."
+    "Do not change M7C formulas or thresholds before historical replay.",
+    "Do not mix genuine source alerts and proxy replay events in a source-reproduction accuracy claim.",
+    "Do not promote M5 RCI9>=80 or H1/H4 RCI rules from the current tiny sample.",
+    "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
