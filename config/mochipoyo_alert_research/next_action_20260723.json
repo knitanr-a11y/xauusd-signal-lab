@@ -1,45 +1,46 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9O_PASS_M9P_GOLD_DYNAMIC_CORE_REPRODUCTION_IMPLEMENTATION_NEXT",
+  "status": "M8C_RUNNING_M9P_IMPLEMENTED_ONE_TIME_LOCAL_REPRODUCTION_NEXT",
   "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED; IMPLEMENT_AND VERIFY M9P REPOSITORY REPRODUCTION; DO NOT REQUIRE USER BAT YET",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR RUNNING UNCHANGED; PULL LATEST BRANCH AND RUN M9P ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9o_result": {
-    "file": "config/mochipoyo_alert_research/m9o_gold_dynamic_core_robustness_result_20260724.json",
-    "N3": "strict full-window N1 OR N2; 1495 trades, WR 62.27%, PF 1.3659, max DD 510.5 bps, about 35.6 trades/month",
-    "robustness": "72/72 nearby W/q combinations have PF>1 in each available year and 72/72 remain aggregate PF>1 under extra 2bps/trade stress",
-    "N6": "H4 RCI9 second-quartile relative zone is a secondary loss-tail hypothesis only, not a gate",
-    "promotion": false
+  "m9p_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9p/bat",
+    "run_once": "01_run_gold_dynamic_core_reproduction_audit.bat",
+    "success": "[M9P PASS]",
+    "blocked": "[M9P BLOCKED]",
+    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9P\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9p_contract": {
-    "file": "config/mochipoyo_alert_research/m9p_gold_dynamic_core_reproduction_contract_20260724.json",
-    "data_folder": "MT5 Files\\gold_v3_2023_2026\\",
-    "implementation_required": true,
-    "user_bat_required_now": false
+  "m9p_expected_reference": {
+    "N1_count": 1075,
+    "N2_count": 818,
+    "N3_count": 1495,
+    "N3_win_rate": 0.622742474916388,
+    "N3_profit_factor_bps": 1.365884145048126,
+    "N3_max_drawdown_bps": 510.52434894848284,
+    "N6_risk_count": 282,
+    "stress_combinations": 72,
+    "stress_all_min_year_pf_above_1": true,
+    "stress_all_extra_2bps_pf_above_1": true
   },
-  "m9p_research_order": [
-    "Implement strict full-window N1/N2/N3 using closed bars only and exact first-turn M1 execution.",
-    "Reproduce yearly, quarterly, monthly, DD, losing streak and cost-sensitivity metrics against M9O references.",
-    "Reproduce the 72-combination parameter-neighborhood stress grid without selecting a new optimum.",
-    "Report N6 H4-RCI risk-zone statistics but do not use N6 as an entry or exit gate.",
-    "Only after deterministic reproduction is internally coherent should one important user-side BAT checkpoint be created.",
-    "Any later GOLD prospective shadow must use a fresh prospective start and must not reset M8C."
+  "after_m9p": [
+    "Verify local output against the self-verified M9O/M9P references.",
+    "If deterministic reproduction matches, decide whether N3 deserves a new GOLD-specific prospective audit shadow with a fresh start.",
+    "Keep N6 separate as a report-only risk layer unless a future prospective test is explicitly frozen.",
+    "Do not reset or reuse M8C prospective start."
   ],
-  "user_side_policy": {
-    "bat_required_now": false,
-    "reason": "The assistant can finish M9P implementation/review first. The user should only be asked to run one BAT at the meaningful reproduction checkpoint, not during each exploratory iteration."
-  },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not describe M9O as untouched independent validation.",
-    "Do not promote N6 from the research-exposed historical sample.",
+    "Do not use N6 as an entry filter or stop.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
