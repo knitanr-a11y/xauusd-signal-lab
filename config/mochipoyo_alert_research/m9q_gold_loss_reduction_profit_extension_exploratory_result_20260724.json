@@ -1,0 +1,104 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9Q_GOLD_LOSS_REDUCTION_AND_PROFIT_EXTENSION_EXPLORATION",
+  "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
+  "population": "Canonical M9P N3 XAUUSD LONG first-turn population, 1495 trades, 2023-01-03 through 2026-06-19",
+  "evidence_warning": "All historical periods used here are research-exposed. These overlays are hypotheses for fresh prospective accounting shadow only, not historically validated gates.",
+  "baseline_N3": {
+    "count": 1495,
+    "win_rate": 0.622742474916388,
+    "profit_factor_bps": 1.365884145048126,
+    "net_bps": 4290.412942927445,
+    "average_win_bps": 17.20361387298759,
+    "average_loss_bps": -20.865038385807825,
+    "max_drawdown_bps": 510.52434894848284,
+    "max_losing_streak": 11
+  },
+  "loss_reduction_hypothesis": {
+    "id": "Q1_N6_HALF_RISK_ACCOUNTING",
+    "definition": "Keep every N3 signal. Assign virtual size 0.50x when entry is in the already-described N6 H4 RCI9 percentile risk zone; assign 1.00x otherwise. This is sizing/accounting only, not an entry rejection or stop.",
+    "historical_exploratory_metrics": {
+      "signal_count_unchanged": 1495,
+      "sign_win_rate_unchanged": 0.622742474916388,
+      "profit_factor_bps": 1.4414377494738762,
+      "net_weighted_bps": 4442.288324822425,
+      "average_positive_weighted_bps": 15.580575110514989,
+      "average_negative_weighted_bps": -17.906098048161976,
+      "max_drawdown_weighted_bps": 428.4727695164456,
+      "max_losing_streak": 11,
+      "yearly_pf": {
+        "2023": 1.1492487304491046,
+        "2024": 1.4431552926411646,
+        "2025": 1.3266543372255206,
+        "2026_to_0619": 1.878421730376977
+      }
+    },
+    "interpretation": "Historically, halving exposure in the N6 risk state reduces loss magnitude and DD without reducing signal frequency, but must be prospectively tested because N6 was discovered on exposed history."
+  },
+  "profit_extension_hypothesis": {
+    "id": "Q2_H1_MACD_RISING_HALF_RUNNER",
+    "definition": "At the unchanged M7C exit decision, inspect the latest fully closed H1 MACD(6,13) line. If the H1 MACD line is rising versus its prior closed H1 bar, close 50% at the original M7C exit and keep 50% as a runner until the first subsequent fully closed M15 RCI9 turn-down, exiting at the next exact M1/M15 decision open. Otherwise close 100% at the original M7C exit.",
+    "future_relative_to_decision_used": false,
+    "historical_exploratory_metrics": {
+      "count": 1495,
+      "win_rate": 0.5899665551839465,
+      "profit_factor_bps": 1.4099347045316546,
+      "net_bps": 5038.646496419836,
+      "max_drawdown_bps": 528.3266732236079,
+      "max_losing_streak": 9,
+      "yearly_pf": {
+        "2023": 1.261757663726311,
+        "2024": 1.3214263359285887,
+        "2025": 1.2252776230797826,
+        "2026_to_0619": 1.9356611778021793
+      }
+    },
+    "interpretation": "The runner increases net profit and PF but lowers closed-trade win rate and slightly increases DD when used alone. It is therefore not a standalone promotion candidate."
+  },
+  "combined_hypothesis": {
+    "id": "Q3_N6_HALF_RISK_PLUS_H1_MACD_HALF_RUNNER",
+    "definition": "Q1 virtual half-risk accounting at entry plus Q2 selective 50% runner at exit. Signal timestamps are unchanged.",
+    "historical_exploratory_metrics": {
+      "count": 1495,
+      "win_rate": 0.5899665551839465,
+      "profit_factor_bps": 1.4702593619140543,
+      "net_weighted_bps": 4975.846704258327,
+      "average_positive_weighted_bps": 17.638226296569382,
+      "average_negative_weighted_bps": -17.26112379986275,
+      "max_drawdown_weighted_bps": 418.20553756332083,
+      "max_losing_streak": 9,
+      "yearly_pf": {
+        "2023": 1.2527712967658045,
+        "2024": 1.3959463899722646,
+        "2025": 1.2625982790431052,
+        "2026_to_0619": 2.080088913306086
+      },
+      "extra_cost_sensitivity_bps_per_trade": {
+        "0.5": {"profit_factor": 1.3880960100880484, "net_bps": 4228.346704258327},
+        "1.0": {"profit_factor": 1.310039317831033, "net_bps": 3480.846704258327},
+        "1.5": {"profit_factor": 1.2361717499712563, "net_bps": 2733.346704258327},
+        "2.0": {"profit_factor": 1.1664369476854257, "net_bps": 1985.846704258327}
+      },
+      "quarter_note": "12 of 14 observed quarters remain above PF 1; 2024Q4 and 2025Q3 remain weak, so the overlay does not eliminate regime risk."
+    },
+    "interpretation": "Historically the combined accounting changes the payoff profile from mildly loss-larger-than-win to roughly balanced average win/loss, while reducing DD and increasing PF. This is the leading fresh prospective risk/reward hypothesis, not a live rule."
+  },
+  "research_decision": [
+    "Do not tighten a fixed stop solely to improve the historical average loss.",
+    "Do not reject N6 entries historically; test N6 as virtual size reduction in a fresh prospective accounting arm.",
+    "Do not replace the M7C exit historically; test the selective runner in a separate fresh prospective accounting arm.",
+    "Use a four-arm fresh GOLD prospective shadow: N3 base, Q1 risk-only, Q2 runner-only, Q3 combined.",
+    "Keep M8C and M7C unchanged and do not reuse their prospective start."
+  ],
+  "guardrails": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "automatic_live_promotion": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "audit_only": true
+  }
+}
