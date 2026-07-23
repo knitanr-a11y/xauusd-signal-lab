@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T04:40:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9H_PASS_FILTER_STACKING_STOPPED_M9I_SOURCE_PROXY_GAP_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9I_GENUINE_SOURCE_VS_PROXY_GAP_AUDIT",
+  "recorded_at_utc": "2026-07-24T04:55:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9I_TIMING_INVALIDATED_M9I2_TIMING_CORRECTION_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -15,60 +15,45 @@
     "source_anchor_separate_and_unsuppressed": true
   },
   "m9b": {
-    "status": "PASS_EXPLORATORY_ONLY",
+    "status": "TIMING_RECOMPUTATION_REQUIRED",
     "population_tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
     "genuine_primary_count": 43,
-    "source_immediate_win_rate": 0.6976744186046512,
-    "source_immediate_profit_factor_bps": 2.2340942206836614,
-    "same_43_is_validation": false
+    "previous_source_immediate_win_rate": 0.6976744186046512,
+    "previous_source_immediate_profit_factor_bps": 2.2340942206836614,
+    "previous_metrics_promotable": false,
+    "reason": "M9B evaluated source entry/exit at the source M15 bar open instead of the next M15 open where the alert became knowable. M9I2 will recompute timing-corrected source outcomes."
   },
-  "m9c": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
-    "exact_m1_resolved_trades": 952,
-    "first_causal_turn_trades": 852,
-    "first_turn_profit_factor_bps": 1.0321683116573177
-  },
-  "m9g": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "p2_forward_candidate": false,
-    "p2_profit_factor_bps": 1.2543359158322271,
-    "p2_max_drawdown_bps": 1224.009522421252,
-    "decision": "REJECT_P2_AS_FORWARD_CANDIDATE"
-  },
-  "m9h": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "result": "config/mochipoyo_alert_research/m9h_result_20260724.json",
-    "h3": {
-      "accepted_count": 605,
-      "retention_vs_852": 0.710093896713615,
-      "win_rate": 0.631404958677686,
-      "profit_factor_bps": 1.585917,
-      "max_drawdown_bps": 810.048151,
-      "max_losing_streak": 6,
-      "april_profit_factor_bps": 1.003281
-    },
-    "decision": "STOP_STACKING_HISTORICAL_FILTERS_AND_RETURN_TO_GENUINE_SOURCE_VS_PROXY_GAP_DIAGNOSIS",
-    "automatic_forward_promotion": false
+  "m9c_to_m9h": {
+    "proxy_timing_status": "UNAFFECTED_BY_SOURCE_TIMING_INCIDENT",
+    "reason": "Frozen proxy replay already evaluates at M15 decision boundaries using the prior closed M15 bar.",
+    "historical_filter_stacking_stopped": true,
+    "m9h_h3_forward_promoted": false
   },
   "m9i": {
-    "status": "READY_ONE_TIME_GENUINE_SOURCE_VS_PROXY_GAP_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m9i_genuine_source_vs_proxy_gap_contract_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9i/bat",
-    "run_once": "01_run_genuine_source_vs_proxy_gap_audit.bat",
+    "status": "INVALIDATED_SOURCE_TIMING_OFF_BY_ONE_M15_BAR",
+    "observed_match_counts": {"EXACT": 1, "WITHIN_ONE_BAR_LATE": 28, "MISSED": 14},
+    "incident": "config/mochipoyo_alert_research/m9i_source_decision_timing_correction_incident_20260724.json",
+    "feature_contrasts_promotable": false,
+    "source_outcome_metrics_promotable": false
+  },
+  "m9i2": {
+    "status": "READY_ONE_TIME_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
+    "source_decision_shift_minutes": 15,
+    "source_exit_decision_shift_minutes": 15,
+    "proxy_timing_changed": false,
+    "operator_folder": "scripts/mochipoyo_alert_research/m9i2/bat",
+    "run_once": "01_run_source_timing_corrected_gap_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "purpose": "Directly compare 43 genuine source PRIMARY boundaries with unchanged frozen-proxy extra/missed PRIMARY states using causal M5/M15/H1/H4 features and fresh divergence context, without fitting another historical filter.",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I2\\LATEST\\99_UPLOAD_PACKAGE.zip",
     "classifier_training": false,
     "threshold_optimization": false,
     "same_sample_gate_promotion_allowed": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
-    "preserve_useful_monthly_frequency": true,
     "stop_historical_filter_stacking": true,
     "genuine_source_priority_over_proxy_replay": true,
-    "diagnose_source_proxy_gap_before_any_new_gate": true
+    "correct_source_decision_timing_before_any_source_proxy_inference": true
   },
   "safety": {
     "audit_only": true,
