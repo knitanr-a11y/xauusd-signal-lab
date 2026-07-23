@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BX_EXCURSION_PATH_AUDIT",
+  "contract_version": "MOCHIPOYO_M8BX_EXCURSION_PATH_V1",
+  "recorded_at_utc": "2026-07-24T00:00:00Z",
+  "audit_only": true,
+  "purpose": "Measure adverse/favorable path quality of the already-frozen M8B 18 extra-entry trades, especially XAUUSD winners that may hide large adverse excursions. This sample is hypothesis-generation only and must not be reused as M8C validation.",
+  "input_contract": {
+    "m8b_trade_file": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8B\\LATEST\\03_extra_entry_trades.csv",
+    "m8b_symbol_metadata": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8B\\LATEST\\06_symbol_metadata.json",
+    "expected_trade_count": 18,
+    "m1_files": {"XAUUSD": "goldsharp_m1.csv", "BTCUSD": "btcusdsharp_m1.csv"},
+    "use_only_existing_m8b_frozen_entry_exit_times": true
+  },
+  "path_contract": {
+    "time_basis": "MT5 server time exactly as frozen in M8B",
+    "bar_resolution": "M1",
+    "window": "entry_server_open through exit_server_open inclusive",
+    "long_mark_to_market": "liquidation on BID; M1 bid low gives adverse extreme, M1 bid high gives favorable extreme",
+    "short_mark_to_market": "liquidation on ASK approximated as M1 BID high/low plus that M1 bar spread * SYMBOL_POINT",
+    "spread_multiplier": 1.0,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "intrabar_ordering_claim": "NONE; only M1-bar extreme magnitude and first extreme minute are reported",
+    "missing_clock_minutes": "reported as data quality; no nearest-bar or synthetic-fill fallback"
+  },
+  "metrics": [
+    "mae_bps",
+    "mfe_bps",
+    "final_return_bps",
+    "time_to_mae_minutes",
+    "time_to_mfe_minutes",
+    "peak_to_exit_giveback_bps",
+    "recovery_from_mae_to_exit_bps",
+    "underwater_m1_bar_fraction",
+    "observed_m1_rows",
+    "missing_clock_minutes"
+  ],
+  "splits": ["ticker", "direction", "outcome", "ticker_direction", "ticker_outcome"],
+  "xau_focus": {
+    "compare_winning_vs_losing_mae": true,
+    "compare_winning_vs_losing_mfe": true,
+    "report_deepest_adverse_xau_trades": true,
+    "report_largest_peak_to_exit_giveback_xau_trades": true,
+    "no_threshold_optimization_on_m8b_18": true
+  },
+  "anti_overfit": {
+    "m8b_18_is_exploratory_only": true,
+    "do_not_select_stop_or_entry_threshold_and_validate_on_same_18": true,
+    "any_loss_reduction_rule_requires_m8c_or_later_new_forward_validation": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false,
+    "m8c_runtime_change": false
+  }
+}
