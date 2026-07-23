@@ -1,0 +1,83 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9C_FROZEN_PROXY_HISTORICAL_REPLAY",
+  "recorded_at_utc": "2026-07-24T03:15:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "upload_package_sha256": "cbf42cad3e898015d1ebfb9cc09d154a74d2d030460a04fcc2b8d9924ebecbcb",
+  "counts": {
+    "replay_signals": 5902,
+    "paired_trades": 2950,
+    "exact_m1_resolved_trades": 952,
+    "first_causal_turn_trades": 852,
+    "m5_context_turns": 851,
+    "htf_context_turns": 820,
+    "missing_exact_m1_entry_or_exit": 1998
+  },
+  "immediate_all_952": {
+    "win_rate": 0.592436974789916,
+    "profit_factor_bps": 0.9879555691742691,
+    "net_bps": -226.56460208778535,
+    "mean_bps": -0.23798802740313588,
+    "median_bps": 6.448055915291835
+  },
+  "first_turn_all_852": {
+    "win_rate": 0.5821596244131455,
+    "profit_factor_bps": 1.0321683116573177,
+    "net_bps": 541.1779966228281,
+    "mean_bps": 0.6351854420455729,
+    "median_bps": 6.862115833727062
+  },
+  "same_852_immediate_counterpart": {
+    "win_rate": 0.5539906103286385,
+    "profit_factor_bps": 0.822540350239085,
+    "net_bps": -3330.2455857595937,
+    "mean_bps": -3.9087389504220584,
+    "median_bps": 3.826935898969416,
+    "mean_first_turn_minus_immediate_bps": 4.543924392467631,
+    "fraction_first_turn_entry_improved_final_return": 0.7171361502347418,
+    "note": "This paired comparison is exploratory. A first turn is only known after it causally occurs; it is not a signal-time gate."
+  },
+  "immediate_by_ticker_direction": {
+    "BTCUSD_LONG": {"count": 226, "win_rate": 0.557522, "profit_factor_bps": 0.739700, "net_bps": -1458.695443},
+    "BTCUSD_SHORT": {"count": 242, "win_rate": 0.615702, "profit_factor_bps": 1.117018, "net_bps": 506.631739},
+    "XAUUSD_LONG": {"count": 232, "win_rate": 0.586207, "profit_factor_bps": 1.077798, "net_bps": 314.990264},
+    "XAUUSD_SHORT": {"count": 252, "win_rate": 0.607143, "profit_factor_bps": 1.085018, "net_bps": 410.508838}
+  },
+  "mae_winner_loss_separation_bps": {
+    "BTCUSD_LONG": {"winner_mean_mae": -31.002592, "loser_mean_mae": -102.176542},
+    "BTCUSD_SHORT": {"winner_mean_mae": -30.761797, "loser_mean_mae": -87.228800},
+    "XAUUSD_LONG": {"winner_mean_mae": -22.345700, "loser_mean_mae": -87.438244},
+    "XAUUSD_SHORT": {"winner_mean_mae": -19.773585, "loser_mean_mae": -89.674626}
+  },
+  "m5_context_observation": {
+    "overall_first_turn_GE_80": {"count": 179, "win_rate": 0.519553, "profit_factor_bps": 1.521439, "net_bps": 1118.772448},
+    "overall_first_turn_50_TO_80": {"count": 228, "win_rate": 0.548246, "profit_factor_bps": 0.879380, "net_bps": -551.417117},
+    "ticker_direction_dependence": "Material. BTCUSD LONG GE_80 is weak while XAUUSD LONG GE_80 is strong in this replay population; no universal M5 RCI threshold is promoted."
+  },
+  "htf_context_observation": {
+    "H1_AND_H4_WITH_TRADE": {"count": 226, "win_rate": 0.557522, "profit_factor_bps": 0.954888, "net_bps": -196.094760},
+    "H1_ONLY_WITH_TRADE": {"count": 149, "win_rate": 0.503356, "profit_factor_bps": 0.803153, "net_bps": -630.723453},
+    "H4_ONLY_WITH_TRADE": {"count": 294, "win_rate": 0.595238, "profit_factor_bps": 1.090999, "net_bps": 555.155585},
+    "NEITHER_WITH_TRADE": {"count": 151, "win_rate": 0.675497, "profit_factor_bps": 1.365854, "net_bps": 925.375737},
+    "interpretation": "The intuitive H1/H4 same-direction RCI rule is not stable as a universal rule in Tier B. No HTF threshold is promoted."
+  },
+  "key_interpretation": [
+    "The frozen M7C proxy replay creates a large research population but does not reproduce the strong Tier A genuine-source edge when used unfiltered.",
+    "Tier B is suitable for studying candidate/path failure modes, not for claiming genuine Mochipoyo reproduction accuracy.",
+    "Winner-versus-loser adverse excursion separation is large across all four ticker/direction groups and warrants causal loss-path feature research.",
+    "Waiting for the first causal pullback turn improves the same 852-trade subset on average, but PF remains only slightly above 1 and is not a universal entry rule.",
+    "M5 and H1/H4 RCI effects are ticker/direction dependent; no global RCI threshold is promoted."
+  ],
+  "guardrails": {
+    "same_sample_threshold_promotion_allowed": false,
+    "source_truth": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "nearest_m1_fallback_used": false,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
