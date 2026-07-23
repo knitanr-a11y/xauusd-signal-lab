@@ -1,0 +1,72 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT",
+  "contract": "MOCHIPOYO_M9E_CAUSAL_DIVERGENCE_CONTEXT_V1",
+  "status": "FROZEN_BEFORE_M9E_EXECUTION",
+  "population": {
+    "upstream": "M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
+    "tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "expected_checkpoint_rows": 3039,
+    "expected_first_turn_rows": 852,
+    "purpose": "Add regular and hidden divergence context to adverse checkpoints and first causal turn entries without changing the frozen M7C proxy or treating replay events as genuine Mochipoyo alerts."
+  },
+  "research_question": [
+    "Do regular or hidden divergences help distinguish recoverable pullbacks from failing adverse paths?",
+    "At the first causal turn, do supportive divergences improve return, MFE/MAE or recovery probability beyond distance-only information?",
+    "Are divergence effects stable by ticker, direction, timeframe, oscillator and month?"
+  ],
+  "causal_contract": {
+    "decision_times": ["M9D checkpoint_decision_time", "M9D turn_entry_time"],
+    "closed_bars_only": true,
+    "pivot_must_be_confirmed_by_decision_time": true,
+    "future_pivot_confirmation_forbidden": true,
+    "future_outcome_used_only_after_divergence_context_is_frozen": true,
+    "nearest_or_future_bar_fallback": false
+  },
+  "pivot_proxies": {
+    "method": "INDEPENDENT_CAUSAL_CONFIRMED_PRICE_PIVOT_PROXY",
+    "scales": {
+      "short": {"depth": 5, "right_confirmation_bars": 2},
+      "medium": {"depth": 12, "right_confirmation_bars": 3}
+    },
+    "note": "These are independent causal pivot proxies, not a claim to reproduce proprietary TradingView/MT5 ZigZag deviation behavior."
+  },
+  "timeframes": ["M1", "M5", "M15", "H1", "H4"],
+  "oscillators": ["RCI9", "RCI14", "RCI18", "MACD_LINE_6_13", "MACD_HISTOGRAM_6_13_4"],
+  "definitions": {
+    "BULLISH_REGULAR": "second confirmed price low < first confirmed price low AND second oscillator value > first oscillator value",
+    "BULLISH_HIDDEN": "second confirmed price low > first confirmed price low AND second oscillator value < first oscillator value",
+    "BEARISH_REGULAR": "second confirmed price high > first confirmed price high AND second oscillator value < first oscillator value",
+    "BEARISH_HIDDEN": "second confirmed price high < first confirmed price high AND second oscillator value > first oscillator value"
+  },
+  "directional_roles": {
+    "LONG_SUPPORTIVE": ["BULLISH_REGULAR", "BULLISH_HIDDEN"],
+    "LONG_OPPOSING": ["BEARISH_REGULAR", "BEARISH_HIDDEN"],
+    "SHORT_SUPPORTIVE": ["BEARISH_REGULAR", "BEARISH_HIDDEN"],
+    "SHORT_OPPOSING": ["BULLISH_REGULAR", "BULLISH_HIDDEN"]
+  },
+  "outputs_and_analysis": {
+    "keep_raw_divergence_type_per_timeframe_oscillator_scale": true,
+    "keep_supportive_and_opposing_counts": true,
+    "evaluate_checkpoint_return_and_recovery": true,
+    "evaluate_first_turn_return": true,
+    "separate_XAU_BTC": true,
+    "separate_LONG_SHORT": true,
+    "temporal_replication_by_month": true,
+    "same_sample_can_generate_hypothesis": true,
+    "same_sample_can_validate_or_promote_rule": false,
+    "automatic_threshold_or_gate_promotion": false,
+    "future_forward_validation_required": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
