@@ -1,0 +1,71 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT",
+  "contract": "MOCHIPOYO_M9F_DIVERGENCE_RECENCY_LOCALITY_V1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "upstream": {
+    "m9e_result": "config/mochipoyo_alert_research/m9e_result_20260724.json",
+    "expected_checkpoint_rows": 3039,
+    "expected_first_turn_rows": 852,
+    "expected_divergence_event_rows": 145560,
+    "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH"
+  },
+  "research_question": [
+    "Does fresh divergence near the causal decision time carry more useful information than stale ambient divergence?",
+    "Does divergence formed during the current post-signal adverse episode differ from divergence that predates the signal?",
+    "Do regular and hidden divergence have different roles for reversal versus continuation/pullback recovery?"
+  ],
+  "recency": {
+    "normalization": "(decision_time - second_pivot_confirmation_time) / timeframe_bar_duration",
+    "observation_cutoffs_bars": [2, 3, 5, 10],
+    "exclusive_buckets": ["LE_2", "GT_2_LE_5", "GT_5_LE_10", "GT_10"],
+    "cutoffs_are_observation_grid_only": true,
+    "no_recency_threshold_is_promoted_by_this_audit": true
+  },
+  "locality": {
+    "BOTH_PIVOTS_AFTER_SIGNAL": "first_pivot_time >= original proxy entry_server_open",
+    "SECOND_PIVOT_AFTER_SIGNAL": "first_pivot_time < entry_server_open <= second_pivot_time",
+    "PRE_SIGNAL_PAIR": "second_pivot_time < entry_server_open",
+    "purpose": "Separate current adverse-episode structure from older higher-timeframe/ambient context without discarding either a priori."
+  },
+  "decision_level_signatures": {
+    "for_each_recency_cutoff": [
+      "SUPPORTIVE_ONLY",
+      "OPPOSING_ONLY",
+      "BOTH",
+      "NEITHER"
+    ],
+    "subtypes_kept_separately": ["SUPPORTIVE_REGULAR", "SUPPORTIVE_HIDDEN", "OPPOSING_REGULAR", "OPPOSING_HIDDEN"]
+  },
+  "analysis": {
+    "panels": ["M9E_CHECKPOINT", "M9E_FIRST_TURN"],
+    "separate_ticker": true,
+    "separate_direction": true,
+    "separate_timeframe": true,
+    "separate_oscillator": true,
+    "separate_pivot_scale": true,
+    "separate_divergence_type": true,
+    "monthly_replication": true,
+    "evaluate_return_bps": true,
+    "evaluate_checkpoint_recovery_fraction": true,
+    "same_sample_hypothesis_generation_allowed": true,
+    "same_sample_validation_or_gate_promotion_allowed": false
+  },
+  "causal_guardrails": {
+    "reuse_only_m9e_events_confirmed_by_decision_time": true,
+    "future_pivot_confirmation_used": false,
+    "future_outcomes_used_only_for_evaluation": true,
+    "nearest_or_future_bar_fallback": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false
+  }
+}
