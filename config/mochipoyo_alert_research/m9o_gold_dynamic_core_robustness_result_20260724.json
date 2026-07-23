@@ -1,0 +1,163 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9O_GOLD_DYNAMIC_CORE_ROBUSTNESS_AND_CANONICALIZATION",
+  "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY",
+  "recorded_at_utc": "2026-07-24T07:40:00Z",
+  "population": "XAUUSD frozen-M7C LONG trades entered at the first causal M1 turn on the user-supplied 2023-01-03 through 2026-06-19 GOLD history",
+  "evidence_status": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "independent_validation": false,
+    "reason": "2025 and 2026 were already research-exposed before M9O. M9O is robustness/canonicalization, not an untouched holdout."
+  },
+  "canonical_semantics_for_reproduction": {
+    "N1": "At first-turn decision, use latest fully closed M5 bar. tick_volume_ratio20 = selected M5 tick volume / mean tick volume of selected plus prior 19 M5 bars. Require the full 20-bar ratio warmup and a full rolling feature window. N1 is true when the selected ratio is <= rolling quantile q1 of the latest W ratio observations.",
+    "N2": "At first-turn decision, use latest fully closed M15 bar. MACD line = EMA6(close)-EMA13(close), expressed in bps of selected close. Require a full rolling feature window. N2 is true when selected MACD line bps is >= rolling quantile q2 of the latest W M15 values.",
+    "N3": "N1 OR N2.",
+    "canonical_W": 200,
+    "canonical_q1": 0.50,
+    "canonical_q2": 0.75,
+    "closed_bars_only": true,
+    "future_relative_to_decision_used": false,
+    "entry_execution": "first causal M1 turn entry, historical spread-adjusted",
+    "exit_execution": "unchanged frozen M7C proxy exit, exact M1 open, historical spread-adjusted"
+  },
+  "canonical_strict_warmup_metrics": {
+    "N1": {
+      "count": 1075,
+      "win_rate": 0.6390697674418605,
+      "profit_factor_bps": 1.3345697428719754,
+      "net_bps": 3126.4594356694624,
+      "max_drawdown_bps": 526.6637957158231,
+      "max_losing_streak": 8,
+      "yearly_pf": {"2023": 1.284428189317745, "2024": 1.3019465178263858, "2025": 1.221390795647477, "2026_to_0619": 1.5552438875187171}
+    },
+    "N2": {
+      "count": 818,
+      "win_rate": 0.5806845965770171,
+      "profit_factor_bps": 1.3786136814608168,
+      "net_bps": 1813.5025756051114,
+      "max_drawdown_bps": 395.5371423805982,
+      "max_losing_streak": 8,
+      "yearly_pf": {"2023": 1.1636694236806244, "2024": 1.4059673730024733, "2025": 1.3282677286829088, "2026_to_0619": 1.6269173139956787}
+    },
+    "N3": {
+      "count": 1495,
+      "average_trades_per_observed_month": 35.595238095238095,
+      "win_rate": 0.622742474916388,
+      "profit_factor_bps": 1.365884145048126,
+      "net_bps": 4290.412942927445,
+      "average_win_bps": 17.20361387298759,
+      "average_loss_bps": -20.865038385807825,
+      "max_drawdown_bps": 510.52434894848284,
+      "max_losing_streak": 11,
+      "tail_le_minus_100_fraction": 0.01137123745819398,
+      "yearly_pf": {"2023": 1.1452954484881541, "2024": 1.357539497969303, "2025": 1.2422104302466985, "2026_to_0619": 1.756805217618165}
+    }
+  },
+  "m9n_reference_difference": {
+    "note": "M9N was assistant-side exploratory and had an early-history percentile warmup ambiguity. M9O adopts strict full-window warmup as canonical for deterministic reproduction.",
+    "M9N_N2_count": 820,
+    "M9O_canonical_N2_count": 818,
+    "M9N_N3_count": 1496,
+    "M9O_canonical_N3_count": 1495,
+    "material_conclusion_changed": false
+  },
+  "parameter_neighborhood_stress": {
+    "rolling_windows_bars": [120, 160, 180, 200, 220, 240, 250, 300],
+    "N1_quantiles": [0.45, 0.50, 0.55],
+    "N2_quantiles": [0.70, 0.75, 0.80],
+    "combination_count": 72,
+    "all_combinations_have_pf_above_1_in_each_available_calendar_year": true,
+    "all_combinations_have_aggregate_pf_above_1_after_extra_2bps_per_trade": true,
+    "aggregate_count_range": [1328, 1626],
+    "aggregate_pf_range": [1.2715035506512653, 1.4041917481751787],
+    "aggregate_pf_after_extra_2bps_range": [1.0298159013035235, 1.1337895767942596],
+    "max_drawdown_bps_range": [510.52434894848284, 646.6094244017816],
+    "minimum_calendar_year_pf_across_all_72_combinations": 1.009790367156742,
+    "interpretation": "N3 is not dependent on exactly W=200, q1=0.50 and q2=0.75. The adaptive concept survives a broad nearby parameter neighborhood."
+  },
+  "canonical_N3_cost_sensitivity": {
+    "extra_0_5_bps_pf": 1.294894309766182,
+    "extra_1_0_bps_pf": 1.2269606693067217,
+    "extra_1_5_bps_pf": 1.1620987348835665,
+    "extra_2_0_bps_pf": 1.1003099451243683,
+    "extra_2_5_bps_pf": 1.0415531969943475,
+    "extra_3_0_bps_pf": 0.9857560673398157,
+    "note": "These are stress deductions on top of historical spread treatment, not modeled commission/swap estimates."
+  },
+  "quarter_stability": {
+    "quarters_observed": 14,
+    "quarters_pf_above_1": 12,
+    "weak_quarters": {
+      "2024Q4": {"count": 114, "win_rate": 0.6228070175438597, "profit_factor_bps": 0.9756132855531192, "net_bps": -21.544960714668463},
+      "2025Q3": {"count": 110, "win_rate": 0.5909090909090909, "profit_factor_bps": 0.7979100417360014, "net_bps": -203.20613208477374}
+    },
+    "interpretation": "N3 is materially more stable than prior static candidates but still has identifiable weak regimes; it is not a finished live rule."
+  },
+  "secondary_tail_risk_observation": {
+    "id": "N6_H4_RCI9_SECOND_QUARTILE_RISK_ZONE",
+    "definition": "Within canonical N3, compute closed H4 RCI9 empirical percentile using the latest 100 fully closed H4 bars after full warmup. Descriptive risk zone is percentile >0.25 and <=0.50.",
+    "risk_zone": {
+      "count": 282,
+      "win_rate": 0.6418439716312057,
+      "profit_factor_bps": 0.9086697052950484,
+      "net_bps": -303.75076378995846,
+      "average_loss_bps": -33.594433732463955,
+      "tail_le_minus_100_fraction": 0.028368794326241134,
+      "yearly_pf": {"2023": 1.112035707919998, "2024": 0.8992752174110412, "2025": 0.7991987922166868, "2026_to_0619": 0.9540762266143249}
+    },
+    "complement_reference": {
+      "count": 1213,
+      "average_trades_per_observed_month": 28.88095238095238,
+      "win_rate": 0.6183017312448474,
+      "profit_factor_bps": 1.5469045470457194,
+      "net_bps": 4594.163706717404,
+      "max_drawdown_bps": 364.9093020817172,
+      "max_losing_streak": 9,
+      "average_loss_bps": -18.1432022317712,
+      "tail_le_minus_100_fraction": 0.00741962077493817,
+      "yearly_pf": {"2023": 1.1542685649043185, "2024": 1.5681114553805835, "2025": 1.4508718925744468, "2026_to_0619": 2.0434688853513716},
+      "extra_2bps_profit_factor": 1.2302687163681139,
+      "extra_3bps_profit_factor": 1.0956376458981354
+    },
+    "stress": {
+      "H4_windows": [80, 100, 120],
+      "nearby_percentile_bands_tested": [[0.20,0.50],[0.25,0.45],[0.25,0.50],[0.25,0.55],[0.30,0.50],[0.30,0.55]],
+      "combination_count": 18,
+      "complement_pf_range": [1.3974536856017479, 1.6621511246954406],
+      "complement_pf_after_extra_2bps_range": [1.1188865078912413, 1.3189405411303512],
+      "minimum_complement_calendar_year_pf": 1.0685699170422904,
+      "all_complement_calendar_years_pf_above_1": true,
+      "risk_zone_pf_range": [0.7721216741348551, 1.223023403183192]
+    },
+    "decision": "KEEP_AS_SECONDARY_PROSPECTIVE_RISK_HYPOTHESIS_ONLY_NOT_A_HISTORICALLY_VALIDATED_GATE",
+    "reason": "The complement is robust, but the risk zone itself is not loss-making under every nearby definition and all periods are research-exposed."
+  },
+  "resolved_only_health_gate": {
+    "explored": true,
+    "decision": "DO_NOT_USE_AS_PRIMARY_M9O_DESIGN",
+    "reason": "Recent resolved-only PF gating was sensitive to lookback and threshold and often failed to reduce drawdown consistently. Simpler market-state N1/N2/N3 remains preferred."
+  },
+  "research_decision": [
+    "Freeze strict causal semantics for N1/N2/N3 for deterministic repository reproduction.",
+    "Keep N3 as the leading frequency-oriented GOLD LONG research candidate.",
+    "Keep N6 only as a secondary forward risk-shadow hypothesis; do not backfill-promote it.",
+    "Do not add SHORT to the main stack; 2023-2025 remains structurally weak.",
+    "Do not modify frozen M7C or reset M8C.",
+    "Do not start live trading or Discord signal output from M9O."
+  ],
+  "guardrails": {
+    "automatic_live_promotion": false,
+    "prospective_shadow_started": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "audit_only": true
+  }
+}
