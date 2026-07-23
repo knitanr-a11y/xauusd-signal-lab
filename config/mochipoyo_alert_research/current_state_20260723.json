@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T04:20:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9F_PASS_M9G_MINIMAL_LOSS_PRUNING_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
+  "recorded_at_utc": "2026-07-24T04:30:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9G_PASS_P2_REJECTED_M9H_RESIDUAL_STATE_BRANCH_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9H_RESIDUAL_STATE_BRANCH_AUDIT",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -29,42 +29,42 @@
     "first_causal_turn_trades": 852,
     "first_turn_profit_factor_bps": 1.0321683116573177
   },
-  "m9d": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "checkpoint_rows": 3039,
-    "winner_loser_mae_separation_material": true,
-    "depth_alone_is_not_sufficient": true
-  },
-  "m9e": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "divergence_event_rows": 145560,
-    "pooled_any_divergence_saturated": true,
-    "future_pivot_confirmation_used": false
-  },
   "m9f": {
     "status": "PASS_EXPLORATORY_ONLY",
-    "result": "config/mochipoyo_alert_research/m9f_result_20260724.json",
     "first_turn_rows": 852,
-    "critical_finding": "Fresh divergence signatures are more discriminative than pooled ANY-divergence, but effects are ticker/direction dependent.",
-    "btc_long_within3_both": "92 trades, PF 0.616993, negative net in every available month Apr-Jul",
     "same_sample_rule_promotion_allowed": false
   },
   "m9g": {
-    "status": "READY_ONE_TIME_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m9g_minimal_loss_pruning_candidate_contract_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9g/bat",
-    "run_once": "01_run_minimal_loss_pruning_candidate_audit.bat",
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m9g_result_20260724.json",
+    "p2_forward_candidate": false,
+    "p2": {
+      "accepted_count": 740,
+      "win_rate": 0.5905405405405405,
+      "profit_factor_bps": 1.2543359158322271,
+      "max_drawdown_bps": 1224.009522421252,
+      "max_losing_streak": 6,
+      "april_profit_factor_bps": 0.7218957099405827
+    },
+    "residual_branch_problem": "BTC LONG remains PF below 1; XAU LONG and SHORT remain around PF 1.15. P2 is not suitable for forward freeze."
+  },
+  "m9h": {
+    "status": "READY_ONE_TIME_RESIDUAL_STATE_BRANCH_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m9h_residual_state_branch_audit_contract_20260724.json",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9h/bat",
+    "run_once": "01_run_residual_state_branch_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9G\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "purpose": "Compare a minimal frozen set of M9F-derived avoid-states using PF, DD, losing streak and monthly retained trade counts. Same-sample hypothesis assessment only.",
-    "new_forward_start_required_after_candidate_freeze": true
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9H\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "purpose": "Test three interpretable natural residual-state observations after rejecting P2, while preserving frequency and reporting monthly/branch PF, DD and losing streak.",
+    "same_sample_validation": false,
+    "automatic_forward_promotion": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
     "preserve_useful_monthly_frequency": true,
+    "do_not_forward_weak_same_sample_policy": true,
     "prune_clear_loss_states_instead_of_overfiltering": true,
-    "feature_state_research_is_primary": true,
-    "regular_and_hidden_divergence_are_context_features_not_assumed_truth": true
+    "feature_state_research_is_primary": true
   },
   "safety": {
     "audit_only": true,
