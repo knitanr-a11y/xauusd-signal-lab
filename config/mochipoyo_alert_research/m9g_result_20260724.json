@@ -1,0 +1,44 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
+  "recorded_at_utc": "2026-07-24T04:20:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "upload_package_sha256": "5605c794cdc7796548ddb4549a8e571aa7483f5bebb755e899aa8c1375df5984",
+  "first_turn_population": 852,
+  "p2": {
+    "accepted_count": 740,
+    "retention_fraction": 0.8685446009389671,
+    "win_rate": 0.5905405405405405,
+    "profit_factor_bps": 1.2543359158322271,
+    "net_bps": 3094.218844771891,
+    "max_drawdown_bps": 1224.009522421252,
+    "max_losing_streak": 6
+  },
+  "p2_monthly": {
+    "2026.02": {"count": 29, "win_rate": 0.5862068965517241, "profit_factor_bps": 1.2180849016019784, "net_bps": 92.51543796827109, "max_drawdown_bps": 301.23890728956536},
+    "2026.03": {"count": 95, "win_rate": 0.6631578947368421, "profit_factor_bps": 1.5385707905576804, "net_bps": 949.2851787330978, "max_drawdown_bps": 440.592841317943},
+    "2026.04": {"count": 146, "win_rate": 0.5205479452054794, "profit_factor_bps": 0.7218957099405827, "net_bps": -793.3718817204677, "max_drawdown_bps": 1224.0095224212523},
+    "2026.05": {"count": 193, "win_rate": 0.6217616580310881, "profit_factor_bps": 1.5612431785680143, "net_bps": 1249.6190660226896, "max_drawdown_bps": 439.468795667216},
+    "2026.06": {"count": 194, "win_rate": 0.5876288659793815, "profit_factor_bps": 1.1301425507624618, "net_bps": 533.6640295620275, "max_drawdown_bps": 934.2773836145668},
+    "2026.07": {"count": 83, "win_rate": 0.5662650602409639, "profit_factor_bps": 2.329563506318331, "net_bps": 1062.5070142062723, "max_drawdown_bps": 153.19323244126713}
+  },
+  "p2_by_ticker_direction": {
+    "BTCUSD_LONG": {"count": 107, "win_rate": 0.5420560747663551, "profit_factor_bps": 0.9883019284396743, "net_bps": -25.71159182748368, "max_drawdown_bps": 712.0355005045842},
+    "BTCUSD_SHORT": {"count": 198, "win_rate": 0.6111111111111112, "profit_factor_bps": 1.9015225098345825, "net_bps": 1897.7654155401012, "max_drawdown_bps": 232.9553227367284},
+    "XAUUSD_LONG": {"count": 209, "win_rate": 0.5741626794258373, "profit_factor_bps": 1.157905846151186, "net_bps": 569.4065450121116, "max_drawdown_bps": 844.972284753452},
+    "XAUUSD_SHORT": {"count": 226, "win_rate": 0.6106194690265486, "profit_factor_bps": 1.1533418000339748, "net_bps": 652.7584760471613, "max_drawdown_bps": 503.8032169127432}
+  },
+  "interpretation": [
+    "P2 improves the same-sample aggregate but remains too weak for a forward candidate: overall PF is only about 1.25, max drawdown remains about 1224 bps, and April remains materially negative.",
+    "Residual weakness is concentrated in BTCUSD LONG plus both XAUUSD directions; only BTCUSD SHORT becomes materially strong under P2.",
+    "P2 is rejected as a forward challenger candidate. Continue residual-state research rather than starting a prospective gate."
+  ],
+  "guardrails": {
+    "same_sample_validation": false,
+    "automatic_gate_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
