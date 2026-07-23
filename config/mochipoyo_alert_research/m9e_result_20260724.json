@@ -1,0 +1,69 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT",
+  "recorded_at_utc": "2026-07-24T03:55:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "upload_package_sha256": "5ca61a34ab0bef8f9212acb9e4f3d729307e7e998dae4416401182e96e298f44",
+  "counts": {
+    "checkpoint_rows": 3039,
+    "first_turn_rows": 852,
+    "divergence_event_rows": 145560
+  },
+  "causality": {
+    "all_pivots_confirmed_by_decision_time": true,
+    "future_pivot_confirmation_used": false,
+    "pivot_method": "INDEPENDENT_CAUSAL_CONFIRMED_PRICE_PIVOT_PROXY",
+    "proprietary_zigzag_reconstruction_claim": false
+  },
+  "critical_saturation_finding": {
+    "checkpoint_supportive_any_fraction": 1.0,
+    "checkpoint_opposing_any_fraction": 1.0,
+    "turn_supportive_any_fraction": 1.0,
+    "turn_opposing_any_fraction": 1.0,
+    "interpretation": "ANY-divergence is saturated when M1/M5/M15/H1/H4 x five oscillators x two pivot scales are pooled. It is not a usable gate as currently aggregated.",
+    "root_cause": "The latest two causal confirmed pivots are used without a recency/locality restriction, so older divergence context can persist until a newer same-side pivot pair replaces it."
+  },
+  "divergence_age_observation": {
+    "median_second_pivot_confirmation_age_bars_all_events": 9.4,
+    "short_scale_median_age_bars_approx": 6.4,
+    "medium_scale_median_age_bars_approx": 13.1,
+    "note": "Age is normalized by the event timeframe. This confirms that many recorded divergences are ambient/older context rather than fresh reversal evidence."
+  },
+  "exploratory_individual_context_examples": [
+    {
+      "context": "M15 short-scale MACD_HISTOGRAM BEARISH_REGULAR SUPPORTIVE",
+      "checkpoint_count": 271,
+      "checkpoint_win_rate": 0.726937,
+      "checkpoint_pf": 3.666574,
+      "checkpoint_net_bps": 6144.198632,
+      "turn_count": 71,
+      "turn_pf": 2.056966,
+      "warning": "Not validated and may be inflated by divergence persistence/recency confounding."
+    },
+    {
+      "context": "H4 short-scale RCI9 BEARISH_HIDDEN SUPPORTIVE",
+      "checkpoint_count": 300,
+      "checkpoint_win_rate": 0.72,
+      "checkpoint_pf": 2.109619,
+      "turn_count": 96,
+      "turn_pf": 2.264696,
+      "warning": "Not validated and must be retested with recency/locality controls."
+    }
+  ],
+  "interpretation": [
+    "Regular and hidden divergence remain promising structural features, but the pooled ANY flags are unusable because they are saturated.",
+    "Regular divergence should be tested as potential reversal evidence and hidden divergence as potential trend-continuation/pullback evidence, without assuming either is beneficial.",
+    "The next audit must distinguish fresh divergence from stale ambient context and distinguish pivots formed during the current adverse episode from pivots that pre-date the signal.",
+    "Effects must remain separated by ticker, direction, timeframe, oscillator, pivot scale and month."
+  ],
+  "guardrails": {
+    "same_sample_rule_promotion_allowed": false,
+    "automatic_gate_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
