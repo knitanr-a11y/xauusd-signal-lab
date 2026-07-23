@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T02:40:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9B_PASS_M9C_FROZEN_PROXY_HISTORICAL_REPLAY_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9C_FROZEN_PROXY_HISTORICAL_REPLAY",
+  "recorded_at_utc": "2026-07-24T03:25:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9C_PASS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -14,66 +14,62 @@
     "historical_backfill_allowed": false,
     "source_anchor_separate_and_unsuppressed": true
   },
-  "m9a": {
-    "status": "PASS",
-    "result": "config/mochipoyo_alert_research/m9a_result_20260724.json",
-    "eligible_genuine_raw_alerts": 107,
-    "genuine_primary_count": 43,
-    "PRIMARY_LONG": 25,
-    "PRIMARY_SHORT": 18,
-    "BTCUSD": 23,
-    "XAUUSD": 20,
-    "historical_proxy_replay_capacity_m15_boundaries": 58704
-  },
   "m9b": {
     "status": "PASS_EXPLORATORY_ONLY",
     "result": "config/mochipoyo_alert_research/m9b_result_20260724.json",
     "population_tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
     "genuine_primary_count": 43,
-    "source_immediate": {
-      "win_rate": 0.6976744186046512,
-      "profit_factor_bps": 2.2340942206836614,
-      "net_bps": 488.6275507192144
-    },
-    "first_causal_turn": {
-      "count": 38,
-      "win_rate": 0.631578947368421,
-      "profit_factor_bps": 1.9915595780433206,
-      "net_bps": 399.6267439252639
-    },
-    "genuine_btcusd_long": {
-      "count": 12,
-      "win_rate": 0.75,
-      "profit_factor_bps": 9.121882,
-      "net_bps": 260.8001
-    },
-    "key_correction": "The M8B extra-only BTC LONG weakness does not generalize to genuine-source BTC LONG. Do not suppress the genuine source branch based on the extra-only result.",
-    "m5_ge80_rule_promoted": false,
-    "h1_h4_rci_rule_promoted": false,
+    "source_immediate_win_rate": 0.6976744186046512,
+    "source_immediate_profit_factor_bps": 2.2340942206836614,
+    "source_immediate_net_bps": 488.6275507192144,
+    "genuine_btcusd_long": "12 trades, WR 75%, PF 9.121882, +260.8001 bps",
     "same_43_is_validation": false
   },
   "m9c": {
-    "status": "READY_ONE_TIME_FROZEN_PROXY_HISTORICAL_REPLAY",
-    "contract": "config/mochipoyo_alert_research/m9c_frozen_proxy_historical_replay_contract_20260724.json",
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m9c_result_20260724.json",
     "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
-    "purpose": "Replay the unchanged frozen M7C proxy over pre-source closed M15 history to expand the trade-edge research population without calling replay events genuine Mochipoyo alerts.",
-    "formula_changed": false,
-    "threshold_changed": false,
-    "candidate_density_capacity_m15_boundaries": 58704,
-    "outcome_requires_exact_m1_entry_and_exit": true,
-    "nearest_m1_fallback": false,
-    "historical_spread_used": true,
-    "operator_folder": "scripts/mochipoyo_alert_research/m9c/bat",
-    "run_once": "01_run_frozen_proxy_historical_replay.bat",
+    "replay_signals": 5902,
+    "paired_trades": 2950,
+    "exact_m1_resolved_trades": 952,
+    "first_causal_turn_trades": 852,
+    "immediate_all_952": {
+      "win_rate": 0.592436974789916,
+      "profit_factor_bps": 0.9879555691742691,
+      "net_bps": -226.56460208778535
+    },
+    "first_turn_all_852": {
+      "win_rate": 0.5821596244131455,
+      "profit_factor_bps": 1.0321683116573177,
+      "net_bps": 541.1779966228281
+    },
+    "key_correction": "The unchanged M7C proxy creates a large path-research population but does not reproduce the strong Tier-A genuine-source edge when used unfiltered.",
+    "mae_separation_material": true,
+    "m5_global_threshold_promoted": false,
+    "h1_h4_global_rule_promoted": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false
+  },
+  "m9d": {
+    "status": "READY_ONE_TIME_LOSS_PATH_STATE_FEATURE_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m9d_loss_path_state_feature_contract_20260724.json",
+    "purpose": "At causal adverse-path checkpoints, record closed-bar M1/M5/M15/H1/H4 state so recoverable pullbacks can be distinguished from failing reversals without making a fixed-bps rule the primary strategy.",
+    "checkpoint_atr_ratios": [0.25, 0.5, 0.75, 1.0, 1.5, 2.0],
+    "checkpoint_ratios_are_observation_grid_only": true,
+    "rich_first_turn_panel": true,
+    "same_sample_gate_promotion_allowed": false,
+    "operator_folder": "scripts/mochipoyo_alert_research/m9d/bat",
+    "run_once": "01_run_loss_path_state_feature_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9C\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9D\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
-    "increase_sample_size_before_feature_promotion": true,
     "genuine_source_priority_over_proxy_replay": true,
     "do_not_call_proxy_replay_genuine": true,
-    "investigate_loss_adverse_excursion_and_entry_state": true
+    "distinguish_recoverable_pullback_from_failing_reversal": true,
+    "fixed_distance_research_retained_as_secondary_reference": true,
+    "feature_state_research_is_primary": true
   },
   "safety": {
     "audit_only": true,
