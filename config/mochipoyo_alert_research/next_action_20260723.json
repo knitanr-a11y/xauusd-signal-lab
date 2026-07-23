@@ -1,48 +1,48 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9H_PASS_FILTER_STACKING_STOPPED_M9I_SOURCE_PROXY_GAP_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9I_GENUINE_SOURCE_VS_PROXY_GAP_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9I_GENUINE_SOURCE_VS_PROXY_GAP_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9I_TIMING_INVALIDATED_M9I2_SOURCE_TIMING_CORRECTION_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9h_result": {
-    "population": "852 independent first-turn Tier-B trades",
-    "h3": "605 kept, WR 63.14%, PF 1.5859, max DD 810.05 bps, max losing streak 6",
-    "april": "113 kept, PF 1.0033, +5.64 bps",
-    "decision": "STOP_STACKING_HISTORICAL_FILTERS",
-    "reason": "H3 improves the mined historical sample but remains too fragile and too heavily iterated for forward promotion."
+  "incident": {
+    "file": "config/mochipoyo_alert_research/m9i_source_decision_timing_correction_incident_20260724.json",
+    "old_m9i_match_counts": "EXACT 1 / WITHIN_ONE_BAR_LATE 28 / MISSED 14",
+    "diagnostic_after_source_plus_15_minutes": "EXACT 28 / WITHIN_ONE_BAR_EARLY 1 / MISSED 14",
+    "decision": "INVALIDATE_OLD_M9I_SOURCE_COMPARISON_AND_RECOMPUTE_SOURCE_TIMING",
+    "m9b_previous_source_metrics_promotable": false
   },
-  "m9i_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9i/bat",
-    "run_once": "01_run_genuine_source_vs_proxy_gap_audit.bat",
-    "success": "[M9I PASS]",
-    "blocked": "[M9I BLOCKED]",
+  "m9i2_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9i2/bat",
+    "run_once": "01_run_source_timing_corrected_gap_audit.bat",
+    "success": "[M9I2 PASS]",
+    "blocked": "[M9I2 BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I2\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9i_research_order": [
-    "Use the 43 frozen genuine source PRIMARY trades as Tier-A reference anchors and keep them separate from proxy replay.",
-    "Replay the unchanged frozen M7C state machine across each ticker's genuine-source observation window only for diagnosis.",
-    "Classify genuine source PRIMARY events as exact, within-one-bar early/late, or missed and record the direct frozen primary kernel at the exact source boundary regardless of state.",
-    "Identify proxy-only extra PRIMARY states and compare causal closed-bar M5/M15/H1/H4 RCI, EMA, MACD, volatility and fresh divergence context against genuine source PRIMARY states.",
-    "Compare spread-adjusted genuine-source outcomes and proxy-extra outcomes separately; commission and swap remain unmodeled.",
-    "Do not train a classifier, optimize a threshold, retrofit M7C, or promote a gate from this same 43-event observation sample."
+  "m9i2_research_order": [
+    "Treat each source entry_server_open as the open of the M15 bar whose close produced the alert; evaluate the source decision and executable entry at +15 minutes.",
+    "Apply the same +15-minute correction to source EXIT execution timing.",
+    "Keep frozen proxy decision timing unchanged.",
+    "Recompute genuine-source spread-adjusted outcomes and source-vs-proxy match classes before interpreting any feature contrast.",
+    "Use closed-bar M5/M15/H1/H4 features available by the corrected source decision time only.",
+    "Do not train a classifier, optimize thresholds, or promote a gate from the same 43 source observations."
   ],
-  "after_m9i": [
-    "If a clear, interpretable source-vs-extra structural difference appears, freeze at most a small hypothesis for later independent/forward validation.",
-    "If no clear structure appears, stop mining filters and continue collecting genuine source and forward observations rather than forcing a rule."
+  "after_m9i2": [
+    "If timing-corrected genuine-source performance remains materially stronger than proxy extras and an interpretable structural difference remains, freeze only a small hypothesis for later independent or forward validation.",
+    "If the corrected source edge weakens materially or no stable structure remains, stop historical mining and continue genuine-source/forward collection rather than forcing a rule."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
+    "Do not use old M9I feature contrasts or old M9B source PF as validated evidence.",
     "Do not call proxy replay events genuine Mochipoyo alerts.",
-    "Do not reuse the M8C prospective start for any future challenger.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
