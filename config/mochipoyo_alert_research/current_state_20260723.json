@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-23T15:25:00Z",
-  "status": "M8B_PASS_M8C_LIVE_CAUSAL_FORWARD_SHADOW_RUNNER_READY_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T00:10:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M8BX_EXCURSION_AUDIT_READY_AUDIT_ONLY",
   "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
   "formal_pre_m8a_baseline_commit": "c0bd4b9d20235422720b7c250e95a2e2c3f64b4d",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
@@ -31,7 +31,6 @@
     "source_anchor_separate": true,
     "source_anchor_suppressed_by_gate": false,
     "generator_state_changed_by_gate": false,
-    "prospective_start": "TO_BE_FROZEN_AT_LOCAL_INITIALIZER_FIRST_RUN",
     "historical_backfill_allowed": false,
     "m8b_18_reused_as_validation": false,
     "minimum_review_sample": {
@@ -44,11 +43,23 @@
     "run_persistent": "02_run_forward_shadow_forever.bat",
     "open_results": "03_open_latest_results.bat"
   },
+  "m8bx": {
+    "status": "READY_ONE_TIME_EXPLORATORY_AUDIT",
+    "purpose": "Measure MAE/MFE and path quality of the frozen M8B 18 trades, especially XAU winners with potentially large adverse excursion.",
+    "contract": "config/mochipoyo_alert_research/m8bx_excursion_path_audit_contract_20260724.json",
+    "operator_folder": "scripts/mochipoyo_alert_research/m8bx/bat",
+    "run_once": "01_run_excursion_path_audit.bat",
+    "open_results": "02_open_latest_results.bat",
+    "normal_submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BX\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "same_sample_threshold_promotion_allowed": false,
+    "m8c_can_continue_simultaneously": true
+  },
   "objective": {
     "reference": "config/mochipoyo_alert_research/objective_trade_edge_frequency_addendum_20260723.json",
     "exact_mochipoyo_replication_required": false,
-    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_AND_USEFUL_TRADE_FREQUENCY",
-    "avoid_over_strict_frequency_collapse": true
+    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_ACCEPTABLE_ADVERSE_EXCURSION",
+    "avoid_over_strict_frequency_collapse": true,
+    "win_rate_alone_is_not_sufficient": true
   },
   "safety": {
     "audit_only": true,
