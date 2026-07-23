@@ -2,7 +2,12 @@
 setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0\.."
 
-set "CSV_DIR=Files"
+set "CONFIG_DIR=Files"
+if defined BTC_YOUTUBE_LIVE_DIR (
+  set "CSV_DIR=%BTC_YOUTUBE_LIVE_DIR%"
+) else (
+  for %%I in ("%~dp0\..\..\..") do set "CSV_DIR=%%~fI"
+)
 set "LEGACY_STATE_DIR=data\runtime_state\btc\youtube_candidates"
 
 if defined LOCALAPPDATA (
@@ -27,11 +32,11 @@ if not exist "%STATE_DIR%" (
 if not exist "%LOG_BASE%" mkdir "%LOG_BASE%"
 if not exist "%STABLE_LOG_DIR%" mkdir "%STABLE_LOG_DIR%"
 if not exist "%AUDIT_DIR%" mkdir "%AUDIT_DIR%"
-if not exist "Files" mkdir "Files"
+if not exist "%CONFIG_DIR%" mkdir "%CONFIG_DIR%"
 
 python scripts\ensure_discord_webhook_env.py ^
   --repo-root "%CD%" ^
-  --target-env "Files\.env"
+  --target-env "%CONFIG_DIR%\.env"
 
 if errorlevel 1 (
   echo.
@@ -41,14 +46,36 @@ if errorlevel 1 (
   exit /b 2
 )
 
-for /f "usebackq tokens=1,* delims==" %%A in ("Files\.env") do (
+for /f "usebackq tokens=1,* delims==" %%A in ("%CONFIG_DIR%\.env") do (
   if /I "%%A"=="DISCORD_WEBHOOK_URL" set "DISCORD_WEBHOOK_URL=%%B"
 )
 
 if not defined DISCORD_WEBHOOK_URL (
-  echo [ERROR] DISCORD_WEBHOOK_URL could not be loaded from Files\.env.
+  echo [ERROR] DISCORD_WEBHOOK_URL could not be loaded from %CONFIG_DIR%\.env.
   pause
   exit /b 3
+)
+
+if not exist "%CSV_DIR%\btcusdsharp_m5.csv" (
+  echo [ERROR] BTC M5 live CSV was not found.
+  echo Expected: "%CSV_DIR%\btcusdsharp_m5.csv"
+  echo Set BTC_YOUTUBE_LIVE_DIR to override the MT5 MQL5\Files directory.
+  pause
+  exit /b 4
+)
+if not exist "%CSV_DIR%\btcusdsharp_m15.csv" (
+  echo [ERROR] BTC M15 live CSV was not found.
+  echo Expected: "%CSV_DIR%\btcusdsharp_m15.csv"
+  echo Set BTC_YOUTUBE_LIVE_DIR to override the MT5 MQL5\Files directory.
+  pause
+  exit /b 4
+)
+if not exist "%CSV_DIR%\btcusdsharp_h4.csv" (
+  echo [ERROR] BTC H4 live CSV was not found.
+  echo Expected: "%CSV_DIR%\btcusdsharp_h4.csv"
+  echo Set BTC_YOUTUBE_LIVE_DIR to override the MT5 MQL5\Files directory.
+  pause
+  exit /b 4
 )
 
 echo ============================================================
@@ -57,6 +84,7 @@ echo BTC4: 0.02 split TP1 0.01 / TP2 0.01, TP2 to BE after TP1
 echo BTC5: 0.01 demo order
 echo BTC6: 0.01 reference-lot monitoring, no broker order
 echo Demo login required: 75539039
+echo Live CSV directory: %CSV_DIR%
 echo Runtime root: %RUNTIME_ROOT%
 echo Stable logs: %STABLE_LOG_DIR%
 echo GOLD-style audit: %AUDIT_DIR%
