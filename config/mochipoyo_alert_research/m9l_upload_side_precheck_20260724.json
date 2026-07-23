@@ -1,0 +1,65 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9L_GOLD_2023_2026_MULTIYEAR_HOLDOUT_AUDIT",
+  "status": "UPLOAD_SIDE_PRECHECK_LOCAL_REPRODUCTION_PENDING",
+  "note": "Computed directly from the six user-uploaded GOLD CSVs using the GitHub-frozen RCI/EMA formulas and unchanged M7C state machine. Formal local M9L BAT reproduction remains required before treating this as repository-reproduced output.",
+  "data_quality": {
+    "M1": {"rows": 1225431, "start": "2023.01.03 01:00:00", "end": "2026.06.19 19:54:00", "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2"},
+    "M5": {"rows": 245327, "start": "2023.01.03 01:00:00", "end": "2026.06.19 19:50:00", "sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d"},
+    "M15": {"rows": 81781, "start": "2023.01.03 01:00:00", "end": "2026.06.19 19:45:00", "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28"},
+    "H1": {"rows": 20459, "start": "2023.01.03 01:00:00", "end": "2026.06.19 19:00:00", "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"},
+    "H4": {"rows": 5352, "start": "2023.01.03 00:00:00", "end": "2026.06.19 16:00:00", "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913"},
+    "D1": {"rows": 894, "start": "2023.01.03 00:00:00", "end": "2026.06.19 00:00:00", "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"},
+    "duplicate_timestamps": 0,
+    "nonmonotonic_timestamps": 0,
+    "missing_cells": 0
+  },
+  "replay": {
+    "signals": 8175,
+    "paired_trades": 4087,
+    "exact_m1_resolved": 4087,
+    "first_turn_trades": 3635
+  },
+  "2023_2025": {
+    "immediate": {"count": 3518, "win_rate": 0.6020466173962479, "profit_factor_bps": 0.925106491305927, "net_bps": -2728.9615023726424, "max_drawdown_bps": 3322.9251720136517, "max_losing_streak": 12},
+    "first_turn": {"count": 3118, "win_rate": 0.6058370750481078, "profit_factor_bps": 0.9361082975407717, "net_bps": -2110.1691158611898, "max_drawdown_bps": 2659.3070336894884, "max_losing_streak": 9},
+    "prefrozen_H2": {"count": 2510, "win_rate": 0.6039840637450199, "profit_factor_bps": 0.9508582128209492, "net_bps": -1284.0068857942583},
+    "prefrozen_H3": {"count": 2378, "win_rate": 0.6055508830950378, "profit_factor_bps": 0.9631993337567551, "net_bps": -902.5115043034864},
+    "decision": "BASE_M7C_AND_PREFROZEN_H2_H3_DO_NOT_GENERALIZE_TO_PROFITABLE_MULTIYEAR_GOLD"
+  },
+  "yearly_first_turn": {
+    "2023": {"count": 1048, "win_rate": 0.5896946564885496, "profit_factor_bps": 0.9422707842615728, "net_bps": -504.16708553917096},
+    "2024": {"count": 1027, "win_rate": 0.5959104186952289, "profit_factor_bps": 0.9962511864276682, "net_bps": -38.3108292027527},
+    "2025": {"count": 1043, "win_rate": 0.6318312559923298, "profit_factor_bps": 0.888614912544633, "net_bps": -1567.6912011192662},
+    "2026_to_0619": {"count": 517, "win_rate": 0.6073500967117988, "profit_factor_bps": 1.2179592850005025, "net_bps": 2082.866105278298}
+  },
+  "yearly_first_turn_long": {
+    "2023": {"count": 540, "win_rate": 0.6018518518518519, "profit_factor_bps": 1.024636957911164, "net_bps": 107.92209659129298},
+    "2024": {"count": 627, "win_rate": 0.6140350877192983, "profit_factor_bps": 1.1330377750920155, "net_bps": 718.1165302945162},
+    "2025": {"count": 619, "win_rate": 0.6672051696284329, "profit_factor_bps": 1.035681917690026, "net_bps": 237.28603249255133},
+    "2026_to_0619": {"count": 282, "win_rate": 0.599290780141844, "profit_factor_bps": 1.314215476770173, "net_bps": 1371.8798921491803},
+    "interpretation": "LONG first-turn is positive-PF in every available calendar year, but 2023-2025 edge is thin and is not sufficient for promotion without further causal quality improvement."
+  },
+  "yearly_first_turn_short": {
+    "2023": {"count": 508, "profit_factor_bps": 0.8593807790807502},
+    "2024": {"count": 400, "profit_factor_bps": 0.8431174306374678},
+    "2025": {"count": 424, "profit_factor_bps": 0.7568884030301146},
+    "2026_to_0619": {"count": 235, "profit_factor_bps": 1.1369871202281177},
+    "interpretation": "SHORT is structurally weak in 2023-2025 and only improves in the already-exposed 2026 reference period."
+  },
+  "next_partition": {
+    "discovery": "2023-2024 only",
+    "sealed_feature_level_holdout": "2025",
+    "reference_only": "2026 through 2026-06-19",
+    "reason": "Avoid repeating 2026-style historical mining while still using the newly supplied history efficiently."
+  },
+  "guardrails": {
+    "automatic_gate_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "audit_only": true
+  }
+}
