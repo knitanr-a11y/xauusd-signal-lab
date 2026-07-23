@@ -1,0 +1,80 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+  "contract_version": "MOCHIPOYO_M8B_EXTRA_SIGNAL_OUTCOME_V1",
+  "recorded_at_utc": "2026-07-23T14:20:00Z",
+  "branch": "feature/mochipoyo-alert-research",
+  "audit_only": true,
+  "candidate_freeze": {
+    "basis": "M7C formal-gate frozen snapshot built 2026-07-23T13:06:15Z",
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "finalized_extra_signal_count": 36,
+    "extra_primary_entry_count": 18,
+    "extra_exit_action_count": 18,
+    "pending_source_arrival_grace_excluded": 2,
+    "frozen_trade_skeleton": "config/mochipoyo_alert_research/m8b_frozen_trade_skeleton_20260723.csv",
+    "frozen_trade_skeleton_sha256": "f42ce896f00b717320662ff1b64991718bf3e1ce7dfe0d671c62f362731f7acc"
+  },
+  "trade_construction": {
+    "population_for_win_rate_pf": "Trades whose PRIMARY_LONG or PRIMARY_SHORT entry signal is a finalized EXTRA_CANDIDATE",
+    "entry_count": 18,
+    "pairing_rule": "Pair each PRIMARY_LONG/PRIMARY_SHORT with the next corresponding LONG_EXIT/SHORT_EXIT in the same frozen M7C proxy state-machine stream. Bootstrap positions with no post-start PRIMARY entry are excluded.",
+    "all_extra_entry_trades_resolved_inside_frozen_signal_stream": true,
+    "extra_exit_actions": "Recorded separately and excluded from standalone WR/PF to avoid double-counting the parent trade.",
+    "source_matched_suppression": "NOT_SILENT; any future suppression requires an explicit separately validated portfolio rule"
+  },
+  "price_contract": {
+    "execution_boundary": "Exact new-M15 decision boundary represented by current_server_open in frozen proxy decisions.",
+    "price_source": "Exact M1 bar whose MT5 server-time open equals the frozen entry/exit current_server_open.",
+    "bar_open_only": true,
+    "intrabar_high_low_close_used": false,
+    "chart_mode_required": "BID",
+    "long_entry": "M1 bid open + historical spread points * SYMBOL_POINT * spread_multiplier",
+    "long_exit": "M1 bid open",
+    "short_entry": "M1 bid open",
+    "short_exit": "M1 bid open + historical spread points * SYMBOL_POINT * spread_multiplier",
+    "historical_spread_source": "M1 MqlRates spread field",
+    "symbol_point_source": "MetaTrader5 symbol_info().point captured at audit runtime",
+    "same_minute_fallback": false,
+    "nearest_bar_fallback": false
+  },
+  "cost_contract": {
+    "primary_view": "historical_spread_x1_0",
+    "sensitivity_views": ["historical_spread_x1_5", "historical_spread_x2_0"],
+    "commission_mode": "NOT_MODELED_IN_M8B_V1",
+    "swap_mode": "NOT_MODELED_IN_M8B_V1",
+    "interpretation": "Spread-adjusted results are exploratory and gross of any broker commission/swap not embedded in the spread. No promotion claim may rely on this sample alone."
+  },
+  "metrics": {
+    "primary": [
+      "trade_count",
+      "win_rate",
+      "profit_factor_using_spread_adjusted_return_bps",
+      "net_return_bps_sum",
+      "average_return_bps",
+      "median_return_bps",
+      "max_drawdown_bps",
+      "maximum_losing_streak",
+      "trades_per_calendar_day"
+    ],
+    "splits": ["ticker", "direction", "entry_exit_origin_combination"],
+    "monetary_pnl": "DEFERRED_TO_M8D_SIZING_CONTRACT"
+  },
+  "anti_overfit": {
+    "candidate_or_rule_changes_after_outcome_reading_forbidden_on_same_sample": true,
+    "m8c_may_use_m8b_for_exploratory_gate_design": true,
+    "m8c_performance_claim_requires_new_forward_or_separate_frozen_validation_sample": true,
+    "source_matched_alerts_are_not_silently_removed": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false,
+    "prospective_start_change": false
+  }
+}
