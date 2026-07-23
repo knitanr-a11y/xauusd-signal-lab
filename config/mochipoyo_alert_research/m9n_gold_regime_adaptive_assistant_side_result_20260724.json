@@ -1,0 +1,154 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9N_GOLD_REGIME_ADAPTIVE_MULTIYEAR_RESEARCH",
+  "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY",
+  "recorded_at_utc": "2026-07-24T07:00:00Z",
+  "population": "XAUUSD frozen-M7C PRIMARY trades entered at first causal M1 turn using the user-supplied 2023-01-03 through 2026-06-19 multi-timeframe GOLD history",
+  "evidence_status": {
+    "2023": "historical research",
+    "2024": "historical research",
+    "2025": "opened during M9M; NOT untouched holdout for M9N hypotheses",
+    "2026_to_0619": "reference only; heavily research-exposed",
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "baseline": {
+    "long_first_turn_yearly_pf": {
+      "2023": 1.024636957911164,
+      "2024": 1.1330377750920155,
+      "2025": 1.035681917690026,
+      "2026_to_0619": 1.314215476770173
+    },
+    "short_first_turn_yearly_pf": {
+      "2023": 0.8593807790807502,
+      "2024": 0.8431174306374678,
+      "2025": 0.7568884030301146,
+      "2026_to_0619": 1.1369871202281177
+    },
+    "interpretation": "Prioritize LONG. SHORT remains structurally weak in 2023-2025 and no simple symmetric regime condition repaired it across all three years."
+  },
+  "static_candidate_postmortem": {
+    "result": "M9M static 2023-2024 candidates failed the 2025 sealed holdout",
+    "cause_pattern": "2025 preserved high win rates but enlarged average losses and loss tails; fixed indicator thresholds were regime-fragile.",
+    "simple_early_exit_check": "M15 bull-stack-break / RCI-negative / MACD-negative fail-safe exits were explored and did not improve PF consistently across 2023-2026; no exit change is promoted."
+  },
+  "adaptive_candidates": {
+    "N1_M5_QUIET_PULLBACK": {
+      "definition": "At the first-turn decision, closed M5 tick_volume_ratio20 <= the rolling 50th percentile of the latest 200 closed M5 bars.",
+      "causal": true,
+      "count": 1075,
+      "average_trades_per_observed_month": 25.595238095238095,
+      "win_rate": 0.6390697674418605,
+      "profit_factor_bps": 1.3345697428719754,
+      "net_bps": 3126.4594356694624,
+      "max_drawdown_bps": 526.6637957158231,
+      "max_losing_streak": 8,
+      "yearly_pf": {
+        "2023": 1.284428,
+        "2024": 1.301947,
+        "2025": 1.221391,
+        "2026_to_0619": 1.555244
+      },
+      "interpretation": "A relatively quiet M5 pullback is more stable than a fixed ATR/RCI threshold and preserves useful frequency."
+    },
+    "N2_M15_STRONG_MOMENTUM": {
+      "definition": "At the first-turn decision, closed M15 MACD(6,13) line in bps >= the rolling 75th percentile of the latest 200 closed M15 bars.",
+      "causal": true,
+      "count": 820,
+      "average_trades_per_observed_month": 19.523809523809526,
+      "win_rate": 0.5792682926829268,
+      "profit_factor_bps": 1.3747978673833448,
+      "net_bps": 1800.2081300621376,
+      "max_drawdown_bps": 395.5371423805982,
+      "max_losing_streak": 8,
+      "yearly_pf": {
+        "2023": 1.150478,
+        "2024": 1.405967,
+        "2025": 1.328268,
+        "2026_to_0619": 1.626917
+      },
+      "interpretation": "Strong M15 trend impulse is a second stable route even though its win rate is lower; losses are smaller and PF is stronger."
+    },
+    "N3_BROAD_CORE_OR": {
+      "definition": "N1 M5 quiet pullback OR N2 M15 strong momentum.",
+      "causal": true,
+      "count": 1496,
+      "average_trades_per_observed_month": 35.61904761904762,
+      "win_rate": 0.6223262032085561,
+      "profit_factor_bps": 1.364771994746645,
+      "net_bps": 4280.855742,
+      "average_win_bps": 17.203614,
+      "average_loss_bps": -20.844953,
+      "max_drawdown_bps": 510.524349,
+      "max_losing_streak": 11,
+      "tail_le_minus_100_fraction": 0.011364,
+      "yearly": {
+        "2023": {"count": 380, "win_rate": 0.602632, "profit_factor_bps": 1.140847, "max_drawdown_bps": 415.555697},
+        "2024": {"count": 452, "win_rate": 0.617257, "profit_factor_bps": 1.357539, "max_drawdown_bps": 435.006846},
+        "2025": {"count": 440, "win_rate": 0.654545, "profit_factor_bps": 1.242210, "max_drawdown_bps": 510.524349},
+        "2026_to_0619": {"count": 224, "win_rate": 0.602679, "profit_factor_bps": 1.756805, "max_drawdown_bps": 492.036237}
+      },
+      "extra_cost_sensitivity_bps_per_trade": {
+        "0.5": {"profit_factor": 1.293811, "net_bps": 3532.855742},
+        "1.0": {"profit_factor": 1.225910, "net_bps": 2784.855742},
+        "1.5": {"profit_factor": 1.161083, "net_bps": 2036.855742},
+        "2.0": {"profit_factor": 1.099330, "net_bps": 1288.855742}
+      },
+      "quarter_warning": "12 of 14 observed quarters clear PF 1.0; 2024Q4 was approximately PF 0.976 and 2025Q3 approximately PF 0.798. This is not a final live rule."
+    },
+    "N4_PREMIUM_QUIET_DAILY_AND_M5": {
+      "definition": "Closed D1 body_to_range <= rolling 25th percentile of latest 100 closed D1 bars AND N1 M5 quiet-pullback condition.",
+      "causal": true,
+      "count": 248,
+      "average_trades_per_observed_month": 6.702702702702703,
+      "win_rate": 0.6693548387096774,
+      "profit_factor_bps": 2.177158,
+      "net_bps": 1718.898642,
+      "max_drawdown_bps": 321.271730,
+      "max_losing_streak": 5,
+      "yearly_pf": {
+        "2023": 3.425031,
+        "2024": 1.888130,
+        "2025": 2.933918,
+        "2026_to_0619": 1.359063
+      },
+      "extra_cost_2bps_profit_factor": 1.745192,
+      "warning": "Low frequency and small subperiod samples. 2026Q2 had only 11 trades and PF about 0.196, so PREMIUM cannot be promoted despite strong aggregate PF."
+    },
+    "N5_H4_RCI18_ACCELERATION_REFERENCE": {
+      "definition": "Closed H4 RCI18 delta1 >= rolling 75th percentile of the latest 100 closed H4 bars.",
+      "count": 774,
+      "win_rate": 0.6395348837209303,
+      "profit_factor_bps": 1.3124105031328035,
+      "max_drawdown_bps": 617.3724376159787,
+      "yearly_pf": {"2023": 1.618170, "2024": 1.080539, "2025": 1.067003, "2026_to_0619": 1.690268},
+      "decision": "SECONDARY_ONLY_BECAUSE_2024_2025_MARGIN_IS_THIN"
+    }
+  },
+  "walk_forward_health_gate": {
+    "explored": true,
+    "decision": "DO_NOT_FREEZE_YET",
+    "reason": "Resolved-only rolling PF gates can reduce DD but parameter selection is sensitive to lookback length and threshold. The adaptive market-state candidates above are simpler and currently preferred."
+  },
+  "research_decision": [
+    "Stop mining fixed RCI/ATR thresholds.",
+    "Keep SHORT out of the main candidate stack for now.",
+    "Carry N1 and N2 as the simplest adaptive LONG building blocks.",
+    "Treat N3 BROAD CORE as the leading frequency-oriented research candidate, not a live rule.",
+    "Treat N4 PREMIUM as a high-quality but low-frequency reference only until fresh evidence exists.",
+    "Do not change M7C or reset M8C."
+  ],
+  "guardrails": {
+    "automatic_live_promotion": false,
+    "prospective_shadow_started": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "audit_only": true
+  }
+}
