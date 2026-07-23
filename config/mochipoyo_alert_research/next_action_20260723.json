@@ -1,46 +1,47 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9D_PASS_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9E_PASS_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9d_result": {
-    "population": "952 exact-M1 Tier-B proxy replay trades",
-    "checkpoint_rows": 3039,
-    "first_turn_rows": 852,
-    "checkpoint_observation": "0.75-1.0 ATR checkpoints had the strongest exploratory average checkpoint-to-exit metrics, but checkpoint depth is not promoted as an entry or stop rule.",
-    "mae_observation": "Winner/loser adverse excursion separation is large in XAU/BTC and LONG/SHORT; depth alone remains insufficient because many trades recover after meaningful adverse movement.",
-    "interpretation": "Study causal state and structural reversal evidence during the adverse path."
+  "m9e_result": {
+    "population": "3039 adverse checkpoints plus 852 first-turn entries from Tier-B replay",
+    "divergence_event_rows": 145560,
+    "causal_pivots_only": true,
+    "supportive_any_saturated": true,
+    "opposing_any_saturated": true,
+    "interpretation": "Regular/hidden divergence remains worth studying, but pooled ANY-divergence is not discriminative because older causal divergence persists across many timeframe/oscillator/scale contexts."
   },
-  "m9e_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9e/bat",
-    "run_once": "01_run_causal_divergence_context_audit.bat",
-    "success": "[M9E PASS]",
-    "blocked": "[M9E BLOCKED]",
+  "m9f_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9f/bat",
+    "run_once": "01_run_divergence_recency_locality_audit.bat",
+    "success": "[M9F PASS]",
+    "blocked": "[M9F BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9E\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9F\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9e_research_order": [
-    "At every M9D adverse checkpoint and first-turn entry, use only price pivots already confirmed by that decision time.",
-    "Classify bullish/bearish regular divergence and bullish/bearish hidden divergence.",
-    "Evaluate RCI9, RCI14, RCI18, MACD line 6/13 and MACD histogram 6/13/4 on M1/M5/M15/H1/H4.",
-    "For LONG treat bullish divergence as supportive and bearish divergence as opposing; reverse for SHORT, while preserving raw divergence types.",
-    "Compare supportive regular, supportive hidden, opposing divergence and no-divergence states separately by XAU/BTC, LONG/SHORT and month.",
-    "Do not promote a divergence rule from the same Tier-B sample; use it only to generate hypotheses for later independent/forward validation."
+  "m9f_research_order": [
+    "Keep regular and hidden divergence separate; do not collapse them to one universal flag.",
+    "Normalize divergence age by its own timeframe and compare <=2, <=3, <=5 and <=10-bar observation windows without promoting a cutoff.",
+    "Separate divergence whose two pivots formed after the original signal, second pivot only after signal, and fully pre-signal context.",
+    "Compare supportive-only, opposing-only, both and neither signatures separately for XAU/BTC, LONG/SHORT and month.",
+    "Retain RCI9/14/18 and MACD line/histogram, timeframe and pivot-scale identities for individual-context analysis.",
+    "Use M9F only for hypothesis generation; any promising divergence/state combination requires separate temporal/forward validation."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
     "Do not call Tier-B replay events genuine Mochipoyo alerts.",
-    "Do not use a pivot that is only confirmed after the checkpoint/turn decision time.",
-    "Do not assume regular or hidden divergence is beneficial before the data shows it.",
+    "Do not promote a 2/3/5/10-bar divergence-age cutoff from this same sample.",
+    "Do not use future pivot confirmation or future outcome to construct divergence context.",
+    "Do not assume regular or hidden divergence is beneficial before recency/locality analysis shows a stable pattern.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
