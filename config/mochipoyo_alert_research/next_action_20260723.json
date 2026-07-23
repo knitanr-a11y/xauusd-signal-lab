@@ -1,50 +1,48 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8B_RUNNER_READY_LOCAL_OUTCOME_AUDIT_NEXT",
-  "current_stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
-  "immediate_action": "RUN_M8B_OPERATOR_BAT_01_ONCE_AND_UPLOAD_SINGLE_PACKAGE",
+  "status": "M8C_FORWARD_SHADOW_OPERATOR_RUN_NEXT",
+  "current_stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
+  "immediate_action": "INITIALIZE_M8C_ONCE_THEN_RUN_PERSISTENT_FORWARD_SHADOW",
   "operator_instruction": {
-    "folder": "scripts/mochipoyo_alert_research/m8b/bat",
-    "run_once": "01_run_outcome_audit.bat",
-    "simultaneous_with_collector_and_m7c": "ALLOWED",
-    "success_display": "[M8B PASS]",
-    "stop_display": "[M8B BLOCKED]",
-    "open_results_after_success": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8B\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "folder": "scripts/mochipoyo_alert_research/m8c/bat",
+    "step_1_once": "01_initialize_forward_shadow.bat",
+    "step_1_success": "[M8C INIT PASS]",
+    "step_1_stop": "[M8C INIT BLOCKED]",
+    "step_2_persistent": "02_run_forward_shadow_forever.bat",
+    "step_2_simultaneous_with_collector_and_m7c": "ALLOWED",
+    "step_2_interval_seconds": 300,
+    "step_2_stop": "[M8C LOOP BLOCKED]",
+    "results": "03_open_latest_results.bat",
+    "normal_submission_when_review_ready": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8C\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m8b_frozen_scope": {
-    "finalized_extra_signals": 36,
-    "extra_entry_trades_for_wr_pf": 18,
-    "extra_exit_actions_separate_not_double_counted": 18,
-    "pending_grace_excluded": 2,
-    "all_extra_entry_trades_resolved_inside_frozen_signal_stream": true,
-    "trade_skeleton_sha256": "f42ce896f00b717320662ff1b64991718bf3e1ce7dfe0d671c62f362731f7acc"
+  "m8b_result": {
+    "status": "PASS_EXPLORATORY_ONLY",
+    "trade_count": 18,
+    "win_rate": 0.6111111111111112,
+    "profit_factor_spread_x1_0": 1.1233074155203668,
+    "profit_factor_spread_x2_0": 0.9250795028223845,
+    "key_observed_weakness": "BTCUSD PRIMARY_LONG proxy extras: 6 trades, WR 33.33%, PF 0.1818, -107.21 bps at spread x1.0",
+    "key_observed_strength": "XAUUSD extras: 10 trades, WR 70%, PF 3.9251, +97.49 bps at spread x1.0"
   },
-  "cost_contract": {
-    "primary": "historical M1 spread x1.0",
-    "sensitivity": ["x1.5", "x2.0"],
-    "commission": "NOT_MODELED_IN_M8B_V1",
-    "swap": "NOT_MODELED_IN_M8B_V1",
-    "monetary_sizing": "DEFERRED_TO_M8D"
+  "m8c_forward_hypothesis": {
+    "control": "accept all future proxy PRIMARY candidates",
+    "challenger": "reject only BTCUSD PRIMARY_LONG on proxy branch",
+    "strict_numeric_filtering": false,
+    "future_source_match_used_as_gate_input": false,
+    "source_anchor_separate_and_unsuppressed": true,
+    "m8b_18_reused_as_validation": false,
+    "review_gate": {
+      "total_future_proxy_primary_candidates": 30,
+      "future_btcusd_primary_long_proxy_candidates": 8,
+      "future_challenger_accepted_proxy_candidates": 15
+    }
   },
-  "objective": {
-    "exact_mochipoyo_replication_required": false,
-    "optimize_for": ["after-cost edge", "win rate", "profit factor", "trade frequency", "drawdown", "losing streak", "robustness"],
-    "avoid_over_strict_frequency_collapse": true,
-    "source_match_is_not_final_promotion_goal": true
-  },
-  "after_result": [
-    "Audit 18 frozen extra-entry trades without changing the frozen population.",
-    "Do not design a gate and claim the same 18 trades as validation.",
-    "Use M8B only as exploratory evidence for M8C design.",
-    "Require a new forward or independent frozen sample before M8C performance claims."
-  ],
   "forbidden": [
-    "Do not modify M7C formulas or thresholds.",
-    "Do not reset M7C runtime manifest or prospective start.",
-    "Do not enable Discord send, MT5 order, live ready, final signal, or entry gate.",
-    "Do not count extra EXIT actions as standalone trades.",
-    "Do not silently remove source-matched alerts without a separately validated explicit portfolio rule."
+    "Do not tune RCI/EMA numeric thresholds on the M8B 18-trade sample and claim validation.",
+    "Do not use future source-match classification as an M8C entry gate input.",
+    "Do not modify M7C formulas, thresholds, runtime manifest, or prospective start.",
+    "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate.",
+    "Do not silently suppress the separate source-anchor branch."
   ]
 }
