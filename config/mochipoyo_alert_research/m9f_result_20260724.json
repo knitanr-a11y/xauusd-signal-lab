@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT",
+  "recorded_at_utc": "2026-07-24T04:10:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "counts": {
+    "checkpoint_rows": 3039,
+    "first_turn_rows": 852,
+    "divergence_event_rows": 145560
+  },
+  "causality": {
+    "future_pivot_confirmation_used": false,
+    "same_sample_rule_promotion_allowed": false,
+    "recency_normalized_by_timeframe_bar_duration": true,
+    "locality_uses_original_proxy_entry_server_open": true
+  },
+  "key_finding": {
+    "pooled_any_divergence_gate_rejected": true,
+    "reason": "M9E pooled ANY divergence saturated. M9F recency/locality separates fresh structure from stale ambient divergence.",
+    "first_turn_baseline": {
+      "count": 852,
+      "win_rate": 0.5821596244131455,
+      "profit_factor_bps": 1.0321683116573177,
+      "net_bps": 541.1779966228281
+    }
+  },
+  "loss_pruning_hypotheses_for_m9g": [
+    {
+      "name": "BTC_LONG_FRESH_CONFLICT",
+      "decision_surface": "FIRST_CAUSAL_TURN",
+      "condition": "ticker=BTCUSD AND direction=LONG AND within_3_bars_signature=BOTH",
+      "count": 92,
+      "profit_factor_bps": 0.6169928213995862,
+      "net_bps": -1128.1848569633833,
+      "monthly_note": "Negative net in every available month 2026-04 through 2026-07.",
+      "interpretation": "Fresh supportive and opposing divergence conflict at the first causal turn is a candidate avoid-state for BTC LONG."
+    },
+    {
+      "name": "BTC_SHORT_SUPPORTIVE_ONLY_WITH_HIDDEN",
+      "decision_surface": "FIRST_CAUSAL_TURN",
+      "condition": "ticker=BTCUSD AND direction=SHORT AND within_3_bars_signature=SUPPORTIVE_ONLY AND within_3_bars_supportive_hidden_count>0",
+      "count": 20,
+      "interpretation": "Exploratory candidate only; hidden-divergence presence inside an otherwise supportive-only fresh signature was weak. Do not generalize hidden divergence as bad outside this branch/state."
+    }
+  ],
+  "candidate_combined_exploratory_counterfactual": {
+    "policy": "reject BTC_LONG_FRESH_CONFLICT; reject BTC_SHORT_SUPPORTIVE_ONLY_WITH_HIDDEN; keep all other first-turn candidates",
+    "kept_count": 740,
+    "retention_fraction": 0.8685446009389671,
+    "win_rate": 0.5905405405405405,
+    "profit_factor_bps": 1.2543359158322271,
+    "net_bps": 3094.2188447718904,
+    "removed_count": 112,
+    "removed_profit_factor_bps": 0.45183737778052396,
+    "removed_net_bps": -2553.040848149062,
+    "monthly_kept_counts": {
+      "2026-02": 29,
+      "2026-03": 95,
+      "2026-04": 146,
+      "2026-05": 193,
+      "2026-06": 194,
+      "2026-07_partial": 83
+    },
+    "warning": "Same Tier-B sample hypothesis generation only. This is not validation and cannot be promoted to a live gate without a new prospective sample."
+  },
+  "guardrails": {
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "automatic_gate_promotion": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
