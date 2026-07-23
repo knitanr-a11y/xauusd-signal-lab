@@ -1,0 +1,71 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9B_GENUINE_PRIMARY_EXPANDED_CONTEXT_AUDIT",
+  "recorded_at_utc": "2026-07-24T02:25:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "population_tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
+  "frozen_genuine_primary_count": 43,
+  "source_immediate": {
+    "count": 43,
+    "win_rate": 0.6976744186046512,
+    "profit_factor_bps": 2.2340942206836614,
+    "net_bps": 488.6275507192144,
+    "mean_bps": 11.363431412074753,
+    "median_bps": 15.061197737101075,
+    "mean_mfe_bps": 39.370124022145355,
+    "mean_mae_bps": -38.41135517337095
+  },
+  "first_causal_turn": {
+    "count": 38,
+    "coverage": 0.8837209302325582,
+    "win_rate": 0.631578947368421,
+    "profit_factor_bps": 1.9915595780433206,
+    "net_bps": 399.6267439252639,
+    "mean_bps": 10.516493261191155,
+    "median_bps": 14.221668084357868,
+    "mean_mfe_bps": 39.22822785233466,
+    "mean_mae_bps": -41.12824387554696
+  },
+  "source_by_ticker_direction": {
+    "XAUUSD_LONG": {"count": 13, "win_rate": 0.6923076923076923, "profit_factor_bps": 2.050555, "net_bps": 128.790451, "mean_mae_bps": -32.456457},
+    "XAUUSD_SHORT": {"count": 7, "win_rate": 0.7142857142857143, "profit_factor_bps": 2.029899, "net_bps": 56.950593, "mean_mae_bps": -30.9128},
+    "BTCUSD_LONG": {"count": 12, "win_rate": 0.75, "profit_factor_bps": 9.121882, "net_bps": 260.8001, "mean_mae_bps": -24.215075},
+    "BTCUSD_SHORT": {"count": 11, "win_rate": 0.6363636363636364, "profit_factor_bps": 1.226345, "net_bps": 42.086408, "mean_mae_bps": -65.707621}
+  },
+  "xau_path_observation": {
+    "wins": {"count": 14, "mean_mae_bps": -18.45612560112654, "median_mae_bps": -9.976645922835097, "mean_mfe_bps": 39.01779715194459},
+    "losses": {"count": 6, "mean_mae_bps": -63.32296286566528, "median_mae_bps": -67.58355089238893, "mean_mfe_bps": 13.040539264344586},
+    "interpretation": "Genuine-source XAU losses show materially deeper adverse excursion than winners; unlike the M8B extra-only sample, MAE separation is visible and should be retested on a larger replay population."
+  },
+  "m5_signal_context": {
+    "signal_m5_directional_rci9_vs_initial_pullback_depth_spearman": 0.11297209621626837,
+    "GE_80": {"count": 3, "mean_initial_pullback_bps": 5.779162, "positive_fraction_from_first_turn": 0.666667, "net_bps_from_first_turn": 44.2028},
+    "50_TO_80": {"count": 4, "mean_initial_pullback_bps": 8.225291, "positive_fraction_from_first_turn": 0.25, "net_bps_from_first_turn": -121.461705},
+    "interpretation": "The prior M8BZ2 extra-only GE_80 pattern did not reproduce on the 43 genuine-source population. M5 overheat remains exploratory only."
+  },
+  "turn_htf_context": {
+    "turn_h1_directional_rci9_delta1_vs_return_spearman": -0.22897510012169278,
+    "turn_h4_directional_rci9_delta1_vs_return_spearman": 0.06862139000747908,
+    "H1_AND_H4_WITH_TRADE": {"count": 9, "positive_fraction": 0.555556, "net_bps": 142.413728},
+    "H1_ONLY_WITH_TRADE": {"count": 3, "positive_fraction": 0.0, "net_bps": -185.79374},
+    "H4_ONLY_WITH_TRADE": {"count": 16, "positive_fraction": 0.8125, "net_bps": 252.799422},
+    "NEITHER_WITH_TRADE": {"count": 10, "positive_fraction": 0.6, "net_bps": 190.207334},
+    "interpretation": "The tiny M8BZ2 H1/H4 directional pattern did not remain stable. No H1/H4 rule is promoted."
+  },
+  "key_correction": {
+    "m8b_extra_btc_long_weakness_does_not_generalize_to_genuine_source_btc_long": true,
+    "genuine_source_btc_long_is_strong_in_this_sample": true,
+    "first_causal_turn_is_not_a_universal_improvement_over_immediate_entry": true
+  },
+  "guardrails": {
+    "same_43_is_validation": false,
+    "threshold_promotion_allowed": false,
+    "proxy_replay_mixed_in": false,
+    "next_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "m8c_reset": false,
+    "m7c_changed": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
