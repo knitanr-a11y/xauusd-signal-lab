@@ -1,0 +1,44 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
+  "contract": "MOCHIPOYO_M9D_CAUSAL_ADVERSE_PATH_STATE_V1",
+  "recorded_at_utc": "2026-07-24T03:40:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "counts": {
+    "upstream_exact_m1_resolved_trades": 952,
+    "upstream_first_turn_trades": 852,
+    "checkpoint_rows": 3039,
+    "turn_rich_feature_rows": 852
+  },
+  "checkpoint_summary": {
+    "0.25_ATR": {"count": 795, "win_rate": 0.6150943396226415, "profit_factor_bps": 1.0663624760531694, "net_bps": 1051.1864161353087, "recovered_signal_fraction": 0.8477987421383648, "mean_elapsed_minutes": 14.861635220125786},
+    "0.50_ATR": {"count": 645, "win_rate": 0.6170542635658914, "profit_factor_bps": 1.0824734036156634, "net_bps": 1160.0780891138136, "recovered_signal_fraction": 0.7736434108527132, "mean_elapsed_minutes": 26.908527131782947},
+    "0.75_ATR": {"count": 527, "win_rate": 0.6337760910815939, "profit_factor_bps": 1.1183668480791686, "net_bps": 1497.5547132206386, "recovered_signal_fraction": 0.7305502846299811, "mean_elapsed_minutes": 42.98292220113852},
+    "1.00_ATR": {"count": 444, "win_rate": 0.6306306306306306, "profit_factor_bps": 1.1168142351410384, "net_bps": 1340.8588038155692, "recovered_signal_fraction": 0.668918918918919, "mean_elapsed_minutes": 60.53378378378378},
+    "1.50_ATR": {"count": 349, "win_rate": 0.6131805157593123, "profit_factor_bps": 1.102455929278131, "net_bps": 969.1595941534054, "recovered_signal_fraction": 0.5644699140401146, "mean_elapsed_minutes": 117.29226361031519},
+    "2.00_ATR": {"count": 279, "win_rate": 0.6021505376344086, "profit_factor_bps": 1.065819465849194, "net_bps": 518.5216760040763, "recovered_signal_fraction": 0.44802867383512546, "mean_elapsed_minutes": 186.88530465949822}
+  },
+  "mae_winner_loser_separation_bps": {
+    "XAUUSD_LONG": {"winner_mean_mae": -22.345700, "loser_mean_mae": -87.438244},
+    "XAUUSD_SHORT": {"winner_mean_mae": -19.773585, "loser_mean_mae": -89.674626},
+    "BTCUSD_LONG": {"winner_mean_mae": -31.002592, "loser_mean_mae": -102.176542},
+    "BTCUSD_SHORT": {"winner_mean_mae": -30.761797, "loser_mean_mae": -87.228800}
+  },
+  "interpretation": [
+    "ATR checkpoints are useful observation points but are not promoted as fixed entry or stop rules.",
+    "Winner/loser adverse-path separation remains large across all ticker/direction groups.",
+    "The recovery fraction falls materially as adverse depth increases, but substantial recovery still exists even after deep adverse movement, so depth alone is insufficient.",
+    "The next research step should add causal structural reversal evidence, including regular and hidden divergence, to distinguish recoverable pullbacks from failing reversals."
+  ],
+  "guardrails": {
+    "same_sample_gate_promotion_allowed": false,
+    "checkpoint_features_use_future_labels": false,
+    "future_outcomes_used_only_after_checkpoint": true,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
