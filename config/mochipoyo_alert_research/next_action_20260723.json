@@ -1,45 +1,50 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8A_DONE_M8B_NEXT_AUDIT_ONLY",
-  "current_stage": "M8A_COVERAGE_GAP_AUDIT",
-  "next_stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
-  "immediate_action": "FREEZE_M8B_OUTCOME_EVALUATION_CONTRACT_BEFORE_READING_FUTURE_OUTCOMES",
-  "m8a_result": {
-    "source_matched_count": 21,
-    "missed_source_count": 14,
-    "unsupported_reentry_count": 10,
-    "finalized_extra_candidate_count": 36,
-    "pending_source_arrival_grace_count": 2,
-    "missed_gap_class_counts": {
-      "DIRECT_EXIT_THRESHOLD_GAP": 5,
-      "STATE_DIVERGENCE_AFTER_PRIOR_MISSED_SOURCE": 6,
-      "STATE_DIVERGENCE_AFTER_PRIOR_EXTRA_PROXY": 3
-    },
-    "direct_primary_kernel_gap_when_required_state_matched_count": 0
+  "status": "M8B_RUNNER_READY_LOCAL_OUTCOME_AUDIT_NEXT",
+  "current_stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+  "immediate_action": "RUN_M8B_OPERATOR_BAT_01_ONCE_AND_UPLOAD_SINGLE_PACKAGE",
+  "operator_instruction": {
+    "folder": "scripts/mochipoyo_alert_research/m8b/bat",
+    "run_once": "01_run_outcome_audit.bat",
+    "simultaneous_with_collector_and_m7c": "ALLOWED",
+    "success_display": "[M8B PASS]",
+    "stop_display": "[M8B BLOCKED]",
+    "open_results_after_success": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8B\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m8b_frozen_candidate_scope": {
-    "include": "Only the 36 M8A rows normalized as EXTRA_CANDIDATE from FINALIZED_EXTRA_PROXY_SIGNAL",
-    "exclude_pending_source_arrival_grace": true,
-    "exclude_source_matched": true,
-    "exclude_missed_source": true,
-    "exclude_unsupported_reentry": true
+  "m8b_frozen_scope": {
+    "finalized_extra_signals": 36,
+    "extra_entry_trades_for_wr_pf": 18,
+    "extra_exit_actions_separate_not_double_counted": 18,
+    "pending_grace_excluded": 2,
+    "all_extra_entry_trades_resolved_inside_frozen_signal_stream": true,
+    "trade_skeleton_sha256": "f42ce896f00b717320662ff1b64991718bf3e1ce7dfe0d671c62f362731f7acc"
   },
-  "before_m8b_outcome_reading": [
-    "Freeze the trade-construction and outcome-evaluation contract.",
-    "Freeze entry/exit pairing rules for extra candidates without looking at their future outcome.",
-    "Freeze cost assumptions and price source/time semantics.",
-    "Freeze same-bar/intrabar ambiguity handling.",
-    "Freeze incomplete/unresolved trade handling.",
-    "Keep source-matched Mochipoyo alerts outside any extra-loss suppression gate by default."
+  "cost_contract": {
+    "primary": "historical M1 spread x1.0",
+    "sensitivity": ["x1.5", "x2.0"],
+    "commission": "NOT_MODELED_IN_M8B_V1",
+    "swap": "NOT_MODELED_IN_M8B_V1",
+    "monetary_sizing": "DEFERRED_TO_M8D"
+  },
+  "objective": {
+    "exact_mochipoyo_replication_required": false,
+    "optimize_for": ["after-cost edge", "win rate", "profit factor", "trade frequency", "drawdown", "losing streak", "robustness"],
+    "avoid_over_strict_frequency_collapse": true,
+    "source_match_is_not_final_promotion_goal": true
+  },
+  "after_result": [
+    "Audit 18 frozen extra-entry trades without changing the frozen population.",
+    "Do not design a gate and claim the same 18 trades as validation.",
+    "Use M8B only as exploratory evidence for M8C design.",
+    "Require a new forward or independent frozen sample before M8C performance claims."
   ],
   "forbidden": [
-    "Do not tune an extra gate after seeing the same extras' outcomes.",
-    "Do not use future bars during candidate creation or acceptance decisions.",
-    "Do not silently suppress SOURCE_MATCHED alerts.",
-    "Do not score pending source-arrival-grace signals as finalized extras.",
-    "Do not modify M7C runtime manifest or prospective start.",
-    "Do not enable Discord send, MT5 order, live ready, final signal, or entry gate."
-  ],
-  "file_organization_contract": "docs/mochipoyo_alert_research/FILE_ORGANIZATION_AND_NUMBERING_CONVENTION_20260722.md"
+    "Do not modify M7C formulas or thresholds.",
+    "Do not reset M7C runtime manifest or prospective start.",
+    "Do not enable Discord send, MT5 order, live ready, final signal, or entry gate.",
+    "Do not count extra EXIT actions as standalone trades.",
+    "Do not silently remove source-matched alerts without a separately validated explicit portfolio rule."
+  ]
 }
