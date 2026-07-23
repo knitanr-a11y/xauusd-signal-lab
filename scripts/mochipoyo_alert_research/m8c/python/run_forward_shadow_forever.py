@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -45,7 +46,11 @@ def main() -> int:
             "live_ready": False,
             "final_signal": False,
         }
-        root = Path.home() / "AppData" / "Local" / "xauusd_signal_lab" / "mochipoyo_alert_research" / "runtime" / "m8c"
+        local = os.environ.get("LOCALAPPDATA", "").strip()
+        if not local:
+            print("[M8C LOOP BLOCKED] LOCALAPPDATA is unavailable")
+            return 2
+        root = Path(local) / "xauusd_signal_lab" / "mochipoyo_alert_research" / "runtime" / "m8c"
         root.mkdir(parents=True, exist_ok=True)
         (root / "m8c_loop_status.json").write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         if last_code != 0:
