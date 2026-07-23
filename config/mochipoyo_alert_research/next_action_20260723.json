@@ -1,36 +1,38 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M8BY_PULLBACK_ENTRY_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M8BY_ENTRY_TIMING_RESEARCH",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BY_PULLBACK_ENTRY_OPPORTUNITY_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M8BZ_PULLBACK_STATE_FEATURE_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M8BZ_PULLBACK_STATE_FEATURE_RESEARCH",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BZ_PULLBACK_STATE_FEATURE_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m8by_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m8by/bat",
-    "run_once": "01_run_pullback_entry_opportunity_audit.bat",
-    "success": "[M8BY PASS]",
-    "blocked": "[M8BY BLOCKED]",
+  "m8bz_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m8bz/bat",
+    "run_once": "01_run_pullback_state_feature_audit.bat",
+    "success": "[M8BZ PASS]",
+    "blocked": "[M8BZ BLOCKED]",
     "simultaneous_with_m8c_collector_m7c": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BY\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BZ\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "research_question": "Can waiting for a real adverse BID-price pullback, optionally followed by a completed-M1 rebound confirmation, improve entry price and loss profile without sacrificing too many profitable trades?",
+  "research_question": "At a causally confirmed pullback-turn point, which local RCI/EMA/MACD/ATR/price-action/volume/spread state signatures are associated with favorable continuation, compared with simply entering immediately or waiting a fixed price distance?",
   "important": [
-    "M8BX small MAE includes spread because it is measured from executable entry; M8BY uses original signal BID open so spread is not misclassified as pullback.",
-    "Touch variants enter only on the next M1 open after threshold touch.",
-    "Rebound variants wait for completed M1 close recovery, then enter on the next M1 open.",
-    "The same frozen 18 trades are hypothesis-generation only, not validation.",
-    "Any selected pullback hypothesis requires a new forward start separate from the already-running M8C."
+    "M8BY fixed-distance results remain available as a secondary sensitivity study.",
+    "M8BZ does not require a fixed bps minimum to create a pullback-turn candidate.",
+    "M8BZ uses only completed M1 bars to confirm the turn and enters at the next observed M1 open.",
+    "Local M1 RCI9/14/18, EMA20/30/40, MACD6/13/4, ATR14, candle/wick, volume, spread and path features are captured at the turn confirmation.",
+    "Original signal M15 RCI/EMA context is kept as inherited context, not recalculated from future bars.",
+    "The same frozen 18 trades are hypothesis-generation only and no ML model or feature threshold is promoted from them.",
+    "Any useful feature signature must later be frozen and tested on a new forward sample without resetting the already-running M8C."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
-    "Do not pick the best M8BY grid result and call it validated.",
-    "Do not use future MAE/MFE as live entry inputs.",
+    "Do not pick the strongest M8BZ correlation/feature and call it validated.",
+    "Do not use future return, MAE or MFE as a candidate-generation input.",
     "Do not modify M7C formulas, thresholds, runtime manifest, or prospective start.",
     "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate."
   ]
