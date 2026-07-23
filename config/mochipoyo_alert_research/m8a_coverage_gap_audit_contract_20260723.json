@@ -1,0 +1,53 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8A_COVERAGE_GAP_AUDIT",
+  "contract_version": "MOCHIPOYO_M8A_COVERAGE_GAP_AUDIT_V1",
+  "audit_only": true,
+  "input_basis": "FROZEN_M7C_FORMAL_GATE_SNAPSHOT",
+  "prospective_start_utc": "2026-07-20T14:54:15Z",
+  "source_class_normalization": {
+    "EXACT_MATCH": "SOURCE_MATCHED",
+    "EARLY_1_BAR": "SOURCE_MATCHED",
+    "LATE_1_BAR": "SOURCE_MATCHED",
+    "MISSED": "MISSED_SOURCE",
+    "UNSUPPORTED_REENTRY_NOT_SCORED": "UNSUPPORTED_REENTRY"
+  },
+  "extra_normalization": {
+    "FINALIZED_EXTRA_PROXY_SIGNAL": "EXTRA_CANDIDATE",
+    "PENDING_SOURCE_ARRIVAL_GRACE": "PENDING_SOURCE_ARRIVAL_GRACE_NOT_M8B_ELIGIBLE"
+  },
+  "gap_audit": {
+    "decision_boundary": "same frozen M15 decision boundary as source_decision_time_utc",
+    "direct_primary_long": "required state IDLE; inspect rci9_turn_up and BULLISH_STACK",
+    "direct_primary_short": "required state IDLE; inspect rci9_turn_down and BEARISH_STACK",
+    "direct_long_exit": "required state ACTIVE_LONG; inspect frozen rci9 >= 78.333333333333",
+    "direct_short_exit": "required state ACTIVE_SHORT; inspect frozen rci9 <= -75",
+    "state_divergence": "when proxy state_before differs from required source state, trace the most recent point where source/proxy states changed from equal to unequal using frozen source events and proxy signals"
+  },
+  "forbidden_inputs": [
+    "future bars",
+    "current-bar future high/low/close",
+    "MFE",
+    "MAE",
+    "trade outcome",
+    "win/loss",
+    "PF",
+    "future TP/SL result"
+  ],
+  "mutations_forbidden": [
+    "M7C formula refit",
+    "M7C threshold change",
+    "M7C grace change",
+    "M7C matching change",
+    "M7C runtime manifest reset",
+    "prospective start change",
+    "source matched suppression"
+  ],
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false
+  }
+}
