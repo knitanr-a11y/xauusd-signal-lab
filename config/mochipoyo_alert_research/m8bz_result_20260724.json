@@ -1,0 +1,48 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BZ_PULLBACK_STATE_FEATURE_AUDIT",
+  "recorded_at_utc": "2026-07-24T00:55:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "population": {
+    "frozen_trade_population": 18,
+    "trades_with_first_causal_turn": 16,
+    "first_turn_coverage": 0.8888888888888888,
+    "all_turn_candidates": 267,
+    "all_turn_candidates_are_independent_samples": false,
+    "feature_analysis_population": "FIRST_CONFIRMED_TURN_PER_TRADE_ONLY"
+  },
+  "first_turn_outcome": {
+    "win_rate_to_original_frozen_exit": 0.6875,
+    "net_bps_to_original_frozen_exit": 29.129194078908814
+  },
+  "top_absolute_spearman_features": [
+    {"feature": "m1_bar_range_bps", "rho": -0.7970588235294118},
+    {"feature": "pullback_depth_bps", "rho": -0.6941176470588235},
+    {"feature": "rebound_from_extreme_bps", "rho": -0.6058823529411764},
+    {"feature": "directional_return_1m_bps", "rho": -0.5470588235294118},
+    {"feature": "signal_entry_ema30_minus_ema40_bps", "rho": -0.42058823529411765},
+    {"feature": "signal_entry_ema20_minus_ema30_bps", "rho": -0.4117647058823529}
+  ],
+  "win_loss_descriptive": {
+    "pullback_depth_bps": {"win_median": 5.135360, "loss_median": 11.658994},
+    "m1_atr14_bps": {"win_median": 4.084283, "loss_median": 6.147414},
+    "m1_bar_range_bps": {"win_median": 2.375723, "loss_median": 4.292220},
+    "m1_price_minus_ema20_bps": {"win_median": 0.065740, "loss_median": -0.326176},
+    "m1_ema20_slope3_bps": {"win_median": 0.069518, "loss_median": -0.140636}
+  },
+  "interpretation": {
+    "single_m1_rci9_boundary_supported": false,
+    "reason": "First-turn LONG winners and losses both occur across high and low M1 RCI9 values; local RCI alone does not cleanly separate continuation in this tiny sample.",
+    "next_research": "MULTITIMEFRAME_RCI_CONTEXT_AT_SIGNAL_AND_PULLBACK_TURN",
+    "user_hypothesis": "M15 LONG with M5 RCI9 near upper extreme may pull back first; H1/H4 RCI9 moving upward may support later LONG continuation. Treat as hypothesis only, with symmetric SHORT evaluation.",
+    "user_hypothesis_assumed_true": false
+  },
+  "guardrails": {
+    "same_sample_is_validation": false,
+    "feature_threshold_promotion_allowed": false,
+    "machine_learning_fit_used": false,
+    "new_forward_validation_required": true,
+    "existing_m8c_reset": false
+  }
+}
