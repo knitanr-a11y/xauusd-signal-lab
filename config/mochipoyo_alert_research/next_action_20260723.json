@@ -1,50 +1,46 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9C_PASS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9D_LOSS_PATH_STATE_FEATURE_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9D_PASS_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9E_CAUSAL_DIVERGENCE_CONTEXT_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9c_result": {
-    "population": "952 exact-M1 resolved Tier-B proxy replay trades",
-    "signals": 5902,
-    "paired_trades": 2950,
-    "immediate_win_rate": 0.592436974789916,
-    "immediate_profit_factor_bps": 0.9879555691742691,
-    "immediate_net_bps": -226.56460208778535,
-    "first_turn_trades": 852,
-    "first_turn_profit_factor_bps": 1.0321683116573177,
-    "first_turn_net_bps": 541.1779966228281,
-    "interpretation": "Large enough for path-state hypothesis generation, but not a genuine-source reproduction success and not a validation sample for a promoted rule."
+  "m9d_result": {
+    "population": "952 exact-M1 Tier-B proxy replay trades",
+    "checkpoint_rows": 3039,
+    "first_turn_rows": 852,
+    "checkpoint_observation": "0.75-1.0 ATR checkpoints had the strongest exploratory average checkpoint-to-exit metrics, but checkpoint depth is not promoted as an entry or stop rule.",
+    "mae_observation": "Winner/loser adverse excursion separation is large in XAU/BTC and LONG/SHORT; depth alone remains insufficient because many trades recover after meaningful adverse movement.",
+    "interpretation": "Study causal state and structural reversal evidence during the adverse path."
   },
-  "m9d_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9d/bat",
-    "run_once": "01_run_loss_path_state_feature_audit.bat",
-    "success": "[M9D PASS]",
-    "blocked": "[M9D BLOCKED]",
+  "m9e_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9e/bat",
+    "run_once": "01_run_causal_divergence_context_audit.bat",
+    "success": "[M9E PASS]",
+    "blocked": "[M9E BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9D\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9E\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9d_research_order": [
-    "Use adverse ATR checkpoints only as an observation grid, not as fixed entry or stop rules.",
-    "At each causal checkpoint record closed-bar M1/M5/M15/H1/H4 RCI, EMA, MACD, volatility, candle and volume state.",
-    "Record whether price later recovers, the proxy-exit return, and post-checkpoint MFE/MAE only as future outcome labels.",
-    "Build the same rich feature panel for M9C first-causal-turn entries.",
-    "Compare recoverable versus failing paths separately for XAU/BTC and LONG/SHORT and across time slices.",
-    "Do not promote a feature threshold or gate from the same M9D sample; later forward validation is required."
+  "m9e_research_order": [
+    "At every M9D adverse checkpoint and first-turn entry, use only price pivots already confirmed by that decision time.",
+    "Classify bullish/bearish regular divergence and bullish/bearish hidden divergence.",
+    "Evaluate RCI9, RCI14, RCI18, MACD line 6/13 and MACD histogram 6/13/4 on M1/M5/M15/H1/H4.",
+    "For LONG treat bullish divergence as supportive and bearish divergence as opposing; reverse for SHORT, while preserving raw divergence types.",
+    "Compare supportive regular, supportive hidden, opposing divergence and no-divergence states separately by XAU/BTC, LONG/SHORT and month.",
+    "Do not promote a divergence rule from the same Tier-B sample; use it only to generate hypotheses for later independent/forward validation."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
     "Do not call Tier-B replay events genuine Mochipoyo alerts.",
-    "Do not make an ATR checkpoint itself a trading rule based on this audit.",
-    "Do not use future outcome labels to create checkpoint features.",
+    "Do not use a pivot that is only confirmed after the checkpoint/turn decision time.",
+    "Do not assume regular or hidden divergence is beneficial before the data shows it.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
