@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9B_GENUINE_PRIMARY_EXPANDED_CONTEXT_AUDIT",
+  "contract_version": "MOCHIPOYO_M9B_GENUINE_PRIMARY_CONTEXT_V1",
+  "status": "FROZEN_BEFORE_M9B_OUTCOME_REVIEW",
+  "audit_only": true,
+  "population": {
+    "tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
+    "frozen_pair_manifest": "config/mochipoyo_alert_research/m9b_frozen_genuine_primary_pairs_20260724.json",
+    "trade_count": 43,
+    "PRIMARY_LONG": 25,
+    "PRIMARY_SHORT": 18,
+    "BTCUSD": 23,
+    "XAUUSD": 20,
+    "proxy_replay_mixed_in": false
+  },
+  "entry_exit": {
+    "entry_boundary": "exact M1 bar open at genuine PRIMARY aligned MT5 server open",
+    "exit_boundary": "exact M1 bar open at corresponding genuine source EXIT aligned MT5 server open",
+    "chart_mode": "BID",
+    "long_entry": "bid open + historical M1 spread * SYMBOL_POINT",
+    "long_exit": "bid open",
+    "short_entry": "bid open",
+    "short_exit": "bid open + historical M1 spread * SYMBOL_POINT",
+    "nearest_bar_fallback": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "pullback_turn": {
+    "candidate_generation": "same causal first-turn definition used by M8BZ",
+    "fixed_bps_minimum": false,
+    "future_outcome_used_for_candidate_generation": false,
+    "turn_confirmation": "completed M1 only",
+    "candidate_entry": "next observed M1 open after confirmation"
+  },
+  "multitimeframe_context": {
+    "timeframes": ["M5", "H1", "H4"],
+    "source": "derived from exact MT5 M1 using MT5 server-time buckets",
+    "closed_bars_only": true,
+    "features": ["RCI9", "RCI14", "RCI18", "RCI9 delta", "RCI9 acceleration", "direction-normalized RCI9 and slope"]
+  },
+  "research_questions": [
+    "Does signal-time M5 direction-normalized RCI9 near the upper extreme predict a deeper initial pullback on genuine source PRIMARY alerts?",
+    "At the first causal pullback-turn, do H1/H4 RCI9 slopes with the trade direction predict better continuation?",
+    "Do these effects persist by XAU/BTC and LONG/SHORT?",
+    "Does waiting for a causal turn improve source-primary entry quality without collapsing coverage?"
+  ],
+  "guardrails": {
+    "same_43_is_hypothesis_generation_only": true,
+    "no_threshold_promotion_from_same_sample": true,
+    "proxy_replay_is_separate_next_tier": true,
+    "m8c_reset": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false
+  }
+}
