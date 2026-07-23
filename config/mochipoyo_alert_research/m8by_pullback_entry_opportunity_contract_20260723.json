@@ -1,0 +1,73 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BY_PULLBACK_ENTRY_OPPORTUNITY_AUDIT",
+  "contract_version": "MOCHIPOYO_M8BY_PULLBACK_ENTRY_V1",
+  "recorded_at_utc": "2026-07-23T15:45:00Z",
+  "status": "EXPLORATORY_CONTRACT_FROZEN_BEFORE_RUN",
+  "audit_only": true,
+  "objective": "Test whether waiting for a real adverse market move after the frozen proxy entry signal can improve entry quality without destroying useful trade frequency.",
+  "population": {
+    "source": "M8B frozen 18 extra-entry trades",
+    "trade_count": 18,
+    "same_sample_is_validation": false,
+    "purpose": "HYPOTHESIS_GENERATION_ONLY"
+  },
+  "trigger_reference": {
+    "reference_price": "original signal M1 BID open, not executable Ask entry price",
+    "reason": "Avoid treating bid/ask spread as market pullback.",
+    "long_adverse_move": "signal_bid_open - later M1 bid low",
+    "short_adverse_move": "later M1 bid high - signal_bid_open",
+    "units": "bps of signal_bid_open"
+  },
+  "variants": {
+    "touch_pullback_bps": [2, 5, 8, 10, 12, 15],
+    "rebound_variants": [
+      {"pullback_bps": 5, "rebound_bps": 2},
+      {"pullback_bps": 8, "rebound_bps": 2},
+      {"pullback_bps": 10, "rebound_bps": 3},
+      {"pullback_bps": 12, "rebound_bps": 3},
+      {"pullback_bps": 15, "rebound_bps": 5}
+    ]
+  },
+  "causal_execution": {
+    "touch_detection": "Use completed M1 high/low to detect first pullback threshold touch; never enter inside that same M1 bar.",
+    "touch_entry": "Enter at next observed M1 open after the completed trigger bar.",
+    "rebound_detection": "After pullback touch, track running adverse extreme. Use completed M1 close to confirm recovery from that extreme by the frozen rebound amount.",
+    "rebound_entry": "Enter at next observed M1 open after completed rebound-confirmation bar.",
+    "long_entry": "next M1 bid open + historical spread * SYMBOL_POINT",
+    "short_entry": "next M1 bid open",
+    "exit_anchor": "Original frozen M8B exit M1 open, exploratory entry-quality comparison only.",
+    "same_bar_intrabar_order_assumption": false,
+    "nearest_price_fallback": false
+  },
+  "metrics": [
+    "eligible_trade_count",
+    "entry_coverage_fraction",
+    "win_rate_after_spread",
+    "profit_factor_after_spread",
+    "net_return_bps_sum",
+    "average_return_bps",
+    "average_entry_improvement_bps",
+    "average_entry_delay_minutes",
+    "missed_original_winner_count",
+    "missed_original_net_return_bps",
+    "ticker_direction_splits"
+  ],
+  "interpretation_guardrails": {
+    "do_not_pick_best_grid_point_and_claim_validation": true,
+    "do_not_promote_from_18_trade_sample": true,
+    "use_result_to_choose_at_most_a_small_number_of_forward_shadow_hypotheses": true,
+    "new_forward_start_required_for_any_new_pullback_rule": true,
+    "m8c_existing_prospective_start_must_not_be_reset": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "real_entry_gate_enabled": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false
+  }
+}
