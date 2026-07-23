@@ -1,49 +1,50 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9C_FROZEN_PROXY_HISTORICAL_REPLAY_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9C_FROZEN_PROXY_HISTORICAL_REPLAY",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9C_FROZEN_PROXY_HISTORICAL_REPLAY_ONCE",
+  "status": "M8C_RUNNING_M9C_PASS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9D_LOSS_PATH_STATE_FEATURE_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9D_LOSS_PATH_STATE_FEATURE_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9c_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9c/bat",
-    "run_once": "01_run_frozen_proxy_historical_replay.bat",
-    "success": "[M9C PASS]",
-    "blocked": "[M9C BLOCKED]",
+  "m9c_result": {
+    "population": "952 exact-M1 resolved Tier-B proxy replay trades",
+    "signals": 5902,
+    "paired_trades": 2950,
+    "immediate_win_rate": 0.592436974789916,
+    "immediate_profit_factor_bps": 0.9879555691742691,
+    "immediate_net_bps": -226.56460208778535,
+    "first_turn_trades": 852,
+    "first_turn_profit_factor_bps": 1.0321683116573177,
+    "first_turn_net_bps": 541.1779966228281,
+    "interpretation": "Large enough for path-state hypothesis generation, but not a genuine-source reproduction success and not a validation sample for a promoted rule."
+  },
+  "m9d_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9d/bat",
+    "run_once": "01_run_loss_path_state_feature_audit.bat",
+    "success": "[M9D PASS]",
+    "blocked": "[M9D BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9C\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9D\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9b_result": {
-    "population": "43 genuine source PRIMARY trades",
-    "source_immediate_win_rate": 0.6976744186046512,
-    "source_immediate_profit_factor_bps": 2.2340942206836614,
-    "source_immediate_net_bps": 488.6275507192144,
-    "genuine_btcusd_long": "12 trades, WR 75%, PF 9.1219, +260.80 bps",
-    "correction": "Do not generalize the M8B extra-only BTC LONG weakness to genuine source BTC LONG.",
-    "first_turn_universal_improvement": false,
-    "m5_ge80_rule_promoted": false,
-    "h1_h4_rci_rule_promoted": false
-  },
-  "m9c_research_order": [
-    "Replay the already-frozen M7C formula over pre-source closed M15 history without threshold or formula changes.",
-    "Keep every replay event labeled TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH.",
-    "Use full pre-source M15 for candidate density and state transitions.",
-    "Evaluate returns, MFE/MAE and pullback context only where exact M1 entry and exit rows exist.",
-    "Compare XAU/BTC and LONG/SHORT loss path quality and multi-timeframe context on the larger replay population.",
-    "Do not mix Tier B into genuine-source reproduction accuracy and do not promote a replay-discovered threshold without a separate validation sample."
+  "m9d_research_order": [
+    "Use adverse ATR checkpoints only as an observation grid, not as fixed entry or stop rules.",
+    "At each causal checkpoint record closed-bar M1/M5/M15/H1/H4 RCI, EMA, MACD, volatility, candle and volume state.",
+    "Record whether price later recovers, the proxy-exit return, and post-checkpoint MFE/MAE only as future outcome labels.",
+    "Build the same rich feature panel for M9C first-causal-turn entries.",
+    "Compare recoverable versus failing paths separately for XAU/BTC and LONG/SHORT and across time slices.",
+    "Do not promote a feature threshold or gate from the same M9D sample; later forward validation is required."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
-    "Do not change M7C formulas or thresholds to rescue historical replay performance.",
-    "Do not call Tier B replay events genuine Mochipoyo alerts.",
-    "Do not use nearest/future M1 fallback for replay outcomes.",
-    "Do not mix Tier A and Tier B in a source-reproduction accuracy claim.",
+    "Do not change M7C formulas or thresholds.",
+    "Do not call Tier-B replay events genuine Mochipoyo alerts.",
+    "Do not make an ATR checkpoint itself a trading rule based on this audit.",
+    "Do not use future outcome labels to create checkpoint features.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
