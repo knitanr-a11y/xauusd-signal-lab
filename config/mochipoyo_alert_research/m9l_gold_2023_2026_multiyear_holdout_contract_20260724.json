@@ -1,0 +1,62 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9L_GOLD_2023_2026_MULTIYEAR_HOLDOUT_AUDIT",
+  "contract": "MOCHIPOYO_M9L_GOLD_MULTIYEAR_HOLDOUT_V1",
+  "audit_only": true,
+  "purpose": "Replay the unchanged frozen M7C proxy on newly supplied XAUUSD 2023-2026 OHLC data, verify previously mined GOLD H2/H3 states on 2023-2025, and reserve 2025 feature relationships as the next holdout for any new GOLD hypothesis discovered only from 2023-2024.",
+  "data": {
+    "files": {
+      "M1": {"name": "gold_v3_2023_2026_m1.csv", "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2"},
+      "M5": {"name": "gold_v3_2023_2026_m5.csv", "sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d"},
+      "M15": {"name": "gold_v3_2023_2026_m15.csv", "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28"},
+      "H1": {"name": "gold_v3_2023_2026_h1.csv", "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"},
+      "H4": {"name": "gold_v3_2023_2026_h4.csv", "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913"},
+      "D1": {"name": "gold_v3_2023_2026_d1.csv", "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"}
+    },
+    "expected_start": "2023.01.03",
+    "expected_end": "2026.06.19",
+    "mt5_server_time_only": true,
+    "newest_row_contract": "CLOSED"
+  },
+  "frozen_m7c": {
+    "PRIMARY_LONG": "IDLE AND rci9_turn_up AND BULLISH_STACK",
+    "PRIMARY_SHORT": "IDLE AND rci9_turn_down AND BEARISH_STACK",
+    "LONG_EXIT": "ACTIVE_LONG AND rci9 >= 78.333333333333",
+    "SHORT_EXIT": "ACTIVE_SHORT AND rci9 <= -75",
+    "reentry": "NOT_MODELED_OR_SCORED",
+    "formula_change_allowed": false,
+    "threshold_change_allowed": false
+  },
+  "execution": {
+    "candidate_boundary": "new M15 open using prior fully closed M15 bar",
+    "exact_M1_entry_exit_required": true,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "nearest_or_future_fallback": false,
+    "first_turn_definition": "same frozen M9C five-M1-bar causal turn definition"
+  },
+  "pre_frozen_gold_hypotheses_to_validate": {
+    "H2_XAU_LONG_H1_RCI9_EXTREME_AVOID": "At first-turn, reject XAU LONG when directional H1 RCI9 >= 80",
+    "H3_XAU_SHORT_M1_RCI18_EXTREME_AVOID": "After H2, reject XAU SHORT when causal M1 RCI18 <= -80"
+  },
+  "time_partition": {
+    "2023_2024": "NEXT_GOLD_DISCOVERY_ONLY_AFTER_M9L",
+    "2025": "RESERVED_FEATURE_LEVEL_HOLDOUT_FOR_NEXT_NEW_GOLD_HYPOTHESES",
+    "2026_through_2026_06_19": "REFERENCE_ONLY_ALREADY_RESEARCH_EXPOSED"
+  },
+  "guardrails": {
+    "do_not_use_2025_feature_outcomes_to_create_next_hypothesis": true,
+    "same_run_threshold_optimization": false,
+    "automatic_gate_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m8c_keep_running": true,
+    "collector_keep_running": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
