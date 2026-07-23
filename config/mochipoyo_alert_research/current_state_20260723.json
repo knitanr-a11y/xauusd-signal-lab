@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T04:55:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9I_TIMING_INVALIDATED_M9I2_TIMING_CORRECTION_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9I2_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
+  "recorded_at_utc": "2026-07-24T05:15:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9J_HOLDOUT_FAILED_M9K_BTC_LONG_TAIL_STATE_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -14,46 +14,45 @@
     "historical_backfill_allowed": false,
     "source_anchor_separate_and_unsuppressed": true
   },
-  "m9b": {
-    "status": "TIMING_RECOMPUTATION_REQUIRED",
-    "population_tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
-    "genuine_primary_count": 43,
-    "previous_source_immediate_win_rate": 0.6976744186046512,
-    "previous_source_immediate_profit_factor_bps": 2.2340942206836614,
-    "previous_metrics_promotable": false,
-    "reason": "M9B evaluated source entry/exit at the source M15 bar open instead of the next M15 open where the alert became knowable. M9I2 will recompute timing-corrected source outcomes."
-  },
-  "m9c_to_m9h": {
-    "proxy_timing_status": "UNAFFECTED_BY_SOURCE_TIMING_INCIDENT",
-    "reason": "Frozen proxy replay already evaluates at M15 decision boundaries using the prior closed M15 bar.",
-    "historical_filter_stacking_stopped": true,
-    "m9h_h3_forward_promoted": false
-  },
-  "m9i": {
-    "status": "INVALIDATED_SOURCE_TIMING_OFF_BY_ONE_M15_BAR",
-    "observed_match_counts": {"EXACT": 1, "WITHIN_ONE_BAR_LATE": 28, "MISSED": 14},
-    "incident": "config/mochipoyo_alert_research/m9i_source_decision_timing_correction_incident_20260724.json",
-    "feature_contrasts_promotable": false,
-    "source_outcome_metrics_promotable": false
-  },
   "m9i2": {
-    "status": "READY_ONE_TIME_SOURCE_TIMING_CORRECTED_GAP_AUDIT",
-    "source_decision_shift_minutes": 15,
-    "source_exit_decision_shift_minutes": 15,
-    "proxy_timing_changed": false,
-    "operator_folder": "scripts/mochipoyo_alert_research/m9i2/bat",
-    "run_once": "01_run_source_timing_corrected_gap_audit.bat",
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m9i2_result_20260724.json",
+    "timing_corrected_source_outcomes": 42,
+    "source_win_rate": 0.6904761904761905,
+    "source_profit_factor_bps": 1.5147327367524606,
+    "source_direct_kernel_true": 40,
+    "state_divergence_misses": 12,
+    "btc_long_source_pf": 4.101736,
+    "btc_long_extra_pf": 0.175005,
+    "old_m9b_source_pf_promotable": false
+  },
+  "m9j": {
+    "status": "PASS_EXPLORATORY_HOLDOUT_ONLY",
+    "result": "config/mochipoyo_alert_research/m9j_result_20260724.json",
+    "population": "pre-source M9C 952 immediate / 852 first-turn Tier-B trades",
+    "J1_btc_long_rci9_lt_0": "FAILED: BTC LONG immediate 113 trades WR 63.72% PF 0.5862; first-turn 100 trades WR 63.0% PF 0.5464",
+    "J2_btc_long_rci9_le_minus50": "SENSITIVITY_ONLY: BTC LONG immediate 80 trades WR 67.5% PF 0.6584; first-turn 72 trades WR 66.67% PF 0.6908",
+    "J3_global_sign": "FAILED_AS_TRADING_POLICY",
+    "decision": "DO_NOT_PROMOTE_J1_J2_J3_AND_STOP_ENTRY_RCI_THRESHOLD_MINING",
+    "tail_observation": "RCI9<0 BTC LONG raises win rate but average loss is about -93.5 bps vs average win +31.2 bps; 14 losses <= -100 bps and 6 <= -200 bps."
+  },
+  "m9k": {
+    "status": "READY_ONE_TIME_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m9k_btc_long_causal_tail_loss_state_audit_contract_20260724.json",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9k/bat",
+    "run_once": "01_run_btc_long_causal_tail_loss_state_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9I2\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "classifier_training": false,
-    "threshold_optimization": false,
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9K\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "target": "113 pre-source BTCUSD LONG trades with entry M15 RCI9 < 0",
+    "purpose": "Identify causal state during adverse movement that separates recoverable pullbacks from large-loss tails without mining additional entry thresholds.",
     "same_sample_gate_promotion_allowed": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
-    "stop_historical_filter_stacking": true,
-    "genuine_source_priority_over_proxy_replay": true,
-    "correct_source_decision_timing_before_any_source_proxy_inference": true
+    "preserve_high_win_rate_when_possible": true,
+    "reduce_large_loss_tail": true,
+    "stop_entry_threshold_mining": true,
+    "feature_state_research_is_primary": true
   },
   "safety": {
     "audit_only": true,
