@@ -1,0 +1,69 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
+  "contract": "MOCHIPOYO_M9G_MINIMAL_LOSS_PRUNING_V1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "upstream": {
+    "m9f_result": "config/mochipoyo_alert_research/m9f_result_20260724.json",
+    "expected_first_turn_rows": 852,
+    "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH"
+  },
+  "purpose": "Quantify whether a very small number of M9F-derived fresh-divergence avoid-states can remove disproportionately poor first-turn trades while preserving useful monthly frequency. This is same-sample hypothesis assessment, not validation.",
+  "decision_surface": "M9C_FIRST_CAUSAL_TURN_ENTRY",
+  "policies": [
+    {
+      "id": "P0_CONTROL_ALL",
+      "rule": "accept all 852 first-turn candidates"
+    },
+    {
+      "id": "P1_BTC_LONG_FRESH_CONFLICT",
+      "rule": "reject when ticker=BTCUSD AND direction=LONG AND within_3_bars_signature=BOTH"
+    },
+    {
+      "id": "P2_MINIMAL_TWO_BRANCH",
+      "rule": "P1 plus reject when ticker=BTCUSD AND direction=SHORT AND within_3_bars_signature=SUPPORTIVE_ONLY AND within_3_bars_supportive_hidden_count>0"
+    },
+    {
+      "id": "P3_BROADER_TWO_BRANCH_SENSITIVITY",
+      "rule": "P1 plus reject every BTCUSD SHORT within_3_bars_signature=SUPPORTIVE_ONLY",
+      "role": "sensitivity only; not preferred merely because it fits the same sample better"
+    }
+  ],
+  "required_metrics": [
+    "accepted_count",
+    "retention_fraction",
+    "win_rate",
+    "profit_factor_bps",
+    "net_bps",
+    "mean_bps",
+    "median_bps",
+    "max_drawdown_bps_from_chronological_cumulative_return",
+    "max_losing_streak",
+    "monthly_accepted_count",
+    "monthly_win_rate",
+    "monthly_profit_factor_bps",
+    "monthly_net_bps",
+    "ticker_direction_metrics",
+    "rejected_population_metrics"
+  ],
+  "selection_principles": {
+    "prefer_small_interpretable_rules": true,
+    "prefer_frequency_retention": true,
+    "do_not_optimize_only_win_rate": true,
+    "do_not_promote_best_same_sample_policy": true,
+    "future_prospective_validation_required": true,
+    "new_forward_start_required_for_any_new_challenger": true,
+    "m8c_start_must_not_be_reused_or_reset": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
