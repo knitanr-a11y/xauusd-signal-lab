@@ -1,0 +1,51 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_LOCAL_REPRODUCTION_MATCHED_REFERENCE",
+  "upload_package_sha256": "0699d558fef49fa93e8f26c5514bc6129f5bd7fc8170078ab1523f1a8eb5dd4a",
+  "population": {
+    "paired_m7c_trades": 4087,
+    "first_turn_trades": 3635,
+    "long_first_turn_trades": 2068
+  },
+  "N1": {
+    "count": 1075,
+    "win_rate": 0.6390697674418605,
+    "profit_factor_bps": 1.3345697428719754
+  },
+  "N2": {
+    "count": 818,
+    "win_rate": 0.5806845965770171,
+    "profit_factor_bps": 1.3786136814608168
+  },
+  "N3": {
+    "count": 1495,
+    "win_rate": 0.622742474916388,
+    "profit_factor_bps": 1.3658841450481258,
+    "net_bps": 4290.412942927445,
+    "average_win_bps": 17.203613872987585,
+    "average_loss_bps": -20.865038385807825,
+    "max_drawdown_bps": 510.52434894848284,
+    "max_losing_streak": 11,
+    "tail_le_minus_100_fraction": 0.01137123745819398
+  },
+  "N6": {
+    "risk_count": 282,
+    "risk_profit_factor_bps": 0.9086697052950484
+  },
+  "parameter_stress": {
+    "combinations": 72,
+    "all_min_calendar_year_pf_above_1": true,
+    "all_aggregate_pf_above_1_after_extra_2bps": true
+  },
+  "verification": {
+    "matches_m9o_reference": true,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "automatic_live_promotion": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "audit_only": true
+  }
+}
