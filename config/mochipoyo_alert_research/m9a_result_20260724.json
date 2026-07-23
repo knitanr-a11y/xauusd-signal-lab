@@ -1,0 +1,64 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9A_SAMPLE_EXPANSION_AVAILABILITY_AUDIT",
+  "recorded_at_utc": "2026-07-24T02:05:00Z",
+  "status": "PASS",
+  "audit_only": true,
+  "submitted_package_sha256": "be198f79a20e3b798d734af0590c4ed5ed7923348ad28cae120ec3d1b53c4d0e",
+  "genuine_inventory_sha256": "3e193c7da206304cad0a1bac6f3b8d894d311e1bd3341f277b0278c8230bb800",
+  "eligible_genuine_raw_alerts": 107,
+  "derived_transition_counts": {
+    "PRIMARY_LONG": 25,
+    "PRIMARY_SHORT": 18,
+    "LONG_EXIT": 25,
+    "SHORT_EXIT": 18,
+    "REENTRY_LONG": 8,
+    "REENTRY_SHORT": 13
+  },
+  "genuine_primary_count": 43,
+  "genuine_primary_by_ticker": {
+    "BTCUSD": 23,
+    "XAUUSD": 20
+  },
+  "genuine_primary_by_ticker_direction": {
+    "BTCUSD_LONG": 12,
+    "BTCUSD_SHORT": 11,
+    "XAUUSD_LONG": 13,
+    "XAUUSD_SHORT": 7
+  },
+  "genuine_primary_observation_utc": {
+    "first": "2026-07-15T08:30:00Z",
+    "last": "2026-07-23T07:15:00Z"
+  },
+  "state_machine_quality": {
+    "unresolved_events": 0,
+    "stored_episode_role_parity_mismatches": 0,
+    "primary_exit_count_parity": true
+  },
+  "mt5_coverage": {
+    "XAUUSD_M1": {"rows": 150627, "first_server_time": "2026.02.19 03:16:00", "last_server_time": "2026.07.23 19:36:00"},
+    "XAUUSD_M15": {"rows": 30042, "first_server_time": "2025.04.14 22:15:00", "last_server_time": "2026.07.23 19:15:00"},
+    "BTCUSD_M1": {"rows": 150627, "first_server_time": "2026.04.09 20:45:00", "last_server_time": "2026.07.23 19:36:00"},
+    "BTCUSD_M15": {"rows": 30042, "first_server_time": "2025.09.13 08:00:00", "last_server_time": "2026.07.23 19:15:00"}
+  },
+  "historical_proxy_replay_capacity_before_first_genuine_primary": {
+    "XAUUSD_M15_boundaries": 29462,
+    "BTCUSD_M15_boundaries": 29242,
+    "combined_boundaries": 58704
+  },
+  "population_policy": {
+    "tier_a": "GENUINE_SOURCE_PRIMARY",
+    "tier_b": "FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "mix_tiers_for_source_reproduction_claim": false,
+    "evaluate_tier_a_first": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m8c_reset": false,
+    "m7c_changed": false
+  }
+}
