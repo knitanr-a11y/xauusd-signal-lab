@@ -1,0 +1,60 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BZ_PULLBACK_STATE_FEATURE_AUDIT",
+  "contract_version": "MOCHIPOYO_M8BZ_PULLBACK_STATE_FEATURE_V1",
+  "recorded_at_utc": "2026-07-24T00:25:00Z",
+  "status": "EXPLORATORY_CONTRACT_FROZEN_BEFORE_FEATURE_OUTCOME_COMPARISON",
+  "audit_only": true,
+  "purpose": "Study whether a causal pullback-turn state has better entry quality than entering immediately or waiting a fixed price distance.",
+  "population": {
+    "basis": "same frozen M8B 18 extra-entry trades",
+    "validation_claim_allowed": false,
+    "role": "hypothesis generation only"
+  },
+  "candidate_generation": {
+    "fixed_bps_minimum_required": false,
+    "uses_future_outcome": false,
+    "entry_bar": "next observed M1 open after a completed M1 pullback-turn confirmation",
+    "long_turn_confirmation": "previous completed M1 low is the lowest low of the trailing 5 completed M1 bars, current completed M1 close is above previous completed M1 close, and previous low is below the original signal BID open",
+    "short_turn_confirmation": "previous completed M1 high is the highest high of the trailing 5 completed M1 bars, current completed M1 close is below previous completed M1 close, and previous high is above the original signal BID open",
+    "same_confirmation_bar_entry": false,
+    "nearest_bar_fallback": false
+  },
+  "features_at_confirmation": {
+    "market_path": ["pullback_depth_bps", "rebound_from_extreme_bps", "minutes_since_signal", "directional_return_1m_bps", "directional_return_3m_bps", "directional_return_5m_bps"],
+    "rci_local_m1": ["rci9", "rci14", "rci18", "rci9_delta1"],
+    "ema_local_m1": ["ema20", "ema30", "ema40", "ema20_minus_ema30_bps", "ema30_minus_ema40_bps", "price_minus_ema20_bps", "ema20_slope3_bps"],
+    "macd_local_m1": ["macd_6_13", "macd_signal_4", "macd_hist", "macd_hist_delta1"],
+    "volatility_price_action": ["atr14_bps", "bar_range_bps", "body_fraction", "directional_wick_fraction", "close_location_directional", "tick_volume_ratio20", "spread_bps"],
+    "signal_context_inherited": ["entry_rci9", "entry_rci9_delta1", "entry_ema_alignment", "entry_ema20_minus_ema30_bps", "entry_ema30_minus_ema40_bps", "ticker", "direction"]
+  },
+  "outcome_fields_for_exploration_only": [
+    "return_to_original_frozen_exit_bps",
+    "forward_mfe_to_original_exit_bps",
+    "forward_mae_to_original_exit_bps",
+    "original_trade_outcome"
+  ],
+  "reporting": {
+    "first_confirmed_turn_per_trade": true,
+    "all_confirmed_turns_exported": true,
+    "feature_win_loss_median_comparison": true,
+    "feature_spearman_rank_correlation_with_return": true,
+    "no_machine_learning_fit_on_18_trades": true,
+    "no_threshold_promotion": true
+  },
+  "next_validation": {
+    "feature_signature_may_be_designed_from_m8bz": true,
+    "performance_claim_requires_new_forward_sample": true,
+    "existing_m8c_prospective_start_must_not_be_reset": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false
+  }
+}
