@@ -1,0 +1,76 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
+  "contract_version": "MOCHIPOYO_M8C_MINIMAL_EXTRA_GATE_V1",
+  "recorded_at_utc": "2026-07-23T15:10:00Z",
+  "status": "HYPOTHESIS_FROZEN_BEFORE_FORWARD_VALIDATION",
+  "audit_only": true,
+  "design_basis": {
+    "source": "M8B frozen 18 extra-entry trade exploratory audit",
+    "same_sample_is_validation": false,
+    "same_sample_may_only_generate_hypothesis": true,
+    "reason_for_minimalism": "User objective prioritizes robust after-cost edge, high win rate and useful frequency; do not collapse frequency by stacking strict thresholds."
+  },
+  "arms": {
+    "CONTROL_ALL_EXTRAS": {
+      "description": "Accept every finalized EXTRA_CANDIDATE entry exactly as produced by the frozen proxy state machine.",
+      "source_matched_policy": "UNCHANGED_OUTSIDE_EXTRA_GATE"
+    },
+    "CHALLENGER_BLOCK_BTCUSD_LONG_EXTRA": {
+      "description": "Reject only finalized EXTRA_CANDIDATE entries where ticker=BTCUSD and transition=PRIMARY_LONG. Accept all other finalized extra entries.",
+      "predecision_only": true,
+      "rule": "NOT (classification == EXTRA_CANDIDATE AND ticker == BTCUSD AND proxy_transition == PRIMARY_LONG)",
+      "source_matched_policy": "NEVER_SUPPRESSED_BY_THIS_RULE"
+    }
+  },
+  "not_tested_as_primary_gate": [
+    "RCI9 numeric threshold tuning",
+    "RCI9 delta threshold tuning",
+    "EMA spread threshold tuning",
+    "time-of-day tuning",
+    "holding-time tuning",
+    "exit-origin-dependent entry filtering"
+  ],
+  "why_not": "Those dimensions would add degrees of freedom on only 18 outcome trades and risk overfitting or frequency collapse.",
+  "forward_validation": {
+    "prospective_start": "TO_BE_FROZEN_BY_M8C_RUNTIME_INITIALIZER_AT_FIRST_RUN",
+    "historical_backfill_allowed": false,
+    "reuse_m8b_18_for_validation_metrics": false,
+    "evaluate_control_and_challenger_on_same_future_candidates": true,
+    "cost_views": ["historical_spread_x1_0", "historical_spread_x1_5", "historical_spread_x2_0"],
+    "minimum_review_sample": {
+      "total_future_extra_entry_trades": 30,
+      "future_btcusd_long_extra_candidates": 8,
+      "future_non_btcusd_long_extra_trades": 15
+    },
+    "review_dimensions": [
+      "win_rate",
+      "profit_factor_after_spread",
+      "net_return_bps_sum",
+      "max_drawdown_bps",
+      "maximum_losing_streak",
+      "trades_per_calendar_day",
+      "accepted_fraction",
+      "ticker_direction_balance"
+    ]
+  },
+  "promotion_guardrails": {
+    "no_fixed_win_rate_target_invented": true,
+    "frequency_must_remain_useful": true,
+    "challenger_must_improve_after_cost_robustness_not_only_win_rate": true,
+    "spread_x2_failure_is_material": true,
+    "source_matched_silent_suppression_forbidden": true,
+    "final_promotion_requires_separate_forward_sample": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled_for_real_trading": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false,
+    "prospective_start_change": false
+  }
+}
