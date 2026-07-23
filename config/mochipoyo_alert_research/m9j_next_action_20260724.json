@@ -1,0 +1,47 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "M8C_RUNNING_M9I2_PASS_M9J_SOURCE_LIKE_RCI_LOCATION_HOLDOUT_NEXT",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_AND_RUN_M9J_ONCE",
+  "m9i2": {
+    "timing_corrected_source_count": 43,
+    "exact_m1_source_outcomes": 42,
+    "source_win_rate": 0.6904761904761905,
+    "source_profit_factor_bps": 1.5147327367524606,
+    "proxy_extra_count": 41,
+    "proxy_extra_profit_factor_bps": 1.2855391795653521,
+    "direct_kernel_true": 40,
+    "state_divergence_misses": 12,
+    "btc_long_source_pf": 4.101736,
+    "btc_long_extra_pf": 0.175005,
+    "source_directional_rci9_positive": "43/43",
+    "extra_directional_rci9_positive": "8/41"
+  },
+  "m9j_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9j/bat",
+    "run_once": "01_run_source_like_rci_location_holdout_audit.bat",
+    "success": "[M9J PASS]",
+    "blocked": "[M9J BLOCKED]",
+    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9J\\LATEST\\99_UPLOAD_PACKAGE.zip"
+  },
+  "research_order": [
+    "Use the separate pre-source M9C population only; no genuine-source labels exist there.",
+    "J1 keeps all branches unchanged except BTC LONG, where M15 entry RCI9 must be below zero.",
+    "J2 uses BTC LONG RCI9<=-50 only as sensitivity, never as an automatically promoted threshold.",
+    "J3 applies the source-like sign rule globally only as a reproduction-oriented reference because profitable XAU/BTC SHORT extras should not be discarded merely for source similarity.",
+    "Compare immediate and first-turn PF, DD, losing streak, monthly counts and ticker/direction metrics.",
+    "Do not change M7C or reset M8C based on this retrospective holdout alone."
+  ],
+  "safety": {
+    "audit_only": true,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
