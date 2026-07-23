@@ -1,0 +1,52 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BZ2_MULTITIMEFRAME_RCI_CONTEXT_AUDIT",
+  "contract_version": "MOCHIPOYO_M8BZ2_MTF_RCI_CONTEXT_V1",
+  "recorded_at": "2026-07-24",
+  "audit_only": true,
+  "research_hypotheses": {
+    "signal_timing": "When an M15 LONG proxy alert occurs while completed-M5 RCI9 is near its upper extreme, an initial pullback may be more likely before continuation. SHORT is evaluated symmetrically with direction-normalized RCI.",
+    "higher_timeframe_context": "At a causal pullback-turn candidate, H1/H4 RCI9 moving in the trade direction may be associated with stronger subsequent continuation.",
+    "user_hypotheses_are_unvalidated": true,
+    "no_rule_is_assumed_true": true
+  },
+  "data_contract": {
+    "base_source": "Existing exact MT5 M1 history used by M8B/M8BX/M8BZ",
+    "timeframes_derived": ["M5", "H1", "H4"],
+    "aggregation_time_basis": "MT5 server time",
+    "closed_higher_timeframe_bars_only": true,
+    "signal_boundary": "Original frozen proxy entry_server_open; only derived bars ending at or before this boundary are visible.",
+    "turn_boundary": "M8BZ candidate_entry_time; only derived bars ending at or before this next-M1-open boundary are visible.",
+    "future_bar_or_future_outcome_used_for_feature_creation": false,
+    "nearest_bar_fallback": false
+  },
+  "features": {
+    "per_timeframe": ["RCI9", "RCI14", "RCI18", "RCI9_delta1", "RCI9_previous_delta", "RCI9_acceleration", "RCI9_rising", "RCI9_ge_80", "RCI9_le_minus80"],
+    "direction_normalized": ["directional_RCI9", "directional_RCI9_delta1", "directional_RCI9_acceleration"],
+    "contexts": ["original_M15_proxy_signal_boundary", "first_causal_M8BZ_pullback_turn_boundary"]
+  },
+  "analysis_questions": [
+    "Does signal-time M5 directional RCI9 relate to subsequent initial pullback depth or delay to first causal turn?",
+    "Do turn-time H1/H4 direction-normalized RCI9 slopes relate to return/MFE/MAE after the turn?",
+    "Does H1+H4 agreement add information beyond local M1 state?",
+    "Are any observed relationships robust across XAUUSD/BTCUSD and LONG/SHORT rather than driven by one tiny subgroup?"
+  ],
+  "anti_overfit": {
+    "same_M8B_18_and_M8BZ_candidates_are_hypothesis_generation_only": true,
+    "fixed_RCI_threshold_promotion_from_this_sample_forbidden": true,
+    "user_suggested_M5_upper_extreme_is_not_a_frozen_rule": true,
+    "user_suggested_H1_H4_rising_is_not_a_frozen_rule": true,
+    "new_forward_validation_required_for_any_selected_signature": true,
+    "existing_M8C_prospective_start_must_not_be_reset": true
+  },
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_change": false,
+    "m7c_threshold_change": false,
+    "m7c_runtime_manifest_change": false
+  }
+}
