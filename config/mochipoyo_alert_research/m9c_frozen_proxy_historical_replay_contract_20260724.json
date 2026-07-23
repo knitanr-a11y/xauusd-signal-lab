@@ -1,0 +1,79 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9C_FROZEN_PROXY_HISTORICAL_REPLAY",
+  "status": "CONTRACT_FROZEN_BEFORE_LOCAL_REPLAY",
+  "audit_only": true,
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "purpose": "Increase research sample size by replaying the already-frozen M7C proxy over pre-source closed M15 history without modifying the proxy formula or calling replay events genuine Mochipoyo alerts.",
+  "source_truth_policy": {
+    "tier_a": "GENUINE_SOURCE_PRIMARY",
+    "tier_b": "FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "mix_for_source_reproduction_accuracy": false,
+    "tier_b_may_be_used_for_trade_edge_hypothesis_research": true
+  },
+  "frozen_m7c_formula": {
+    "PRIMARY_LONG": "IDLE AND rci9_turn_up AND ema_alignment==BULLISH_STACK",
+    "PRIMARY_SHORT": "IDLE AND rci9_turn_down AND ema_alignment==BEARISH_STACK",
+    "LONG_EXIT": "ACTIVE_LONG AND rci9>=78.333333333333",
+    "SHORT_EXIT": "ACTIVE_SHORT AND rci9<=-75.0",
+    "REENTRY": "NOT_MODELED_OR_SCORED"
+  },
+  "decision_contract": {
+    "timeframe": "M15",
+    "evaluate_at": "CURRENT_M15_SERVER_OPEN",
+    "feature_bar": "PREVIOUS_FULLY_CLOSED_M15",
+    "current_m15_high_low_close_used": false,
+    "future_bars_used_for_candidate_generation": false,
+    "state_per_ticker": true,
+    "bootstrap_state": "IDLE_AFTER_MINIMUM_50_CLOSED_M15_WARMUP_BARS",
+    "formula_change_allowed": false,
+    "threshold_change_allowed": false
+  },
+  "replay_window": {
+    "XAUUSD_first_genuine_primary_server_open_exclusive": "2026.07.15 12:30:00",
+    "BTCUSD_first_genuine_primary_server_open_exclusive": "2026.07.15 11:15:00",
+    "full_m15_history_before_cutoff_used_for_candidate_density": true,
+    "m1_exact_coverage_required_for_trade_outcome": true,
+    "no_nearest_m1_fallback": true
+  },
+  "execution_and_outcome": {
+    "entry": "EXACT_M1_OPEN_AT_PROXY_PRIMARY_SERVER_OPEN",
+    "exit": "EXACT_M1_OPEN_AT_PROXY_EXIT_SERVER_OPEN",
+    "chart_mode": "BID",
+    "long_entry": "bid_open + historical_spread_points*SYMBOL_POINT",
+    "long_exit": "bid_open",
+    "short_entry": "bid_open",
+    "short_exit": "bid_open + historical_spread_points*SYMBOL_POINT",
+    "mfe_mae": "M1_PATH_BETWEEN_EXACT_ENTRY_AND_EXIT",
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "context_research": {
+    "first_causal_turn_definition": "SAME_FAMILY_AS_M9B",
+    "signal_context": ["M5_RCI9_14_18", "H1_RCI9_14_18", "H4_RCI9_14_18"],
+    "turn_context": ["M5_RCI9_14_18", "H1_RCI9_14_18", "H4_RCI9_14_18"],
+    "direction_normalized": true,
+    "fixed_bps_entry_rule_promoted": false,
+    "feature_threshold_promoted": false
+  },
+  "required_outputs": [
+    "replay_signal_ledger",
+    "replay_trade_pairs",
+    "m1_resolved_trade_outcomes",
+    "first_turn_context",
+    "m5_zone_summary",
+    "htf_slope_summary",
+    "ticker_direction_summary",
+    "data_quality"
+  ],
+  "safety": {
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m8c_reset": false,
+    "m7c_runtime_manifest_reset": false
+  }
+}
