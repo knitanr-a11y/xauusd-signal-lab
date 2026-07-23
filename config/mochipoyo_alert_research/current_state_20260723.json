@@ -2,26 +2,17 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T02:20:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9A_PASS_M9B_GENUINE_PRIMARY_EXPANDED_CONTEXT_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9B_GENUINE_PRIMARY_CONTEXT",
+  "recorded_at_utc": "2026-07-24T02:40:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9B_PASS_M9C_FROZEN_PROXY_HISTORICAL_REPLAY_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9C_FROZEN_PROXY_HISTORICAL_REPLAY",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
     "control": "ACCEPT_ALL_FUTURE_PROXY_PRIMARY_CANDIDATES",
     "challenger": "REJECT_BTCUSD_PRIMARY_LONG_ON_PROXY_BRANCH_ONLY",
     "prospective_start_reset_allowed": false,
-    "historical_backfill_allowed": false
-  },
-  "m8bz2": {
-    "status": "PASS_EXPLORATORY_ONLY",
-    "result": "config/mochipoyo_alert_research/m8bz2_result_20260724.json",
-    "first_turn_rows": 16,
-    "m5_ge80_count": 3,
-    "m5_ge80_positive_fraction_to_frozen_exit": 0.0,
-    "m5_50_to_80_count": 7,
-    "m5_50_to_80_positive_fraction_to_frozen_exit": 0.857143,
-    "same_sample_is_validation": false
+    "historical_backfill_allowed": false,
+    "source_anchor_separate_and_unsuppressed": true
   },
   "m9a": {
     "status": "PASS",
@@ -32,33 +23,57 @@
     "PRIMARY_SHORT": 18,
     "BTCUSD": 23,
     "XAUUSD": 20,
-    "historical_proxy_replay_capacity_m15_boundaries": 58704,
-    "tier_a": "GENUINE_SOURCE_PRIMARY",
-    "tier_b": "FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH"
+    "historical_proxy_replay_capacity_m15_boundaries": 58704
   },
   "m9b": {
-    "status": "READY_ONE_TIME_GENUINE_PRIMARY_CONTEXT_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m9b_genuine_primary_expanded_context_contract_20260724.json",
-    "frozen_pairs": "config/mochipoyo_alert_research/m9b_frozen_genuine_primary_pairs_20260724.json",
-    "frozen_genuine_primary_count": 43,
-    "proxy_replay_mixed_in": false,
-    "purpose": "Re-evaluate M5 overheat, first causal pullback-turn, H1/H4 RCI direction and source-exit outcome on all 43 frozen genuine source PRIMARY trades.",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9b/bat",
-    "run_once": "01_run_genuine_primary_expanded_context_audit.bat",
-    "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9B\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m9b_result_20260724.json",
+    "population_tier": "TIER_A_GENUINE_SOURCE_PRIMARY",
+    "genuine_primary_count": 43,
+    "source_immediate": {
+      "win_rate": 0.6976744186046512,
+      "profit_factor_bps": 2.2340942206836614,
+      "net_bps": 488.6275507192144
+    },
+    "first_causal_turn": {
+      "count": 38,
+      "win_rate": 0.631578947368421,
+      "profit_factor_bps": 1.9915595780433206,
+      "net_bps": 399.6267439252639
+    },
+    "genuine_btcusd_long": {
+      "count": 12,
+      "win_rate": 0.75,
+      "profit_factor_bps": 9.121882,
+      "net_bps": 260.8001
+    },
+    "key_correction": "The M8B extra-only BTC LONG weakness does not generalize to genuine-source BTC LONG. Do not suppress the genuine source branch based on the extra-only result.",
+    "m5_ge80_rule_promoted": false,
+    "h1_h4_rci_rule_promoted": false,
     "same_43_is_validation": false
   },
-  "after_m9b": {
-    "next_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
-    "purpose": "Replay the already-frozen proxy over older closed M15 history without claiming the replay events are genuine Mochipoyo alerts.",
-    "source_reproduction_claim_must_keep_tiers_separate": true
+  "m9c": {
+    "status": "READY_ONE_TIME_FROZEN_PROXY_HISTORICAL_REPLAY",
+    "contract": "config/mochipoyo_alert_research/m9c_frozen_proxy_historical_replay_contract_20260724.json",
+    "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+    "purpose": "Replay the unchanged frozen M7C proxy over pre-source closed M15 history to expand the trade-edge research population without calling replay events genuine Mochipoyo alerts.",
+    "formula_changed": false,
+    "threshold_changed": false,
+    "candidate_density_capacity_m15_boundaries": 58704,
+    "outcome_requires_exact_m1_entry_and_exit": true,
+    "nearest_m1_fallback": false,
+    "historical_spread_used": true,
+    "operator_folder": "scripts/mochipoyo_alert_research/m9c/bat",
+    "run_once": "01_run_frozen_proxy_historical_replay.bat",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9C\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
     "increase_sample_size_before_feature_promotion": true,
     "genuine_source_priority_over_proxy_replay": true,
-    "do_not_call_proxy_replay_genuine": true
+    "do_not_call_proxy_replay_genuine": true,
+    "investigate_loss_adverse_excursion_and_entry_state": true
   },
   "safety": {
     "audit_only": true,
