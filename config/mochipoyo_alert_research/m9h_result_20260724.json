@@ -1,0 +1,38 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9H_RESIDUAL_STATE_BRANCH_AUDIT",
+  "recorded_at_utc": "2026-07-24T04:30:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "first_turn_population": 852,
+  "p2_forward_candidate": false,
+  "thresholds_optimized_in_run": false,
+  "same_sample_validation": false,
+  "policies": {
+    "H0_P2_BASELINE": {"count": 740, "win_rate": 0.5905405405405405, "profit_factor_bps": 1.2543359158322271, "net_bps": 3094.218844771891, "max_drawdown_bps": 1224.009522421252, "max_losing_streak": 6},
+    "H1_P2_PLUS_BTC_LONG_HIGH_M15_RANGE": {"count": 694, "retention_vs_852": 0.8145539906103286, "win_rate": 0.6051873198847262, "profit_factor_bps": 1.334642, "net_bps": 3702.779740, "max_drawdown_bps": 851.970623, "max_losing_streak": 6},
+    "H2_H1_PLUS_XAU_LONG_H1_RCI9_EXTREME": {"count": 630, "retention_vs_852": 0.7394366197183099, "win_rate": 0.6238095238095238, "profit_factor_bps": 1.508486, "net_bps": 4681.959739, "max_drawdown_bps": 810.048151, "max_losing_streak": 6},
+    "H3_H2_PLUS_XAU_SHORT_M1_RCI18_EXTREME": {"count": 605, "retention_vs_852": 0.710093896713615, "win_rate": 0.631404958677686, "profit_factor_bps": 1.585917, "net_bps": 5053.709274, "max_drawdown_bps": 810.048151, "max_losing_streak": 6}
+  },
+  "h3_monthly": {
+    "2026-02": {"count":17,"profit_factor_bps":1.117471},
+    "2026-03": {"count":77,"profit_factor_bps":2.445836},
+    "2026-04": {"count":113,"profit_factor_bps":1.003281,"net_bps":5.644804},
+    "2026-05": {"count":157,"profit_factor_bps":1.450317},
+    "2026-06": {"count":170,"profit_factor_bps":1.581466},
+    "2026-07": {"count":71,"profit_factor_bps":2.400615}
+  },
+  "h3_by_ticker_direction": {
+    "BTCUSD_LONG": {"count":61,"win_rate":0.672131,"profit_factor_bps":1.531328,"net_bps":582.849304},
+    "BTCUSD_SHORT": {"count":198,"win_rate":0.611111,"profit_factor_bps":1.901523,"net_bps":1897.765416},
+    "XAUUSD_LONG": {"count":145,"win_rate":0.641379,"profit_factor_bps":1.885554,"net_bps":1548.586544},
+    "XAUUSD_SHORT": {"count":201,"win_rate":0.631841,"profit_factor_bps":1.278812,"net_bps":1024.508011}
+  },
+  "decision": "STOP_STACKING_HISTORICAL_FILTERS_AND_RETURN_TO_GENUINE_SOURCE_VS_PROXY_GAP_DIAGNOSIS",
+  "interpretation": [
+    "H3 improves the same-sample Tier-B replay materially but remains too fragile for promotion: April is approximately break-even, drawdown remains large, and the sample has already been mined through multiple exploratory stages.",
+    "Do not add more historical filters to force PF higher. The next research step is to compare genuine-source PRIMARY states against frozen-proxy extra/missed states directly.",
+    "The genuine Tier-A 43-trade sample remains a reference anchor, not a validation set for a fitted gate."
+  ],
+  "guardrails": {"automatic_forward_promotion": false, "m7c_formula_changed": false, "m7c_threshold_changed": false, "m8c_reset": false, "commission": "NOT_MODELED", "swap": "NOT_MODELED"}
+}
