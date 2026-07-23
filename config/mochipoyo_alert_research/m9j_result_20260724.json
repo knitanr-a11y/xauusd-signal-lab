@@ -1,0 +1,66 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9J_SOURCE_LIKE_RCI_LOCATION_HOLDOUT_AUDIT",
+  "status": "PASS_EXPLORATORY_HOLDOUT_ONLY",
+  "upload_package_sha256": "40ed0129c56bfa57ed2f9117763deb776ac2e3ecdf459884faa999b8db0a60db",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "validation_population": "PRE_SOURCE_M9C_REVERSE_TIME_RETROSPECTIVE_HOLDOUT",
+  "counts": {
+    "immediate_control": 952,
+    "first_turn_control": 852
+  },
+  "policies": {
+    "J0_CONTROL": {
+      "immediate": {"count": 952, "win_rate": 0.592436974789916, "profit_factor_bps": 0.9879555691742691, "net_bps": -226.56460208778535, "max_drawdown_bps": 2318.274264596609, "max_losing_streak": 6},
+      "first_turn": {"count": 852, "win_rate": 0.5821596244131455, "profit_factor_bps": 1.0321683116573177, "net_bps": 541.1779966228281, "max_drawdown_bps": 2044.3840442071669, "max_losing_streak": 6}
+    },
+    "J1_BTC_LONG_SIGN": {
+      "definition": "Keep all branches unchanged except BTCUSD LONG requires entry M15 RCI9 < 0.",
+      "immediate": {"count": 839, "retention_fraction": 0.8813025210084033, "win_rate": 0.6078665077473182, "profit_factor_bps": 0.9792439875527404, "net_bps": -353.6595119773385, "max_drawdown_bps": 2485.4412020055424, "max_losing_streak": 6},
+      "first_turn": {"count": 753, "retention_fraction": 0.8838028169014085, "win_rate": 0.5949535192563081, "profit_factor_bps": 1.0003461757248617, "net_bps": 5.3327784236516935, "max_drawdown_bps": 2262.2078206976353, "max_losing_streak": 6},
+      "btc_long_immediate": {"count": 113, "win_rate": 0.6371681415929203, "profit_factor_bps": 0.5861777729767758, "net_bps": -1585.790353070753},
+      "btc_long_first_turn": {"count": 100, "win_rate": 0.63, "profit_factor_bps": 0.5463824558717517, "net_bps": -1689.741666990043},
+      "decision": "HYPOTHESIS_FAILED_ON_HOLDOUT"
+    },
+    "J2_BTC_LONG_NEG50_SENSITIVITY": {
+      "definition": "Sensitivity only: BTCUSD LONG requires entry M15 RCI9 <= -50.",
+      "immediate": {"count": 806, "win_rate": 0.6104218362282878, "profit_factor_bps": 1.0237023231715343, "net_bps": 372.66618036755335, "max_drawdown_bps": 2148.0265243593703},
+      "first_turn": {"count": 725, "win_rate": 0.5972413793103448, "profit_factor_bps": 1.0667683806987964, "net_bps": 942.3966557408567, "max_drawdown_bps": 1961.3068812493834},
+      "btc_long_immediate": {"count": 80, "win_rate": 0.675, "profit_factor_bps": 0.6583911955066659, "net_bps": -859.4646607258613},
+      "btc_long_first_turn": {"count": 72, "win_rate": 0.6666666666666666, "profit_factor_bps": 0.6908439108963798, "net_bps": -752.6777896728385},
+      "decision": "SENSITIVITY_NOT_PROMOTABLE_BTC_LONG_REMAINS_PF_BELOW_1"
+    },
+    "J3_GLOBAL_SIGN_REFERENCE": {
+      "immediate": {"count": 485, "win_rate": 0.6577319587628866, "profit_factor_bps": 0.9687775292626061, "net_bps": -374.2076875600674},
+      "first_turn": {"count": 444, "win_rate": 0.6441441441441441, "profit_factor_bps": 0.9577849185695131, "net_bps": -474.1475642167407},
+      "decision": "REPRODUCTION_REFERENCE_FAILED_AS_TRADING_POLICY"
+    }
+  },
+  "btc_long_tail_observation": {
+    "j1_immediate_avg_win_bps": 31.198147580373302,
+    "j1_immediate_avg_loss_bps": -93.46480436238124,
+    "j1_immediate_losses_le_minus_100_bps": 14,
+    "j1_immediate_losses_le_minus_200_bps": 6,
+    "j1_immediate_worst_bps": -462.9174617559403,
+    "rci_nonnegative_immediate_count": 113,
+    "rci_nonnegative_immediate_profit_factor_bps": 1.0717304385254571,
+    "rci_nonnegative_immediate_net_bps": 127.09490988955334,
+    "interpretation": "The source-like negative-RCI BTC LONG subset raises win rate but concentrates large-loss tails. The next question is causal tail-loss invalidation after entry, not further entry-RCI threshold mining."
+  },
+  "monthly_stability": {
+    "J1_immediate_negative_months": ["2026-02", "2026-04", "2026-06"],
+    "J2_immediate_negative_months": ["2026-02", "2026-04", "2026-06"],
+    "note": "Neither source-like BTC LONG location policy resolves April/June weakness."
+  },
+  "decision": "DO_NOT_PROMOTE_J1_J2_J3_AND_STOP_ENTRY_RCI_THRESHOLD_MINING",
+  "next_research": "BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+  "guardrails": {
+    "automatic_forward_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "classifier_trained": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  }
+}
