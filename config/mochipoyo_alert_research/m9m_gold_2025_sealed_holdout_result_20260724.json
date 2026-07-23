@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9M_GOLD_2025_SEALED_HOLDOUT",
+  "status": "PASS_HOLDOUT_ALL_FROZEN_CANDIDATES_FAILED_TO_CLEAR_PF1",
+  "freeze_commit_before_holdout_open": "31d21edec97eb39ae0a56a52ac5759f7cffb1ef5",
+  "freeze_file": "config/mochipoyo_alert_research/m9m_gold_2023_2024_discovery_candidate_freeze_20260724.json",
+  "holdout_population": "2025 XAUUSD frozen-M7C LONG trades entered at first causal M1 turn",
+  "baseline_2025": {
+    "count": 619,
+    "win_rate": 0.6672051696284329,
+    "profit_factor_bps": 1.035681917690026,
+    "net_bps": 237.28603249255133,
+    "max_drawdown_bps": 1107.7027756650477,
+    "max_losing_streak": 9
+  },
+  "frozen_candidate_results": {
+    "GOLD_L1_D1_RCI14_RISING_AND_M5_BULLISH_STACK": {
+      "count": 221,
+      "win_rate": 0.6561085972850679,
+      "profit_factor_bps": 0.974029869106445,
+      "net_bps": -62.89507865588966,
+      "max_drawdown_bps": 709.2498527176792,
+      "max_losing_streak": 5,
+      "quarterly_pf": {"2025Q1": 1.1521483833743238, "2025Q2": 1.1482065130881975, "2025Q3": 0.9214171486160354, "2025Q4": 0.8262217156031413},
+      "decision": "REJECT_AS_GENERALIZED_RULE"
+    },
+    "GOLD_L2_M5_ATR_EXPANSION_1P2": {
+      "count": 115,
+      "win_rate": 0.7043478260869566,
+      "profit_factor_bps": 0.7987495075977201,
+      "net_bps": -325.23639232046656,
+      "max_drawdown_bps": 617.9030611199738,
+      "max_losing_streak": 4,
+      "quarterly_pf": {"2025Q1": 1.4698021597534217, "2025Q2": 0.9076979929240819, "2025Q3": 1.203354459920255, "2025Q4": 0.3724584303120085},
+      "decision": "REJECT_AS_GENERALIZED_RULE"
+    },
+    "GOLD_L3_H1_MEDIUM_RCI9_BULLISH_REGULAR_DIV_RECENT10": {
+      "count": 39,
+      "win_rate": 0.6666666666666666,
+      "profit_factor_bps": 0.9799713558139932,
+      "net_bps": -10.415004547291893,
+      "max_drawdown_bps": 273.20180617274315,
+      "max_losing_streak": 3,
+      "quarterly_pf": {"2025Q1": 0.48779987756448834, "2025Q2": 0.7879288665579361, "2025Q3": 0.2555017844122285, "2025Q4": 5.215004345970353},
+      "decision": "REJECT_AS_GENERALIZED_RULE"
+    }
+  },
+  "interpretation": [
+    "The 2023-2024 discovery candidates looked strong but did not survive the sealed 2025 holdout.",
+    "High win rate alone is misleading: the volatility-expansion candidate retained 70.4% WR while PF fell to 0.799 because loss tails dominated, especially in 2025Q4.",
+    "The next GOLD research should focus on regime adaptation and loss-tail control rather than adding another static indicator threshold.",
+    "2025 is now opened and must not be represented as untouched holdout for future hypotheses."
+  ],
+  "guardrails": {
+    "candidate_definitions_changed_after_holdout_open": false,
+    "automatic_live_promotion": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "audit_only": true
+  }
+}
