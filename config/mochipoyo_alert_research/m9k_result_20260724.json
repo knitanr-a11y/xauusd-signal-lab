@@ -1,0 +1,70 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "upload_package_sha256": "6bb86919ba62d94845e08dae0d06f5f987ad69b2b8985bf25635bb26249f0fc5",
+  "population_tier": "TIER_B_FROZEN_PROXY_REPLAY_NOT_SOURCE_TRUTH",
+  "population": {
+    "btc_long_entry_m15_rci9_lt_0": 113,
+    "checkpoint_rows": 405,
+    "win_rate": 0.6371681415929203,
+    "profit_factor_bps": 0.5861777729767759,
+    "net_bps": -1585.7903530707533,
+    "average_win_bps": 31.198147580373302,
+    "average_loss_bps": -93.46480436238124,
+    "losses_le_minus_100_bps": 14,
+    "losses_le_minus_200_bps": 6,
+    "worst_bps": -462.9174617559403
+  },
+  "causal_checkpoint_findings": {
+    "checkpoint_0_50_atr": {
+      "reaching_trades": 81,
+      "tail_le_minus_100_fraction": 0.1728395061728395,
+      "m5_bullish_stack_count": 39,
+      "m5_bullish_stack_tail_le_minus_100_fraction": 0.28205128205128205,
+      "m5_non_bullish_tail_le_minus_100_fraction": 0.07142857142857142,
+      "m5_bullish_stack_checkpoint_to_exit_pf": 0.37955826593531794,
+      "m5_non_bullish_checkpoint_to_exit_pf": 0.9399713484955242
+    },
+    "persistent_m5_bullish_stack_0_25_0_50_0_75": {
+      "count": 28,
+      "tail_le_minus_100_fraction": 0.32142857142857145,
+      "tail_capture": "9_of_14",
+      "interpretation": "Persistent M5 bullish alignment while a BTC LONG continues moving adversely is a plausible failed-reset / overextension state, not a validated exit rule."
+    }
+  },
+  "feature_pattern": {
+    "early_checkpoint_repeated_signals": [
+      "M5 EMA BULLISH_STACK remains more common in >=100 bps tail losses than non-tail trades",
+      "M15 close remains farther above EMA30/EMA40 in tail losses",
+      "M1/M5 ATR is higher in the large-tail group at early checkpoints"
+    ],
+    "interpretation": "Large tails look more like high-volatility adverse movement from an insufficiently reset lower-timeframe structure than a simple RCI-threshold problem."
+  },
+  "temporal_stability": {
+    "available_checkpoint_months": ["2026-04", "2026-05", "2026-06", "2026-07_partial"],
+    "m5_bullish_stack_risk_pattern": "Stronger in May-July; April does not show a stable PF disadvantage and both groups are weak.",
+    "decision": "INSUFFICIENT_FOR_PROSPECTIVE_RISK_GATE_FREEZE"
+  },
+  "decision": "STOP_HISTORICAL_TAIL_FILTER_MINING_AND_CONTINUE_FORWARD_SOURCE_COLLECTION",
+  "next": {
+    "m8c": "KEEP_RUNNING_UNCHANGED",
+    "m7c": "KEEP_RUNNING_UNCHANGED",
+    "collector": "KEEP_RUNNING",
+    "new_tail_gate": false,
+    "new_forward_challenger": false,
+    "future_recheck": "Re-evaluate the frozen descriptive M5 failed-reset pattern only on newly accumulated forward BTC LONG/control candidates; do not backfill or reuse the M8C prospective start."
+  },
+  "guardrails": {
+    "checkpoint_depth_is_gate": false,
+    "tail_bps_label_is_gate": false,
+    "same_sample_rule_promotion_allowed": false,
+    "automatic_threshold_selection": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "audit_only": true
+  }
+}
