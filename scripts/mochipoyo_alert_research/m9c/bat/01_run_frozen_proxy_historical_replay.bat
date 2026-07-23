@@ -6,10 +6,11 @@ echo ============================================================
 echo M9C Frozen Proxy Historical Replay - ONE TIME AUDIT
 echo Tier B: PROXY_REPLAY_NOT_SOURCE_TRUTH
 echo Keep M8C / M7C / collector running. Do not reset anything.
+echo Context warmup fix V2: exact M1 outcomes remain valid even when early M5/H1/H4 context is unavailable.
 echo ============================================================
 echo.
 
-python "..\python\run_frozen_proxy_historical_replay.py"
+python "..\python\run_frozen_proxy_historical_replay_v2.py"
 set "RC=%ERRORLEVEL%"
 
 if not "%RC%"=="0" (
