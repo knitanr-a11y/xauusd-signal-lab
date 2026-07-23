@@ -1,0 +1,45 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BZ2_MULTITIMEFRAME_RCI_CONTEXT_AUDIT",
+  "recorded_at_utc": "2026-07-24T01:30:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "population": {
+    "frozen_trade_population": 18,
+    "first_turn_rows_evaluated": 16,
+    "same_sample_is_validation": false
+  },
+  "key_correlations": {
+    "signal_m5_directional_rci9_vs_initial_pullback_depth_bps_spearman": 0.5949932815016497,
+    "turn_h1_directional_rci9_delta1_vs_return_spearman": 0.43853054970001026,
+    "turn_h4_directional_rci9_delta1_vs_return_spearman": -0.5528529276253789,
+    "turn_h1_directional_rci9_delta1_vs_mfe_spearman": 0.2518587616520329,
+    "turn_h4_directional_rci9_delta1_vs_mfe_spearman": -0.6031122846822315
+  },
+  "signal_m5_groups": {
+    "GE_80": {"count": 3, "mean_initial_pullback_bps": 14.161450, "mean_return_from_first_turn_bps": -20.356929, "positive_fraction": 0.0},
+    "50_TO_80": {"count": 7, "mean_initial_pullback_bps": 6.996333, "mean_return_from_first_turn_bps": 7.440174, "positive_fraction": 0.857143},
+    "MINUS50_TO_50": {"count": 5, "mean_initial_pullback_bps": 6.557343, "mean_return_from_first_turn_bps": 4.001012, "positive_fraction": 0.8},
+    "LE_MINUS50": {"count": 1, "mean_initial_pullback_bps": 1.172849, "mean_return_from_first_turn_bps": 18.113707, "positive_fraction": 1.0}
+  },
+  "turn_htf_slope_groups": {
+    "H1_AND_H4_WITH_TRADE": {"count": 7, "mean_return_bps": 5.433633, "positive_fraction": 0.714286},
+    "H1_ONLY_WITH_TRADE": {"count": 2, "mean_return_bps": 19.492656, "positive_fraction": 1.0},
+    "H4_ONLY_WITH_TRADE": {"count": 7, "mean_return_bps": -6.841650, "positive_fraction": 0.571429}
+  },
+  "interpretation": {
+    "m5_overheat_hypothesis_has_same_direction_signal": true,
+    "m5_ge80_rule_promotable": false,
+    "h1_support_looks_more_consistent_than_h4_in_this_tiny_sample": true,
+    "h4_rising_assumption_supported": false,
+    "larger_sample_required": true,
+    "next_priority": "EXPAND_GENUINE_MOCHIPOYO_PRIMARY_SAMPLE_THEN_SEPARATE_HISTORICAL_PROXY_REPLAY"
+  },
+  "guardrails": {
+    "user_hypothesis_assumed_true": false,
+    "no_fixed_rci_threshold_promoted": true,
+    "no_same_sample_validation_claim": true,
+    "existing_m8c_reset": false,
+    "m7c_changed": false
+  }
+}
