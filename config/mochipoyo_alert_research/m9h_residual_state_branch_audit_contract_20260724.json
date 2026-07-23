@@ -1,0 +1,70 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9H_RESIDUAL_STATE_BRANCH_AUDIT",
+  "contract": "MOCHIPOYO_M9H_RESIDUAL_STATE_BRANCH_V1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "upstream": {
+    "m9g_result": "config/mochipoyo_alert_research/m9g_result_20260724.json",
+    "first_turn_population": 852,
+    "p2_is_forward_candidate": false,
+    "p2_reason": "PF 1.2543, max DD 1224 bps, April PF 0.7219, residual BTC LONG and XAU branches still weak"
+  },
+  "purpose": "Find interpretable residual avoid-states after P2 without simply tightening divergence filters until frequency collapses.",
+  "frozen_observation_states": [
+    {
+      "id": "BTC_LONG_HIGH_M15_RANGE",
+      "condition": "P2_KEEP AND ticker=BTCUSD AND direction=LONG AND turnrich_m15_bar_range_atr >= 1.0",
+      "reason": "Natural volatility anchor: first-turn closed M15 bar range is at least one ATR. Threshold is not optimized."
+    },
+    {
+      "id": "XAU_LONG_H1_RCI9_EXTREME",
+      "condition": "P2_KEEP AND ticker=XAUUSD AND direction=LONG AND turn_h1_directional_rci9 >= 80",
+      "reason": "Canonical RCI extreme; tests whether a long first-turn entry is too late when H1 is already at the upper extreme."
+    },
+    {
+      "id": "XAU_SHORT_M1_RCI18_EXTREME",
+      "condition": "P2_KEEP AND ticker=XAUUSD AND direction=SHORT AND turnrich_m1_rci18 <= -80",
+      "reason": "Canonical RCI extreme; tests whether a short first-turn entry is too late when M1 RCI18 is already deeply oversold."
+    }
+  ],
+  "policy_ladder": [
+    "H0_P2_BASELINE",
+    "H1_P2_PLUS_BTC_LONG_HIGH_M15_RANGE",
+    "H2_H1_PLUS_XAU_LONG_H1_RCI9_EXTREME",
+    "H3_H2_PLUS_XAU_SHORT_M1_RCI18_EXTREME"
+  ],
+  "required_metrics": [
+    "count",
+    "retention_fraction_vs_852",
+    "win_rate",
+    "profit_factor_bps",
+    "net_bps",
+    "mean_bps",
+    "median_bps",
+    "chronological_max_drawdown_bps",
+    "max_losing_streak",
+    "monthly_count_and_pf",
+    "ticker_direction_count_and_pf",
+    "rejected_state_metrics"
+  ],
+  "analysis_rules": {
+    "frequency_is_primary_constraint": true,
+    "do_not_optimize_thresholds_in_this_run": true,
+    "compare_months_separately": true,
+    "compare_ticker_direction_separately": true,
+    "same_sample_hypothesis_generation_only": true,
+    "same_sample_validation_or_live_promotion": false,
+    "new_forward_sample_required_before_promotion": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
