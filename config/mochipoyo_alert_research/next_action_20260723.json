@@ -1,47 +1,42 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9E_PASS_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9F_DIVERGENCE_RECENCY_LOCALITY_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M9F_PASS_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M9G_MINIMAL_LOSS_PRUNING_CANDIDATE_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9e_result": {
-    "population": "3039 adverse checkpoints plus 852 first-turn entries from Tier-B replay",
-    "divergence_event_rows": 145560,
-    "causal_pivots_only": true,
-    "supportive_any_saturated": true,
-    "opposing_any_saturated": true,
-    "interpretation": "Regular/hidden divergence remains worth studying, but pooled ANY-divergence is not discriminative because older causal divergence persists across many timeframe/oscillator/scale contexts."
+  "m9f_result": {
+    "population": "852 independent first-turn Tier-B trades plus 3039 adverse checkpoints",
+    "pooled_any_divergence_rejected": true,
+    "fresh_btc_long_conflict": "within 3 bars BOTH: 92 trades, PF 0.616993, negative net in every available month Apr-Jul",
+    "interpretation": "Fresh divergence/state signatures can be used to generate loss-pruning hypotheses, but no same-sample gate is validated."
   },
-  "m9f_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9f/bat",
-    "run_once": "01_run_divergence_recency_locality_audit.bat",
-    "success": "[M9F PASS]",
-    "blocked": "[M9F BLOCKED]",
+  "m9g_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9g/bat",
+    "run_once": "01_run_minimal_loss_pruning_candidate_audit.bat",
+    "success": "[M9G PASS]",
+    "blocked": "[M9G BLOCKED]",
     "simultaneous_with_m8c_m7c_collector": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9F\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9G\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "m9f_research_order": [
-    "Keep regular and hidden divergence separate; do not collapse them to one universal flag.",
-    "Normalize divergence age by its own timeframe and compare <=2, <=3, <=5 and <=10-bar observation windows without promoting a cutoff.",
-    "Separate divergence whose two pivots formed after the original signal, second pivot only after signal, and fully pre-signal context.",
-    "Compare supportive-only, opposing-only, both and neither signatures separately for XAU/BTC, LONG/SHORT and month.",
-    "Retain RCI9/14/18 and MACD line/histogram, timeframe and pivot-scale identities for individual-context analysis.",
-    "Use M9F only for hypothesis generation; any promising divergence/state combination requires separate temporal/forward validation."
+  "m9g_research_order": [
+    "Compare P0 control, P1 BTC LONG fresh-conflict prune, P2 minimal two-branch prune, and P3 broader sensitivity only.",
+    "Judge PF, chronological max drawdown, max losing streak and monthly retained trade counts together with win rate.",
+    "Prefer minimal interpretable pruning with high frequency retention rather than maximum same-sample PF.",
+    "Do not treat P3 or any best-fitting policy as validated merely because it scores best on the same 852 trades.",
+    "After review, freeze at most one small candidate before starting any NEW prospective challenger. Do not reuse or reset M8C prospective start."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
     "Do not call Tier-B replay events genuine Mochipoyo alerts.",
-    "Do not promote a 2/3/5/10-bar divergence-age cutoff from this same sample.",
-    "Do not use future pivot confirmation or future outcome to construct divergence context.",
-    "Do not assume regular or hidden divergence is beneficial before recency/locality analysis shows a stable pattern.",
+    "Do not promote an M9G policy from the same historical sample.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
