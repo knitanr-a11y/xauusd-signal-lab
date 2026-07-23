@@ -1,44 +1,42 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9J_HOLDOUT_FAILED_M9K_BTC_LONG_CAUSAL_TAIL_STATE_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_AND_RUN_M9K_ONCE",
+  "status": "M8C_RUNNING_M9K_PASS_FORWARD_COLLECTION_ONLY_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_FORWARD_SOURCE_COLLECTION_AFTER_M9K",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED_AND_ACCUMULATE_NEW_FORWARD_EVIDENCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9j_result": {
-    "population": "952 immediate / 852 first-turn pre-source Tier-B trades",
-    "J1": "BTC LONG RCI9<0 failed: higher WR but lower PF and worse large-loss tail",
-    "J2": "BTC LONG RCI9<=-50 sensitivity still PF<1 within BTC LONG",
-    "J3": "Global source-like sign rule not profitable",
-    "decision": "STOP_ENTRY_RCI_THRESHOLD_MINING"
+  "m9k_result": {
+    "population": "113 BTCUSD LONG pre-source trades with M15 RCI9<0",
+    "checkpoint_rows": 405,
+    "main_pattern": "M5 BULLISH_STACK persisting during adverse movement enriches the >=100 bps loss tail, but the historical pattern is not temporally stable enough for promotion.",
+    "m5_bullish_at_0_50_atr": "39 trades; 28.2% >=100 bps tail vs 7.1% for non-BULLISH",
+    "persistent_m5_bullish_0_25_0_50_0_75": "28 trades; 32.1% >=100 bps tail; captures 9 of 14 >=100 bps losses",
+    "decision": "NO_NEW_TAIL_GATE_NO_NEW_FORWARD_CHALLENGER"
   },
-  "m9k_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m9k/bat",
-    "run_once": "01_run_btc_long_causal_tail_loss_state_audit.bat",
-    "success": "[M9K PASS]",
-    "blocked": "[M9K BLOCKED]",
-    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
-    "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9K\\LATEST\\99_UPLOAD_PACKAGE.zip"
+  "next_research_trigger": {
+    "mode": "WAIT_FOR_NEW_FORWARD_EVIDENCE_NOT_HISTORICAL_BACKFILL",
+    "target": "Revisit M5 failed-reset / adverse-path state only after materially more post-M9K BTC LONG control candidates and genuine source events exist.",
+    "must_keep_populations_separate": true,
+    "do_not_reuse_m8c_start": true,
+    "do_not_fit_more_thresholds_to_m9c_m9k": true
   },
-  "m9k_research_order": [
-    "Restrict the audit to the 113 BTCUSD LONG pre-source trades with frozen entry M15 RCI9 < 0.",
-    "Reuse M9D causal adverse checkpoints at 0.25/0.5/0.75/1.0/1.5/2.0 ATR; checkpoint depth is observation only, not a stop.",
-    "Use -50/-100/-200 bps only as future severity labels to compare causal checkpoint state; never use those values to construct a gate.",
-    "Compare closed-bar M1/M5/M15/H1/H4 RCI, EMA, MACD, range, volume, elapsed time and recovery-from-extreme state between large-tail losses and recoverable trades.",
-    "Do not select a decimal threshold or promote a rule from the same historical sample.",
-    "Only if a small interpretable causal failure state appears should it later be frozen for a new prospective risk-shadow with a fresh start; otherwise keep collecting forward/source data."
+  "while_collecting": [
+    "Keep genuine source collection running.",
+    "Keep M7C prospective shadow running with frozen formula/thresholds.",
+    "Keep M8C control/challenger forward shadow running without reset.",
+    "Do not create a stop from 0.25/0.5/0.75/1.0/1.5/2.0 ATR checkpoints.",
+    "Do not use -50/-100/-200 bps evaluation labels as trading stops."
   ],
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not use checkpoint ATR depth itself as a stop rule.",
-    "Do not turn -50/-100/-200 bps evaluation labels into live stops.",
+    "Do not start a new forward challenger from the mined M9K state.",
+    "Do not backfill a future prospective tail audit with pre-freeze data.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
