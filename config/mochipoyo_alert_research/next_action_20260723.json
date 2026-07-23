@@ -1,42 +1,45 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9K_PASS_FORWARD_COLLECTION_ONLY_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_FORWARD_SOURCE_COLLECTION_AFTER_M9K",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_UNCHANGED_AND_ACCUMULATE_NEW_FORWARD_EVIDENCE",
+  "status": "M8C_RUNNING_M9L_GOLD_MULTIYEAR_HOLDOUT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9L_GOLD_2023_2026_MULTIYEAR_HOLDOUT_AUDIT",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING_AND_RUN_M9L_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
     "prospective_start_reset_allowed": false
   },
-  "m9k_result": {
-    "population": "113 BTCUSD LONG pre-source trades with M15 RCI9<0",
-    "checkpoint_rows": 405,
-    "main_pattern": "M5 BULLISH_STACK persisting during adverse movement enriches the >=100 bps loss tail, but the historical pattern is not temporally stable enough for promotion.",
-    "m5_bullish_at_0_50_atr": "39 trades; 28.2% >=100 bps tail vs 7.1% for non-BULLISH",
-    "persistent_m5_bullish_0_25_0_50_0_75": "28 trades; 32.1% >=100 bps tail; captures 9 of 14 >=100 bps losses",
-    "decision": "NO_NEW_TAIL_GATE_NO_NEW_FORWARD_CHALLENGER"
+  "m9l_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9l/bat",
+    "run_once": "01_run_gold_multiyear_holdout_audit.bat",
+    "success": "[M9L PASS]",
+    "blocked": "[M9L BLOCKED]",
+    "simultaneous_with_m8c_m7c_collector": "ALLOWED",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9L\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "next_research_trigger": {
-    "mode": "WAIT_FOR_NEW_FORWARD_EVIDENCE_NOT_HISTORICAL_BACKFILL",
-    "target": "Revisit M5 failed-reset / adverse-path state only after materially more post-M9K BTC LONG control candidates and genuine source events exist.",
-    "must_keep_populations_separate": true,
-    "do_not_reuse_m8c_start": true,
-    "do_not_fit_more_thresholds_to_m9c_m9k": true
-  },
-  "while_collecting": [
-    "Keep genuine source collection running.",
-    "Keep M7C prospective shadow running with frozen formula/thresholds.",
-    "Keep M8C control/challenger forward shadow running without reset.",
-    "Do not create a stop from 0.25/0.5/0.75/1.0/1.5/2.0 ATR checkpoints.",
-    "Do not use -50/-100/-200 bps evaluation labels as trading stops."
+  "m9l_research_order": [
+    "Verify the six supplied GOLD CSV SHA256 values and MT5 server-time contract.",
+    "Replay the unchanged frozen M7C XAUUSD state machine from 2023 through 2026-06-19 with exact M1 execution and historical spread.",
+    "Report yearly and LONG/SHORT immediate plus first-turn performance.",
+    "Validate only the already-frozen 2026 GOLD H2/H3 states on 2023-2025; do not tune them.",
+    "After M9L, use 2023-2024 only for new GOLD feature discovery. Do not inspect 2025 feature/outcome relationships while creating hypotheses.",
+    "Freeze new hypotheses before opening the 2025 holdout. Keep 2026 as reference only because it has already been heavily research-exposed."
   ],
+  "preliminary_upload_side_findings": {
+    "2023_2025_immediate": "3518 trades, WR 60.20%, PF 0.9251",
+    "2023_2025_first_turn": "3118 trades, WR 60.58%, PF 0.9361",
+    "prefrozen_H2": "PF 0.9509 on 2023-2025",
+    "prefrozen_H3": "PF 0.9632 on 2023-2025",
+    "long_first_turn": "PF above 1 in each available year: 2023 1.0246 / 2024 1.1330 / 2025 1.0357 / 2026-to-Jun19 1.3142",
+    "short_first_turn": "PF below 1 in 2023-2025; 2026 reference improves above 1"
+  },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not start a new forward challenger from the mined M9K state.",
-    "Do not backfill a future prospective tail audit with pre-freeze data.",
+    "Do not use the new 2023-2026 GOLD data as genuine Mochipoyo source truth.",
+    "Do not use 2025 feature/outcome relationships to create the next GOLD hypotheses before they are frozen from 2023-2024.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
