@@ -1,42 +1,36 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M8BX_ONE_TIME_EXCURSION_AUDIT_NEXT",
-  "current_stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
-  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BX_EXCURSION_PATH_AUDIT_ONCE",
+  "status": "M8C_RUNNING_M8BY_PULLBACK_ENTRY_AUDIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M8BY_ENTRY_TIMING_RESEARCH",
+  "immediate_action": "KEEP_M8C_RUNNING_AND_RUN_M8BY_PULLBACK_ENTRY_OPPORTUNITY_AUDIT_ONCE",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
     "keep_running": true,
-    "results": "03_open_latest_results.bat",
-    "review_submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8C\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "prospective_start_reset_allowed": false
   },
-  "m8bx_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m8bx/bat",
-    "run_once": "01_run_excursion_path_audit.bat",
-    "success": "[M8BX PASS]",
-    "blocked": "[M8BX BLOCKED]",
+  "m8by_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m8by/bat",
+    "run_once": "01_run_pullback_entry_opportunity_audit.bat",
+    "success": "[M8BY PASS]",
+    "blocked": "[M8BY BLOCKED]",
     "simultaneous_with_m8c_collector_m7c": "ALLOWED",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BX\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BY\\LATEST\\99_UPLOAD_PACKAGE.zip"
   },
-  "why_m8bx": {
-    "win_rate_alone_is_insufficient": true,
-    "xau_m8b_surface_result": "10 trades, WR 70%, PF 3.9251, +97.49 bps",
-    "unresolved_question": "Whether XAU winners experienced large MAE or large peak-to-exit giveback before finishing profitable.",
-    "metrics": ["MAE", "MFE", "time-to-MAE", "time-to-MFE", "underwater fraction", "peak-to-exit giveback"],
-    "same_18_is_validation": false
-  },
-  "loss_reduction_research_order": [
-    "First identify the path signature of losses and dangerous winners with M8BX.",
-    "Do not invent an MAE/stop/RCI/EMA threshold from the same 18 trades as a validated rule.",
-    "Use M8C or a later new forward sample to validate any predecision loss-reduction gate.",
-    "Evaluate both win rate and adverse excursion/drawdown while preserving useful trade frequency."
+  "research_question": "Can waiting for a real adverse BID-price pullback, optionally followed by a completed-M1 rebound confirmation, improve entry price and loss profile without sacrificing too many profitable trades?",
+  "important": [
+    "M8BX small MAE includes spread because it is measured from executable entry; M8BY uses original signal BID open so spread is not misclassified as pullback.",
+    "Touch variants enter only on the next M1 open after threshold touch.",
+    "Rebound variants wait for completed M1 close recovery, then enter on the next M1 open.",
+    "The same frozen 18 trades are hypothesis-generation only, not validation.",
+    "Any selected pullback hypothesis requires a new forward start separate from the already-running M8C."
   ],
   "forbidden": [
-    "Do not stop or reset M8C while running M8BX.",
-    "Do not tune a stop or entry threshold on M8B 18 trades and claim validation.",
-    "Do not use future excursion information as an entry decision input.",
+    "Do not stop or reset M8C.",
+    "Do not pick the best M8BY grid result and call it validated.",
+    "Do not use future MAE/MFE as live entry inputs.",
     "Do not modify M7C formulas, thresholds, runtime manifest, or prospective start.",
     "Do not enable Discord send, MT5 order, live ready, final signal, or real trading entry gate."
   ]
