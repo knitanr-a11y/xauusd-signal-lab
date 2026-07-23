@@ -2,55 +2,53 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-23T14:35:00Z",
-  "status": "M8B_CONTRACT_FROZEN_AND_RUNNER_READY_LOCAL_OUTCOME_RUN_NEXT_AUDIT_ONLY",
-  "stage": "M8B_EXTRA_SIGNAL_OUTCOME_AUDIT",
+  "recorded_at_utc": "2026-07-23T15:25:00Z",
+  "status": "M8B_PASS_M8C_LIVE_CAUSAL_FORWARD_SHADOW_RUNNER_READY_AUDIT_ONLY",
+  "stage": "M8C_EXTRA_LOSS_REDUCTION_GATE_FORWARD_SHADOW",
   "formal_pre_m8a_baseline_commit": "c0bd4b9d20235422720b7c250e95a2e2c3f64b4d",
-  "prospective_start_utc": "2026-07-20T14:54:15Z",
-  "m7c_formal_gate": {
-    "supported_source_events": 35,
-    "BTCUSD": 19,
-    "XAUUSD": 16,
-    "PRIMARY_LONG": 12,
-    "PRIMARY_SHORT": 5,
-    "LONG_EXIT": 13,
-    "SHORT_EXIT": 5,
-    "formal_review_state": "READY_FOR_MANUAL_REPRODUCTION_REVIEW",
-    "automatic_reproduction_claim": false
-  },
-  "m8a": {
-    "status": "PASS",
-    "source_matched_count": 21,
-    "missed_source_count": 14,
-    "unsupported_reentry_count": 10,
-    "extra_candidate_count": 36,
-    "pending_source_arrival_grace_count": 2,
-    "missed_gap_class_counts": {
-      "DIRECT_EXIT_THRESHOLD_GAP": 5,
-      "STATE_DIVERGENCE_AFTER_PRIOR_MISSED_SOURCE": 6,
-      "STATE_DIVERGENCE_AFTER_PRIOR_EXTRA_PROXY": 3
-    }
-  },
+  "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8b": {
-    "contract_status": "FROZEN_BEFORE_OUTCOME_READING",
-    "contract": "config/mochipoyo_alert_research/m8b_extra_signal_outcome_contract_20260723.json",
-    "trade_skeleton": "config/mochipoyo_alert_research/m8b_frozen_trade_skeleton_20260723.csv",
-    "trade_skeleton_sha256": "f42ce896f00b717320662ff1b64991718bf3e1ce7dfe0d671c62f362731f7acc",
-    "finalized_extra_signal_count": 36,
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m8b_result_20260723.json",
     "extra_entry_trade_count": 18,
-    "extra_exit_action_count": 18,
-    "all_extra_entry_trades_resolved_in_frozen_stream": true,
-    "outcome_evaluation_completed": false,
-    "local_runner_ready": true,
-    "operator_bat": "scripts/mochipoyo_alert_research/m8b/bat/01_run_outcome_audit.bat",
-    "normal_submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8B\\LATEST\\99_UPLOAD_PACKAGE.zip"
+    "win_rate": 0.6111111111111112,
+    "profit_factor_spread_x1_0": 1.1233074155203668,
+    "net_return_bps_spread_x1_0": 20.26718175007738,
+    "profit_factor_spread_x2_0": 0.9250795028223845,
+    "net_return_bps_spread_x2_0": -13.465352151156972,
+    "trades_per_calendar_day": 6.520754716981132,
+    "observed_xau": {"trade_count": 10, "win_rate": 0.7, "profit_factor": 3.92514627495335, "net_return_bps": 97.49155199395173},
+    "observed_btc_long": {"trade_count": 6, "win_rate": 0.3333333333333333, "profit_factor": 0.18184061065137128, "net_return_bps": -107.20691198687707},
+    "same_sample_gate_validation_allowed": false
+  },
+  "m8c": {
+    "contract": "config/mochipoyo_alert_research/m8c_extra_gate_forward_shadow_contract_20260723.json",
+    "contract_version": "MOCHIPOYO_M8C_MINIMAL_PROXY_BRANCH_GATE_V2",
+    "hypothesis": "Minimal proxy-branch filter: reject BTCUSD PRIMARY_LONG only; no RCI/EMA numeric threshold tuning.",
+    "control": "ACCEPT_ALL_FUTURE_PROXY_PRIMARY_CANDIDATES",
+    "challenger": "REJECT_BTCUSD_PRIMARY_LONG_ON_PROXY_BRANCH_ONLY",
+    "gate_uses_future_source_match": false,
+    "source_anchor_separate": true,
+    "source_anchor_suppressed_by_gate": false,
+    "generator_state_changed_by_gate": false,
+    "prospective_start": "TO_BE_FROZEN_AT_LOCAL_INITIALIZER_FIRST_RUN",
+    "historical_backfill_allowed": false,
+    "m8b_18_reused_as_validation": false,
+    "minimum_review_sample": {
+      "total_future_proxy_primary_candidates": 30,
+      "future_btcusd_primary_long_proxy_candidates": 8,
+      "future_challenger_accepted_proxy_candidates": 15
+    },
+    "operator_folder": "scripts/mochipoyo_alert_research/m8c/bat",
+    "initialize_once": "01_initialize_forward_shadow.bat",
+    "run_persistent": "02_run_forward_shadow_forever.bat",
+    "open_results": "03_open_latest_results.bat"
   },
   "objective": {
     "reference": "config/mochipoyo_alert_research/objective_trade_edge_frequency_addendum_20260723.json",
     "exact_mochipoyo_replication_required": false,
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_AND_USEFUL_TRADE_FREQUENCY",
-    "avoid_over_strict_frequency_collapse": true,
-    "source_match_is_reference_not_final_promotion_goal": true
+    "avoid_over_strict_frequency_collapse": true
   },
   "safety": {
     "audit_only": true,
@@ -59,8 +57,9 @@
     "live_ready": false,
     "final_signal": false,
     "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
     "m7c_runtime_manifest_reset_allowed": false,
-    "prospective_start_change_allowed": false
-  },
-  "next_stage_after_m8b_result": "M8C_EXTRA_LOSS_REDUCTION_GATE_DESIGN_AND_FORWARD_SHADOW"
+    "m7c_prospective_start_change_allowed": false
+  }
 }
