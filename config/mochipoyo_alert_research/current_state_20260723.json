@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T08:30:00Z",
-  "status": "M8C_RUNNING_M9P_LOCAL_PASS_M9Q_RISK_REWARD_HYPOTHESES_READY_M9R_PROSPECTIVE_DESIGN_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9R_GOLD_FOUR_ARM_RISK_REWARD_PROSPECTIVE_DESIGN",
+  "recorded_at_utc": "2026-07-24T09:10:00Z",
+  "status": "M8C_RUNNING_M9P_PASS_M9Q_RISK_REWARD_READY_M9S_MULTI_TIMEFRAME_PASS_M9T_PORTFOLIO_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -25,31 +25,54 @@
   "m9q": {
     "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
     "result": "config/mochipoyo_alert_research/m9q_gold_loss_reduction_profit_extension_exploratory_result_20260724.json",
-    "Q1": "Keep all N3 signals but virtual-size N6 at 0.50x; historical exploratory PF 1.4414 and DD 428.5 bps",
-    "Q2": "If H1 MACD line is rising at original M7C exit, close half and run half until first M15 RCI9 turn-down; historical exploratory PF 1.4099",
-    "Q3": "Q1 + Q2; historical exploratory PF 1.4703, DD 418.2 bps, average positive 17.64 bps vs average negative -17.26 bps",
-    "promotion": false,
-    "reason": "2023-2026 history is research-exposed; fresh prospective evidence is required"
+    "Q1": "Keep all N3 signals but virtual-size N6 at 0.50x; exploratory PF 1.4414 and DD 428.5 bps",
+    "Q2": "If H1 MACD line is rising at original M7C exit, close half and run half until first M15 RCI9 turn-down; exploratory PF 1.4099",
+    "Q3": "Q1 + Q2; exploratory PF 1.4703, DD 418.2 bps, average positive 17.64 bps vs average negative -17.26 bps",
+    "promotion": false
+  },
+  "m9r": {
+    "status": "FOUR_ARM_FRESH_PROSPECTIVE_DESIGN_FROZEN_NOT_STARTED",
+    "arms": ["R0_N3_BASE", "R1_N6_HALF_RISK", "R2_SELECTIVE_HALF_RUNNER", "R3_COMBINED"],
+    "fresh_start_required": true,
+    "reuse_m8c_or_m7c_start_forbidden": true,
+    "historical_backfill_forbidden": true,
+    "decision": "KEEP_AS_M15_BRANCH_PROSPECTIVE_DESIGN; DO_NOT_START_UNTIL MULTI_TIMEFRAME PORTFOLIO DESIGN IS REVIEWED"
+  },
+  "m9s": {
+    "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
+    "result": "config/mochipoyo_alert_research/m9s_gold_multitimeframe_portfolio_exploratory_result_20260724.json",
+    "direction": "Use stricter quality per timeframe and let portfolio breadth provide frequency instead of forcing every branch to keep many trades.",
+    "M5": "1256 exploratory strict LONG candidates, about 29.9/month, WR 65.45%, PF 1.3337, DD 335.3 bps; all-year PF>1 but 2023/2026 margins thin",
+    "M15": "Canonical M9P N3: 1495, about 35.6/month, WR 62.27%, PF 1.3659",
+    "H1": "191 exploratory LONG candidates, about 4.55/month over 42 months, WR 71.20%, PF 1.7802; all-year PF>1",
+    "H4": "70 exploratory premium LONG candidates, about 1.67/month over 42 months, WR 72.86%, PF 3.2956; very small samples",
+    "raw_frequency_before_dedup": "about 71.7 candidates/month",
+    "overlap_note": "M5 strict vs M15 N3 overlap within +/-60m is about 28.9%; H1 branch vs M15 within +/-4h is about 56.0%. Do not simply sum or pyramid overlapping signals.",
+    "gold_short": "No stable raw SHORT branch across M5/M15/H1/H4; do not force SHORT into the stack."
+  },
+  "btc": {
+    "historical_2023_2026_data_available": false,
+    "policy": "Treat BTC as separate research family; continue genuine-source/M7C/M8C forward collection. Do not transplant GOLD multi-timeframe rules into BTC.",
+    "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
   },
   "next": {
-    "stage": "M9R_GOLD_FOUR_ARM_RISK_REWARD_PROSPECTIVE_SHADOW_DESIGN",
-    "arms": [
-      "R0_N3_BASE",
-      "R1_N3_PLUS_N6_HALF_RISK_ACCOUNTING",
-      "R2_N3_PLUS_SELECTIVE_HALF_RUNNER",
-      "R3_N3_PLUS_N6_HALF_RISK_PLUS_SELECTIVE_HALF_RUNNER"
+    "stage": "M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+    "tasks": [
+      "Parameter-neighborhood stress M5/H1/H4 exploratory branch definitions rather than trusting the one discovered historical definition.",
+      "Quantify monthly/quarterly stability, DD, loss tails and added-cost sensitivity for each branch.",
+      "Design deduplication/confidence stacking so overlapping M5/M15/H1/H4 LONG signals are not automatically separate positions.",
+      "Compare strict branch portfolio frequency after dedup instead of raw count sum.",
+      "Keep M9R four-arm risk/reward design attached to M15 branch for later fresh prospective comparison.",
+      "Continue BTC source/M7C/M8C forward evidence in parallel."
     ],
-    "fresh_prospective_start_required": true,
-    "reuse_m8c_start_forbidden": true,
-    "historical_backfill_forbidden": true,
     "user_bat_required_now": false
   },
   "objective": {
-    "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_BALANCED_PAYOFF_AND_LOWER_DRAWDOWN",
-    "preserve_signal_frequency": true,
-    "reduce_loss_magnitude": true,
-    "extend_profit_when_momentum_remains": true,
-    "continue_m8c_m7c_source_collection_in_parallel": true
+    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_HIGH_WIN_RATE_USEFUL_PORTFOLIO_FREQUENCY_BALANCED_PAYOFF_AND_LOWER_DRAWDOWN",
+    "single_branch_frequency_is_not_primary_constraint": true,
+    "quality_over_branch_count": true,
+    "deduplicate_overlapping_timeframes": true,
+    "use_multi_timeframe_agreement_as_confidence_before_pyramiding": true
   },
   "safety": {
     "audit_only": true,
