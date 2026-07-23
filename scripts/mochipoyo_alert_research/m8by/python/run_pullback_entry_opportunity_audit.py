@@ -9,8 +9,15 @@ TOUCH=(2.,5.,8.,10.,12.,15.); REBOUND=((5.,2.),(8.,2.),(10.,3.),(12.,3.),(15.,5.
 def rcsv(p):
     with p.open('r',encoding='utf-8-sig',newline='') as f:return list(csv.DictReader(f))
 def wcsv(p,rows):
+    if not rows:
+        p.write_text('',encoding='utf-8-sig')
+        return
+    fields=[]
+    for row in rows:
+        for key in row:
+            if key not in fields:fields.append(key)
     with p.open('w',encoding='utf-8-sig',newline='') as f:
-        w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
+        w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(rows)
 def dump(p,x):p.write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def load_m1(p):
     r=rcsv(p); exp=['time','open','high','low','close','tick_volume','spread','real_volume']
