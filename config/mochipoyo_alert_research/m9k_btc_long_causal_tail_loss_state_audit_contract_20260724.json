@@ -1,0 +1,55 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+  "contract": "MOCHIPOYO_M9K_BTC_LONG_CAUSAL_TAIL_STATE_V1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "upstream": {
+    "m9j_result": "config/mochipoyo_alert_research/m9j_result_20260724.json",
+    "m9c_population": "952 exact-M1 Tier-B proxy replay trades before genuine-source observation window",
+    "m9d_checkpoint_rows": 3039,
+    "target_subset": "BTCUSD LONG with frozen M15 entry_rci9 < 0",
+    "expected_target_trades": 113
+  },
+  "reason": "M9J rejected the source-like entry-RCI location hypothesis as a trading gate. The RCI9<0 BTC LONG subset has high win rate but poor PF because losing trades have much larger tails. Study causal failure state after adverse movement begins instead of further mining entry thresholds.",
+  "research_question": [
+    "Can causal closed-bar state after adverse movement begins distinguish recoverable BTC LONG pullbacks from the large-loss tail?",
+    "Can a later forward risk-shadow preserve the high win-rate subset while identifying failing reversals before the frozen proxy exit?"
+  ],
+  "observation_grid": {
+    "m15_atr_ratios": [0.25, 0.5, 0.75, 1.0, 1.5, 2.0],
+    "role": "OBSERVATION_ONLY_NOT_ENTRY_OR_STOP_RULE"
+  },
+  "evaluation_tail_labels_bps": [-50, -100, -200],
+  "tail_labels_role": "FUTURE_OUTCOME_EVALUATION_ONLY_NOT_GATE_OR_STOP",
+  "causal_features": {
+    "source": "M9D closed-bar checkpoint feature panel",
+    "timeframes": ["M1", "M5", "M15", "H1", "H4"],
+    "families": ["RCI9_14_18", "EMA20_30_40", "MACD_6_13_4", "ATR_and_range", "candle_structure", "tick_volume", "elapsed_time", "recovery_from_adverse_extreme"],
+    "future_feature_use": false
+  },
+  "analysis": {
+    "compare_tail_le_minus_100_vs_non_tail": true,
+    "numeric_standardized_mean_difference": true,
+    "categorical_ema_and_rci_turn_contrasts": true,
+    "checkpoint_recovery_fraction": true,
+    "same_sample_hypothesis_generation_allowed": true,
+    "same_sample_rule_promotion_allowed": false,
+    "automatic_threshold_selection": false
+  },
+  "decision_policy": {
+    "do_not_mine_more_entry_rci_thresholds": true,
+    "do_not_promote_checkpoint_atr_depth_as_stop": true,
+    "after_m9k": "Only a small interpretable causal failure-state hypothesis may be frozen for a NEW prospective risk-shadow. Otherwise continue forward/source collection without forcing a rule."
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false
+  }
+}
