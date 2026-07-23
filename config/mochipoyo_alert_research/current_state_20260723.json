@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T05:15:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9J_HOLDOUT_FAILED_M9K_BTC_LONG_TAIL_STATE_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9K_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
+  "recorded_at_utc": "2026-07-24T05:30:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9K_PASS_NO_STABLE_TAIL_GATE_FORWARD_COLLECTION_ONLY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_FORWARD_SOURCE_COLLECTION_AFTER_M9K",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -29,30 +29,25 @@
   "m9j": {
     "status": "PASS_EXPLORATORY_HOLDOUT_ONLY",
     "result": "config/mochipoyo_alert_research/m9j_result_20260724.json",
-    "population": "pre-source M9C 952 immediate / 852 first-turn Tier-B trades",
-    "J1_btc_long_rci9_lt_0": "FAILED: BTC LONG immediate 113 trades WR 63.72% PF 0.5862; first-turn 100 trades WR 63.0% PF 0.5464",
-    "J2_btc_long_rci9_le_minus50": "SENSITIVITY_ONLY: BTC LONG immediate 80 trades WR 67.5% PF 0.6584; first-turn 72 trades WR 66.67% PF 0.6908",
-    "J3_global_sign": "FAILED_AS_TRADING_POLICY",
     "decision": "DO_NOT_PROMOTE_J1_J2_J3_AND_STOP_ENTRY_RCI_THRESHOLD_MINING",
-    "tail_observation": "RCI9<0 BTC LONG raises win rate but average loss is about -93.5 bps vs average win +31.2 bps; 14 losses <= -100 bps and 6 <= -200 bps."
+    "btc_long_tail_observation": "RCI9<0 BTC LONG has high win rate but large loss tails dominate PF."
   },
   "m9k": {
-    "status": "READY_ONE_TIME_BTC_LONG_CAUSAL_TAIL_LOSS_STATE_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m9k_btc_long_causal_tail_loss_state_audit_contract_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9k/bat",
-    "run_once": "01_run_btc_long_causal_tail_loss_state_audit.bat",
-    "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9K\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "target": "113 pre-source BTCUSD LONG trades with entry M15 RCI9 < 0",
-    "purpose": "Identify causal state during adverse movement that separates recoverable pullbacks from large-loss tails without mining additional entry thresholds.",
-    "same_sample_gate_promotion_allowed": false
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m9k_result_20260724.json",
+    "population": "113 pre-source BTCUSD LONG trades with entry M15 RCI9 < 0",
+    "checkpoint_rows": 405,
+    "key_descriptive_state": "At 0.50 ATR adverse observation, M5 BULLISH_STACK tail<=-100 rate 28.2% vs 7.1% for non-BULLISH; persistent 0.25/0.50/0.75 BULLISH has 32.1% tail rate.",
+    "temporal_warning": "May-July show the stronger risk pattern but April does not provide stable PF confirmation.",
+    "decision": "NO_STABLE_PROSPECTIVE_TAIL_GATE_FREEZE_STOP_HISTORICAL_MINING"
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
-    "preserve_high_win_rate_when_possible": true,
+    "preserve_useful_frequency": true,
     "reduce_large_loss_tail": true,
     "stop_entry_threshold_mining": true,
-    "feature_state_research_is_primary": true
+    "stop_historical_tail_filter_mining": true,
+    "next_evidence_priority": "NEW_FORWARD_PROXY_AND_GENUINE_SOURCE_OBSERVATIONS"
   },
   "safety": {
     "audit_only": true,
@@ -64,6 +59,7 @@
     "m7c_formula_changed": false,
     "m7c_threshold_changed": false,
     "m7c_runtime_manifest_reset_allowed": false,
-    "m8c_prospective_start_reset_allowed": false
+    "m8c_prospective_start_reset_allowed": false,
+    "new_forward_challenger_started": false
   }
 }
