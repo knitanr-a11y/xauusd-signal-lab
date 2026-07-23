@@ -1,0 +1,33 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BY_PULLBACK_ENTRY_OPPORTUNITY_AUDIT",
+  "recorded_at_utc": "2026-07-24T00:20:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "population": 18,
+  "interpretation": {
+    "fixed_bps_is_primary_entry_design": false,
+    "user_preferred_next_direction": "PULLBACK_POINT_FEATURE_STATE_RESEARCH",
+    "reason": "A fixed price-distance wait can improve entry price, but deeper waits sharply reduce coverage and may discard valid winners. Treat pullback distance as one feature, not the whole entry rule.",
+    "same_18_is_validation": false
+  },
+  "selected_grid_observations": {
+    "TOUCH_2BPS": {"entered": 17, "coverage": 0.9444444444444444, "win_rate": 0.5882352941176471, "pf": 1.1603448100387992, "net_bps": 21.302658559234153},
+    "TOUCH_5BPS": {"entered": 16, "coverage": 0.8888888888888888, "win_rate": 0.625, "pf": 1.1545483550837157, "net_bps": 19.773703392430974},
+    "TOUCH_12BPS": {"entered": 10, "coverage": 0.5555555555555556, "win_rate": 0.8, "pf": 1.9086579893928903, "net_bps": 86.09338855728618},
+    "TOUCH_15BPS": {"entered": 8, "coverage": 0.4444444444444444, "win_rate": 0.75, "pf": 2.3604169840499845, "net_bps": 115.32582774897878},
+    "REBOUND_15_5BPS": {"entered": 8, "coverage": 0.4444444444444444, "win_rate": 0.75, "pf": 2.7924659293762732, "net_bps": 124.08235541390279}
+  },
+  "xau_selected_observations": {
+    "TOUCH_2BPS": {"entered": 9, "coverage": 0.9, "win_rate": 0.6666666666666666, "pf": 3.888076699534128, "net_bps": 62.062736023916166},
+    "TOUCH_12BPS": {"entered": 4, "coverage": 0.4, "win_rate": 1.0, "pf": null, "net_bps": 66.05420376202132},
+    "TOUCH_15BPS": {"entered": 2, "coverage": 0.2, "win_rate": 1.0, "pf": null, "net_bps": 69.73498536993301}
+  },
+  "guardrails": {
+    "best_grid_point_promotable": false,
+    "fixed_bps_threshold_frozen_for_live": false,
+    "new_forward_validation_required": true,
+    "m8c_reset": false,
+    "m7c_changed": false
+  }
+}
