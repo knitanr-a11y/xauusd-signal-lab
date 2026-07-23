@@ -1,0 +1,88 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9P_GOLD_DYNAMIC_CORE_DETERMINISTIC_REPRODUCTION",
+  "contract": "MOCHIPOYO_M9P_GOLD_DYNAMIC_CORE_REPRODUCTION_V1",
+  "status": "DESIGN_READY_IMPLEMENTATION_NEXT",
+  "purpose": "Implement one deterministic repository-side replay of the M9O canonical N1/N2/N3 definitions and the descriptive N6 H4-RCI risk layer against the supplied GOLD 2023-2026 files, without changing any live/forward system.",
+  "data_folder": "MT5 Files\\gold_v3_2023_2026\\",
+  "data_contract": {
+    "time_basis": "MT5_SERVER_TIME_FROM_CSV_UNCHANGED",
+    "csv_latest_row_contract": "CLOSED",
+    "open_asof_treatment": "FORBIDDEN",
+    "required_timeframes": ["M1","M5","M15","H1","H4","D1"],
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED"
+  },
+  "population": {
+    "ticker": "XAUUSD",
+    "base_candidate": "unchanged frozen M7C PRIMARY_LONG",
+    "entry": "first causal M1 turn after frozen M7C PRIMARY_LONG and before its frozen proxy LONG_EXIT",
+    "exit": "unchanged frozen M7C LONG_EXIT",
+    "short_in_main_candidate": false
+  },
+  "N1": {
+    "id": "M5_QUIET_PULLBACK",
+    "selected_bar": "latest M5 bar fully closed by first-turn decision time",
+    "tick_volume_ratio20": "selected tick_volume divided by arithmetic mean of selected plus previous 19 M5 tick_volume values",
+    "ratio_warmup": 20,
+    "rolling_window": 200,
+    "rolling_window_requires_full_history": true,
+    "condition": "tick_volume_ratio20 <= empirical 50th percentile of latest 200 fully formed tick_volume_ratio20 values including selected"
+  },
+  "N2": {
+    "id": "M15_STRONG_MOMENTUM",
+    "selected_bar": "latest M15 bar fully closed by first-turn decision time",
+    "macd": "EMA6(close)-EMA13(close), recursive alpha=2/(period+1), first close seed",
+    "macd_line_bps": "MACD line / abs(selected M15 close) * 10000",
+    "rolling_window": 200,
+    "rolling_window_requires_full_history": true,
+    "condition": "macd_line_bps >= empirical 75th percentile of latest 200 closed-M15 macd_line_bps values including selected"
+  },
+  "N3": {
+    "id": "BROAD_CORE",
+    "condition": "N1 OR N2"
+  },
+  "N6_descriptive_only": {
+    "id": "H4_RCI9_SECOND_QUARTILE_RISK_ZONE",
+    "selected_bar": "latest H4 bar fully closed by first-turn decision time",
+    "rci": "RCI9 Spearman rank correlation using average ranks for ties",
+    "rolling_window": 100,
+    "rolling_window_requires_full_history": true,
+    "condition": "current H4 RCI9 empirical percentile over latest 100 closed H4 bars is >0.25 and <=0.50",
+    "role": "REPORT_ONLY_SECONDARY_RISK_HYPOTHESIS",
+    "entry_gate": false,
+    "exit_gate": false
+  },
+  "required_outputs": [
+    "00_READ_ME_FIRST.txt",
+    "01_summary.json",
+    "02_yearly_candidate_summary.csv",
+    "03_quarterly_candidate_summary.csv",
+    "04_monthly_candidate_summary.csv",
+    "05_candidate_trade_ledger.csv",
+    "06_parameter_neighborhood_stress.csv",
+    "07_cost_sensitivity.csv",
+    "08_n6_risk_layer_summary.csv",
+    "09_data_quality.json",
+    "10_audit.log",
+    "99_UPLOAD_PACKAGE.zip"
+  ],
+  "acceptance_checks": {
+    "strict_closed_bar_features": true,
+    "future_outcome_in_feature_construction": false,
+    "nearest_m1_fallback": false,
+    "N3_calendar_year_pf_above_1_reference_expected": true,
+    "parameter_stress_combinations": 72,
+    "parameter_stress_all_year_pf_above_1_reference_expected": true,
+    "parameter_stress_all_plus_2bps_pf_above_1_reference_expected": true,
+    "automatic_live_promotion": false
+  },
+  "forbidden": [
+    "Do not modify M7C formula or thresholds.",
+    "Do not stop or reset M8C.",
+    "Do not use N6 as a historical gate or live stop.",
+    "Do not describe 2025 or 2026 as untouched validation.",
+    "Do not enable Discord send, MT5 orders, live ready, final signal or real trading entry gates."
+  ]
+}
