@@ -1,0 +1,54 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M8BX_EXCURSION_PATH_AUDIT",
+  "recorded_at_utc": "2026-07-23T15:40:00Z",
+  "status": "PASS_EXPLORATORY_ONLY",
+  "audit_only": true,
+  "trade_count": 18,
+  "overall": {
+    "win_rate": 0.6111111111111112,
+    "mean_mae_bps": -29.43203031259158,
+    "median_mae_bps": -15.219614639743423,
+    "mean_mfe_bps": 19.567718716905173,
+    "mean_peak_to_exit_giveback_bps": 18.44176417523421,
+    "mean_underwater_fraction": 0.6153645275520341
+  },
+  "xau": {
+    "trade_count": 10,
+    "win_rate": 0.7,
+    "mean_mae_bps": -13.10657028817705,
+    "median_mae_bps": -10.212916202490248,
+    "mean_mfe_bps": 21.019551613206836,
+    "mean_final_return_bps": 9.749155199395172,
+    "mean_peak_to_exit_giveback_bps": 11.270396413811664,
+    "mean_underwater_fraction": 0.5037215838740032,
+    "wins": {
+      "count": 7,
+      "mean_mae_bps": -12.826478687249665,
+      "median_mae_bps": -7.430255806108229,
+      "worst_mae_bps": -33.83684895280503,
+      "mean_mfe_bps": 29.57088124700279,
+      "mean_final_return_bps": 18.688618628119876
+    },
+    "losses": {
+      "count": 3,
+      "mean_mae_bps": -13.76011735700761,
+      "median_mae_bps": -14.377502470755237,
+      "worst_mae_bps": -14.630979726356056,
+      "mean_mfe_bps": 1.066449134349608,
+      "mean_final_return_bps": -11.109592800962465
+    }
+  },
+  "observed_pattern": {
+    "simple_mae_stop_separation": false,
+    "reason": "XAU losses clustered near roughly -12 to -15 bps MAE, while two winning XAU shorts reached much deeper MAE near -28 and -34 bps and later recovered.",
+    "pullback_entry_opportunity_requires_separate_audit": true,
+    "spread_contamination_note": "M8BX MAE is measured versus executable entry price, so small adverse values can include bid/ask spread. Pullback-entry research must use a BID-reference market-move trigger, then execute at a later causal M1 open."
+  },
+  "guardrails": {
+    "same_18_validation": false,
+    "no_mae_stop_promoted": true,
+    "no_pullback_threshold_promoted": true,
+    "forward_validation_required_after_hypothesis_generation": true
+  }
+}
