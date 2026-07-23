@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T05:30:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M9K_PASS_NO_STABLE_TAIL_GATE_FORWARD_COLLECTION_ONLY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_FORWARD_SOURCE_COLLECTION_AFTER_M9K",
+  "recorded_at_utc": "2026-07-23T19:33:12Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M9L_GOLD_MULTIYEAR_HOLDOUT_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9L_GOLD_2023_2026_MULTIYEAR_HOLDOUT_AUDIT",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -18,36 +18,42 @@
     "status": "PASS_EXPLORATORY_ONLY",
     "result": "config/mochipoyo_alert_research/m9i2_result_20260724.json",
     "timing_corrected_source_outcomes": 42,
-    "source_win_rate": 0.6904761904761905,
     "source_profit_factor_bps": 1.5147327367524606,
     "source_direct_kernel_true": 40,
-    "state_divergence_misses": 12,
-    "btc_long_source_pf": 4.101736,
-    "btc_long_extra_pf": 0.175005,
-    "old_m9b_source_pf_promotable": false
+    "state_divergence_misses": 12
   },
   "m9j": {
     "status": "PASS_EXPLORATORY_HOLDOUT_ONLY",
     "result": "config/mochipoyo_alert_research/m9j_result_20260724.json",
-    "decision": "DO_NOT_PROMOTE_J1_J2_J3_AND_STOP_ENTRY_RCI_THRESHOLD_MINING",
-    "btc_long_tail_observation": "RCI9<0 BTC LONG has high win rate but large loss tails dominate PF."
+    "decision": "DO_NOT_PROMOTE_J1_J2_J3_AND_STOP_ENTRY_RCI_THRESHOLD_MINING"
   },
   "m9k": {
     "status": "PASS_EXPLORATORY_ONLY",
     "result": "config/mochipoyo_alert_research/m9k_result_20260724.json",
-    "population": "113 pre-source BTCUSD LONG trades with entry M15 RCI9 < 0",
-    "checkpoint_rows": 405,
-    "key_descriptive_state": "At 0.50 ATR adverse observation, M5 BULLISH_STACK tail<=-100 rate 28.2% vs 7.1% for non-BULLISH; persistent 0.25/0.50/0.75 BULLISH has 32.1% tail rate.",
-    "temporal_warning": "May-July show the stronger risk pattern but April does not provide stable PF confirmation.",
     "decision": "NO_STABLE_PROSPECTIVE_TAIL_GATE_FREEZE_STOP_HISTORICAL_MINING"
+  },
+  "m9l": {
+    "status": "READY_ONE_TIME_GOLD_MULTIYEAR_HOLDOUT_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m9l_gold_2023_2026_multiyear_holdout_contract_20260724.json",
+    "upload_side_precheck": "config/mochipoyo_alert_research/m9l_upload_side_precheck_20260724.json",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9l/bat",
+    "run_once": "01_run_gold_multiyear_holdout_audit.bat",
+    "open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9L\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "uploaded_data_period": "2023-01-03 through 2026-06-19",
+    "preliminary_2023_2025_m7c_immediate_pf": 0.925106491305927,
+    "preliminary_2023_2025_first_turn_pf": 0.9361082975407717,
+    "prefrozen_h2_preliminary_pf": 0.9508582128209492,
+    "prefrozen_h3_preliminary_pf": 0.9631993337567551,
+    "preliminary_long_first_turn_pf_by_year": {"2023": 1.024636957911164, "2024": 1.1330377750920155, "2025": 1.035681917690026, "2026_to_0619": 1.314215476770173},
+    "next_partition_after_reproduction": "DISCOVER_NEW_GOLD_HYPOTHESES_ON_2023_2024_ONLY_KEEP_2025_FEATURE_LEVEL_HOLDOUT_SEALED"
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
     "preserve_useful_frequency": true,
-    "reduce_large_loss_tail": true,
-    "stop_entry_threshold_mining": true,
-    "stop_historical_tail_filter_mining": true,
-    "next_evidence_priority": "NEW_FORWARD_PROXY_AND_GENUINE_SOURCE_OBSERVATIONS"
+    "use_new_multiyear_gold_history_without_contaminating_2025_holdout": true,
+    "reject_2026_only_effects_that_fail_2023_2025": true,
+    "continue_forward_collection_in_parallel": true
   },
   "safety": {
     "audit_only": true,
