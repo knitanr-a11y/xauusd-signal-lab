@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T00:30:00Z",
-  "status": "M8C_FORWARD_SHADOW_RUNNING_M8BY_PASS_M8BZ_PULLBACK_STATE_FEATURE_AUDIT_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M8BZ_PULLBACK_STATE_FEATURE_RESEARCH",
+  "recorded_at_utc": "2026-07-24T01:05:00Z",
+  "status": "M8C_FORWARD_SHADOW_RUNNING_M8BZ_PASS_M8BZ2_MULTITIMEFRAME_RCI_CONTEXT_AUDIT_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M8BZ2_MULTITIMEFRAME_RCI_RESEARCH",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8b": {
     "status": "PASS_EXPLORATORY_ONLY",
@@ -25,40 +25,44 @@
   "m8bx": {
     "status": "PASS_EXPLORATORY_ONLY",
     "result": "config/mochipoyo_alert_research/m8bx_excursion_result_20260723.json",
-    "simple_mae_stop_supported": false,
-    "key_reason": "XAU losses clustered around roughly -12 to -15 bps MAE, but some XAU winners recovered from substantially deeper adverse excursion."
+    "simple_mae_stop_supported": false
   },
   "m8by": {
     "status": "PASS_EXPLORATORY_ONLY",
     "result": "config/mochipoyo_alert_research/m8by_result_20260724.json",
-    "purpose": "Fixed-distance pullback/rebound timing sensitivity",
-    "interpretation": "Deeper fixed-distance waits can improve conditional results but materially reduce entry coverage; fixed bps is not the primary entry design.",
-    "selected_examples": {
-      "TOUCH_2BPS": {"entered": 17, "coverage": 0.9444444444444444, "win_rate": 0.5882352941176471, "pf": 1.1603448100387992},
-      "TOUCH_12BPS": {"entered": 10, "coverage": 0.5555555555555556, "win_rate": 0.8, "pf": 1.9086579893928903},
-      "TOUCH_15BPS": {"entered": 8, "coverage": 0.4444444444444444, "win_rate": 0.75, "pf": 2.3604169840499845}
-    },
-    "same_18_is_validation": false
+    "fixed_bps_is_primary_entry_design": false
   },
   "m8bz": {
+    "status": "PASS_EXPLORATORY_ONLY",
+    "result": "config/mochipoyo_alert_research/m8bz_result_20260724.json",
+    "first_turn_rows": 16,
+    "all_turn_candidates": 267,
+    "first_turn_win_rate_to_original_exit": 0.6875,
+    "first_turn_net_bps_to_original_exit": 29.129194078908814,
+    "single_m1_rci_boundary_supported": false,
+    "same_sample_is_validation": false
+  },
+  "m8bz2": {
     "status": "READY_ONE_TIME_EXPLORATORY_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m8bz_pullback_state_feature_audit_contract_20260724.json",
-    "purpose": "Find causal pullback-turn state signatures associated with favorable continuation rather than relying on a fixed price-distance threshold.",
-    "fixed_bps_minimum": false,
-    "local_m1_features": ["RCI9/14/18", "EMA20/30/40", "MACD6/13/4", "ATR14", "candle/body/wick", "tick volume", "spread", "pullback depth", "rebound strength", "elapsed time"],
-    "signal_context_inherited": ["M15 RCI9", "M15 EMA alignment/gaps", "ticker", "direction"],
-    "operator_folder": "scripts/mochipoyo_alert_research/m8bz/bat",
-    "run_once": "01_run_pullback_state_feature_audit.bat",
+    "contract": "config/mochipoyo_alert_research/m8bz2_multitimeframe_rci_context_audit_contract_20260724.json",
+    "purpose": "Test signal-time M5 RCI short-term overheat versus initial pullback, and turn-time H1/H4 RCI direction versus later continuation.",
+    "timeframes": ["M5", "H1", "H4"],
+    "derived_from": "existing exact MT5 M1 using MT5 server-time buckets",
+    "closed_bars_only": true,
+    "direction_normalized_long_short_analysis": true,
+    "operator_folder": "scripts/mochipoyo_alert_research/m8bz2/bat",
+    "run_once": "01_run_multitimeframe_rci_context_audit.bat",
     "open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BZ\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "same_18_is_validation": false,
-    "machine_learning_fit_on_18": false
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M8BZ2\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "user_hypothesis_assumed_true": false,
+    "same_sample_is_validation": false
   },
   "objective": {
     "final_goal": "ROBUST_AFTER_COST_EDGE_WITH_HIGH_WIN_RATE_USEFUL_FREQUENCY_AND_BETTER_ENTRY_PATH_QUALITY",
     "avoid_over_strict_frequency_collapse": true,
     "fixed_distance_is_only_one_feature": true,
-    "research_feature_conditioned_pullback_entry": true
+    "research_feature_conditioned_pullback_entry": true,
+    "research_multitimeframe_context": true
   },
   "safety": {
     "audit_only": true,
