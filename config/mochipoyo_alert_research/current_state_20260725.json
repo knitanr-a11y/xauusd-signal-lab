@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10J_PASS_STABLE_EDGE_BELOW_PF2_M10K_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10J_STABLE_M15_EDGE_M10K_NO_PF2_STATIC_EXIT_M10L_H1_MINING_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -25,18 +25,10 @@
     "only_miss_reason": "STATE_NOT_IDLE",
     "m7c_refit_approved": false
   },
-  "m10i": {
-    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_ROBUST_SHORT_EDGE",
-    "robust_pf2_candidate_count": 0,
-    "all_three_split_pf_gt_1_candidate_count": 0
-  },
   "m10j": {
     "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
     "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
     "result": "config/mochipoyo_alert_research/m10j_user_local_result_20260725.json",
-    "uploaded_package_sha256": "d1f262d8d2c995e3aa203cc1894acc6a53b743b195a5f5943598068a216ce731",
-    "robust_pf2_candidate_count": 0,
-    "all_three_split_pf_gt_1_count": 47,
     "primary_seed": {
       "candidate_id": "M10J_C0212",
       "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
@@ -52,19 +44,29 @@
   },
   "m10k": {
     "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
-    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10k_m15_short_exit_loss_tail_audit_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10k/python/run_m10k.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10k/bat/01_run_m10k.bat",
-    "seed": "M10J_C0212_ENTRY_FORMULA_FROZEN",
-    "entry_formula_changed": false,
-    "tp_atr_grid": [1.0, 1.5, 2.0, 2.5],
-    "sl_atr_grid": [0.75, 1.0, 1.25, 1.5],
-    "max_hold_minutes": [120, 240, 360],
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_STATIC_ATR_EXIT",
+    "result": "config/mochipoyo_alert_research/m10k_user_local_result_20260725.json",
+    "uploaded_package_sha256": "1b89602d67fc840af5d3b77fb316ca18e4a113525b3ffaacca817d768238b4d7",
     "grid_cells": 48,
-    "same_m1_bar_priority": "SL_FIRST_CONSERVATIVE",
+    "all_cells_three_split_pf_gt_1": 48,
+    "robust_pf2_candidate_count": 0,
+    "best_discovery_rank_1": {"tp_atr": 2.0, "sl_atr": 1.5, "max_hold_minutes": 120, "train_pf": 1.317195823821474, "validation_2025_pf": 1.2126242231484694, "test_2026_pf": 1.1575442304873906, "all_pf": 1.2133128651530305},
+    "best_min_split": {"tp_atr": 2.5, "sl_atr": 1.5, "max_hold_minutes": 240, "train_pf": 1.2686865412540729, "validation_2025_pf": 1.2086650855791168, "test_2026_pf": 1.2207088220231666, "all_pf": 1.2251137540985007},
+    "entry_formula_changed": false,
+    "forward_approved": false
+  },
+  "m10l": {
+    "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10l_h1_short_causal_feature_mining_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10l/python/run_m10l.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10l/bat/01_run_m10l.bat",
+    "candidate_universe": "all causal H1 decisions; Mochipoyo/M10J/M10K-independent",
+    "fixed_horizon_minutes": [240, 480, 720],
+    "formula_generation_and_ranking": "2023-2024_ONLY",
+    "validation": "2025_LOCKED",
+    "final_test": "2026_THROUGH_0619_LOCKED",
     "target_pf": 2.0,
-    "historical_research_exposed": true,
     "forward_approved": false
   },
   "forced_reboot_recovery": {
@@ -82,5 +84,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep all existing forward collectors/monitors running unchanged. Continue genuine XAUUSD PRIMARY_SHORT collection for later M10H re-audit. Fetch/Pull and run M10K 01_run_m10k.bat; submit only M10K 99_UPLOAD_PACKAGE.zip."
+  "next": "Keep all existing forward collectors/monitors running unchanged. Continue genuine XAUUSD PRIMARY_SHORT collection for later M10H re-audit. Fetch/Pull and run M10L 01_run_m10l.bat; submit only M10L 99_UPLOAD_PACKAGE.zip."
 }
