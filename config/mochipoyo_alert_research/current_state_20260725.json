@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10N_PF2_PAIR_M10O_REPRODUCTION_PASS_M10P_FRESH_SHADOW_DESIGN_NEXT_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10O_REPRODUCTION_PASS_M10P_IMPLEMENTED_FRESH_BOOTSTRAP_READY_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -17,13 +17,13 @@
     "M9V_mt5_server": "2026.07.24 11:04:00",
     "M9Y_mt5_server": "2026.07.24 12:45:00",
     "M10B_mt5_server": "2026.07.24 20:54:00",
-    "M10E_mt5_server": "2026.07.24 22:06:00"
+    "M10E_mt5_server": "2026.07.24 22:06:00",
+    "M10P_mt5_server": "TO_BE_FROZEN_ONCE_BY_M10P_BAT01"
   },
   "short_research_adoption": {
-    "status": "RESEARCH_ADOPTION_DIRECTION_ONLY_NOT_FORWARD_APPROVED",
-    "primary": "M10J_C0212",
-    "secondary": "M10L_H240_C056",
-    "h1_high_pf_reference": "M10L_H480_C050",
+    "status": "RESEARCH_ADOPTION_DIRECTION_ONLY_NOT_LIVE_APPROVED",
+    "primary_reference": "M10J_C0212",
+    "pf2_fresh_shadow_candidate": "M10L_H240_C056 + M10N_G013",
     "forward_approved": false
   },
   "m10n": {
@@ -68,19 +68,33 @@
   },
   "m10p": {
     "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-    "status": "DESIGN_NEXT_NOT_STARTED",
+    "status": "IMPLEMENTED_FRESH_BOOTSTRAP_NOT_YET_FROZEN",
+    "contract": "config/mochipoyo_alert_research/m10p_c056_g013_fresh_prospective_shadow_contract_20260725.json",
+    "source_verification": "config/mochipoyo_alert_research/m10p_live_source_contract_verification_20260725.json",
+    "core_runtime": "scripts/mochipoyo_alert_research/m10p/python/m10p_runtime.py",
+    "guarded_runtime": "scripts/mochipoyo_alert_research/m10p/python/m10p_guarded_runtime.py",
+    "initializer_bat": "scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat",
+    "bootstrap_bat": "scripts/mochipoyo_alert_research/m10p/bat/02_run_bootstrap_once_and_open_results.bat",
+    "forever_bat": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat",
     "fixed_seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
     "fixed_regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
     "fixed_horizon_minutes": 240,
+    "live_source_contract": {
+      "resolver": "M8B symbol metadata mt5_files_root",
+      "files": ["goldsharp_m1.csv", "goldsharp_m5.csv", "goldsharp_m15.csv", "goldsharp_h1.csv", "goldsharp_h4.csv", "goldsharp_d1.csv"],
+      "append_safe_prefix": true,
+      "newest_row_closed": true,
+      "time_basis": "MT5_SERVER_TIME"
+    },
     "new_immutable_mt5_server_start_required": true,
     "historical_backfill": false,
     "automatic_promotion": false,
     "forward_approved": false
   },
   "forced_reboot_recovery": {
-    "status": "READY_WITH_M10B_M10E",
+    "status": "CURRENT_RECOVERY_COVERS_M10B_M10E;_ADD_M10P_ONLY_AFTER_BOOTSTRAP_AND_LOOP_START",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
+    "current_restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
     "never_reinitialize_after_reboot": true
   },
   "safety": {
@@ -92,5 +106,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep all existing forward collectors/monitors running unchanged. Freeze C056+G013 exactly as reproduced. Design M10P as a separate fresh prospective audit-only shadow with a new immutable MT5-server start, no historical backfill, and no automatic promotion."
+  "next": "Keep all existing monitors running unchanged. Fetch/Pull. Run M10P BAT01 exactly once to freeze the new prospective start. If INIT PASS, never run BAT01 again. Then run BAT02 once and upload only M10P LATEST/99_UPLOAD_PACKAGE.zip. Do not start BAT03 until the bootstrap package is reviewed."
 }
