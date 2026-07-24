@@ -1,41 +1,64 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING_LOCAL_AUDIT_NEXT",
-  "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Retain M10J C0212 and M10L C056 as research adoption candidates, while running the independent M5 SHORT mining locally.",
+  "status": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_LOCAL_AUDIT_NEXT",
+  "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Retain C0212 and C056 as research adoption candidates. Run M10N common downside-opportunity regime research locally.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10m/bat/01_run_m10m.bat.",
-    "Required success marker: [M10M PASS].",
-    "Run scripts/mochipoyo_alert_research/m10m/bat/02_open_latest_results.bat.",
-    "Submit only M10M LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not use C0212 or C056 thresholds to generate M10M formulas.",
-    "Do not create/start a SHORT forward arm from M10M historical results alone."
+    "Run scripts/mochipoyo_alert_research/m10n/bat/01_run_m10n.bat.",
+    "Required success marker: [M10N PASS].",
+    "Run scripts/mochipoyo_alert_research/m10n/bat/02_open_latest_results.bat.",
+    "Submit only M10N LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not alter C0212/C056/M10M seed formulas from M10N results.",
+    "Do not create/start a SHORT forward arm from M10N historical results alone."
   ],
-  "research_adoption_candidates": {
-    "primary": "M10J_C0212",
-    "secondary": "M10L_H240_C056",
-    "reference": "M10L_H480_C050",
-    "status": "RETAIN_FOR_PORTFOLIO_AND_REGIME_RESEARCH_NOT_FORWARD_APPROVED"
+  "m10m_result": {
+    "status": "PASS_STABLE_EDGE_BELOW_PF2_INDEPENDENT_C0212_REDISCOVERY",
+    "package_sha256": "c2db635f5560e2bd9aff60e1d5bf1b2732bc6218392e9d61a7fcc863045bfc89",
+    "stable_all_three_split_pf_gt_1_count": 51,
+    "robust_pf2_candidate_count": 0,
+    "independent_rediscovery": {
+      "candidate_id": "M10M_H240_C006",
+      "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+      "same_as": "M10J_C0212",
+      "train_pf": 1.5689385901535529,
+      "validation_2025_pf": 1.3904778450159343,
+      "test_2026_pf": 1.5465266111892766,
+      "all_pf": 1.4839437156621065
+    },
+    "m5_specific_references": [
+      {
+        "candidate_id": "M10M_H120_C021",
+        "formula": "m5_ema30_40_bps <= -3.052275892 AND h4_ema20_30_bps >= 37.61355979",
+        "train_pf": 1.3852960596148525,
+        "validation_2025_pf": 1.3119429447822308,
+        "test_2026_pf": 1.325145,
+        "all_pf": 1.331124
+      },
+      {
+        "candidate_id": "M10M_H240_C057",
+        "formula": "m5_ema20_30_bps <= -1.885808038 AND h4_ema20_30_bps >= 37.61355979",
+        "train_pf": 1.274587,
+        "validation_2025_pf": 1.255802,
+        "test_2026_pf": 1.808992,
+        "all_pf": 1.403366
+      }
+    ]
   },
-  "m10m_design": {
-    "candidate_universe": "all causal M5 decisions; explicitly not M7C KERNEL-S1, M10J C0212, or M10L candidates",
-    "direction": "SHORT",
-    "features": "M5 plus latest closed M15/H1/H4 causal RCI/MACD/EMA/ATR/return/candle/volume/server-hour features",
-    "threshold_source": "2023-2024 discovery quantiles only",
+  "m10n_design": {
+    "goal": "Find a common causal higher-timeframe SHORT-favorable regime that improves retained C0212/C056 edges rather than inventing more entry filters.",
+    "ranking_seeds": ["M10J_C0212", "M10L_H240_C056"],
+    "third_seed_descriptive_check": "M10M_H120_C021",
+    "regime_snapshot": "latest fully closed H1 with causal H4/D1 context",
+    "regime_features": "20 H1/H4/D1 trend, momentum, return, volatility, RCI and EMA-slope/spacing features",
+    "exact_seed_formula_features_excluded": ["h4_ema20_30_bps", "h1_atr_pct100", "h1_macd_hist_bps", "h1_macd_line_bps", "m5_ema30_40_bps"],
+    "threshold_source": "2023-2024 only",
     "formula_families": ["single threshold", "two-condition AND"],
-    "pairing_and_ranking": "2023-2024 only",
+    "ranking": "minimum train PF lift across C0212 and C056, then mean lift",
     "validation": "2025 locked",
     "final_test": "2026 through 2026-06-19 locked",
-    "fixed_horizon_exits_minutes": [60, 120, 240],
-    "target_pf": 2.0,
-    "minimum_counts": {"discovery": 80, "validation_2025": 40, "final_test_2026": 20}
-  },
-  "planned_after_m10m": {
-    "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
-    "goal": "Determine whether C0212/C056 and any M10M candidate become materially stronger when restricted to objectively defined downside regimes.",
-    "guardrail": "Regime definitions must be generated/frozen using 2023-2024 only; 2025/2026 may validate but not invent the regime."
+    "target_pf": 2.0
   },
   "safety": {
     "audit_only": true,
