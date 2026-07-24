@@ -1,38 +1,39 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10D_USER_LOCAL_DETERMINISTIC_REPRODUCTION_NEXT",
-  "stage": "M10D_H1_COMPOUND_LOSS_FILTER_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B unchanged; run the fixed H1 compound-loss historical reproduction locally and submit its package before any new fresh filter monitor is created.",
+  "status": "M10E_FRESH_H1_BASELINE_VS_FILTER_BOOTSTRAP_NEXT",
+  "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B unchanged; create the independent M10E fresh start exactly once; run one M10E one-shot; submit its bootstrap package before persistent M10E collection.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, or reinitialize collector/M7C/M8C/M9V/M9Y/M10B.",
-    "Run scripts/mochipoyo_alert_research/m10d/bat/01_run_h1_compound_loss_filter_reproduction.bat.",
-    "Required success marker: [M10D PASS].",
-    "Run scripts/mochipoyo_alert_research/m10d/bat/02_open_latest_results.bat.",
-    "Submit only M10D LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not create or start a new prospective H1 filter arm before package review."
+    "Run scripts/mochipoyo_alert_research/m10e/bat/01_initialize_fresh_runtime_once.bat ONE TIME ONLY.",
+    "Required success marker: [M10E INIT PASS] fresh start=<MT5 server timestamp>.",
+    "After INIT PASS, NEVER run M10E BAT01 again and never delete/recreate the M10E runtime/start.",
+    "Run scripts/mochipoyo_alert_research/m10e/bat/02_run_shadow_once.bat ONE TIME.",
+    "Required success marker: [M10E PASS].",
+    "Run scripts/mochipoyo_alert_research/m10e/bat/05_open_latest_results.bat.",
+    "Submit only M10E LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do NOT run M10E BAT03 until the first M10E bootstrap package has been reviewed."
   ],
-  "fixed_rule": {
-    "m5_macd_bps_slope_le": -0.1308,
-    "h1_ema30_minus_ema40_bps_ge": 17.3333,
-    "decision_time": "actual H1 reclaim entry",
-    "closed_bar_only": true,
-    "future_outcome_used_in_entry_gate": false
+  "success_conditions": {
+    "fresh_start_rule": "M10E start is frozen from the latest stable CLOSED M1 row at BAT01 time and must be strictly after M9V 2026.07.24 11:04:00, M9Y 2026.07.24 12:45:00 and M10B 2026.07.24 20:54:00.",
+    "upstream": "M9V v2 S3_H1 READ-ONLY, post-M10E-start PRIMARY only, resolved-only native materialization",
+    "arms": ["E0_H1_BASELINE_RUNNER50", "E1_H1_FILTERED_RUNNER50"],
+    "fixed_filter": {"m5_macd_bps_slope_le": -0.1308, "h1_ema30_minus_ema40_bps_ge": 17.3333},
+    "filter_before_one_position": true,
+    "historical_backfill": false
   },
-  "expected_success": {
-    "baseline_count": 159,
-    "baseline_pf": 2.8303858342555084,
-    "baseline_payoff": 1.3365710883984345,
-    "filtered_count": 130,
-    "filtered_pf": 5.4011538832619195,
-    "filtered_payoff": 1.9129086669885966,
+  "m10d_pass": {
+    "package_sha256": "f5de107c13a4649af6c354c04d03661b75916e06f65c896d349dbfc5e872141c",
+    "baseline": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345},
+    "filtered": {"count": 130, "win_rate": 0.7384615384615385, "pf": 5.40115388326192, "payoff": 1.9129086669885969},
     "fixed_spread_0p20_pf": 5.3636874914829455,
     "fixed_spread_0p20_payoff": 1.8996393199002097,
     "neighborhood_every_year_pass_cells": 5
   },
-  "m10b_note": "M10B bootstrap is already PASS with immutable start 2026.07.24 20:54:00. Never rerun M10B initializer. Persistent BAT03 is allowed after the reviewed bootstrap; whether the user has already started it is not yet confirmed.",
-  "if_blocked": "Do not alter thresholds or delete/recreate any prospective runtime. Send the complete M10D console output for diagnosis.",
-  "after_local_pass": "Review exact deterministic metrics and anti-leakage outputs. Only then freeze a NEW independent fresh prospective H1 baseline-vs-filter comparison with a new start; never retrofit M10B or reuse M9V/M9Y/M10B starts.",
+  "m10b_note": "M10B bootstrap remains PASS with immutable start 2026.07.24 20:54:00. Never rerun the M10B initializer. M10B BAT03 is allowed from its reviewed bootstrap; whether the persistent loop has already been started is not confirmed in chat.",
+  "if_blocked": "Do not delete locks/manifests/receipts or alter thresholds. Send the complete M10E console output. If INIT PASS already occurred, never retry BAT01; diagnose BAT02/runtime only while preserving the frozen start.",
+  "after_first_local_pass": "Review M10E start chronology, prefix integrity, zero/preliminary counts, fixed filter fields, resolved-only behavior and guardrails. Only after review may M10E BAT03 be authorized and forced-reboot recovery extended to M10E.",
   "safety": {
     "audit_only": true,
     "discord_send": false,
