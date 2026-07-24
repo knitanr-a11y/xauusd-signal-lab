@@ -1,0 +1,73 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9Y_GOLD_PAYOFF_FRESH_PROSPECTIVE_SHADOW_IMPLEMENTATION_SELF_TEST",
+  "status": "PASS_SELF_TEST_READY_FOR_ONE_TIME_LOCAL_FRESH_START",
+  "recorded_at_utc": "2026-07-24T13:40:00Z",
+  "contract": "config/mochipoyo_alert_research/m9y_gold_payoff_fresh_prospective_shadow_contract_20260724.json",
+  "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
+  "architecture": {
+    "upstream": "Read-only M9V v2 S2_M15 branch candidate ledger",
+    "m9y_fresh_start_independent": true,
+    "eligibility": "proxy_primary_time strictly greater than M9Y start",
+    "m9v_start_reused": false,
+    "m9v_modified": false,
+    "m9v_reset": false
+  },
+  "historical_parity_test": {
+    "window_start": "2025.06.01 00:00:00",
+    "upstream_S2_post_start": 476,
+    "W1_candidates": 348,
+    "independent_recompute_and_feed_mode_exact_match": true,
+    "Y0": {"accepted": 348, "profit_factor": 1.9096771524763991},
+    "Y1": {"accepted": 348, "profit_factor": 2.050800724761162},
+    "Y2": {"accepted": 331, "profit_factor": 2.069775123045078},
+    "Y3": {"accepted": 331, "profit_factor": 2.034581162873279}
+  },
+  "fresh_start_simulation": {
+    "frozen_start_server_time": "2025.06.03 11:59:00",
+    "upstream_S2_post_start": 471,
+    "W1_candidates": 344,
+    "earliest_accepted_proxy_primary_time": "2025.06.04 23:30:00",
+    "pre_start_primary_candidate_count": 0,
+    "append_after_freeze_pass": true
+  },
+  "fail_closed_tests": {
+    "frozen_M5_row_tamper": "BLOCKED",
+    "error_frozen_M5": "frozen pre-start rows changed after M9Y start: M5",
+    "M9V_runtime_manifest_tamper": "BLOCKED",
+    "error_m9v_manifest": "M9V runtime manifest changed after M9Y freeze",
+    "runtime_reinitialization_forbidden": true
+  },
+  "historical_one_position_reference": {
+    "source": "config/mochipoyo_alert_research/m9x_one_position_runner_overlap_addendum_20260724.json",
+    "Y2_like_runner50_count": 1008,
+    "Y2_like_runner50_pf": 1.66289170174128,
+    "Y2_like_payoff_ratio": 1.1542424753263003,
+    "Y3_like_runner75_count": 1008,
+    "Y3_like_runner75_pf": 1.6483266594682453,
+    "Y3_like_payoff_ratio": 1.2412616409560873,
+    "note": "Historical/research-exposed reference only; not forward validation."
+  },
+  "operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9y/bat",
+    "01": "01_initialize_fresh_runtime_once.bat",
+    "02": "02_run_shadow_once.bat",
+    "03": "03_run_shadow_forever.bat",
+    "04": "04_stop_shadow_forever.bat",
+    "05": "05_open_latest_results.bat"
+  },
+  "decision": {
+    "ready_for_user_fresh_start": true,
+    "start_persistent_before_initial_zip_review": false,
+    "automatic_live_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "m8c_reset": false,
+    "m9v_reset": false
+  }
+}
