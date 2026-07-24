@@ -1,9 +1,9 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9X_IMPLEMENTED_USER_REPRODUCTION_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9X_LOCAL_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; PULL LATEST; RUN M9X BAT 01 ONCE; SUBMIT M9X ZIP; DO NOT CHANGE M9V",
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9Y_IMPLEMENTED_USER_FRESH_START_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_FRESH_PAYOFF_INITIALIZATION_AND_INITIAL_REVIEW",
+  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; PULL LATEST; RUN M9Y BAT 01 ONCE; AFTER INIT PASS RUN M9Y BAT 02 ONCE AND SUBMIT M9Y ZIP; DO NOT START M9Y BAT 03 YET",
   "m9v": {
     "prospective_start_server_time": "2026.07.24 11:04:00",
     "keep_running": true,
@@ -12,33 +12,50 @@
     "runtime_reset_allowed": false
   },
   "m9x": {
-    "implementation": "scripts/mochipoyo_alert_research/m9x/python/run_gold_payoff_decoupling_reproduction.py",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9x/bat",
-    "01_reproduction": "01_run_gold_payoff_decoupling_reproduction.bat",
-    "02_open_results": "02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9X\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "expected_pass_line": "[M9X PASS] N3=1495 W1=1054 ...",
-    "historical_only": true,
-    "m9v_modified": false
+    "status": "PASS_EXACT_LOCAL_REPRODUCTION_HISTORICAL_ONLY",
+    "result": "config/mochipoyo_alert_research/m9x_gold_payoff_decoupling_local_reproduction_result_20260724.json",
+    "one_position_addendum": "config/mochipoyo_alert_research/m9x_one_position_runner_overlap_addendum_20260724.json",
+    "forward_validated": false
+  },
+  "m9y": {
+    "contract": "config/mochipoyo_alert_research/m9y_gold_payoff_fresh_prospective_shadow_contract_20260724.json",
+    "self_test": "config/mochipoyo_alert_research/m9y_implementation_self_test_result_20260724.json",
+    "state": "IMPLEMENTED_SELF_TEST_PASS_READY_LOCAL_INIT",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9y/bat",
+    "01_initialize_once": "01_initialize_fresh_runtime_once.bat",
+    "02_one_shot": "02_run_shadow_once.bat",
+    "03_persistent": "03_run_shadow_forever.bat",
+    "04_stop": "04_stop_shadow_forever.bat",
+    "05_open_results": "05_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9Y\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_runtime_manifest.json",
+    "runtime_receipt": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_runtime_start_receipt.json",
+    "fresh_start_created": false,
+    "reset_allowed_after_pass": false,
+    "upstream_policy": "Read M9V v2 S2_M15 LATEST output read-only; require proxy_primary_time > independent M9Y start; never modify/reset M9V."
   },
   "operator_order_now": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Keep M8C, M7C, genuine source collector and M9V 03 running unchanged.",
-    "Run scripts/mochipoyo_alert_research/m9x/bat/01_run_gold_payoff_decoupling_reproduction.bat once.",
-    "If PASS, run scripts/mochipoyo_alert_research/m9x/bat/02_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip.",
-    "If BLOCKED, send the full screen output. Do not stop/reset M9V."
+    "Run scripts/mochipoyo_alert_research/m9y/bat/01_initialize_fresh_runtime_once.bat exactly once until [M9Y INIT PASS].",
+    "After INIT PASS never rerun M9Y 01 and never delete/reset M9Y runtime/start receipt.",
+    "Run scripts/mochipoyo_alert_research/m9y/bat/02_run_shadow_once.bat once.",
+    "Run scripts/mochipoyo_alert_research/m9y/bat/05_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip.",
+    "Do NOT start M9Y 03_run_shadow_forever.bat until ChatGPT reviews the initial M9Y ZIP."
   ],
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9X_IMPLEMENTED_LOCAL_REPRODUCTION_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9X_PASS_M9Y_IMPLEMENTED_FRESH_START_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
   "forbidden": [
     "Do not stop/reset M8C/M7C/M9V.",
     "Do not rerun M9V BAT00/BAT01.",
-    "Do not backfill M9V.",
-    "Do not add M9W/M9X rules retroactively into M9V.",
-    "Do not promote M9W historical results as fresh validation.",
+    "Do not backfill M9V or M9Y.",
+    "Do not reuse the M9V prospective start as the M9Y start.",
+    "Do not allow an M9V S2 candidate whose proxy PRIMARY is at/before M9Y start into M9Y.",
+    "Do not rerun/reset M9Y initializer after INIT PASS.",
+    "Do not start M9Y persistent loop before initial ZIP review.",
     "Do not start M9R.",
     "Do not transplant GOLD payoff rules into BTC.",
     "Do not enable Discord, MT5 orders, live ready, final signal, or real entry gate."
