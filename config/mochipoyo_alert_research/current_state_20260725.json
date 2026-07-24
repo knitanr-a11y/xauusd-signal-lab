@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T20:15:00Z",
-  "status": "M10B_M10E_RUNNING_M10F_SHORT_AUDIT_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T20:40:00Z",
+  "status": "M10B_M10E_RUNNING_M10F_PASS_M10G_M15_SHORT_RECLAIM_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -28,59 +28,55 @@
   },
   "m10b": {
     "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10b_user_local_bootstrap_result_20260725.json",
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_PERSISTENT_RUNNING",
     "prospective_start_server_time": "2026.07.24 20:54:00",
     "historical_backfill": false,
-    "reset_allowed": false,
-    "persistent_shadow_allowed": true,
-    "persistent_loop_started_confirmed": true
-  },
-  "m10d": {
-    "stage": "M10D_H1_COMPOUND_LOSS_FILTER_DETERMINISTIC_REPRODUCTION",
-    "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
-    "result": "config/mochipoyo_alert_research/m10d_h1_compound_loss_filter_user_local_reproduction_result_20260725.json",
-    "baseline": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345, "max_drawdown_bps": 271.583159570446},
-    "filtered": {"count": 130, "win_rate": 0.7384615384615385, "pf": 5.40115388326192, "payoff": 1.9129086669885969, "max_drawdown_bps": 101.7430435392024},
-    "fixed_spread_0p20": {"pf": 5.3636874914829455, "payoff": 1.8996393199002097},
-    "forward_validated": false
+    "reset_allowed": false
   },
   "m10e": {
     "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10e_user_local_bootstrap_result_20260725.json",
-    "uploaded_package_sha256": "301e5f7361446300164e50183987c58c03aa4a58a3d06a5b5fd7692d4489514d",
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_PERSISTENT_RUNNING",
     "prospective_start_server_time": "2026.07.24 22:06:00",
-    "start_is_immutable": true,
-    "arms": ["E0_H1_BASELINE_RUNNER50", "E1_H1_FILTERED_RUNNER50"],
     "fixed_filter": {"m5_macd_bps_slope_le": -0.1308, "h1_ema30_minus_ema40_bps_ge": 17.3333},
-    "bootstrap": {"upstream_resolved_post_start": 0, "h1_entry_candidates": 0, "compound_excluded": 0, "E0_accepted": 0, "E1_accepted": 0},
-    "resolved_only": true,
-    "prefix_integrity_verified": true,
     "historical_backfill": false,
-    "reset_allowed": false,
-    "persistent_shadow_allowed": true,
-    "persistent_loop_started_confirmed": true
+    "reset_allowed": false
   },
   "m10f": {
     "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
-    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10f_short_compound_loss_feature_audit_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10f/python/run_short_compound_loss_feature_audit.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10f/bat/01_run_short_compound_loss_feature_audit.bat",
-    "timeframes": ["M5", "M15", "H1", "H4"],
-    "direction": "SHORT",
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_ROBUST_SHORT",
+    "result": "config/mochipoyo_alert_research/m10f_short_compound_loss_user_local_result_20260725.json",
+    "uploaded_package_sha256": "e31c553dadded8c49c163d839810f998b65b9aa55a5ed8527cf945b5f4d8ae88",
     "target_pf": 2.0,
-    "discovery": "2023-2024_ONLY",
-    "validation": "2025_ONLY",
-    "final_test": "2026_THROUGH_0619_ONLY",
-    "retention_bands": [0.25, 0.50, 0.75],
-    "long_rule_mirroring": false,
+    "pf2_train_val_test_all": {"M5": 0, "M15": 0, "H1": 0, "H4": 0},
+    "promising_seed": {
+      "timeframe": "M15",
+      "candidate_id": "M10F_M15_C0049",
+      "all_count": 1089,
+      "all_pf": 1.1566500291510813,
+      "fixed0p20_all_pf": 1.1413439010359998,
+      "train_pf": 1.1384295285895225,
+      "validation_2025_pf": 1.03663660004606,
+      "test_2026_pf": 1.3615777641528928
+    },
+    "forward_approved": false
+  },
+  "m10g": {
+    "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
+    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10g_m15_short_reclaim_audit_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10g/python/run_m15_short_reclaim_audit.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10g/bat/01_run_m15_short_reclaim_audit.bat",
+    "seed": "M10F_M15_C0049_FIXED",
+    "offset_atr_grid": [0.0, 0.05, 0.10, 0.15, 0.20],
+    "wait_minutes_grid": [5, 10, 15, 20, 30],
+    "grid_cells": 25,
+    "runner_tested": false,
+    "target_pf": 2.0,
+    "historical_research_exposed": true,
     "forward_approved": false
   },
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10B_M10E",
-    "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
     "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
     "never_reinitialize_after_reboot": true
@@ -94,5 +90,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B/M10E running unchanged. Fetch/Pull and run M10F historical SHORT compound-loss audit locally; submit M10F 99_UPLOAD_PACKAGE.zip for holdout review. No SHORT forward arm before deterministic reproduction."
+  "next": "Keep M10B/M10E persistent shadows running unchanged. Fetch/Pull and run M10G M15 SHORT reclaim audit locally; submit M10G 99_UPLOAD_PACKAGE.zip. No SHORT forward arm from M10F/M10G historical results alone."
 }
