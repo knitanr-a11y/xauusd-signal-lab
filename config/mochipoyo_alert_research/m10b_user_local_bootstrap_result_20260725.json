@@ -1,0 +1,48 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T19:25:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(23).zip",
+    "sha256": "50027a8a295f0b6db13ad77c68801dbe5a57c67b33bd109edf2c2848182c80f7"
+  },
+  "prospective_start_server_time": "2026.07.24 20:54:00",
+  "chronology": {
+    "m9v_start": "2026.07.24 11:04:00",
+    "m9y_start": "2026.07.24 12:45:00",
+    "m10b_strictly_after_both": true
+  },
+  "bootstrap_observation": {
+    "latest_M1_server_open": "2026.07.24 20:55:00",
+    "upstream_resolved_post_start": {"S1_M5": 0, "S3_H1": 0, "S4_H4": 0},
+    "entry_candidate_counts": {"M5": 0, "H1": 0, "H4": 0},
+    "all_arm_accepted_counts": 0,
+    "interpretation": "Expected zero bootstrap immediately after fresh start; resolved-only materialization has not yet had time to resolve a post-start native candidate."
+  },
+  "data_quality": {
+    "closed_rows_contract": true,
+    "prefix_integrity_verified": true,
+    "point": 0.01
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "future_outcome_used_in_entry_gate": false,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "reset_allowed": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "decision": {
+    "bootstrap": "PASS",
+    "fresh_start_frozen": true,
+    "never_rerun_m10b_initializer": true,
+    "persistent_shadow_allowed": true,
+    "persistent_shadow_command": "scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat"
+  }
+}
