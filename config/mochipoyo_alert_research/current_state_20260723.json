@@ -2,127 +2,102 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T14:25:00Z",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9Y_PERSISTENT_READY_WITH_FORCED_REBOOT_RECOVERY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FRESH_FORWARD_COLLECTION",
+  "recorded_at_utc": "2026-07-24T14:40:00Z",
+  "status": "M8C_RUNNING_M9V_M9Y_FORWARD_M9Z_MULTI_TIMEFRAME_PAYOFF_RESEARCH_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FORWARD_PLUS_M9Z_ASSISTANT_SIDE_RESEARCH",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
+  "running_monitors": {
+    "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
+    "M7C": "RUNNING_KEEP_UNCHANGED",
+    "M8C": "RUNNING_KEEP_UNCHANGED",
+    "M9V": "RUNNING_KEEP_UNCHANGED",
+    "M9Y": "RUNNING_KEEP_UNCHANGED"
+  },
   "m8c": {
-    "status": "RUNNING_FORWARD_SHADOW",
     "prospective_start_reset_allowed": false,
     "historical_backfill_allowed": false,
-    "review_gates": {
-      "total_future_proxy_primary": 30,
-      "btcusd_primary_long": 8,
-      "challenger_accepted": 15
-    }
+    "review_gates": {"total_future_proxy_primary": 30, "btcusd_primary_long": 8, "challenger_accepted": 15}
   },
   "m9v": {
     "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 11:04:00",
-    "status": "FRESH_FORWARD_COLLECTION_BASE_MULTI_TIMEFRAME_BREADTH",
-    "persistent_operator": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
-    "runtime_reset_allowed": false,
     "historical_backfill_allowed": false,
+    "runtime_reset_allowed": false,
     "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
-    "review_gates": {
-      "operational_total_accepted_arm_events": 20,
-      "interim_total_accepted_arm_events": 60,
-      "minimum_H1_S3_candidates": 10,
-      "formal_total_accepted_arm_events": 120
-    }
+    "review_gates": {"operational_total_accepted_arm_events": 20, "interim_total_accepted_arm_events": 60, "minimum_H1_S3_candidates": 10, "formal_total_accepted_arm_events": 120}
   },
   "m9x": {
     "status": "PASS_EXACT_LOCAL_REPRODUCTION_HISTORICAL_ONLY",
     "result": "config/mochipoyo_alert_research/m9x_gold_payoff_decoupling_local_reproduction_result_20260724.json",
     "one_position_addendum": "config/mochipoyo_alert_research/m9x_one_position_runner_overlap_addendum_20260724.json",
-    "runner50_one_position": {
-      "count": 1008,
-      "profit_factor": 1.66289170174128,
-      "average_win_bps": 17.404333045815353,
-      "average_loss_bps": -15.078576137908293,
-      "payoff_ratio": 1.1542424753263003,
-      "extra_2bps_pf": 1.3277448963066876
-    },
-    "runner75_one_position": {
-      "count": 1008,
-      "profit_factor": 1.6483266594682453,
-      "average_win_bps": 18.9514125771714,
-      "average_loss_bps": -15.267862916132648,
-      "payoff_ratio": 1.2412616409560873,
-      "extra_2bps_pf": 1.3302567506733145
-    },
+    "runner50_one_position": {"count": 1008, "profit_factor": 1.66289170174128, "average_win_bps": 17.404333045815353, "average_loss_bps": -15.078576137908293, "payoff_ratio": 1.1542424753263003, "extra_2bps_pf": 1.3277448963066876},
+    "runner75_one_position": {"count": 1008, "profit_factor": 1.6483266594682453, "average_win_bps": 18.9514125771714, "average_loss_bps": -15.267862916132648, "payoff_ratio": 1.2412616409560873, "extra_2bps_pf": 1.3302567506733145},
     "forward_validated": false
   },
   "m9y": {
-    "status": "INITIAL_LOCAL_PASS_READY_FOR_PERSISTENT_FORWARD_SHADOW",
-    "contract": "config/mochipoyo_alert_research/m9y_gold_payoff_fresh_prospective_shadow_contract_20260724.json",
-    "self_test": "config/mochipoyo_alert_research/m9y_implementation_self_test_result_20260724.json",
-    "initial_local_result": "config/mochipoyo_alert_research/m9y_initial_local_pass_20260724.json",
     "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 12:45:00",
+    "status": "PERSISTENT_FRESH_FORWARD_COLLECTION",
     "m9v_upstream": "READ_ONLY_M9V_V2_S2_M15_POST_M9Y_START_ONLY",
-    "m9v_start_reused": false,
-    "m9v_modified": false,
     "historical_backfill_allowed": false,
-    "pre_start_primary_candidate_eligibility": false,
     "runtime_reset_allowed": false,
-    "persistent_operator": "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat",
-    "stop_operator": "scripts/mochipoyo_alert_research/m9y/bat/04_stop_shadow_forever.bat",
     "arms": ["Y0_W1_NATIVE_EXIT", "Y1_W1_N6_NATIVE_EXIT", "Y2_W1_N6_RUNNER50", "Y3_W1_N6_RUNNER75"],
-    "review_gates": {
-      "operational_checkpoint_Y0_accepted": 20,
-      "interim_checkpoint_Y0_accepted": 60,
-      "minimum_N6_flagged_entries_for_risk_review": 10,
-      "formal_checkpoint_Y0_accepted": 120
-    }
+    "review_gates": {"operational_checkpoint_Y0_accepted": 20, "interim_checkpoint_Y0_accepted": 60, "minimum_N6_flagged_entries_for_risk_review": 10, "formal_checkpoint_Y0_accepted": 120}
   },
   "forced_reboot_recovery": {
     "status": "READY",
     "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "reason": "Forced Windows reboot can leave stale exclusive lock files for collector/M7C/M9V/M9Y because graceful finally cleanup may not execute.",
     "recovery_changes_runtime_or_start": false,
-    "restart_order": [
-      "MT5/CSV export",
-      "collector",
-      "M7C",
-      "M8C",
-      "M9V",
-      "M9Y"
-    ],
+    "restart_order": ["MT5/CSV export", "collector", "M7C", "M8C", "M9V", "M9Y"],
     "never_reinitialize_after_reboot": true
+  },
+  "m9z_next": {
+    "stage": "M9Z_GOLD_MULTI_TIMEFRAME_PAYOFF_EXTENSION_ASSISTANT_SIDE_AUDIT_ONLY",
+    "status": "NEXT_NOT_STARTED",
+    "purpose": "Extend the payoff-decoupling research from canonical M15 to GOLD M5/H1/H4 using timeframe-specific entry-location and profit-management logic while all fresh forward monitors continue unchanged.",
+    "research_order": ["M5", "H1", "H4"],
+    "required_per_timeframe": [
+      "Rebuild the frozen M9S branch candidate population without changing its branch definition.",
+      "Measure entry-to-native-exit MAE/MFE, holding time and loss-tail structure.",
+      "Measure post-native-exit MFE at causal horizons appropriate to the branch timeframe.",
+      "Test whether deep unresolved pullback is weaker than reclaim/confirmation entry; do not copy M15 0.10 ATR / 10m parameters blindly.",
+      "Test a small predefined neighborhood of causal reclaim/confirmation rules, seeking a stable family rather than a historical best cell.",
+      "Test separate profit-management vectors using higher-timeframe momentum/structure and runner logic appropriate to that branch.",
+      "Enforce one-position accounting and quantify overlaps with M15/M9Y and other timeframe branches.",
+      "Report count/month, WR, PF, avg win/loss, payoff ratio, DD, max losing streak, loss tails, year/quarter/month behavior and +0.5/+1/+1.5/+2bps sensitivity."
+    ],
+    "portfolio_after_branch_research": [
+      "Rebuild a deduplicated GOLD portfolio using only branch families that show broad robustness.",
+      "Use multi-timeframe confirmation primarily for position management/confidence, not automatic pyramiding.",
+      "Measure incremental value and correlation of each added branch.",
+      "Do not modify M9V/M9Y with any M9Z historical finding until a separate deterministic reproduction and future prospective contract are completed."
+    ],
+    "btc_policy": "Keep BTC as a separate research family. Do not transplant GOLD M9Z rules. Continue collecting genuine-source/M7C/M8C evidence; BTC-specific payoff research requires BTC-specific evidence/data."
   },
   "monitoring_duration_policy": {
     "date_based_stop": false,
-    "policy": "Keep forward loops running through frozen review checkpoints; perform manual review at the operational gate before deciding whether to continue, stop, or redesign.",
-    "M7C": "Review at supported events 5, 15, then formal >=30 with ticker/direction/exit minimums.",
-    "M8C": "Review when total>=30, BTCUSD PRIMARY_LONG>=8, challenger accepted>=15.",
-    "M9V": "Review at total accepted arm events 20, 60, then formal 120; H1 branch review also needs >=10 S3 candidates.",
-    "M9Y": "Review Y0 at 20, 60, then formal 120; N6 risk layer needs >=10 flagged entries.",
-    "collector": "Keep running while any forward research requiring genuine source attribution remains active."
-  },
-  "m9r": {
-    "status": "FROZEN_NOT_STARTED",
-    "decision": "M9Y supersedes M9R for current payoff-forward validation path."
-  },
-  "btc": {
-    "historical_2023_2026_data_available": false,
-    "policy": "Separate research family; do not transplant GOLD M9X/M9Y payoff rules into BTC without BTC-specific evidence."
+    "policy": "Keep forward loops running through frozen review checkpoints and manually review at the first operational gate before deciding whether further collection is justified.",
+    "M7C": "5 / 15 / formal >=30 supported events plus ticker/direction/exit minimums.",
+    "M8C": "total>=30, BTCUSD PRIMARY_LONG>=8, challenger accepted>=15.",
+    "M9V": "accepted arm events 20 / 60 / 120 and H1 S3>=10.",
+    "M9Y": "Y0 accepted 20 / 60 / 120 and N6 flagged entries>=10."
   },
   "next": {
-    "stage": "M9V_AND_M9Y_PERSISTENT_FORWARD_COLLECTION_WITH_REBOOT_SAFE_RECOVERY",
+    "stage": "M9Z_GOLD_MULTI_TIMEFRAME_PAYOFF_EXTENSION_ASSISTANT_SIDE_AUDIT_ONLY",
     "tasks": [
-      "Keep M8C/M7C/genuine source collector/M9V/M9Y persistent loops running while collecting fresh evidence.",
-      "At first operational review gates, inspect results before deciding whether further months are justified.",
-      "After any forced reboot, do not rerun initializers. Pull latest if needed, run the forced-reboot recovery BAT once, confirm MT5 CSV export resumed, then restart persistent loops in the documented order.",
-      "If MT5 raw CSV has a permanent downtime gap, do not silently count that interval as observed forward evidence."
+      "Keep collector/M7C/M8C/M9V/M9Y running unchanged.",
+      "Begin assistant-side M9Z with GOLD M5 branch first, then H1, then H4.",
+      "Do not ask the user to run a BAT until a deterministic reproduction or fresh prospective stage actually requires it.",
+      "At any forward operational checkpoint, pause historical expansion long enough to review fresh evidence before deciding continuation/promotion.",
+      "After forced reboot use only the dedicated recovery BAT; never rerun frozen initializers."
     ],
     "user_bat_required_now": false
   },
   "objective": {
-    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_POSITIVE_REWARD_RISK_AND_LOWER_DRAWDOWN",
+    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_USEFUL_FREQUENCY_POSITIVE_REWARD_RISK_AND_LOWER_DRAWDOWN",
     "entry_and_exit_vectors_separate": true,
-    "prefer_reclaim_confirmation_over_bottom_fishing": true,
+    "quality_over_single_branch_frequency": true,
     "native_alert_exit_is_profit_management_event_not_mandatory_full_exit": true
   },
   "safety": {
