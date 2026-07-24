@@ -1,0 +1,42 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_PRESTART_DESIGN_AND_STATIC_REVIEW_USER_LOCAL_BOOTSTRAP_PENDING",
+  "recorded_at_utc": "2026-07-24T19:25:00Z",
+  "inputs": {
+    "m10d_user_local_result": "config/mochipoyo_alert_research/m10d_h1_compound_loss_filter_user_local_reproduction_result_20260725.json",
+    "m10e_contract": "config/mochipoyo_alert_research/m10e_h1_compound_loss_filter_fresh_prospective_shadow_contract_20260725.json",
+    "m10e_runtime": "scripts/mochipoyo_alert_research/m10e/python/m10e_runtime.py"
+  },
+  "review": {
+    "fixed_thresholds_match_m10d": true,
+    "m5_macd_bps_formula_matches_m10d": true,
+    "closed_m5_h1_at_actual_entry_only": true,
+    "filter_before_one_position": true,
+    "baseline_and_filtered_arms_independent_one_position": true,
+    "upstream_branch": "S3_H1_ONLY",
+    "m9v_upstream_read_only": true,
+    "resolved_only_native_materialization": true,
+    "pre_start_primary_candidate_eligibility": false,
+    "fresh_start_independent": true,
+    "fresh_start_must_be_after_m9v_m9y_m10b": true,
+    "prefix_fingerprint_freeze_all_six_live_csvs": true,
+    "historical_backfill": false,
+    "m9y_output_dependency": false,
+    "m10b_output_dependency": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  },
+  "implementation_note": "An initial prestart static review found that the first M10E draft referenced a non-public M9P macd_bps function. Before any M10E runtime/start was created, the runtime was corrected to compute the exact M10D MACD-bps formula locally from M9P EMA(6) and EMA(13). Therefore no prospective evidence was observed or used in the correction.",
+  "user_local_status": {
+    "runtime_created": false,
+    "prospective_start_server_time": null,
+    "bat01_pending": true,
+    "bat02_pending": true,
+    "persistent_loop_allowed_before_bootstrap_review": false
+  },
+  "next": "Fetch/Pull; keep existing monitors unchanged; run M10E BAT01 once until INIT PASS; never rerun BAT01; run BAT02 once; submit M10E 99_UPLOAD_PACKAGE.zip before BAT03."
+}
