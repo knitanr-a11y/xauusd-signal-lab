@@ -1,0 +1,95 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-24T10:20:00Z",
+  "purpose": "Fresh prospective audit-only comparison of whether adding H1 and then M5/H4 branches to canonical M15 N3 improves portfolio-level edge/frequency under one-position dedup, before introducing the separate M9R risk/reward overlays.",
+  "data": {
+    "ticker": "XAUUSD",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false
+  },
+  "branch_definitions": {
+    "S1_M5": "M5 M7C-style PRIMARY/EXIT state machine; first causal M1 turn after a post-start PRIMARY; at turn decision own M5 relative core true (M5 tick_volume_ratio20 <= trailing200 q50 OR M5 MACD line bps >= trailing200 q75), latest closed M15 MACD line bps >= trailing100 q75, latest closed H1 MACD line bps >= trailing100 q50, latest closed H1 RCI9 >= trailing100 q50.",
+    "S2_M15": "Canonical M9P N3: M15 M7C-style state machine; first causal M1 turn after post-start PRIMARY; N1 latest closed M5 tick_volume_ratio20 <= trailing200 q50 OR N2 latest closed M15 MACD line bps >= trailing200 q75.",
+    "S3_H1": "H1 M7C-style state machine; first causal M1 turn after post-start PRIMARY; latest closed H4 MACD line bps >= trailing100 q75 AND latest closed D1 MACD line bps >= trailing100 q50.",
+    "S4_H4": "H4 M7C-style state machine; first causal M1 turn after post-start PRIMARY; latest closed D1 RCI9 >= trailing100 q50 AND D1 EMA20>EMA30>EMA40. Premium/reference branch only."
+  },
+  "first_turn_contract": {
+    "lookback_m1_bars": 5,
+    "long_condition": "previous M1 low <= minimum low of prior five-bar history, previous low < original proxy-primary signal bid/open, current closed M1 close > previous closed M1 close; virtual entry at next exact M1 open",
+    "future_relative_to_entry_decision_used": false,
+    "nearest_m1_fallback": false
+  },
+  "arms": {
+    "V0_M15_ONLY": {
+      "eligible_branches": ["S2_M15"],
+      "one_position": true
+    },
+    "V1_M15_PLUS_H1": {
+      "eligible_branches": ["S2_M15", "S3_H1"],
+      "one_position": true
+    },
+    "V2_ALL_TIMEFRAMES": {
+      "eligible_branches": ["S1_M5", "S2_M15", "S3_H1", "S4_H4"],
+      "one_position": true
+    }
+  },
+  "portfolio_dedup": {
+    "when_flat": "accept the first eligible branch candidate chronologically",
+    "while_active": "do not open another GOLD LONG; record later eligible branch candidates as ordered confirmation metadata only",
+    "simultaneous_priority": ["S4_H4", "S3_H1", "S2_M15", "S1_M5"],
+    "accepted_trade_exit": "use the accepted branch's own frozen timeframe proxy exit; no runner in M9V",
+    "generic_agreement_score": false,
+    "pyramiding": false
+  },
+  "fresh_start_bootstrap": {
+    "fresh_gold_prospective_start_required": true,
+    "reuse_m7c_start": false,
+    "reuse_m8c_start": false,
+    "backfill": false,
+    "pre_start_primary_eligibility": "FORBIDDEN",
+    "state_rehydration": "Historical closed bars may be replayed before start only to determine each timeframe state. Any ACTIVE position whose PRIMARY occurred before start is ineligible for M9V candidate accounting; wait for its proxy EXIT/return-to-IDLE before a new post-start PRIMARY becomes eligible.",
+    "start_freeze_rule": "Initialize only after required live CSVs are current and stable; write immutable runtime manifest/start receipt before prospective rows are accepted."
+  },
+  "reporting": {
+    "branch_metrics": ["count", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "max_drawdown_bps", "max_losing_streak", "tail_le_minus_100_fraction"],
+    "arm_metrics": ["count", "monthly_frequency", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "max_drawdown_bps", "max_losing_streak", "tail_le_minus_100_fraction"],
+    "confirmation_metadata": "record ordered causal branch sequence and time gaps; do not convert to a positive score automatically",
+    "cost_reporting": "historical/live spread where available; commission/swap remain separately labeled unless explicitly modeled"
+  },
+  "review_gates": {
+    "operational_checkpoint_total_accepted_arm_events": 20,
+    "interim_checkpoint_total_accepted_arm_events": 60,
+    "minimum_H1_S3_candidates_for_branch_review": 10,
+    "formal_portfolio_review_total_accepted_arm_events": 120,
+    "automatic_live_promotion": false,
+    "note": "These are review checkpoints, not statistical guarantees. H1 frequency is low, so branch-specific conclusions may require more evidence than the portfolio event gate."
+  },
+  "m9r_relationship": {
+    "status": "KEEP_FROZEN_NOT_STARTED",
+    "policy": "Do not add N6 half-risk or selective runner into M9V arms. First establish fresh multi-timeframe branch/portfolio behavior. Later test M9R as a separate portfolio-compatible risk/reward layer with its own explicit comparison."
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m7c_runtime_manifest_reset": false,
+    "m8c_prospective_start_reset": false
+  }
+}
