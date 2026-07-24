@@ -1,0 +1,62 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW_IMPLEMENTATION_SELF_TEST",
+  "status": "PASS_READY_FOR_ONE_TIME_LOCAL_FRESH_START_INITIALIZATION",
+  "recorded_at_utc": "2026-07-24T10:55:00Z",
+  "scope": "Implementation/bootstrap safety self-test only. Historical post-start rows used in simulation are NOT forward evidence and their performance must not be used for promotion.",
+  "implementation": {
+    "core": "scripts/mochipoyo_alert_research/m9v/python/m9v_core.py",
+    "initializer": "scripts/mochipoyo_alert_research/m9v/python/initialize_m9v_runtime.py",
+    "default_initializer": "scripts/mochipoyo_alert_research/m9v/python/initialize_m9v_fresh_runtime_once.py",
+    "one_shot": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_once.py",
+    "forever_loop": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_forever_safe.py",
+    "stop_helper": "scripts/mochipoyo_alert_research/m9v/python/stop_m9v_shadow_forever.py"
+  },
+  "simulated_fresh_start": {
+    "method": "Historical GOLD files were truncated before initialization, a fresh runtime was frozen, then only later rows were appended. This tests event-time forward/bootstrap semantics without treating the appended historical outcomes as prospective evidence.",
+    "prospective_start_server_time": "2025.05.30 23:57:00",
+    "state_at_start": {
+      "M5": {"state": "IDLE", "inherited_active_primary_time": null},
+      "M15": {"state": "ACTIVE_SHORT", "inherited_active_primary_time": "2025.05.30 19:15:00"},
+      "H1": {"state": "ACTIVE_LONG", "inherited_active_primary_time": "2025.05.30 08:00:00"},
+      "H4": {"state": "ACTIVE_LONG", "inherited_active_primary_time": "2025.05.27 04:00:00"}
+    },
+    "post_append_candidate_count": 923,
+    "V0_accepted": 476,
+    "V1_accepted": 504,
+    "V2_accepted": 705,
+    "minimum_candidate_primary_server_time": "2025.06.02 01:05:00",
+    "candidate_primary_at_or_before_start_count": 0,
+    "arm_holding_period_overlap_count": {"V0": 0, "V1": 0, "V2": 0},
+    "interpretation": "The test intentionally started while M15/H1/H4 had inherited ACTIVE states. No pre-start PRIMARY became an M9V candidate, confirming wait-for-exit/IDLE semantics."
+  },
+  "fail_closed_tests": {
+    "pre_start_csv_prefix_tamper": "PASS: one pre-start M15 row modification caused [M9V BLOCKED] historical prefix changed after M9V start and exit code 2",
+    "runtime_reinitialization": "PASS: existing runtime manifest caused [M9V INIT FAIL_CLOSED] and exit code 2; no replacement start",
+    "persistent_loop_one_cycle": "PASS: one-cycle safe loop produced M9V PASS and exited normally under max-cycles test",
+    "M1_start_anchor": "PASS: initializer uses M1 latest closed row as prospective start and rejects any other timeframe that is ahead of M1 coverage"
+  },
+  "operator_files": [
+    "scripts/mochipoyo_alert_research/m9v/bat/01_initialize_fresh_runtime_once.bat",
+    "scripts/mochipoyo_alert_research/m9v/bat/02_run_shadow_once.bat",
+    "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "scripts/mochipoyo_alert_research/m9v/bat/04_stop_shadow_forever.bat",
+    "scripts/mochipoyo_alert_research/m9v/bat/05_open_latest_results.bat"
+  ],
+  "operator_next": "Pull latest branch, keep M8C/M7C/collector running, run 01 once. If INIT PASS, never rerun/reset. Then run 02 once and submit M9V LATEST/99_UPLOAD_PACKAGE.zip for review before starting 03 persistent loop.",
+  "guardrails": {
+    "prospective_start_created_in_user_environment": false,
+    "historical_backfill": false,
+    "pre_start_primary_eligibility": false,
+    "pyramiding": false,
+    "generic_agreement_score": false,
+    "m9r_overlay_included": false,
+    "m7c_changed": false,
+    "m8c_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "audit_only": true
+  }
+}
