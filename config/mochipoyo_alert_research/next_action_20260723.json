@@ -1,62 +1,46 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9W_PASS_M9X_PAYOFF_REPRODUCTION_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_PERSISTENT_FORWARD_PLUS_M9X_ASSISTANT_SIDE_REPRODUCTION",
-  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; CONTINUE ASSISTANT_SIDE M9X; NO NEW USER BAT YET",
-  "m8c_operator": {
-    "folder": "scripts/mochipoyo_alert_research/m8c/bat",
-    "persistent": "02_run_forward_shadow_forever.bat",
-    "keep_running": true,
-    "prospective_start_reset_allowed": false
-  },
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9X_IMPLEMENTED_USER_REPRODUCTION_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9X_LOCAL_DETERMINISTIC_REPRODUCTION",
+  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; PULL LATEST; RUN M9X BAT 01 ONCE; SUBMIT M9X ZIP; DO NOT CHANGE M9V",
   "m9v": {
-    "runtime_v2": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 11:04:00",
-    "03_persistent_v2": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
     "keep_running": true,
+    "persistent": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
     "never_rerun_00_or_01": true,
     "runtime_reset_allowed": false
   },
-  "m9w": {
-    "result": "config/mochipoyo_alert_research/m9w_gold_entry_exit_decoupling_assistant_side_result_20260724.json",
-    "state": "EXPLORATORY_PAYOFF_ARCHITECTURE_FOUND_NOT_FORWARD_VALIDATED",
-    "reference_entry": "PRIMARY bid - 0.10*M5 ATR reclaim within 10 closed M1 bars, next M1 open entry",
-    "reference_profit_vector": "At native LONG_EXIT, H1 MACD still rising => selective runner to M15 RCI9 causal turn-down",
-    "reference_risk_vector": "N6 actual-entry half risk, no signal suppression",
-    "combined_50pct_runner": "n1054 PF1.6576 WR57.97 avgwin17.22 avgloss-14.33 DD291.5 cost2PF1.3149",
-    "combined_75pct_runner": "n1054 PF1.6441 WR55.88 avgwin18.86 avgloss-14.53 DD300.2 cost2PF1.3195",
-    "forward_promotion": false
+  "m9x": {
+    "implementation": "scripts/mochipoyo_alert_research/m9x/python/run_gold_payoff_decoupling_reproduction.py",
+    "operator_folder": "scripts/mochipoyo_alert_research/m9x/bat",
+    "01_reproduction": "01_run_gold_payoff_decoupling_reproduction.bat",
+    "02_open_results": "02_open_latest_results.bat",
+    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9X\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "expected_pass_line": "[M9X PASS] N3=1495 W1=1054 ...",
+    "historical_only": true,
+    "m9v_modified": false
   },
-  "m9x_order": [
-    "Implement deterministic W1 entry-reclaim from canonical M9P N3 without changing M7C formulas.",
-    "Use latest fully closed M5 Wilder ATR14 at first-turn decision to compute reclaim level.",
-    "Allow at most 10 fully closed M1 bars in the reference rule; entry is the exact next M1 open after causal reclaim close.",
-    "Recompute N6 at actual delayed entry time, not original first-turn time.",
-    "At native EXIT evaluate only fully closed H1 MACD. Runner exits at first causal M15 RCI9 turn-down decision.",
-    "Reproduce runner shares 25/50/75/100 and component attribution without choosing a historical optimum.",
-    "Stress reclaim offset 0.00/0.05/0.10/0.15/0.20 ATR and wait 5/10/15/20/30 minutes.",
-    "Report counts/frequency, yearly and quarterly PF, average win/loss, DD/streak/tails and +1/+2bps costs.",
-    "Only after deterministic PASS decide whether a new separate payoff prospective shadow is justified. Never modify the existing M9V start."
+  "operator_order_now": [
+    "Fetch/Pull feature/mochipoyo-alert-research.",
+    "Keep M8C, M7C, genuine source collector and M9V 03 running unchanged.",
+    "Run scripts/mochipoyo_alert_research/m9x/bat/01_run_gold_payoff_decoupling_reproduction.bat once.",
+    "If PASS, run scripts/mochipoyo_alert_research/m9x/bat/02_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip.",
+    "If BLOCKED, send the full screen output. Do not stop/reset M9V."
   ],
-  "m9r_status": "FROZEN_NOT_STARTED; do not launch while M9W/M9X superseding payoff architecture is being reproduced",
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
     "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_RUNNING_M9W_PAYOFF_FOUND_M9X_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
-  "user_side_policy": {
-    "new_bat_required_now": false,
-    "instruction": "Keep already-running M8C/M7C/collector and M9V 03 windows unchanged. Do not rerun M9V 00/01."
-  },
   "forbidden": [
-    "Do not stop/reset M8C or M7C.",
-    "Do not rerun M9V BAT 00 or BAT 01.",
-    "Do not delete/reset M9V v2 runtime or backfill it.",
-    "Do not add M9W rules into M9V retrospectively.",
-    "Do not promote historical M9W metrics as forward validation.",
-    "Do not use arbitrary tight fixed stops as the primary loss-control solution.",
-    "Do not transplant GOLD M9W rules into BTC.",
-    "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
+    "Do not stop/reset M8C/M7C/M9V.",
+    "Do not rerun M9V BAT00/BAT01.",
+    "Do not backfill M9V.",
+    "Do not add M9W/M9X rules retroactively into M9V.",
+    "Do not promote M9W historical results as fresh validation.",
+    "Do not start M9R.",
+    "Do not transplant GOLD payoff rules into BTC.",
+    "Do not enable Discord, MT5 orders, live ready, final signal, or real entry gate."
   ]
 }
