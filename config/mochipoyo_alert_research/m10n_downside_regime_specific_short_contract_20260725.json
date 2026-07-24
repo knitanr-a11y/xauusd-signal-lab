@@ -1,0 +1,93 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "objective": "Test whether retained independent SHORT candidates concentrate their edge in a common causal higher-timeframe downside-opportunity regime, without tautologically reusing their exact entry features and without using 2025/2026 to invent or rank regime gates.",
+  "seed_candidates": [
+    {
+      "id": "M10J_C0212",
+      "role": "PRIMARY_ADOPTION_DIRECTION",
+      "timeframe": "M15",
+      "horizon_minutes": 240,
+      "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8"
+    },
+    {
+      "id": "M10L_H240_C056",
+      "role": "SECONDARY_ADOPTION_DIRECTION",
+      "timeframe": "H1",
+      "horizon_minutes": 240,
+      "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443"
+    },
+    {
+      "id": "M10M_H120_C021",
+      "role": "M5_ROBUSTNESS_REFERENCE",
+      "timeframe": "M5",
+      "horizon_minutes": 120,
+      "formula": "m5_ema30_40_bps <= -3.052275892 AND h4_ema20_30_bps >= 37.61355979"
+    }
+  ],
+  "regime_definition": {
+    "meaning": "SHORT-favorable downside opportunity context. It may represent established decline, rollover, exhaustion, or volatility/momentum transition; it is not hard-coded as bearish EMA stack only.",
+    "snapshot_basis": "latest fully closed H1 regime snapshot at or before each seed decision, with causal H4/D1 context",
+    "regime_features": [
+      "h1_rci9", "h1_rci9_delta", "h1_ret3_bps", "h1_ret5_bps", "h1_ema20_slope_atr", "h1_ema20_30_bps", "h1_ema30_40_bps", "h1_macd_hist_slope", "h1_volume_ratio20",
+      "h4_ema30_40_bps", "h4_macd_hist_bps", "h4_macd_hist_slope", "h4_rci9", "h4_atr_pct100",
+      "d1_ema20_30_bps", "d1_ema30_40_bps", "d1_macd_hist_bps", "d1_macd_hist_slope", "d1_rci9", "d1_atr_pct100"
+    ],
+    "explicitly_excluded_exact_seed_features": [
+      "h4_ema20_30_bps", "h1_atr_pct100", "h1_macd_hist_bps", "h1_macd_line_bps", "m5_ema30_40_bps"
+    ],
+    "threshold_quantiles": [0.10, 0.20, 0.30, 0.70, 0.80, 0.90],
+    "formula_families": ["single threshold", "two-condition AND"],
+    "threshold_source": "all causal H1 regime snapshots in 2023-2024 only"
+  },
+  "discovery": {
+    "years": [2023, 2024],
+    "ranking_seeds": ["M10J_C0212", "M10L_H240_C056"],
+    "m5_seed_role": "descriptive third-seed check after gate freeze; not used to rank regime gates",
+    "minimum_train_count": {"M10J_C0212": 35, "M10L_H240_C056": 25},
+    "minimum_train_retention_fraction": 0.30,
+    "maximum_allowed_train_pf_degradation_ratio": 0.95,
+    "single_gate_pairing_pool": 30,
+    "frozen_shortlist": 100,
+    "ranking": "maximize minimum train PF lift ratio across C0212 and C056, then mean lift, then retained count"
+  },
+  "holdouts": {
+    "validation": "2025 only after regime shortlist freeze",
+    "final_test": "2026 through 2026-06-19 only after regime shortlist freeze",
+    "no_holdout_regime_invention": true,
+    "no_holdout_threshold_refit": true,
+    "no_holdout_pair_refit": true
+  },
+  "evaluation": {
+    "one_position_per_seed": true,
+    "entry": "exact M1 open bid at each frozen seed decision",
+    "exit": "exact M1 open ask at each seed's frozen fixed horizon",
+    "actual_spread": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "report_seed_baselines": true,
+    "report_gate_retention": true,
+    "report_pf_lift_vs_ungated_seed": true,
+    "report_common_holdout_support": true,
+    "target_pf": 2.0,
+    "robust_pf2_minimum_counts": {"train": 25, "validation_2025": 12, "final_test_2026": 8}
+  },
+  "interpretation_guardrails": {
+    "historical_results_are_research_exposed": true,
+    "common_gate_is_not_forward_approved": true,
+    "deterministic_reproduction_required_before_new_forward_shadow": true,
+    "fresh_prospective_proof_required_before_live_use": true,
+    "do_not_call_proprietary_mochipoyo_bad": true,
+    "do_not_modify_existing_m7c": true,
+    "do_not_modify_existing_m10b_m10e": true
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
