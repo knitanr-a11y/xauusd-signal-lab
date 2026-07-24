@@ -2,8 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T21:35:00Z",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10I_PASS_NO_ROBUST_EDGE_M10J_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10J_PASS_STABLE_EDGE_BELOW_PF2_M10K_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -20,76 +19,52 @@
     "M10B_mt5_server": "2026.07.24 20:54:00",
     "M10E_mt5_server": "2026.07.24 22:06:00"
   },
-  "m10b": {
-    "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_PERSISTENT_RUNNING",
-    "prospective_start_server_time": "2026.07.24 20:54:00",
-    "historical_backfill": false,
-    "reset_allowed": false
-  },
-  "m10e": {
-    "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_PERSISTENT_RUNNING",
-    "prospective_start_server_time": "2026.07.24 22:06:00",
-    "fixed_filter": {"m5_macd_bps_slope_le": -0.1308, "h1_ema30_minus_ema40_bps_ge": 17.3333},
-    "historical_backfill": false,
-    "reset_allowed": false
-  },
-  "m10f": {
-    "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
-    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_ROBUST_SHORT",
-    "result": "config/mochipoyo_alert_research/m10f_short_compound_loss_user_local_result_20260725.json",
-    "target_pf": 2.0,
-    "pf2_train_val_test_all": {"M5": 0, "M15": 0, "H1": 0, "H4": 0},
-    "promising_seed": {"timeframe": "M15", "candidate_id": "M10F_M15_C0049", "all_count": 1089, "all_pf": 1.1566500291510813},
-    "forward_approved": false
-  },
-  "m10g": {
-    "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
-    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_RECLAIM",
-    "result": "config/mochipoyo_alert_research/m10g_m15_short_reclaim_user_local_result_20260725.json",
-    "seed_count": 1089,
-    "seed_pf": 1.1566500291510813,
-    "pf2_all_cells": 0,
-    "pf2_every_calendar_year_cells": 0,
-    "best_overall": {"offset_atr": 0.05, "wait_minutes": 5, "count": 654, "pf": 1.282682823962094, "fixed0p20_pf": 1.261683717881273, "min_year_pf": 0.9950950823400048},
-    "forward_approved": false
-  },
   "m10h": {
-    "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
     "status": "PASS_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_ONLY_INSUFFICIENT_XAU_SHORT_SAMPLE_CONTINUE_COLLECTION",
-    "result": "config/mochipoyo_alert_research/m10h_primary_short_source_fidelity_user_local_result_20260725.json",
-    "uploaded_package_sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
     "xauusd_primary_short": {"genuine_scored": 4, "matched": 3, "missed": 1, "finalized_extra_proxy_short": 9},
     "only_miss_reason": "STATE_NOT_IDLE",
-    "failed_kernel_condition_on_only_miss": false,
-    "continue_source_collection": true,
     "m7c_refit_approved": false
   },
   "m10i": {
-    "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
     "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_ROBUST_SHORT_EDGE",
-    "result": "config/mochipoyo_alert_research/m10i_independent_m15_short_archetype_user_local_result_20260725.json",
-    "uploaded_package_sha256": "22252fc94af9e58675a5280c8e980e1f4ccfdbc205fa40240e8c7e02d2f4c5b8",
-    "feature_row_count": 81001,
-    "rule_variant_count": 42,
-    "rule_horizon_result_count": 126,
     "robust_pf2_candidate_count": 0,
-    "all_three_split_pf_gt_1_candidate_count": 0,
-    "best_train_candidate": {"candidate_id": "M10I_C027_H240", "train_pf": 1.1884742109881739, "validation_2025_pf": 0.8029580227141846, "test_2026_pf": 1.0546714869380376, "all_pf": 1.0045081730733159, "fixed0p20_all_pf": 0.9992636565935438},
-    "forward_approved": false
+    "all_three_split_pf_gt_1_candidate_count": 0
   },
   "m10j": {
     "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
+    "result": "config/mochipoyo_alert_research/m10j_user_local_result_20260725.json",
+    "uploaded_package_sha256": "d1f262d8d2c995e3aa203cc1894acc6a53b743b195a5f5943598068a216ce731",
+    "robust_pf2_candidate_count": 0,
+    "all_three_split_pf_gt_1_count": 47,
+    "primary_seed": {
+      "candidate_id": "M10J_C0212",
+      "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+      "horizon_minutes": 240,
+      "train_pf": 1.5689385901535529,
+      "validation_2025_pf": 1.3904778450159343,
+      "test_2026_pf": 1.5465266111892766,
+      "all_count": 318,
+      "all_pf": 1.4839437156621065,
+      "fixed0p20_all_pf": 1.4816933419152245
+    },
+    "forward_approved": false
+  },
+  "m10k": {
+    "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
     "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10j_independent_m15_short_feature_mining_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10j/python/run_m10j.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10j/bat/01_run_m10j.bat",
-    "candidate_universe_uses_mochipoyo_kernel": false,
-    "formula_generation_and_ranking": "2023-2024_ONLY",
-    "validation": "2025_LOCKED",
-    "final_test": "2026_THROUGH_0619_LOCKED",
+    "contract": "config/mochipoyo_alert_research/m10k_m15_short_exit_loss_tail_audit_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10k/python/run_m10k.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10k/bat/01_run_m10k.bat",
+    "seed": "M10J_C0212_ENTRY_FORMULA_FROZEN",
+    "entry_formula_changed": false,
+    "tp_atr_grid": [1.0, 1.5, 2.0, 2.5],
+    "sl_atr_grid": [0.75, 1.0, 1.25, 1.5],
+    "max_hold_minutes": [120, 240, 360],
+    "grid_cells": 48,
+    "same_m1_bar_priority": "SL_FIRST_CONSERVATIVE",
     "target_pf": 2.0,
+    "historical_research_exposed": true,
     "forward_approved": false
   },
   "forced_reboot_recovery": {
@@ -107,5 +82,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep all existing forward collectors/monitors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT for future M10H re-audit. Fetch/Pull and run M10J 01_run_m10j.bat locally, then submit M10J 99_UPLOAD_PACKAGE.zip."
+  "next": "Keep all existing forward collectors/monitors running unchanged. Continue genuine XAUUSD PRIMARY_SHORT collection for later M10H re-audit. Fetch/Pull and run M10K 01_run_m10k.bat; submit only M10K 99_UPLOAD_PACKAGE.zip."
 }
