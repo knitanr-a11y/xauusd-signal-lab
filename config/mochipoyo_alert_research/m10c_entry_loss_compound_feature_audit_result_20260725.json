@@ -1,0 +1,136 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10C_ENTRY_LOSS_COMPOUND_FEATURE_AUDIT_ASSISTANT_SIDE",
+  "status": "PASS_EXPLORATORY_ONLY_NO_FORWARD_CHANGE",
+  "recorded_at_utc": "2026-07-24T19:00:00Z",
+  "purpose": "Test whether causal feature combinations known at actual entry disproportionately identify losing trades and can improve payoff/PF when removed, across current M5/M15/H1 payoff architectures.",
+  "data": {
+    "sample": "same frozen 2023-01-03 through 2026-06-19 GOLD historical CSV family used by M10A deterministic reproduction",
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_spread_used_in_baseline": true,
+    "user_reference_spread_usd": 0.20
+  },
+  "anti_leakage": {
+    "features": "actual-entry-time causal only; latest fully closed M1/M5/M15/H1/H4/D1 information plus reclaim timing/price context and entry spread",
+    "future_MAE_MFE_exit_path_used_as_filter_feature": false,
+    "outcome_used_only_as_supervised_label": true,
+    "discovery_period": "2023-2024",
+    "validation_period": "2025",
+    "final_test_period": "2026 through 2026-06-19",
+    "one_position_recomputed_after_filter": true
+  },
+  "baseline_architectures": {
+    "M5": {
+      "architecture": "M10A M5 0.15 ATR5 / 6m reclaim + M15-MACD selective runner75 + one-position",
+      "count": 837,
+      "win_rate": 0.6296296296296297,
+      "profit_factor": 1.6651962763806496,
+      "average_win_bps": 11.360485887595685,
+      "average_loss_bps": -11.59792769347865,
+      "payoff_ratio": 0.9795272214003821
+    },
+    "M15": {
+      "architecture": "M9X W1 0.10 ATR5 / 10m + H1-MACD selective runner50 + N6 half-risk + operational one-position correction",
+      "count": 1008,
+      "win_rate": 0.5902777777777778,
+      "profit_factor": 1.66289170174128,
+      "average_win_bps": 17.404333045815353,
+      "average_loss_bps": -15.078576137908293,
+      "payoff_ratio": 1.1542424753263003
+    },
+    "H1": {
+      "architecture": "M10A H1 0.05 ATR1H with M5 confirmation / 30m + H4&D1-MACD selective runner50 + one-position",
+      "count": 159,
+      "win_rate": 0.6792452830188679,
+      "profit_factor": 2.8303858342555084,
+      "average_win_bps": 40.12947532813278,
+      "average_loss_bps": -30.024198246139303,
+      "payoff_ratio": 1.3365710883984345
+    }
+  },
+  "search_method": {
+    "feature_families": ["RCI9 value/slope/100-bar percentile", "MACD(6,13) bps value/slope/100-bar percentile", "EMA20/30/40 stack and distance", "ATR14 bps and percentile", "tick-volume ratio20 and percentile", "RSI14", "closed candle shape/position", "causal 1/3/5-bar returns", "M1 pre-entry return/range", "reclaim delay and entry-vs-primary ATR", "spread", "MT5 server hour"],
+    "compound_search": "quantile conjunction mining plus shallow decision-tree interactions, maximum depth 3",
+    "selection_policy": "candidate generation/ranking on 2023-2024 only; 2025 validation; 2026 final test; no rule promoted from final-test optimization"
+  },
+  "M5_result": {
+    "train_shortlist_rules": 100,
+    "rules_passing_2025_pf_and_payoff": 14,
+    "rules_also_passing_2026_pf_and_payoff": 0,
+    "decision": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
+    "note": "Several 2023-2024 patterns improved 2025 but reversed in 2026. Do not freeze an M5 exclusion from this audit."
+  },
+  "M15_result": {
+    "train_shortlist_rules": 14,
+    "rules_passing_2025_pf_and_payoff": 0,
+    "rules_also_passing_2026_pf_and_payoff": 0,
+    "decision": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
+    "note": "No M15 conjunction passed the strict 2023-2024 discovery to 2025 PF+payoff validation gate. Keep current M15 payoff research unchanged."
+  },
+  "H1_result": {
+    "decision": "PROMISING_EXPLORATORY_COMPOUND_LOSS_STRUCTURE_FOUND_NOT_FORWARD_APPROVED",
+    "family_A_broad": {
+      "interpretation": "H1 LONG entry while latest closed M5 MACD momentum is rolling down and M5 EMA20-EMA40 trend-stack strength is not exceptionally high.",
+      "tree_discovery_thresholds": {
+        "M5_MACD_bps_slope_le": -0.23927830159664154,
+        "M5_EMA20_minus_EMA40_stack_percentile100_le": 0.8299999833106995
+      },
+      "rounded_neighborhood": {
+        "M5_MACD_slope_thresholds": [-0.35, -0.30, -0.24, -0.18, -0.12],
+        "M5_stack_percentile_thresholds": [0.70, 0.80, 0.85, 0.90],
+        "cells": 20,
+        "cells_improving_both_PF_and_payoff_in_2025_and_2026": 16,
+        "cells_improving_PF_in_each_calendar_year_2023_2026": 16,
+        "cells_improving_both_PF_and_payoff_in_every_calendar_year": 0
+      },
+      "warning": "Broad holdout support exists, but 2024 payoff does not improve across the family. Treat as loss-tail/quality evidence, not a frozen filter."
+    },
+    "family_B_payoff_stronger_but_narrower": {
+      "interpretation": "Exclude H1 LONG entries when latest closed M5 MACD slope is negative while the H1 EMA30-EMA40 positive stack is already large, consistent with a higher-timeframe uptrend undergoing short-term momentum rollover.",
+      "discovery_rule": {
+        "M5_MACD_bps_slope_le": -0.1308,
+        "H1_EMA30_minus_EMA40_bps_ge": 17.3333
+      },
+      "one_position_recomputed_metrics": {
+        "count": 130,
+        "win_rate": 0.7384615384615385,
+        "profit_factor": 5.4011538832619195,
+        "average_win_bps": 37.78959763996185,
+        "average_loss_bps": -19.755045440539647,
+        "payoff_ratio": 1.9129086669885966,
+        "net_bps": 2956.12982845799
+      },
+      "yearly": {
+        "2023": {"count": 31, "profit_factor": 6.305704093248458, "payoff_ratio": 2.1932883802603333},
+        "2024": {"count": 49, "profit_factor": 5.002500062921975, "payoff_ratio": 1.1255625141574443},
+        "2025": {"count": 40, "profit_factor": 4.16184709325092, "payoff_ratio": 2.497108255950552},
+        "2026_through_0619": {"count": 10, "profit_factor": 11.629177619564157, "payoff_ratio": 2.907294404891039}
+      },
+      "fixed_spread_0p20_usd": {"count": 130, "profit_factor": 5.3636874914829455, "payoff_ratio": 1.8996393199002097},
+      "neighborhood": {
+        "cells": 25,
+        "M5_MACD_slope_thresholds": [-0.20, -0.16, -0.13, -0.10, -0.06],
+        "H1_EMA30_minus_EMA40_bps_thresholds": [12.5, 15.0, 17.5, 20.0, 22.5],
+        "cells_improving_both_PF_and_payoff_in_2025_and_2026": 5,
+        "cells_improving_both_PF_and_payoff_in_every_calendar_year": 5,
+        "warning": "Robustness is concentrated near H1 EMA30-EMA40 around 17.5 bps; this family is promising but parameter-narrow."
+      }
+    },
+    "family_C_higher_tf_overextension": {
+      "interpretation": "Exclude H1 LONG entries when the latest closed H4 5-bar return and D1 1-bar return are simultaneously strongly positive, consistent with overextended higher-timeframe momentum/chasing.",
+      "discovery_rule": {"H4_return_5bars_bps_ge": 121.3949, "D1_return_1bar_bps_ge": 137.4576},
+      "one_position_recomputed_metrics": {"count": 136, "profit_factor": 3.8221993807594554, "payoff_ratio": 1.5925830753164398},
+      "neighborhood": {"cells": 25, "cells_improving_both_PF_and_payoff_in_2025_and_2026": 5, "cells_improving_both_PF_and_payoff_in_every_calendar_year": 3, "warning": "Improvement concentrates near D1 return around 140 bps. Treat as secondary evidence only."}
+    }
+  },
+  "forward_policy": {
+    "modify_M9Y": false,
+    "modify_M10B": false,
+    "reset_any_existing_start": false,
+    "historical_backfill": false,
+    "automatic_live_promotion": false,
+    "next": "If H1 compound-loss filtering is pursued, first make a deterministic reproduction stage from the frozen six historical CSV hashes, then freeze a separate new fresh prospective comparison arm. Do not retrofit the current M10B H1 arm."
+  },
+  "safety": {"audit_only": true, "discord_send": false, "mt5_order": false, "live_ready": false, "final_signal": false}
+}
