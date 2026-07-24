@@ -72,8 +72,10 @@
     "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
     "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
     "contract": "config/mochipoyo_alert_research/m10i_mochipoyo_independent_m15_short_archetype_discovery_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10i/python/run_independent_m15_short_archetype_discovery_fast.py",
+    "script": "scripts/mochipoyo_alert_research/m10i/python/run_independent_m15_short_archetype_discovery.py",
     "run_bat": "scripts/mochipoyo_alert_research/m10i/bat/01_run_independent_m15_short_archetype_discovery.bat",
+    "launcher_fast_file_dependency_removed": true,
+    "launcher_fix_commit": "2589a8475b0040faa51b7438056aa197449e7cff",
     "timeframe": "M15",
     "direction": "SHORT",
     "candidate_universe_uses_mochipoyo_kernel": false,
@@ -100,5 +102,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT events for future M10H re-audit. In parallel Fetch/Pull and run M10I independent M15 SHORT historical discovery; submit M10I 99_UPLOAD_PACKAGE.zip. Do not refit M7C or create a SHORT forward arm from M10H/M10I without review and deterministic reproduction."
+  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT events for future M10H re-audit. Fetch/Pull feature/mochipoyo-alert-research so M10I BAT commit 2589a8475b0040faa51b7438056aa197449e7cff is present, then rerun the same M10I BAT. The BAT no longer depends on run_independent_m15_short_archetype_discovery_fast.py. Submit M10I 99_UPLOAD_PACKAGE.zip."
 }
