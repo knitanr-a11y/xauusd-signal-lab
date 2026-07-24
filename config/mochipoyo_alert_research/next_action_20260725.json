@@ -1,49 +1,53 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10I_INDEPENDENT_M15_SHORT_LOCAL_AUDIT_NEXT",
-  "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for a later M10H re-audit, while running the separate Mochipoyo-independent M15 SHORT historical discovery locally.",
+  "status": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING_LOCAL_AUDIT_NEXT",
+  "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for later M10H re-audit; in parallel run M10J historical causal feature mining locally.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10i/bat/01_run_independent_m15_short_archetype_discovery.bat.",
-    "Required success marker: [M10I PASS].",
-    "Run scripts/mochipoyo_alert_research/m10i/bat/02_open_latest_results.bat.",
-    "Submit only M10I LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Run scripts/mochipoyo_alert_research/m10j/bat/01_run_m10j.bat.",
+    "Required success marker: [M10J PASS].",
+    "Run scripts/mochipoyo_alert_research/m10j/bat/02_open_latest_results.bat.",
+    "Submit only M10J LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
     "Do not refit M7C from the current four XAUUSD genuine PRIMARY_SHORT events.",
-    "Do not create/start a SHORT forward arm from M10I historical results alone."
+    "Do not create/start a SHORT forward arm from M10J historical results alone."
   ],
-  "m10h_result": {
-    "status": "PASS_INSUFFICIENT_XAU_SHORT_SAMPLE",
-    "package_sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
-    "genuine_xau_primary_short_scored": 4,
-    "source_matched": 3,
-    "source_missed": 1,
-    "finalized_extra_proxy_short": 9,
-    "only_miss_reason": "STATE_NOT_IDLE",
-    "failed_kernel_condition_on_only_miss": false,
-    "candidate_fidelity_gate_count": 0,
-    "decision": "Do not guess a missing proprietary condition; keep collecting genuine source SHORT events."
+  "m10i_result": {
+    "status": "PASS_NO_ROBUST_SHORT_EDGE",
+    "package_sha256": "22252fc94af9e58675a5280c8e980e1f4ccfdbc205fa40240e8c7e02d2f4c5b8",
+    "feature_rows": 81001,
+    "rule_variants": 42,
+    "rule_horizon_results": 126,
+    "robust_pf2_candidate_count": 0,
+    "all_three_split_pf_gt_1_candidate_count": 0,
+    "best_train_candidate": {
+      "candidate_id": "M10I_C027_H240",
+      "train_pf": 1.1884742109881739,
+      "validation_2025_pf": 0.8029580227141846,
+      "test_2026_pf": 1.0546714869380376,
+      "all_pf": 1.0045081730733159,
+      "fixed0p20_all_pf": 0.9992636565935438
+    },
+    "interpretation": "Handcrafted Mochipoyo-independent M15 SHORT archetypes with fixed 60/120/240 minute exits do not provide a robust edge. Do not force PF2 by adding post-hoc conditions."
   },
-  "m10i_design": {
-    "candidate_universe": "all causal M15 decisions; explicitly not M7C KERNEL-S1, M10F C0049 or M10G reclaim entries",
+  "m10j_design": {
+    "candidate_universe": "all causal M15 decisions; Mochipoyo-independent",
     "direction": "SHORT",
-    "archetypes": ["TREND_BREAKDOWN", "PULLBACK_RESUME", "MOMENTUM_ACCELERATION", "VOLATILITY_BREAKDOWN", "HTF_ALIGNMENT_BREAK", "EXHAUSTION_REVERSAL"],
-    "entry": "exact M1 open bid at the new M15 bar open",
+    "features": "28 causal M15/H1/H4 RCI/MACD/EMA/ATR/return/candle/volume features",
+    "threshold_source": "2023-2024 discovery quantiles only",
+    "formula_families": ["single threshold", "two-condition AND"],
+    "pairing_and_ranking": "2023-2024 only",
+    "validation": "2025 locked",
+    "final_test": "2026 through 2026-06-19 locked",
     "fixed_horizon_exits_minutes": [60, 120, 240],
-    "one_position_per_rule_horizon": true,
-    "actual_spread": true,
-    "fixed_spread_sensitivity_usd": 0.20,
-    "discovery": "2023-2024 only",
-    "validation": "2025 only",
-    "final_test": "2026 through 2026-06-19 only",
     "target_pf": 2.0,
-    "robust_pf2_requires_minimum_counts": {"discovery": 40, "validation_2025": 20, "final_test_2026": 15}
+    "minimum_counts": {"discovery": 40, "validation_2025": 20, "final_test_2026": 15}
   },
   "after_package_review": {
-    "if_robust_pf2_found": "Freeze exact archetype+variant+horizon and build deterministic reproduction. Only after reproduction may a new independent fresh prospective SHORT shadow be designed.",
-    "if_improves_but_below_pf2": "Inspect whether entry architecture or exit horizon is limiting without using 2025/2026 to refit the trigger.",
-    "if_no_robust_improvement": "Do not force M15 SHORT. Move to separately contracted M5/H1 independent SHORT architectures or remain LONG-only."
+    "if_robust_pf2_found": "Freeze exact formula+horizon and build deterministic reproduction before any new fresh prospective SHORT shadow.",
+    "if_some_all_split_pf_gt_1_but_below_pf2": "Inspect payoff/exit architecture without changing the frozen trigger from 2025/2026 evidence.",
+    "if_no_all_split_edge": "Stop M15 SHORT feature-mining escalation and move to a separately contracted M5/H1 or regime-specific downside architecture."
   },
   "safety": {
     "audit_only": true,
