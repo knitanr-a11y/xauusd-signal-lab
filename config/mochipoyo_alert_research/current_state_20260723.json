@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T11:25:00Z",
-  "status": "M8C_RUNNING_M9V_V1_PREFIX_INCIDENT_V2_RECOVERY_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V1_INVALIDATION_AND_V2_FRESH_START_RECOVERY",
+  "recorded_at_utc": "2026-07-24T11:40:00Z",
+  "status": "M8C_RUNNING_M9V_V2_INITIAL_PASS_PERSISTENT_FORWARD_SHADOW_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_GOLD_MULTI_TIMEFRAME_PERSISTENT_FORWARD_SHADOW",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -24,33 +24,37 @@
   "m9v": {
     "contract": "config/mochipoyo_alert_research/m9v_gold_multitimeframe_fresh_prospective_shadow_contract_20260724.json",
     "incident": "config/mochipoyo_alert_research/m9v_v1_prefix_freeze_incident_and_v2_recovery_20260724.json",
-    "v1_status": "INITIALIZER_PASSED_BUT_FIRST_ONE_SHOT_BLOCKED_ON_M5_PREFIX_CHANGE; START_MUST_BE_ARCHIVED_AS_INVALID_BEFORE_V2",
-    "v1_error": "historical prefix changed after M9V start: M5",
-    "v1_classification": "IMPLEMENTATION_CONTRACT_BUG_NOT_USER_ERROR_NOT_STRATEGY_FAILURE",
-    "v2_runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
-    "v2_status": "IMPLEMENTED_AND_SELF_TESTED_RECOVERY_READY",
-    "v2_core": "scripts/mochipoyo_alert_research/m9v/python/m9v_core_v2.py",
-    "v2_initializer": "scripts/mochipoyo_alert_research/m9v/python/initialize_m9v_runtime_v2.py",
-    "v2_one_shot": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_once_v2.py",
-    "v2_forever": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_forever_safe_v2.py",
+    "initial_local_result": "config/mochipoyo_alert_research/m9v_v2_initial_local_pass_20260724.json",
+    "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "prospective_start_server_time": "2026.07.24 11:04:00",
+    "status": "INITIAL_LOCAL_PASS_READY_TO_RUN_PERSISTENT_FORWARD_SHADOW",
+    "v1_start_valid": false,
+    "v1_incident_archived_by_guarded_recovery": true,
+    "historical_backfill_allowed": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "runtime_reset_allowed": false,
     "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
-    "purpose": "Isolate forward value of H1 and then M5/H4 breadth before M9R risk/reward overlays.",
-    "historical_backfill_forbidden": true,
-    "reuse_m7c_or_m8c_start_forbidden": true,
-    "operator_folder": "scripts/mochipoyo_alert_research/m9v/bat",
-    "operator_order_now": [
-      "00_recover_invalid_v1_prefix_start_once.bat",
-      "01_initialize_fresh_runtime_once.bat",
-      "02_run_shadow_once.bat",
-      "05_open_latest_results.bat",
-      "03_run_shadow_forever.bat only after initial v2 package review"
-    ],
-    "v2_self_tests": {
-      "normal_append_after_start_pass": true,
-      "m5_append_with_server_open_before_m1_start_pass": true,
-      "frozen_row_tamper_fail_closed": true,
-      "recovery_archives_old_runtime_before_removal": true,
-      "recovery_blocks_if_old_start_has_successful_prospective_output": true
+    "initial_counts": {
+      "candidate_count": 0,
+      "V0_M15_ONLY": 0,
+      "V1_M15_PLUS_H1": 0,
+      "V2_ALL_TIMEFRAMES": 0,
+      "confirmation_metadata_count": 0
+    },
+    "initial_count_interpretation": "Expected bootstrap-only pass because one-shot was executed about one M1 minute after fresh start; not a performance result.",
+    "bootstrap_state_at_start": {
+      "M5": "ACTIVE_SHORT inherited from 2026.07.24 07:45:00",
+      "M15": "IDLE",
+      "H1": "ACTIVE_LONG inherited from 2026.07.23 03:00:00",
+      "H4": "IDLE"
+    },
+    "persistent_operator": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "stop_operator": "scripts/mochipoyo_alert_research/m9v/bat/04_stop_shadow_forever.bat",
+    "review_gates": {
+      "operational_checkpoint_total_accepted_arm_events": 20,
+      "interim_checkpoint_total_accepted_arm_events": 60,
+      "minimum_H1_S3_candidates_for_branch_review": 10,
+      "formal_portfolio_review_total_accepted_arm_events": 120
     }
   },
   "m9r": {
@@ -64,15 +68,14 @@
     "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
   },
   "next": {
-    "stage": "M9V_V1_INCIDENT_RECOVERY_THEN_V2_INITIAL_ONE_SHOT_REVIEW",
+    "stage": "M9V_V2_PERSISTENT_FORWARD_COLLECTION",
     "tasks": [
-      "User pulls latest feature/mochipoyo-alert-research while M8C/M7C/collector keep running.",
-      "Run M9V 00_recover_invalid_v1_prefix_start_once.bat once. It must archive the invalid v1 runtime and refuse if a successful prospective summary exists for that old start.",
-      "After RECOVERY PASS run 01_initialize_fresh_runtime_once.bat exactly once to create runtime v2. Never rerun after INIT PASS.",
-      "Run 02_run_shadow_once.bat once after v2 INIT PASS.",
-      "Open 05_open_latest_results.bat and submit M9V LATEST/99_UPLOAD_PACKAGE.zip for review.",
-      "Do not start 03 persistent loop until the initial v2 package is reviewed.",
-      "Keep M9R out of M9V and keep BTC source/M7C/M8C unchanged."
+      "User pulls latest feature/mochipoyo-alert-research if needed and starts M9V 03_run_shadow_forever.bat while M8C/M7C/collector remain running.",
+      "Never rerun M9V 00 or 01 and never delete/reset the v2 runtime manifest/start receipt.",
+      "Let M9V collect fresh candidates from the immutable start 2026.07.24 11:04:00 MT5 server time.",
+      "Review V0/V1/V2 separately plus S1/S2/S3/S4 branch counts, ordered confirmations, PF, win rate, payoff, DD and tails at checkpoints.",
+      "Do not start M9R overlays until base multi-timeframe forward behavior is established.",
+      "Keep BTC source/M7C/M8C evidence collection unchanged."
     ],
     "user_bat_required_now": true
   },
@@ -94,7 +97,7 @@
     "m7c_threshold_changed": false,
     "m7c_runtime_manifest_reset_allowed": false,
     "m8c_prospective_start_reset_allowed": false,
-    "silent_m9v_v1_runtime_delete_allowed": false,
-    "new_gold_prospective_shadow_started": false
+    "m9v_runtime_reset_allowed": false,
+    "automatic_live_promotion": false
   }
 }
