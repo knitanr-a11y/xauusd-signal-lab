@@ -1,0 +1,134 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+  "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY_NOT_INDEPENDENT_VALIDATION",
+  "recorded_at_utc": "2026-07-24T09:45:00Z",
+  "population": "User-supplied XAUUSD M1/M5/M15/H1/H4/D1 history 2023-01-03 through 2026-06-19. All post-M9M periods are research-exposed; this is robustness/design work, not independent validation.",
+  "cost_contract": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "extra_bps_tests": "stress deductions only, not broker commission estimates"
+  },
+  "branch_robustness": {
+    "S1_M5_STRICT_MULTI_TIMEFRAME_LONG": {
+      "canonical": {"count": 1256, "win_rate": 0.6544585987261147, "profit_factor_bps": 1.3336981886264172, "max_drawdown_bps": 335.25502477738183, "max_losing_streak": 6},
+      "stress_grid": "729 combinations: own W 160/200/240; M5 volume q45/q50/q55; M5 MACD q70/q75/q80; HTF W80/100/120; M15 MACD q70/q75/q80; H1 MACD+RCI q45/q50/q55",
+      "all_729_aggregate_pf_above_1": true,
+      "combinations_all_calendar_years_pf_above_1": 408,
+      "combinations_aggregate_pf_above_1_after_extra_2bps": 4,
+      "canonical_extra_2bps_pf": 0.9568343894236889,
+      "decision": "AUXILIARY_ONLY_COST_SENSITIVE_NOT_READY_AS_PRIMARY_BRANCH",
+      "interpretation": "The M5 branch has useful frequency and aggregate edge but the edge is thin relative to transaction-cost stress. Do not promote the canonical single definition from exposed history."
+    },
+    "S2_M15_CANONICAL_N3": {
+      "source": "M9O/M9P deterministic reproduction",
+      "count": 1495,
+      "win_rate": 0.622742474916388,
+      "profit_factor_bps": 1.365884145048126,
+      "max_drawdown_bps": 510.52434894848284,
+      "nearby_combinations": 72,
+      "all_72_calendar_years_pf_above_1": true,
+      "all_72_aggregate_pf_above_1_after_extra_2bps": true,
+      "decision": "PRIMARY_REPRODUCIBLE_RESEARCH_CORE_NOT_LIVE"
+    },
+    "S3_H1_HIGHER_TIMEFRAME_MOMENTUM_LONG": {
+      "canonical": {"count": 191, "win_rate": 0.7120418848167539, "profit_factor_bps": 1.7802349633701025, "average_win_bps": 35.13579185051415, "average_loss_bps": -48.80323808109188, "max_drawdown_bps": 532.3023910458769, "max_losing_streak": 4},
+      "stress_grid": "81 combinations: H4 W80/100/120 x MACD q70/q75/q80 x D1 W80/100/120 x MACD q45/q50/q55",
+      "all_81_calendar_years_pf_above_1": true,
+      "all_81_aggregate_pf_above_1_after_extra_2bps": true,
+      "aggregate_pf_range": [1.569876, 2.627827],
+      "extra_2bps_pf_range": [1.43298, 2.342852],
+      "minimum_calendar_year_pf_across_grid": 1.090716,
+      "decision": "HIGHEST_PRIORITY_NEW_MULTI_TIMEFRAME_BRANCH_FOR_DETERMINISTIC_REPRODUCTION_AND_FRESH_PROSPECTIVE_TEST"
+    },
+    "S4_H4_DAILY_TREND_LONG": {
+      "canonical": {"count": 70, "win_rate": 0.7285714285714285, "profit_factor_bps": 3.295562620459433, "average_win_bps": 77.50087391006367, "average_loss_bps": -63.123868518409296, "max_drawdown_bps": 281.7143876704429, "max_losing_streak": 2},
+      "stress_grid": "9 combinations: D1 W80/100/120 x RCI9 q45/q50/q55, D1 bullish EMA stack fixed",
+      "all_9_aggregate_pf_above_1_after_extra_2bps": true,
+      "combinations_all_calendar_years_pf_above_1": 4,
+      "decision": "PREMIUM_REFERENCE_ONLY_SMALL_SAMPLE_AND_2023_SENSITIVITY"
+    }
+  },
+  "quarter_stability": {
+    "S1_weak_quarters": {"2023Q2": 0.7308698865549804, "2024Q1": 0.9597237905097769},
+    "S2_weak_quarters": {"2024Q4": 0.9756132855531192, "2025Q3": 0.7979100417360014},
+    "S3_weak_quarters": {"2025Q4": 0.7019046407374923},
+    "S4_weak_quarters": {"2024Q4": "one trade only, loss"},
+    "interpretation": "Weak periods are mostly asynchronous, which supports diversification across timeframes rather than forcing one branch to trade every regime."
+  },
+  "monthly_net_return_correlation": {
+    "M5_vs_M15": -0.072738,
+    "M5_vs_H1": 0.054581,
+    "M5_vs_H4": 0.317983,
+    "M15_vs_H1": 0.154441,
+    "M15_vs_H4": 0.214799,
+    "H1_vs_H4": 0.195529,
+    "interpretation": "Historical monthly branch returns are only weakly correlated; portfolio breadth can add diversification as well as frequency."
+  },
+  "dedup_frequency": {
+    "method_for_frequency_only": "Sort all S1/S2/S3/S4 candidate timestamps. Start a fixed window at the first event and cluster events inside the window; cluster composition is descriptive and must not be used as an entry filter because later events are future relative to the first event.",
+    "15m": {"clusters": 2886, "clusters_per_42_months": 68.71428571428571, "multi_branch_fraction": 0.041926541926541924},
+    "60m": {"clusters": 2439, "clusters_per_42_months": 58.07142857142857, "multi_branch_fraction": 0.14678146781467816},
+    "120m": {"clusters": 1988, "clusters_per_42_months": 47.333333333333336, "multi_branch_fraction": 0.2630784708249497},
+    "240m": {"clusters": 1501, "clusters_per_42_months": 35.73809523809524, "multi_branch_fraction": 0.40772818121252496}
+  },
+  "causal_one_position_portfolio_reference": {
+    "definition": "GOLD LONG only. Sort S1/S2/S3/S4 events chronologically. When flat, the first qualifying event opens one virtual position using that branch's own first-turn entry and own frozen proxy exit. While the position is active, later LONG events do not open another position; they are confirmation metadata only. Simultaneous timestamps use deterministic priority H4 > H1 > M15 > M5. No future event is used to decide the initial entry.",
+    "count": 2241,
+    "average_trades_per_observed_month": 53.357142857142854,
+    "monthly_count_median": 53.0,
+    "monthly_count_range": [27, 75],
+    "win_rate": 0.6323070058009818,
+    "profit_factor_bps": 1.44465145217794,
+    "net_bps": 7515.320942048054,
+    "average_win_bps": 17.23141908779551,
+    "average_loss_bps": -20.536573396547002,
+    "max_drawdown_bps": 535.4125258246631,
+    "max_losing_streak": 8,
+    "tail_le_minus_100_fraction": 0.011601963409192326,
+    "yearly_pf": {"2023": 1.3190898570464964, "2024": 1.5244961726487936, "2025": 1.361648452580772, "2026_to_0619": 1.5964934940498556},
+    "quarters_pf_above_1": "13 of 14",
+    "weak_quarter": {"2025Q3": {"count": 175, "win_rate": 0.5942857142857143, "profit_factor_bps": 0.804309, "net_bps": -317.821174}},
+    "extra_cost_pf": {"0.5bps": 1.3691386484696297, "1.0bps": 1.2967297960106627, "1.5bps": 1.2275533612361385, "2.0bps": 1.161735796954849, "2.5bps": 1.0992358746240396, "3.0bps": 1.0399915392801387},
+    "accepted_branch_counts": {"M15_S2": 1104, "M5_S1": 952, "H1_S3": 139, "H4_S4": 46},
+    "decision": "PROMISING_PORTFOLIO_REFERENCE_ONLY_NOT_VALIDATED_OR_LIVE"
+  },
+  "confidence_sequence_findings": {
+    "warning": "Simple agreement count is not a valid universal confidence rule. The order of timeframe signals materially changes outcomes.",
+    "examples_causal_prior_only": {
+      "M15_target_with_prior_M5_within_60m": {"count": 198, "profit_factor_bps": 1.841073},
+      "M15_target_with_prior_H1_within_60m": {"count": 21, "profit_factor_bps": 3.091392},
+      "H1_target_with_prior_M5_within_240m": {"count": 40, "profit_factor_bps": 4.208473},
+      "H1_target_with_prior_M15_within_240m": {"count": 59, "profit_factor_bps": 0.898370},
+      "H4_target_with_prior_M15_within_60m": {"count": 12, "profit_factor_bps": 8.163475},
+      "M5_target_with_prior_H1_within_240m": {"count": 58, "profit_factor_bps": 2.315768},
+      "M5_target_with_prior_H4_within_240m": {"count": 23, "profit_factor_bps": 0.654769}
+    },
+    "decision": "MODEL_CONFIRMATION_AS_CAUSAL_SEQUENCE_OR_PHASE_METADATA; DO_NOT_SCORE_ALL_MULTI_TIMEFRAME_AGREEMENT_AS_POSITIVE"
+  },
+  "research_decision": [
+    "Keep M15 N3 as the primary deterministic branch.",
+    "Advance H1 S3 to deterministic repository reproduction because its nearby parameter neighborhood is unusually robust.",
+    "Keep M5 S1 auxiliary until cost/definition robustness improves; do not use its raw frequency to justify weak trades.",
+    "Keep H4 S4 premium/reference only until more fresh observations exist.",
+    "Use one-position GOLD dedup as the first portfolio accounting reference; do not pyramid overlapping LONG signals.",
+    "Treat later timeframe signals during an active trade as phase/confidence metadata, not additional positions.",
+    "Do not use a generic agreement-count confidence boost; sequence matters.",
+    "Keep M9R M15 Q1/Q2/Q3 risk-reward design frozen and separate until deterministic portfolio implementation is ready.",
+    "BTC remains a separate forward research family; do not transplant GOLD branch rules."
+  ],
+  "guardrails": {
+    "audit_only": true,
+    "automatic_live_promotion": false,
+    "m7c_formula_changed": false,
+    "m7c_threshold_changed": false,
+    "m8c_reset": false,
+    "m9r_gold_prospective_started": false,
+    "new_multitimeframe_prospective_started": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
