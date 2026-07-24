@@ -1,0 +1,79 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Search for GOLD M15 SHORT opportunity structures that do not use the frozen Mochipoyo PRIMARY_SHORT kernel or M10F C0049 as the candidate universe.",
+  "why_now": {
+    "M10F": "No robust PF2 SHORT loss-filter rule across discovery/2025/2026.",
+    "M10G": "Reclaim improved M15 SHORT only to PF about 1.28 and did not solve 2024.",
+    "M10H": "Only four genuine XAUUSD PRIMARY_SHORT source events are available; no fidelity refit is justified yet."
+  },
+  "data": {
+    "source": "frozen GOLD raw CSVs 2023-01-03 through 2026-06-19",
+    "time_basis": "MT5 server time",
+    "newest_row_contract": "CLOSED",
+    "hashes_must_match_M10A_frozen_core": true,
+    "historical_research_exposed": true,
+    "fresh_forward_evidence": false
+  },
+  "candidate_design": {
+    "timeframe": "M15",
+    "direction": "SHORT",
+    "decision_time": "new M15 bar open; all features use the immediately preceding fully CLOSED M15 bar and latest fully CLOSED H1/H4 bars only",
+    "entry_execution": "exact M1 open bid at decision time",
+    "exit_architecture": "fixed-horizon screening only at 60, 120 and 240 minutes; exit at exact M1 open ask at horizon",
+    "one_position": "within each rule+horizon; ignore new signals while a prior fixed-horizon virtual trade is open",
+    "actual_spread": "M1 recorded spread applied at exit ask",
+    "fixed_spread_sensitivity_usd": 0.20,
+    "not_used_as_candidate_universe": ["M7C KERNEL-S1", "M10F C0049", "M10G reclaim entries"]
+  },
+  "frozen_archetypes": [
+    "TREND_BREAKDOWN: M15+H1 bearish trend with prior-low break and bearish momentum",
+    "PULLBACK_RESUME: H1 bearish trend, M15 pullback through EMA20 then renewed bearish momentum",
+    "MOMENTUM_ACCELERATION: H1 bearish trend plus negative/accelerating M15 MACD and negative short returns",
+    "VOLATILITY_BREAKDOWN: high M15 ATR regime plus bearish wide-range close near low and prior-low break",
+    "HTF_ALIGNMENT_BREAK: H4+H1 bearish EMA stacks plus M15 bearish momentum/break structure",
+    "EXHAUSTION_REVERSAL: stretched/overbought M15 state followed by causal bearish reversal trigger"
+  ],
+  "bounded_variants": {
+    "break_lookbacks": [10, 20],
+    "atr_percentile_thresholds": [0.5, 0.7],
+    "bear_body_fraction_thresholds": [0.4, 0.6],
+    "close_position_thresholds": [0.25, 0.4],
+    "overbought_rci9_thresholds": [60.0, 80.0],
+    "ema_pullback_atr_thresholds": [0.0, 0.25, 0.5],
+    "horizons_minutes": [60, 120, 240]
+  },
+  "split_contract": {
+    "discovery": "2023-2024 only",
+    "validation": "2025 only",
+    "final_test": "2026 through 2026-06-19 only",
+    "variant_ranking_uses_2025": false,
+    "variant_ranking_uses_2026": false,
+    "top_train_candidates_reported_per_archetype_horizon": 5
+  },
+  "minimums": {
+    "discovery_trade_count": 40,
+    "validation_trade_count_for_robust_claim": 20,
+    "final_test_trade_count_for_robust_claim": 15
+  },
+  "target": {
+    "profit_factor": 2.0,
+    "pf2_is_descriptive_not_auto_adoption": true,
+    "robust_candidate_requires": "PF>=2 in discovery, 2025 validation and 2026 final test with minimum counts, positive net in each split, and fixed-$0.20 all-history PF>1"
+  },
+  "next_if_promising": "Freeze exact archetype+variant+horizon and reproduce deterministically before any fresh prospective SHORT shadow.",
+  "next_if_not_promising": "Do not force M15 SHORT. Expand to a separately contracted M5/H1 independent architecture or remain LONG-only.",
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "modify_M7C": false,
+    "modify_M10B": false,
+    "modify_M10E": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
