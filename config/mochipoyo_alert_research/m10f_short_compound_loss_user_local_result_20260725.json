@@ -1,0 +1,45 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_ROBUST_SHORT",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(26).zip",
+    "sha256": "e31c553dadded8c49c163d839810f998b65b9aa55a5ed8527cf945b5f4d8ae88",
+    "size_bytes": 2926136
+  },
+  "sample": "frozen research-exposed GOLD 2023-01-03 through 2026-06-19",
+  "target_pf": 2.0,
+  "baseline": {
+    "M5": {"all": {"count": 3940, "pf": 0.9072154917664874, "payoff": 0.6275916036456071, "dd_bps": 3672.673049103292}, "train_2023_2024": {"count": 2289, "pf": 0.8625687706108831}, "validation_2025": {"count": 1069, "pf": 0.8765391849518689}, "test_2026": {"count": 582, "pf": 1.02466628878545}, "fixed0p20_all_pf": 0.8941307574956597},
+    "M15": {"all": {"count": 1567, "pf": 0.8869843085732072, "payoff": 0.6367593170218194, "dd_bps": 3954.184474562527}, "train_2023_2024": {"count": 908, "pf": 0.8508335863048824}, "validation_2025": {"count": 424, "pf": 0.7568884030301147}, "test_2026": {"count": 235, "pf": 1.1369871202281174}, "fixed0p20_all_pf": 0.8790367158258083},
+    "H1": {"all": {"count": 415, "pf": 0.7585431658429277, "payoff": 0.4522084257909761, "dd_bps": 5233.40235666879}, "train_2023_2024": {"count": 241, "pf": 0.6884712626524}, "validation_2025": {"count": 97, "pf": 0.6036622695836666}, "test_2026": {"count": 77, "pf": 1.0750441066315122}, "fixed0p20_all_pf": 0.7554158601814313},
+    "H4": {"all": {"count": 74, "pf": 0.7784842357793761, "payoff": 0.447214348213684, "dd_bps": 2519.823751959405}, "train_2023_2024": {"count": 48, "pf": 0.7463887964833987}, "validation_2025": {"count": 13, "pf": 0.3802871490455242}, "test_2026": {"count": 13, "pf": 2.25712792795749}, "fixed0p20_all_pf": 0.7761492560379344}
+  },
+  "pf2_summary": {
+    "M5": {"reported_candidate_rules": 60, "pf2_all_count": 0, "pf2_validation_2025_count": 0, "pf2_final_test_2026_count": 0, "pf2_train_val_test_all_count": 0},
+    "M15": {"reported_candidate_rules": 57, "pf2_all_count": 0, "pf2_validation_2025_count": 0, "pf2_final_test_2026_count": 0, "pf2_train_val_test_all_count": 0},
+    "H1": {"reported_candidate_rules": 56, "pf2_all_count": 0, "pf2_validation_2025_count": 0, "pf2_final_test_2026_count": 0, "pf2_train_val_test_all_count": 0},
+    "H4": {"reported_candidate_rules": 63, "pf2_all_count": 0, "pf2_validation_2025_count": 0, "pf2_final_test_2026_count": 56, "pf2_train_val_test_all_count": 0}
+  },
+  "promising_seed": {
+    "timeframe": "M15",
+    "candidate_id": "M10F_M15_C0049",
+    "formula": "(H4_atr14_bps >= 52.608214 AND H1_atr14_bps >= 25.921365 AND H1_ret1_bps >= 4.8560396) OR (M5_ema30_40_bps >= -0.66120739 AND H4_ema30_40_bps >= 10.436275)",
+    "clauses_json": [[{"feature":"H4_atr14_bps","op":">=","threshold":52.60821382133402,"train_quantile":0.65},{"feature":"H1_atr14_bps","op":">=","threshold":25.921365071429697,"train_quantile":0.65},{"feature":"H1_ret1_bps","op":">=","threshold":4.856039581559264,"train_quantile":0.65}],[{"feature":"M5_ema30_40_bps","op":">=","threshold":-0.6612073901334448,"train_quantile":0.65},{"feature":"H4_ema30_40_bps","op":">=","threshold":10.436275364829477,"train_quantile":0.65}]],
+    "train_retention": 0.7995594713656388,
+    "train": {"count": 726, "pf": 1.1384295285895225, "payoff": 0.7694940332132884, "dd_bps": 508.42175393271975},
+    "validation_2025": {"count": 241, "pf": 1.03663660004606, "payoff": 0.6514000257046187, "dd_bps": 360.9598848514471},
+    "test_2026": {"count": 122, "pf": 1.3615777641528928, "payoff": 0.7957272647646776, "dd_bps": 455.51724439350505},
+    "all": {"count": 1089, "pf": 1.1566500291510813, "payoff": 0.7570160008142541, "dd_bps": 508.42175393271975},
+    "fixed0p20_all": {"pf": 1.1413439010359998, "payoff": 0.7603133184543032, "dd_bps": 562.6588620928109}
+  },
+  "interpretation": {
+    "pf2_robust_short_found": false,
+    "M5": "NO_ROBUST_PF2; best robust filter remains below PF1.",
+    "M15": "PROMISING_POSITIVE_ACROSS_2023_2024_2025_2026_BUT_NOT_PF2; proceed to payoff/entry architecture research only.",
+    "H1": "NO_ROBUST_IMPROVEMENT; validation remains weak.",
+    "H4": "TRAIN_PF2_CANDIDATES_COLLAPSE_IN_2025; small-sample overfit risk; do not promote."
+  },
+  "guardrails": {"historical_research_exposed": true, "fresh_forward_validated": false, "m10b_modified_or_reset": false, "m10e_modified_or_reset": false, "historical_backfill": false, "automatic_live_promotion": false, "discord_send": false, "mt5_order": false, "live_ready": false, "final_signal": false},
+  "next": "Keep M10B/M10E running unchanged. Use M15 candidate C0049 only as research-exposed seed for a bounded SHORT reclaim/payoff audit; no SHORT forward arm yet."
+}
