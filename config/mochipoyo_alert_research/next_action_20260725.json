@@ -1,58 +1,45 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10K_M15_SHORT_EXIT_LOSS_TAIL_LOCAL_AUDIT_NEXT",
-  "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for later M10H re-audit; in parallel run M10K historical exit/loss-tail audit locally.",
+  "status": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING_LOCAL_AUDIT_NEXT",
+  "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for later M10H re-audit; in parallel run M10L historical H1 SHORT causal feature mining locally.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10k/bat/01_run_m10k.bat.",
-    "Required success marker: [M10K PASS].",
-    "Run scripts/mochipoyo_alert_research/m10k/bat/02_open_latest_results.bat.",
-    "Submit only M10K LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not change the frozen M10J C0212 entry formula from M10K results.",
-    "Do not create/start a SHORT forward arm from M10K historical results alone."
+    "Run scripts/mochipoyo_alert_research/m10l/bat/01_run_m10l.bat.",
+    "Required success marker: [M10L PASS].",
+    "Run scripts/mochipoyo_alert_research/m10l/bat/02_open_latest_results.bat.",
+    "Submit only M10L LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not refit M7C from the current genuine SHORT sample.",
+    "Do not create/start a SHORT forward arm from M10L historical results alone."
   ],
-  "m10j_result": {
-    "status": "PASS_STABLE_EDGE_BELOW_PF2",
-    "package_sha256": "d1f262d8d2c995e3aa203cc1894acc6a53b743b195a5f5943598068a216ce731",
-    "robust_pf2_candidate_count": 0,
-    "all_three_split_pf_gt_1_count": 47,
-    "primary_seed": {
-      "candidate_id": "M10J_C0212",
-      "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-      "fixed_horizon_minutes": 240,
-      "train_count": 105,
-      "train_pf": 1.5689385901535529,
-      "validation_2025_count": 149,
-      "validation_2025_pf": 1.3904778450159343,
-      "test_2026_count": 64,
-      "test_2026_pf": 1.5465266111892766,
-      "all_count": 318,
-      "all_pf": 1.4839437156621065,
-      "fixed0p20_all_pf": 1.4816933419152245
-    }
-  },
-  "m10k_design": {
-    "entry_formula": "M10J C0212 fixed; no new entry condition",
-    "tp_atr": [1.0, 1.5, 2.0, 2.5],
-    "sl_atr": [0.75, 1.0, 1.25, 1.5],
-    "max_hold_minutes": [120, 240, 360],
+  "m10k_result": {
+    "status": "PASS_NO_PF2_STATIC_ATR_EXIT",
+    "package_sha256": "1b89602d67fc840af5d3b77fb316ca18e4a113525b3ffaacca817d768238b4d7",
     "grid_cells": 48,
-    "M1_path": "exact contiguous M1 only",
-    "same_bar_priority": "SL_FIRST_CONSERVATIVE",
-    "actual_spread": true,
-    "fixed_spread_sensitivity_usd": 0.20,
-    "grid_discovery_and_ranking": "2023-2024 only",
-    "validation": "2025 descriptive after grid freeze",
-    "final_test": "2026 through 2026-06-19 descriptive after grid freeze",
+    "all_cells_three_split_pf_gt_1": 48,
+    "robust_pf2_candidate_count": 0,
+    "best_discovery_rank_1": {"tp_atr": 2.0, "sl_atr": 1.5, "max_hold_minutes": 120, "train_pf": 1.317195823821474, "validation_2025_pf": 1.2126242231484694, "test_2026_pf": 1.1575442304873906, "all_pf": 1.2133128651530305},
+    "best_min_split": {"tp_atr": 2.5, "sl_atr": 1.5, "max_hold_minutes": 240, "train_pf": 1.2686865412540729, "validation_2025_pf": 1.2086650855791168, "test_2026_pf": 1.2207088220231666, "all_pf": 1.2251137540985007},
+    "interpretation": "The M10J C0212 M15 seed remains directionally stable, but static ATR TP/SL does not provide a PF2 path. Do not escalate M15 post-hoc tuning."
+  },
+  "m10l_design": {
+    "candidate_universe": "all causal H1 decisions; explicitly not M7C KERNEL-S1, M10J C0212, or M10K exit cells",
+    "direction": "SHORT",
+    "features": "H1/H4/D1 plus latest closed M15 causal RCI/MACD/EMA/ATR/return/candle/volume/server-hour features",
+    "threshold_source": "2023-2024 discovery quantiles only",
+    "formula_families": ["single threshold", "two-condition AND"],
+    "pairing_and_ranking": "2023-2024 only",
+    "validation": "2025 locked",
+    "final_test": "2026 through 2026-06-19 locked",
+    "fixed_horizon_exits_minutes": [240, 480, 720],
     "target_pf": 2.0,
-    "historical_status": "research-exposed; fresh prospective proof required before any forward use"
+    "minimum_counts": {"discovery": 40, "validation_2025": 20, "final_test_2026": 10}
   },
   "after_package_review": {
-    "if_robust_pf2_found": "Deterministically reproduce the exact fixed trigger+exit cell, then design a new independent fresh prospective SHORT shadow; no automatic promotion.",
-    "if_stable_improvement_below_pf2": "Review whether the exit materially reduces DD/loss-tail enough to justify deterministic reproduction despite PF below 2.",
-    "if_no_improvement": "Stop escalating this M15 seed and move to separately contracted H1/M5 or regime-specific SHORT discovery."
+    "if_robust_pf2_found": "Freeze exact H1 formula+horizon and build deterministic reproduction before any fresh prospective H1 SHORT shadow.",
+    "if_stable_below_pf2": "Keep only as research candidate; do not use 2025/2026 to refit the frozen formula.",
+    "if_no_all_split_edge": "Do not force H1 SHORT; move to separately contracted M5 or regime-specific downside discovery."
   },
   "safety": {
     "audit_only": true,
