@@ -1,0 +1,59 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10O_C056_G013_DETERMINISTIC_REPRODUCTION",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "objective": "Independently reproduce the exact M10N_G013 plus M10L_H240_C056 historical PF2 result from frozen raw GOLD data before any prospective shadow is considered.",
+  "seed": {
+    "candidate_id": "M10L_H240_C056",
+    "timeframe": "H1",
+    "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+    "horizon_minutes": 240
+  },
+  "regime_gate": {
+    "gate_id": "M10N_G013",
+    "formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+    "conditions": [
+      {"feature": "h1_ret3_bps", "op": ">=", "threshold": 18.70087437},
+      {"feature": "d1_macd_hist_bps", "op": ">=", "threshold": -14.25480242}
+    ]
+  },
+  "expected_reference": {
+    "train": {"count": 29, "pf": 3.002653803622849, "fixed0p20_pf": 2.9834805038048677},
+    "val2025": {"count": 33, "pf": 2.35052772774399, "fixed0p20_pf": 2.3440637223943472},
+    "test2026": {"count": 22, "pf": 2.5802661605659214, "fixed0p20_pf": 2.593619282755113},
+    "all": {"count": 84, "pf": 2.540715351740206, "fixed0p20_pf": 2.538476073441831}
+  },
+  "reproduction_rules": {
+    "rebuild_seed_from_frozen_raw": true,
+    "rebuild_regime_snapshots_from_frozen_raw": true,
+    "no_read_of_m10n_result_csv_for_trade_generation": true,
+    "entry": "exact M1 open bid at frozen H1 decision",
+    "exit": "exact M1 open ask 240 minutes later",
+    "actual_spread": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "one_position": true,
+    "nearest_m1_fallback": false,
+    "metric_tolerance": 1e-10
+  },
+  "required_pass": {
+    "exact_counts_match_all_splits": true,
+    "pf_within_tolerance_all_splits": true,
+    "fixed0p20_pf_within_tolerance_all_splits": true,
+    "frozen_hashes_verified": true
+  },
+  "interpretation_guardrails": {
+    "historical_reproduction_is_not_fresh_proof": true,
+    "fresh_prospective_shadow_may_be_designed_only_after_reproduction_pass": true,
+    "no_automatic_forward_promotion": true,
+    "do_not_modify_existing_m7c_m10b_m10e": true
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
