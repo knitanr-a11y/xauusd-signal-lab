@@ -1,0 +1,128 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9Y_GOLD_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-24T13:10:00Z",
+  "purpose": "Fresh audit-only prospective validation of the M9X payoff-decoupling architecture: reclaim-confirmed entry, N6 risk sizing, and selective runner profit management, without modifying or backfilling M9V.",
+  "data": {
+    "ticker": "XAUUSD",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv"
+    },
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false
+  },
+  "base_candidate": {
+    "source": "Canonical M15 N3 only; do not import M5/H1/H4 M9V branch candidates into M9Y.",
+    "primary": "M15 M7C-style post-start LONG PRIMARY: IDLE, RCI9 causal turn-up, EMA20>EMA30>EMA40.",
+    "native_exit": "M15 M7C LONG_EXIT when latest fully closed M15 RCI9 >= 78.333333333333.",
+    "first_turn": "First causal M1 LONG turn after eligible post-start PRIMARY and before native exit: previous M1 low <= minimum low of prior five-bar history, previous low < original PRIMARY bid/open, current closed M1 close > previous closed M1 close; first-turn decision/virtual entry time is next exact M1 open.",
+    "n3": "At first-turn decision, latest fully closed M5 tick_volume_ratio20 <= trailing200 q50 OR latest fully closed M15 MACD(6,13) line in bps >= trailing200 q75.",
+    "future_feature_use": false,
+    "nearest_m1_fallback": false
+  },
+  "w1_reclaim_entry": {
+    "id": "W1_RECLAIM_0P10_ATR5_WITHIN_10M",
+    "atr": "Wilder ATR14 from latest fully closed M5 available at the canonical first-turn decision.",
+    "level": "original PRIMARY bid/open - 0.10 * M5 ATR14",
+    "immediate": "If first-turn exact M1 open bid >= reclaim level, actual entry is that M1 open ask = open + spread*point.",
+    "delayed": "Otherwise observe at most 10 fully closed M1 bars. After the first M1 close >= reclaim level, enter at the exact next M1 open ask. Entry must occur before native M7C exit.",
+    "timeout": "If reclaim is not confirmed within 10 closed M1 bars or native exit occurs first, candidate is skipped.",
+    "historical_best_claim": false,
+    "selection_note": "0.10 ATR / 10m is the central frozen reference cell; M9X showed a broad nearby plateau and this forward shadow does not adapt parameters."
+  },
+  "risk_vector": {
+    "n6_definition": "At ACTUAL entry decision, latest fully closed H4 RCI9 empirical percentile within trailing100 fully closed H4 bars is >0.25 and <=0.50.",
+    "normal_risk_weight": 1.0,
+    "n6_risk_weight": 0.5,
+    "signal_suppression": false
+  },
+  "profit_vector": {
+    "native_exit_event": "Native M7C LONG_EXIT is a profit-management event, not automatically a 100% economic exit for runner arms.",
+    "runner_eligibility": "At native exit decision, latest fully closed H1 MACD(6,13) line is strictly greater than the previous fully closed H1 MACD line.",
+    "runner_exit": "First later M15 decision whose latest fully closed M15 RCI9 makes causal turn-down: current < previous AND previous >= previous2.",
+    "runner_share_adaptation": false
+  },
+  "arms": {
+    "Y0_W1_NATIVE_EXIT": {
+      "entry": "W1 reclaim",
+      "risk": "1.0x always",
+      "runner_share": 0.0,
+      "purpose": "Entry-location baseline"
+    },
+    "Y1_W1_N6_NATIVE_EXIT": {
+      "entry": "W1 reclaim",
+      "risk": "N6 0.5x else 1.0x",
+      "runner_share": 0.0,
+      "purpose": "Isolate risk-sizing effect"
+    },
+    "Y2_W1_N6_RUNNER50": {
+      "entry": "W1 reclaim",
+      "risk": "N6 0.5x else 1.0x",
+      "runner_share": 0.5,
+      "purpose": "Central balanced payoff arm"
+    },
+    "Y3_W1_N6_RUNNER75": {
+      "entry": "W1 reclaim",
+      "risk": "N6 0.5x else 1.0x",
+      "runner_share": 0.75,
+      "purpose": "More explicit positive reward/risk arm"
+    }
+  },
+  "one_position_accounting": {
+    "per_arm": true,
+    "when_flat": "Accept the next eligible W1 actual entry chronologically.",
+    "while_active": "Do not open another trade in that same arm. Record later W1 entries as skipped/confirmation metadata.",
+    "runner_arms_active_until": "Runner exit if runner eligible; otherwise native exit.",
+    "pyramiding": false,
+    "cross_arm_positions_are_virtual_comparison_only": true
+  },
+  "fresh_start_bootstrap": {
+    "fresh_gold_prospective_start_required": true,
+    "reuse_m7c_start": false,
+    "reuse_m8c_start": false,
+    "reuse_m9v_start": false,
+    "backfill": false,
+    "pre_start_primary_eligibility": "FORBIDDEN",
+    "state_rehydration": "Pre-start closed bars may be replayed only to determine M15 state. If M15 is ACTIVE from a pre-start PRIMARY, wait for native exit/return-to-IDLE before any new post-start PRIMARY can become M9Y eligible.",
+    "runtime_prefix": "Use append-safe immutable-row-prefix semantics equivalent to M9V runtime v2; later strictly ascending appends are allowed, already-frozen rows may never change."
+  },
+  "reporting": {
+    "arm_metrics": ["accepted_count", "resolved_count", "open_count", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "payoff_ratio", "max_drawdown_bps", "max_losing_streak", "tail_le_minus_100_fraction"],
+    "entry_metadata": ["primary_time", "first_turn_time", "actual_entry_time", "reclaim_delay_minutes", "reclaim_level", "N6_at_actual_entry"],
+    "profit_metadata": ["native_exit_time", "H1_MACD_rising_at_native_exit", "runner_exit_time"],
+    "overlap_metadata": "Record W1 candidates skipped because an arm still has an active runner/native position.",
+    "cost_reporting": "Live/historical spread at entry where available; commission/swap remain separately labeled and are not claimed modeled."
+  },
+  "review_gates": {
+    "operational_checkpoint_Y0_accepted": 20,
+    "interim_checkpoint_Y0_accepted": 60,
+    "minimum_N6_flagged_entries_for_risk_review": 10,
+    "formal_checkpoint_Y0_accepted": 120,
+    "automatic_live_promotion": false,
+    "note": "These are review checkpoints only. Y2/Y3 may resolve later than Y0/Y1 because runners remain open."
+  },
+  "relationship_to_m9v": {
+    "m9v_continues_unchanged": true,
+    "m9v_start_reset": false,
+    "m9v_backfill": false,
+    "m9y_is_separate_runtime": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "m9v_reset": false,
+    "automatic_live_promotion": false
+  }
+}
