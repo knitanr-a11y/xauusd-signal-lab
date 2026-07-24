@@ -1,0 +1,65 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW_V2_INITIAL_LOCAL_REVIEW",
+  "status": "PASS_INITIAL_LOCAL_V2_READY_FOR_PERSISTENT_FORWARD_SHADOW",
+  "recorded_at_utc": "2026-07-24T11:35:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(19).zip",
+    "sha256": "8c6bf608887966d50474c49ac63dd73eb20fb112d74df0a6c3f89bc61138e5cd"
+  },
+  "runtime": {
+    "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "prospective_start_server_time": "2026.07.24 11:04:00",
+    "created_at_utc": "2026-07-24T08:05:49Z",
+    "contract_sha256": "a5717fd774e9e4660b33859f402057248a74a3cb131fe00589a8a5f80e60ccac",
+    "reset_allowed": false,
+    "historical_backfill_allowed": false,
+    "pre_start_primary_candidate_eligibility": false
+  },
+  "initial_one_shot": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "built_at_utc": "2026-07-24T08:06:08Z",
+    "latest_server_open": {
+      "M1": "2026.07.24 11:05:00",
+      "M5": "2026.07.24 11:00:00",
+      "M15": "2026.07.24 10:45:00",
+      "H1": "2026.07.24 10:00:00",
+      "H4": "2026.07.24 04:00:00",
+      "D1": "2026.07.23 00:00:00"
+    },
+    "candidate_count": 0,
+    "arm_accepted_counts": {
+      "V0_M15_ONLY": 0,
+      "V1_M15_PLUS_H1": 0,
+      "V2_ALL_TIMEFRAMES": 0
+    },
+    "confirmation_metadata_count": 0,
+    "interpretation": "Expected immediately after fresh start; only one M1 minute elapsed beyond the prospective start. This is a bootstrap/integrity pass, not a performance result."
+  },
+  "bootstrap_state_at_start": {
+    "M5": {"state": "ACTIVE_SHORT", "inherited_primary_time": "2026.07.24 07:45:00"},
+    "M15": {"state": "IDLE", "inherited_primary_time": null},
+    "H1": {"state": "ACTIVE_LONG", "inherited_primary_time": "2026.07.23 03:00:00"},
+    "H4": {"state": "IDLE", "inherited_primary_time": null}
+  },
+  "integrity": {
+    "prefix_integrity_verified": true,
+    "closed_rows_contract": true,
+    "nearest_m1_fallback": false,
+    "pyramiding": false,
+    "generic_agreement_score": false,
+    "m9r_overlay_included": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "m8c_reset": false
+  },
+  "decision": {
+    "persistent_m9v_v2_shadow_allowed": true,
+    "operator": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "keep_m8c_m7c_collector_running": true,
+    "m9r_start_allowed": false,
+    "automatic_live_promotion": false
+  }
+}
