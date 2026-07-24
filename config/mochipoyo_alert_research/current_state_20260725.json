@@ -1,0 +1,60 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "recorded_at_utc": "2026-07-24T18:25:00Z",
+  "status": "M10A_USER_LOCAL_REPRODUCTION_PASS_M10B_IMPLEMENTED_FRESH_START_PENDING_AUDIT_ONLY",
+  "running_monitors": {
+    "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
+    "M7C": "RUNNING_KEEP_UNCHANGED",
+    "M8C": "RUNNING_KEEP_UNCHANGED",
+    "M9V": "RUNNING_KEEP_UNCHANGED",
+    "M9Y": "RUNNING_KEEP_UNCHANGED"
+  },
+  "immutable_starts": {
+    "M7C_utc": "2026-07-20T14:54:15Z",
+    "M9V_mt5_server": "2026.07.24 11:04:00",
+    "M9Y_mt5_server": "2026.07.24 12:45:00"
+  },
+  "m10a": {
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
+    "result": "config/mochipoyo_alert_research/m10a_gold_multitimeframe_payoff_user_local_reproduction_result_20260725.json",
+    "M5_ENTRY": {"count": 842, "pf": 1.537338444576352},
+    "M5_RUNNER75": {"count": 837, "pf": 1.6651962763806494},
+    "H1_ENTRY": {"count": 171, "pf": 2.814130403928734},
+    "H1_RUNNER50": {"count": 159, "pf": 2.8303858342555084},
+    "H4_ENTRY": {"count": 57, "pf": 4.668798744063922},
+    "forward_validated": false
+  },
+  "m10b": {
+    "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+    "status": "IMPLEMENTED_DESIGN_FROZEN_FRESH_START_NOT_YET_CREATED",
+    "contract": "config/mochipoyo_alert_research/m10b_gold_multitimeframe_payoff_fresh_prospective_shadow_contract_20260725.json",
+    "resolved_only_addendum": "config/mochipoyo_alert_research/m10b_resolved_only_materialization_addendum_20260725.json",
+    "prestart_review": "config/mochipoyo_alert_research/m10b_implementation_prestart_review_20260725.json",
+    "upstream": "READ_ONLY_M9V_V2_S1_S3_S4_POST_M10B_START_ONLY",
+    "m9y_output_dependency": false,
+    "start_server_time": null,
+    "start_freeze_pending_user_bat01": true,
+    "historical_backfill": false,
+    "reset_allowed": false,
+    "persistent_loop_started": false
+  },
+  "forced_reboot_recovery": {
+    "status": "READY_WITH_M10B",
+    "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
+    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B"],
+    "never_reinitialize_after_reboot": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "automatic_live_promotion": false
+  },
+  "next": "Pull branch; keep existing monitors running; run M10B BAT01 once, then BAT02 once; submit M10B LATEST 99_UPLOAD_PACKAGE.zip before starting BAT03."
+}
