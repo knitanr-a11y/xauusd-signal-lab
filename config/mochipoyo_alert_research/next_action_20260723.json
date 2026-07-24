@@ -1,56 +1,75 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9Y_INITIAL_PASS_PERSISTENT_FORWARD_NEXT",
+  "status": "M8C_M9V_M9Y_PERSISTENT_FORWARD_WITH_REBOOT_RECOVERY_READY",
   "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FRESH_FORWARD_COLLECTION",
-  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; PULL LATEST; START M9Y BAT 03 AND KEEP WINDOW OPEN; NEVER RERUN M9Y BAT 01; REVIEW AT FORWARD CHECKPOINTS",
-  "m9v": {
-    "prospective_start_server_time": "2026.07.24 11:04:00",
-    "keep_running": true,
-    "persistent": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
-    "never_rerun_00_or_01": true,
-    "runtime_reset_allowed": false
+  "immediate_action": "KEEP CURRENT PERSISTENT LOOPS RUNNING; REVIEW AT FROZEN CHECKPOINTS; AFTER FORCED REBOOT USE ONLY THE DEDICATED RECOVERY BAT THEN RESTART PERSISTENT LOOPS WITHOUT REINITIALIZING STARTS",
+  "forward_review_policy": {
+    "M7C": {
+      "operational_supported_events": 5,
+      "interim_supported_events": 15,
+      "formal_supported_events": 30,
+      "formal_additional_minimums": "per ticker >=10, PRIMARY_LONG >=5, PRIMARY_SHORT >=5, total exits >=10"
+    },
+    "M8C": {
+      "total_future_proxy_primary": 30,
+      "btcusd_primary_long": 8,
+      "challenger_accepted": 15
+    },
+    "M9V": {
+      "operational_total_accepted_arm_events": 20,
+      "interim_total_accepted_arm_events": 60,
+      "minimum_H1_S3_candidates": 10,
+      "formal_total_accepted_arm_events": 120
+    },
+    "M9Y": {
+      "operational_Y0_accepted": 20,
+      "interim_Y0_accepted": 60,
+      "minimum_N6_flagged_entries": 10,
+      "formal_Y0_accepted": 120
+    },
+    "rule": "These are review checkpoints, not automatic promotion thresholds. At the first operational gate, manually review edge, implementation integrity, frequency, DD/tails and whether continued collection remains justified."
   },
-  "m9y": {
-    "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
-    "prospective_start_server_time": "2026.07.24 12:45:00",
-    "initial_local_result": "config/mochipoyo_alert_research/m9y_initial_local_pass_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9y/bat",
-    "03_persistent": "03_run_shadow_forever.bat",
-    "04_stop": "04_stop_shadow_forever.bat",
-    "05_open_results": "05_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9Y\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_runtime_manifest.json",
-    "runtime_receipt": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_runtime_start_receipt.json",
-    "arms": ["Y0_W1_NATIVE_EXIT", "Y1_W1_N6_NATIVE_EXIT", "Y2_W1_N6_RUNNER50", "Y3_W1_N6_RUNNER75"],
-    "review_gates": {
-      "operational_checkpoint_Y0_accepted": 20,
-      "interim_checkpoint_Y0_accepted": 60,
-      "minimum_N6_flagged_entries_for_risk_review": 10,
-      "formal_checkpoint_Y0_accepted": 120
-    }
+  "forced_reboot": {
+    "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
+    "recovery_bat": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "restart_order": [
+      "Confirm MT5 and CSV export are running/updating.",
+      "scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat",
+      "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
+      "scripts/mochipoyo_alert_research/m8c/bat/02_run_forward_shadow_forever.bat",
+      "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+      "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat"
+    ],
+    "never_do": [
+      "Do not rerun/reset M7C prospective initializer.",
+      "Do not rerun/reset M8C prospective initializer/start.",
+      "Do not rerun M9V BAT00/BAT01.",
+      "Do not rerun M9Y BAT01.",
+      "Do not manually delete runtime manifests/start receipts or change prospective starts."
+    ],
+    "data_gap_rule": "Reports can reconstruct from frozen starts only when underlying source data catches up. Cloudflare backlog is cursor/database based. MT5 CSV downtime must be restored in the raw CSV; a permanent missing-bar interval is not valid observed forward evidence."
   },
-  "operator_order_now": [
-    "Fetch/Pull feature/mochipoyo-alert-research so local state records are current.",
-    "Keep M8C, M7C, genuine source collector and M9V 03 running unchanged.",
-    "Run scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat and keep that window open.",
-    "Never rerun M9Y 01_initialize_fresh_runtime_once.bat and never delete/reset the M9Y runtime/start receipt.",
-    "Use M9Y 04_stop_shadow_forever.bat only for an intentional safe stop.",
-    "At requested checkpoints run M9Y 05_open_latest_results.bat and submit the current 99_UPLOAD_PACKAGE.zip."
-  ],
+  "normal_operator_state": {
+    "collector": "running",
+    "M7C": "running",
+    "M8C": "running",
+    "M9V": "running",
+    "M9Y": "running",
+    "M9V_start": "2026.07.24 11:04:00 MT5 server time",
+    "M9Y_start": "2026.07.24 12:45:00 MT5 server time"
+  },
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9Y_INITIAL_PASS_PERSISTENT_FORWARD_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_M9Y_RUNNING_REBOOT_RECOVERY_READY_20260724.md",
     "update_when_material_state_changes": true
   },
   "forbidden": [
-    "Do not stop/reset M8C/M7C/M9V.",
+    "Do not stop/reset M8C/M7C/M9V/M9Y merely because the PC rebooted.",
     "Do not rerun M9V BAT00/BAT01.",
     "Do not rerun M9Y BAT01.",
-    "Do not delete/reset/backfill M9V or M9Y.",
-    "Do not allow an M9V S2 candidate whose proxy PRIMARY is at/before M9Y start into M9Y.",
-    "Do not start M9R.",
-    "Do not transplant GOLD payoff rules into BTC.",
+    "Do not backfill by changing any frozen prospective start.",
+    "Do not transplant GOLD payoff rules into BTC without BTC-specific evidence.",
     "Do not enable Discord, MT5 orders, live ready, final signal, or real entry gate."
   ]
 }
