@@ -1,0 +1,61 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Test whether a bounded causal M15 SHORT reclaim/confirmation family can improve the M10F M15 SHORT seed toward PF 2 without changing the frozen loss-filter seed or touching any forward monitor.",
+  "sample": "frozen research-exposed GOLD history 2023-01-03 through 2026-06-19",
+  "seed": {
+    "source_stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
+    "candidate_id": "M10F_M15_C0049",
+    "direction": "SHORT",
+    "all_count": 1089,
+    "all_pf": 1.1566500291510813,
+    "fixed0p20_all_pf": 1.1413439010359998,
+    "formula_is_frozen": true,
+    "exclude_when": "(H4_atr14_bps >= 52.60821382133402 AND H1_atr14_bps >= 25.921365071429697 AND H1_ret1_bps >= 4.856039581559264) OR (M5_ema30_40_bps >= -0.6612073901334448 AND H4_ema30_40_bps >= 10.436275364829477)"
+  },
+  "reclaim_family": {
+    "reason": "Direction-symmetric counterpart of the already studied M15 LONG reclaim neighborhood; this stage tests entry confirmation only and does not add runner logic.",
+    "atr_source": "latest fully closed M15 Wilder ATR14 at original first-turn time",
+    "level": "original PRIMARY bid/open + offset_atr * M15_ATR14",
+    "immediate_entry": "if first-turn M1 open <= reclaim level, short at that exact M1 open bid",
+    "delayed_confirmation": "otherwise wait only for fully closed M1 close <= reclaim level; enter short at exact next M1 open bid",
+    "timeout": "skip if confirmation does not occur within max wait or before native exit",
+    "native_exit": "unchanged original native exit at exact M1 open ask using historical spread",
+    "offset_atr_grid": [0.0, 0.05, 0.10, 0.15, 0.20],
+    "wait_minutes_grid": [5, 10, 15, 20, 30],
+    "grid_cells": 25,
+    "fixed_spread_usd_check": 0.20,
+    "runner": "NOT_TESTED_IN_M10G"
+  },
+  "evaluation": {
+    "target_pf": 2.0,
+    "target_pf_is_descriptive_not_auto_adoption": true,
+    "report_all_25_cells": true,
+    "report_calendar_years": [2023, 2024, 2025, 2026],
+    "report_count_retention_vs_seed": true,
+    "report_win_rate_pf_payoff_net_dd_losing_streak_tail100": true,
+    "report_fixed_spread_0p20": true,
+    "historical_holdout_note": "M10F holdouts have now been inspected. M10G is research-exposed hypothesis development and must not be presented as fresh/OOS validation. Any promising exact rule requires later deterministic reproduction and a new fresh prospective start."
+  },
+  "data_contract": {
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "frozen_hashes_required": true,
+    "nearest_m1_fallback": false,
+    "future_outcome_used_in_entry_gate": false,
+    "historical_backfill": false
+  },
+  "safety": {
+    "audit_only": true,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
