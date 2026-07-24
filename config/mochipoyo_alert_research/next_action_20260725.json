@@ -1,41 +1,53 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10E_FRESH_H1_BASELINE_VS_FILTER_BOOTSTRAP_NEXT",
+  "status": "M10E_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW",
   "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B unchanged; create the independent M10E fresh start exactly once; run one M10E one-shot; submit its bootstrap package before persistent M10E collection.",
+  "immediate_action": "Fetch/Pull the recovery extension, keep all existing monitors and frozen starts unchanged, ensure M10B persistent shadow is running, then start M10E persistent shadow. Never rerun any initializer.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Do not stop, reset, backfill, or reinitialize collector/M7C/M8C/M9V/M9Y/M10B.",
-    "Run scripts/mochipoyo_alert_research/m10e/bat/01_initialize_fresh_runtime_once.bat ONE TIME ONLY.",
-    "Required success marker: [M10E INIT PASS] fresh start=<MT5 server timestamp>.",
-    "After INIT PASS, NEVER run M10E BAT01 again and never delete/recreate the M10E runtime/start.",
-    "Run scripts/mochipoyo_alert_research/m10e/bat/02_run_shadow_once.bat ONE TIME.",
-    "Required success marker: [M10E PASS].",
-    "Run scripts/mochipoyo_alert_research/m10e/bat/05_open_latest_results.bat.",
-    "Submit only M10E LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do NOT run M10E BAT03 until the first M10E bootstrap package has been reviewed."
+    "Keep collector/M7C/M8C/M9V/M9Y unchanged.",
+    "M10B start is immutable at 2026.07.24 20:54:00. Never run M10B BAT01 again. If M10B BAT03 is not currently running, start scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat.",
+    "M10E start is immutable at 2026.07.24 22:06:00. Never run M10E BAT01 again.",
+    "Start scripts/mochipoyo_alert_research/m10e/bat/03_run_shadow_forever.bat.",
+    "Leave the M10E loop running. Review checkpoints are E0 H1 accepted counts 5, 10 and 20.",
+    "After a forced reboot use only scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat, then follow its restart order."
   ],
-  "success_conditions": {
-    "fresh_start_rule": "M10E start is frozen from the latest stable CLOSED M1 row at BAT01 time and must be strictly after M9V 2026.07.24 11:04:00, M9Y 2026.07.24 12:45:00 and M10B 2026.07.24 20:54:00.",
-    "upstream": "M9V v2 S3_H1 READ-ONLY, post-M10E-start PRIMARY only, resolved-only native materialization",
-    "arms": ["E0_H1_BASELINE_RUNNER50", "E1_H1_FILTERED_RUNNER50"],
-    "fixed_filter": {"m5_macd_bps_slope_le": -0.1308, "h1_ema30_minus_ema40_bps_ge": 17.3333},
+  "m10e_bootstrap": {
+    "result": "config/mochipoyo_alert_research/m10e_user_local_bootstrap_result_20260725.json",
+    "package_sha256": "301e5f7361446300164e50183987c58c03aa4a58a3d06a5b5fd7692d4489514d",
+    "prospective_start_server_time": "2026.07.24 22:06:00",
+    "upstream_resolved_post_start": 0,
+    "h1_entry_candidates": 0,
+    "E0_accepted": 0,
+    "E1_accepted": 0,
+    "compound_excluded": 0,
+    "prefix_integrity_verified": true,
+    "resolved_only": true,
+    "bootstrap_zero_is_expected": true
+  },
+  "comparison": {
+    "E0": "unchanged H1 0.05 ATR reclaim + M5 confirmation + H4&D1 MACD runner50 baseline",
+    "E1": "same H1 architecture, but exclude before one-position when M5 MACD bps slope <= -0.1308 AND H1 EMA30-EMA40 >= 17.3333 bps",
+    "fixed_filter": true,
     "filter_before_one_position": true,
-    "historical_backfill": false
+    "upstream": "M9V v2 S3_H1 READ-ONLY, post-M10E-start PRIMARY only, resolved-only native materialization"
   },
-  "m10d_pass": {
-    "package_sha256": "f5de107c13a4649af6c354c04d03661b75916e06f65c896d349dbfc5e872141c",
-    "baseline": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345},
-    "filtered": {"count": 130, "win_rate": 0.7384615384615385, "pf": 5.40115388326192, "payoff": 1.9129086669885969},
-    "fixed_spread_0p20_pf": 5.3636874914829455,
-    "fixed_spread_0p20_payoff": 1.8996393199002097,
-    "neighborhood_every_year_pass_cells": 5
+  "review_gates": {
+    "operational_E0_accepted": 5,
+    "interim_E0_accepted": 10,
+    "formal_E0_accepted": 20,
+    "manual_review_only": true,
+    "automatic_live_promotion": false
   },
-  "m10b_note": "M10B bootstrap remains PASS with immutable start 2026.07.24 20:54:00. Never rerun the M10B initializer. M10B BAT03 is allowed from its reviewed bootstrap; whether the persistent loop has already been started is not confirmed in chat.",
-  "if_blocked": "Do not delete locks/manifests/receipts or alter thresholds. Send the complete M10E console output. If INIT PASS already occurred, never retry BAT01; diagnose BAT02/runtime only while preserving the frozen start.",
-  "after_first_local_pass": "Review M10E start chronology, prefix integrity, zero/preliminary counts, fixed filter fields, resolved-only behavior and guardrails. Only after review may M10E BAT03 be authorized and forced-reboot recovery extended to M10E.",
+  "forced_reboot_recovery": {
+    "status": "READY_WITH_M10B_M10E",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
+    "never_rerun_M10B_BAT01": true,
+    "never_rerun_M10E_BAT01": true
+  },
   "safety": {
     "audit_only": true,
+    "historical_backfill": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
