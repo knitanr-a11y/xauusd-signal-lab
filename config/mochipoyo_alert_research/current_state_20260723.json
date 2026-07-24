@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T13:45:00Z",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9X_EXACT_PASS_M9Y_IMPLEMENTED_FRESH_START_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FRESH_START_INITIALIZATION_PENDING",
+  "recorded_at_utc": "2026-07-24T14:05:00Z",
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9X_EXACT_PASS_M9Y_INITIAL_PASS_PERSISTENT_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FRESH_FORWARD_COLLECTION",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -24,10 +24,6 @@
     "status": "PASS_EXACT_LOCAL_REPRODUCTION_HISTORICAL_ONLY",
     "result": "config/mochipoyo_alert_research/m9x_gold_payoff_decoupling_local_reproduction_result_20260724.json",
     "one_position_addendum": "config/mochipoyo_alert_research/m9x_one_position_runner_overlap_addendum_20260724.json",
-    "uploaded_package_sha256": "bafa3102b2d4d4a1e7e92f23781b1202ce84edb14a1820618fc02bff9be157da",
-    "canonical_n3": 1495,
-    "w1_count": 1054,
-    "entry_only_pf": 1.5875291007284058,
     "runner50_one_position": {
       "count": 1008,
       "profit_factor": 1.66289170174128,
@@ -44,49 +40,58 @@
       "payoff_ratio": 1.2412616409560873,
       "extra_2bps_pf": 1.3302567506733145
     },
-    "reclaim_neighborhood_25_all_aggregate_pf_above_1": true,
-    "reclaim_neighborhood_25_all_extra_2bps_pf_above_1": true,
-    "reclaim_neighborhood_25_all_calendar_year_pf_above_1": true,
     "forward_validated": false
   },
   "m9y": {
-    "status": "IMPLEMENTED_SELF_TEST_PASS_READY_FOR_ONE_TIME_LOCAL_FRESH_START",
+    "status": "INITIAL_LOCAL_PASS_READY_FOR_PERSISTENT_FORWARD_SHADOW",
     "contract": "config/mochipoyo_alert_research/m9y_gold_payoff_fresh_prospective_shadow_contract_20260724.json",
     "self_test": "config/mochipoyo_alert_research/m9y_implementation_self_test_result_20260724.json",
+    "initial_local_result": "config/mochipoyo_alert_research/m9y_initial_local_pass_20260724.json",
     "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
-    "upstream": "READ_ONLY_M9V_V2_S2_M15_POST_M9Y_START_ONLY",
-    "reuse_m9v_start": false,
+    "prospective_start_server_time": "2026.07.24 12:45:00",
+    "m9v_upstream": "READ_ONLY_M9V_V2_S2_M15_POST_M9Y_START_ONLY",
+    "m9v_start_reused": false,
     "m9v_modified": false,
-    "fresh_start_created": false,
     "historical_backfill_allowed": false,
-    "operator_folder": "scripts/mochipoyo_alert_research/m9y/bat",
+    "pre_start_primary_candidate_eligibility": false,
+    "runtime_reset_allowed": false,
+    "persistent_operator": "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat",
+    "stop_operator": "scripts/mochipoyo_alert_research/m9y/bat/04_stop_shadow_forever.bat",
     "arms": ["Y0_W1_NATIVE_EXIT", "Y1_W1_N6_NATIVE_EXIT", "Y2_W1_N6_RUNNER50", "Y3_W1_N6_RUNNER75"],
-    "self_test_key_results": {
-      "independent_vs_m9v_feed_exact_parity": true,
-      "pre_start_primary_candidate_count": 0,
-      "raw_prefix_tamper_fail_closed": true,
-      "m9v_manifest_tamper_fail_closed": true,
-      "one_position_runner_overlap_enforced": true
+    "initial_counts": {
+      "upstream_s2_post_start_count": 0,
+      "w1_candidate_count": 0,
+      "Y0": 0,
+      "Y1": 0,
+      "Y2": 0,
+      "Y3": 0,
+      "overlap_skip_count": 0
+    },
+    "initial_count_interpretation": "Expected bootstrap/integrity pass about one M1 minute after fresh start; not a performance result.",
+    "review_gates": {
+      "operational_checkpoint_Y0_accepted": 20,
+      "interim_checkpoint_Y0_accepted": 60,
+      "minimum_N6_flagged_entries_for_risk_review": 10,
+      "formal_checkpoint_Y0_accepted": 120
     }
   },
   "m9r": {
     "status": "FROZEN_NOT_STARTED",
-    "decision": "M9Y supersedes M9R for the current payoff-forward validation path; do not start M9R in parallel."
+    "decision": "M9Y supersedes M9R for current payoff-forward validation path."
   },
   "btc": {
     "historical_2023_2026_data_available": false,
     "policy": "Separate research family; do not transplant GOLD M9X/M9Y payoff rules into BTC without BTC-specific evidence."
   },
   "next": {
-    "stage": "M9Y_FRESH_START_LOCAL_INITIALIZATION_AND_INITIAL_ONE_SHOT_REVIEW",
+    "stage": "M9Y_PERSISTENT_FORWARD_COLLECTION",
     "tasks": [
       "Keep M8C/M7C/genuine source collector/M9V v2 running unchanged.",
-      "User pulls latest feature/mochipoyo-alert-research.",
-      "Run M9Y 01_initialize_fresh_runtime_once.bat exactly once until INIT PASS.",
-      "After INIT PASS never rerun M9Y 01 and never delete/reset the M9Y runtime manifest/start receipt.",
-      "Run M9Y 02_run_shadow_once.bat once.",
-      "Run M9Y 05_open_latest_results.bat and submit M9Y LATEST/99_UPLOAD_PACKAGE.zip.",
-      "Do not start M9Y 03 persistent loop until initial M9Y ZIP is reviewed."
+      "User pulls latest feature/mochipoyo-alert-research if needed.",
+      "Start M9Y 03_run_shadow_forever.bat and keep the window open.",
+      "Never rerun M9Y 01 and never delete/reset/backfill the M9Y runtime/start receipt.",
+      "Review Y0/Y1/Y2/Y3 separately at forward checkpoints including count, PF, win rate, payoff ratio, DD, N6 frequency, runner extension and overlap skips.",
+      "Keep M9Y separate from M9V and do not promote automatically."
     ],
     "user_bat_required_now": true
   },
@@ -106,7 +111,7 @@
     "m7c_formula_changed": false,
     "m8c_prospective_start_reset_allowed": false,
     "m9v_runtime_reset_allowed": false,
-    "m9y_runtime_reset_allowed_after_pass": false,
+    "m9y_runtime_reset_allowed": false,
     "automatic_live_promotion": false
   }
 }
