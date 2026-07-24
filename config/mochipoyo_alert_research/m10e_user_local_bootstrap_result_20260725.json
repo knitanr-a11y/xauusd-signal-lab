@@ -1,0 +1,71 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T19:20:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(25).zip",
+    "sha256": "301e5f7361446300164e50183987c58c03aa4a58a3d06a5b5fd7692d4489514d",
+    "size_bytes": 4326
+  },
+  "prospective_start_server_time": "2026.07.24 22:06:00",
+  "chronology": {
+    "M9V_start": "2026.07.24 11:04:00",
+    "M9Y_start": "2026.07.24 12:45:00",
+    "M10B_start": "2026.07.24 20:54:00",
+    "M10E_strictly_after_all_prior_starts": true
+  },
+  "bootstrap_observation": {
+    "built_at_utc": "2026-07-24T19:09:46Z",
+    "latest_M1_server_open": "2026.07.24 22:08:00",
+    "upstream_resolved_post_start": 0,
+    "h1_entry_candidate_count": 0,
+    "compound_excluded_before_one_position": 0,
+    "E0_H1_BASELINE_RUNNER50_accepted": 0,
+    "E1_H1_FILTERED_RUNNER50_accepted": 0,
+    "interpretation": "Expected zero bootstrap immediately after independent start because M10E materializes only post-start S3_H1 candidates after native M9V EXIT resolves."
+  },
+  "fixed_filter": {
+    "m5_macd_bps_slope_le": -0.1308,
+    "h1_ema30_minus_ema40_bps_ge": 17.3333,
+    "feature_decision_time": "actual H1 reclaim entry; latest fully closed M5/H1 only"
+  },
+  "runtime": {
+    "runtime_contract_version": "M10E_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "runtime_status": "FROZEN_FRESH_START",
+    "reset_allowed": false,
+    "historical_backfill_allowed": false,
+    "m9v_upstream_read_only": true,
+    "m9y_output_dependency": false,
+    "m10b_output_dependency": false,
+    "pre_start_primary_candidate_eligibility": false
+  },
+  "data_quality": {
+    "point": 0.01,
+    "newest_csv_row_contract": "CLOSED",
+    "prefix_integrity_verified": true,
+    "all_bootstrap_ledgers_empty_as_expected": true
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "future_outcome_used_in_entry_gate": false,
+    "mae_mfe_exit_path_used_as_filter_feature": false,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  },
+  "decision": {
+    "bootstrap": "PASS",
+    "prospective_start_is_now_immutable": true,
+    "rerun_initializer": false,
+    "persistent_shadow_allowed_after_recovery_extension": true,
+    "automatic_live_promotion": false
+  }
+}
