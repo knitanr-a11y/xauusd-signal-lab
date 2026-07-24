@@ -1,0 +1,94 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9X_GOLD_PAYOFF_DECOUPLING_LOCAL_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_EXACT_LOCAL_REPRODUCTION_HISTORICAL_ONLY",
+  "recorded_at_utc": "2026-07-24T12:50:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(20).zip",
+    "sha256": "bafa3102b2d4d4a1e7e92f23781b1202ce84edb14a1820618fc02bff9be157da"
+  },
+  "sample_status": {
+    "research_exposed": true,
+    "independent_forward_validation": false,
+    "m9v_fresh_forward_data_used": false,
+    "promotion_from_history_allowed": false
+  },
+  "data_quality": {
+    "point": 0.01,
+    "closed_bars_only": true,
+    "nearest_m1_fallback": false,
+    "hashes_match_m9p_reference": true
+  },
+  "exact_reproduction": {
+    "canonical_n3_count": 1495,
+    "w1_reference_count": 1054,
+    "w1_entry_only_pf": 1.5875291007284058,
+    "combined_50pct_runner": {
+      "win_rate": 0.579696394686907,
+      "profit_factor": 1.6575611560852093,
+      "average_win_bps": 17.22400846453467,
+      "average_loss_bps": -14.331846680015381,
+      "max_drawdown_bps": 291.531445157726,
+      "max_losing_streak": 8,
+      "tail_le_minus_100_fraction": 0.0056925996204933585,
+      "extra_2bps_profit_factor": 1.3149249734387372
+    },
+    "combined_75pct_runner": {
+      "win_rate": 0.5588235294117647,
+      "profit_factor": 1.6440999252824295,
+      "average_win_bps": 18.862871810321334,
+      "average_loss_bps": -14.532554008623249,
+      "max_drawdown_bps": 300.1866673654429,
+      "max_losing_streak": 8,
+      "tail_le_minus_100_fraction": 0.0056925996204933585,
+      "extra_2bps_profit_factor": 1.319513780692735
+    }
+  },
+  "runner_share_sensitivity": {
+    "25pct_pf": 1.661486705407864,
+    "50pct_pf": 1.6575611560852093,
+    "75pct_pf": 1.6440999252824295,
+    "100pct_pf": 1.6263014699756844,
+    "interpretation": "Broad runner-share family remains positive; do not choose a historical optimum. 50-75% remains the central payoff research range."
+  },
+  "reclaim_neighborhood_stress": {
+    "combination_count": 25,
+    "offset_atr_range": [0.0, 0.2],
+    "wait_minutes": [5, 10, 15, 20, 30],
+    "count_range": [872, 1206],
+    "profit_factor_range": [1.504295426233107, 1.6575611560852093],
+    "extra_2bps_profit_factor_range": [1.1944355436589351, 1.3149249734387372],
+    "minimum_calendar_year_pf_range": [1.1822705410247778, 1.40771465477917],
+    "all_25_aggregate_pf_above_1": true,
+    "all_25_extra_2bps_pf_above_1": true,
+    "all_25_each_calendar_year_pf_above_1": true,
+    "minimum_quarter_pf_range": [0.620334984540075, 0.9069000837665548],
+    "all_25_have_at_least_one_weak_quarter": true
+  },
+  "reference_50pct_yearly_pf": {
+    "2023": 1.40771465477917,
+    "2024": 1.4571027372188405,
+    "2025": 1.4266417392018944,
+    "2026_through_0619": 2.510536211534049
+  },
+  "reference_50pct_weak_quarters": {
+    "2024Q4": 0.8276529945581997,
+    "2025Q3": 0.9399519260751627
+  },
+  "guardrails": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "m9v_changed_or_reset": false,
+    "automatic_live_promotion": false,
+    "audit_only": true
+  },
+  "decision": {
+    "m9x_reproduction": "PASS",
+    "retrofit_into_m9v": false,
+    "reuse_m9v_start": false,
+    "next": "Freeze and implement a separate NEW M9Y fresh prospective payoff shadow after this result, using W1 reclaim entry and explicit baseline/risk/runner comparison arms."
+  }
+}
