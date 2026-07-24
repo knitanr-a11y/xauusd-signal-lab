@@ -1,9 +1,9 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9V_V2_INITIAL_PASS_PERSISTENT_FORWARD_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_PERSISTENT_MULTI_TIMEFRAME_FORWARD_COLLECTION",
-  "immediate_action": "KEEP M8C M7C COLLECTOR RUNNING UNCHANGED; START M9V BAT 03 AND KEEP WINDOW OPEN; NEVER RERUN BAT 00 OR 01; REVIEW AT FORWARD CHECKPOINTS",
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9W_PASS_M9X_PAYOFF_REPRODUCTION_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_PERSISTENT_FORWARD_PLUS_M9X_ASSISTANT_SIDE_REPRODUCTION",
+  "immediate_action": "KEEP M8C M7C COLLECTOR AND M9V V2 RUNNING UNCHANGED; CONTINUE ASSISTANT_SIDE M9X; NO NEW USER BAT YET",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
@@ -13,47 +13,50 @@
   "m9v": {
     "runtime_v2": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 11:04:00",
-    "initial_local_result": "config/mochipoyo_alert_research/m9v_v2_initial_local_pass_20260724.json",
-    "operator_folder": "scripts/mochipoyo_alert_research/m9v/bat",
-    "03_persistent_v2": "03_run_shadow_forever.bat",
-    "04_stop": "04_stop_shadow_forever.bat",
-    "05_open_results": "05_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9V\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9v_runtime\\m9v_runtime_manifest.json",
-    "runtime_receipt": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9v_runtime\\m9v_runtime_start_receipt.json",
-    "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
-    "review_gates": {
-      "operational_checkpoint_total_accepted_arm_events": 20,
-      "interim_checkpoint_total_accepted_arm_events": 60,
-      "minimum_H1_S3_candidates_for_branch_review": 10,
-      "formal_portfolio_review_total_accepted_arm_events": 120
-    }
+    "03_persistent_v2": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "keep_running": true,
+    "never_rerun_00_or_01": true,
+    "runtime_reset_allowed": false
   },
-  "operator_order_now": [
-    "Fetch/Pull feature/mochipoyo-alert-research so the local repo contains the latest state records.",
-    "Keep M8C, M7C and genuine source collector running.",
-    "Run 03_run_shadow_forever.bat and keep that window open.",
-    "Never rerun 00_recover_invalid_v1_prefix_start_once.bat.",
-    "Never rerun 01_initialize_fresh_runtime_once.bat and never delete/reset the M9V v2 runtime manifest/start receipt.",
-    "Use 04_stop_shadow_forever.bat only for an intentional safe stop.",
-    "When ChatGPT requests a checkpoint, run 05_open_latest_results.bat and submit the current 99_UPLOAD_PACKAGE.zip."
+  "m9w": {
+    "result": "config/mochipoyo_alert_research/m9w_gold_entry_exit_decoupling_assistant_side_result_20260724.json",
+    "state": "EXPLORATORY_PAYOFF_ARCHITECTURE_FOUND_NOT_FORWARD_VALIDATED",
+    "reference_entry": "PRIMARY bid - 0.10*M5 ATR reclaim within 10 closed M1 bars, next M1 open entry",
+    "reference_profit_vector": "At native LONG_EXIT, H1 MACD still rising => selective runner to M15 RCI9 causal turn-down",
+    "reference_risk_vector": "N6 actual-entry half risk, no signal suppression",
+    "combined_50pct_runner": "n1054 PF1.6576 WR57.97 avgwin17.22 avgloss-14.33 DD291.5 cost2PF1.3149",
+    "combined_75pct_runner": "n1054 PF1.6441 WR55.88 avgwin18.86 avgloss-14.53 DD300.2 cost2PF1.3195",
+    "forward_promotion": false
+  },
+  "m9x_order": [
+    "Implement deterministic W1 entry-reclaim from canonical M9P N3 without changing M7C formulas.",
+    "Use latest fully closed M5 Wilder ATR14 at first-turn decision to compute reclaim level.",
+    "Allow at most 10 fully closed M1 bars in the reference rule; entry is the exact next M1 open after causal reclaim close.",
+    "Recompute N6 at actual delayed entry time, not original first-turn time.",
+    "At native EXIT evaluate only fully closed H1 MACD. Runner exits at first causal M15 RCI9 turn-down decision.",
+    "Reproduce runner shares 25/50/75/100 and component attribution without choosing a historical optimum.",
+    "Stress reclaim offset 0.00/0.05/0.10/0.15/0.20 ATR and wait 5/10/15/20/30 minutes.",
+    "Report counts/frequency, yearly and quarterly PF, average win/loss, DD/streak/tails and +1/+2bps costs.",
+    "Only after deterministic PASS decide whether a new separate payoff prospective shadow is justified. Never modify the existing M9V start."
   ],
-  "m9r_status": "FROZEN_NOT_STARTED; excluded until base M9V multi-timeframe forward behavior is established",
+  "m9r_status": "FROZEN_NOT_STARTED; do not launch while M9W/M9X superseding payoff architecture is being reproduced",
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_V2_INITIAL_PASS_PERSISTENT_FORWARD_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_RUNNING_M9W_PAYOFF_FOUND_M9X_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
+  "user_side_policy": {
+    "new_bat_required_now": false,
+    "instruction": "Keep already-running M8C/M7C/collector and M9V 03 windows unchanged. Do not rerun M9V 00/01."
+  },
   "forbidden": [
-    "Do not stop or reset M8C.",
-    "Do not change M7C formulas or thresholds.",
+    "Do not stop/reset M8C or M7C.",
     "Do not rerun M9V BAT 00 or BAT 01.",
-    "Do not delete/reset M9V v2 runtime or receipt.",
-    "Do not backfill M9V.",
-    "Do not allow pre-start PRIMARY events into M9V candidates.",
-    "Do not pyramid overlapping timeframe LONG signals.",
-    "Do not start M9R yet.",
-    "Do not transplant GOLD branch rules into BTC.",
+    "Do not delete/reset M9V v2 runtime or backfill it.",
+    "Do not add M9W rules into M9V retrospectively.",
+    "Do not promote historical M9W metrics as forward validation.",
+    "Do not use arbitrary tight fixed stops as the primary loss-control solution.",
+    "Do not transplant GOLD M9W rules into BTC.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
   ]
 }
