@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10J_STABLE_M15_EDGE_M10K_NO_PF2_STATIC_EXIT_M10L_H1_MINING_PENDING_LOCAL_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_SHORT_ADOPTION_C0212_C056_M10M_M5_MINING_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -25,49 +25,69 @@
     "only_miss_reason": "STATE_NOT_IDLE",
     "m7c_refit_approved": false
   },
-  "m10j": {
-    "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
-    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
-    "result": "config/mochipoyo_alert_research/m10j_user_local_result_20260725.json",
-    "primary_seed": {
+  "short_research_adoption": {
+    "status": "RESEARCH_ADOPTION_DIRECTION_ONLY_NOT_FORWARD_APPROVED",
+    "config": "config/mochipoyo_alert_research/short_adoption_candidates_20260725.json",
+    "primary": {
       "candidate_id": "M10J_C0212",
+      "timeframe": "M15",
       "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
       "horizon_minutes": 240,
       "train_pf": 1.5689385901535529,
       "validation_2025_pf": 1.3904778450159343,
       "test_2026_pf": 1.5465266111892766,
-      "all_count": 318,
-      "all_pf": 1.4839437156621065,
-      "fixed0p20_all_pf": 1.4816933419152245
+      "all_pf": 1.4839437156621065
+    },
+    "secondary": {
+      "candidate_id": "M10L_H240_C056",
+      "timeframe": "H1",
+      "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+      "horizon_minutes": 240,
+      "train_pf": 1.314149813327255,
+      "validation_2025_pf": 1.4866907197300367,
+      "test_2026_pf": 1.3318688824185096,
+      "all_pf": 1.370313393687437
+    },
+    "h1_high_pf_reference": {
+      "candidate_id": "M10L_H480_C050",
+      "all_pf": 1.5228292700907973,
+      "test_2026_pf": 1.7016953863022222
     },
     "forward_approved": false
   },
   "m10k": {
-    "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
     "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_STATIC_ATR_EXIT",
-    "result": "config/mochipoyo_alert_research/m10k_user_local_result_20260725.json",
-    "uploaded_package_sha256": "1b89602d67fc840af5d3b77fb316ca18e4a113525b3ffaacca817d768238b4d7",
-    "grid_cells": 48,
-    "all_cells_three_split_pf_gt_1": 48,
     "robust_pf2_candidate_count": 0,
-    "best_discovery_rank_1": {"tp_atr": 2.0, "sl_atr": 1.5, "max_hold_minutes": 120, "train_pf": 1.317195823821474, "validation_2025_pf": 1.2126242231484694, "test_2026_pf": 1.1575442304873906, "all_pf": 1.2133128651530305},
-    "best_min_split": {"tp_atr": 2.5, "sl_atr": 1.5, "max_hold_minutes": 240, "train_pf": 1.2686865412540729, "validation_2025_pf": 1.2086650855791168, "test_2026_pf": 1.2207088220231666, "all_pf": 1.2251137540985007},
-    "entry_formula_changed": false,
-    "forward_approved": false
+    "all_cells_three_split_pf_gt_1": 48,
+    "static_atr_exit_improvement_supported": false
   },
   "m10l": {
     "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
+    "result": "config/mochipoyo_alert_research/m10l_user_local_result_20260725.json",
+    "uploaded_package_sha256": "c6da1d6f6b0b127d87e9cf0e984c6b2f1389fd3dd536056b49896481ad663ee8",
+    "stable_all_three_split_pf_gt_1_count": 37,
+    "robust_pf2_candidate_count": 0,
+    "forward_approved": false
+  },
+  "m10m": {
+    "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
     "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10l_h1_short_causal_feature_mining_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10l/python/run_m10l.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10l/bat/01_run_m10l.bat",
-    "candidate_universe": "all causal H1 decisions; Mochipoyo/M10J/M10K-independent",
-    "fixed_horizon_minutes": [240, 480, 720],
+    "contract": "config/mochipoyo_alert_research/m10m_m5_short_causal_feature_mining_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10m/python/run_m10m.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10m/bat/01_run_m10m.bat",
+    "candidate_universe": "all causal M5 decisions; Mochipoyo/M10J/M10L-independent",
+    "fixed_horizon_minutes": [60, 120, 240],
     "formula_generation_and_ranking": "2023-2024_ONLY",
     "validation": "2025_LOCKED",
     "final_test": "2026_THROUGH_0619_LOCKED",
     "target_pf": 2.0,
     "forward_approved": false
+  },
+  "planned_m10n": {
+    "stage": "DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+    "status": "PLANNED_AFTER_M10M_REVIEW",
+    "intent": "Test whether C0212/C056/M10M edges concentrate in objectively defined downside regimes without using 2025/2026 to invent the regime definition."
   },
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10B_M10E",
@@ -84,5 +104,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep all existing forward collectors/monitors running unchanged. Continue genuine XAUUSD PRIMARY_SHORT collection for later M10H re-audit. Fetch/Pull and run M10L 01_run_m10l.bat; submit only M10L 99_UPLOAD_PACKAGE.zip."
+  "next": "Keep all existing forward collectors/monitors running unchanged. Fetch/Pull and run M10M 01_run_m10m.bat, submit only M10M 99_UPLOAD_PACKAGE.zip. After M10M review, design M10N downside-regime-specific SHORT research while retaining C0212/C056 as adoption-direction research candidates."
 }
