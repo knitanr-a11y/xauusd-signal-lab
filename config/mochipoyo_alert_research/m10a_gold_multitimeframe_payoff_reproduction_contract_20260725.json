@@ -1,0 +1,106 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
+  "status": "FROZEN_FOR_USER_LOCAL_REPRODUCTION",
+  "recorded_at_utc": "2026-07-25T00:00:00Z",
+  "purpose": "Independently reproduce the M9Z historical M5/H1/H4 payoff references from the frozen M9S branch populations using only the same immutable hashed GOLD CSVs, before any separate fresh prospective design.",
+  "data_contract": {
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "period": "2023-01-03 through 2026-06-19",
+    "point": 0.01,
+    "files": {
+      "M1": {"filename": "gold_v3_2023_2026_m1.csv", "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2"},
+      "M5": {"filename": "gold_v3_2023_2026_m5.csv", "sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d"},
+      "M15": {"filename": "gold_v3_2023_2026_m15.csv", "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28"},
+      "H1": {"filename": "gold_v3_2023_2026_h1.csv", "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a"},
+      "H4": {"filename": "gold_v3_2023_2026_h4.csv", "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913"},
+      "D1": {"filename": "gold_v3_2023_2026_d1.csv", "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"}
+    }
+  },
+  "raw_frozen_branch_expected": {
+    "M5_S1": {"count": 1256, "profit_factor_bps": 1.3336981886264172},
+    "M15_S2": {"count": 1495, "profit_factor_bps": 1.365884145048126},
+    "H1_S3": {"count": 191, "profit_factor_bps": 1.7802349633701025},
+    "H4_S4": {"count": 70, "profit_factor_bps": 3.295562620459433}
+  },
+  "frozen_payoff_references": {
+    "M5_ENTRY": {
+      "definition": "Frozen M9S S1; at first causal M1 turn use latest fully closed M5 Wilder ATR14; reclaim level = original PRIMARY bid/open - 0.15*ATR; immediate entry if first-turn M1 open is already >= level, otherwise wait at most 6 fully closed M1 bars and enter exact next M1 open ask after first close >= level; skip if no reclaim before timeout/native exit.",
+      "expected_count": 842,
+      "expected_profit_factor_bps": 1.5373384445763516,
+      "expected_extra_2bps_pf": 1.0380554833102582
+    },
+    "M5_RUNNER75": {
+      "definition": "From M5_ENTRY; at native M5 exit, latest fully closed M15 MACD(6,13) raw line strictly rising versus previous fully closed M15 enables 75% runner; runner exits at first causal M5 RCI9 turn-down decision at/after native exit; one-position accounting, later entries while active are skipped/metadata.",
+      "expected_count": 837,
+      "expected_overlap_skips": 5,
+      "expected_profit_factor_bps": 1.6651962763806496,
+      "expected_payoff_ratio": 0.9795272214003821,
+      "expected_extra_2bps_pf": 1.1664055911962432
+    },
+    "H1_ENTRY": {
+      "definition": "Frozen M9S S3; at first causal M1 turn use latest fully closed H1 Wilder ATR14; reclaim level = original PRIMARY bid/open - 0.05*ATR; fully closed M5 confirmation; maximum 30 minutes; after first M5 close >= level enter exact M1 open at that confirmation close-time, or first-turn ask when the latest fully closed M5 already confirms; native H1 exit unchanged.",
+      "expected_count": 171,
+      "expected_profit_factor_bps": 2.814130403928734,
+      "expected_payoff_ratio": 1.0981972308014571,
+      "expected_extra_2bps_pf": 2.4819002508383456
+    },
+    "H1_RUNNER50": {
+      "definition": "From H1_ENTRY; at native H1 exit, latest fully closed H4 MACD and latest fully closed D1 MACD raw lines must both be strictly rising versus their previous fully closed bars; then retain 50% runner; runner exits at first causal H1 RCI9 turn-down decision at/after native exit; one-position accounting.",
+      "expected_count": 159,
+      "expected_overlap_skips": 12,
+      "expected_profit_factor_bps": 2.8303858342555084,
+      "expected_payoff_ratio": 1.3365710883984345,
+      "expected_extra_2bps_pf": 2.515705722093707
+    },
+    "H4_ENTRY": {
+      "definition": "Frozen M9S S4; original PRIMARY bid/open itself is the reclaim level; require fully closed M15 reclaim within maximum 60 minutes; enter exact M1 open at confirmation close-time, or first-turn ask when latest fully closed M15 already confirms; native H4 exit only; no runner is promoted from M9Z history.",
+      "expected_count": 57,
+      "expected_profit_factor_bps": 4.668798744063922,
+      "expected_payoff_ratio": 1.5200740096952303,
+      "expected_extra_2bps_pf": 4.351631051771246
+    }
+  },
+  "causality_contract": {
+    "future_outcome_used_in_candidate_or_entry_gate": false,
+    "future_bar_or_unclosed_bar_used": false,
+    "native_exit_result_used_to_select_entry": false,
+    "runner_context_evaluated_only_at_native_exit_decision": true,
+    "one_position_state_is_chronological": true,
+    "historical_outcomes_are_scoring_only": true,
+    "nearest_m1_fallback": false
+  },
+  "operator": {
+    "run_once": "scripts/mochipoyo_alert_research/m10a/bat/01_run_gold_multitimeframe_payoff_reproduction.bat",
+    "open_results": "scripts/mochipoyo_alert_research/m10a/bat/02_open_latest_results.bat",
+    "output_latest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M10A\\LATEST",
+    "submit": "99_UPLOAD_PACKAGE.zip"
+  },
+  "forward_isolation": {
+    "collector_keep_running": true,
+    "m7c_keep_running": true,
+    "m8c_keep_running": true,
+    "m9v_keep_running": true,
+    "m9y_keep_running": true,
+    "m9v_start": "2026.07.24 11:04:00 MT5 server time",
+    "m9y_start": "2026.07.24 12:45:00 MT5 server time",
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "historical_backfill_allowed": false,
+    "initializer_rerun_allowed": false
+  },
+  "promotion": {
+    "automatic_live_promotion": false,
+    "next_after_user_local_pass": "Freeze a separate NEW fresh prospective payoff-extension contract with an independent future start. Do not retrofit M9V/M9Y and do not reuse M9V/M9Y starts.",
+    "fresh_forward_started_by_m10a": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "real_entry_gate": false
+  }
+}
