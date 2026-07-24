@@ -35,6 +35,11 @@ TARGETS = (
         "process_marker": "m10b_runtime.py",
         "lock_rel": Path("m10b_runtime") / "m10b_shadow_loop.lock",
     },
+    {
+        "name": "M10E",
+        "process_marker": "m10e_runtime.py",
+        "lock_rel": Path("m10e_runtime") / "m10e_shadow_loop.lock",
+    },
 )
 
 
@@ -128,6 +133,10 @@ def main() -> int:
             "runtime_or_start_reset": False,
             "database_deleted_or_reset": False,
             "m8c_modified": False,
+            "m9v_modified_or_reset": False,
+            "m9y_modified_or_reset": False,
+            "m10b_modified_or_reset": False,
+            "m10e_modified_or_reset": False,
             "next_restart_order": [
                 "1) Ensure MT5 and the CSV-producing terminal/export are running and updating again.",
                 "2) run_collect_events_cloudflare_forever.bat",
@@ -136,6 +145,7 @@ def main() -> int:
                 "5) m9v/bat/03_run_shadow_forever.bat",
                 "6) m9y/bat/03_run_shadow_forever.bat",
                 "7) m10b/bat/03_run_shadow_forever.bat",
+                "8) m10e/bat/03_run_shadow_forever.bat",
             ],
             "never_run_after_reboot": [
                 "M7C initializer/runtime reset",
@@ -143,8 +153,9 @@ def main() -> int:
                 "M9V BAT00/BAT01",
                 "M9Y BAT01",
                 "M10B BAT01",
+                "M10E BAT01",
             ],
-            "data_gap_note": "M10B, M9V and M9Y forward evidence is valid only for bars actually present in the restored MT5 raw CSVs. A permanent PC-off CSV gap is unobserved forward time and must never be silently counted or reconstructed from future outcomes.",
+            "data_gap_note": "M10E, M10B, M9V and M9Y forward evidence is valid only for bars actually present in the restored MT5 raw CSVs. A permanent PC-off CSV gap is unobserved forward time and must never be silently counted or reconstructed from future outcomes.",
         }
         (archive / "recovery_receipt.json").write_text(
             json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
