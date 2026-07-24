@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_SHORT_ADOPTION_C0212_C056_M10M_M5_MINING_PENDING_LOCAL_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_SHORT_ADOPTION_C0212_C056_M10M_PASS_M10N_REGIME_RESEARCH_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -72,22 +72,31 @@
   },
   "m10m": {
     "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
-    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10m_m5_short_causal_feature_mining_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10m/python/run_m10m.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10m/bat/01_run_m10m.bat",
-    "candidate_universe": "all causal M5 decisions; Mochipoyo/M10J/M10L-independent",
-    "fixed_horizon_minutes": [60, 120, 240],
-    "formula_generation_and_ranking": "2023-2024_ONLY",
-    "validation": "2025_LOCKED",
-    "final_test": "2026_THROUGH_0619_LOCKED",
-    "target_pf": 2.0,
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2_INDEPENDENT_C0212_REDISCOVERY",
+    "result": "config/mochipoyo_alert_research/m10m_user_local_result_20260725.json",
+    "uploaded_package_sha256": "c2db635f5560e2bd9aff60e1d5bf1b2732bc6218392e9d61a7fcc863045bfc89",
+    "feature_row_count": 240158,
+    "stable_all_three_split_pf_gt_1_count": 51,
+    "robust_pf2_candidate_count": 0,
+    "independent_c0212_rediscovery": true,
+    "m5_robustness_reference": "M10M_H120_C021",
+    "m5_high_2026_reference": "M10M_H240_C057",
     "forward_approved": false
   },
-  "planned_m10n": {
-    "stage": "DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
-    "status": "PLANNED_AFTER_M10M_REVIEW",
-    "intent": "Test whether C0212/C056/M10M edges concentrate in objectively defined downside regimes without using 2025/2026 to invent the regime definition."
+  "m10n": {
+    "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10n_downside_regime_specific_short_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10n/python/run_m10n.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10n/bat/01_run_m10n.bat",
+    "ranking_seeds": ["M10J_C0212", "M10L_H240_C056"],
+    "third_seed_check": "M10M_H120_C021",
+    "regime_generation": "2023-2024_ONLY",
+    "validation": "2025_LOCKED",
+    "final_test": "2026_THROUGH_0619_LOCKED",
+    "exact_seed_formula_features_excluded_from_regime_generation": true,
+    "target_pf": 2.0,
+    "forward_approved": false
   },
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10B_M10E",
@@ -104,5 +113,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep all existing forward collectors/monitors running unchanged. Fetch/Pull and run M10M 01_run_m10m.bat, submit only M10M 99_UPLOAD_PACKAGE.zip. After M10M review, design M10N downside-regime-specific SHORT research while retaining C0212/C056 as adoption-direction research candidates."
+  "next": "Keep all existing forward collectors/monitors running unchanged. Fetch/Pull and run M10N 01_run_m10n.bat. Submit only M10N 99_UPLOAD_PACKAGE.zip. M10N searches common higher-timeframe downside-opportunity regime gates on 2023-2024 only and excludes exact C0212/C056/M5 seed formula features from regime generation."
 }
