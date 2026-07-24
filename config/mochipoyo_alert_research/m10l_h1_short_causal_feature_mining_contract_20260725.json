@@ -1,0 +1,77 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Search for a Mochipoyo-independent H1 SHORT edge after M10K showed no PF2 benefit from static ATR exits on the M10J M15 seed.",
+  "candidate_universe": {
+    "symbol": "XAUUSD",
+    "decision_timeframe": "H1",
+    "direction": "SHORT",
+    "universe": "all causal H1 decisions from frozen historical GOLD data",
+    "uses_m7c_kernel": false,
+    "uses_m10f_c0049": false,
+    "uses_m10j_c0212": false,
+    "uses_m10k_exit_cells": false
+  },
+  "causality": {
+    "newest_csv_row": "CLOSED",
+    "time_basis": "MT5 server time",
+    "decision_features": "latest fully closed H1 plus latest fully closed H4/D1/M15 context at H1 decision open",
+    "future_outcome_in_features": false,
+    "mfe_mae_in_features": false,
+    "threshold_source": "2023-2024 discovery only",
+    "formula_generation": "2023-2024 discovery only",
+    "formula_ranking": "2023-2024 discovery only",
+    "validation": "2025 locked until shortlist freeze",
+    "final_test": "2026 through 2026-06-19 locked until shortlist freeze"
+  },
+  "features": {
+    "H1": ["RCI9", "RCI9 delta", "ATR percentile100", "ret3/ret5 bps", "bearish body fraction", "close position", "price-vs-EMA20 ATR", "EMA20 slope ATR", "EMA20-30/EMA30-40 bps", "MACD line/hist/slope", "volume ratio20", "MT5 server hour"],
+    "H4": ["EMA20-30/EMA30-40 bps", "MACD hist/slope", "RCI9", "ATR percentile100"],
+    "D1": ["EMA20-30/EMA30-40 bps", "MACD hist/slope", "RCI9", "ATR percentile100"],
+    "M15": ["EMA20-30 bps", "MACD hist/slope", "RCI9"]
+  },
+  "formula_search": {
+    "quantiles": [0.10, 0.20, 0.30, 0.70, 0.80, 0.90],
+    "operators": ["<=", ">="],
+    "families": ["single threshold", "two-condition AND"],
+    "pair_features_must_be_distinct": true,
+    "top_single_conditions_per_horizon_for_pairing": 30,
+    "frozen_shortlist_per_horizon": 100,
+    "minimum_discovery_count": 40
+  },
+  "execution": {
+    "entry": "exact M1 open bid at the H1 decision open",
+    "fixed_horizon_minutes": [240, 480, 720],
+    "one_position_per_formula_horizon": true,
+    "exit": "exact M1 open ask at fixed horizon",
+    "actual_spread_at_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "nearest_m1_fallback": false
+  },
+  "robust_pf2_gate": {
+    "target_pf": 2.0,
+    "minimum_counts": {"discovery_2023_2024": 40, "validation_2025": 20, "final_test_2026": 10},
+    "requires_pf_ge_2_in_all_three_splits": true,
+    "requires_positive_net_in_all_three_splits": true,
+    "requires_fixed_0p20_all_pf_gt_1": true,
+    "automatic_forward_approval": false
+  },
+  "interpretation": {
+    "if_robust_pf2": "Freeze exact formula+horizon and build deterministic reproduction before any fresh prospective H1 SHORT shadow.",
+    "if_stable_below_pf2": "Keep as research candidate; inspect architecture without using holdouts to refit formula.",
+    "if_no_all_split_edge": "Do not force H1 SHORT; next research may move to M5 or regime-specific downside architecture."
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
