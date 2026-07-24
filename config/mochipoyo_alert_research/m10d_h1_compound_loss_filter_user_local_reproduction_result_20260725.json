@@ -1,0 +1,87 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10D_H1_COMPOUND_LOSS_FILTER_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
+  "recorded_at_utc": "2026-07-24T18:53:39Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(24).zip",
+    "sha256": "f5de107c13a4649af6c354c04d03661b75916e06f65c896d349dbfc5e872141c"
+  },
+  "fixed_rule": {
+    "direction": "EXCLUDE_H1_LONG_ENTRY",
+    "m5_macd_bps_slope_le": -0.1308,
+    "h1_ema30_minus_ema40_bps_ge": 17.3333,
+    "decision_time": "actual H1 reclaim entry",
+    "closed_bars_only": true
+  },
+  "baseline": {
+    "count": 159,
+    "win_rate": 0.6792452830188679,
+    "profit_factor": 2.8303858342555084,
+    "average_win_bps": 40.12947532813278,
+    "average_loss_bps": -30.024198246139303,
+    "payoff_ratio": 1.3365710883984345,
+    "max_drawdown_bps": 271.583159570446,
+    "net_bps": 2802.7492248852354
+  },
+  "filtered": {
+    "count": 130,
+    "win_rate": 0.7384615384615385,
+    "profit_factor": 5.40115388326192,
+    "average_win_bps": 37.789597639961855,
+    "average_loss_bps": -19.755045440539647,
+    "payoff_ratio": 1.9129086669885969,
+    "max_drawdown_bps": 101.7430435392024,
+    "net_bps": 2956.12982845799,
+    "excluded_before_one_position": 34,
+    "overlap_skips": 7
+  },
+  "filtered_yearly": {
+    "2023": {"count": 31, "profit_factor": 6.30570409324846, "payoff_ratio": 2.1932883802603342},
+    "2024": {"count": 49, "profit_factor": 5.002500062921975, "payoff_ratio": 1.1255625141574443},
+    "2025": {"count": 40, "profit_factor": 4.16184709325092, "payoff_ratio": 2.497108255950552},
+    "2026_through_0619": {"count": 10, "profit_factor": 11.629177619564157, "payoff_ratio": 2.907294404891039}
+  },
+  "fixed_spread_0p20_usd": {
+    "count": 130,
+    "profit_factor": 5.3636874914829455,
+    "payoff_ratio": 1.8996393199002097,
+    "max_drawdown_bps": 101.93652910248773
+  },
+  "neighborhood": {
+    "cells": 25,
+    "cells_improving_both_pf_and_payoff_in_2025_and_2026": 5,
+    "cells_improving_both_pf_and_payoff_in_every_calendar_year": 5,
+    "common_h1_stack_threshold_bps": 17.5,
+    "passing_m5_slope_thresholds": [-0.20, -0.16, -0.13, -0.10, -0.06]
+  },
+  "data_quality": {
+    "point": 0.01,
+    "newest_csv_row_contract": "CLOSED",
+    "nearest_m1_fallback": false,
+    "all_six_frozen_hashes_match": true
+  },
+  "anti_leakage": {
+    "future_outcome_used_in_entry_gate": false,
+    "mae_mfe_exit_path_used_as_filter_feature": false,
+    "outcome_used_only_for_scoring": true,
+    "one_position_recomputed_after_filter": true
+  },
+  "guardrails": {
+    "historical_research_exposed": true,
+    "fresh_forward_validated": false,
+    "m9y_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "historical_backfill": false,
+    "automatic_live_promotion": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "audit_only": true
+  },
+  "decision": {
+    "m10d_reproduction": "PASS",
+    "next": "Freeze and implement a separate independent fresh prospective H1 baseline-vs-compound-filter shadow. Do not retrofit M10B and do not reuse any existing prospective start."
+  }
+}
