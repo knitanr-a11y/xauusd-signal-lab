@@ -1,0 +1,72 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Discover a Mochipoyo-independent M5 SHORT edge from all causal M5 decisions without using M7C KERNEL-S1, M10J C0212, M10L candidates, or any forward outcomes as the candidate universe.",
+  "candidate_universe": {
+    "symbol": "XAUUSD",
+    "timeframe": "M5",
+    "direction": "SHORT",
+    "decision_time": "new M5 bar open using only the immediately prior fully closed M5 bar and fully closed higher-timeframe context",
+    "uses_mochipoyo_kernel": false,
+    "uses_m10j_c0212": false,
+    "uses_m10l_candidates": false
+  },
+  "reference_candidates_not_used_for_formula_generation": {
+    "M10J_C0212": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "M10L_H240_C056": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443"
+  },
+  "features": {
+    "base": "M5 causal RCI/MACD/EMA/ATR/returns/candle/volume/server-hour",
+    "context": "latest fully closed M15/H1/H4 causal RCI/MACD/EMA/ATR context",
+    "future_outcome_features": false
+  },
+  "formula_search": {
+    "threshold_source": "2023-2024 discovery quantiles only",
+    "quantiles": [0.1, 0.2, 0.3, 0.7, 0.8, 0.9],
+    "families": ["single threshold", "two-condition AND"],
+    "top_singles_per_horizon_for_pairing": 30,
+    "shortlist_per_horizon": 100,
+    "minimum_train_trades": 80
+  },
+  "exit_contract": {
+    "fixed_horizon_minutes": [60, 120, 240],
+    "entry": "exact M1 open bid at M5 decision time",
+    "exit": "exact M1 open ask at fixed horizon",
+    "one_position_per_formula_horizon": true,
+    "nearest_m1_fallback": false,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.2
+  },
+  "causality": {
+    "discovery_and_formula_ranking": "2023-2024 only",
+    "validation": "2025 locked until shortlist freeze",
+    "final_test": "2026 through 2026-06-19 locked until shortlist freeze",
+    "minimum_counts_for_robust_pf2": {"discovery": 80, "validation_2025": 40, "final_test_2026": 20},
+    "target_pf": 2.0,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time"
+  },
+  "decision_policy": {
+    "robust_pf2": "PF >= 2.0 with positive net in 2023-2024, 2025, and 2026 plus fixed-$0.20 all-sample PF > 1.0 and minimum counts",
+    "stable_edge": "PF > 1.0 in all three splits",
+    "no_automatic_forward_promotion": true,
+    "if_no_stable_edge": "Do not force M5. Proceed to separately contracted downside-regime SHORT research (M10N).",
+    "if_stable_edge_below_pf2": "Retain as adoption-direction research candidate and compare with C0212/C056 before regime research."
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m8c_modified_or_reset": false,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
