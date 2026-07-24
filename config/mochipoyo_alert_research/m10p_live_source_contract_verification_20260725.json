@@ -1,0 +1,59 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_LIVE_SOURCE_CONTRACT_VERIFICATION",
+  "status": "PASS_SOURCE_CONTRACT_VERIFIED_IMPLEMENTATION_READY_FOR_FRESH_BOOTSTRAP",
+  "verified_against": [
+    "config/mochipoyo_alert_research/m10b_gold_multitimeframe_payoff_fresh_prospective_shadow_contract_20260725.json",
+    "config/mochipoyo_alert_research/m10e_h1_compound_loss_filter_fresh_prospective_shadow_contract_20260725.json",
+    "M10B user-local runtime manifest bootstrap copy",
+    "M10E user-local runtime manifest bootstrap copy"
+  ],
+  "source_contract": {
+    "resolver": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M8B/LATEST/06_symbol_metadata.json -> mt5_files_root",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "point_source": "M8B symbol metadata XAUUSD.point",
+    "append_safety": "Freeze row-prefix fingerprints at one-time bootstrap and verify those exact prefixes every cycle.",
+    "start_rule": "Two identical tail snapshots separated by 2 seconds; latest CLOSED M1 server-open becomes immutable M10P start.",
+    "runtime_feed_guard": "Fail closed if any required file is absent, source root/point changes, prefix changes, or timeframe lag exceeds frozen M10B/M10E-style bounds."
+  },
+  "candidate_parity": {
+    "seed": "M10L_H240_C056",
+    "gate": "M10N_G013",
+    "h1_macd_hist_bps_ge": 3.637199446,
+    "h1_macd_line_bps_le": -7.667425443,
+    "h1_ret3_bps_ge": 18.70087437,
+    "d1_macd_hist_bps_ge": -14.25480242,
+    "horizon_minutes": 240,
+    "entry": "exact M1 open bid at H1 decision",
+    "exit": "exact M1 open ask at decision + 240 minutes",
+    "one_position": true,
+    "nearest_m1_fallback": false
+  },
+  "implementation": {
+    "contract": "config/mochipoyo_alert_research/m10p_c056_g013_fresh_prospective_shadow_contract_20260725.json",
+    "core_runtime": "scripts/mochipoyo_alert_research/m10p/python/m10p_runtime.py",
+    "guarded_runtime": "scripts/mochipoyo_alert_research/m10p/python/m10p_guarded_runtime.py",
+    "initializer": "scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat",
+    "bootstrap_cycle": "scripts/mochipoyo_alert_research/m10p/bat/02_run_bootstrap_once_and_open_results.bat",
+    "forever_loop": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat"
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "existing_monitor_reset_or_modification": false
+  }
+}
