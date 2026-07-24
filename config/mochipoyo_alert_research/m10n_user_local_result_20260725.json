@@ -1,0 +1,60 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_ONE_ROBUST_PF2_SEED_GATE_PAIR",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(34).zip",
+    "sha256": "3573369f5a92381c633d48b6b6dc0574803758e8412671dcc33e7d821a753438",
+    "size_bytes": 222380
+  },
+  "design_integrity": {
+    "regime_gate_generation_uses_2025": false,
+    "regime_gate_generation_uses_2026": false,
+    "exact_seed_features_excluded": ["h1_atr_pct100", "h1_macd_hist_bps", "h1_macd_line_bps", "h4_ema20_30_bps", "m5_ema30_40_bps"],
+    "frozen_hashes_match_repository_frozen_core": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time"
+  },
+  "search_summary": {
+    "regime_snapshot_count": 17866,
+    "train_regime_snapshot_count": 9229,
+    "regime_feature_count": 20,
+    "generated_regime_condition_count": 240,
+    "eligible_single_gate_count": 52,
+    "frozen_regime_gate_count": 100,
+    "common_holdout_supported_gate_count": 11,
+    "robust_pf2_seed_gate_pair_count": 1
+  },
+  "robust_pf2_pair": {
+    "gate_id": "M10N_G013",
+    "seed_id": "M10L_H240_C056",
+    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+    "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+    "horizon_minutes": 240,
+    "train_2023_2024": {"count": 29, "pf": 3.002653803622849, "net_bps": 333.6308663454399, "win_rate": 0.6206896551724138, "payoff": 1.8349551022139636, "max_dd_bps": 56.056907016666855, "fixed0p20_pf": 2.9834805038048677},
+    "validation_2025": {"count": 33, "pf": 2.35052772774399, "net_bps": 634.3246868031993, "win_rate": 0.5454545454545454, "payoff": 1.958773106453325, "max_dd_bps": 210.69534329229785, "fixed0p20_pf": 2.3440637223943472},
+    "test_2026": {"count": 22, "pf": 2.5802661605659214, "net_bps": 494.33615844417017, "win_rate": 0.5, "payoff": 2.580266160565922, "max_dd_bps": 186.4680277240873, "fixed0p20_pf": 2.593619282755113},
+    "all": {"count": 84, "pf": 2.540715351740206, "net_bps": 1462.2917115928094, "win_rate": 0.5595238095238095, "payoff": 2.000137617327396, "max_dd_bps": 210.69534329229785, "fixed0p20_pf": 2.538476073441831}
+  },
+  "cross_seed_context": {
+    "M10J_C0212_under_G013": {"train_pf": 2.241382045982479, "validation_2025_pf": 1.6275929505237687, "test_2026_pf": 1.0911979808481227, "all_pf": 1.490304535328098, "interpretation": "G013 is not a robust PF2 gate for C0212."},
+    "M10M_H120_C021_under_G013": {"train_count": 1, "validation_2025_count": 4, "test_2026_count": 10, "all_count": 15, "all_pf": 2.9949745692129897, "interpretation": "Too sparse for robustness; descriptive only."}
+  },
+  "decision": {
+    "pf2_historical_pair_found": true,
+    "forward_approved": false,
+    "automatic_promotion": false,
+    "next": "Deterministically reproduce exact M10L_H240_C056 plus M10N_G013 from frozen raw data before any fresh prospective shadow design."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
