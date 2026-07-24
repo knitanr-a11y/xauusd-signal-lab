@@ -1,0 +1,73 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9X_ONE_POSITION_RUNNER_OVERLAP_ADDENDUM",
+  "status": "PASS_OPERATIONAL_ONE_POSITION_CORRECTION",
+  "recorded_at_utc": "2026-07-24T13:05:00Z",
+  "reason": "M9X historical ledger scored each candidate independently. A runner can remain open beyond native EXIT and overlap the next reclaim entry. A prospective arm must enforce one-position accounting.",
+  "reference_population": 1054,
+  "overlap": {
+    "candidate_entries_arriving_before_prior_runner_exit": 46,
+    "runner_arm_accepted_count_after_one_position_dedup": 1008,
+    "policy": "When a runner arm is active, do not open the next reclaim candidate in that same arm; record it as skipped/confirmation metadata. Native-exit-only arms remain unaffected."
+  },
+  "one_position_metrics": {
+    "runner_25pct_plus_n6": {
+      "count": 1008,
+      "win_rate": 0.6121031746031746,
+      "profit_factor": 1.6687590578249816,
+      "average_win_bps": 16.056409216358176,
+      "average_loss_bps": -15.183196012974664,
+      "max_drawdown_bps": 289.99316708427295,
+      "extra_2bps_profit_factor": 1.320369926705752
+    },
+    "runner_50pct_plus_n6": {
+      "count": 1008,
+      "win_rate": 0.5902777777777778,
+      "profit_factor": 1.66289170174128,
+      "average_win_bps": 17.404333045815353,
+      "average_loss_bps": -15.078576137908293,
+      "max_drawdown_bps": 291.531445157726,
+      "max_losing_streak": 8,
+      "extra_2bps_profit_factor": 1.3277448963066876,
+      "yearly_pf": {
+        "2023": 1.4240892956790634,
+        "2024": 1.4958137262495792,
+        "2025": 1.4198843851631258,
+        "2026_through_0619": 2.4905463135893346
+      }
+    },
+    "runner_75pct_plus_n6": {
+      "count": 1008,
+      "win_rate": 0.5704365079365079,
+      "profit_factor": 1.6483266594682453,
+      "average_win_bps": 18.9514125771714,
+      "average_loss_bps": -15.267862916132648,
+      "max_drawdown_bps": 296.2782085361946,
+      "max_losing_streak": 8,
+      "extra_2bps_profit_factor": 1.3302567506733145,
+      "yearly_pf": {
+        "2023": 1.478804221219343,
+        "2024": 1.4659646402148356,
+        "2025": 1.367277310337715,
+        "2026_through_0619": 2.4974082259056907
+      }
+    },
+    "runner_100pct_plus_n6": {
+      "count": 1008,
+      "win_rate": 0.5535714285714286,
+      "profit_factor": 1.6296794635251997,
+      "average_win_bps": 20.612247330007104,
+      "average_loss_bps": -15.683566775714963,
+      "max_drawdown_bps": 301.0249719146623,
+      "max_losing_streak": 6,
+      "extra_2bps_profit_factor": 1.3303359081590398
+    }
+  },
+  "interpretation": "The payoff improvement survives operational one-position dedup. Do not use the independent-trade M9X ledger as the prospective arm accounting rule; M9Y must enforce one-position state separately per arm.",
+  "guardrails": {
+    "historical_research_exposed": true,
+    "forward_validated": false,
+    "m9v_modified": false,
+    "automatic_promotion": false
+  }
+}
