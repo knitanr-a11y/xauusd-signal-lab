@@ -1,45 +1,41 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING_LOCAL_AUDIT_NEXT",
-  "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for later M10H re-audit; in parallel run M10L historical H1 SHORT causal feature mining locally.",
+  "status": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING_LOCAL_AUDIT_NEXT",
+  "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Retain M10J C0212 and M10L C056 as research adoption candidates, while running the independent M5 SHORT mining locally.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10l/bat/01_run_m10l.bat.",
-    "Required success marker: [M10L PASS].",
-    "Run scripts/mochipoyo_alert_research/m10l/bat/02_open_latest_results.bat.",
-    "Submit only M10L LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not refit M7C from the current genuine SHORT sample.",
-    "Do not create/start a SHORT forward arm from M10L historical results alone."
+    "Run scripts/mochipoyo_alert_research/m10m/bat/01_run_m10m.bat.",
+    "Required success marker: [M10M PASS].",
+    "Run scripts/mochipoyo_alert_research/m10m/bat/02_open_latest_results.bat.",
+    "Submit only M10M LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not use C0212 or C056 thresholds to generate M10M formulas.",
+    "Do not create/start a SHORT forward arm from M10M historical results alone."
   ],
-  "m10k_result": {
-    "status": "PASS_NO_PF2_STATIC_ATR_EXIT",
-    "package_sha256": "1b89602d67fc840af5d3b77fb316ca18e4a113525b3ffaacca817d768238b4d7",
-    "grid_cells": 48,
-    "all_cells_three_split_pf_gt_1": 48,
-    "robust_pf2_candidate_count": 0,
-    "best_discovery_rank_1": {"tp_atr": 2.0, "sl_atr": 1.5, "max_hold_minutes": 120, "train_pf": 1.317195823821474, "validation_2025_pf": 1.2126242231484694, "test_2026_pf": 1.1575442304873906, "all_pf": 1.2133128651530305},
-    "best_min_split": {"tp_atr": 2.5, "sl_atr": 1.5, "max_hold_minutes": 240, "train_pf": 1.2686865412540729, "validation_2025_pf": 1.2086650855791168, "test_2026_pf": 1.2207088220231666, "all_pf": 1.2251137540985007},
-    "interpretation": "The M10J C0212 M15 seed remains directionally stable, but static ATR TP/SL does not provide a PF2 path. Do not escalate M15 post-hoc tuning."
+  "research_adoption_candidates": {
+    "primary": "M10J_C0212",
+    "secondary": "M10L_H240_C056",
+    "reference": "M10L_H480_C050",
+    "status": "RETAIN_FOR_PORTFOLIO_AND_REGIME_RESEARCH_NOT_FORWARD_APPROVED"
   },
-  "m10l_design": {
-    "candidate_universe": "all causal H1 decisions; explicitly not M7C KERNEL-S1, M10J C0212, or M10K exit cells",
+  "m10m_design": {
+    "candidate_universe": "all causal M5 decisions; explicitly not M7C KERNEL-S1, M10J C0212, or M10L candidates",
     "direction": "SHORT",
-    "features": "H1/H4/D1 plus latest closed M15 causal RCI/MACD/EMA/ATR/return/candle/volume/server-hour features",
+    "features": "M5 plus latest closed M15/H1/H4 causal RCI/MACD/EMA/ATR/return/candle/volume/server-hour features",
     "threshold_source": "2023-2024 discovery quantiles only",
     "formula_families": ["single threshold", "two-condition AND"],
     "pairing_and_ranking": "2023-2024 only",
     "validation": "2025 locked",
     "final_test": "2026 through 2026-06-19 locked",
-    "fixed_horizon_exits_minutes": [240, 480, 720],
+    "fixed_horizon_exits_minutes": [60, 120, 240],
     "target_pf": 2.0,
-    "minimum_counts": {"discovery": 40, "validation_2025": 20, "final_test_2026": 10}
+    "minimum_counts": {"discovery": 80, "validation_2025": 40, "final_test_2026": 20}
   },
-  "after_package_review": {
-    "if_robust_pf2_found": "Freeze exact H1 formula+horizon and build deterministic reproduction before any fresh prospective H1 SHORT shadow.",
-    "if_stable_below_pf2": "Keep only as research candidate; do not use 2025/2026 to refit the frozen formula.",
-    "if_no_all_split_edge": "Do not force H1 SHORT; move to separately contracted M5 or regime-specific downside discovery."
+  "planned_after_m10m": {
+    "stage": "M10N_DOWNSIDE_REGIME_SPECIFIC_SHORT_RESEARCH",
+    "goal": "Determine whether C0212/C056 and any M10M candidate become materially stronger when restricted to objectively defined downside regimes.",
+    "guardrail": "Regime definitions must be generated/frozen using 2023-2024 only; 2025/2026 may validate but not invent the regime."
   },
   "safety": {
     "audit_only": true,
