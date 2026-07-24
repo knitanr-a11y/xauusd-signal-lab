@@ -1,9 +1,9 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9S_MULTI_TIMEFRAME_PASS_M9T_ROBUSTNESS_AND_PORTFOLIO_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
-  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING UNCHANGED; CONTINUE ASSISTANT-SIDE M9T ROBUSTNESS/DEDUP WORK; DO NOT REQUIRE USER BAT YET",
+  "status": "M8C_RUNNING_M9T_PASS_M9U_DETERMINISTIC_MULTI_TIMEFRAME_PORTFOLIO_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION_AND_PROSPECTIVE_DESIGN",
+  "immediate_action": "KEEP_M8C_M7C_COLLECTOR_RUNNING UNCHANGED; BUILD AND SELF-VERIFY M9U DETERMINISTIC S1/S2/S3/S4 PLUS CAUSAL ONE-POSITION PORTFOLIO BEFORE ASKING USER FOR ANY BAT",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
@@ -13,34 +13,36 @@
   "m9r_status": {
     "state": "FROZEN_DESIGN_NOT_STARTED",
     "purpose": "Fresh prospective M15 N3 risk/reward comparison: base vs N6 half-risk vs selective half-runner vs combined.",
-    "policy": "Keep design available but do not start it before the M9T multi-timeframe portfolio structure is reviewed. Never reuse M7C/M8C prospective starts."
+    "policy": "Keep design separate and available. Integrate with portfolio only after deterministic M9U accounting; never reuse M7C/M8C starts."
   },
-  "m9s_result": {
-    "file": "config/mochipoyo_alert_research/m9s_gold_multitimeframe_portfolio_exploratory_result_20260724.json",
-    "M5": "Strict exploratory LONG: 1256, WR 65.45%, PF 1.3337, about 29.9 raw candidates/month",
-    "M15": "Canonical M9P N3: 1495, WR 62.27%, PF 1.3659, about 35.6 raw candidates/month",
-    "H1": "Exploratory HTF-momentum LONG: 191, WR 71.20%, PF 1.7802, about 4.55 raw candidates/month",
-    "H4": "Exploratory D1-aligned premium LONG: 70, WR 72.86%, PF 3.2956, about 1.67 raw candidates/month; very small samples",
-    "raw_sum_warning": "About 71.7/month before overlap; not independent trade count and must be deduplicated.",
-    "short": "No stable GOLD SHORT branch; do not force one."
+  "m9t_result": {
+    "file": "config/mochipoyo_alert_research/m9t_multitimeframe_branch_robustness_portfolio_dedup_result_20260724.json",
+    "M5_S1": "Auxiliary/cost-sensitive: 729/729 aggregate PF>1, 408/729 all-year PF>1, only 4/729 extra-2bps PF>1",
+    "M15_S2": "Primary reproducible N3 branch; prior M9O/P 72/72 all-year and extra-2bps robustness",
+    "H1_S3": "Highest-priority new branch: 81/81 nearby combinations all-year PF>1 and aggregate PF>1 after extra 2bps",
+    "H4_S4": "Premium small-sample branch: 9/9 aggregate extra-2bps PF>1 but only 4/9 all-year PF>1",
+    "portfolio": "Causal one-position S1+S2+S3+S4 reference: 2241 trades, about 53.36/month, WR 63.23%, PF 1.4447, DD 535.4 bps, streak 8, all years PF>1, extra-2bps PF 1.1617",
+    "weakness": "2025Q3 remains PF about 0.804",
+    "confirmation": "Generic agreement count rejected; causal sequence/order of timeframe signals matters"
   },
-  "m9t_research_order": [
-    "Stress the M5/H1/H4 exploratory definitions over nearby rolling windows/quantiles and reject one-point historical fits.",
-    "Require branch-level calendar-year and quarter stability, frequency, PF, DD, loss-tail and added-cost reporting together.",
-    "Measure cross-timeframe overlap at several windows and design one-market-position deduplication/confidence stacking rules.",
-    "Do not automatically open multiple positions because M5/M15/H1/H4 all signal LONG; agreement should initially increase confidence metadata, not exposure.",
-    "After robust branch definitions exist, estimate actual portfolio monthly candidate frequency after dedup.",
-    "Decide whether the M15 M9R risk/reward arms should be generalized to other timeframe branches or remain M15-only.",
-    "Keep BTC separate; no GOLD rule transfer. Continue genuine BTC source/M7C/M8C forward evidence while no long BTC history is available."
+  "m9u_research_order": [
+    "Implement deterministic S1 M5, canonical S2 M15 N3, S3 H1 and S4 H4 in one repository runner with closed-bar-only relative features and exact first-turn execution.",
+    "Self-verify branch counts/metrics and reproduce M9T stress anchors without asking user to run Python.",
+    "Implement causal one-position GOLD dedup: first qualifying event opens one position; later same-direction branch signals while active become metadata only; simultaneous priority H4>H1>M15>M5.",
+    "Report accepted contribution by branch, monthly/quarterly/yearly PF, DD, streak, tail and added-cost sensitivity.",
+    "Preserve ordered confirmation sequence metadata (which branch appeared before which) and do not use generic agreement count as a positive score.",
+    "After deterministic reproduction, design a fresh GOLD-specific prospective portfolio shadow. Do not backfill and do not reuse M7C/M8C starts.",
+    "Keep M5 auxiliary, promote no historical threshold; H1 is the highest-priority new prospective branch; H4 remains premium/reference until sample grows.",
+    "Keep BTC separate and continue source/M7C/M8C forward evidence unchanged."
   ],
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9S_DONE_M9T_MULTI_TIMEFRAME_PORTFOLIO_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9T_DONE_M9U_DETERMINISTIC_PORTFOLIO_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
   "user_side_policy": {
     "bat_required_now": false,
-    "reason": "M9T remains assistant-side exploratory robustness work. Ask user for a BAT only at an important deterministic/fresh prospective checkpoint."
+    "reason": "M9U implementation/self-verification is assistant-side first. Ask user for a numbered BAT only at an important deterministic or fresh prospective checkpoint."
   },
   "forbidden": [
     "Do not stop or reset M8C.",
@@ -48,6 +50,7 @@
     "Do not treat M5/H1/H4 historical branch results as independent validation.",
     "Do not sum raw multi-timeframe candidate counts as independent trades.",
     "Do not pyramid overlapping timeframe signals by default.",
+    "Do not assign a generic positive score to all multi-timeframe agreement; sequence matters.",
     "Do not transplant GOLD branch rules into BTC.",
     "Do not reuse M7C/M8C prospective starts for any new GOLD shadow.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
