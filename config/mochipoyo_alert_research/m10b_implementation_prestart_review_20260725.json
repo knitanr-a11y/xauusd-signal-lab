@@ -1,0 +1,58 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_PRESTART_DESIGN_AND_STATIC_REVIEW_USER_LOCAL_BOOTSTRAP_PENDING",
+  "recorded_at_utc": "2026-07-24T18:20:00Z",
+  "implementation": {
+    "runtime": "scripts/mochipoyo_alert_research/m10b/python/m10b_runtime.py",
+    "github_blob_sha": "0d29007b3774a5c4c3912239feedbe3dc7e2cdfb",
+    "operator_bats": [
+      "scripts/mochipoyo_alert_research/m10b/bat/01_initialize_fresh_runtime_once.bat",
+      "scripts/mochipoyo_alert_research/m10b/bat/02_run_shadow_once.bat",
+      "scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat",
+      "scripts/mochipoyo_alert_research/m10b/bat/04_stop_shadow_forever.bat",
+      "scripts/mochipoyo_alert_research/m10b/bat/05_open_latest_results.bat"
+    ]
+  },
+  "verified_contract_properties": {
+    "m10a_user_local_reproduction_pass_required_and_present": true,
+    "m9v_upstream_read_only": true,
+    "m9y_output_dependency": false,
+    "eligible_upstream_branches": ["S1_M5", "S3_H1", "S4_H4"],
+    "post_start_primary_required": true,
+    "pre_start_primary_forbidden": true,
+    "historical_backfill": false,
+    "resolved_only_native_history_materialization": true,
+    "unresolved_native_outcome_early_insert": false,
+    "future_outcome_used_in_entry_gate": false,
+    "closed_bar_entry_reconstruction": true,
+    "one_position_per_arm": true,
+    "runner_open_trade_blocks_same_arm": true,
+    "prefix_integrity_check": true,
+    "m9v_runtime_sha_and_start_check": true,
+    "fresh_start_strictly_after_m9v_and_m9y": true,
+    "runtime_reset_allowed": false
+  },
+  "forced_reboot": {
+    "recovery_extended_to_m10b": true,
+    "m10b_stale_lock": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m10b_runtime\\m10b_shadow_loop.lock",
+    "restart_after_m9y": true,
+    "rerun_m10b_initializer_after_reboot": false,
+    "permanent_mt5_gap_is_unobserved": true
+  },
+  "not_yet_verified": {
+    "user_local_fresh_start_initialization": true,
+    "user_local_first_one_shot": true,
+    "persistent_forward_loop_started": false,
+    "fresh_forward_performance": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  },
+  "next": "User pulls the latest feature/mochipoyo-alert-research branch, keeps all existing monitors running, runs M10B BAT01 once, then BAT02 once, and submits the M10B LATEST 99_UPLOAD_PACKAGE.zip for bootstrap review before BAT03 persistent collection."
+}
