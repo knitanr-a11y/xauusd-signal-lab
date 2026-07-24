@@ -1,60 +1,40 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10G_M15_SHORT_RECLAIM_LOCAL_AUDIT_NEXT",
-  "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged; run the frozen historical M15 SHORT reclaim audit locally and submit its package.",
+  "status": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_LOCAL_AUDIT_NEXT",
+  "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged; audit genuine XAUUSD PRIMARY_SHORT source events versus matched, missed and finalized-extra M7C proxy SHORT signals using causal M15 features only.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10g/bat/01_run_m15_short_reclaim_audit.bat.",
-    "Required success marker: [M10G PASS].",
-    "Run scripts/mochipoyo_alert_research/m10g/bat/02_open_latest_results.bat.",
-    "Submit only M10G LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not create/start a SHORT forward arm from M10G alone."
+    "Run scripts/mochipoyo_alert_research/m10h/bat/01_run_primary_short_source_fidelity_audit.bat.",
+    "Required success marker: [M10H PASS].",
+    "Run scripts/mochipoyo_alert_research/m10h/bat/02_open_latest_results.bat.",
+    "Submit only M10H LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not change the frozen M7C kernel or create a SHORT forward arm from M10H alone."
   ],
-  "m10f_result": {
-    "status": "PASS_NO_ROBUST_PF2_SHORT",
-    "package_sha256": "e31c553dadded8c49c163d839810f998b65b9aa55a5ed8527cf945b5f4d8ae88",
-    "M5_baseline_pf": 0.9072154917664874,
-    "M15_baseline_pf": 0.8869843085732072,
-    "H1_baseline_pf": 0.7585431658429277,
-    "H4_baseline_pf": 0.7784842357793761,
-    "pf2_train_val_test_all_count": 0,
-    "promising_seed": {
-      "candidate_id": "M10F_M15_C0049",
-      "all_count": 1089,
-      "all_pf": 1.1566500291510813,
-      "fixed0p20_all_pf": 1.1413439010359998,
-      "train_pf": 1.1384295285895225,
-      "validation_2025_pf": 1.03663660004606,
-      "test_2026_pf": 1.3615777641528928
-    }
+  "why_now": {
+    "M10F": "No SHORT compound-loss rule reached PF2 robustly across discovery/2025/2026.",
+    "M10G": "M15 SHORT reclaim improved best overall PF only from 1.1567 to 1.2827; no PF2 cell and 2024 remained about PF1.",
+    "fidelity_concern": "The frozen M7C proxy is an approximation, not a proven proprietary-formula clone. Earlier prospective recall was materially below 100%, and M7A explicitly left EMA slope/density/price-position and other missing conditions unresolved."
   },
   "research_design": {
-    "direction": "SHORT",
+    "ticker": "XAUUSD",
     "timeframe": "M15",
-    "seed": "M10F_M15_C0049 exact frozen formula",
-    "reclaim_level": "PRIMARY bid/open + offset_atr * latest fully closed M15 Wilder ATR14",
-    "confirmation": "immediate if first-turn M1 open <= level; otherwise fully closed M1 close <= level then exact next M1 open bid",
-    "offset_atr_grid": [0.0, 0.05, 0.10, 0.15, 0.20],
-    "wait_minutes_grid": [5, 10, 15, 20, 30],
-    "grid_cells": 25,
-    "native_exit_unchanged": true,
-    "runner_tested": false,
-    "fixed_spread_usd": 0.20,
-    "target_pf": 2.0,
-    "historical_holdout_status": "RESEARCH_EXPOSED_AFTER_M10F_REVIEW; M10G IS HYPOTHESIS DEVELOPMENT, NOT FRESH/OOS"
+    "transition": "PRIMARY_SHORT",
+    "groups": ["SOURCE_MATCHED_SHORT", "SOURCE_MISSED_SHORT", "FINALIZED_EXTRA_PROXY_SHORT"],
+    "source": "existing M7C prospective evidence only",
+    "historical_scan": false,
+    "trade_outcome_used": false,
+    "mfe_mae_used": false,
+    "first_task": "Explain source misses by proxy state and frozen-kernel condition failures.",
+    "second_task": "Compare causal entry-time feature distributions between matched genuine SHORT and finalized-extra proxy SHORT.",
+    "candidate_gate_policy": "Exploratory simple separators only; prefer >=80% matched-source retention while rejecting extras. No automatic M7C refit."
   },
-  "review_focus": [
-    "Whether entry confirmation improves PF beyond the M10F seed while retaining usable count",
-    "Whether improvement is broad across the 25-cell neighborhood rather than one isolated cell",
-    "Whether all calendar years remain positive and the minimum calendar-year PF improves",
-    "Whether payoff and DD improve together",
-    "Whether fixed $0.20 spread remains robust",
-    "Whether any cell reaches PF >= 2 overall or in every calendar year"
-  ],
-  "if_promising": "Freeze the exact reclaim family only after package review. Runner/exit research may then be tested as a separate stage; any eventual SHORT forward arm requires deterministic reproduction and a new independent fresh start.",
-  "if_not_promising": "Do not force M15 SHORT. Keep LONG forward monitors unchanged and move to another independent research axis.",
+  "branching_after_review": {
+    "if_clear_fidelity_signal": "Freeze the candidate missing condition as an exploratory hypothesis and create a separate new prospective comparison shadow without changing current M7C.",
+    "if_sample_too_small": "Keep collecting genuine source PRIMARY_SHORT events; do not guess the missing formula.",
+    "if_no_clear_fidelity_signal": "Start a separate Mochipoyo-independent GOLD SHORT candidate discovery stage instead of forcing more proxy payoff optimization."
+  },
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
