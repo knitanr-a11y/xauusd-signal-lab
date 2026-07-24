@@ -1,0 +1,105 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_STATIC_ATR_EXIT",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(31).zip",
+    "sha256": "1b89602d67fc840af5d3b77fb316ca18e4a113525b3ffaacca817d768238b4d7",
+    "size_bytes": 60515
+  },
+  "seed": {
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "entry_formula_changed": false,
+    "seed_decision_count": 4406
+  },
+  "grid": {
+    "tp_atr": [1.0, 1.5, 2.0, 2.5],
+    "sl_atr": [0.75, 1.0, 1.25, 1.5],
+    "max_hold_minutes": [120, 240, 360],
+    "cell_count": 48,
+    "all_cells_three_split_pf_gt_1": 48,
+    "robust_pf2_candidate_count": 0
+  },
+  "best_discovery_rank_1": {
+    "tp_atr": 2.0,
+    "sl_atr": 1.5,
+    "max_hold_minutes": 120,
+    "train_count": 255,
+    "train_pf": 1.317195823821474,
+    "validation_2025_count": 385,
+    "validation_2025_pf": 1.2126242231484694,
+    "test_2026_count": 170,
+    "test_2026_pf": 1.1575442304873906,
+    "all_count": 810,
+    "all_pf": 1.2133128651530305,
+    "fixed0p20_all_pf": 1.2094041058285272,
+    "all_max_drawdown_bps": 788.1576576369434,
+    "all_payoff_ratio": 1.3196340956045844,
+    "all_tail_le_minus_100_fraction": 0.0123456790123456
+  },
+  "best_min_split": {
+    "tp_atr": 2.5,
+    "sl_atr": 1.5,
+    "max_hold_minutes": 240,
+    "train_pf": 1.2686865412540729,
+    "validation_2025_pf": 1.2086650855791168,
+    "test_2026_pf": 1.2207088220231666,
+    "all_count": 535,
+    "all_pf": 1.2251137540985007,
+    "fixed0p20_all_pf": 1.2195282277922197,
+    "all_max_drawdown_bps": 746.7424132291851,
+    "all_payoff_ratio": 1.6000408081545074,
+    "all_tail_le_minus_100_fraction": 0.014953271028037384
+  },
+  "best_all_pf_research_exposed_only": {
+    "tp_atr": 2.5,
+    "sl_atr": 1.5,
+    "max_hold_minutes": 360,
+    "train_pf": 1.056025085336336,
+    "validation_2025_pf": 1.2766049503915298,
+    "test_2026_pf": 1.4947387436449031,
+    "all_pf": 1.2937065720615115,
+    "fixed0p20_all_pf": 1.2883601075450068,
+    "all_max_drawdown_bps": 485.1016918697494,
+    "not_selection_eligible": "Uses holdout/all-sample ranking; descriptive only."
+  },
+  "comparison_to_m10j_fixed_horizon": {
+    "m10j_all_count": 318,
+    "m10j_all_pf": 1.4839437156621065,
+    "m10j_fixed0p20_all_pf": 1.4816933419152245,
+    "m10j_all_max_drawdown_bps": 823.9691089106718,
+    "m10j_all_tail_le_minus_100_fraction": 0.0251572327044025,
+    "strict_difference_caveat": "M10K requires a fully contiguous M1 path through max hold and therefore is not an apples-to-apples population with the M10J exact-endpoint fixed-horizon result. Do not interpret the PF difference as a pure exit delta."
+  },
+  "data_quality": {
+    "all_frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "nearest_m1_fallback": false,
+    "exact_m1_entry_only": true,
+    "m1_path_required_contiguous": true,
+    "same_bar_priority": "SL_FIRST_CONSERVATIVE",
+    "actual_spread_path": true,
+    "fixed_spread_path_usd": 0.2
+  },
+  "decision": {
+    "pf2_reached": false,
+    "static_atr_exit_improvement_supported": false,
+    "m15_seed_still_has_stable_directional_edge": true,
+    "escalate_more_m15_posthoc_entry_filters": false,
+    "next": "Move to separately contracted Mochipoyo-independent H1 SHORT causal feature mining while keeping the M10J C0212 result as a research reference only."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
