@@ -1,12 +1,12 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "FORCED_REBOOT_RECOVERY_CONTRACT",
-  "status": "READY",
-  "recorded_at_utc": "2026-07-24T14:20:00Z",
-  "reason": "Collector, M7C, M9V and M9Y persistent loops use exclusive lock files that are normally removed on graceful process exit. A Windows forced reboot/power loss can leave those lock files behind even though no loop process remains.",
+  "status": "READY_WITH_M10B",
+  "recorded_at_utc": "2026-07-24T18:10:00Z",
+  "reason": "Collector, M7C, M9V, M9Y and M10B persistent loops use exclusive lock files that are normally removed on graceful process exit. A Windows forced reboot/power loss can leave those lock files behind even though no loop process remains.",
   "recovery_operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
   "recovery_behavior": {
-    "first_check": "Confirm no protected collector/M7C/M9V/M9Y loop process is running by Windows process command line.",
+    "first_check": "Confirm no protected collector/M7C/M9V/M9Y/M10B loop process is running by Windows process command line.",
     "if_any_protected_loop_running": "BLOCK and touch no lock.",
     "if_stale_lock_exists_and_no_loop_running": "Archive the lock under LOCALAPPDATA reboot_recovery timestamp folder, then remove only that stale lock.",
     "runtime_manifest_deleted_or_reset": false,
@@ -18,7 +18,8 @@
     "collector": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\collector_loop.lock",
     "M7C": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m7c_shadow_loop.lock",
     "M9V": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9v_runtime\\m9v_shadow_loop.lock",
-    "M9Y": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_shadow_loop.lock"
+    "M9Y": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9y_runtime\\m9y_shadow_loop.lock",
+    "M10B": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m10b_runtime\\m10b_shadow_loop.lock"
   },
   "restart_order_after_recovery_pass": [
     "Confirm MT5 terminal / CSV exporter is running and goldsharp/btcusdsharp CSVs resume updating.",
@@ -26,17 +27,19 @@
     "scripts/mochipoyo_alert_research/run_m7c_prospective_shadow_forever.bat",
     "scripts/mochipoyo_alert_research/m8c/bat/02_run_forward_shadow_forever.bat",
     "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
-    "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat"
+    "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat",
+    "scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat"
   ],
   "never_after_reboot": [
     "Do not rerun/reset the M7C prospective runtime initializer.",
     "Do not rerun/reset the M8C prospective initializer/start.",
     "Do not rerun M9V BAT00 or BAT01.",
     "Do not rerun M9Y BAT01.",
+    "Do not rerun M10B BAT01.",
     "Do not delete runtime manifests/start receipts manually.",
     "Do not backfill by changing a frozen prospective start."
   ],
-  "data_gap_note": "Persistent scripts can reconstruct their reports from frozen starts and currently available source data. Recovery of the PC downtime interval therefore depends on the underlying sources catching up: Cloudflare collector can fetch backlog from its preserved cursor/database; MT5 raw CSVs must actually contain/restore the missed closed bars after terminal restart. If MT5 CSVs have a permanent gap, do not silently treat the interval as observed forward evidence.",
+  "data_gap_note": "Persistent scripts can reconstruct reports from frozen starts and currently available source data only. Cloudflare can catch up from its preserved cursor/database. MT5 raw CSVs must actually contain/restore missed CLOSED bars after terminal restart. If an MT5 CSV has a permanent gap, that interval is unobserved forward time for M9V/M9Y/M10B and must not be silently counted, interpolated, or reconstructed using later outcomes.",
   "safety": {
     "audit_only": true,
     "discord_send": false,
