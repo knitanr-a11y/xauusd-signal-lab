@@ -1,50 +1,39 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10E_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW",
-  "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "Fetch/Pull the recovery extension, keep all existing monitors and frozen starts unchanged, ensure M10B persistent shadow is running, then start M10E persistent shadow. Never rerun any initializer.",
+  "status": "M10F_SHORT_COMPOUND_LOSS_LOCAL_AUDIT_NEXT",
+  "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged; run the frozen historical SHORT compound-loss audit locally and submit its package for holdout review.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Keep collector/M7C/M8C/M9V/M9Y unchanged.",
-    "M10B start is immutable at 2026.07.24 20:54:00. Never run M10B BAT01 again. If M10B BAT03 is not currently running, start scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat.",
-    "M10E start is immutable at 2026.07.24 22:06:00. Never run M10E BAT01 again.",
-    "Start scripts/mochipoyo_alert_research/m10e/bat/03_run_shadow_forever.bat.",
-    "Leave the M10E loop running. Review checkpoints are E0 H1 accepted counts 5, 10 and 20.",
-    "After a forced reboot use only scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat, then follow its restart order."
+    "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
+    "Run scripts/mochipoyo_alert_research/m10f/bat/01_run_short_compound_loss_feature_audit.bat.",
+    "Required success marker: [M10F PASS].",
+    "Run scripts/mochipoyo_alert_research/m10f/bat/02_open_latest_results.bat.",
+    "Submit only M10F LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not create/start any SHORT forward arm from the historical result alone."
   ],
-  "m10e_bootstrap": {
-    "result": "config/mochipoyo_alert_research/m10e_user_local_bootstrap_result_20260725.json",
-    "package_sha256": "301e5f7361446300164e50183987c58c03aa4a58a3d06a5b5fd7692d4489514d",
-    "prospective_start_server_time": "2026.07.24 22:06:00",
-    "upstream_resolved_post_start": 0,
-    "h1_entry_candidates": 0,
-    "E0_accepted": 0,
-    "E1_accepted": 0,
-    "compound_excluded": 0,
-    "prefix_integrity_verified": true,
-    "resolved_only": true,
-    "bootstrap_zero_is_expected": true
+  "research_design": {
+    "timeframes": ["M5", "M15", "H1", "H4"],
+    "direction": "SHORT",
+    "candidate_universe": "all frozen-engine first-turn SHORT candidates; do not mirror LONG S1/S2/S3/S4 rules",
+    "target_pf": 2.0,
+    "target_pf_is_not_auto_adoption": true,
+    "discovery": "2023-2024 only",
+    "validation": "2025 only",
+    "final_test": "2026 through 2026-06-19 only",
+    "retention_bands": [0.25, 0.50, 0.75],
+    "fixed_spread_usd": 0.20,
+    "compound_rules": "2- and 3-feature bad-region conjunctions plus two-rule unions, formulas generated/ranked on discovery data only"
   },
-  "comparison": {
-    "E0": "unchanged H1 0.05 ATR reclaim + M5 confirmation + H4&D1 MACD runner50 baseline",
-    "E1": "same H1 architecture, but exclude before one-position when M5 MACD bps slope <= -0.1308 AND H1 EMA30-EMA40 >= 17.3333 bps",
-    "fixed_filter": true,
-    "filter_before_one_position": true,
-    "upstream": "M9V v2 S3_H1 READ-ONLY, post-M10E-start PRIMARY only, resolved-only native materialization"
-  },
-  "review_gates": {
-    "operational_E0_accepted": 5,
-    "interim_E0_accepted": 10,
-    "formal_E0_accepted": 20,
-    "manual_review_only": true,
-    "automatic_live_promotion": false
-  },
-  "forced_reboot_recovery": {
-    "status": "READY_WITH_M10B_M10E",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
-    "never_rerun_M10B_BAT01": true,
-    "never_rerun_M10E_BAT01": true
-  },
+  "review_focus": [
+    "Whether any rule reaches PF >= 2 without collapsing count",
+    "Whether PF improvement survives 2025 validation and 2026 final test",
+    "Whether fixed $0.20 spread remains positive/robust",
+    "Whether payoff, DD, losing streak and <= -100bps tail improve together",
+    "Whether a common SHORT loss structure appears across multiple timeframes"
+  ],
+  "if_promising": "Freeze the exact candidate and reproduce it deterministically on the frozen hashes. Only after deterministic PASS may a separate new fresh prospective SHORT arm be designed with a new independent start.",
+  "if_not_promising": "Do not force SHORT into the portfolio. Keep LONG research and forward monitors unchanged and move to other independent research axes.",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
