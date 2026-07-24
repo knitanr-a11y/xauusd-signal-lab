@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T20:40:00Z",
-  "status": "M10B_M10E_RUNNING_M10F_PASS_M10G_M15_SHORT_RECLAIM_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T21:10:00Z",
+  "status": "M10B_M10E_RUNNING_M10G_PASS_NO_PF2_M10H_PRIMARY_SHORT_FIDELITY_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -19,12 +19,6 @@
     "M9Y_mt5_server": "2026.07.24 12:45:00",
     "M10B_mt5_server": "2026.07.24 20:54:00",
     "M10E_mt5_server": "2026.07.24 22:06:00"
-  },
-  "m10a": {
-    "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
-    "M5_RUNNER75": {"count": 837, "pf": 1.6651962763806494, "payoff": 0.9795272214003821},
-    "H1_RUNNER50": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345},
-    "forward_validated": false
   },
   "m10b": {
     "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
@@ -45,34 +39,35 @@
     "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
     "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_ROBUST_SHORT",
     "result": "config/mochipoyo_alert_research/m10f_short_compound_loss_user_local_result_20260725.json",
-    "uploaded_package_sha256": "e31c553dadded8c49c163d839810f998b65b9aa55a5ed8527cf945b5f4d8ae88",
     "target_pf": 2.0,
     "pf2_train_val_test_all": {"M5": 0, "M15": 0, "H1": 0, "H4": 0},
-    "promising_seed": {
-      "timeframe": "M15",
-      "candidate_id": "M10F_M15_C0049",
-      "all_count": 1089,
-      "all_pf": 1.1566500291510813,
-      "fixed0p20_all_pf": 1.1413439010359998,
-      "train_pf": 1.1384295285895225,
-      "validation_2025_pf": 1.03663660004606,
-      "test_2026_pf": 1.3615777641528928
-    },
+    "promising_seed": {"timeframe": "M15", "candidate_id": "M10F_M15_C0049", "all_count": 1089, "all_pf": 1.1566500291510813},
     "forward_approved": false
   },
   "m10g": {
     "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
-    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10g_m15_short_reclaim_audit_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10g/python/run_m15_short_reclaim_audit.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10g/bat/01_run_m15_short_reclaim_audit.bat",
-    "seed": "M10F_M15_C0049_FIXED",
-    "offset_atr_grid": [0.0, 0.05, 0.10, 0.15, 0.20],
-    "wait_minutes_grid": [5, 10, 15, 20, 30],
-    "grid_cells": 25,
-    "runner_tested": false,
-    "target_pf": 2.0,
-    "historical_research_exposed": true,
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_RECLAIM",
+    "result": "config/mochipoyo_alert_research/m10g_m15_short_reclaim_user_local_result_20260725.json",
+    "seed_count": 1089,
+    "seed_pf": 1.1566500291510813,
+    "pf2_all_cells": 0,
+    "pf2_every_calendar_year_cells": 0,
+    "best_overall": {"offset_atr": 0.05, "wait_minutes": 5, "count": 654, "pf": 1.282682823962094, "fixed0p20_pf": 1.261683717881273, "min_year_pf": 0.9950950823400048},
+    "interpretation": "Entry timing helps but is insufficient. Re-audit genuine source PRIMARY_SHORT fidelity before more payoff optimization.",
+    "forward_approved": false
+  },
+  "m10h": {
+    "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
+    "status": "IMPLEMENTED_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10h_primary_short_source_fidelity_audit_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10h/python/run_primary_short_source_fidelity_audit.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10h/bat/01_run_primary_short_source_fidelity_audit.bat",
+    "ticker": "XAUUSD",
+    "transition": "PRIMARY_SHORT",
+    "uses_existing_m7c_prospective_evidence_only": true,
+    "trade_outcome_used": false,
+    "m7c_refit_allowed": false,
+    "next_if_fidelity_signal_weak": "MOCHIPOYO_INDEPENDENT_SHORT_DISCOVERY",
     "forward_approved": false
   },
   "forced_reboot_recovery": {
@@ -90,5 +85,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B/M10E persistent shadows running unchanged. Fetch/Pull and run M10G M15 SHORT reclaim audit locally; submit M10G 99_UPLOAD_PACKAGE.zip. No SHORT forward arm from M10F/M10G historical results alone."
+  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Fetch/Pull and run M10H PRIMARY_SHORT source fidelity audit locally. Submit M10H 99_UPLOAD_PACKAGE.zip. Do not refit M7C or create a SHORT forward arm from M10H alone."
 }
