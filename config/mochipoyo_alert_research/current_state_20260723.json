@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T09:10:00Z",
-  "status": "M8C_RUNNING_M9P_PASS_M9Q_RISK_REWARD_READY_M9S_MULTI_TIMEFRAME_PASS_M9T_PORTFOLIO_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+  "recorded_at_utc": "2026-07-24T09:50:00Z",
+  "status": "M8C_RUNNING_M9T_PASS_H1_ROBUST_MTF_PORTFOLIO_PROMISING_M9U_DETERMINISTIC_PORTFOLIO_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION_AND_PROSPECTIVE_DESIGN",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -36,19 +36,19 @@
     "fresh_start_required": true,
     "reuse_m8c_or_m7c_start_forbidden": true,
     "historical_backfill_forbidden": true,
-    "decision": "KEEP_AS_M15_BRANCH_PROSPECTIVE_DESIGN; DO_NOT_START_UNTIL MULTI_TIMEFRAME PORTFOLIO DESIGN IS REVIEWED"
+    "decision": "KEEP_AS_M15_BRANCH_RISK_REWARD_DESIGN; INTEGRATE ONLY AFTER MULTI_TIMEFRAME PORTFOLIO ACCOUNTING IS DETERMINISTIC"
   },
-  "m9s": {
-    "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
-    "result": "config/mochipoyo_alert_research/m9s_gold_multitimeframe_portfolio_exploratory_result_20260724.json",
-    "direction": "Use stricter quality per timeframe and let portfolio breadth provide frequency instead of forcing every branch to keep many trades.",
-    "M5": "1256 exploratory strict LONG candidates, about 29.9/month, WR 65.45%, PF 1.3337, DD 335.3 bps; all-year PF>1 but 2023/2026 margins thin",
-    "M15": "Canonical M9P N3: 1495, about 35.6/month, WR 62.27%, PF 1.3659",
-    "H1": "191 exploratory LONG candidates, about 4.55/month over 42 months, WR 71.20%, PF 1.7802; all-year PF>1",
-    "H4": "70 exploratory premium LONG candidates, about 1.67/month over 42 months, WR 72.86%, PF 3.2956; very small samples",
-    "raw_frequency_before_dedup": "about 71.7 candidates/month",
-    "overlap_note": "M5 strict vs M15 N3 overlap within +/-60m is about 28.9%; H1 branch vs M15 within +/-4h is about 56.0%. Do not simply sum or pyramid overlapping signals.",
-    "gold_short": "No stable raw SHORT branch across M5/M15/H1/H4; do not force SHORT into the stack."
+  "m9t": {
+    "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY_NOT_INDEPENDENT_VALIDATION",
+    "result": "config/mochipoyo_alert_research/m9t_multitimeframe_branch_robustness_portfolio_dedup_result_20260724.json",
+    "M5_S1": "729 nearby combinations all aggregate PF>1, but only 408/729 all-year PF>1 and only 4/729 remain aggregate PF>1 after extra 2bps; auxiliary/cost-sensitive",
+    "M15_S2": "Canonical N3 remains primary reproducible branch; 72/72 nearby combinations all-year PF>1 and extra-2bps aggregate PF>1",
+    "H1_S3": "81/81 nearby combinations all-year PF>1 and extra-2bps aggregate PF>1; highest-priority new branch for deterministic reproduction/prospective testing",
+    "H4_S4": "9/9 aggregate survives extra 2bps but only 4/9 all-year PF>1; premium small-sample reference",
+    "one_position_portfolio": "S1+S2+S3+S4 causal one-position dedup: 2241 trades, about 53.36/month, WR 63.23%, PF 1.4447, DD 535.4 bps, streak 8, all years PF>1, extra-2bps PF 1.1617",
+    "portfolio_weakness": "2025Q3 remains weak at PF about 0.804; portfolio is not finished",
+    "confidence": "Generic agreement-count boost rejected. Causal sequence/order matters; e.g. H1 after prior M5 was strong while H1 after prior M15 was weak historically.",
+    "promotion": false
   },
   "btc": {
     "historical_2023_2026_data_available": false,
@@ -56,14 +56,17 @@
     "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
   },
   "next": {
-    "stage": "M9T_MULTI_TIMEFRAME_BRANCH_ROBUSTNESS_AND_PORTFOLIO_DEDUP_DESIGN",
+    "stage": "M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION_AND_PROSPECTIVE_DESIGN",
     "tasks": [
-      "Parameter-neighborhood stress M5/H1/H4 exploratory branch definitions rather than trusting the one discovered historical definition.",
-      "Quantify monthly/quarterly stability, DD, loss tails and added-cost sensitivity for each branch.",
-      "Design deduplication/confidence stacking so overlapping M5/M15/H1/H4 LONG signals are not automatically separate positions.",
-      "Compare strict branch portfolio frequency after dedup instead of raw count sum.",
-      "Keep M9R four-arm risk/reward design attached to M15 branch for later fresh prospective comparison.",
-      "Continue BTC source/M7C/M8C forward evidence in parallel."
+      "Build one deterministic repository implementation for S1 M5, canonical S2 M15 N3, S3 H1 and S4 H4 using only fully closed causal features and exact first-turn execution.",
+      "Deterministically reproduce the M9T causal one-position dedup portfolio and its per-branch contribution, yearly/quarterly/monthly metrics and cost stress.",
+      "Treat S3 H1 as the highest-priority new branch because 81/81 nearby definitions survived all-year and extra-2bps stress.",
+      "Do not promote S1 M5 merely for frequency; keep it auxiliary until cost margin is adequate.",
+      "Keep S4 H4 premium/reference only until fresh observations grow.",
+      "Encode multi-timeframe confirmations as ordered causal sequence metadata, not generic positive confidence count.",
+      "After deterministic self-verification, design a fresh GOLD prospective portfolio shadow without reusing M7C/M8C starts or backfilling.",
+      "Keep M9R M15 risk/reward arms separate and available for a later portfolio-compatible comparison.",
+      "Continue BTC source/M7C/M8C forward evidence unchanged."
     ],
     "user_bat_required_now": false
   },
@@ -72,7 +75,7 @@
     "single_branch_frequency_is_not_primary_constraint": true,
     "quality_over_branch_count": true,
     "deduplicate_overlapping_timeframes": true,
-    "use_multi_timeframe_agreement_as_confidence_before_pyramiding": true
+    "ordered_confirmation_metadata_not_generic_agreement_score": true
   },
   "safety": {
     "audit_only": true,
