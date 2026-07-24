@@ -18,11 +18,19 @@
     "historical_backfill": false
   },
   "base_candidate": {
-    "source": "Canonical M15 N3 only; do not import M5/H1/H4 M9V branch candidates into M9Y.",
-    "primary": "M15 M7C-style post-start LONG PRIMARY: IDLE, RCI9 causal turn-up, EMA20>EMA30>EMA40.",
-    "native_exit": "M15 M7C LONG_EXIT when latest fully closed M15 RCI9 >= 78.333333333333.",
-    "first_turn": "First causal M1 LONG turn after eligible post-start PRIMARY and before native exit: previous M1 low <= minimum low of prior five-bar history, previous low < original PRIMARY bid/open, current closed M1 close > previous closed M1 close; first-turn decision/virtual entry time is next exact M1 open.",
-    "n3": "At first-turn decision, latest fully closed M5 tick_volume_ratio20 <= trailing200 q50 OR latest fully closed M15 MACD(6,13) line in bps >= trailing200 q75.",
+    "source": "Canonical M15 N3 only. Operationally consume the existing M9V v2 S2_M15 causal branch-candidate ledger, then require proxy_primary_time > the independent M9Y fresh start. Do not import M5/H1/H4 M9V branches.",
+    "m9v_dependency": {
+      "required_stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW",
+      "required_runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+      "read_only": true,
+      "m9v_start_reused": false,
+      "m9v_modified": false,
+      "reason": "Avoid a second implementation of canonical M15 N3 and preserve exact forward parity; M9Y validates only the new payoff layers."
+    },
+    "primary_eligibility": "M9V S2 row must have proxy_primary_time strictly greater than the frozen M9Y start. A first-turn after M9Y start that belongs to a pre-M9Y PRIMARY is forbidden.",
+    "native_exit": "Use the exact M9V S2 native M15 proxy exit for the same candidate when it becomes available.",
+    "first_turn": "Use the exact M9V S2 causal first-turn time. No nearest-M1 fallback.",
+    "n3": "Already frozen and evaluated causally by the M9V S2_M15 branch; M9Y must not re-tune or reinterpret N1/N2.",
     "future_feature_use": false,
     "nearest_m1_fallback": false
   },
@@ -30,6 +38,7 @@
     "id": "W1_RECLAIM_0P10_ATR5_WITHIN_10M",
     "atr": "Wilder ATR14 from latest fully closed M5 available at the canonical first-turn decision.",
     "level": "original PRIMARY bid/open - 0.10 * M5 ATR14",
+    "primary_bid_lookup": "Exact XAUUSD M1 bid/open at proxy_primary_time from the raw live M1 CSV.",
     "immediate": "If first-turn exact M1 open bid >= reclaim level, actual entry is that M1 open ask = open + spread*point.",
     "delayed": "Otherwise observe at most 10 fully closed M1 bars. After the first M1 close >= reclaim level, enter at the exact next M1 open ask. Entry must occur before native M7C exit.",
     "timeout": "If reclaim is not confirmed within 10 closed M1 bars or native exit occurs first, candidate is skipped.",
@@ -45,34 +54,14 @@
   "profit_vector": {
     "native_exit_event": "Native M7C LONG_EXIT is a profit-management event, not automatically a 100% economic exit for runner arms.",
     "runner_eligibility": "At native exit decision, latest fully closed H1 MACD(6,13) line is strictly greater than the previous fully closed H1 MACD line.",
-    "runner_exit": "First M15 decision at or after the native EXIT time whose latest fully closed M15 RCI9 makes causal turn-down: current < previous AND previous >= previous2. If the native EXIT decision itself is also a turn-down decision, the runner exits immediately at that same exact M1/M15 open and produces no extension.",
+    "runner_exit": "First M15 decision at or after the native EXIT time whose latest fully closed M15 RCI9 makes causal turn-down: current < previous AND previous >= previous2. If the native EXIT decision itself is also a turn-down decision, the runner exits immediately at that same exact open and produces no extension.",
     "runner_share_adaptation": false
   },
   "arms": {
-    "Y0_W1_NATIVE_EXIT": {
-      "entry": "W1 reclaim",
-      "risk": "1.0x always",
-      "runner_share": 0.0,
-      "purpose": "Entry-location baseline"
-    },
-    "Y1_W1_N6_NATIVE_EXIT": {
-      "entry": "W1 reclaim",
-      "risk": "N6 0.5x else 1.0x",
-      "runner_share": 0.0,
-      "purpose": "Isolate risk-sizing effect"
-    },
-    "Y2_W1_N6_RUNNER50": {
-      "entry": "W1 reclaim",
-      "risk": "N6 0.5x else 1.0x",
-      "runner_share": 0.5,
-      "purpose": "Central balanced payoff arm"
-    },
-    "Y3_W1_N6_RUNNER75": {
-      "entry": "W1 reclaim",
-      "risk": "N6 0.5x else 1.0x",
-      "runner_share": 0.75,
-      "purpose": "More explicit positive reward/risk arm"
-    }
+    "Y0_W1_NATIVE_EXIT": {"entry": "W1 reclaim", "risk": "1.0x always", "runner_share": 0.0, "purpose": "Entry-location baseline"},
+    "Y1_W1_N6_NATIVE_EXIT": {"entry": "W1 reclaim", "risk": "N6 0.5x else 1.0x", "runner_share": 0.0, "purpose": "Isolate risk-sizing effect"},
+    "Y2_W1_N6_RUNNER50": {"entry": "W1 reclaim", "risk": "N6 0.5x else 1.0x", "runner_share": 0.5, "purpose": "Central balanced payoff arm"},
+    "Y3_W1_N6_RUNNER75": {"entry": "W1 reclaim", "risk": "N6 0.5x else 1.0x", "runner_share": 0.75, "purpose": "More explicit positive reward/risk arm"}
   },
   "one_position_accounting": {
     "per_arm": true,
@@ -89,8 +78,8 @@
     "reuse_m9v_start": false,
     "backfill": false,
     "pre_start_primary_eligibility": "FORBIDDEN",
-    "state_rehydration": "Pre-start closed bars may be replayed only to determine M15 state. If M15 is ACTIVE from a pre-start PRIMARY, wait for native exit/return-to-IDLE before any new post-start PRIMARY can become M9Y eligible.",
-    "runtime_prefix": "Use append-safe immutable-row-prefix semantics equivalent to M9V runtime v2; later strictly ascending appends are allowed, already-frozen rows may never change."
+    "operational_rule": "Because canonical candidate state is consumed read-only from M9V S2, M9Y does not independently rehydrate/replay M15 PRIMARY state. Eligibility is fail-closed by requiring the M9V S2 proxy_primary_time to be strictly after M9Y start.",
+    "runtime_prefix": "Freeze append-safe immutable prefixes for the raw M1/M5/M15/H1/H4 files used by the new payoff layers; later strictly ascending appends are allowed, already-frozen rows may never change."
   },
   "reporting": {
     "arm_metrics": ["accepted_count", "resolved_count", "open_count", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "payoff_ratio", "max_drawdown_bps", "max_losing_streak", "tail_le_minus_100_fraction"],
@@ -111,7 +100,8 @@
     "m9v_continues_unchanged": true,
     "m9v_start_reset": false,
     "m9v_backfill": false,
-    "m9y_is_separate_runtime": true
+    "m9y_is_separate_runtime": true,
+    "m9y_reads_m9v_s2_output_read_only": true
   },
   "safety": {
     "audit_only": true,
