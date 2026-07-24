@@ -5,7 +5,7 @@ set "TARGET=%LOCALAPPDATA%\xauusd_signal_lab\mochipoyo_alert_research\outputs\M9
 
 echo ============================================================
 echo M9V Latest Results Folder
-necho ============================================================
+echo ============================================================
 echo %TARGET%
 echo.
 
