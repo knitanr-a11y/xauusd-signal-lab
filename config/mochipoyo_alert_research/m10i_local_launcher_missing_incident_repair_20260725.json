@@ -1,0 +1,39 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+  "status": "LOCAL_LAUNCH_BLOCKED_MISSING_TRACKED_FAST_WRAPPER_REPAIRED_NO_RESEARCH_RUN_OCCURRED",
+  "incident": {
+    "console_error": "python: can't open file ...run_independent_m15_short_archetype_discovery_fast.py: [Errno 2] No such file or directory",
+    "classification": "OPERATOR_LAUNCH_FILE_AVAILABILITY_ONLY",
+    "strategy_failure": false,
+    "historical_audit_started": false,
+    "thresholds_modified": false,
+    "hashes_modified": false,
+    "forward_starts_modified": false,
+    "running_monitors_modified": false
+  },
+  "repair": {
+    "file": "scripts/mochipoyo_alert_research/m10i/python/run_independent_m15_short_archetype_discovery_fast.py",
+    "repair_commit": "f0327b0b76be476594305eb224796038050e6671",
+    "action": "Fetch/Pull feature/mochipoyo-alert-research, confirm the tracked fast wrapper is present, then rerun the same M10I BAT01. Do not restart or reinitialize any forward monitor."
+  },
+  "short_count_clarification": {
+    "m10h_scope": "XAUUSD M15 genuine source PRIMARY_SHORT only, post M7C prospective start",
+    "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
+    "m10h_snapshot_built_at_utc": "2026-07-24T20:15:02Z",
+    "m7c_supported_source_events": 47,
+    "m7c_by_ticker": {"BTCUSD": 24, "XAUUSD": 23},
+    "m7c_by_transition": {"PRIMARY_LONG": 14, "PRIMARY_SHORT": 10, "LONG_EXIT": 14, "SHORT_EXIT": 9},
+    "unsupported_reentry_total_both_directions": 12,
+    "xauusd_genuine_primary_short": 4,
+    "why_only_four": "M10H intentionally excludes BTCUSD, all pre-start source history, exits, reentries/opposite roles, and non-PRIMARY_SHORT transitions. The number four is not the total number of SHORT-related alerts."
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
