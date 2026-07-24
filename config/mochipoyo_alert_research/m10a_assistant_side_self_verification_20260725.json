@@ -1,0 +1,44 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_ASSISTANT_SIDE_SELF_VERIFICATION_AWAITING_USER_LOCAL_REPRODUCTION",
+  "recorded_at_utc": "2026-07-25T00:00:00Z",
+  "implementation": "scripts/mochipoyo_alert_research/m10a/python/run_gold_multitimeframe_payoff_reproduction.py",
+  "implementation_mode": "SELF_CONTAINED_INDEPENDENT_REPLAY_NO_M9P_M9U_RUNTIME_IMPORT",
+  "verification": {
+    "python_syntax_compile": "PASS",
+    "same_uploaded_csv_sha256_6_of_6": "PASS",
+    "raw_M5_S1": {"count": 1256, "profit_factor_bps": 1.3336981886264172, "match": true},
+    "raw_M15_S2": {"count": 1495, "profit_factor_bps": 1.365884145048126, "match": true},
+    "raw_H1_S3": {"count": 191, "profit_factor_bps": 1.7802349633701025, "match": true},
+    "raw_H4_S4": {"count": 70, "profit_factor_bps": 3.295562620459433, "match": true},
+    "M5_ENTRY": {"count": 842, "profit_factor_bps": 1.537338444576352, "match": true},
+    "M5_RUNNER75": {"count": 837, "profit_factor_bps": 1.6651962763806494, "overlap_skips": 5, "match": true},
+    "H1_ENTRY": {"count": 171, "profit_factor_bps": 2.814130403928734, "match": true},
+    "H1_RUNNER50": {"count": 159, "profit_factor_bps": 2.8303858342555084, "overlap_skips": 12, "match": true},
+    "H4_ENTRY": {"count": 57, "profit_factor_bps": 4.668798744063922, "match": true}
+  },
+  "causality_review": {
+    "entry_features_closed_only": true,
+    "future_outcome_in_entry_gate": false,
+    "future_outcome_in_candidate_selection": false,
+    "runner_context_only_at_native_exit": true,
+    "one_position_accounting_chronological": true,
+    "historical_results_used_only_for_expected_reproduction_assertions_and_scoring": true
+  },
+  "decision": {
+    "assistant_side_reproduction": "PASS",
+    "user_local_reproduction_required_before_fresh_prospective_contract": true,
+    "fresh_prospective_started": false,
+    "retrofit_m9v": false,
+    "retrofit_m9y": false,
+    "automatic_live_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
