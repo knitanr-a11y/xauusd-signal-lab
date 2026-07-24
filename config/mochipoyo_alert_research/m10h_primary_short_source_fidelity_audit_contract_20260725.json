@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
+  "status": "DESIGN_FROZEN_PROSPECTIVE_EVIDENCE_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T21:00:00Z",
+  "purpose": "Determine whether weak GOLD SHORT performance is partly caused by incomplete Mochipoyo PRIMARY_SHORT proxy fidelity before any further payoff optimization. Compare genuine XAUUSD source PRIMARY_SHORT events with matched, missed and finalized-extra proxy PRIMARY_SHORT signals using only causal M15 information available at each decision time.",
+  "scope": {
+    "ticker": "XAUUSD",
+    "timeframe": "M15",
+    "source_transition": "PRIMARY_SHORT",
+    "source": "existing M7C prospective source-event comparisons and proxy decisions, read-only",
+    "historical_scan": false,
+    "trade_outcome_used": false,
+    "mfe_mae_used": false,
+    "entry_payoff_used": false
+  },
+  "groups": {
+    "SOURCE_MATCHED_SHORT": "genuine source PRIMARY_SHORT classified EXACT_MATCH/EARLY_1_BAR/LATE_1_BAR",
+    "SOURCE_MISSED_SHORT": "genuine source PRIMARY_SHORT classified MISSED or WRONG_TRANSITION_NEARBY",
+    "FINALIZED_EXTRA_PROXY_SHORT": "proxy PRIMARY_SHORT not matched to a source event after the frozen M7C arrival grace"
+  },
+  "features": {
+    "decision_time": "new M15 bar open; previous fully closed M15 only plus current M15 open exactly as frozen M7C causal contract",
+    "reuse_frozen_m7c_feature_builder": true,
+    "focus": [
+      "RCI9 value/delta/turn structure",
+      "EMA20/30/40 alignment and spacing",
+      "EMA slope-related flattened features when available",
+      "current open distance from EMA20/EMA40 normalized by ATR",
+      "MACD-related flattened features when available",
+      "ATR/volatility and candle/price-position features when available"
+    ]
+  },
+  "analysis": {
+    "first_diagnose_missed_source_kernel_failure": true,
+    "compare_matched_source_vs_finalized_extra_proxy": true,
+    "candidate_fidelity_gate_generation": "descriptive simple one-feature separators only; prefer >=80% matched-source retention and rank extra-proxy rejection; no automatic kernel change",
+    "minimum_group_size_for_feature_claim": 5,
+    "proprietary_formula_claim": false
+  },
+  "decision_policy": {
+    "if_clear_missing_condition_signal": "freeze only as an exploratory fidelity hypothesis, then validate prospectively in a new comparison shadow without changing M7C",
+    "if_no_clear_signal_or_sample_too_small": "do not refit M7C; proceed to a separate Mochipoyo-independent SHORT candidate discovery stage",
+    "m7c_change_allowed": false,
+    "m10b_change_allowed": false,
+    "m10e_change_allowed": false
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "automatic_live_promotion": false,
+    "m7c_reset": false,
+    "m9v_reset": false,
+    "m9y_reset": false,
+    "m10b_reset": false,
+    "m10e_reset": false
+  }
+}
