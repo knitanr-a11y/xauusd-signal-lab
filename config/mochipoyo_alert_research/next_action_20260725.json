@@ -1,56 +1,43 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10O_C056_G013_DETERMINISTIC_REPRODUCTION_LOCAL_AUDIT_NEXT",
-  "stage": "M10O_C056_G013_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Reproduce exact M10L_H240_C056 + M10N_G013 from frozen raw GOLD data before any new forward SHORT shadow is designed.",
-  "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10o/bat/01_run_m10o.bat.",
-    "Required success marker: [M10O PASS].",
-    "Run scripts/mochipoyo_alert_research/m10o/bat/02_open_latest_results.bat.",
-    "Submit only M10O LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not alter C056 or G013 thresholds.",
-    "Do not start a new SHORT forward arm from M10N historical results before M10O reproduction PASS."
+  "status": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW_DESIGN_NEXT",
+  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. M10O deterministic reproduction passed; freeze C056+G013 exactly and design a separate fresh prospective audit-only shadow.",
+  "m10o_result": {
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+    "package_sha256": "c2b6b84a5fa22ac4892d155ce321a90f8bc05d7b750138e379ce5e063ed71bb3",
+    "trade_count": 84,
+    "split_counts": {"train": 29, "validation_2025": 33, "test_2026": 22},
+    "train_pf": 3.002653803622849,
+    "validation_2025_pf": 2.35052772774399,
+    "test_2026_pf": 2.5802661605659214,
+    "all_pf": 2.540715351740206,
+    "fixed0p20_all_pf": 2.538476073441831,
+    "max_reference_abs_diff": 4.440892098500626e-16,
+    "required_tolerance": 1e-10,
+    "all_reference_checks_pass": true,
+    "trade_generation_from_raw_frozen_data": true,
+    "reads_m10n_result_csv_for_trade_generation": false
+  },
+  "m10p_frozen_candidate": {
+    "seed_id": "M10L_H240_C056",
+    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+    "gate_id": "M10N_G013",
+    "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+    "horizon_minutes": 240
+  },
+  "m10p_design_requirements": [
+    "Use a brand-new immutable MT5-server prospective start set at bootstrap time.",
+    "No candidate before the new prospective start is eligible; no historical backfill.",
+    "Use only fully closed H1 and D1 information available causally at each H1 decision.",
+    "Entry is virtual exact H1 decision/open bid according to the frozen causal implementation; exit is virtual exact 240-minute M1 open ask.",
+    "One-position rule is frozen and must match M10O.",
+    "Store persistent candidate/open/resolved ledgers and restart-safe runtime state.",
+    "No Discord send, no MT5 order, no live_ready/final_signal, no automatic promotion.",
+    "Do not reset or modify M7C/M8C/M9V/M9Y/M10B/M10E.",
+    "Do not change C056/G013 thresholds based on prospective outcomes."
   ],
-  "m10n_result": {
-    "status": "PASS_ONE_ROBUST_PF2_SEED_GATE_PAIR",
-    "package_sha256": "3573369f5a92381c633d48b6b6dc0574803758e8412671dcc33e7d821a753438",
-    "robust_pair": {
-      "seed_id": "M10L_H240_C056",
-      "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
-      "gate_id": "M10N_G013",
-      "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
-      "horizon_minutes": 240,
-      "train_count": 29,
-      "train_pf": 3.002653803622849,
-      "validation_2025_count": 33,
-      "validation_2025_pf": 2.35052772774399,
-      "test_2026_count": 22,
-      "test_2026_pf": 2.5802661605659214,
-      "all_count": 84,
-      "all_pf": 2.540715351740206,
-      "fixed0p20_all_pf": 2.538476073441831
-    },
-    "common_holdout_supported_gate_count": 11,
-    "historical_research_exposed": true,
-    "forward_approved": false
-  },
-  "m10o_design": {
-    "trade_generation_source": "frozen raw GOLD CSV only",
-    "read_m10n_result_csv_for_generation": false,
-    "exact_seed_and_gate": true,
-    "expected_trade_count": 84,
-    "expected_split_counts": {"train": 29, "validation_2025": 33, "test_2026": 22},
-    "metric_tolerance": 1e-10,
-    "entry": "exact M1 open bid",
-    "exit": "exact M1 open ask 240 minutes later",
-    "fixed_spread_sensitivity_usd": 0.20
-  },
-  "after_m10o": {
-    "if_pass": "Design a completely separate fresh prospective C056+G013 SHORT shadow with a new immutable MT5-server start. No historical backfill and no automatic promotion.",
-    "if_blocked_or_mismatch": "Do not start the forward shadow; diagnose reproduction mismatch without changing thresholds."
-  },
+  "before_starting_m10p": "Reuse/verify the existing append-safe live GOLD CSV source resolution used by current M10B/M10E monitors. Fail closed if the exact live source contract cannot be verified; do not guess filenames or paths.",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
