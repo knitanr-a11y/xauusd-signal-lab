@@ -1,0 +1,57 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
+  "recorded_at_utc": "2026-07-24T17:40:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(22).zip",
+    "sha256": "c5e575b479dfbf38de87697f4afec0b2f4a02a09d57b13b4463a76dcd814600a",
+    "size_bytes": 193348
+  },
+  "sample": {
+    "period": "2023-01-03 through 2026-06-19",
+    "historical_research_exposed": true,
+    "fresh_forward_validation": false,
+    "newest_csv_row_contract": "CLOSED",
+    "nearest_m1_fallback": false
+  },
+  "raw_frozen_branch_reproduction": {
+    "M5_S1": {"count": 1256, "profit_factor_bps": 1.3336981886264174},
+    "M15_S2": {"count": 1495, "profit_factor_bps": 1.3658841450481258},
+    "H1_S3": {"count": 191, "profit_factor_bps": 1.7802349633701025},
+    "H4_S4": {"count": 70, "profit_factor_bps": 3.2955626204594335}
+  },
+  "payoff_reference_reproduction": {
+    "M5_ENTRY": {"count": 842, "win_rate": 0.665083135391924, "profit_factor_bps": 1.537338444576352, "average_win_bps": 9.400593078271461, "average_loss_bps": -12.142963364125183, "payoff_ratio": 0.7741597167330916, "max_drawdown_bps": 227.3232304692574},
+    "M5_RUNNER75": {"count": 837, "overlap_skips": 5, "win_rate": 0.6296296296296297, "profit_factor_bps": 1.6651962763806494, "average_win_bps": 11.360485887595683, "average_loss_bps": -11.59792769347865, "payoff_ratio": 0.9795272214003818, "max_drawdown_bps": 211.06607310179675},
+    "H1_ENTRY": {"count": 171, "win_rate": 0.7192982456140351, "profit_factor_bps": 2.814130403928734, "average_win_bps": 34.418344429800925, "average_loss_bps": -31.34076781880304, "payoff_ratio": 1.0981972308014571, "max_drawdown_bps": 271.583159570446},
+    "H1_RUNNER50": {"count": 159, "overlap_skips": 12, "win_rate": 0.6792452830188679, "profit_factor_bps": 2.8303858342555084, "average_win_bps": 40.12947532813278, "average_loss_bps": -30.024198246139303, "payoff_ratio": 1.3365710883984345, "max_drawdown_bps": 271.583159570446},
+    "H4_ENTRY": {"count": 57, "win_rate": 0.7543859649122807, "profit_factor_bps": 4.668798744063922, "average_win_bps": 73.14596729072778, "average_loss_bps": -48.12000391046308, "payoff_ratio": 1.5200740096952303, "max_drawdown_bps": 270.9863310584244}
+  },
+  "data_hashes": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "audit_guardrails": {
+    "future_outcome_used_in_entry_gate": false,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "historical_backfill": false,
+    "automatic_live_promotion": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "audit_only": true
+  },
+  "decision": {
+    "deterministic_reproduction": "PASS",
+    "retrofit_into_m9v_or_m9y": false,
+    "reuse_existing_start": false,
+    "next": "Freeze and initialize a separate M10B fresh prospective payoff shadow using only post-M10B-start M9V S1/S3/S4 candidates read-only."
+  }
+}
