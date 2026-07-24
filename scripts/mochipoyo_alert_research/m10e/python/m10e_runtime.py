@@ -182,10 +182,17 @@ def normalize_h1(rows: list[dict[str, str]]) -> list[dict[str, Any]]:
     return output
 
 
+def macd_bps(bars: list[p.Bar]) -> list[float]:
+    closes = [bar.close for bar in bars]
+    fast = p.ema(closes, 6)
+    slow = p.ema(closes, 13)
+    return [(a - b) / abs(close) * 10000.0 for a, b, close in zip(fast, slow, closes)]
+
+
 def annotate_filter(rows: list[dict[str, Any]], m5: list[p.Bar], h1: list[p.Bar]) -> list[dict[str, Any]]:
     m5_close_times = [bar.time + timedelta(minutes=5) for bar in m5]
     h1_close_times = [bar.time + timedelta(hours=1) for bar in h1]
-    m5_macd = p.macd_bps(m5)
+    m5_macd = macd_bps(m5)
     h1_closes = [bar.close for bar in h1]
     h1_ema30 = p.ema(h1_closes, 30)
     h1_ema40 = p.ema(h1_closes, 40)
