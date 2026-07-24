@@ -1,9 +1,9 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M8C_RUNNING_M9V_IMPLEMENTED_SELF_TEST_PASS_USER_FRESH_START_INIT_NEXT",
-  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_FRESH_START_LOCAL_INITIALIZATION_AND_INITIAL_ONE_SHOT_REVIEW",
-  "immediate_action": "KEEP M8C M7C COLLECTOR RUNNING UNCHANGED; PULL LATEST BRANCH; RUN M9V BAT 01 ONCE; IF INIT PASS NEVER RERUN; THEN RUN BAT 02 ONCE AND SUBMIT M9V LATEST 99_UPLOAD_PACKAGE.ZIP BEFORE STARTING BAT 03",
+  "status": "M8C_RUNNING_M9V_V1_PREFIX_INCIDENT_RECOVERY_V2_INIT_NEXT",
+  "current_stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V1_INVALIDATION_AND_V2_INITIAL_ONE_SHOT_REVIEW",
+  "immediate_action": "KEEP M8C M7C COLLECTOR RUNNING UNCHANGED; PULL LATEST BRANCH; RUN M9V BAT 00 ONCE; AFTER RECOVERY PASS RUN BAT 01 ONCE; AFTER V2 INIT PASS RUN BAT 02 ONCE AND SUBMIT M9V LATEST ZIP; DO NOT START BAT 03 YET",
   "m8c_operator": {
     "folder": "scripts/mochipoyo_alert_research/m8c/bat",
     "persistent": "02_run_forward_shadow_forever.bat",
@@ -11,45 +11,45 @@
     "prospective_start_reset_allowed": false
   },
   "m9v": {
-    "contract": "config/mochipoyo_alert_research/m9v_gold_multitimeframe_fresh_prospective_shadow_contract_20260724.json",
-    "self_test": "config/mochipoyo_alert_research/m9v_implementation_self_test_result_20260724.json",
-    "state": "IMPLEMENTED_SELF_TEST_PASS_READY_LOCAL_INIT",
+    "incident": "config/mochipoyo_alert_research/m9v_v1_prefix_freeze_incident_and_v2_recovery_20260724.json",
+    "runtime_v2": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "operator_folder": "scripts/mochipoyo_alert_research/m9v/bat",
-    "01_initialize_once": "01_initialize_fresh_runtime_once.bat",
-    "02_one_shot": "02_run_shadow_once.bat",
-    "03_persistent": "03_run_shadow_forever.bat",
+    "00_recover_v1_once": "00_recover_invalid_v1_prefix_start_once.bat",
+    "01_initialize_v2_once": "01_initialize_fresh_runtime_once.bat",
+    "02_one_shot_v2": "02_run_shadow_once.bat",
+    "03_persistent_v2": "03_run_shadow_forever.bat",
     "04_stop": "04_stop_shadow_forever.bat",
     "05_open_results": "05_open_latest_results.bat",
     "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9V\\LATEST\\99_UPLOAD_PACKAGE.zip",
     "runtime_manifest": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9v_runtime\\m9v_runtime_manifest.json",
     "runtime_receipt": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\m9v_runtime\\m9v_runtime_start_receipt.json",
-    "fresh_start_created": false,
-    "reset_allowed_after_pass": false
+    "old_v1_start_valid": false,
+    "v2_start_created": false
   },
   "operator_order_now": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Keep existing M8C, M7C and genuine source collector running.",
-    "Run scripts/mochipoyo_alert_research/m9v/bat/01_initialize_fresh_runtime_once.bat exactly once until [M9V INIT PASS]. If blocked, send full screen output; no start was frozen.",
-    "After INIT PASS, never rerun 01 and never delete/reset the runtime manifest/start receipt.",
-    "Run scripts/mochipoyo_alert_research/m9v/bat/02_run_shadow_once.bat once.",
+    "Run 00_recover_invalid_v1_prefix_start_once.bat exactly once. Expected success: [M9V RECOVERY PASS]. If blocked, send full screen output and do not manually delete anything.",
+    "After RECOVERY PASS, run 01_initialize_fresh_runtime_once.bat exactly once. Expected success: [M9V INIT PASS]. After PASS never rerun 01 and never delete/reset the v2 runtime manifest/start receipt.",
+    "Run 02_run_shadow_once.bat exactly once. Expected success: [M9V PASS].",
     "Run 05_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip for review.",
-    "Do NOT start 03_run_shadow_forever.bat until the initial package is reviewed."
+    "Do NOT start 03_run_shadow_forever.bat until the initial v2 package is reviewed."
   ],
   "m9r_status": "FROZEN_NOT_STARTED; excluded from M9V initial breadth test",
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_IMPLEMENTED_FRESH_START_INIT_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_V1_PREFIX_INCIDENT_V2_RECOVERY_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
   "forbidden": [
     "Do not stop or reset M8C.",
     "Do not change M7C formulas or thresholds.",
-    "Do not reuse M7C/M8C start for M9V.",
-    "Do not rerun or reset M9V initializer after INIT PASS.",
+    "Do not manually delete the old M9V v1 runtime/receipt; use BAT 00 only.",
+    "Do not reuse the invalid v1 start.",
+    "Do not rerun/reset M9V v2 initializer after INIT PASS.",
     "Do not backfill M9V.",
     "Do not allow pre-start PRIMARY events into M9V candidates.",
     "Do not pyramid overlapping timeframe LONG signals.",
-    "Do not use generic agreement count as a confidence score.",
     "Do not start M9R yet.",
     "Do not transplant GOLD branch rules into BTC.",
     "Do not enable Discord send, MT5 orders, live ready, final signal, or real trading entry gates."
