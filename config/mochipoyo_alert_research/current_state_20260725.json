@@ -2,11 +2,11 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T21:10:00Z",
-  "status": "M10B_M10E_RUNNING_M10G_PASS_NO_PF2_M10H_PRIMARY_SHORT_FIDELITY_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T21:35:00Z",
+  "status": "M10B_M10E_RUNNING_M10H_PASS_SAMPLE_INSUFFICIENT_M10I_INDEPENDENT_SHORT_DISCOVERY_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
-    "M7C": "RUNNING_KEEP_UNCHANGED",
+    "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
     "M8C": "RUNNING_KEEP_UNCHANGED",
     "M9V": "RUNNING_KEEP_UNCHANGED",
     "M9Y": "RUNNING_KEEP_UNCHANGED",
@@ -53,21 +53,36 @@
     "pf2_all_cells": 0,
     "pf2_every_calendar_year_cells": 0,
     "best_overall": {"offset_atr": 0.05, "wait_minutes": 5, "count": 654, "pf": 1.282682823962094, "fixed0p20_pf": 1.261683717881273, "min_year_pf": 0.9950950823400048},
-    "interpretation": "Entry timing helps but is insufficient. Re-audit genuine source PRIMARY_SHORT fidelity before more payoff optimization.",
     "forward_approved": false
   },
   "m10h": {
     "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
-    "status": "IMPLEMENTED_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10h_primary_short_source_fidelity_audit_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10h/python/run_primary_short_source_fidelity_audit.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10h/bat/01_run_primary_short_source_fidelity_audit.bat",
-    "ticker": "XAUUSD",
-    "transition": "PRIMARY_SHORT",
-    "uses_existing_m7c_prospective_evidence_only": true,
-    "trade_outcome_used": false,
-    "m7c_refit_allowed": false,
-    "next_if_fidelity_signal_weak": "MOCHIPOYO_INDEPENDENT_SHORT_DISCOVERY",
+    "status": "PASS_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_ONLY_INSUFFICIENT_XAU_SHORT_SAMPLE",
+    "result": "config/mochipoyo_alert_research/m10h_primary_short_source_fidelity_user_local_result_20260725.json",
+    "uploaded_package_sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
+    "xauusd_primary_short": {"genuine_scored": 4, "matched": 3, "missed": 1, "finalized_extra_proxy_short": 9},
+    "only_miss_reason": "STATE_NOT_IDLE",
+    "failed_kernel_condition_on_only_miss": false,
+    "candidate_fidelity_gate_count": 0,
+    "clear_missing_indicator_condition_found": false,
+    "continue_source_collection": true,
+    "m7c_refit_approved": false
+  },
+  "m10i": {
+    "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10i_mochipoyo_independent_m15_short_archetype_discovery_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10i/python/run_independent_m15_short_archetype_discovery_fast.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10i/bat/01_run_independent_m15_short_archetype_discovery.bat",
+    "timeframe": "M15",
+    "direction": "SHORT",
+    "candidate_universe_uses_mochipoyo_kernel": false,
+    "archetypes": ["TREND_BREAKDOWN", "PULLBACK_RESUME", "MOMENTUM_ACCELERATION", "VOLATILITY_BREAKDOWN", "HTF_ALIGNMENT_BREAK", "EXHAUSTION_REVERSAL"],
+    "fixed_horizons_minutes": [60, 120, 240],
+    "target_pf": 2.0,
+    "discovery": "2023-2024_ONLY",
+    "validation": "2025_ONLY",
+    "final_test": "2026_THROUGH_0619_ONLY",
     "forward_approved": false
   },
   "forced_reboot_recovery": {
@@ -85,5 +100,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Fetch/Pull and run M10H PRIMARY_SHORT source fidelity audit locally. Submit M10H 99_UPLOAD_PACKAGE.zip. Do not refit M7C or create a SHORT forward arm from M10H alone."
+  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT events for future M10H re-audit. In parallel Fetch/Pull and run M10I independent M15 SHORT historical discovery; submit M10I 99_UPLOAD_PACKAGE.zip. Do not refit M7C or create a SHORT forward arm from M10H/M10I without review and deterministic reproduction."
 }
