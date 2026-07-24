@@ -45,7 +45,7 @@
   "profit_vector": {
     "native_exit_event": "Native M7C LONG_EXIT is a profit-management event, not automatically a 100% economic exit for runner arms.",
     "runner_eligibility": "At native exit decision, latest fully closed H1 MACD(6,13) line is strictly greater than the previous fully closed H1 MACD line.",
-    "runner_exit": "First later M15 decision whose latest fully closed M15 RCI9 makes causal turn-down: current < previous AND previous >= previous2.",
+    "runner_exit": "First M15 decision at or after the native EXIT time whose latest fully closed M15 RCI9 makes causal turn-down: current < previous AND previous >= previous2. If the native EXIT decision itself is also a turn-down decision, the runner exits immediately at that same exact M1/M15 open and produces no extension.",
     "runner_share_adaptation": false
   },
   "arms": {
