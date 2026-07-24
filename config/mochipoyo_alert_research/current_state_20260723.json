@@ -2,11 +2,15 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T12:30:00Z",
-  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9W_FOUND_M9X_IMPLEMENTED_LOCAL_REPRODUCTION_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9X_DETERMINISTIC_LOCAL_REPRODUCTION",
+  "recorded_at_utc": "2026-07-24T13:45:00Z",
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9X_EXACT_PASS_M9Y_IMPLEMENTED_FRESH_START_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9Y_PAYOFF_FRESH_START_INITIALIZATION_PENDING",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
-  "m8c": {"status": "RUNNING_FORWARD_SHADOW", "prospective_start_reset_allowed": false, "historical_backfill_allowed": false},
+  "m8c": {
+    "status": "RUNNING_FORWARD_SHADOW",
+    "prospective_start_reset_allowed": false,
+    "historical_backfill_allowed": false
+  },
   "m9v": {
     "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 11:04:00",
@@ -16,46 +20,82 @@
     "historical_backfill_allowed": false,
     "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"]
   },
-  "m9w": {
-    "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY_NOT_FORWARD_VALIDATED",
-    "result": "config/mochipoyo_alert_research/m9w_gold_entry_exit_decoupling_assistant_side_result_20260724.json",
-    "reference_entry": "PRIMARY bid - 0.10*M5 ATR reclaim within 10 closed M1 bars",
-    "combined_50pct_runner": "n1054 PF1.6576 WR57.97 avgwin+17.22 avgloss-14.33 DD291.5 +2bpsPF1.3149",
-    "combined_75pct_runner": "n1054 PF1.6441 WR55.88 avgwin+18.86 avgloss-14.53 DD300.2 +2bpsPF1.3195",
-    "promotion": false
-  },
   "m9x": {
-    "status": "IMPLEMENTED_REPOSITORY_REPRODUCTION_PENDING_USER_LOCAL_RUN",
-    "implementation": "scripts/mochipoyo_alert_research/m9x/python/run_gold_payoff_decoupling_reproduction.py",
-    "bat": "scripts/mochipoyo_alert_research/m9x/bat/01_run_gold_payoff_decoupling_reproduction.bat",
-    "open_results_bat": "scripts/mochipoyo_alert_research/m9x/bat/02_open_latest_results.bat",
-    "submission": "%LOCALAPPDATA%\\xauusd_signal_lab\\mochipoyo_alert_research\\outputs\\M9X\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "expected_assertions": {
-      "canonical_n3": 1495,
-      "reference_w1_count": 1054,
-      "entry_only_pf": 1.587529100728406,
-      "combined_50_pf": 1.657561156085209,
-      "combined_75_pf": 1.6440999252824298
+    "status": "PASS_EXACT_LOCAL_REPRODUCTION_HISTORICAL_ONLY",
+    "result": "config/mochipoyo_alert_research/m9x_gold_payoff_decoupling_local_reproduction_result_20260724.json",
+    "one_position_addendum": "config/mochipoyo_alert_research/m9x_one_position_runner_overlap_addendum_20260724.json",
+    "uploaded_package_sha256": "bafa3102b2d4d4a1e7e92f23781b1202ce84edb14a1820618fc02bff9be157da",
+    "canonical_n3": 1495,
+    "w1_count": 1054,
+    "entry_only_pf": 1.5875291007284058,
+    "runner50_one_position": {
+      "count": 1008,
+      "profit_factor": 1.66289170174128,
+      "average_win_bps": 17.404333045815353,
+      "average_loss_bps": -15.078576137908293,
+      "payoff_ratio": 1.1542424753263003,
+      "extra_2bps_pf": 1.3277448963066876
     },
-    "does_not_modify_m9v": true,
-    "historical_only": true,
-    "automatic_promotion": false
+    "runner75_one_position": {
+      "count": 1008,
+      "profit_factor": 1.6483266594682453,
+      "average_win_bps": 18.9514125771714,
+      "average_loss_bps": -15.267862916132648,
+      "payoff_ratio": 1.2412616409560873,
+      "extra_2bps_pf": 1.3302567506733145
+    },
+    "reclaim_neighborhood_25_all_aggregate_pf_above_1": true,
+    "reclaim_neighborhood_25_all_extra_2bps_pf_above_1": true,
+    "reclaim_neighborhood_25_all_calendar_year_pf_above_1": true,
+    "forward_validated": false
   },
-  "m9r": {"status": "FROZEN_NOT_STARTED", "decision": "Do not launch while M9W/M9X superseding payoff architecture is reproduced."},
-  "btc": {"historical_2023_2026_data_available": false, "policy": "Separate research family; do not transplant GOLD M9W/M9X rules."},
+  "m9y": {
+    "status": "IMPLEMENTED_SELF_TEST_PASS_READY_FOR_ONE_TIME_LOCAL_FRESH_START",
+    "contract": "config/mochipoyo_alert_research/m9y_gold_payoff_fresh_prospective_shadow_contract_20260724.json",
+    "self_test": "config/mochipoyo_alert_research/m9y_implementation_self_test_result_20260724.json",
+    "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "upstream": "READ_ONLY_M9V_V2_S2_M15_POST_M9Y_START_ONLY",
+    "reuse_m9v_start": false,
+    "m9v_modified": false,
+    "fresh_start_created": false,
+    "historical_backfill_allowed": false,
+    "operator_folder": "scripts/mochipoyo_alert_research/m9y/bat",
+    "arms": ["Y0_W1_NATIVE_EXIT", "Y1_W1_N6_NATIVE_EXIT", "Y2_W1_N6_RUNNER50", "Y3_W1_N6_RUNNER75"],
+    "self_test_key_results": {
+      "independent_vs_m9v_feed_exact_parity": true,
+      "pre_start_primary_candidate_count": 0,
+      "raw_prefix_tamper_fail_closed": true,
+      "m9v_manifest_tamper_fail_closed": true,
+      "one_position_runner_overlap_enforced": true
+    }
+  },
+  "m9r": {
+    "status": "FROZEN_NOT_STARTED",
+    "decision": "M9Y supersedes M9R for the current payoff-forward validation path; do not start M9R in parallel."
+  },
+  "btc": {
+    "historical_2023_2026_data_available": false,
+    "policy": "Separate research family; do not transplant GOLD M9X/M9Y payoff rules into BTC without BTC-specific evidence."
+  },
   "next": {
-    "stage": "M9X_LOCAL_DETERMINISTIC_REPRODUCTION_REVIEW",
+    "stage": "M9Y_FRESH_START_LOCAL_INITIALIZATION_AND_INITIAL_ONE_SHOT_REVIEW",
     "tasks": [
-      "Keep M8C/M7C/collector/M9V v2 running unchanged.",
+      "Keep M8C/M7C/genuine source collector/M9V v2 running unchanged.",
       "User pulls latest feature/mochipoyo-alert-research.",
-      "Run M9X 01_run_gold_payoff_decoupling_reproduction.bat once.",
-      "If M9X PASS, run 02_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip.",
-      "If blocked, send full screen output and do not alter M9V.",
-      "After exact reproduction, decide whether M9W family merits its own NEW future prospective shadow; never retrofit it into M9V."
+      "Run M9Y 01_initialize_fresh_runtime_once.bat exactly once until INIT PASS.",
+      "After INIT PASS never rerun M9Y 01 and never delete/reset the M9Y runtime manifest/start receipt.",
+      "Run M9Y 02_run_shadow_once.bat once.",
+      "Run M9Y 05_open_latest_results.bat and submit M9Y LATEST/99_UPLOAD_PACKAGE.zip.",
+      "Do not start M9Y 03 persistent loop until initial M9Y ZIP is reviewed."
     ],
     "user_bat_required_now": true
   },
-  "objective": {"final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_POSITIVE_REWARD_RISK_AND_LOWER_DRAWDOWN", "entry_and_exit_vectors_separate": true},
+  "objective": {
+    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_POSITIVE_REWARD_RISK_AND_LOWER_DRAWDOWN",
+    "entry_and_exit_vectors_separate": true,
+    "prefer_reclaim_confirmation_over_bottom_fishing": true,
+    "native_alert_exit_is_profit_management_event_not_mandatory_full_exit": true
+  },
   "safety": {
     "audit_only": true,
     "discord_send": false,
@@ -66,7 +106,7 @@
     "m7c_formula_changed": false,
     "m8c_prospective_start_reset_allowed": false,
     "m9v_runtime_reset_allowed": false,
-    "m9w_added_to_m9v": false,
+    "m9y_runtime_reset_allowed_after_pass": false,
     "automatic_live_promotion": false
   }
 }
