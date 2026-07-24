@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10G_M15_SHORT_RECLAIM_AUDIT",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_PF2_RECLAIM",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(27).zip",
+    "sample": "research-exposed frozen GOLD history 2023-01-03 through 2026-06-19"
+  },
+  "seed": {
+    "candidate_id": "M10F_M15_C0049",
+    "count": 1089,
+    "profit_factor_bps": 1.1566500291510813,
+    "payoff_ratio": 0.7570160008142541,
+    "max_drawdown_bps": 508.42175393271975,
+    "fixed0p20_profit_factor_bps": 1.1413439010359998
+  },
+  "grid": {
+    "cells": 25,
+    "offset_atr": [0.0, 0.05, 0.10, 0.15, 0.20],
+    "wait_minutes": [5, 10, 15, 20, 30],
+    "pf2_all_cells": 0,
+    "pf2_every_calendar_year_cells": 0
+  },
+  "best_overall_pf_cell": {
+    "offset_atr": 0.05,
+    "wait_minutes": 5,
+    "accepted_count": 654,
+    "retention_vs_seed": 0.6005509641873278,
+    "win_rate": 0.6085626911314985,
+    "profit_factor_bps": 1.282682823962094,
+    "payoff_ratio": 0.8250420606769123,
+    "max_drawdown_bps": 408.998635963192,
+    "fixed0p20_profit_factor_bps": 1.261683717881273,
+    "pf_2023": 1.498256006931468,
+    "pf_2024": 0.9950950823400048,
+    "pf_2025": 1.2958091630049606,
+    "pf_2026": 1.455499199418859,
+    "min_calendar_year_pf": 0.9950950823400048
+  },
+  "best_min_calendar_year_pf_cell": {
+    "offset_atr": 0.10,
+    "wait_minutes": 30,
+    "accepted_count": 862,
+    "retention_vs_seed": 0.7915518824609734,
+    "profit_factor_bps": 1.1286477574246576,
+    "payoff_ratio": 0.7509764575514163,
+    "max_drawdown_bps": 525.5301575734794,
+    "fixed0p20_profit_factor_bps": 1.1119233502078198,
+    "pf_2023": 1.1516982516859335,
+    "pf_2024": 1.055033915056323,
+    "pf_2025": 1.1013742652348226,
+    "pf_2026": 1.2356923742116543,
+    "min_calendar_year_pf": 1.055033915056323
+  },
+  "interpretation": {
+    "reclaim_is_not_sufficient_to_reach_pf2": true,
+    "entry_timing_improves_some_cells": true,
+    "best_overall_pf_improvement_vs_seed": "1.1567 -> 1.2827 with 60.1% retention",
+    "evidence_for_core_short_signal_or_exit_limitation": true,
+    "source_proxy_fidelity_should_be_reaudited_before_more_short_optimization": true
+  },
+  "guardrails": {
+    "historical_research_exposed": true,
+    "fresh_forward_validated": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "historical_backfill": false,
+    "automatic_live_promotion": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "next": "Pause further SHORT payoff optimization and re-audit fidelity of the M15 proxy to genuine Mochipoyo PRIMARY_SHORT events, including candidate missing conditions such as EMA slope/density/price position. Do not infer the proprietary formula and do not modify running M10B/M10E."
+}
