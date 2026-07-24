@@ -1,0 +1,60 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10O_C056_G013_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(35).zip",
+    "sha256": "c2b6b84a5fa22ac4892d155ce321a90f8bc05d7b750138e379ce5e063ed71bb3",
+    "size_bytes": 10747
+  },
+  "candidate": {
+    "seed_id": "M10L_H240_C056",
+    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+    "gate_id": "M10N_G013",
+    "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+    "horizon_minutes": 240
+  },
+  "reproduction": {
+    "candidate_row_count_before_one_position": 157,
+    "trade_count_after_one_position": 84,
+    "split_counts": {"train_2023_2024": 29, "validation_2025": 33, "test_2026": 22},
+    "train_pf": 3.002653803622849,
+    "validation_2025_pf": 2.35052772774399,
+    "test_2026_pf": 2.5802661605659214,
+    "all_pf": 2.540715351740206,
+    "all_win_rate": 0.5595238095238095,
+    "all_payoff_ratio": 2.000137617327396,
+    "all_net_bps": 1462.2917115928094,
+    "all_max_drawdown_bps": 210.69534329229782,
+    "fixed0p20_all_pf": 2.538476073441831,
+    "maximum_metric_abs_difference": 4.440892098500626e-16,
+    "required_tolerance": 1e-10,
+    "all_reference_checks_pass": true
+  },
+  "data_quality": {
+    "frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "nearest_m1_fallback": false,
+    "exact_m1_entry_and_exit_only": true,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "reads_m10n_result_csv_for_generation": false
+  },
+  "decision": {
+    "historical_pf2_pair_reproduced": true,
+    "deterministic_reproduction_pass": true,
+    "forward_approved": false,
+    "automatic_promotion": false,
+    "next": "Design a separate fresh prospective C056+G013 audit-only SHORT shadow with a new immutable MT5-server start, no historical backfill, and no modification/reset of existing monitors."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
