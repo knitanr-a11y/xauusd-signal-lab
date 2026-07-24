@@ -1,0 +1,139 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-24T17:45:00Z",
+  "purpose": "Fresh audit-only prospective validation of the M10A deterministic GOLD M5/H1/H4 payoff references without modifying, resetting, backfilling, or reusing the starts of M9V or M9Y.",
+  "data": {
+    "ticker": "XAUUSD",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false
+  },
+  "upstream": {
+    "source": "M9V v2 branch-candidate ledger READ-ONLY",
+    "required_stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW",
+    "required_runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "eligible_branches": ["S1_M5", "S3_H1", "S4_H4"],
+    "m9v_modified": false,
+    "m9v_start_reused": false,
+    "m9y_output_dependency": false,
+    "eligibility": "proxy_primary_time must be strictly greater than the independently frozen M10B prospective start. A first-turn after M10B start that belongs to a pre-M10B PRIMARY is forbidden."
+  },
+  "entry_references": {
+    "M5": {
+      "source_branch": "S1_M5",
+      "atr": "Wilder ATR14 from latest fully closed M5 at first-turn decision",
+      "level": "original PRIMARY bid/open - 0.15 * M5 ATR14",
+      "immediate": "If exact first-turn M1 open bid >= level, enter at that exact M1 open ask.",
+      "delayed": "Otherwise wait at most 6 fully closed M1 bars. After first closed M1 close >= level, enter exact next M1 open ask, strictly before native M5 EXIT.",
+      "timeout": "Skip if no causal reclaim before timeout/native EXIT.",
+      "nearest_m1_fallback": false
+    },
+    "H1": {
+      "source_branch": "S3_H1",
+      "atr": "Wilder ATR14 from latest fully closed H1 at first-turn decision",
+      "level": "original PRIMARY bid/open - 0.05 * H1 ATR14",
+      "confirmation": "Use latest fully closed M5 at first-turn. If its close >= level, enter at exact first-turn M1 open ask. Otherwise wait for the first fully closed M5 close >= level within 30 minutes, then enter at the exact M1 open at that M5 close time, strictly before native H1 EXIT.",
+      "timeout": "Skip if no causal M5 reclaim confirmation within 30 minutes or native EXIT occurs first.",
+      "nearest_m1_fallback": false
+    },
+    "H4": {
+      "source_branch": "S4_H4",
+      "level": "original PRIMARY bid/open; no ATR offset",
+      "confirmation": "Use latest fully closed M15 at first-turn. If its close >= PRIMARY level, enter at exact first-turn M1 open ask. Otherwise wait for the first fully closed M15 close >= PRIMARY level within 60 minutes, then enter at the exact M1 open at that M15 close time, strictly before native H4 EXIT.",
+      "timeout": "Skip if no causal M15 reclaim confirmation within 60 minutes or native EXIT occurs first.",
+      "runner": "NONE; native H4 EXIT only",
+      "nearest_m1_fallback": false
+    }
+  },
+  "profit_references": {
+    "M5_RUNNER75": {
+      "native_exit_event": "Native M5 proxy EXIT is a profit-management event.",
+      "runner_eligibility": "At native EXIT decision, latest fully closed M15 MACD(6,13) line is strictly greater than previous fully closed M15 MACD line.",
+      "runner_share": 0.75,
+      "runner_exit": "First causal M5 RCI9 turn-down decision at or after native EXIT. If native EXIT decision itself is already such a turn-down, runner exits immediately.",
+      "one_position": true
+    },
+    "H1_RUNNER50": {
+      "native_exit_event": "Native H1 proxy EXIT is a profit-management event.",
+      "runner_eligibility": "At native EXIT decision, BOTH latest fully closed H4 MACD(6,13) and latest fully closed D1 MACD(6,13) lines are strictly greater than their respective previous fully closed values.",
+      "runner_share": 0.5,
+      "runner_exit": "First causal H1 RCI9 turn-down decision at or after native EXIT. If native EXIT decision itself is already such a turn-down, runner exits immediately.",
+      "one_position": true
+    }
+  },
+  "arms": {
+    "B0_M5_ENTRY_NATIVE": {"branch": "S1_M5", "entry": "M5 reference", "runner_share": 0.0, "one_position": true},
+    "B1_M5_RUNNER75": {"branch": "S1_M5", "entry": "M5 reference", "runner_share": 0.75, "one_position": true},
+    "B2_H1_ENTRY_NATIVE": {"branch": "S3_H1", "entry": "H1 reference", "runner_share": 0.0, "one_position": true},
+    "B3_H1_RUNNER50": {"branch": "S3_H1", "entry": "H1 reference", "runner_share": 0.5, "one_position": true},
+    "B4_H4_ENTRY_NATIVE": {"branch": "S4_H4", "entry": "H4 reference", "runner_share": 0.0, "one_position": true}
+  },
+  "one_position_accounting": {
+    "per_arm": true,
+    "while_active": "Do not open another trade in the same arm. Record later eligible entries as overlap/confirmation metadata.",
+    "runner_arm_active_until": "runner exit when runner eligible; otherwise native exit",
+    "cross_arm_positions": "virtual comparison only",
+    "pyramiding": false
+  },
+  "fresh_start_bootstrap": {
+    "fresh_gold_prospective_start_required": true,
+    "reuse_m7c_start": false,
+    "reuse_m8c_start": false,
+    "reuse_m9v_start": false,
+    "reuse_m9y_start": false,
+    "backfill": false,
+    "pre_start_primary_eligibility": "FORBIDDEN",
+    "start_freeze_rule": "Initialize only while all required live CSVs are current and stable. Freeze immutable row-prefix fingerprints and a new start before accepting any M10B candidate. Start must be strictly after existing M9V and M9Y starts."
+  },
+  "reporting": {
+    "arm_metrics": ["accepted_count", "resolved_count", "open_count", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "payoff_ratio", "max_drawdown_bps", "max_losing_streak", "tail_le_minus_100_fraction"],
+    "entry_metadata": ["upstream_candidate_id", "proxy_primary_time", "first_turn_time", "actual_entry_time", "entry_delay_minutes", "reclaim_level"],
+    "profit_metadata": ["native_exit_time", "runner_eligible", "runner_exit_time"],
+    "overlap_metadata": true,
+    "cost_note": "Live spread is embedded at actual entry via M1 ask. Commission and swap remain NOT MODELED."
+  },
+  "review_gates": {
+    "M5_operational_accepted": 20,
+    "M5_interim_accepted": 60,
+    "M5_formal_accepted": 120,
+    "H1_operational_accepted": 5,
+    "H1_interim_accepted": 10,
+    "H1_formal_accepted": 20,
+    "H4_descriptive_checkpoint_accepted": 5,
+    "H4_no_formal_claim_before_accepted": 20,
+    "automatic_live_promotion": false,
+    "note": "Checkpoint means manual review only. H4 remains premium/reference because frequency is very low."
+  },
+  "relationship_to_existing_forward": {
+    "collector_continues_unchanged": true,
+    "m7c_continues_unchanged": true,
+    "m8c_continues_unchanged": true,
+    "m9v_continues_unchanged": true,
+    "m9y_continues_unchanged": true,
+    "retrofit_historical_m10a_into_existing_starts": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "historical_backfill": false,
+    "m7c_reset": false,
+    "m8c_reset": false,
+    "m9v_reset": false,
+    "m9y_reset": false,
+    "automatic_live_promotion": false
+  }
+}
