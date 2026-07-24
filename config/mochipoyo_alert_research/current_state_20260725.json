@@ -2,27 +2,26 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T19:30:00Z",
-  "status": "M10D_USER_LOCAL_PASS_M10E_IMPLEMENTED_FRESH_START_PENDING_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T19:25:00Z",
+  "status": "M10E_USER_LOCAL_BOOTSTRAP_PASS_PERSISTENT_SHADOW_AUTHORIZED_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
     "M8C": "RUNNING_KEEP_UNCHANGED",
     "M9V": "RUNNING_KEEP_UNCHANGED",
     "M9Y": "RUNNING_KEEP_UNCHANGED",
-    "M10B": "BOOTSTRAP_PASS_PERSISTENT_LOOP_START_NOT_CONFIRMED_BY_USER",
-    "M10E": "IMPLEMENTED_FRESH_START_NOT_YET_CREATED"
+    "M10B": "BOOTSTRAP_PASS_PERSISTENT_LOOP_ALLOWED_START_CONFIRMATION_NOT_RECORDED",
+    "M10E": "BOOTSTRAP_PASS_PERSISTENT_LOOP_AUTHORIZED_NOT_YET_CONFIRMED_STARTED"
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
     "M9V_mt5_server": "2026.07.24 11:04:00",
     "M9Y_mt5_server": "2026.07.24 12:45:00",
     "M10B_mt5_server": "2026.07.24 20:54:00",
-    "M10E_mt5_server": null
+    "M10E_mt5_server": "2026.07.24 22:06:00"
   },
   "m10a": {
     "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
-    "result": "config/mochipoyo_alert_research/m10a_gold_multitimeframe_payoff_user_local_reproduction_result_20260725.json",
     "M5_RUNNER75": {"count": 837, "pf": 1.6651962763806494, "payoff": 0.9795272214003821},
     "H1_RUNNER50": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345},
     "forward_validated": false
@@ -32,57 +31,41 @@
     "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10b_user_local_bootstrap_result_20260725.json",
     "prospective_start_server_time": "2026.07.24 20:54:00",
-    "bootstrap_arm_counts": 0,
-    "resolved_only": true,
-    "prefix_integrity_verified": true,
     "historical_backfill": false,
     "reset_allowed": false,
-    "persistent_shadow_allowed": true,
-    "persistent_shadow_started_confirmed": false
-  },
-  "m10c": {
-    "stage": "M10C_ENTRY_LOSS_COMPOUND_FEATURE_AUDIT_ASSISTANT_SIDE",
-    "status": "PASS_EXPLORATORY_ONLY_NO_FORWARD_CHANGE",
-    "result": "config/mochipoyo_alert_research/m10c_entry_loss_compound_feature_audit_assistant_side_20260725.json",
-    "M5": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
-    "M15": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
-    "H1": "PROMISING_EXPLORATORY_COMPOUND_LOSS_STRUCTURE_FOUND_NOT_FORWARD_APPROVED",
-    "selected_reproduction_family": "family_B_payoff_stronger_but_narrower"
+    "persistent_shadow_allowed": true
   },
   "m10d": {
     "stage": "M10D_H1_COMPOUND_LOSS_FILTER_DETERMINISTIC_REPRODUCTION",
     "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
     "result": "config/mochipoyo_alert_research/m10d_h1_compound_loss_filter_user_local_reproduction_result_20260725.json",
-    "uploaded_package_sha256": "f5de107c13a4649af6c354c04d03661b75916e06f65c896d349dbfc5e872141c",
     "baseline": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345, "max_drawdown_bps": 271.583159570446},
     "filtered": {"count": 130, "win_rate": 0.7384615384615385, "pf": 5.40115388326192, "payoff": 1.9129086669885969, "max_drawdown_bps": 101.7430435392024},
     "fixed_spread_0p20": {"pf": 5.3636874914829455, "payoff": 1.8996393199002097},
-    "neighborhood_every_year_pass_cells": 5,
     "forward_validated": false
   },
   "m10e": {
     "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
-    "status": "IMPLEMENTED_DESIGN_FROZEN_FRESH_START_NOT_YET_CREATED",
-    "contract": "config/mochipoyo_alert_research/m10e_h1_compound_loss_filter_fresh_prospective_shadow_contract_20260725.json",
-    "prestart_review": "config/mochipoyo_alert_research/m10e_implementation_prestart_review_20260725.json",
-    "runtime": "scripts/mochipoyo_alert_research/m10e/python/m10e_runtime.py",
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10e_user_local_bootstrap_result_20260725.json",
+    "uploaded_package_sha256": "301e5f7361446300164e50183987c58c03aa4a58a3d06a5b5fd7692d4489514d",
+    "prospective_start_server_time": "2026.07.24 22:06:00",
+    "start_is_immutable": true,
     "arms": ["E0_H1_BASELINE_RUNNER50", "E1_H1_FILTERED_RUNNER50"],
     "fixed_filter": {"m5_macd_bps_slope_le": -0.1308, "h1_ema30_minus_ema40_bps_ge": 17.3333},
-    "upstream": "READ_ONLY_M9V_V2_S3_H1_POST_M10E_START_ONLY_RESOLVED_ONLY",
-    "m9y_output_dependency": false,
-    "m10b_output_dependency": false,
-    "prospective_start_server_time": null,
-    "start_freeze_pending_user_bat01": true,
+    "bootstrap": {"upstream_resolved_post_start": 0, "h1_entry_candidates": 0, "compound_excluded": 0, "E0_accepted": 0, "E1_accepted": 0},
+    "resolved_only": true,
+    "prefix_integrity_verified": true,
     "historical_backfill": false,
     "reset_allowed": false,
-    "persistent_loop_started": false
+    "persistent_shadow_allowed": true,
+    "persistent_loop_started_confirmed": false
   },
   "forced_reboot_recovery": {
-    "status": "READY_WITH_M10B_M10E_NOT_STARTED_YET",
+    "status": "READY_WITH_M10B_M10E",
     "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B"],
-    "note": "M10E is not yet initialized or persistent; recovery will be extended for M10E before M10E BAT03 is authorized.",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E"],
     "never_reinitialize_after_reboot": true
   },
   "safety": {
@@ -94,5 +77,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Fetch/Pull. Keep existing monitors and starts unchanged. Run M10E BAT01 exactly once until INIT PASS, never rerun it, then run M10E BAT02 once and submit M10E 99_UPLOAD_PACKAGE.zip. Do not run M10E BAT03 before bootstrap review."
+  "next": "Fetch/Pull the recovery extension, keep all frozen starts unchanged, ensure M10B persistent BAT03 is running, then start M10E BAT03. Review M10E at H1 accepted-count checkpoints 5/10/20; no automatic promotion."
 }
