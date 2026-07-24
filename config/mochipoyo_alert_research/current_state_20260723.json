@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T09:50:00Z",
-  "status": "M8C_RUNNING_M9T_PASS_H1_ROBUST_MTF_PORTFOLIO_PROMISING_M9U_DETERMINISTIC_PORTFOLIO_NEXT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION_AND_PROSPECTIVE_DESIGN",
+  "recorded_at_utc": "2026-07-24T10:25:00Z",
+  "status": "M8C_RUNNING_M9U_SELF_VERIFIED_M9V_FRESH_MULTI_TIMEFRAME_DESIGN_FROZEN_NOT_STARTED_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW_IMPLEMENTATION",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -14,41 +14,27 @@
     "historical_backfill_allowed": false,
     "source_anchor_separate_and_unsuppressed": true
   },
-  "m9p": {
-    "status": "PASS_LOCAL_REPRODUCTION_MATCHED_REFERENCE",
-    "result": "config/mochipoyo_alert_research/m9p_local_reproduction_result_20260724.json",
-    "upload_package_sha256": "0699d558fef49fa93e8f26c5514bc6129f5bd7fc8170078ab1523f1a8eb5dd4a",
-    "N3": "1495 trades, WR 62.27%, PF 1.3659, max DD 510.5 bps",
-    "stress": "72/72 nearby parameter combinations retain PF>1 in every available year and aggregate PF>1 after extra 2bps/trade stress",
+  "m9u": {
+    "status": "PASS_SELF_VERIFIED_HISTORICAL_REPRODUCTION_ONLY",
+    "implementation": "scripts/mochipoyo_alert_research/m9u/python/run_multitimeframe_portfolio_reproduction_audit.py",
+    "result": "config/mochipoyo_alert_research/m9u_multitimeframe_portfolio_deterministic_reproduction_result_20260724.json",
+    "self_verified": "S1=1256 S2=1495 S3=191 S4=70 PORTFOLIO=2241 PF=1.444651452178 matched M9T reference",
     "promotion": false
   },
-  "m9q": {
-    "status": "PASS_EXPLORATORY_ONLY_NOT_INDEPENDENT_VALIDATION",
-    "result": "config/mochipoyo_alert_research/m9q_gold_loss_reduction_profit_extension_exploratory_result_20260724.json",
-    "Q1": "Keep all N3 signals but virtual-size N6 at 0.50x; exploratory PF 1.4414 and DD 428.5 bps",
-    "Q2": "If H1 MACD line is rising at original M7C exit, close half and run half until first M15 RCI9 turn-down; exploratory PF 1.4099",
-    "Q3": "Q1 + Q2; exploratory PF 1.4703, DD 418.2 bps, average positive 17.64 bps vs average negative -17.26 bps",
-    "promotion": false
+  "m9v": {
+    "status": "DESIGN_FROZEN_NOT_STARTED",
+    "contract": "config/mochipoyo_alert_research/m9v_gold_multitimeframe_fresh_prospective_shadow_contract_20260724.json",
+    "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
+    "purpose": "Isolate the forward value of adding H1 and then M5/H4 branches under one-position dedup before mixing in M9R risk/reward overlays.",
+    "fresh_start_required": true,
+    "reuse_m7c_or_m8c_start_forbidden": true,
+    "historical_backfill_forbidden": true,
+    "started": false
   },
   "m9r": {
     "status": "FOUR_ARM_FRESH_PROSPECTIVE_DESIGN_FROZEN_NOT_STARTED",
     "arms": ["R0_N3_BASE", "R1_N6_HALF_RISK", "R2_SELECTIVE_HALF_RUNNER", "R3_COMBINED"],
-    "fresh_start_required": true,
-    "reuse_m8c_or_m7c_start_forbidden": true,
-    "historical_backfill_forbidden": true,
-    "decision": "KEEP_AS_M15_BRANCH_RISK_REWARD_DESIGN; INTEGRATE ONLY AFTER MULTI_TIMEFRAME PORTFOLIO ACCOUNTING IS DETERMINISTIC"
-  },
-  "m9t": {
-    "status": "PASS_EXPLORATORY_ROBUSTNESS_ONLY_NOT_INDEPENDENT_VALIDATION",
-    "result": "config/mochipoyo_alert_research/m9t_multitimeframe_branch_robustness_portfolio_dedup_result_20260724.json",
-    "M5_S1": "729 nearby combinations all aggregate PF>1, but only 408/729 all-year PF>1 and only 4/729 remain aggregate PF>1 after extra 2bps; auxiliary/cost-sensitive",
-    "M15_S2": "Canonical N3 remains primary reproducible branch; 72/72 nearby combinations all-year PF>1 and extra-2bps aggregate PF>1",
-    "H1_S3": "81/81 nearby combinations all-year PF>1 and extra-2bps aggregate PF>1; highest-priority new branch for deterministic reproduction/prospective testing",
-    "H4_S4": "9/9 aggregate survives extra 2bps but only 4/9 all-year PF>1; premium small-sample reference",
-    "one_position_portfolio": "S1+S2+S3+S4 causal one-position dedup: 2241 trades, about 53.36/month, WR 63.23%, PF 1.4447, DD 535.4 bps, streak 8, all years PF>1, extra-2bps PF 1.1617",
-    "portfolio_weakness": "2025Q3 remains weak at PF about 0.804; portfolio is not finished",
-    "confidence": "Generic agreement-count boost rejected. Causal sequence/order matters; e.g. H1 after prior M5 was strong while H1 after prior M15 was weak historically.",
-    "promotion": false
+    "decision": "KEEP_SEPARATE_UNTIL_BASE_MULTI_TIMEFRAME_FORWARD_BEHAVIOR_IS_ESTABLISHED"
   },
   "btc": {
     "historical_2023_2026_data_available": false,
@@ -56,16 +42,15 @@
     "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
   },
   "next": {
-    "stage": "M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION_AND_PROSPECTIVE_DESIGN",
+    "stage": "M9V_GOLD_MULTI_TIMEFRAME_FRESH_PROSPECTIVE_SHADOW_IMPLEMENTATION",
     "tasks": [
-      "Build one deterministic repository implementation for S1 M5, canonical S2 M15 N3, S3 H1 and S4 H4 using only fully closed causal features and exact first-turn execution.",
-      "Deterministically reproduce the M9T causal one-position dedup portfolio and its per-branch contribution, yearly/quarterly/monthly metrics and cost stress.",
-      "Treat S3 H1 as the highest-priority new branch because 81/81 nearby definitions survived all-year and extra-2bps stress.",
-      "Do not promote S1 M5 merely for frequency; keep it auxiliary until cost margin is adequate.",
-      "Keep S4 H4 premium/reference only until fresh observations grow.",
-      "Encode multi-timeframe confirmations as ordered causal sequence metadata, not generic positive confidence count.",
-      "After deterministic self-verification, design a fresh GOLD prospective portfolio shadow without reusing M7C/M8C starts or backfilling.",
-      "Keep M9R M15 risk/reward arms separate and available for a later portfolio-compatible comparison.",
+      "Implement M9V live audit-only branch engine using goldsharp M1/M5/M15/H1/H4/D1 closed CSVs.",
+      "Use post-start PRIMARY eligibility only; replay pre-start bars for state rehydration but do not allow a pre-start PRIMARY to create a prospective candidate.",
+      "Implement V0 M15-only, V1 M15+H1 and V2 all-timeframe one-position arms with identical branch definitions frozen in M9V contract.",
+      "Record later eligible timeframe signals during an active arm trade as ordered confirmation metadata only; no pyramiding and no generic confidence score.",
+      "Create immutable fresh GOLD runtime manifest/start receipt only after CSV readiness checks; never reuse M7C/M8C starts and never backfill.",
+      "Self-verify implementation before requesting any numbered BAT from user.",
+      "Keep M9R runner/half-risk overlays out of M9V so branch-addition effects remain isolated.",
       "Continue BTC source/M7C/M8C forward evidence unchanged."
     ],
     "user_bat_required_now": false
