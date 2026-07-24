@@ -2,43 +2,63 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T18:25:00Z",
-  "status": "M10A_USER_LOCAL_REPRODUCTION_PASS_M10B_IMPLEMENTED_FRESH_START_PENDING_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T19:30:00Z",
+  "status": "M10B_BOOTSTRAP_PASS_M10D_IMPLEMENTED_USER_LOCAL_REPRO_PENDING_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
     "M8C": "RUNNING_KEEP_UNCHANGED",
     "M9V": "RUNNING_KEEP_UNCHANGED",
-    "M9Y": "RUNNING_KEEP_UNCHANGED"
+    "M9Y": "RUNNING_KEEP_UNCHANGED",
+    "M10B": "BOOTSTRAP_PASS_PERSISTENT_LOOP_START_NOT_CONFIRMED_BY_USER"
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
     "M9V_mt5_server": "2026.07.24 11:04:00",
-    "M9Y_mt5_server": "2026.07.24 12:45:00"
+    "M9Y_mt5_server": "2026.07.24 12:45:00",
+    "M10B_mt5_server": "2026.07.24 20:54:00"
   },
   "m10a": {
     "status": "PASS_USER_LOCAL_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
     "result": "config/mochipoyo_alert_research/m10a_gold_multitimeframe_payoff_user_local_reproduction_result_20260725.json",
-    "M5_ENTRY": {"count": 842, "pf": 1.537338444576352},
-    "M5_RUNNER75": {"count": 837, "pf": 1.6651962763806494},
-    "H1_ENTRY": {"count": 171, "pf": 2.814130403928734},
-    "H1_RUNNER50": {"count": 159, "pf": 2.8303858342555084},
-    "H4_ENTRY": {"count": 57, "pf": 4.668798744063922},
+    "M5_RUNNER75": {"count": 837, "pf": 1.6651962763806494, "payoff": 0.9795272214003821},
+    "H1_RUNNER50": {"count": 159, "pf": 2.8303858342555084, "payoff": 1.3365710883984345},
     "forward_validated": false
   },
   "m10b": {
     "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
-    "status": "IMPLEMENTED_DESIGN_FROZEN_FRESH_START_NOT_YET_CREATED",
-    "contract": "config/mochipoyo_alert_research/m10b_gold_multitimeframe_payoff_fresh_prospective_shadow_contract_20260725.json",
-    "resolved_only_addendum": "config/mochipoyo_alert_research/m10b_resolved_only_materialization_addendum_20260725.json",
-    "prestart_review": "config/mochipoyo_alert_research/m10b_implementation_prestart_review_20260725.json",
-    "upstream": "READ_ONLY_M9V_V2_S1_S3_S4_POST_M10B_START_ONLY",
-    "m9y_output_dependency": false,
-    "start_server_time": null,
-    "start_freeze_pending_user_bat01": true,
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10b_user_local_bootstrap_result_20260725.json",
+    "prospective_start_server_time": "2026.07.24 20:54:00",
+    "bootstrap_arm_counts": 0,
+    "resolved_only": true,
+    "prefix_integrity_verified": true,
     "historical_backfill": false,
     "reset_allowed": false,
-    "persistent_loop_started": false
+    "persistent_shadow_allowed": true,
+    "persistent_shadow_started_confirmed": false
+  },
+  "m10c": {
+    "stage": "M10C_ENTRY_LOSS_COMPOUND_FEATURE_AUDIT_ASSISTANT_SIDE",
+    "status": "PASS_EXPLORATORY_ONLY_NO_FORWARD_CHANGE",
+    "result": "config/mochipoyo_alert_research/m10c_entry_loss_compound_feature_audit_assistant_side_20260725.json",
+    "M5": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
+    "M15": "NO_ROBUST_ENTRY_LOSS_COMPOUND_FILTER_FOUND",
+    "H1": "PROMISING_EXPLORATORY_COMPOUND_LOSS_STRUCTURE_FOUND_NOT_FORWARD_APPROVED",
+    "selected_reproduction_family": "family_B_payoff_stronger_but_narrower"
+  },
+  "m10d": {
+    "stage": "M10D_H1_COMPOUND_LOSS_FILTER_DETERMINISTIC_REPRODUCTION",
+    "status": "IMPLEMENTED_USER_LOCAL_REPRODUCTION_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10d_h1_compound_loss_filter_deterministic_reproduction_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10d/python/run_h1_compound_loss_filter_reproduction.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10d/bat/01_run_h1_compound_loss_filter_reproduction.bat",
+    "fixed_filter": {
+      "m5_macd_bps_slope_le": -0.1308,
+      "h1_ema30_minus_ema40_bps_ge": 17.3333
+    },
+    "expected_filtered": {"count": 130, "pf": 5.4011538832619195, "payoff": 1.9129086669885966},
+    "forward_approved": false
   },
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10B",
@@ -56,5 +76,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Pull branch; keep existing monitors running; run M10B BAT01 once, then BAT02 once; submit M10B LATEST 99_UPLOAD_PACKAGE.zip before starting BAT03."
+  "next": "Fetch/Pull. Keep all existing monitors and starts unchanged. Run M10D BAT01 once for deterministic historical reproduction, then BAT02 and submit M10D 99_UPLOAD_PACKAGE.zip. Only after package review may a separate fresh H1 filter comparison be frozen."
 }
