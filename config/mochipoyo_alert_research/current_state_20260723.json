@@ -2,9 +2,9 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T11:00:00Z",
-  "status": "M8C_RUNNING_M9V_IMPLEMENTED_SELF_TEST_PASS_READY_FRESH_START_LOCAL_INIT_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_FRESH_START_LOCAL_INITIALIZATION_PENDING",
+  "recorded_at_utc": "2026-07-24T11:25:00Z",
+  "status": "M8C_RUNNING_M9V_V1_PREFIX_INCIDENT_V2_RECOVERY_READY_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V1_INVALIDATION_AND_V2_FRESH_START_RECOVERY",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
@@ -22,35 +22,35 @@
     "promotion": false
   },
   "m9v": {
-    "status": "IMPLEMENTED_SELF_TEST_PASS_READY_FOR_ONE_TIME_LOCAL_FRESH_START",
     "contract": "config/mochipoyo_alert_research/m9v_gold_multitimeframe_fresh_prospective_shadow_contract_20260724.json",
-    "self_test": "config/mochipoyo_alert_research/m9v_implementation_self_test_result_20260724.json",
-    "core": "scripts/mochipoyo_alert_research/m9v/python/m9v_core.py",
-    "initializer": "scripts/mochipoyo_alert_research/m9v/python/initialize_m9v_runtime.py",
-    "one_shot": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_once.py",
-    "forever_loop": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_forever_safe.py",
+    "incident": "config/mochipoyo_alert_research/m9v_v1_prefix_freeze_incident_and_v2_recovery_20260724.json",
+    "v1_status": "INITIALIZER_PASSED_BUT_FIRST_ONE_SHOT_BLOCKED_ON_M5_PREFIX_CHANGE; START_MUST_BE_ARCHIVED_AS_INVALID_BEFORE_V2",
+    "v1_error": "historical prefix changed after M9V start: M5",
+    "v1_classification": "IMPLEMENTATION_CONTRACT_BUG_NOT_USER_ERROR_NOT_STRATEGY_FAILURE",
+    "v2_runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "v2_status": "IMPLEMENTED_AND_SELF_TESTED_RECOVERY_READY",
+    "v2_core": "scripts/mochipoyo_alert_research/m9v/python/m9v_core_v2.py",
+    "v2_initializer": "scripts/mochipoyo_alert_research/m9v/python/initialize_m9v_runtime_v2.py",
+    "v2_one_shot": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_once_v2.py",
+    "v2_forever": "scripts/mochipoyo_alert_research/m9v/python/run_m9v_shadow_forever_safe_v2.py",
     "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
     "purpose": "Isolate forward value of H1 and then M5/H4 breadth before M9R risk/reward overlays.",
-    "fresh_start_required": true,
-    "reuse_m7c_or_m8c_start_forbidden": true,
     "historical_backfill_forbidden": true,
-    "started": false,
-    "runtime_manifest_created_in_user_environment": false,
+    "reuse_m7c_or_m8c_start_forbidden": true,
     "operator_folder": "scripts/mochipoyo_alert_research/m9v/bat",
-    "operator_order": [
+    "operator_order_now": [
+      "00_recover_invalid_v1_prefix_start_once.bat",
       "01_initialize_fresh_runtime_once.bat",
       "02_run_shadow_once.bat",
-      "03_run_shadow_forever.bat",
-      "04_stop_shadow_forever.bat",
-      "05_open_latest_results.bat"
+      "05_open_latest_results.bat",
+      "03_run_shadow_forever.bat only after initial v2 package review"
     ],
-    "self_test_key_results": {
-      "inherited_active_state_tested": true,
-      "pre_start_primary_candidate_count": 0,
-      "arm_overlap_count": 0,
-      "prefix_tamper_fail_closed": true,
-      "runtime_reinitialization_fail_closed": true,
-      "persistent_loop_one_cycle_pass": true
+    "v2_self_tests": {
+      "normal_append_after_start_pass": true,
+      "m5_append_with_server_open_before_m1_start_pass": true,
+      "frozen_row_tamper_fail_closed": true,
+      "recovery_archives_old_runtime_before_removal": true,
+      "recovery_blocks_if_old_start_has_successful_prospective_output": true
     }
   },
   "m9r": {
@@ -64,13 +64,14 @@
     "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
   },
   "next": {
-    "stage": "M9V_FRESH_START_LOCAL_INITIALIZATION_AND_INITIAL_ONE_SHOT_REVIEW",
+    "stage": "M9V_V1_INCIDENT_RECOVERY_THEN_V2_INITIAL_ONE_SHOT_REVIEW",
     "tasks": [
       "User pulls latest feature/mochipoyo-alert-research while M8C/M7C/collector keep running.",
-      "Run M9V 01_initialize_fresh_runtime_once.bat one time. If INIT PASS, never rerun, delete or reset the M9V runtime manifest/start receipt.",
-      "Run 02_run_shadow_once.bat one time after successful initialization.",
-      "Open 05_open_latest_results.bat and submit M9V LATEST/99_UPLOAD_PACKAGE.zip plus any screen error if blocked.",
-      "Do not start 03 persistent loop until the initial local package has been reviewed.",
+      "Run M9V 00_recover_invalid_v1_prefix_start_once.bat once. It must archive the invalid v1 runtime and refuse if a successful prospective summary exists for that old start.",
+      "After RECOVERY PASS run 01_initialize_fresh_runtime_once.bat exactly once to create runtime v2. Never rerun after INIT PASS.",
+      "Run 02_run_shadow_once.bat once after v2 INIT PASS.",
+      "Open 05_open_latest_results.bat and submit M9V LATEST/99_UPLOAD_PACKAGE.zip for review.",
+      "Do not start 03 persistent loop until the initial v2 package is reviewed.",
       "Keep M9R out of M9V and keep BTC source/M7C/M8C unchanged."
     ],
     "user_bat_required_now": true
@@ -93,6 +94,7 @@
     "m7c_threshold_changed": false,
     "m7c_runtime_manifest_reset_allowed": false,
     "m8c_prospective_start_reset_allowed": false,
+    "silent_m9v_v1_runtime_delete_allowed": false,
     "new_gold_prospective_shadow_started": false
   }
 }
