@@ -1,39 +1,49 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_LOCAL_AUDIT_NEXT",
-  "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged; audit genuine XAUUSD PRIMARY_SHORT source events versus matched, missed and finalized-extra M7C proxy SHORT signals using causal M15 features only.",
+  "status": "M10I_INDEPENDENT_M15_SHORT_LOCAL_AUDIT_NEXT",
+  "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Continue collecting genuine XAUUSD PRIMARY_SHORT for a later M10H re-audit, while running the separate Mochipoyo-independent M15 SHORT historical discovery locally.",
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10h/bat/01_run_primary_short_source_fidelity_audit.bat.",
-    "Required success marker: [M10H PASS].",
-    "Run scripts/mochipoyo_alert_research/m10h/bat/02_open_latest_results.bat.",
-    "Submit only M10H LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not change the frozen M7C kernel or create a SHORT forward arm from M10H alone."
+    "Run scripts/mochipoyo_alert_research/m10i/bat/01_run_independent_m15_short_archetype_discovery.bat.",
+    "Required success marker: [M10I PASS].",
+    "Run scripts/mochipoyo_alert_research/m10i/bat/02_open_latest_results.bat.",
+    "Submit only M10I LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not refit M7C from the current four XAUUSD genuine PRIMARY_SHORT events.",
+    "Do not create/start a SHORT forward arm from M10I historical results alone."
   ],
-  "why_now": {
-    "M10F": "No SHORT compound-loss rule reached PF2 robustly across discovery/2025/2026.",
-    "M10G": "M15 SHORT reclaim improved best overall PF only from 1.1567 to 1.2827; no PF2 cell and 2024 remained about PF1.",
-    "fidelity_concern": "The frozen M7C proxy is an approximation, not a proven proprietary-formula clone. Earlier prospective recall was materially below 100%, and M7A explicitly left EMA slope/density/price-position and other missing conditions unresolved."
+  "m10h_result": {
+    "status": "PASS_INSUFFICIENT_XAU_SHORT_SAMPLE",
+    "package_sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
+    "genuine_xau_primary_short_scored": 4,
+    "source_matched": 3,
+    "source_missed": 1,
+    "finalized_extra_proxy_short": 9,
+    "only_miss_reason": "STATE_NOT_IDLE",
+    "failed_kernel_condition_on_only_miss": false,
+    "candidate_fidelity_gate_count": 0,
+    "decision": "Do not guess a missing proprietary condition; keep collecting genuine source SHORT events."
   },
-  "research_design": {
-    "ticker": "XAUUSD",
-    "timeframe": "M15",
-    "transition": "PRIMARY_SHORT",
-    "groups": ["SOURCE_MATCHED_SHORT", "SOURCE_MISSED_SHORT", "FINALIZED_EXTRA_PROXY_SHORT"],
-    "source": "existing M7C prospective evidence only",
-    "historical_scan": false,
-    "trade_outcome_used": false,
-    "mfe_mae_used": false,
-    "first_task": "Explain source misses by proxy state and frozen-kernel condition failures.",
-    "second_task": "Compare causal entry-time feature distributions between matched genuine SHORT and finalized-extra proxy SHORT.",
-    "candidate_gate_policy": "Exploratory simple separators only; prefer >=80% matched-source retention while rejecting extras. No automatic M7C refit."
+  "m10i_design": {
+    "candidate_universe": "all causal M15 decisions; explicitly not M7C KERNEL-S1, M10F C0049 or M10G reclaim entries",
+    "direction": "SHORT",
+    "archetypes": ["TREND_BREAKDOWN", "PULLBACK_RESUME", "MOMENTUM_ACCELERATION", "VOLATILITY_BREAKDOWN", "HTF_ALIGNMENT_BREAK", "EXHAUSTION_REVERSAL"],
+    "entry": "exact M1 open bid at the new M15 bar open",
+    "fixed_horizon_exits_minutes": [60, 120, 240],
+    "one_position_per_rule_horizon": true,
+    "actual_spread": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "discovery": "2023-2024 only",
+    "validation": "2025 only",
+    "final_test": "2026 through 2026-06-19 only",
+    "target_pf": 2.0,
+    "robust_pf2_requires_minimum_counts": {"discovery": 40, "validation_2025": 20, "final_test_2026": 15}
   },
-  "branching_after_review": {
-    "if_clear_fidelity_signal": "Freeze the candidate missing condition as an exploratory hypothesis and create a separate new prospective comparison shadow without changing current M7C.",
-    "if_sample_too_small": "Keep collecting genuine source PRIMARY_SHORT events; do not guess the missing formula.",
-    "if_no_clear_fidelity_signal": "Start a separate Mochipoyo-independent GOLD SHORT candidate discovery stage instead of forcing more proxy payoff optimization."
+  "after_package_review": {
+    "if_robust_pf2_found": "Freeze exact archetype+variant+horizon and build deterministic reproduction. Only after reproduction may a new independent fresh prospective SHORT shadow be designed.",
+    "if_improves_but_below_pf2": "Inspect whether entry architecture or exit horizon is limiting without using 2025/2026 to refit the trigger.",
+    "if_no_robust_improvement": "Do not force M15 SHORT. Move to separately contracted M5/H1 independent SHORT architectures or remain LONG-only."
   },
   "safety": {
     "audit_only": true,
