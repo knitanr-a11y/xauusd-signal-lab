@@ -4,13 +4,13 @@ cd /d "%~dp0\..\..\..\.."
 
 echo ============================================================
 echo M10P C056 + G013 Fresh Prospective Shadow - ONE CYCLE
- echo AUDIT ONLY - SAFE TO RERUN; DOES NOT RESET START
- echo ============================================================
+echo AUDIT ONLY - SAFE TO RERUN; DOES NOT RESET START
+echo ============================================================
 echo.
 echo Keep collector / M7C / M8C / M9V / M9Y / M10B / M10E running unchanged.
 echo.
 
-python "scripts\mochipoyo_alert_research\m10p\python\m10p_runtime.py" once
+python "scripts\mochipoyo_alert_research\m10p\python\m10p_guarded_runtime.py" once
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" (
