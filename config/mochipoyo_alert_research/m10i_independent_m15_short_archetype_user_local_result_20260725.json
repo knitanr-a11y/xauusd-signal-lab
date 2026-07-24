@@ -1,0 +1,76 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_ROBUST_SHORT_EDGE",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(29).zip",
+    "sha256": "22252fc94af9e58675a5280c8e980e1f4ccfdbc205fa40240e8c7e02d2f4c5b8",
+    "size_bytes": 140632
+  },
+  "candidate_universe": "all causal M15 decisions; not M7C KERNEL-S1, M10F C0049, or M10G reclaim",
+  "feature_row_count": 81001,
+  "rule_variant_count": 42,
+  "rule_horizon_result_count": 126,
+  "train_eligible_result_count": 126,
+  "robust_pf2_candidate_count": 0,
+  "all_three_split_pf_gt_1_candidate_count": 0,
+  "split_contract": {
+    "discovery": "2023-2024",
+    "validation": "2025",
+    "final_test": "2026 through 2026-06-19"
+  },
+  "best_train_candidate": {
+    "candidate_id": "M10I_C027_H240",
+    "archetype": "VOLATILITY_BREAKDOWN",
+    "variant": "break20_atr0.7_body0.4_cp0.25",
+    "horizon_minutes": 240,
+    "train_count": 259,
+    "train_pf": 1.1884742109881739,
+    "validation_2025_count": 157,
+    "validation_2025_pf": 0.8029580227141846,
+    "test_2026_count": 73,
+    "test_2026_pf": 1.0546714869380376,
+    "all_count": 489,
+    "all_pf": 1.0045081730733159,
+    "fixed0p20_all_pf": 0.9992636565935438,
+    "all_payoff": 1.1838846325506938,
+    "all_max_drawdown_bps": 1301.5242995347626
+  },
+  "best_min_split_pf_by_archetype": {
+    "EXHAUSTION_REVERSAL": {"candidate_id": "M10I_C040_H120", "train_pf": 0.8223249420975951, "validation_2025_pf": 1.068970690244342, "test_2026_pf": 1.0716968125635322, "all_pf": 0.9589964827978377},
+    "HTF_ALIGNMENT_BREAK": {"candidate_id": "M10I_C033_H240", "train_pf": 0.8351520702426327, "validation_2025_pf": 1.1995305210460228, "test_2026_pf": 1.6662604474618337, "all_pf": 1.153095116334279},
+    "MOMENTUM_ACCELERATION": {"candidate_id": "M10I_C012_H240", "train_pf": 0.8423855833080387, "validation_2025_pf": 0.8106740818430767, "test_2026_pf": 1.1792670628234772, "all_pf": 0.9219514472222327},
+    "PULLBACK_RESUME": {"candidate_id": "M10I_C007_H240", "train_pf": 0.8745333274786138, "validation_2025_pf": 0.9087241917153126, "test_2026_pf": 0.8873368307548839, "all_pf": 0.8873236564802731},
+    "TREND_BREAKDOWN": {"candidate_id": "M10I_C001_H60", "train_pf": 0.8361480752382532, "validation_2025_pf": 0.8924284297564191, "test_2026_pf": 1.0962912432094365, "all_pf": 0.94099225008055},
+    "VOLATILITY_BREAKDOWN": {"candidate_id": "M10I_C016_H240", "train_pf": 0.9159449393279441, "validation_2025_pf": 0.8385295543360723, "test_2026_pf": 1.5223392056928462, "all_pf": 0.9954591677475659}
+  },
+  "interpretation": {
+    "mochipoyo_proxy_alone_not_sufficient_explanation": true,
+    "handcrafted_independent_m15_short_archetypes_not_robust": true,
+    "fixed_horizon_entry_exit_structure_may_be_limiting": true,
+    "do_not_force_pf2_by_posthoc_tuning": true,
+    "next_research": "DISCOVERY_ONLY_CAUSAL_FEATURE_MINING_ON_2023_2024_WITH_2025_AND_2026_LOCKED"
+  },
+  "data_quality": {
+    "frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "nearest_m1_fallback": false,
+    "exact_m1_entry_and_exit_only": true,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20
+  },
+  "guardrails": {
+    "audit_only": true,
+    "future_outcome_used_in_features": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
