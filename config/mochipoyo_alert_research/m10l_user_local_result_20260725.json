@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(32).zip",
+    "sha256": "c6da1d6f6b0b127d87e9cf0e984c6b2f1389fd3dd536056b49896481ad663ee8",
+    "size_bytes": 239995
+  },
+  "candidate_universe": "all causal H1 decisions; Mochipoyo-independent; M10J/M10K-independent",
+  "feature_row_count": 17866,
+  "train_2023_2024_feature_row_count": 9229,
+  "feature_count": 33,
+  "generated_condition_count": 392,
+  "frozen_shortlist_count": 300,
+  "stable_all_three_split_pf_gt_1_count": 37,
+  "robust_pf2_candidate_count": 0,
+  "best_min_split_candidate": {
+    "candidate_id": "M10L_H240_C056",
+    "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+    "horizon_minutes": 240,
+    "train_2023_2024": {"count": 72, "pf": 1.314149813327255},
+    "validation_2025": {"count": 65, "pf": 1.4866907197300367},
+    "test_2026": {"count": 77, "pf": 1.3318688824185096},
+    "all": {"count": 214, "pf": 1.370313393687437},
+    "fixed0p20_all_pf": 1.3699783740979736,
+    "min_split_pf": 1.314149813327255
+  },
+  "best_all_pf_among_stable_candidates": {
+    "candidate_id": "M10L_H480_C050",
+    "formula": "h1_macd_line_bps <= -7.667425443 AND h1_macd_hist_bps >= 3.637199446",
+    "horizon_minutes": 480,
+    "train_2023_2024": {"count": 55, "pf": 1.3813832800484998},
+    "validation_2025": {"count": 52, "pf": 1.313436526811133},
+    "test_2026": {"count": 56, "pf": 1.7016953863022222},
+    "all": {"count": 163, "pf": 1.5228292700907973},
+    "fixed0p20_all_pf": 1.5213429832800756,
+    "min_split_pf": 1.313436526811133
+  },
+  "comparison_to_m15_seed": {
+    "m10j_c0212_min_split_pf": 1.3904778450159343,
+    "m10j_c0212_all_pf": 1.4839437156621065,
+    "interpretation": "H1 has a stable historical edge, but its best minimum-split robustness is below the M10J M15 C0212 reference."
+  },
+  "decision": {
+    "pf2_reached": false,
+    "h1_short_edge_found": true,
+    "h1_stronger_than_m10j_c0212": false,
+    "do_not_posthoc_refit_h1_from_2025_2026": true,
+    "next": "Do not force further H1 post-hoc tuning. Move to separately contracted Mochipoyo-independent M5 or regime-specific downside discovery while retaining M10L candidates as research references only."
+  },
+  "data_quality": {
+    "all_frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "nearest_m1_fallback": false,
+    "exact_m1_entry_and_exit_only": true,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "formula_generation_uses_2025": false,
+    "formula_generation_uses_2026": false
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
