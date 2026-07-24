@@ -1,0 +1,242 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9W_GOLD_ENTRY_EXIT_DECOUPLING_ASSISTANT_SIDE",
+  "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY_NOT_FORWARD_VALIDATED",
+  "recorded_at_utc": "2026-07-24T12:10:00Z",
+  "purpose": "Explore a payoff-improvement architecture in which entry location, loss control and profit taking are separate causal vectors while M9V fresh multi-timeframe forward collection remains unchanged.",
+  "sample_status": {
+    "history": "XAUUSD supplied 2023-01 through 2026-06-19 closed-bar history",
+    "research_exposed": true,
+    "independent_holdout": false,
+    "m9v_fresh_forward_data_used": false,
+    "promotion_allowed_from_this_result": false
+  },
+  "guardrails": {
+    "mt5_server_time": true,
+    "closed_bars_only_for_features": true,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "future_feature_use": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "m9v_changed_or_reset": false,
+    "m9r_started": false,
+    "audit_only": true
+  },
+  "baseline_n3": {
+    "count": 1495,
+    "approx_trades_per_observed_month": 35.5952,
+    "win_rate": 0.6227424749,
+    "profit_factor": 1.3658841450,
+    "net_bps": 4290.412943,
+    "average_win_bps": 17.203614,
+    "average_loss_bps": -20.865038,
+    "max_drawdown_bps": 510.524349,
+    "max_losing_streak": 11
+  },
+  "path_diagnosis": {
+    "winning_trades": {
+      "count": 931,
+      "average_mfe_bps_before_native_exit": 23.852585,
+      "median_mfe_bps_before_native_exit": 16.461313,
+      "average_mae_bps_before_native_exit": -12.828655,
+      "median_mae_bps_before_native_exit": -6.280147,
+      "average_holding_minutes": 127.1740
+    },
+    "losing_trades": {
+      "count": 564,
+      "average_mfe_bps_before_native_exit": 6.049649,
+      "median_mfe_bps_before_native_exit": 2.847792,
+      "average_mae_bps_before_native_exit": -43.668417,
+      "median_mae_bps_before_native_exit": -25.086994,
+      "average_holding_minutes": 251.3156
+    },
+    "interpretation": "Large losers usually fail to generate meaningful favorable excursion and remain open much longer, but simple time/MFE fail exits also cut too many eventual winners."
+  },
+  "rejected_loss_cutting_tests": {
+    "first_turn_m1_pivot_stop": {
+      "profit_factor": 0.830621,
+      "win_rate": 0.186622,
+      "decision": "REJECT_TOO_TIGHT_NORMAL_PULLBACKS_STOPPED"
+    },
+    "recent_m5_or_m15_structure_stops": {
+      "tested_recent_low_windows": [3, 5, 10, 20],
+      "result": "Mostly PF around or below 1 and DD worse than baseline; no simple initial structure stop promoted."
+    },
+    "time_plus_mfe_fail_gate": {
+      "representative_rule": "At 60 minutes, if MFE < 0.75 x entry-time M5 ATR, current return < 0, and M5 bullish EMA stack is lost, exit at current M1 open.",
+      "profit_factor": 1.319351,
+      "average_loss_bps": -17.652850,
+      "max_drawdown_bps": 626.266415,
+      "decision": "REJECT_AS_PRIMARY_IMPROVEMENT; loss size improves but PF/DD do not."
+    }
+  },
+  "native_exit_leakage": {
+    "all_n3_post_exit_mfe": {
+      "15m_average_bps": 7.142094,
+      "30m_average_bps": 10.805807,
+      "60m_average_bps": 16.042386,
+      "120m_average_bps": 22.529792,
+      "240m_average_bps": 32.571256,
+      "60m_fraction_reaching_plus_20bps": 0.2361204
+    },
+    "h1_macd_still_rising_at_native_exit": {
+      "count": 1116,
+      "post60m_average_mfe_bps": 16.967007,
+      "post120m_average_mfe_bps": 23.736396,
+      "post240m_average_mfe_bps": 33.276066,
+      "average_extension_to_next_m15_rci9_turn_down_bps": 1.340920
+    },
+    "h1_macd_not_rising_at_native_exit": {
+      "count": 379,
+      "post60m_average_mfe_bps": 13.319756,
+      "average_extension_to_next_m15_rci9_turn_down_bps": -0.934606
+    },
+    "interpretation": "M7C native EXIT is a useful state transition but not always an economically optimal full-profit exit. H1 MACD direction at native EXIT provides a simple causal separator for selective runner treatment."
+  },
+  "entry_location_finding": {
+    "definition": "Compare first-turn bid/open to the original proxy PRIMARY bid/open using entry-time latest closed M5 ATR14.",
+    "key_result": "Deep unresolved pullback is weaker. Requiring price to reclaim near the original PRIMARY level improves payoff more consistently than trying to buy the deepest first-turn.",
+    "immediate_reclaim_group": {
+      "rule": "first-turn entry bid >= original PRIMARY bid",
+      "count": 502,
+      "win_rate": 0.6374502,
+      "profit_factor": 1.698438,
+      "average_win_bps": 16.407215,
+      "average_loss_bps": -16.984933,
+      "yearly_pf": {
+        "2023": 2.439051,
+        "2024": 1.770773,
+        "2025": 1.310443,
+        "2026_through_0619": 1.856220
+      }
+    },
+    "deep_pullback_group": {
+      "rule": "first-turn bid remains >0.5 x M5 ATR below original PRIMARY bid",
+      "count": 369,
+      "profit_factor": 1.144958,
+      "average_loss_bps": -25.723944,
+      "note": "2024 PF < 1; not a desirable standalone entry-location state."
+    }
+  },
+  "w1_reclaim_entry_family": {
+    "concept": "Do not blindly take a first-turn while price remains deeply below the PRIMARY level. Require a quick reclaim of a volatility-normalized level; otherwise skip the trade.",
+    "reference_rule": {
+      "id": "W1_RECLAIM_0P10_ATR5_WITHIN_10M",
+      "level": "original PRIMARY bid - 0.10 x ATR14 from latest closed M5 available at first-turn decision",
+      "entry": "If first-turn bid/open is already >= level, enter normally. Otherwise observe at most 10 fully closed M1 bars; after the first M1 close >= level, enter at the next exact M1 open with historical spread. If no reclaim before timeout/native exit, skip.",
+      "causal": true
+    },
+    "entry_only_result": {
+      "count": 1054,
+      "approx_trades_per_observed_month": 25.0952,
+      "win_rate": 0.6233397,
+      "profit_factor": 1.587529,
+      "average_win_bps": 16.372951,
+      "average_loss_bps": -17.111002,
+      "max_drawdown_bps": 358.852816,
+      "max_losing_streak": 8,
+      "extra_2bps_profit_factor": 1.244550,
+      "yearly_pf": {
+        "2023": 1.261233,
+        "2024": 1.534001,
+        "2025": 1.541777,
+        "2026_through_0619": 1.984647
+      }
+    },
+    "neighborhood": {
+      "tested_reclaim_atr_offsets": [0.0, 0.05, 0.10, 0.15, 0.20],
+      "tested_wait_minutes": [5, 10, 15, 20, 30],
+      "combination_count": 25,
+      "interpretation": "The improvement is not isolated to exactly 0.10 ATR / 10 minutes. Most nearby combinations remain materially above baseline PF, although weak quarters remain. Do not optimize to the single best cell."
+    }
+  },
+  "separate_profit_vector": {
+    "runner_eligibility": "At native M7C LONG_EXIT, latest fully closed H1 MACD(6,13) line is still rising versus its previous closed H1 bar.",
+    "runner_exit": "First later M15 decision whose latest fully closed M15 RCI9 makes a causal turn-down (current < previous and previous >= previous2).",
+    "note": "This treats native M7C EXIT as a profit-management event rather than an unconditional 100% economic exit."
+  },
+  "risk_vector": {
+    "n6_reference": "H4 RCI9 percentile within trailing 100 fully closed H4 bars is >25% and <=50% at actual entry decision.",
+    "action": "0.5 risk/size for N6 only; do not suppress the signal.",
+    "status": "EXPLORATORY_SIZING_LAYER_NOT_FORWARD_PROMOTED"
+  },
+  "w1_combined_payoff_family": {
+    "base_entry": "W1_RECLAIM_0P10_ATR5_WITHIN_10M",
+    "n6_half_risk": true,
+    "runner_share_sensitivity": [
+      {
+        "runner_share": 0.25,
+        "count": 1054,
+        "win_rate": 0.6015180,
+        "profit_factor": 1.661487,
+        "average_win_bps": 15.835602,
+        "average_loss_bps": -14.387246,
+        "max_drawdown_bps": 289.993167,
+        "extra_2bps_profit_factor": 1.305052,
+        "minimum_calendar_year_pf": 1.352290
+      },
+      {
+        "runner_share": 0.50,
+        "count": 1054,
+        "win_rate": 0.5796964,
+        "profit_factor": 1.657561,
+        "average_win_bps": 17.224008,
+        "average_loss_bps": -14.331847,
+        "max_drawdown_bps": 291.531445,
+        "extra_2bps_profit_factor": 1.314925,
+        "minimum_calendar_year_pf": 1.407715,
+        "yearly_pf": {
+          "2023": 1.407715,
+          "2024": 1.457103,
+          "2025": 1.426642,
+          "2026_through_0619": 2.510536
+        }
+      },
+      {
+        "runner_share": 0.75,
+        "count": 1054,
+        "win_rate": 0.5588235,
+        "profit_factor": 1.644100,
+        "average_win_bps": 18.862872,
+        "average_loss_bps": -14.532554,
+        "max_drawdown_bps": 300.186667,
+        "extra_2bps_profit_factor": 1.319514,
+        "minimum_calendar_year_pf": 1.368550
+      },
+      {
+        "runner_share": 1.00,
+        "count": 1054,
+        "win_rate": 0.5426945,
+        "profit_factor": 1.626301,
+        "average_win_bps": 20.566061,
+        "average_loss_bps": -15.007179,
+        "max_drawdown_bps": 320.808886,
+        "extra_2bps_profit_factor": 1.321487,
+        "minimum_calendar_year_pf": 1.315949
+      }
+    ],
+    "interpretation": "A broad 25%-100% runner family remains viable historically. Increasing runner share lowers win rate but converts payoff toward genuine positive reward/risk. 50%-75% is a useful central research range rather than choosing the historical optimum."
+  },
+  "remaining_weakness": {
+    "reference_50pct_runner_weak_quarters": {
+      "2024Q4": 0.827653,
+      "2025Q3": 0.939952
+    },
+    "interpretation": "The architecture improves aggregate/yearly payoff but does not eliminate all subperiod weakness. It must not be called complete or forward validated."
+  },
+  "decision": {
+    "promote_to_m9v_now": false,
+    "start_new_forward_shadow_now": false,
+    "change_existing_m9v": false,
+    "preferred_research_direction": "ENTRY_RECLAIM_CONFIRMATION_PLUS_SEPARATE_PROFIT_VECTOR_PLUS_RISK_SIZING",
+    "do_not_pursue": [
+      "arbitrary tight fixed stop",
+      "first-turn pivot stop",
+      "blind deep-pullback buying",
+      "native M7C EXIT as mandatory 100% economic exit"
+    ],
+    "next": "Create a deterministic M9X reproduction/robustness implementation for W1 entry-reclaim and runner-share family, preserving M9V fresh forward unchanged. Only after deterministic reproduction should a separate future payoff shadow be considered."
+  }
+}
