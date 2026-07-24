@@ -1,0 +1,93 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10M_M5_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2_INDEPENDENT_C0212_REDISCOVERY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(33).zip",
+    "sha256": "c2db635f5560e2bd9aff60e1d5bf1b2732bc6218392e9d61a7fcc863045bfc89",
+    "size_bytes": 272242
+  },
+  "candidate_universe": "all causal M5 decisions; Mochipoyo-independent; M10J/M10L-independent",
+  "feature_row_count": 240158,
+  "train_2023_2024_feature_row_count": 136583,
+  "feature_count": 35,
+  "generated_condition_count": 416,
+  "frozen_shortlist_count": 300,
+  "stable_all_three_split_pf_gt_1_count": 51,
+  "robust_pf2_candidate_count": 0,
+  "primary_finding": {
+    "candidate_id": "M10M_H240_C006",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "horizon_minutes": 240,
+    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529},
+    "validation_2025": {"count": 149, "pf": 1.3904778450159343},
+    "test_2026": {"count": 64, "pf": 1.5465266111892766},
+    "all": {"count": 318, "pf": 1.4839437156621065, "max_dd_bps": 823.9691089106718, "payoff": 1.7262202406681646},
+    "fixed0p20_all_pf": 1.4816933419152243,
+    "interpretation": "Exact M10J C0212 formula was independently rediscovered by M10M discovery/ranking even though C0212 thresholds were not used to generate M10M formulas. This supports the higher-timeframe/volatility context as a recurring historical structure; it is not fresh proof."
+  },
+  "m5_specific_candidates": [
+    {
+      "candidate_id": "M10M_H120_C021",
+      "formula": "m5_ema30_40_bps <= -3.052275892 AND h4_ema20_30_bps >= 37.61355979",
+      "horizon_minutes": 120,
+      "train_pf": 1.3852960596148525,
+      "validation_2025_pf": 1.3119429447822308,
+      "test_2026_pf": 1.325145,
+      "all_count": 340,
+      "all_pf": 1.331124,
+      "fixed0p20_all_pf": 1.328636,
+      "role": "M5_ROBUSTNESS_RESEARCH_REFERENCE"
+    },
+    {
+      "candidate_id": "M10M_H240_C057",
+      "formula": "m5_ema20_30_bps <= -1.885808038 AND h4_ema20_30_bps >= 37.61355979",
+      "horizon_minutes": 240,
+      "train_pf": 1.274587,
+      "validation_2025_pf": 1.255802,
+      "test_2026_pf": 1.808992,
+      "all_count": 344,
+      "all_pf": 1.403366,
+      "fixed0p20_all_pf": 1.400107,
+      "role": "M5_HIGHER_2026_PAYOFF_RESEARCH_REFERENCE"
+    }
+  ],
+  "family_evidence": {
+    "stable_candidates_containing_h4_ema20_30_bps": 22,
+    "stable_candidates_containing_h1_atr_pct100": 12,
+    "stable_candidates_containing_m5_features": 19,
+    "interpretation": "The repeated H4/H1 context dominates the strongest robust M5 findings, while M5-specific momentum/EMA structure can add secondary filtering."
+  },
+  "decision": {
+    "pf2_reached": false,
+    "m5_short_edge_found": true,
+    "m5_stronger_than_c0212": false,
+    "c0212_independently_rediscovered": true,
+    "retain_c0212_c056_adoption_direction": true,
+    "retain_m5_references": true,
+    "next": "Run M10N common downside-regime research. Generate/freeze regime gates using 2023-2024 only, exclude exact adoption-seed formula features from regime-gate generation to avoid tautology, then test whether C0212/C056/M5 references improve in 2025 and 2026."
+  },
+  "data_quality": {
+    "all_frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "nearest_m1_fallback": false,
+    "exact_m1_entry_and_exit_only": true,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "formula_generation_uses_2025": false,
+    "formula_generation_uses_2026": false
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
