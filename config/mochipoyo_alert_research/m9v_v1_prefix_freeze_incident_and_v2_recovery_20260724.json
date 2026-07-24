@@ -1,0 +1,53 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_V1_PREFIX_FREEZE_SEMANTICS_INCIDENT_AND_V2_RECOVERY",
+  "status": "V1_START_INVALIDATION_REQUIRED_BEFORE_V2_REINITIALIZATION",
+  "recorded_at_utc": "2026-07-24T11:20:00Z",
+  "observed_user_error": "[M9V BLOCKED] M9VContractError: historical prefix changed after M9V start: M5",
+  "root_cause": {
+    "v1_behavior": "Initializer froze a fingerprint of every row whose server-open timestamp was <= the M1-derived prospective start.",
+    "problem": "M5 was allowed to trail M1 at initialization. A normal later M5 catch-up/append could therefore add a row whose server-open timestamp was <= the already-frozen start, changing the v1 prefix set even though no previously existing row was modified.",
+    "classification": "IMPLEMENTATION_CONTRACT_BUG_NOT_USER_ERROR_NOT_STRATEGY_FAILURE"
+  },
+  "safety_assessment": {
+    "one_shot_result": "BLOCKED_BEFORE_PASS_OUTPUT",
+    "m8c_modified": false,
+    "m7c_modified": false,
+    "collector_modified": false,
+    "m9v_v1_start_safe_to_auto_archive_only_if_no_success_summary_for_same_start": true,
+    "silent_delete_or_reset_allowed": false
+  },
+  "v2_fix": {
+    "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "prefix_semantics": "Freeze the exact first N CSV rows physically present at initialization. Verify those N rows never change. Strictly ascending later appends are allowed.",
+    "bootstrap_semantics": "State-at-start comparison is anchored to the frozen row prefix, so later appends do not rewrite the bootstrap snapshot.",
+    "coverage_check": "Other timeframe CSVs may trail the M1 anchor by no more than two native timeframe durations and may never be ahead of M1.",
+    "pre_start_primary_candidate_eligibility": false,
+    "historical_backfill": false
+  },
+  "self_tests": {
+    "v2_initializer_pass": true,
+    "normal_append_after_start_pass": true,
+    "append_with_m5_server_open_before_m1_start_pass": true,
+    "tamper_existing_frozen_m5_row_blocks": true,
+    "old_v1_recovery_archives_before_removing_original": true,
+    "recovery_blocks_if_successful_m9v_summary_exists_for_old_start": true
+  },
+  "recovery_operator": {
+    "folder": "scripts/mochipoyo_alert_research/m9v/bat",
+    "step_00": "00_recover_invalid_v1_prefix_start_once.bat",
+    "step_01": "01_initialize_fresh_runtime_once.bat",
+    "step_02": "02_run_shadow_once.bat",
+    "step_03": "03_run_shadow_forever.bat",
+    "instruction": "Run 00 once after pulling the v2 fix. Only after RECOVERY PASS run 01 once. Only after INIT PASS run 02 once. Do not run 03 until ChatGPT reviews the initial v2 package."
+  },
+  "forbidden": [
+    "Do not manually delete the old M9V runtime/receipt.",
+    "Do not recover while the M9V forever loop is running.",
+    "Do not reset M8C or M7C.",
+    "Do not reuse the invalid v1 start.",
+    "Do not backfill M9V v2.",
+    "Do not start M9R.",
+    "Do not enable Discord, MT5 orders, live-ready or final signal."
+  ]
+}
