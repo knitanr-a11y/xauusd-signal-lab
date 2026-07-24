@@ -30,7 +30,7 @@
   ],
   "handoff_policy": {
     "maintain_next_chat_handoff": true,
-    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9V_RUNNING_M9W_PAYOFF_FOUND_M9X_NEXT_20260724.md",
+    "handoff_file": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M9X_IMPLEMENTED_LOCAL_REPRODUCTION_NEXT_20260724.md",
     "update_when_material_state_changes": true
   },
   "forbidden": [
