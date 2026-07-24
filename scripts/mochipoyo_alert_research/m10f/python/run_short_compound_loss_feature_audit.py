@@ -23,7 +23,7 @@ import frozen_core as c
 import payoff_rules as pay
 
 STAGE = "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT"
-CONTRACT = THIS.parents[3] / "config" / "mochipoyo_alert_research" / "m10f_short_compound_loss_feature_audit_contract_20260725.json"
+CONTRACT = THIS.parents[4] / "config" / "mochipoyo_alert_research" / "m10f_short_compound_loss_feature_audit_contract_20260725.json"
 TIMEFRAMES = ("M5", "M15", "H1", "H4")
 CONTEXT_TFS = ("M5", "M15", "H1", "H4", "D1")
 TF_DELTA = {
