@@ -1,0 +1,73 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
+  "status": "PASS_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_ONLY_INSUFFICIENT_XAU_SHORT_SAMPLE",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(28).zip",
+    "sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
+    "size_bytes": 15468
+  },
+  "m7c_anchor": {
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "built_at_utc": "2026-07-24T20:15:02Z",
+    "supported_source_events": 47,
+    "scored_source_events": 47,
+    "exact_match_count": 24,
+    "exact_recall": 0.5106382978723404,
+    "within_one_bar_match_count": 27,
+    "within_one_bar_recall": 0.574468085106383,
+    "missed_count": 20,
+    "finalized_extra_proxy_signal_count": 53,
+    "formal_review_state": "READY_FOR_MANUAL_REPRODUCTION_REVIEW"
+  },
+  "xauusd_primary_short": {
+    "genuine_source_primary_short_scored": 4,
+    "source_matched_short": 3,
+    "source_missed_short": 1,
+    "finalized_extra_proxy_short": 9,
+    "candidate_fidelity_gate_count": 0,
+    "decision": "INSUFFICIENT_MATCHED_OR_EXTRA_SHORT_SAMPLE_FOR_FIDELITY_GATE_CLAIM"
+  },
+  "miss_diagnostic": {
+    "raw_alert_id": 101,
+    "source_decision_time_utc": "2026-07-23T01:00:00Z",
+    "classification": "MISSED",
+    "diagnostic_reason": "STATE_NOT_IDLE",
+    "proxy_state_before": "ACTIVE_LONG",
+    "proxy_emitted_transition": "NO_SIGNAL",
+    "failed_kernel_conditions": null,
+    "rci9_turn_down": true,
+    "ema_alignment": "BEARISH_STACK",
+    "interpretation": "The only XAUUSD PRIMARY_SHORT miss did not fail the frozen RCI/EMA short kernel. It was suppressed by proxy state, so current evidence does not support adding or changing an indicator condition."
+  },
+  "interpretation": {
+    "clear_missing_indicator_condition_found": false,
+    "m7c_refit_approved": false,
+    "why_not_refit": "Only four genuine XAUUSD PRIMARY_SHORT source events are scored, below the minimum group size for a fidelity separator claim.",
+    "continue_source_collection": true,
+    "parallel_next_research": "MOCHIPOYO_INDEPENDENT_GOLD_SHORT_DISCOVERY",
+    "do_not_force_payoff_optimization_on_current_proxy": true
+  },
+  "input_integrity": {
+    "m7c_report_sha256": "a726d93e15780337258d9a9432502f4ae38bd1f27af0df6879100bce5b921850",
+    "m7c_source_comparisons_sha256": "a710aa3b7f9a37e7558e5636efacade8f7f29dd5101c0be2782bcff6cd4026f9",
+    "m7c_extra_proxy_signals_sha256": "4e6a6210917a659b1d68801ad97381fc7727ed20a4e8077dbcd9a5a75e535bb8",
+    "m7c_proxy_decisions_sha256": "f43dbd5c54f7d29e119985e03156396bac15036a11bba071c8d5694452799c45",
+    "closed_m15_feature_builder_reused": true
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_scan": false,
+    "historical_backfill": false,
+    "trade_outcome_used": false,
+    "mfe_mae_used": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
