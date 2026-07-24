@@ -1,0 +1,66 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9Y_GOLD_PAYOFF_FRESH_PROSPECTIVE_SHADOW_INITIAL_LOCAL_REVIEW",
+  "status": "PASS_INITIAL_LOCAL_READY_FOR_PERSISTENT_FORWARD_SHADOW",
+  "recorded_at_utc": "2026-07-24T14:00:00Z",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(21).zip",
+    "sha256": "d58233d6dd360b6fbbdffdb02d8bbfa287c657fdea8166c555bc5476d04fd224"
+  },
+  "runtime": {
+    "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "prospective_start_server_time": "2026.07.24 12:45:00",
+    "created_at_utc": "2026-07-24T09:46:58Z",
+    "contract_sha256": "1991d18e02b863818137ea4b4794bf1b80f60c198c43124c38f0547a0c8036e6",
+    "historical_backfill_allowed": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "reset_allowed": false,
+    "m9v_upstream_read_only": true,
+    "m9v_prospective_start_server_time": "2026.07.24 11:04:00",
+    "m9v_runtime_manifest_sha256": "07731d1071b7fb6f063d70464782163a74acf2330062bd0d27c2d49b87b5b04a"
+  },
+  "initial_one_shot": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "built_at_utc": "2026-07-24T09:47:18Z",
+    "latest_server_open": {
+      "M1": "2026.07.24 12:46:00",
+      "M5": "2026.07.24 12:40:00",
+      "M15": "2026.07.24 12:30:00",
+      "H1": "2026.07.24 11:00:00",
+      "H4": "2026.07.24 08:00:00"
+    },
+    "upstream_s2_post_start_count": 0,
+    "w1_candidate_count": 0,
+    "pending_count": 0,
+    "skipped_reclaim_count": 0,
+    "overlap_skip_count": 0,
+    "arm_accepted_counts": {
+      "Y0_W1_NATIVE_EXIT": 0,
+      "Y1_W1_N6_NATIVE_EXIT": 0,
+      "Y2_W1_N6_RUNNER50": 0,
+      "Y3_W1_N6_RUNNER75": 0
+    },
+    "interpretation": "Expected bootstrap/integrity pass because the initial one-shot was executed about one M1 minute after the independent M9Y start. This is not a performance result."
+  },
+  "integrity": {
+    "prefix_integrity_verified": true,
+    "closed_rows_contract": true,
+    "nearest_m1_fallback": false,
+    "historical_backfill": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "one_position_per_arm": true,
+    "m9v_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "decision": {
+    "persistent_m9y_shadow_allowed": true,
+    "operator": "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat",
+    "keep_m8c_m7c_collector_m9v_running": true,
+    "rerun_m9y_initializer_allowed": false,
+    "m9y_runtime_reset_allowed": false,
+    "automatic_live_promotion": false
+  }
+}
