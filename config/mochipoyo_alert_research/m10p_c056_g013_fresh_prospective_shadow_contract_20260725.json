@@ -1,0 +1,117 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-24T23:00:00Z",
+  "purpose": "Fresh audit-only prospective validation of the deterministically reproduced M10L_H240_C056 + M10N_G013 SHORT candidate, with a brand-new immutable MT5-server start, no historical backfill, and no modification/reset of existing forward monitors.",
+  "data": {
+    "ticker": "XAUUSD",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "source_resolution": "Reuse M8B LATEST/06_symbol_metadata.json mt5_files_root exactly, as used by M10B/M10E.",
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false,
+    "append_safe_prefix_required": true,
+    "nearest_m1_fallback": false
+  },
+  "candidate": {
+    "direction": "SHORT",
+    "seed_id": "M10L_H240_C056",
+    "gate_id": "M10N_G013",
+    "decision_timeframe": "H1",
+    "seed_formula": {
+      "h1_macd_hist_bps_ge": 3.637199446,
+      "h1_macd_line_bps_le": -7.667425443
+    },
+    "regime_formula": {
+      "h1_ret3_bps_ge": 18.70087437,
+      "d1_macd_hist_bps_ge": -14.25480242
+    },
+    "feature_definitions": {
+      "macd": "TORYS-style MACD fast=6 slow=13 signal=4. MACD line=(EMA6-EMA13)/abs(close)*10000 bps; signal=EMA4(MACD line); histogram=line-signal.",
+      "h1_ret3_bps": "(latest fully closed H1 close - H1 close 3 bars earlier)/abs(H1 close 3 bars earlier)*10000.",
+      "causal_context": "At each H1 decision/open, use only H1 and D1 bars fully closed at or before that decision."
+    },
+    "entry": "Virtual exact M1 open bid at the eligible H1 decision. Exact timestamp required.",
+    "exit": "Virtual exact M1 open ask exactly 240 minutes after entry; ask = M1 open + spread_points * point. Exact timestamp required; missing exact exit becomes unresolved data-gap outcome and is never backfilled.",
+    "horizon_minutes": 240,
+    "one_position": true,
+    "overlap_rule": "While an accepted candidate is within its 240-minute scheduled holding interval, later eligible candidates are recorded as ONE_POSITION_ACTIVE skips. A candidate exactly at the prior scheduled exit time is allowed.",
+    "fixed_spread_sensitivity_usd": 0.20
+  },
+  "historical_reference": {
+    "stage": "M10O_C056_G013_DETERMINISTIC_REPRODUCTION",
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+    "trade_count": 84,
+    "train_2023_2024": {"count": 29, "pf": 3.002653803622849},
+    "validation_2025": {"count": 33, "pf": 2.35052772774399},
+    "test_2026": {"count": 22, "pf": 2.5802661605659214},
+    "all_pf": 2.540715351740206,
+    "fixed0p20_all_pf": 2.538476073441831,
+    "reference_only": true,
+    "prospective_threshold_tuning_from_outcomes": false
+  },
+  "fresh_start_bootstrap": {
+    "fresh_gold_prospective_start_required": true,
+    "start_freeze_rule": "Resolve M8B mt5_files_root; verify all six live CSVs exist; take two identical tail snapshots separated by 2 seconds; verify lag bounds; freeze immutable row-prefix fingerprints; set prospective start to the latest CLOSED M1 server-open timestamp.",
+    "start_must_be_strictly_after_m10e_start": true,
+    "pre_start_candidate_eligibility": false,
+    "backfill": false,
+    "reset_allowed": false,
+    "initializer_may_run_once_only": true
+  },
+  "runtime": {
+    "version": "M10P_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "persistent_runtime_manifest": true,
+    "persistent_state": true,
+    "candidate_ledger": true,
+    "trade_ledger": true,
+    "overlap_ledger": true,
+    "restart_safe": true,
+    "cycle_seconds": 60,
+    "rebuild_post_start_deterministically_each_cycle": true,
+    "do_not_delete_unresolved_gap_rows": true
+  },
+  "review_gates": {
+    "operational_resolved": 5,
+    "interim_resolved": 10,
+    "formal_resolved": 20,
+    "pf2_is_not_claimed_before_formal_resolved": true,
+    "automatic_live_promotion": false,
+    "interpretation": "All checkpoints are manual research reviews only. Fresh prospective outcomes may not alter C056/G013 thresholds."
+  },
+  "relationship_to_existing_forward": {
+    "collector_continues_unchanged": true,
+    "m7c_continues_unchanged": true,
+    "m8c_continues_unchanged": true,
+    "m9v_continues_unchanged": true,
+    "m9y_continues_unchanged": true,
+    "m10b_continues_unchanged": true,
+    "m10e_continues_unchanged": true,
+    "m10e_runtime_manifest_is_chronology_anchor_read_only": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "historical_backfill": false,
+    "collector_reset": false,
+    "m7c_reset": false,
+    "m8c_reset": false,
+    "m9v_reset": false,
+    "m9y_reset": false,
+    "m10b_reset": false,
+    "m10e_reset": false,
+    "automatic_live_promotion": false
+  }
+}
