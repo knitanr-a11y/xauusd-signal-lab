@@ -2,89 +2,73 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T11:40:00Z",
-  "status": "M8C_RUNNING_M9V_V2_INITIAL_PASS_PERSISTENT_FORWARD_SHADOW_READY_AUDIT_ONLY",
-  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_GOLD_MULTI_TIMEFRAME_PERSISTENT_FORWARD_SHADOW",
+  "recorded_at_utc": "2026-07-24T12:15:00Z",
+  "status": "M8C_RUNNING_M9V_V2_FORWARD_M9W_PAYOFF_DECOUPLING_FOUND_M9X_REPRODUCTION_NEXT_AUDIT_ONLY",
+  "stage": "M8C_FORWARD_SHADOW_PLUS_M9V_V2_FORWARD_PLUS_M9X_PAYOFF_REPRODUCTION_DESIGN",
   "m7c_prospective_start_utc": "2026-07-20T14:54:15Z",
   "m8c": {
     "status": "RUNNING_FORWARD_SHADOW",
-    "control": "ACCEPT_ALL_FUTURE_PROXY_PRIMARY_CANDIDATES",
-    "challenger": "REJECT_BTCUSD_PRIMARY_LONG_ON_PROXY_BRANCH_ONLY",
     "prospective_start_reset_allowed": false,
     "historical_backfill_allowed": false,
     "source_anchor_separate_and_unsuppressed": true
   },
-  "m9u": {
-    "status": "PASS_SELF_VERIFIED_HISTORICAL_REPRODUCTION_ONLY",
-    "implementation": "scripts/mochipoyo_alert_research/m9u/python/run_multitimeframe_portfolio_reproduction_audit.py",
-    "result": "config/mochipoyo_alert_research/m9u_multitimeframe_portfolio_deterministic_reproduction_result_20260724.json",
-    "self_verified": "S1=1256 S2=1495 S3=191 S4=70 PORTFOLIO=2241 PF=1.444651452178 matched M9T reference",
-    "promotion": false
-  },
   "m9v": {
-    "contract": "config/mochipoyo_alert_research/m9v_gold_multitimeframe_fresh_prospective_shadow_contract_20260724.json",
-    "incident": "config/mochipoyo_alert_research/m9v_v1_prefix_freeze_incident_and_v2_recovery_20260724.json",
-    "initial_local_result": "config/mochipoyo_alert_research/m9v_v2_initial_local_pass_20260724.json",
     "runtime_contract_version": "M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
     "prospective_start_server_time": "2026.07.24 11:04:00",
-    "status": "INITIAL_LOCAL_PASS_READY_TO_RUN_PERSISTENT_FORWARD_SHADOW",
-    "v1_start_valid": false,
-    "v1_incident_archived_by_guarded_recovery": true,
-    "historical_backfill_allowed": false,
-    "pre_start_primary_candidate_eligibility": false,
-    "runtime_reset_allowed": false,
-    "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"],
-    "initial_counts": {
-      "candidate_count": 0,
-      "V0_M15_ONLY": 0,
-      "V1_M15_PLUS_H1": 0,
-      "V2_ALL_TIMEFRAMES": 0,
-      "confirmation_metadata_count": 0
-    },
-    "initial_count_interpretation": "Expected bootstrap-only pass because one-shot was executed about one M1 minute after fresh start; not a performance result.",
-    "bootstrap_state_at_start": {
-      "M5": "ACTIVE_SHORT inherited from 2026.07.24 07:45:00",
-      "M15": "IDLE",
-      "H1": "ACTIVE_LONG inherited from 2026.07.23 03:00:00",
-      "H4": "IDLE"
-    },
+    "initial_local_result": "config/mochipoyo_alert_research/m9v_v2_initial_local_pass_20260724.json",
     "persistent_operator": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
-    "stop_operator": "scripts/mochipoyo_alert_research/m9v/bat/04_stop_shadow_forever.bat",
-    "review_gates": {
-      "operational_checkpoint_total_accepted_arm_events": 20,
-      "interim_checkpoint_total_accepted_arm_events": 60,
-      "minimum_H1_S3_candidates_for_branch_review": 10,
-      "formal_portfolio_review_total_accepted_arm_events": 120
-    }
+    "status": "FRESH_FORWARD_COLLECTION_BASE_MULTI_TIMEFRAME_BREADTH",
+    "runtime_reset_allowed": false,
+    "historical_backfill_allowed": false,
+    "arms": ["V0_M15_ONLY", "V1_M15_PLUS_H1", "V2_ALL_TIMEFRAMES"]
+  },
+  "m9w": {
+    "status": "PASS_EXPLORATORY_ASSISTANT_SIDE_ONLY_NOT_FORWARD_VALIDATED",
+    "result": "config/mochipoyo_alert_research/m9w_gold_entry_exit_decoupling_assistant_side_result_20260724.json",
+    "core_finding": "Better payoff comes from entry reclaim confirmation plus a separate profit-management vector, not from simply tightening the initial stop.",
+    "baseline_n3": "n=1495 WR=62.27% PF=1.3659 avg_win=+17.20bps avg_loss=-20.87bps DD=510.5bps",
+    "loss_path": "Losers average MFE only +6.05bps, MAE -43.67bps and hold about 251m versus winners MFE +23.85bps, MAE -12.83bps and hold about 127m.",
+    "rejected": [
+      "first-turn pivot stop",
+      "simple recent M5/M15 structure stops",
+      "simple fixed checkpoint MFE/time fail exits"
+    ],
+    "entry_reclaim_reference": "If first-turn bid is below PRIMARY bid - 0.10*M5 ATR14, wait up to 10 closed M1 bars for close reclaim then enter next exact M1 open; otherwise skip.",
+    "entry_only_reference": "n=1054 ~25.1/month WR=62.33% PF=1.5875 avg_win=+16.37 avg_loss=-17.11 DD=358.9; all years PF>1; +2bps PF=1.2446",
+    "profit_vector": "At native LONG_EXIT, if latest closed H1 MACD(6,13) still rises, treat native EXIT as partial-profit event and keep runner until first causal M15 RCI9 turn-down.",
+    "risk_vector": "N6 H4 RCI9 percentile 25-50% remains half-risk sizing only, not signal suppression.",
+    "combined_50pct_runner": "n=1054 ~25.1/month WR=57.97% PF=1.6576 avg_win=+17.22 avg_loss=-14.33 DD=291.5 maxLS=8 +2bpsPF=1.3149; yearly PF 1.408/1.457/1.427/2.511",
+    "combined_75pct_runner": "n=1054 WR=55.88% PF=1.6441 avg_win=+18.86 avg_loss=-14.53 DD=300.2 +2bpsPF=1.3195; true payoff ratio about 1.30:1",
+    "combined_100pct_runner": "n=1054 WR=54.27% PF=1.6263 avg_win=+20.57 avg_loss=-15.01 DD=320.8 +2bpsPF=1.3215",
+    "weak_quarters_remain": ["2024Q4", "2025Q3"],
+    "promotion": false
   },
   "m9r": {
-    "status": "FOUR_ARM_FRESH_PROSPECTIVE_DESIGN_FROZEN_NOT_STARTED",
-    "arms": ["R0_N3_BASE", "R1_N6_HALF_RISK", "R2_SELECTIVE_HALF_RUNNER", "R3_COMBINED"],
-    "decision": "KEEP_SEPARATE_UNTIL_BASE_MULTI_TIMEFRAME_FORWARD_BEHAVIOR_IS_ESTABLISHED"
+    "status": "FROZEN_NOT_STARTED",
+    "decision": "Do not launch old M9R separately now; M9W supersedes the research direction but remains historical/exposed. Preserve old M9R files for history."
   },
   "btc": {
     "historical_2023_2026_data_available": false,
-    "policy": "Treat BTC as separate research family; continue genuine-source/M7C/M8C forward collection. Do not transplant GOLD multi-timeframe rules into BTC.",
-    "known_issue": "BTC LONG extras historically had large tail-loss problems; M8C BTC LONG rejection challenger remains running unchanged."
+    "policy": "Separate research family; continue genuine-source/M7C/M8C evidence. Do not transplant GOLD M9W rules into BTC."
   },
   "next": {
-    "stage": "M9V_V2_PERSISTENT_FORWARD_COLLECTION",
+    "stage": "M9X_GOLD_PAYOFF_DECOUPLING_DETERMINISTIC_REPRODUCTION_AND_ROBUSTNESS",
     "tasks": [
-      "User pulls latest feature/mochipoyo-alert-research if needed and starts M9V 03_run_shadow_forever.bat while M8C/M7C/collector remain running.",
-      "Never rerun M9V 00 or 01 and never delete/reset the v2 runtime manifest/start receipt.",
-      "Let M9V collect fresh candidates from the immutable start 2026.07.24 11:04:00 MT5 server time.",
-      "Review V0/V1/V2 separately plus S1/S2/S3/S4 branch counts, ordered confirmations, PF, win rate, payoff, DD and tails at checkpoints.",
-      "Do not start M9R overlays until base multi-timeframe forward behavior is established.",
-      "Keep BTC source/M7C/M8C evidence collection unchanged."
+      "Keep M9V v2 fresh forward and M8C/M7C/collector unchanged.",
+      "Build one deterministic repository implementation reproducing M9W entry-reclaim, N6 actual-entry sizing, selective runner and runner-share sensitivity.",
+      "Audit exact closed-bar timing, M5 Wilder ATR14, PRIMARY bid versus first-turn/reclaim bid, 10-M1-bar timeout semantics, spread treatment and exact runner exit timing.",
+      "Reproduce component attribution: entry only, entry+N6, entry+runner, combined.",
+      "Stress reclaim offset around 0.00-0.20 ATR and wait 5-30 minutes without selecting a single historical optimum.",
+      "Report yearly/quarterly/monthly counts, PF, payoff, DD, streak, tail loss and added-cost sensitivity.",
+      "Do not add M9W to M9V or start any new payoff forward shadow until deterministic reproduction passes."
     ],
-    "user_bat_required_now": true
+    "user_bat_required_now": false
   },
   "objective": {
-    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_HIGH_WIN_RATE_USEFUL_PORTFOLIO_FREQUENCY_BALANCED_PAYOFF_AND_LOWER_DRAWDOWN",
-    "single_branch_frequency_is_not_primary_constraint": true,
-    "quality_over_branch_count": true,
-    "deduplicate_overlapping_timeframes": true,
-    "ordered_confirmation_metadata_not_generic_agreement_score": true
+    "final_goal": "ROBUST_MULTI_TIMEFRAME_MULTI_ASSET_EDGE_WITH_HIGH_WIN_RATE_USEFUL_PORTFOLIO_FREQUENCY_POSITIVE_REWARD_RISK_AND_LOWER_DRAWDOWN",
+    "entry_and_exit_vectors_separate": true,
+    "quality_over_single_branch_frequency": true,
+    "deduplicate_overlapping_timeframes": true
   },
   "safety": {
     "audit_only": true,
@@ -95,9 +79,9 @@
     "entry_gate_enabled": false,
     "m7c_formula_changed": false,
     "m7c_threshold_changed": false,
-    "m7c_runtime_manifest_reset_allowed": false,
     "m8c_prospective_start_reset_allowed": false,
     "m9v_runtime_reset_allowed": false,
+    "m9w_added_to_forward": false,
     "automatic_live_promotion": false
   }
 }
