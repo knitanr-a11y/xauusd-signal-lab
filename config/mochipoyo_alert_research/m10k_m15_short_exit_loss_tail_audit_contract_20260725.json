@@ -1,0 +1,63 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10K_M15_SHORT_EXIT_LOSS_TAIL_AUDIT",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "audit_only": true,
+  "purpose": "Hold the M10J C0212 entry trigger fixed and test whether causal ATR-based exits can improve PF/payoff/DD by cutting loss tails without post-hoc entry filtering.",
+  "seed": {
+    "source_stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "entry_timeframe": "M15",
+    "direction": "SHORT",
+    "entry": "exact M1 open bid at the new M15 bar open",
+    "entry_formula_must_not_change": true
+  },
+  "exit_grid": {
+    "entry_atr": "latest fully closed M15 Wilder ATR14 at decision",
+    "take_profit_atr": [1.0, 1.5, 2.0, 2.5],
+    "stop_loss_atr": [0.75, 1.0, 1.25, 1.5],
+    "max_hold_minutes": [120, 240, 360],
+    "cells": 48,
+    "M1_path": true,
+    "short_touch_prices": "evaluate ask high/low using bid OHLC plus the M1 spread",
+    "same_m1_bar_tp_sl_priority": "SL_FIRST_CONSERVATIVE",
+    "timeout_exit": "exact M1 open ask at max-hold time",
+    "one_position_per_cell": true
+  },
+  "spread": {
+    "actual_m1_spread": true,
+    "fixed_usd_sensitivity": 0.20,
+    "fixed_spread_path_recomputed": true
+  },
+  "split_contract": {
+    "exit_grid_discovery_and_ranking": "2023-2024_ONLY",
+    "validation": "2025_LOCKED_DESCRIPTIVE_AFTER_GRID_FREEZE",
+    "final_test": "2026_THROUGH_2026-06-19_LOCKED_DESCRIPTIVE_AFTER_GRID_FREEZE",
+    "historical_status": "RESEARCH_EXPOSED_BECAUSE_M10J_TRIGGER_WAS_SELECTED_AFTER VALIDATION/TEST REVIEW; NOT A FRESH OOS CLAIM"
+  },
+  "selection": {
+    "minimum_discovery_count": 40,
+    "freeze_top_cells_from_discovery_only": 20,
+    "target_pf": 2.0,
+    "review_metrics": ["count", "win_rate", "PF", "average_win", "average_loss", "payoff", "net", "max_DD", "max_losing_streak", "loss_tail", "fixed0p20_PF"],
+    "do_not_add_entry_conditions": true,
+    "do_not_use_2025_or_2026_to_choose_tp_sl_hold": true
+  },
+  "success_interpretation": {
+    "robust_pf2": "PF >= 2.0 in 2023-2024, 2025, and 2026 with minimum counts and fixed-$0.20 PF > 1",
+    "below_pf2_but_improved": "May justify separate deterministic reproduction/fresh prospective hypothesis, but remains historical research-exposed.",
+    "no_improvement": "Stop escalating this M15 seed and move to H1/M5 or regime-specific SHORT research."
+  },
+  "safety": {
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
