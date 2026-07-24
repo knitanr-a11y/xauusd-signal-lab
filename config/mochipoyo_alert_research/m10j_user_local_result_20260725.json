@@ -1,0 +1,49 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_STABLE_EDGE_BELOW_PF2",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(30).zip",
+    "sha256": "d1f262d8d2c995e3aa203cc1894acc6a53b743b195a5f5943598068a216ce731",
+    "size_bytes": 348829
+  },
+  "feature_row_count": 80059,
+  "feature_count": 28,
+  "generated_condition_count": 332,
+  "frozen_shortlist_count": 300,
+  "robust_pf2_candidate_count": 0,
+  "all_three_split_pf_gt_1_count": 47,
+  "primary_seed": {
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "horizon_minutes": 240,
+    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529, "win_rate": 0.4571428571428571, "payoff": 1.863114575807344, "max_dd_bps": 367.96281437757904},
+    "validation_2025": {"count": 149, "pf": 1.3904778450159343, "win_rate": 0.4697986577181208, "payoff": 1.5692535679465545, "max_dd_bps": 545.658977395173},
+    "test_2026": {"count": 64, "pf": 1.5465266111892766, "win_rate": 0.453125, "payoff": 1.8664976341939543, "max_dd_bps": 823.9691089106715},
+    "all": {"count": 318, "pf": 1.4839437156621065, "win_rate": 0.4622641509433962, "payoff": 1.7262202406681646, "max_dd_bps": 823.9691089106718},
+    "fixed0p20_all_pf": 1.4816933419152245
+  },
+  "family_evidence": {
+    "stable_all_three_split_candidates": 47,
+    "stable_candidates_containing_h4_ema20_30_bps": 24,
+    "interpretation": "A repeated higher-timeframe/volatility structure appears across stable formulas; this is a historical research hypothesis, not a forward-approved signal."
+  },
+  "interpretation": {
+    "pf2_reached": false,
+    "m15_short_edge_found": true,
+    "edge_is_modest_not_deployable": true,
+    "next": "Freeze C0212 trigger and research exit/loss-tail architecture without adding new entry filters."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "research_exposed_after_validation_review": true,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
