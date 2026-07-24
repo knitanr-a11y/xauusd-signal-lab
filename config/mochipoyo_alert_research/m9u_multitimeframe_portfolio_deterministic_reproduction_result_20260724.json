@@ -1,0 +1,65 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9U_MULTI_TIMEFRAME_PORTFOLIO_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_SELF_VERIFIED_HISTORICAL_REPRODUCTION_ONLY",
+  "recorded_at_utc": "2026-07-24T10:10:00Z",
+  "implementation": "scripts/mochipoyo_alert_research/m9u/python/run_multitimeframe_portfolio_reproduction_audit.py",
+  "self_verification": {
+    "executed_on_same_uploaded_hashed_gold_csvs": true,
+    "result": "PASS",
+    "M5_S1_count": 1256,
+    "M15_S2_count": 1495,
+    "H1_S3_count": 191,
+    "H4_S4_count": 70,
+    "portfolio_count": 2241,
+    "portfolio_profit_factor_bps": 1.44465145217794,
+    "matched_m9t_reference": true
+  },
+  "branch_metrics": {
+    "M5_S1": {"count": 1256, "win_rate": 0.6544585987261147, "profit_factor_bps": 1.3336981886264172, "max_drawdown_bps": 335.25502477738183},
+    "M15_S2": {"count": 1495, "win_rate": 0.622742474916388, "profit_factor_bps": 1.365884145048126, "max_drawdown_bps": 510.52434894848284},
+    "H1_S3": {"count": 191, "win_rate": 0.7120418848167539, "profit_factor_bps": 1.7802349633701025, "max_drawdown_bps": 532.3023910458769},
+    "H4_S4": {"count": 70, "win_rate": 0.7285714285714285, "profit_factor_bps": 3.295562620459433, "max_drawdown_bps": 281.7143876704429}
+  },
+  "portfolio_reference": {
+    "definition": "Chronological GOLD LONG one-position dedup. When flat, first qualifying S1/S2/S3/S4 event opens one virtual position using that branch's own first-turn entry and own frozen proxy exit. Later LONG events during an active position are confirmation metadata only. Simultaneous priority H4>H1>M15>M5.",
+    "count": 2241,
+    "average_trades_per_observed_month": 53.357142857142854,
+    "win_rate": 0.6323070058009818,
+    "profit_factor_bps": 1.44465145217794,
+    "net_bps": 7515.320942048054,
+    "average_win_bps": 17.23141908779551,
+    "average_loss_bps": -20.536573396547002,
+    "max_drawdown_bps": 535.4125258246631,
+    "max_losing_streak": 8,
+    "tail_le_minus_100_fraction": 0.011601963409192326,
+    "yearly_pf": {"2023": 1.3190898570464964, "2024": 1.5244961726487936, "2025": 1.361648452580772, "2026_to_0619": 1.5964934940498556},
+    "extra_2bps_profit_factor": 1.161735796954849,
+    "remaining_weak_quarter": "2025Q3 PF approximately 0.804"
+  },
+  "prospective_design_decision": {
+    "do_not_mix_m9r_risk_reward_into_first_portfolio_forward_test": true,
+    "reason": "First isolate whether adding robust H1 and auxiliary/premium M5/H4 branches improves forward frequency/edge under one-position dedup. M9R runner changes holding duration and could confound the branch-addition comparison.",
+    "next_compare": [
+      "V0_M15_N3_ONLY",
+      "V1_M15_N3_PLUS_H1_S3_ONE_POSITION",
+      "V2_ALL_M5_S1_M15_S2_H1_S3_H4_S4_ONE_POSITION"
+    ],
+    "branch_reporting": "Always report S1/S2/S3/S4 separately in addition to portfolio arms.",
+    "m9r_status": "KEEP_FROZEN_NOT_STARTED; evaluate after base multi-timeframe forward behavior is established"
+  },
+  "guardrails": {
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "historical_periods_research_exposed": true,
+    "independent_validation": false,
+    "generic_agreement_score_used": false,
+    "pyramiding_used": false,
+    "m7c_formula_changed": false,
+    "m8c_reset": false,
+    "new_gold_prospective_started": false,
+    "automatic_live_promotion": false,
+    "audit_only": true
+  }
+}
