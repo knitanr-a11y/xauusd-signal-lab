@@ -14,6 +14,8 @@ if not "%RC%"=="0" (
   exit /b %RC%
 )
 echo.
-echo [DONE] M10B one-shot PASS. NEXT: run 03_run_shadow_forever.bat.
+echo [DONE] M10B one-shot PASS.
+echo NEXT: run 05_open_latest_results.bat and submit 99_UPLOAD_PACKAGE.zip to ChatGPT.
+echo DO NOT run 03_run_shadow_forever.bat until the bootstrap package is reviewed.
 pause
 exit /b 0
