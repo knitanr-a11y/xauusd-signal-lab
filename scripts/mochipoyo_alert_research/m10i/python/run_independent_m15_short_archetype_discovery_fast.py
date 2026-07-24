@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# M10I local-launch repair marker 2026-07-25.
+# This tracked wrapper must be present beside the main M10I discovery script.
+
 import bisect
 from datetime import timedelta
 
