@@ -1,0 +1,29 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10B_GOLD_MULTI_TIMEFRAME_PAYOFF_FRESH_PROSPECTIVE_SHADOW",
+  "status": "FROZEN_IMPLEMENTATION_CLARITY_ADDENDUM_BEFORE_START",
+  "recorded_at_utc": "2026-07-24T18:00:00Z",
+  "clarification": {
+    "native_base_materialization": "RESOLVED_ONLY",
+    "rule": "M10B arm history materializes an upstream post-M10B-start S1/S3/S4 candidate only after its native M9V branch EXIT is resolved. Open upstream candidates are not inserted early into resolved performance history.",
+    "entry_reconstruction": "After native EXIT resolves, entry acceptance is deterministically reconstructed using only the bars/features that were fully closed and knowable at the original entry/reclaim decision. The native EXIT outcome/value is never an input to entry eligibility.",
+    "reason": "Preserve resolved-only live reproducibility and avoid early insertion of unresolved outcomes while reusing the exact M10A deterministic payoff implementation.",
+    "runner_exception": "After native EXIT resolves, a runner arm can remain OPEN if its causal runner exit has not occurred yet. That open runner blocks later entries in the same arm under one-position accounting and is not included in resolved PF/WR until its runner exit resolves."
+  },
+  "not_changed": {
+    "entry_thresholds": true,
+    "runner_thresholds": true,
+    "m9v_start": true,
+    "m9y_start": true,
+    "historical_backfill": false,
+    "live_promotion": false
+  },
+  "safety": {
+    "future_outcome_used_in_entry_gate": false,
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
