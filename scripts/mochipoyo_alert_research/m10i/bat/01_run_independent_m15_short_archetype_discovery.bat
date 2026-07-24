@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-cd /d "%~dp0\..\..\..\..\.."
+cd /d "%~dp0\..\..\..\.."
 
 echo ============================================================
 echo M10I Mochipoyo-Independent M15 SHORT Archetype Discovery
@@ -17,7 +17,7 @@ set "M10I_MAIN=%M10I_PYDIR%\run_independent_m15_short_archetype_discovery.py"
 if not exist "%M10I_MAIN%" (
   echo [M10I BLOCKED] Required main script is missing: %M10I_MAIN%
   echo [SAFE] Do not modify thresholds, hashes, forward starts, or running monitors.
-  echo [ACTION] Confirm GitHub Desktop Current branch is feature/mochipoyo-alert-research, then Fetch origin and Pull origin.
+  echo [ACTION] Send the complete console output to ChatGPT.
   pause
   exit /b 2
 )
