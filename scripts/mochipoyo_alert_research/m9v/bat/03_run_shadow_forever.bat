@@ -3,7 +3,7 @@ setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0\..\..\..\.."
 
 echo ============================================================
-echo M9V GOLD Multi-Timeframe Prospective Shadow - PERSISTENT
+echo M9V GOLD Multi-Timeframe Prospective Shadow v2 - PERSISTENT
 echo ============================================================
 echo.
 echo Keep this window OPEN.
@@ -13,7 +13,7 @@ echo The loop runs every 60 seconds and stops fail-closed on contract/data-integ
 echo Stop safely with 04_stop_shadow_forever.bat.
 echo.
 
-python "scripts\mochipoyo_alert_research\m9v\python\run_m9v_shadow_forever_safe.py" --interval-seconds 60
+python "scripts\mochipoyo_alert_research\m9v\python\run_m9v_shadow_forever_safe_v2.py" --interval-seconds 60
 set "RC=%ERRORLEVEL%"
 
 echo.
