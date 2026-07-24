@@ -3,7 +3,7 @@
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
   "recorded_at_utc": "2026-07-24T21:35:00Z",
-  "status": "M10B_M10E_RUNNING_M10H_PASS_SAMPLE_INSUFFICIENT_M10I_INDEPENDENT_SHORT_DISCOVERY_PENDING_LOCAL_AUDIT_ONLY",
+  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10I_PASS_NO_ROBUST_EDGE_M10J_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -57,34 +57,39 @@
   },
   "m10h": {
     "stage": "M10H_PRIMARY_SHORT_SOURCE_FIDELITY_AUDIT",
-    "status": "PASS_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_ONLY_INSUFFICIENT_XAU_SHORT_SAMPLE",
+    "status": "PASS_USER_LOCAL_PROSPECTIVE_EVIDENCE_AUDIT_ONLY_INSUFFICIENT_XAU_SHORT_SAMPLE_CONTINUE_COLLECTION",
     "result": "config/mochipoyo_alert_research/m10h_primary_short_source_fidelity_user_local_result_20260725.json",
     "uploaded_package_sha256": "a8f29a0fe3e761c51c8f2436f7d50616855349108cc922c5608754f0eb831a11",
     "xauusd_primary_short": {"genuine_scored": 4, "matched": 3, "missed": 1, "finalized_extra_proxy_short": 9},
     "only_miss_reason": "STATE_NOT_IDLE",
     "failed_kernel_condition_on_only_miss": false,
-    "candidate_fidelity_gate_count": 0,
-    "clear_missing_indicator_condition_found": false,
     "continue_source_collection": true,
     "m7c_refit_approved": false
   },
   "m10i": {
     "stage": "M10I_MOCHIPOYO_INDEPENDENT_M15_SHORT_ARCHETYPE_DISCOVERY",
+    "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_NO_ROBUST_SHORT_EDGE",
+    "result": "config/mochipoyo_alert_research/m10i_independent_m15_short_archetype_user_local_result_20260725.json",
+    "uploaded_package_sha256": "22252fc94af9e58675a5280c8e980e1f4ccfdbc205fa40240e8c7e02d2f4c5b8",
+    "feature_row_count": 81001,
+    "rule_variant_count": 42,
+    "rule_horizon_result_count": 126,
+    "robust_pf2_candidate_count": 0,
+    "all_three_split_pf_gt_1_candidate_count": 0,
+    "best_train_candidate": {"candidate_id": "M10I_C027_H240", "train_pf": 1.1884742109881739, "validation_2025_pf": 0.8029580227141846, "test_2026_pf": 1.0546714869380376, "all_pf": 1.0045081730733159, "fixed0p20_all_pf": 0.9992636565935438},
+    "forward_approved": false
+  },
+  "m10j": {
+    "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
     "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
-    "contract": "config/mochipoyo_alert_research/m10i_mochipoyo_independent_m15_short_archetype_discovery_contract_20260725.json",
-    "script": "scripts/mochipoyo_alert_research/m10i/python/run_independent_m15_short_archetype_discovery.py",
-    "run_bat": "scripts/mochipoyo_alert_research/m10i/bat/01_run_independent_m15_short_archetype_discovery.bat",
-    "launcher_fast_file_dependency_removed": true,
-    "launcher_fix_commit": "2589a8475b0040faa51b7438056aa197449e7cff",
-    "timeframe": "M15",
-    "direction": "SHORT",
+    "contract": "config/mochipoyo_alert_research/m10j_independent_m15_short_feature_mining_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10j/python/run_m10j.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10j/bat/01_run_m10j.bat",
     "candidate_universe_uses_mochipoyo_kernel": false,
-    "archetypes": ["TREND_BREAKDOWN", "PULLBACK_RESUME", "MOMENTUM_ACCELERATION", "VOLATILITY_BREAKDOWN", "HTF_ALIGNMENT_BREAK", "EXHAUSTION_REVERSAL"],
-    "fixed_horizons_minutes": [60, 120, 240],
+    "formula_generation_and_ranking": "2023-2024_ONLY",
+    "validation": "2025_LOCKED",
+    "final_test": "2026_THROUGH_0619_LOCKED",
     "target_pf": 2.0,
-    "discovery": "2023-2024_ONLY",
-    "validation": "2025_ONLY",
-    "final_test": "2026_THROUGH_0619_ONLY",
     "forward_approved": false
   },
   "forced_reboot_recovery": {
@@ -102,5 +107,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B/M10E and all existing source/proxy collectors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT events for future M10H re-audit. Fetch/Pull feature/mochipoyo-alert-research so M10I BAT commit 2589a8475b0040faa51b7438056aa197449e7cff is present, then rerun the same M10I BAT. The BAT no longer depends on run_independent_m15_short_archetype_discovery_fast.py. Submit M10I 99_UPLOAD_PACKAGE.zip."
+  "next": "Keep all existing forward collectors/monitors running unchanged. Continue accumulating genuine XAUUSD PRIMARY_SHORT for future M10H re-audit. Fetch/Pull and run M10J 01_run_m10j.bat locally, then submit M10J 99_UPLOAD_PACKAGE.zip."
 }
