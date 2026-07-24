@@ -4,12 +4,12 @@ cd /d "%~dp0\..\..\..\..\.."
 
 echo ============================================================
 echo MOCHIPOYO RESEARCH - FORCED REBOOT SAFE RECOVERY
-ECHO ============================================================
+echo ============================================================
 echo.
 echo Use this ONLY after Windows/PC was forcibly restarted or powered off.
-echo It checks that collector / M7C / M9V / M9Y loops are NOT running.
+echo It checks that collector / M7C / M9V / M9Y / M10B loops are NOT running.
 echo It archives and removes stale loop-lock files only.
-echo It does NOT reset/delete runtime manifests, prospective starts, SQLite, M8C, M9V, or M9Y history.
+echo It does NOT reset/delete runtime manifests, prospective starts, SQLite, M8C, M9V, M9Y, or M10B history.
 echo.
 
 python "scripts\mochipoyo_alert_research\recovery\python\recover_after_forced_reboot.py"
@@ -32,9 +32,11 @@ echo 3. scripts\mochipoyo_alert_research\run_m7c_prospective_shadow_forever.bat
 echo 4. scripts\mochipoyo_alert_research\m8c\bat\02_run_forward_shadow_forever.bat
 echo 5. scripts\mochipoyo_alert_research\m9v\bat\03_run_shadow_forever.bat
 echo 6. scripts\mochipoyo_alert_research\m9y\bat\03_run_shadow_forever.bat
+echo 7. scripts\mochipoyo_alert_research\m10b\bat\03_run_shadow_forever.bat
 echo.
-echo NEVER rerun M9V BAT00/BAT01 or M9Y BAT01 after reboot.
-echo NEVER reset M7C/M8C/M9V/M9Y prospective starts.
+echo NEVER rerun M9V BAT00/BAT01, M9Y BAT01, or M10B BAT01 after reboot.
+echo NEVER reset M7C/M8C/M9V/M9Y/M10B prospective starts.
+echo If raw MT5 CSVs have a permanent downtime gap, that interval is unobserved and must not be backfilled from future outcomes.
 echo.
 pause
 exit /b 0
