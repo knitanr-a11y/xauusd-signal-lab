@@ -1,0 +1,55 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10J_INDEPENDENT_M15_SHORT_CAUSAL_FEATURE_MINING",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Search for robust GOLD M15 SHORT entry structure without using the Mochipoyo kernel as the candidate universe and without post-hoc tuning on 2025 or 2026.",
+  "candidate_universe": "all causal M15 decisions from frozen GOLD history",
+  "direction": "SHORT",
+  "timeframe": "M15",
+  "discovery_split": "2023-2024 only",
+  "validation_split": "2025 only; unavailable to formula generation/ranking",
+  "final_test_split": "2026 through 2026-06-19 only; unavailable to formula generation/ranking",
+  "entry": "exact M1 open bid at the new M15 decision bar",
+  "exit_horizons_minutes": [60, 120, 240],
+  "one_position_per_formula_horizon": true,
+  "feature_policy": {
+    "causal_closed_only": true,
+    "allowed_families": ["RCI", "MACD", "EMA gaps and slopes", "ATR percentile", "returns", "candle body/close position", "H1/H4 trend and momentum", "tick-volume ratio"],
+    "future_MAE_MFE": false,
+    "trade_outcome_as_entry_feature": false
+  },
+  "mining": {
+    "threshold_source": "discovery feature quantiles only",
+    "quantiles": [0.1, 0.2, 0.3, 0.7, 0.8, 0.9],
+    "operators": ["<=", ">="],
+    "single_condition_formulas": true,
+    "two_condition_conjunctions": true,
+    "minimum_discovery_trades": 40,
+    "top_single_conditions_per_horizon_for_pairing": 30,
+    "frozen_shortlist_per_horizon": 100,
+    "ranking": "discovery PF first, then discovery net, then count",
+    "validation_or_test_used_to_generate_or_rank_shortlist": false
+  },
+  "robust_target": {
+    "profit_factor": 2.0,
+    "minimum_validation_trades": 20,
+    "minimum_final_test_trades": 15,
+    "positive_net_each_split": true,
+    "fixed_spread_usd": 0.20,
+    "fixed_spread_all_pf_gt": 1.0
+  },
+  "guardrails": {
+    "audit_only": true,
+    "newest_csv_row_closed": true,
+    "time_basis": "MT5 server time",
+    "historical_backfill": false,
+    "m7c_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "m10e_modified_or_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
