@@ -2,8 +2,8 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "recorded_at_utc": "2026-07-24T19:25:00Z",
-  "status": "M10B_M10E_PERSISTENT_SHADOWS_CONFIRMED_RUNNING_AUDIT_ONLY",
+  "recorded_at_utc": "2026-07-24T20:15:00Z",
+  "status": "M10B_M10E_RUNNING_M10F_SHORT_AUDIT_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -62,6 +62,22 @@
     "persistent_shadow_allowed": true,
     "persistent_loop_started_confirmed": true
   },
+  "m10f": {
+    "stage": "M10F_SHORT_COMPOUND_LOSS_FEATURE_AUDIT",
+    "status": "IMPLEMENTED_USER_LOCAL_HISTORICAL_AUDIT_PENDING",
+    "contract": "config/mochipoyo_alert_research/m10f_short_compound_loss_feature_audit_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10f/python/run_short_compound_loss_feature_audit.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10f/bat/01_run_short_compound_loss_feature_audit.bat",
+    "timeframes": ["M5", "M15", "H1", "H4"],
+    "direction": "SHORT",
+    "target_pf": 2.0,
+    "discovery": "2023-2024_ONLY",
+    "validation": "2025_ONLY",
+    "final_test": "2026_THROUGH_0619_ONLY",
+    "retention_bands": [0.25, 0.50, 0.75],
+    "long_rule_mirroring": false,
+    "forward_approved": false
+  },
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10B_M10E",
     "contract": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
@@ -78,5 +94,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10B and M10E persistent shadows running unchanged. Review M10E at H1 accepted-count checkpoints 5/10/20; no automatic promotion. Separate historical SHORT research, if pursued, must not retrofit current forward monitors."
+  "next": "Keep M10B/M10E running unchanged. Fetch/Pull and run M10F historical SHORT compound-loss audit locally; submit M10F 99_UPLOAD_PACKAGE.zip for holdout review. No SHORT forward arm before deterministic reproduction."
 }
