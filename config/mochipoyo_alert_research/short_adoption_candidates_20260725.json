@@ -1,0 +1,57 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "status": "RESEARCH_ADOPTION_DIRECTION_ONLY_NOT_FORWARD_APPROVED",
+  "recorded_after_stage": "M10L_H1_SHORT_CAUSAL_FEATURE_MINING",
+  "candidates": [
+    {
+      "priority": 1,
+      "candidate_id": "M10J_C0212",
+      "timeframe": "M15",
+      "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+      "horizon_minutes": 240,
+      "train_pf": 1.5689385901535529,
+      "validation_2025_pf": 1.3904778450159343,
+      "test_2026_pf": 1.5465266111892766,
+      "all_pf": 1.4839437156621065,
+      "fixed0p20_all_pf": 1.4816933419152245,
+      "role": "PRIMARY_SHORT_RESEARCH_ADOPTION_CANDIDATE"
+    },
+    {
+      "priority": 2,
+      "candidate_id": "M10L_H240_C056",
+      "timeframe": "H1",
+      "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
+      "horizon_minutes": 240,
+      "train_pf": 1.314149813327255,
+      "validation_2025_pf": 1.4866907197300367,
+      "test_2026_pf": 1.3318688824185096,
+      "all_pf": 1.370313393687437,
+      "fixed0p20_all_pf": 1.3699783740979736,
+      "role": "H1_ROBUSTNESS_RESEARCH_ADOPTION_CANDIDATE"
+    },
+    {
+      "priority": 3,
+      "candidate_id": "M10L_H480_C050",
+      "timeframe": "H1",
+      "formula": "h1_macd_line_bps <= -7.667425443 AND h1_macd_hist_bps >= 3.637199446",
+      "horizon_minutes": 480,
+      "train_pf": 1.3813832800484998,
+      "validation_2025_pf": 1.313436526811133,
+      "test_2026_pf": 1.7016953863022222,
+      "all_pf": 1.5228292700907973,
+      "fixed0p20_all_pf": 1.5213429832800756,
+      "role": "H1_HIGHER_PAYOFF_RESEARCH_REFERENCE"
+    }
+  ],
+  "policy": {
+    "retain_for_portfolio_and_regime_research": true,
+    "do_not_refit_from_2025_2026": true,
+    "deterministic_reproduction_required_before_any_forward_shadow": true,
+    "fresh_prospective_proof_required_before_any_live_use": true,
+    "automatic_promotion": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
