@@ -1,0 +1,91 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-24T19:15:00Z",
+  "purpose": "Fresh prospective audit-only comparison of the unchanged H1 runner50 baseline versus the M10D-reproduced causal compound-loss entry filter, using an independent new start and no retrofit/backfill of M9V/M9Y/M10B.",
+  "data": {
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false,
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    }
+  },
+  "upstream": {
+    "source": "M9V v2 branch-candidate ledger READ-ONLY",
+    "required_branch": "S3_H1",
+    "eligibility": "proxy_primary_time must be strictly greater than the independently frozen M10E prospective start",
+    "pre_start_primary_candidate_eligibility": false,
+    "native_materialization": "RESOLVED_ONLY; a post-start S3_H1 candidate is materialized only after its native M9V EXIT resolves. Native outcome is never an entry/filter condition.",
+    "m9v_modified": false,
+    "m9y_output_dependency": false,
+    "m10b_output_dependency": false
+  },
+  "h1_reference": {
+    "entry": "Frozen M10A/M10D H1 reference: original S3_H1; reclaim level = original PRIMARY bid/open - 0.05 * latest fully closed H1 Wilder ATR14 at first-turn; latest fully closed M5 confirmation; max 30 minutes; exact M1 open ask execution; no nearest-M1 fallback.",
+    "runner": "At native H1 EXIT, latest fully closed H4 MACD(6,13) raw line and latest fully closed D1 MACD(6,13) raw line must both be rising versus their previous fully closed bars; then 50% runner exits at first causal H1 RCI9 turn-down at/after native EXIT.",
+    "one_position": true
+  },
+  "compound_filter": {
+    "source": "M10D deterministic user-local reproduction PASS",
+    "direction": "EXCLUDE_H1_LONG_ENTRY",
+    "feature_decision_time": "actual H1 reclaim entry time",
+    "closed_bars_only": true,
+    "m5_macd_definition": "MACD(6,13) line normalized by latest closed M5 close into bps; slope = latest fully closed M5 MACD bps minus previous fully closed M5 MACD bps",
+    "h1_stack_definition": "(EMA30 - EMA40) / abs(latest fully closed H1 close) * 10000 bps",
+    "m5_macd_bps_slope_le": -0.1308,
+    "h1_ema30_minus_ema40_bps_ge": 17.3333,
+    "exclude_when": "both conditions are true",
+    "future_outcome_used_in_entry_gate": false,
+    "mae_mfe_exit_path_used_as_filter_feature": false
+  },
+  "arms": {
+    "E0_H1_BASELINE_RUNNER50": {
+      "entry": "unchanged H1 reference",
+      "compound_filter": false,
+      "runner_share": 0.5,
+      "one_position": true
+    },
+    "E1_H1_FILTERED_RUNNER50": {
+      "entry": "unchanged H1 reference",
+      "compound_filter": true,
+      "filter_before_one_position": true,
+      "runner_share": 0.5,
+      "one_position": true
+    }
+  },
+  "review_gates": {
+    "H1_operational_accepted": 5,
+    "H1_interim_accepted": 10,
+    "H1_formal_accepted": 20,
+    "interpretation": "Checkpoints are manual research reviews only. No automatic promotion. Compare baseline and filtered arms on accepted/resolved counts, win rate, PF, payoff, net, DD, loss tail and excluded-entry metadata."
+  },
+  "chronology_anchors": {
+    "M9V_start_mt5_server": "2026.07.24 11:04:00",
+    "M9Y_start_mt5_server": "2026.07.24 12:45:00",
+    "M10B_start_mt5_server": "2026.07.24 20:54:00",
+    "M10E_start": "TO_BE_FROZEN_ONCE_FROM_LATEST_STABLE_CLOSED_M1_BY_BAT01",
+    "M10E_start_must_be_strictly_after_all_prior_starts": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "historical_backfill": false,
+    "m7c_reset": false,
+    "m8c_reset": false,
+    "m9v_reset": false,
+    "m9y_reset": false,
+    "m10b_reset": false,
+    "automatic_live_promotion": false
+  }
+}
