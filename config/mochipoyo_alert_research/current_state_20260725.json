@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10B_M10E_RUNNING_M10H_COLLECTING_M10P_BOOTSTRAP_PASS_PERSISTENT_SHADOW_START_READY_AUDIT_ONLY",
+  "status": "M10P_RUNNING_M10P1_C0212_DETERMINISTIC_REPRODUCTION_IMPLEMENTED_PENDING_LOCAL_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -11,7 +11,7 @@
     "M9Y": "RUNNING_KEEP_UNCHANGED",
     "M10B": "PERSISTENT_LOOP_CONFIRMED_RUNNING_KEEP_UNCHANGED",
     "M10E": "PERSISTENT_LOOP_CONFIRMED_RUNNING_KEEP_UNCHANGED",
-    "M10P": "BOOTSTRAP_PASS_READY_TO_START_BAT03"
+    "M10P": "PERSISTENT_LOOP_USER_CONFIRMED_RUNNING_KEEP_UNCHANGED"
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
@@ -43,29 +43,38 @@
   },
   "m10p": {
     "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
     "bootstrap_result": "config/mochipoyo_alert_research/m10p_user_local_bootstrap_result_20260725.json",
-    "uploaded_package_sha256": "417ac47982bcad88f621e760d89fdec329fdf3f39cf636d0d6fadfc8b373d325",
     "prospective_start_server_time": "2026.07.24 23:56:00",
     "fixed_seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
     "fixed_regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
     "fixed_horizon_minutes": 240,
     "one_position": true,
-    "bootstrap_counts": {
-      "candidate_match_count": 0,
-      "accepted_count": 0,
-      "resolved_count": 0,
-      "open_count": 0,
-      "entry_data_gap_count": 0,
-      "exit_data_gap_count": 0
-    },
-    "initializer_bat": "scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat",
-    "forever_bat": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat",
     "initializer_must_never_run_again": true,
     "historical_backfill": false,
+    "review_gates_resolved": {"M10Q": 5, "M10R": 10, "M10S": 20, "M10T": 40, "M10U": 60},
     "automatic_promotion": false,
     "forward_live_trading_approved": false
   },
+  "m10p1": {
+    "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
+    "status": "IMPLEMENTED_PENDING_USER_LOCAL_HISTORICAL_AUDIT_ONLY",
+    "contract": "config/mochipoyo_alert_research/m10p1_c0212_deterministic_reproduction_contract_20260725.json",
+    "script": "scripts/mochipoyo_alert_research/m10p1/python/run_m10p1.py",
+    "run_bat": "scripts/mochipoyo_alert_research/m10p1/bat/01_run_m10p1.bat",
+    "open_results_bat": "scripts/mochipoyo_alert_research/m10p1/bat/02_open_latest_results.bat",
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "decision_timeframe": "M15",
+    "horizon_minutes": 240,
+    "expected_split_counts": {"train_2023_2024": 105, "validation_2025": 149, "test_2026": 64, "all": 318},
+    "expected_pf": {"train_2023_2024": 1.5689385901535529, "validation_2025": 1.3904778450159343, "test_2026": 1.5465266111892766, "all": 1.4839437156621065},
+    "expected_fixed0p20_all_pf": 1.4816933419152243,
+    "metric_tolerance": 1e-10,
+    "reads_result_csv_for_trade_generation": false,
+    "m10p_modified": false
+  },
+  "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
   "forced_reboot_recovery": {
     "status": "READY_WITH_M10P",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
@@ -82,5 +91,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Fetch/Pull the recovery/state updates if desired, then start scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat. Never rerun M10P BAT01. Keep all existing monitors unchanged. M10P remains audit-only fresh prospective shadow; do not tune C056/G013 from prospective outcomes."
+  "next": "Keep M10P and all existing monitors running unchanged. Fetch/Pull and run M10P1 C0212 deterministic reproduction locally. Upload only M10P1 LATEST/99_UPLOAD_PACKAGE.zip. If and only if deterministic reproduction passes, design a completely separate fresh C0212 shadow with its own immutable start; never reuse M10P start."
 }
