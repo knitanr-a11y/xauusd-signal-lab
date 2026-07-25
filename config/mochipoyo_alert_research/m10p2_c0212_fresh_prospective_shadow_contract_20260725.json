@@ -1,0 +1,114 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-25T06:30:00Z",
+  "purpose": "Fresh audit-only prospective validation of the deterministically reproduced M10J_C0212 SHORT family, using its own brand-new immutable MT5-server start, without reusing or modifying M10P.",
+  "data": {
+    "ticker": "XAUUSD",
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "source_resolution": "Reuse M8B LATEST/06_symbol_metadata.json mt5_files_root exactly, as used by M10B/M10E/M10P.",
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "historical_backfill": false,
+    "append_safe_prefix_required": true,
+    "nearest_m1_fallback": false
+  },
+  "candidate": {
+    "candidate_id": "M10J_C0212",
+    "direction": "SHORT",
+    "decision_timeframe": "M15",
+    "formula": {
+      "h4_ema20_30_bps_ge": 37.61355979,
+      "h1_atr_pct100_ge": 0.8
+    },
+    "feature_definitions": {
+      "h4_ema20_30_bps": "At each M15 decision, use latest fully closed H4. Compute (EMA20-EMA30)/abs(H4 close)*10000 bps using standard EMA recursion identical to M10J/M10P1.",
+      "h1_atr_pct100": "At each M15 decision, use latest fully closed H1. Compute Wilder ATR14, then percentile100 as count(last 100 ATR values <= current ATR)/100, identical to M10I/M10J/M10P1.",
+      "causal_context": "Only H1/H4 bars fully closed at or before the M15 decision are eligible."
+    },
+    "entry": "Virtual exact M1 open bid at the eligible M15 decision. Exact timestamp required.",
+    "exit": "Virtual exact M1 open ask exactly 240 minutes after entry; ask = M1 open + spread_points * point. Exact timestamp required; missing exact exit becomes EXIT_DATA_GAP and is never backfilled.",
+    "horizon_minutes": 240,
+    "one_position": true,
+    "overlap_rule": "While an accepted candidate is within its scheduled 240-minute holding interval, later eligible C0212 candidates are ONE_POSITION_ACTIVE skips. Candidate exactly at prior scheduled exit is allowed.",
+    "fixed_spread_sensitivity_usd": 0.20
+  },
+  "historical_reference": {
+    "source_stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+    "trade_count": 318,
+    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529},
+    "validation_2025": {"count": 149, "pf": 1.3904778450159343},
+    "test_2026": {"count": 64, "pf": 1.5465266111892766},
+    "all_pf": 1.4839437156621065,
+    "fixed0p20_all_pf": 1.4816933419152243,
+    "reference_only": true,
+    "prospective_threshold_tuning_from_outcomes": false
+  },
+  "fresh_start_bootstrap": {
+    "fresh_gold_prospective_start_required": true,
+    "start_freeze_rule": "Resolve M8B mt5_files_root; verify six live CSVs; take two identical tail snapshots 2 seconds apart; verify lag bounds; freeze immutable row-prefix fingerprints; set M10P2 start to latest CLOSED M1 server-open.",
+    "start_must_be_strictly_after_m10p_start": true,
+    "reuse_m10p_start": false,
+    "pre_start_candidate_eligibility": false,
+    "backfill": false,
+    "reset_allowed": false,
+    "initializer_may_run_once_only": true
+  },
+  "runtime": {
+    "version": "M10P2_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "persistent_runtime_manifest": true,
+    "persistent_state": true,
+    "candidate_ledger": true,
+    "trade_ledger": true,
+    "overlap_ledger": true,
+    "restart_safe": true,
+    "cycle_seconds": 60,
+    "rebuild_post_start_deterministically_each_cycle": true,
+    "do_not_delete_unresolved_gap_rows": true
+  },
+  "review_gates": {
+    "operational_resolved": 5,
+    "interim_resolved": 10,
+    "formal_resolved": 20,
+    "automatic_live_promotion": false,
+    "interpretation": "Checkpoints are manual research reviews only. C0212 historical PF target is positive-edge preservation, not automatic PF2 promotion."
+  },
+  "relationship_to_existing_forward": {
+    "collector_continues_unchanged": true,
+    "m7c_continues_unchanged": true,
+    "m8c_continues_unchanged": true,
+    "m9v_continues_unchanged": true,
+    "m9y_continues_unchanged": true,
+    "m10b_continues_unchanged": true,
+    "m10e_continues_unchanged": true,
+    "m10p_continues_unchanged": true,
+    "m10p_runtime_manifest_is_chronology_anchor_read_only": true
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "historical_backfill": false,
+    "collector_reset": false,
+    "m7c_reset": false,
+    "m8c_reset": false,
+    "m9v_reset": false,
+    "m9y_reset": false,
+    "m10b_reset": false,
+    "m10e_reset": false,
+    "m10p_reset": false,
+    "automatic_live_promotion": false
+  }
+}
