@@ -69,11 +69,23 @@ def build_candidate_rows(bars: dict[str, list[c.Bar]]) -> list[dict[str, Any]]:
     return selected
 
 
-def build_trade_ledger(rows: list[dict[str, Any]], m1: list[c.Bar]) -> list[dict[str, Any]]:
+def build_trade_ledger(
+    rows: list[dict[str, Any]],
+    m1: list[c.Bar],
+    allowed_years: set[int] | None,
+    id_prefix: str,
+) -> list[dict[str, Any]]:
+    """Mirror original M10J selected_returns one-position semantics exactly.
+
+    Each split is evaluated independently. Rows outside allowed_years do not
+    consume the one-position block for that split.
+    """
     by_time = {bar.time: bar for bar in m1}
     trades: list[dict[str, Any]] = []
     blocked_until: datetime | None = None
     for row in rows:
+        if allowed_years is not None and int(row["year"]) not in allowed_years:
+            continue
         decision = row["decision"]
         if blocked_until is not None and decision < blocked_until:
             continue
@@ -87,7 +99,7 @@ def build_trade_ledger(rows: list[dict[str, Any]], m1: list[c.Bar]) -> list[dict
         fixed_exit_ask = float(exit_bar.open) + FIXED_SPREAD_USD
         trades.append(
             {
-                "trade_id": f"M10P1_T{len(trades) + 1:06d}",
+                "trade_id": f"{id_prefix}_T{len(trades) + 1:06d}",
                 "entry_time": decision.strftime(c.TIME_FORMAT),
                 "exit_time": exit_time.strftime(c.TIME_FORMAT),
                 "year": int(row["year"]),
@@ -106,18 +118,24 @@ def build_trade_ledger(rows: list[dict[str, Any]], m1: list[c.Bar]) -> list[dict
     return trades
 
 
-def split_metrics(trades: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    specs = {
+def split_ledgers(rows: list[dict[str, Any]], m1: list[c.Bar]) -> dict[str, list[dict[str, Any]]]:
+    specs: dict[str, set[int] | None] = {
         "train": {2023, 2024},
         "val2025": {2025},
         "test2026": {2026},
         "all": {2023, 2024, 2025, 2026},
     }
+    return {
+        name: build_trade_ledger(rows, m1, years, f"M10P1_{name.upper()}")
+        for name, years in specs.items()
+    }
+
+
+def split_metrics(ledgers: dict[str, list[dict[str, Any]]]) -> dict[str, dict[str, Any]]:
     output: dict[str, dict[str, Any]] = {}
-    for name, years in specs.items():
-        subset = [row for row in trades if int(row["year"]) in years]
-        actual = c.metrics_from_values([float(row["return_bps"]) for row in subset])
-        fixed = c.metrics_from_values([float(row["fixed0p20_return_bps"]) for row in subset])
+    for name, trades in ledgers.items():
+        actual = c.metrics_from_values([float(row["return_bps"]) for row in trades])
+        fixed = c.metrics_from_values([float(row["fixed0p20_return_bps"]) for row in trades])
         output[name] = {"actual": actual, "fixed0p20": fixed}
     return output
 
@@ -142,15 +160,16 @@ def assert_reference(metrics: dict[str, dict[str, Any]], reference: dict[str, An
     checks: list[dict[str, Any]] = []
     for split, expected in mapping.items():
         actual = metrics[split]["actual"]
-        count_check = {
-            "split": split,
-            "field": "count",
-            "expected": int(expected["count"]),
-            "actual": int(actual["count"]),
-            "abs_diff": abs(int(actual["count"]) - int(expected["count"])),
-            "pass": int(actual["count"]) == int(expected["count"]),
-        }
-        checks.append(count_check)
+        checks.append(
+            {
+                "split": split,
+                "field": "count",
+                "expected": int(expected["count"]),
+                "actual": int(actual["count"]),
+                "abs_diff": abs(int(actual["count"]) - int(expected["count"])),
+                "pass": int(actual["count"]) == int(expected["count"]),
+            }
+        )
         pf_check = check_close("pf", actual["profit_factor_bps"], expected["pf"], tolerance)
         pf_check["split"] = split
         checks.append(pf_check)
@@ -204,10 +223,11 @@ def main() -> int:
 
         bars = {tf: c.load_bars(path) for tf, path in paths.items()}
         candidate_rows = build_candidate_rows(bars)
-        trades = build_trade_ledger(candidate_rows, bars["M1"])
-        metrics = split_metrics(trades)
+        ledgers = split_ledgers(candidate_rows, bars["M1"])
+        metrics = split_metrics(ledgers)
         tolerance = float(contract["reproduction_rules"]["metric_tolerance"])
         checks = assert_reference(metrics, contract["reference"], tolerance)
+        all_trades = ledgers["all"]
 
         out_root = local / "outputs" / "M10P1"
         stamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
@@ -224,14 +244,15 @@ def main() -> int:
             "run_at_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "candidate_id": "M10J_C0212",
             "candidate_row_count_before_one_position": len(candidate_rows),
-            "trade_count_after_one_position": len(trades),
+            "trade_count_after_one_position": len(all_trades),
+            "split_trade_counts": {name: len(rows) for name, rows in ledgers.items()},
             "metrics": metrics,
             "reference_checks": checks,
             "frozen_hashes": hashes,
             "guardrails": contract["safety"],
         }
         (archive / "01_summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        write_csv(archive / "02_reproduced_trade_ledger.csv", trades)
+        write_csv(archive / "02_reproduced_trade_ledger.csv", all_trades)
         write_csv(archive / "03_reference_checks.csv", checks)
         (archive / "04_data_quality.json").write_text(
             json.dumps(
@@ -240,6 +261,7 @@ def main() -> int:
                     "newest_row_contract": "CLOSED",
                     "time_basis": "MT5 server time",
                     "decision_timeframe": "M15",
+                    "split_one_position_recomputed_independently": True,
                     "exact_m1_entry_and_exit_only": True,
                     "nearest_m1_fallback": False,
                     "actual_spread_at_short_exit": True,
@@ -258,8 +280,12 @@ def main() -> int:
                 [
                     "status=PASS_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
                     f"candidate_rows={len(candidate_rows)}",
-                    f"trades={len(trades)}",
+                    f"all_trades={len(all_trades)}",
+                    f"train_trades={len(ledgers['train'])}",
+                    f"val2025_trades={len(ledgers['val2025'])}",
+                    f"test2026_trades={len(ledgers['test2026'])}",
                     "all_reference_checks_pass=true",
+                    "split_one_position_recomputed_independently=true",
                     "m10p_modified=false",
                     "discord_send=false",
                     "mt5_order=false",
@@ -290,7 +316,7 @@ def main() -> int:
 
         max_diff = max((float(row["abs_diff"]) for row in checks if row.get("abs_diff") is not None), default=0.0)
         print("[M10P1 PASS] Deterministic C0212 reproduction completed")
-        print(f"[RESULT] trades={len(trades)} all_pf={metrics['all']['actual']['profit_factor_bps']} max_abs_diff={max_diff}")
+        print(f"[RESULT] trades={len(all_trades)} all_pf={metrics['all']['actual']['profit_factor_bps']} max_abs_diff={max_diff}")
         print(f"[PACKAGE] {package}")
         return 0
     except Exception as exc:
