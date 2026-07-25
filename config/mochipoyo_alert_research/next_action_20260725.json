@@ -1,68 +1,54 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_IMPLEMENTED_FRESH_BOOTSTRAP_NEXT",
+  "status": "M10P_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW_NEXT",
   "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Fetch/Pull, freeze M10P once with BAT01, then run one bootstrap cycle with BAT02 and submit the package before starting BAT03.",
-  "source_contract_verification": {
-    "status": "PASS",
-    "result": "config/mochipoyo_alert_research/m10p_live_source_contract_verification_20260725.json",
-    "resolver": "M8B LATEST/06_symbol_metadata.json mt5_files_root",
-    "live_file_map": {
-      "M1": "goldsharp_m1.csv",
-      "M5": "goldsharp_m5.csv",
-      "M15": "goldsharp_m15.csv",
-      "H1": "goldsharp_h1.csv",
-      "H4": "goldsharp_h4.csv",
-      "D1": "goldsharp_d1.csv"
-    },
-    "append_safe_prefix": true,
-    "time_basis": "MT5_SERVER_TIME",
-    "newest_row_contract": "CLOSED"
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. M10P bootstrap passed. Start only M10P BAT03 persistent audit-only loop. NEVER rerun M10P BAT01.",
+  "bootstrap_result": {
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+    "result": "config/mochipoyo_alert_research/m10p_user_local_bootstrap_result_20260725.json",
+    "package_sha256": "417ac47982bcad88f621e760d89fdec329fdf3f39cf636d0d6fadfc8b373d325",
+    "prospective_start_server_time": "2026.07.24 23:56:00",
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "prefix_integrity_verified": true,
+    "pre_start_candidate_eligibility": false,
+    "historical_backfill": false
   },
   "frozen_candidate": {
     "seed_id": "M10L_H240_C056",
-    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
     "gate_id": "M10N_G013",
+    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
     "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
     "horizon_minutes": 240,
     "one_position": true,
-    "historical_reference_pf": 2.540715351740206,
-    "historical_reference_fixed0p20_pf": 2.538476073441831,
-    "deterministic_reproduction_pass": true
+    "threshold_refit_from_prospective_outcomes": false
   },
   "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research.",
+    "Fetch/Pull feature/mochipoyo-alert-research so the M10P-aware forced-reboot recovery and updated state files are present.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Run scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat exactly once.",
-    "Required marker: [M10P INIT PASS]. If it passes, NEVER run BAT01 again, including after reboot.",
-    "Run scripts/mochipoyo_alert_research/m10p/bat/02_run_bootstrap_once_and_open_results.bat.",
-    "Required marker: [M10P BOOTSTRAP PASS].",
-    "Submit only M10P LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do NOT start scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat until the bootstrap package is reviewed.",
-    "Do not change C056/G013 thresholds from prospective outcomes."
+    "Do NOT run scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat again. The immutable start is already frozen at 2026.07.24 23:56:00 MT5 server time.",
+    "Run scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat.",
+    "Keep the M10P window running during normal monitoring.",
+    "If a forced reboot occurs, use scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat and restart in the printed order; M10P is step 9 and uses BAT03 only.",
+    "Do not change C056/G013 thresholds from prospective outcomes and do not call the candidate live-ready from historical or early fresh results."
   ],
-  "bootstrap_behavior": {
-    "new_start": "latest stable CLOSED M1 server-open at BAT01 execution",
-    "start_must_be_after_m10e": true,
-    "two_snapshot_stability_check_seconds": 2,
-    "freeze_pre_start_prefixes": true,
-    "pre_start_candidate_eligibility": false,
-    "historical_backfill": false,
-    "runtime_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p_runtime",
-    "outputs": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P"
+  "review_gates": {
+    "operational_resolved": 5,
+    "interim_resolved": 10,
+    "formal_resolved": 20,
+    "pf2_claim_before_formal_resolved": false,
+    "automatic_live_promotion": false
   },
-  "runtime_fail_closed": [
-    "M8B mt5_files_root changes",
-    "XAUUSD point changes",
-    "required goldsharp CSV is missing",
-    "any frozen pre-start CSV prefix changes",
-    "M10E chronology anchor manifest changes",
-    "timeframe feed lag exceeds frozen limits",
-    "contract or C056/G013 thresholds differ"
-  ],
-  "after_bootstrap_review": {
-    "if_pass": "Start BAT03 persistent M10P loop and then extend forced-reboot recovery to include optional M10P restart after M10E without ever rerunning BAT01.",
-    "if_blocked": "Diagnose the exact bootstrap failure without changing the candidate thresholds or existing prospective starts."
+  "forced_reboot_recovery": {
+    "status": "UPDATED_FOR_M10P",
+    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P"],
+    "m10p_initializer_after_reboot": "FORBIDDEN",
+    "m10p_restart": "03_run_shadow_forever.bat only"
   },
   "safety": {
     "audit_only": true,
