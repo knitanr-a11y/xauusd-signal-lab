@@ -1,0 +1,71 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
+  "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(37).zip",
+    "sha256": "fe48c34e2069369aeb92f90b635cfea809dc2138db8ef9f7255d94af806cc10c",
+    "size_bytes": 21482
+  },
+  "candidate": {
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "direction": "SHORT",
+    "decision_timeframe": "M15",
+    "horizon_minutes": 240,
+    "one_position": true
+  },
+  "reproduction": {
+    "candidate_row_count_before_one_position": 4406,
+    "trade_count_after_one_position": 318,
+    "split_counts": {
+      "train_2023_2024": 105,
+      "validation_2025": 149,
+      "test_2026": 64,
+      "all": 318
+    },
+    "train_pf": 1.5689385901535529,
+    "validation_2025_pf": 1.3904778450159343,
+    "test_2026_pf": 1.5465266111892766,
+    "all_pf": 1.4839437156621065,
+    "all_win_rate": 0.46226415094339623,
+    "all_payoff_ratio": 1.7262202406681646,
+    "all_net_bps": 2894.1154501413307,
+    "all_max_drawdown_bps": 823.9691089106718,
+    "all_max_losing_streak": 12,
+    "fixed0p20_all_pf": 1.4816933419152243,
+    "maximum_metric_abs_difference": 0.0,
+    "required_tolerance": 1e-10,
+    "all_reference_checks_pass": true
+  },
+  "data_quality": {
+    "frozen_hashes_verified": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "split_one_position_recomputed_independently": true,
+    "exact_m1_entry_and_exit_only": true,
+    "nearest_m1_fallback": false,
+    "actual_spread_at_short_exit": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "reads_m10j_or_m10m_result_csv_for_trade_generation": false,
+    "m10p_modified": false
+  },
+  "decision": {
+    "deterministic_reproduction_pass": true,
+    "historical_edge_reproduced": true,
+    "forward_live_trading_approved": false,
+    "automatic_promotion": false,
+    "next": "Design and bootstrap a completely separate fresh prospective C0212 audit-only shadow with a new immutable MT5-server start. Never reuse or modify M10P start/runtime."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "modify_m10p": false,
+    "modify_existing_forward_monitors": false
+  }
+}
