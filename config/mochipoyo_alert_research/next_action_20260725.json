@@ -1,58 +1,76 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_RUNNING_M10P1_C0212_DETERMINISTIC_REPRODUCTION_LOCAL_AUDIT_NEXT",
-  "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. M10P BAT03 is already running with immutable start 2026.07.24 23:56:00 MT5 server time. Run the independent C0212 deterministic raw-data reproduction locally; do not modify or stop M10P.",
-  "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
-  "m10p_running": {
-    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
-    "prospective_start_server_time": "2026.07.24 23:56:00",
-    "initializer_after_start": "FORBIDDEN",
-    "threshold_refit_from_prospective_outcomes": false,
-    "review_gates_resolved": {"M10Q": 5, "M10R": 10, "M10S": 20, "M10T": 40, "M10U": 60}
+  "status": "M10P_RUNNING_M10P1_C0212_REPRODUCTION_PASS_M10P2_FRESH_BOOTSTRAP_NEXT",
+  "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. C0212 deterministic reproduction passed. Freeze a completely separate M10P2 C0212 fresh start exactly once, then run one bootstrap cycle and submit the package before starting M10P2 BAT03.",
+  "m10p1_result": {
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10p1_c0212_user_local_reproduction_result_20260725.json",
+    "package_sha256": "fe48c34e2069369aeb92f90b635cfea809dc2138db8ef9f7255d94af806cc10c",
+    "candidate_rows_before_one_position": 4406,
+    "trade_count": 318,
+    "split_counts": {"train": 105, "validation_2025": 149, "test_2026": 64, "all": 318},
+    "train_pf": 1.5689385901535529,
+    "validation_2025_pf": 1.3904778450159343,
+    "test_2026_pf": 1.5465266111892766,
+    "all_pf": 1.4839437156621065,
+    "fixed0p20_all_pf": 1.4816933419152243,
+    "all_max_drawdown_bps": 823.9691089106718,
+    "all_payoff_ratio": 1.7262202406681646,
+    "maximum_metric_abs_difference": 0.0,
+    "all_reference_checks_pass": true,
+    "frozen_hashes_verified": true,
+    "m10p_modified": false
   },
-  "m10p1_design": {
+  "m10p2_frozen_candidate": {
     "candidate_id": "M10J_C0212",
     "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "direction": "SHORT",
     "decision_timeframe": "M15",
+    "direction": "SHORT",
     "horizon_minutes": 240,
     "one_position": true,
-    "entry": "exact M1 open bid at M15 decision",
-    "exit": "exact M1 open ask 240 minutes later",
-    "actual_spread": true,
-    "fixed0p20_sensitivity": true,
-    "source": "frozen raw GOLD CSV only",
-    "reads_m10j_or_m10m_result_csv_for_trade_generation": false,
-    "split_one_position_recomputed_independently": true,
-    "metric_tolerance": 1e-10
-  },
-  "expected_reference": {
-    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529},
-    "validation_2025": {"count": 149, "pf": 1.3904778450159343},
-    "test_2026": {"count": 64, "pf": 1.5465266111892766},
-    "all": {"count": 318, "pf": 1.4839437156621065, "max_dd_bps": 823.9691089106718, "payoff_ratio": 1.7262202406681646, "fixed0p20_pf": 1.4816933419152243}
+    "threshold_refit_from_prospective_outcomes": false
   },
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Keep M10P BAT03 and collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged.",
-    "Do NOT rerun M10P BAT01 and do not change C056/G013 or C0212 thresholds.",
-    "Run scripts/mochipoyo_alert_research/m10p1/bat/01_run_m10p1.bat.",
-    "Required marker: [M10P1 PASS]. If BLOCKED, send the complete console output; do not modify thresholds or frozen starts.",
-    "Run scripts/mochipoyo_alert_research/m10p1/bat/02_open_latest_results.bat.",
-    "Submit only M10P1 LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do not create/start a C0212 fresh shadow before M10P1 deterministic reproduction is reviewed and passes."
+    "Keep M10P BAT03 and all existing monitors running unchanged.",
+    "Run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
+    "Required marker: [M10P2 INIT PASS]. If it passes, NEVER run M10P2 BAT01 again, including after reboot.",
+    "Run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat.",
+    "Required marker: [M10P2 BOOTSTRAP PASS].",
+    "Submit only M10P2 LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do NOT start scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat until bootstrap review.",
+    "Do not change C0212 thresholds from prospective outcomes."
   ],
-  "after_m10p1": {
-    "if_pass": "Design a separate fresh prospective C0212 audit-only shadow with a brand-new immutable MT5-server start. Never reuse M10P start and do not merge the two SHORT families yet.",
-    "if_mismatch": "Stop C0212 forward progression and diagnose the reproduction mismatch while M10P continues unchanged."
+  "bootstrap_behavior": {
+    "new_start": "latest stable CLOSED M1 server-open at M10P2 BAT01 execution",
+    "start_must_be_strictly_after_m10p": true,
+    "reuse_m10p_start": false,
+    "two_snapshot_stability_check_seconds": 2,
+    "freeze_pre_start_prefixes": true,
+    "pre_start_candidate_eligibility": false,
+    "historical_backfill": false,
+    "runtime_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p2_runtime",
+    "outputs": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P2"
   },
-  "forced_reboot_recovery": {
-    "status": "UPDATED_FOR_M10P",
-    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P"],
-    "m10p_initializer_after_reboot": "FORBIDDEN",
-    "m10p_restart": "03_run_shadow_forever.bat only"
+  "review_gates": {
+    "operational_resolved": 5,
+    "interim_resolved": 10,
+    "formal_resolved": 20,
+    "automatic_live_promotion": false
+  },
+  "runtime_fail_closed": [
+    "M8B mt5_files_root changes",
+    "XAUUSD point changes",
+    "required goldsharp CSV missing",
+    "any frozen pre-start CSV prefix changes",
+    "M10P chronology anchor manifest changes",
+    "timeframe feed lag exceeds frozen limits",
+    "contract or C0212 thresholds differ"
+  ],
+  "after_bootstrap_review": {
+    "if_pass": "Start M10P2 BAT03 persistent C0212 shadow and then extend forced-reboot recovery to include M10P2 restart after M10P without ever rerunning M10P2 BAT01.",
+    "if_blocked": "Diagnose the exact bootstrap failure without changing C0212 thresholds, M10P start/runtime, or any existing prospective start."
   },
   "safety": {
     "audit_only": true,
