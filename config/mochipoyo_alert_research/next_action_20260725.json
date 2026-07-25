@@ -1,72 +1,52 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW_AND_PARALLEL_C0212_REPRODUCTION_NEXT",
-  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Start only M10P BAT03 persistent audit-only loop. NEVER rerun M10P BAT01. While M10P accumulates fresh evidence, the next independent research task is deterministic raw-data reproduction of C0212 without modifying M10P.",
+  "status": "M10P_RUNNING_M10P1_C0212_DETERMINISTIC_REPRODUCTION_LOCAL_AUDIT_NEXT",
+  "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. M10P BAT03 is already running with immutable start 2026.07.24 23:56:00 MT5 server time. Run the independent C0212 deterministic raw-data reproduction locally; do not modify or stop M10P.",
   "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
-  "bootstrap_result": {
-    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
-    "result": "config/mochipoyo_alert_research/m10p_user_local_bootstrap_result_20260725.json",
-    "package_sha256": "417ac47982bcad88f621e760d89fdec329fdf3f39cf636d0d6fadfc8b373d325",
+  "m10p_running": {
+    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
     "prospective_start_server_time": "2026.07.24 23:56:00",
-    "candidate_match_count": 0,
-    "accepted_count": 0,
-    "resolved_count": 0,
-    "open_count": 0,
-    "entry_data_gap_count": 0,
-    "exit_data_gap_count": 0,
-    "prefix_integrity_verified": true,
-    "pre_start_candidate_eligibility": false,
-    "historical_backfill": false
+    "initializer_after_start": "FORBIDDEN",
+    "threshold_refit_from_prospective_outcomes": false,
+    "review_gates_resolved": {"M10Q": 5, "M10R": 10, "M10S": 20, "M10T": 40, "M10U": 60}
   },
-  "frozen_candidate": {
-    "seed_id": "M10L_H240_C056",
-    "gate_id": "M10N_G013",
-    "seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
-    "regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+  "m10p1_design": {
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "direction": "SHORT",
+    "decision_timeframe": "M15",
     "horizon_minutes": 240,
     "one_position": true,
-    "threshold_refit_from_prospective_outcomes": false
+    "entry": "exact M1 open bid at M15 decision",
+    "exit": "exact M1 open ask 240 minutes later",
+    "actual_spread": true,
+    "fixed0p20_sensitivity": true,
+    "source": "frozen raw GOLD CSV only",
+    "reads_m10j_or_m10m_result_csv_for_trade_generation": false,
+    "split_one_position_recomputed_independently": true,
+    "metric_tolerance": 1e-10
+  },
+  "expected_reference": {
+    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529},
+    "validation_2025": {"count": 149, "pf": 1.3904778450159343},
+    "test_2026": {"count": 64, "pf": 1.5465266111892766},
+    "all": {"count": 318, "pf": 1.4839437156621065, "max_dd_bps": 823.9691089106718, "payoff_ratio": 1.7262202406681646, "fixed0p20_pf": 1.4816933419152243}
   },
   "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research so the M10P-aware forced-reboot recovery, roadmap and updated state files are present.",
-    "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
-    "Do NOT run scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat again. The immutable start is already frozen at 2026.07.24 23:56:00 MT5 server time.",
-    "Run scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat and keep that window running during normal monitoring.",
-    "If a forced reboot occurs, use scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat and restart in the printed order; M10P is step 9 and uses BAT03 only.",
-    "Do not change C056/G013 thresholds from prospective outcomes and do not call the candidate live-ready from historical or early fresh results."
+    "Fetch/Pull feature/mochipoyo-alert-research.",
+    "Keep M10P BAT03 and collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged.",
+    "Do NOT rerun M10P BAT01 and do not change C056/G013 or C0212 thresholds.",
+    "Run scripts/mochipoyo_alert_research/m10p1/bat/01_run_m10p1.bat.",
+    "Required marker: [M10P1 PASS]. If BLOCKED, send the complete console output; do not modify thresholds or frozen starts.",
+    "Run scripts/mochipoyo_alert_research/m10p1/bat/02_open_latest_results.bat.",
+    "Submit only M10P1 LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
+    "Do not create/start a C0212 fresh shadow before M10P1 deterministic reproduction is reviewed and passes."
   ],
-  "review_gates": {
-    "M10Q_operational_resolved": 5,
-    "M10R_interim_resolved": 10,
-    "M10S_formal_resolved": 20,
-    "M10T_stability_resolved": 40,
-    "M10U_adoption_review_resolved": 60,
-    "pf2_claim_before_20_resolved": false,
-    "automatic_live_promotion": false
+  "after_m10p1": {
+    "if_pass": "Design a separate fresh prospective C0212 audit-only shadow with a brand-new immutable MT5-server start. Never reuse M10P start and do not merge the two SHORT families yet.",
+    "if_mismatch": "Stop C0212 forward progression and diagnose the reproduction mismatch while M10P continues unchanged."
   },
-  "formal_20_trade_interpretation_bands": {
-    "pf_ge_2": "EARLY_FORMAL_PF2_REPLICATION_SUPPORT",
-    "pf_ge_1p5_lt_2": "STRONG_POSITIVE_FRESH_SUPPORT_BELOW_PF2",
-    "pf_gt_1_lt_1p5": "POSITIVE_FRESH_SUPPORT_BELOW_TARGET",
-    "pf_le_1": "FRESH_EDGE_NOT_SUPPORTED_AT_20",
-    "positive_interpretation_also_requires": ["positive_net_bps", "fixed0p20_pf_gt_1", "no_integrity_violation"]
-  },
-  "parallel_next_research": {
-    "candidate": "M10J_C0212",
-    "purpose": "Deterministically reproduce the independent M15 SHORT family while M10P accumulates; do not merge it with C056+G013 yet.",
-    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "historical_reference_all_pf": 1.4839437156621065,
-    "independently_rediscovered_by_M10M": true,
-    "next_after_reproduction_pass": "Separate fresh prospective C0212 shadow with its own new immutable start; never reuse M10P start."
-  },
-  "longer_term": [
-    "Compare C056+G013 and C0212 as separate SHORT families after independent fresh characterization.",
-    "Build frozen SHORT-family overlap/correlation/single-capital comparison without threshold optimization.",
-    "Reconstruct integrated frozen LONG+SHORT portfolio with raw simultaneous and deterministic single-capital views.",
-    "Only after portfolio rules freeze, run a new fresh integrated portfolio shadow.",
-    "Any Discord/demo alert, MT5 demo order, or live order stage requires separate explicit user approval and a separate frozen contract."
-  ],
   "forced_reboot_recovery": {
     "status": "UPDATED_FOR_M10P",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
