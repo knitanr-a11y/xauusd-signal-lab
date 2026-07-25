@@ -1,0 +1,45 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
+  "status": "WAIT_FOR_FIRST_NEW_CLOSED_M1_AFTER_M10P",
+  "recorded_at_date": "2026-07-25",
+  "observed_console": {
+    "message": "M10P2 start must be strictly after M10P start",
+    "safe_message": "M10P and all existing forward monitors/frozen starts were not modified"
+  },
+  "interpretation": {
+    "implementation_bug": false,
+    "candidate_failure": false,
+    "m10p2_runtime_created": false,
+    "m10p2_start_created": false,
+    "reason": "At initialization, the latest stable CLOSED M1 server-open was not strictly later than the already frozen M10P start. The fresh-shadow contract correctly forbids reusing the M10P start.",
+    "required_condition_before_init": "latest CLOSED M1 server-open > 2026.07.24 23:56:00 MT5 server time"
+  },
+  "operator": {
+    "readiness_bat": "scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat",
+    "initializer_bat": "scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat",
+    "instruction": "After Fetch/Pull, use BAT00 as a read-only check. Only when it prints [M10P2 READY] run BAT01 exactly once. A prior BLOCK before INIT PASS does not consume the one allowed successful initialization.",
+    "never_after_init_pass": "Never run M10P2 BAT01 again once [M10P2 INIT PASS] has occurred."
+  },
+  "running_monitors": {
+    "collector": "KEEP_UNCHANGED",
+    "M7C": "KEEP_UNCHANGED",
+    "M8C": "KEEP_UNCHANGED",
+    "M9V": "KEEP_UNCHANGED",
+    "M9Y": "KEEP_UNCHANGED",
+    "M10B": "KEEP_UNCHANGED",
+    "M10E": "KEEP_UNCHANGED",
+    "M10P": "KEEP_RUNNING_UNCHANGED"
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "change_c0212_thresholds": false,
+    "reuse_m10p_start": false
+  }
+}
