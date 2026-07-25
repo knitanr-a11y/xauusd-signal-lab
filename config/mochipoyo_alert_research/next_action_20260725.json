@@ -1,28 +1,44 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_RUNNING_M10P1_C0212_REPRODUCTION_PASS_M10P2_FRESH_BOOTSTRAP_NEXT",
+  "status": "M10P_RUNNING_M10P1_PASS_M10P2_WAIT_FOR_FIRST_NEW_CLOSED_M1",
   "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. C0212 deterministic reproduction passed. Freeze a completely separate M10P2 C0212 fresh start exactly once, then run one bootstrap cycle and submit the package before starting M10P2 BAT03.",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. M10P2 initialization correctly blocked because no newer CLOSED M1 existed beyond the frozen M10P start. Do not weaken the fresh-start rule. Use the new read-only BAT00 readiness check; only after it reports READY run M10P2 BAT01 exactly once.",
+  "m10p_running": {
+    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 23:56:00",
+    "initializer_after_start": "FORBIDDEN",
+    "threshold_refit_from_prospective_outcomes": false
+  },
   "m10p1_result": {
     "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10p1_c0212_user_local_reproduction_result_20260725.json",
-    "package_sha256": "fe48c34e2069369aeb92f90b635cfea809dc2138db8ef9f7255d94af806cc10c",
-    "candidate_rows_before_one_position": 4406,
     "trade_count": 318,
-    "split_counts": {"train": 105, "validation_2025": 149, "test_2026": 64, "all": 318},
-    "train_pf": 1.5689385901535529,
-    "validation_2025_pf": 1.3904778450159343,
-    "test_2026_pf": 1.5465266111892766,
     "all_pf": 1.4839437156621065,
     "fixed0p20_all_pf": 1.4816933419152243,
-    "all_max_drawdown_bps": 823.9691089106718,
-    "all_payoff_ratio": 1.7262202406681646,
     "maximum_metric_abs_difference": 0.0,
-    "all_reference_checks_pass": true,
-    "frozen_hashes_verified": true,
-    "m10p_modified": false
+    "all_reference_checks_pass": true
   },
-  "m10p2_frozen_candidate": {
+  "m10p2_wait": {
+    "status": "WAIT_FOR_FIRST_NEW_CLOSED_M1_AFTER_M10P",
+    "record": "config/mochipoyo_alert_research/m10p2_start_wait_for_new_closed_m1_20260725.json",
+    "m10p_start": "2026.07.24 23:56:00",
+    "required_condition": "latest CLOSED M1 server-open > 2026.07.24 23:56:00",
+    "runtime_created": false,
+    "start_created": false,
+    "implementation_bug": false,
+    "candidate_failure": false
+  },
+  "operator_steps": [
+    "Fetch/Pull feature/mochipoyo-alert-research so the read-only readiness check is present.",
+    "Keep M10P BAT03 and collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged.",
+    "Run scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat whenever you want to check whether a newer CLOSED M1 exists. BAT00 is read-only and safe to rerun.",
+    "If BAT00 prints [M10P2 WAIT], do not run BAT01 yet.",
+    "Only if BAT00 prints [M10P2 READY], run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
+    "After [M10P2 INIT PASS], never run BAT01 again, including after reboot.",
+    "Then run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat and submit only M10P2 LATEST/99_UPLOAD_PACKAGE.zip.",
+    "Do not start M10P2 BAT03 before bootstrap review."
+  ],
+  "frozen_candidate": {
     "candidate_id": "M10J_C0212",
     "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
     "decision_timeframe": "M15",
@@ -31,47 +47,6 @@
     "one_position": true,
     "threshold_refit_from_prospective_outcomes": false
   },
-  "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Keep M10P BAT03 and all existing monitors running unchanged.",
-    "Run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
-    "Required marker: [M10P2 INIT PASS]. If it passes, NEVER run M10P2 BAT01 again, including after reboot.",
-    "Run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat.",
-    "Required marker: [M10P2 BOOTSTRAP PASS].",
-    "Submit only M10P2 LATEST/99_UPLOAD_PACKAGE.zip to ChatGPT.",
-    "Do NOT start scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat until bootstrap review.",
-    "Do not change C0212 thresholds from prospective outcomes."
-  ],
-  "bootstrap_behavior": {
-    "new_start": "latest stable CLOSED M1 server-open at M10P2 BAT01 execution",
-    "start_must_be_strictly_after_m10p": true,
-    "reuse_m10p_start": false,
-    "two_snapshot_stability_check_seconds": 2,
-    "freeze_pre_start_prefixes": true,
-    "pre_start_candidate_eligibility": false,
-    "historical_backfill": false,
-    "runtime_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p2_runtime",
-    "outputs": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P2"
-  },
-  "review_gates": {
-    "operational_resolved": 5,
-    "interim_resolved": 10,
-    "formal_resolved": 20,
-    "automatic_live_promotion": false
-  },
-  "runtime_fail_closed": [
-    "M8B mt5_files_root changes",
-    "XAUUSD point changes",
-    "required goldsharp CSV missing",
-    "any frozen pre-start CSV prefix changes",
-    "M10P chronology anchor manifest changes",
-    "timeframe feed lag exceeds frozen limits",
-    "contract or C0212 thresholds differ"
-  ],
-  "after_bootstrap_review": {
-    "if_pass": "Start M10P2 BAT03 persistent C0212 shadow and then extend forced-reboot recovery to include M10P2 restart after M10P without ever rerunning M10P2 BAT01.",
-    "if_blocked": "Diagnose the exact bootstrap failure without changing C0212 thresholds, M10P start/runtime, or any existing prospective start."
-  },
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
@@ -79,6 +54,7 @@
     "mt5_order": false,
     "live_ready": false,
     "final_signal": false,
-    "automatic_live_promotion": false
+    "automatic_live_promotion": false,
+    "reuse_m10p_start": false
   }
 }
