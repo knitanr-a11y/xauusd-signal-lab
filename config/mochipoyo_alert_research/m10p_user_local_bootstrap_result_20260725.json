@@ -1,0 +1,78 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(36).zip",
+    "sha256": "417ac47982bcad88f621e760d89fdec329fdf3f39cf636d0d6fadfc8b373d325",
+    "size_bytes": 3515
+  },
+  "prospective_start_server_time": "2026.07.24 23:56:00",
+  "chronology": {
+    "m10e_start_server_time": "2026.07.24 22:06:00",
+    "m10p_start_strictly_after_m10e": true,
+    "pre_start_candidate_eligibility": false,
+    "historical_backfill": false
+  },
+  "frozen_candidate": {
+    "seed_id": "M10L_H240_C056",
+    "gate_id": "M10N_G013",
+    "h1_macd_hist_bps_ge": 3.637199446,
+    "h1_macd_line_bps_le": -7.667425443,
+    "h1_ret3_bps_ge": 18.70087437,
+    "d1_macd_hist_bps_ge": -14.25480242,
+    "horizon_minutes": 240,
+    "one_position": true
+  },
+  "bootstrap_cycle": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "overlap_skip_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "interpretation": "Zero candidates immediately after the fresh start is expected and confirms no historical/pre-start C056+G013 trades were imported."
+  },
+  "live_source": {
+    "data_root_resolved_from_m8b": true,
+    "point": 0.01,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5_SERVER_TIME",
+    "prefix_integrity_verified": true,
+    "exact_m1_entry_only": true,
+    "exact_m1_exit_only": true,
+    "nearest_m1_fallback": false,
+    "exit_data_gap_never_backfilled": true,
+    "latest_server_open": {
+      "M1": "2026.07.24 23:56:00",
+      "M5": "2026.07.24 23:50:00",
+      "M15": "2026.07.24 23:30:00",
+      "H1": "2026.07.24 22:00:00",
+      "H4": "2026.07.24 16:00:00",
+      "D1": "2026.07.23 00:00:00"
+    }
+  },
+  "runtime": {
+    "runtime_contract_version": "M10P_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "reset_allowed": false,
+    "initializer_must_never_run_again": true,
+    "persistent_forever_bat": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat"
+  },
+  "decision": {
+    "bootstrap_pass": true,
+    "bat03_start_approved": true,
+    "forward_live_trading_approved": false,
+    "automatic_promotion": false,
+    "next": "Start M10P BAT03 persistent audit-only shadow. Never rerun M10P BAT01. Keep all pre-existing monitors unchanged."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
