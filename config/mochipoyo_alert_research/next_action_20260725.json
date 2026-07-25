@@ -1,8 +1,9 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW_NEXT",
+  "status": "M10P_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW_AND_PARALLEL_C0212_REPRODUCTION_NEXT",
   "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. M10P bootstrap passed. Start only M10P BAT03 persistent audit-only loop. NEVER rerun M10P BAT01.",
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged. Start only M10P BAT03 persistent audit-only loop. NEVER rerun M10P BAT01. While M10P accumulates fresh evidence, the next independent research task is deterministic raw-data reproduction of C0212 without modifying M10P.",
+  "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
   "bootstrap_result": {
     "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
     "result": "config/mochipoyo_alert_research/m10p_user_local_bootstrap_result_20260725.json",
@@ -28,21 +29,44 @@
     "threshold_refit_from_prospective_outcomes": false
   },
   "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research so the M10P-aware forced-reboot recovery and updated state files are present.",
+    "Fetch/Pull feature/mochipoyo-alert-research so the M10P-aware forced-reboot recovery, roadmap and updated state files are present.",
     "Do not stop, reset, backfill, reinitialize, or modify collector/M7C/M8C/M9V/M9Y/M10B/M10E.",
     "Do NOT run scripts/mochipoyo_alert_research/m10p/bat/01_initialize_fresh_shadow.bat again. The immutable start is already frozen at 2026.07.24 23:56:00 MT5 server time.",
-    "Run scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat.",
-    "Keep the M10P window running during normal monitoring.",
+    "Run scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat and keep that window running during normal monitoring.",
     "If a forced reboot occurs, use scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat and restart in the printed order; M10P is step 9 and uses BAT03 only.",
     "Do not change C056/G013 thresholds from prospective outcomes and do not call the candidate live-ready from historical or early fresh results."
   ],
   "review_gates": {
-    "operational_resolved": 5,
-    "interim_resolved": 10,
-    "formal_resolved": 20,
-    "pf2_claim_before_formal_resolved": false,
+    "M10Q_operational_resolved": 5,
+    "M10R_interim_resolved": 10,
+    "M10S_formal_resolved": 20,
+    "M10T_stability_resolved": 40,
+    "M10U_adoption_review_resolved": 60,
+    "pf2_claim_before_20_resolved": false,
     "automatic_live_promotion": false
   },
+  "formal_20_trade_interpretation_bands": {
+    "pf_ge_2": "EARLY_FORMAL_PF2_REPLICATION_SUPPORT",
+    "pf_ge_1p5_lt_2": "STRONG_POSITIVE_FRESH_SUPPORT_BELOW_PF2",
+    "pf_gt_1_lt_1p5": "POSITIVE_FRESH_SUPPORT_BELOW_TARGET",
+    "pf_le_1": "FRESH_EDGE_NOT_SUPPORTED_AT_20",
+    "positive_interpretation_also_requires": ["positive_net_bps", "fixed0p20_pf_gt_1", "no_integrity_violation"]
+  },
+  "parallel_next_research": {
+    "candidate": "M10J_C0212",
+    "purpose": "Deterministically reproduce the independent M15 SHORT family while M10P accumulates; do not merge it with C056+G013 yet.",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "historical_reference_all_pf": 1.4839437156621065,
+    "independently_rediscovered_by_M10M": true,
+    "next_after_reproduction_pass": "Separate fresh prospective C0212 shadow with its own new immutable start; never reuse M10P start."
+  },
+  "longer_term": [
+    "Compare C056+G013 and C0212 as separate SHORT families after independent fresh characterization.",
+    "Build frozen SHORT-family overlap/correlation/single-capital comparison without threshold optimization.",
+    "Reconstruct integrated frozen LONG+SHORT portfolio with raw simultaneous and deterministic single-capital views.",
+    "Only after portfolio rules freeze, run a new fresh integrated portfolio shadow.",
+    "Any Discord/demo alert, MT5 demo order, or live order stage requires separate explicit user approval and a separate frozen contract."
+  ],
   "forced_reboot_recovery": {
     "status": "UPDATED_FOR_M10P",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
