@@ -1,0 +1,66 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
+  "status": "DESIGN_FROZEN_HISTORICAL_AUDIT_ONLY",
+  "purpose": "Deterministically reproduce the retained M10J_C0212 M15 SHORT candidate from frozen raw GOLD CSVs before any separate fresh prospective C0212 shadow is designed.",
+  "candidate": {
+    "candidate_id": "M10J_C0212",
+    "direction": "SHORT",
+    "decision_timeframe": "M15",
+    "formula": {
+      "h4_ema20_30_bps_ge": 37.61355979,
+      "h1_atr_pct100_ge": 0.8
+    },
+    "horizon_minutes": 240,
+    "one_position": true,
+    "entry": "Exact M1 open bid at the causal M15 decision timestamp.",
+    "exit": "Exact M1 open ask 240 minutes later, using exit spread_points * point. No nearest-M1 fallback.",
+    "fixed_spread_sensitivity_usd": 0.2
+  },
+  "causal_feature_contract": {
+    "m15_decision": "For fully closed M15 bar i, decision is M15 bar i+1 open time.",
+    "h1_context": "Latest H1 bar fully closed at or before M15 decision.",
+    "h4_context": "Latest H4 bar fully closed at or before M15 decision.",
+    "h4_ema20_30_bps": "(H4 EMA20 - H4 EMA30) / abs(latest fully closed H4 close) * 10000.",
+    "h1_atr_pct100": "Percentile rank of latest fully closed H1 Wilder ATR14 inside the trailing 100 H1 ATR values, inclusive.",
+    "future_outcome_used_in_entry_gate": false
+  },
+  "reference": {
+    "source": "M10J C0212 with exact formula independently rediscovered by M10M_H240_C006",
+    "train_2023_2024": {"count": 105, "pf": 1.5689385901535529},
+    "validation_2025": {"count": 149, "pf": 1.3904778450159343},
+    "test_2026": {"count": 64, "pf": 1.5465266111892766},
+    "all": {
+      "count": 318,
+      "pf": 1.4839437156621065,
+      "max_dd_bps": 823.9691089106718,
+      "payoff_ratio": 1.7262202406681646,
+      "fixed0p20_pf": 1.4816933419152243
+    }
+  },
+  "reproduction_rules": {
+    "trade_generation_source": "Frozen raw GOLD CSV only",
+    "read_m10j_or_m10m_result_csv_for_trade_generation": false,
+    "verify_frozen_hashes": true,
+    "newest_row_contract": "CLOSED",
+    "time_basis": "MT5 server time",
+    "exact_m1_entry_and_exit_only": true,
+    "nearest_m1_fallback": false,
+    "metric_tolerance": 1e-10
+  },
+  "decision_after_run": {
+    "if_pass": "Keep C0212 frozen and design a separate fresh prospective C0212 audit-only shadow with its own new immutable MT5-server start, never reusing M10P start.",
+    "if_mismatch": "Do not start a C0212 fresh shadow. Diagnose the reproduction mismatch without changing C0212 thresholds or any running forward monitor."
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "modify_m10p": false,
+    "modify_existing_forward_monitors": false
+  }
+}
