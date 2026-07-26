@@ -1,0 +1,74 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(38).zip",
+    "sha256": "ae464486c481741b99b7368f501a9b31d216354c12cefde9ab54cdc0dd9d8dfa",
+    "size_bytes": 3747
+  },
+  "prospective_start_server_time": "2026.07.27 01:39:00",
+  "m10p_chronology_anchor_server_time": "2026.07.24 23:56:00",
+  "candidate": {
+    "candidate_id": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "decision_timeframe": "M15",
+    "direction": "SHORT",
+    "horizon_minutes": 240,
+    "one_position": true
+  },
+  "bootstrap_counts": {
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0
+  },
+  "latest_server_open": {
+    "M1": "2026.07.27 01:39:00",
+    "M5": "2026.07.27 01:35:00",
+    "M15": "2026.07.27 01:15:00",
+    "H1": "2026.07.24 23:00:00",
+    "H4": "2026.07.24 20:00:00",
+    "D1": "2026.07.24 00:00:00"
+  },
+  "runtime": {
+    "runtime_contract_version": "M10P2_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "point": 0.01,
+    "contract_sha256": "eae7c4f396166d3fc71946ded7d835e6c039e999624faefd1b4e2f7b96ce014e",
+    "m10p_runtime_manifest_sha256_at_freeze": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "reset_allowed": false,
+    "historical_backfill_allowed": false,
+    "pre_start_candidate_eligibility": false
+  },
+  "data_quality": {
+    "closed_rows_contract": true,
+    "prefix_integrity_verified": true,
+    "session_gap_aware_feed_guard_passed": true,
+    "exact_m1_entry_only": true,
+    "exact_m1_exit_only": true,
+    "nearest_m1_fallback": false,
+    "exit_data_gap_never_backfilled": true,
+    "m10p_chronology_anchor_read_only": true
+  },
+  "decision": {
+    "bootstrap_pass": true,
+    "start_persistent_bat03_allowed": true,
+    "initializer_must_never_run_again": true,
+    "forward_live_trading_approved": false,
+    "automatic_promotion": false
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "modify_m10p": false,
+    "modify_existing_forward_monitors": false
+  }
+}
