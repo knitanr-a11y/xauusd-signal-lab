@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10P_START_PRESERVED_SESSION_GAP_GUARD_FIXED_M10P1_PASS_M10P2_READINESS_RECHECK_NEXT_AUDIT_ONLY",
+  "status": "M10P_AND_M10P2_TWO_INDEPENDENT_FRESH_SHORT_SHADOWS_READY_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
@@ -11,7 +11,8 @@
     "M9Y": "RUNNING_KEEP_UNCHANGED",
     "M10B": "KEEP_UNCHANGED",
     "M10E": "KEEP_UNCHANGED",
-    "M10P": "IMMUTABLE_START_PRESERVED; OLD PROCESS MAY HAVE BLOCKED ON WALL_CLOCK_WEEKEND_GUARD; AFTER_PULL RESTART_WITH_BAT03_ONLY_IF_NEEDED"
+    "M10P": "KEEP_RUNNING_WITH_SESSION_GAP_AWARE_GUARD",
+    "M10P2": "BOOTSTRAP_PASS_READY_TO_START_BAT03"
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
@@ -20,13 +21,12 @@
     "M10B_mt5_server": "2026.07.24 20:54:00",
     "M10E_mt5_server": "2026.07.24 22:06:00",
     "M10P_mt5_server": "2026.07.24 23:56:00",
-    "M10P2_mt5_server": "NOT_YET_CREATED"
+    "M10P2_mt5_server": "2026.07.27 01:39:00"
   },
   "short_research_adoption": {
-    "status": "TWO_INDEPENDENT_SHORT_FAMILIES_RETAINED_NOT_LIVE_APPROVED",
-    "primary_reference": "M10J_C0212",
-    "pf2_fresh_shadow_candidate": "M10L_H240_C056 + M10N_G013",
-    "c0212_reproduction_pass": true,
+    "status": "TWO_INDEPENDENT_SHORT_FAMILIES_WITH_SEPARATE_FRESH_SHADOWS_NOT_LIVE_APPROVED",
+    "c056_g013_fresh_shadow": "M10P",
+    "c0212_fresh_shadow": "M10P2",
     "forward_live_trading_approved": false
   },
   "m10n": {
@@ -50,7 +50,7 @@
     "initializer_must_never_run_again": true,
     "historical_backfill": false,
     "feed_guard": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
-    "restart_after_pull_if_stopped": "BAT03_ONLY",
+    "review_gates_resolved": {"M10Q": 5, "M10R": 10, "M10S": 20, "M10T": 40, "M10U": 60},
     "automatic_promotion": false,
     "forward_live_trading_approved": false
   },
@@ -68,8 +68,6 @@
   "feed_guard_correction": {
     "status": "CORRECTED",
     "record": "config/mochipoyo_alert_research/m10p_m10p2_weekend_feed_freshness_guard_correction_20260727.json",
-    "observed_latest_closed_m1": "2026.07.27 01:25:00",
-    "false_block_h1_wall_lag_seconds": 181500.0,
     "root_cause": "WEEKEND_MARKET_CLOSED_WALL_TIME_WAS_COUNTED_AS_FEED_AGE",
     "corrected_measure": "OBSERVED_M1_TRADING_BARS",
     "preserved_limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
@@ -79,30 +77,41 @@
   },
   "m10p2": {
     "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
-    "status": "IMPLEMENTED_NOT_YET_FROZEN_READINESS_RECHECK_AFTER_SESSION_GAP_GUARD_FIX",
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+    "bootstrap_result": "config/mochipoyo_alert_research/m10p2_user_local_bootstrap_result_20260727.json",
+    "uploaded_package_sha256": "ae464486c481741b99b7368f501a9b31d216354c12cefde9ab54cdc0dd9d8dfa",
+    "prospective_start_server_time": "2026.07.27 01:39:00",
     "candidate_id": "M10J_C0212",
     "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
     "decision_timeframe": "M15",
     "fixed_horizon_minutes": 240,
     "one_position": true,
-    "runtime_created": false,
-    "start_created": false,
-    "new_immutable_mt5_server_start_required": true,
-    "start_must_be_strictly_after_m10p": true,
-    "reuse_m10p_start": false,
+    "bootstrap_counts": {
+      "candidate_match_count": 0,
+      "accepted_count": 0,
+      "resolved_count": 0,
+      "open_count": 0,
+      "entry_data_gap_count": 0,
+      "exit_data_gap_count": 0,
+      "overlap_skip_count": 0
+    },
+    "initializer_must_never_run_again": true,
     "historical_backfill": false,
     "feed_guard": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
+    "review_gates_resolved": {"operational": 5, "interim": 10, "formal": 20},
     "automatic_promotion": false,
     "forward_live_trading_approved": false
   },
-  "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
   "forced_reboot_recovery": {
-    "status": "READY_WITH_M10P_M10P2_NOT_ADDED_UNTIL_BOOTSTRAP_REVIEW",
+    "status": "READY_WITH_M10P2_SAFE_WRAPPER",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P"],
+    "wrapper": "scripts/mochipoyo_alert_research/recovery/python/recover_after_forced_reboot_with_m10p2.py",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2"],
     "m10p_restart": "BAT03_ONLY_NEVER_BAT01",
-    "m10p2_recovery_addition": "ONLY_AFTER_M10P2_BOOTSTRAP_PASS_AND_REVIEW"
+    "m10p2_restart": "BAT03_ONLY_NEVER_BAT01",
+    "never_reinitialize_after_reboot": true
   },
+  "roadmap": "docs/mochipoyo_alert_research/M10P_AND_AFTER_SHORT_ADOPTION_ROADMAP_20260725.md",
   "safety": {
     "audit_only": true,
     "discord_send": false,
@@ -112,5 +121,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Fetch/Pull the session-gap-aware guard correction. Ensure M10P uses the updated BAT03 guarded runtime without rerunning BAT01. Then rerun M10P2 BAT00. Only if BAT00 reports M10P2 READY, run M10P2 BAT01 exactly once, then BAT02 and upload the bootstrap package."
+  "next": "Fetch/Pull the M10P2 bootstrap/recovery state updates, then start scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat. Never rerun M10P2 BAT01. Keep M10P and all existing monitors unchanged. Wait for fresh resolved checkpoints while continuing non-refitting parallel research only."
 }
