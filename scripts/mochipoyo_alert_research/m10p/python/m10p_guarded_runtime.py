@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import bisect
 import math
 import sys
 from pathlib import Path
@@ -44,6 +45,50 @@ def guarded_metrics(trades):
     return result
 
 
+def observed_feed_health(root: Path) -> dict[str, dict[str, float | int | str]]:
+    """Validate feed freshness in observed M1 trading bars, not wall-clock weekend time.
+
+    The original limits are preserved exactly in trading-time terms:
+    M5=10 observed M1 bars, M15=30, H1=120, H4=480, D1=2880.
+    Missing market-closed minutes do not consume the allowance.
+    """
+    latest = {}
+    for tf, filename in EXPECTED_LIVE_FILE_MAP.items():
+        path = root / filename
+        if not path.is_file():
+            raise impl.E(f"required live CSV missing during runtime: {path}")
+        latest[tf] = impl.pt(str(impl.v.tail_snapshot(path)["last_server_open"]))
+
+    m1_time = latest["M1"]
+    m1_bars = impl.load_bars_retry(root / EXPECTED_LIVE_FILE_MAP["M1"])
+    m1_times = [bar.time for bar in m1_bars]
+    end_index = bisect.bisect_right(m1_times, m1_time)
+    if end_index == 0 or m1_times[end_index - 1] != m1_time:
+        raise impl.E("M1 tail snapshot is not present in stable M1 read")
+
+    details: dict[str, dict[str, float | int | str]] = {}
+    for tf, time_value in latest.items():
+        wall_seconds = (m1_time - time_value).total_seconds()
+        if wall_seconds < 0:
+            raise impl.E(f"live feed out-of-order during M10P cycle: {tf} wall_lag={wall_seconds}s")
+        start_index = bisect.bisect_right(m1_times, time_value, hi=end_index)
+        observed_m1_bars = end_index - start_index
+        limit_bars = int(impl.LAG[tf] // 60)
+        details[tf] = {
+            "last_server_open": impl.ft(time_value),
+            "wall_lag_seconds": wall_seconds,
+            "observed_m1_bars_after_tf": observed_m1_bars,
+            "allowed_observed_m1_bars": limit_bars,
+        }
+        if observed_m1_bars > limit_bars:
+            raise impl.E(
+                f"live feed stale during M10P cycle: {tf} "
+                f"observed_m1_bars={observed_m1_bars} limit={limit_bars} "
+                f"wall_lag={wall_seconds}s"
+            )
+    return details
+
+
 def current_feed_guard() -> None:
     local_root, root, point = impl.env()
     contract = impl.js(impl.CONTRACT)
@@ -57,18 +102,7 @@ def current_feed_guard() -> None:
     frozen_point = float(runtime.get("point", "nan"))
     if not math.isfinite(frozen_point) or abs(float(point) - frozen_point) > 1e-12:
         raise impl.E(f"M10P XAUUSD point changed after start freeze: current={point} frozen={frozen_point}")
-
-    latest = {}
-    for tf, filename in EXPECTED_LIVE_FILE_MAP.items():
-        path = root / filename
-        if not path.is_file():
-            raise impl.E(f"required live CSV missing during runtime: {path}")
-        latest[tf] = impl.pt(str(impl.v.tail_snapshot(path)["last_server_open"]))
-    m1_time = latest["M1"]
-    for tf, time_value in latest.items():
-        lag = (m1_time - time_value).total_seconds()
-        if lag < 0 or lag > impl.LAG[tf]:
-            raise impl.E(f"live feed stale/out-of-order during M10P cycle: {tf} lag={lag}s")
+    observed_feed_health(root)
 
 
 def guarded_once() -> int:
