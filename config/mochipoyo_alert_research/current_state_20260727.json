@@ -1,0 +1,80 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_CHECKPOINT_AUDITOR_READY_AUDIT_ONLY",
+  "running_monitors": {
+    "collector": "RUNNING_KEEP_UNCHANGED",
+    "M7C": "RUNNING_KEEP_UNCHANGED",
+    "M8C": "RUNNING_KEEP_UNCHANGED",
+    "M9V": "RUNNING_KEEP_UNCHANGED",
+    "M9Y": "RUNNING_KEEP_UNCHANGED",
+    "M10B": "RUNNING_KEEP_UNCHANGED",
+    "M10E": "RUNNING_KEEP_UNCHANGED",
+    "M10P": "RUNNING_KEEP_UNCHANGED",
+    "M10P2": "RUNNING_KEEP_UNCHANGED"
+  },
+  "immutable_starts": {
+    "M7C_utc": "2026-07-20T14:54:15Z",
+    "M9V_mt5_server": "2026.07.24 11:04:00",
+    "M9Y_mt5_server": "2026.07.24 12:45:00",
+    "M10B_mt5_server": "2026.07.24 20:54:00",
+    "M10E_mt5_server": "2026.07.24 22:06:00",
+    "M10P_mt5_server": "2026.07.24 23:56:00",
+    "M10P2_mt5_server": "2026.07.27 01:39:00"
+  },
+  "M10P": {
+    "candidate": "M10L_H240_C056 + M10N_G013",
+    "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443 AND h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
+    "direction": "SHORT",
+    "horizon_minutes": 240,
+    "one_position": true,
+    "review_gates": [5, 10, 20, 40, 60]
+  },
+  "M10P2": {
+    "candidate": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "direction": "SHORT",
+    "decision_timeframe": "M15",
+    "horizon_minutes": 240,
+    "one_position": true,
+    "review_gates": [5, 10, 20]
+  },
+  "M10P1_reproduction": {
+    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
+    "trade_count": 318,
+    "all_pf": 1.4839437156621065,
+    "fixed0p20_all_pf": 1.4816933419152243,
+    "max_reference_abs_diff": 0.0
+  },
+  "feed_guard": {
+    "measure": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
+    "limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
+    "candidate_or_threshold_change": false,
+    "start_change": false
+  },
+  "recovery": {
+    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2"],
+    "M10P_restart": "BAT03_ONLY_NEVER_BAT01",
+    "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
+    "pc_off_gap_backfill": false
+  },
+  "M10Q": {
+    "status": "IMPLEMENTED_READ_ONLY_CHECKPOINT_AUDITOR",
+    "script": "scripts/mochipoyo_alert_research/m10q/python/run_m10q_dual_fresh_checkpoint_audit.py",
+    "bat": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
+    "purpose": "Read M10P and M10P2 LATEST, verify immutable starts/safety flags, report fresh metrics and next review gate, and create one upload package without modifying either forward runtime."
+  },
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_NEXT_20260727.md",
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit_from_prospective": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
