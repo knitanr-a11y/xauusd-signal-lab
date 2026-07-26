@@ -1,0 +1,42 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "status": "M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_READ_ONLY_CHECKPOINT_NEXT",
+  "stage": "M10Q_DUAL_SHORT_FRESH_CHECKPOINT_AUDIT",
+  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Use the M10Q read-only checkpoint audit to snapshot both fresh SHORT families without changing starts, thresholds, runtimes, or ledgers.",
+  "operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10P": {
+    "start": "2026.07.24 23:56:00",
+    "review_gates_resolved": [5, 10, 20, 40, 60],
+    "no_pf2_claim_before": 20
+  },
+  "M10P2": {
+    "start": "2026.07.27 01:39:00",
+    "review_gates_resolved": [5, 10, 20],
+    "no_formal_claim_before": 20
+  },
+  "when_to_run_M10Q": [
+    "after starting or recovering the dual fresh monitors to verify continuity",
+    "whenever a fresh checkpoint review is desired",
+    "when either monitor appears to have reached 5, 10, 20, 40, or 60 resolved as applicable",
+    "before any future stage transition"
+  ],
+  "after_M10Q": {
+    "if_no_gate_reached": "Continue both fresh shadows unchanged; do not tune or merge them.",
+    "if_gate_reached": "Upload M10Q 99_UPLOAD_PACKAGE.zip and perform the predeclared review for that gate without threshold refit.",
+    "M10V": "Do not begin SHORT-family combination/portfolio comparison until sufficient independent fresh characterization exists for both families."
+  },
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_NEXT_20260727.md",
+  "recovery": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
