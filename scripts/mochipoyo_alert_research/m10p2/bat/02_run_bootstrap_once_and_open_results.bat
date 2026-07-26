@@ -11,7 +11,7 @@ echo Keep collector / M7C / M8C / M9V / M9Y / M10B / M10E / M10P running unchang
 echo Do NOT rerun M10P2 BAT01.
 echo.
 
-python "scripts\mochipoyo_alert_research\m10p2\python\m10p2_runtime.py" once
+python "scripts\mochipoyo_alert_research\m10p2\python\m10p2_guarded_runtime.py" once
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" (
