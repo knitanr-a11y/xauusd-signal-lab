@@ -1,52 +1,52 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_RUNNING_M10P1_PASS_M10P2_WAIT_FOR_FIRST_NEW_CLOSED_M1",
+  "status": "SESSION_GAP_FEED_GUARD_FIXED_M10P2_READINESS_RECHECK_NEXT",
   "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. M10P2 initialization correctly blocked because no newer CLOSED M1 existed beyond the frozen M10P start. Do not weaken the fresh-start rule. Use the new read-only BAT00 readiness check; only after it reports READY run M10P2 BAT01 exactly once.",
-  "m10p_running": {
-    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
+  "immediate_action": "Fetch/Pull the guard correction. Do not rerun any initializer for existing forward monitors. M10P start remains frozen at 2026.07.24 23:56:00. Ensure M10P is running the updated BAT03 guarded runtime, then rerun the read-only M10P2 BAT00 readiness check. Only after M10P2 READY may BAT01 be run exactly once.",
+  "incident": {
+    "record": "config/mochipoyo_alert_research/m10p_m10p2_weekend_feed_freshness_guard_correction_20260727.json",
+    "latest_closed_m1": "2026.07.27 01:25:00",
+    "old_false_block": "H1 wall lag 181500 seconds across weekend",
+    "root_cause": "absolute wall-clock lag incorrectly counted market-closed weekend time",
+    "fix": "preserve the same freshness limits but measure them as observed M1 trading bars",
+    "preserved_observed_m1_limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
+    "candidate_formula_changed": false,
+    "threshold_changed": false,
+    "prospective_start_changed": false,
+    "historical_backfill": false
+  },
+  "m10p": {
     "prospective_start_server_time": "2026.07.24 23:56:00",
     "initializer_after_start": "FORBIDDEN",
-    "threshold_refit_from_prospective_outcomes": false
+    "updated_guard": "scripts/mochipoyo_alert_research/m10p/python/m10p_guarded_runtime.py",
+    "restart_if_old_process_stopped": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat only",
+    "never_use_bat01": true
   },
-  "m10p1_result": {
-    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10p1_c0212_user_local_reproduction_result_20260725.json",
-    "trade_count": 318,
-    "all_pf": 1.4839437156621065,
-    "fixed0p20_all_pf": 1.4816933419152243,
-    "maximum_metric_abs_difference": 0.0,
-    "all_reference_checks_pass": true
-  },
-  "m10p2_wait": {
-    "status": "WAIT_FOR_FIRST_NEW_CLOSED_M1_AFTER_M10P",
-    "record": "config/mochipoyo_alert_research/m10p2_start_wait_for_new_closed_m1_20260725.json",
-    "m10p_start": "2026.07.24 23:56:00",
-    "required_condition": "latest CLOSED M1 server-open > 2026.07.24 23:56:00",
+  "m10p2": {
     "runtime_created": false,
     "start_created": false,
-    "implementation_bug": false,
-    "candidate_failure": false
+    "readiness_bat": "scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat",
+    "guarded_runtime": "scripts/mochipoyo_alert_research/m10p2/python/m10p2_guarded_runtime.py",
+    "initializer_bat": "scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat",
+    "bootstrap_bat": "scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat",
+    "forever_bat": "scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat",
+    "candidate": "M10J_C0212",
+    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
+    "start_rule": "brand-new latest stable CLOSED M1 strictly after M10P start",
+    "reuse_m10p_start": false
   },
   "operator_steps": [
-    "Fetch/Pull feature/mochipoyo-alert-research so the read-only readiness check is present.",
-    "Keep M10P BAT03 and collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged.",
-    "Run scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat whenever you want to check whether a newer CLOSED M1 exists. BAT00 is read-only and safe to rerun.",
-    "If BAT00 prints [M10P2 WAIT], do not run BAT01 yet.",
-    "Only if BAT00 prints [M10P2 READY], run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
-    "After [M10P2 INIT PASS], never run BAT01 again, including after reboot.",
-    "Then run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat and submit only M10P2 LATEST/99_UPLOAD_PACKAGE.zip.",
+    "Fetch/Pull feature/mochipoyo-alert-research.",
+    "Do not rerun M10P BAT01. Its immutable start remains 2026.07.24 23:56:00.",
+    "Check the M10P BAT03 window. If the old process stopped on the weekend wall-clock guard, start scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat again after Pull. If it is still running old code, restart BAT03 so the corrected guard is loaded; never reinitialize M10P.",
+    "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E unchanged.",
+    "Run scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat again.",
+    "If BAT00 reports M10P2 BLOCKED because observed M1 bars exceed a limit, send the full output; that now indicates a genuine feed problem rather than weekend wall time.",
+    "If BAT00 reports M10P2 READY, run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
+    "After M10P2 INIT PASS, never run M10P2 BAT01 again.",
+    "Then run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat and upload only M10P2 LATEST/99_UPLOAD_PACKAGE.zip.",
     "Do not start M10P2 BAT03 before bootstrap review."
   ],
-  "frozen_candidate": {
-    "candidate_id": "M10J_C0212",
-    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "decision_timeframe": "M15",
-    "direction": "SHORT",
-    "horizon_minutes": 240,
-    "one_position": true,
-    "threshold_refit_from_prospective_outcomes": false
-  },
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
@@ -54,7 +54,6 @@
     "mt5_order": false,
     "live_ready": false,
     "final_signal": false,
-    "automatic_live_promotion": false,
-    "reuse_m10p_start": false
+    "automatic_live_promotion": false
   }
 }
