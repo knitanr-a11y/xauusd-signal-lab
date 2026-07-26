@@ -7,12 +7,12 @@ echo MOCHIPOYO RESEARCH - FORCED REBOOT SAFE RECOVERY
 echo ============================================================
 echo.
 echo Use this ONLY after Windows/PC was forcibly restarted or powered off.
-echo It checks that collector / M7C / M9V / M9Y / M10B / M10E / M10P loops are NOT running.
+echo It checks that collector / M7C / M9V / M9Y / M10B / M10E / M10P / M10P2 loops are NOT running.
 echo It archives and removes stale loop-lock files only.
-echo It does NOT reset/delete runtime manifests, prospective starts, SQLite, M8C, M9V, M9Y, M10B, M10E, or M10P history.
+echo It does NOT reset/delete runtime manifests, prospective starts, SQLite, M8C, M9V, M9Y, M10B, M10E, M10P, or M10P2 history.
 echo.
 
-python "scripts\mochipoyo_alert_research\recovery\python\recover_after_forced_reboot.py"
+python "scripts\mochipoyo_alert_research\recovery\python\recover_after_forced_reboot_with_m10p2.py"
 set "RC=%ERRORLEVEL%"
 
 echo.
@@ -35,9 +35,10 @@ echo 6. scripts\mochipoyo_alert_research\m9y\bat\03_run_shadow_forever.bat
 echo 7. scripts\mochipoyo_alert_research\m10b\bat\03_run_shadow_forever.bat
 echo 8. scripts\mochipoyo_alert_research\m10e\bat\03_run_shadow_forever.bat
 echo 9. scripts\mochipoyo_alert_research\m10p\bat\03_run_shadow_forever.bat
+echo 10. scripts\mochipoyo_alert_research\m10p2\bat\03_run_shadow_forever.bat
 echo.
-echo NEVER rerun M9V BAT00/BAT01, M9Y BAT01, M10B BAT01, M10E BAT01, or M10P BAT01 after reboot.
-echo NEVER reset M7C/M8C/M9V/M9Y/M10B/M10E/M10P prospective starts.
+echo NEVER rerun M9V BAT00/BAT01, M9Y BAT01, M10B BAT01, M10E BAT01, M10P BAT01, or M10P2 BAT01 after reboot.
+echo NEVER reset M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 prospective starts.
 echo If raw MT5 CSVs have a permanent downtime gap, that interval is unobserved and must not be backfilled from future outcomes.
 echo.
 pause
