@@ -2,16 +2,16 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10P_RUNNING_M10P1_C0212_REPRODUCTION_PASS_M10P2_FRESH_SHADOW_IMPLEMENTED_BOOTSTRAP_NEXT_AUDIT_ONLY",
+  "status": "M10P_START_PRESERVED_SESSION_GAP_GUARD_FIXED_M10P1_PASS_M10P2_READINESS_RECHECK_NEXT_AUDIT_ONLY",
   "running_monitors": {
     "genuine_source_collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED_CONTINUE_GENUINE_SHORT_COLLECTION",
     "M8C": "RUNNING_KEEP_UNCHANGED",
     "M9V": "RUNNING_KEEP_UNCHANGED",
     "M9Y": "RUNNING_KEEP_UNCHANGED",
-    "M10B": "PERSISTENT_LOOP_CONFIRMED_RUNNING_KEEP_UNCHANGED",
-    "M10E": "PERSISTENT_LOOP_CONFIRMED_RUNNING_KEEP_UNCHANGED",
-    "M10P": "PERSISTENT_LOOP_USER_CONFIRMED_RUNNING_KEEP_UNCHANGED"
+    "M10B": "KEEP_UNCHANGED",
+    "M10E": "KEEP_UNCHANGED",
+    "M10P": "IMMUTABLE_START_PRESERVED; OLD PROCESS MAY HAVE BLOCKED ON WALL_CLOCK_WEEKEND_GUARD; AFTER_PULL RESTART_WITH_BAT03_ONLY_IF_NEEDED"
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
@@ -20,7 +20,7 @@
     "M10B_mt5_server": "2026.07.24 20:54:00",
     "M10E_mt5_server": "2026.07.24 22:06:00",
     "M10P_mt5_server": "2026.07.24 23:56:00",
-    "M10P2_mt5_server": "TO_BE_FROZEN_ONCE_BY_M10P2_BAT01"
+    "M10P2_mt5_server": "NOT_YET_CREATED"
   },
   "short_research_adoption": {
     "status": "TWO_INDEPENDENT_SHORT_FAMILIES_RETAINED_NOT_LIVE_APPROVED",
@@ -31,22 +31,17 @@
   },
   "m10n": {
     "status": "PASS_USER_LOCAL_HISTORICAL_AUDIT_ONLY_ONE_ROBUST_PF2_SEED_GATE_PAIR",
-    "result": "config/mochipoyo_alert_research/m10n_user_local_result_20260725.json",
     "historical_all_pf": 2.540715351740206,
     "historical_fixed0p20_all_pf": 2.538476073441831,
     "historical_research_exposed": true
   },
   "m10o": {
     "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10o_user_local_result_20260725.json",
     "trade_count": 84,
-    "max_reference_abs_diff": 4.440892098500626e-16,
     "all_reference_checks_pass": true
   },
   "m10p": {
     "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
-    "status": "PERSISTENT_FRESH_PROSPECTIVE_SHADOW_USER_CONFIRMED_RUNNING_AUDIT_ONLY",
-    "bootstrap_result": "config/mochipoyo_alert_research/m10p_user_local_bootstrap_result_20260725.json",
     "prospective_start_server_time": "2026.07.24 23:56:00",
     "fixed_seed_formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443",
     "fixed_regime_formula": "h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
@@ -54,7 +49,8 @@
     "one_position": true,
     "initializer_must_never_run_again": true,
     "historical_backfill": false,
-    "review_gates_resolved": {"M10Q": 5, "M10R": 10, "M10S": 20, "M10T": 40, "M10U": 60},
+    "feed_guard": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
+    "restart_after_pull_if_stopped": "BAT03_ONLY",
     "automatic_promotion": false,
     "forward_live_trading_approved": false
   },
@@ -62,40 +58,40 @@
     "stage": "M10P1_C0212_DETERMINISTIC_REPRODUCTION",
     "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10p1_c0212_user_local_reproduction_result_20260725.json",
-    "uploaded_package_sha256": "fe48c34e2069369aeb92f90b635cfea809dc2138db8ef9f7255d94af806cc10c",
-    "candidate_id": "M10J_C0212",
-    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "decision_timeframe": "M15",
-    "horizon_minutes": 240,
-    "candidate_rows_before_one_position": 4406,
     "trade_count": 318,
     "split_counts": {"train_2023_2024": 105, "validation_2025": 149, "test_2026": 64, "all": 318},
     "pf": {"train_2023_2024": 1.5689385901535529, "validation_2025": 1.3904778450159343, "test_2026": 1.5465266111892766, "all": 1.4839437156621065},
     "fixed0p20_all_pf": 1.4816933419152243,
-    "all_max_drawdown_bps": 823.9691089106718,
-    "all_payoff_ratio": 1.7262202406681646,
     "max_reference_abs_diff": 0.0,
-    "all_reference_checks_pass": true,
-    "reads_result_csv_for_trade_generation": false,
-    "m10p_modified": false
+    "all_reference_checks_pass": true
+  },
+  "feed_guard_correction": {
+    "status": "CORRECTED",
+    "record": "config/mochipoyo_alert_research/m10p_m10p2_weekend_feed_freshness_guard_correction_20260727.json",
+    "observed_latest_closed_m1": "2026.07.27 01:25:00",
+    "false_block_h1_wall_lag_seconds": 181500.0,
+    "root_cause": "WEEKEND_MARKET_CLOSED_WALL_TIME_WAS_COUNTED_AS_FEED_AGE",
+    "corrected_measure": "OBSERVED_M1_TRADING_BARS",
+    "preserved_limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
+    "candidate_or_threshold_change": false,
+    "start_change": false,
+    "historical_backfill": false
   },
   "m10p2": {
     "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
-    "status": "IMPLEMENTED_FRESH_BOOTSTRAP_NOT_YET_FROZEN",
-    "contract": "config/mochipoyo_alert_research/m10p2_c0212_fresh_prospective_shadow_contract_20260725.json",
-    "runtime": "scripts/mochipoyo_alert_research/m10p2/python/m10p2_runtime.py",
-    "initializer_bat": "scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat",
-    "bootstrap_bat": "scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat",
-    "forever_bat": "scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat",
+    "status": "IMPLEMENTED_NOT_YET_FROZEN_READINESS_RECHECK_AFTER_SESSION_GAP_GUARD_FIX",
     "candidate_id": "M10J_C0212",
     "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
     "decision_timeframe": "M15",
     "fixed_horizon_minutes": 240,
     "one_position": true,
+    "runtime_created": false,
+    "start_created": false,
     "new_immutable_mt5_server_start_required": true,
     "start_must_be_strictly_after_m10p": true,
     "reuse_m10p_start": false,
     "historical_backfill": false,
+    "feed_guard": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
     "automatic_promotion": false,
     "forward_live_trading_approved": false
   },
@@ -104,7 +100,6 @@
     "status": "READY_WITH_M10P_M10P2_NOT_ADDED_UNTIL_BOOTSTRAP_REVIEW",
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
     "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P"],
-    "never_reinitialize_after_reboot": true,
     "m10p_restart": "BAT03_ONLY_NEVER_BAT01",
     "m10p2_recovery_addition": "ONLY_AFTER_M10P2_BOOTSTRAP_PASS_AND_REVIEW"
   },
@@ -117,5 +112,5 @@
     "entry_gate_enabled": false,
     "automatic_live_promotion": false
   },
-  "next": "Keep M10P and all existing monitors running unchanged. Fetch/Pull, run M10P2 BAT01 exactly once to freeze a new C0212-specific prospective start strictly after M10P, then run M10P2 BAT02 once and upload only M10P2 LATEST/99_UPLOAD_PACKAGE.zip. Do not start M10P2 BAT03 until bootstrap review."
+  "next": "Fetch/Pull the session-gap-aware guard correction. Ensure M10P uses the updated BAT03 guarded runtime without rerunning BAT01. Then rerun M10P2 BAT00. Only if BAT00 reports M10P2 READY, run M10P2 BAT01 exactly once, then BAT02 and upload the bootstrap package."
 }
