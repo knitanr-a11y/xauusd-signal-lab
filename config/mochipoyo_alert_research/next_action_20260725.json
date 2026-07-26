@@ -1,52 +1,71 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "SESSION_GAP_FEED_GUARD_FIXED_M10P2_READINESS_RECHECK_NEXT",
+  "status": "M10P2_BOOTSTRAP_PASS_START_PERSISTENT_SHADOW_NEXT",
   "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
-  "immediate_action": "Fetch/Pull the guard correction. Do not rerun any initializer for existing forward monitors. M10P start remains frozen at 2026.07.24 23:56:00. Ensure M10P is running the updated BAT03 guarded runtime, then rerun the read-only M10P2 BAT00 readiness check. Only after M10P2 READY may BAT01 be run exactly once.",
-  "incident": {
-    "record": "config/mochipoyo_alert_research/m10p_m10p2_weekend_feed_freshness_guard_correction_20260727.json",
-    "latest_closed_m1": "2026.07.27 01:25:00",
-    "old_false_block": "H1 wall lag 181500 seconds across weekend",
-    "root_cause": "absolute wall-clock lag incorrectly counted market-closed weekend time",
-    "fix": "preserve the same freshness limits but measure them as observed M1 trading bars",
-    "preserved_observed_m1_limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
-    "candidate_formula_changed": false,
-    "threshold_changed": false,
-    "prospective_start_changed": false,
-    "historical_backfill": false
+  "immediate_action": "KEEP collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P running unchanged. M10P2 bootstrap passed with immutable start 2026.07.27 01:39:00 MT5 server time. Fetch/Pull the recovery/state updates, then start only M10P2 BAT03. NEVER rerun M10P2 BAT01.",
+  "bootstrap_result": {
+    "status": "PASS_USER_LOCAL_FRESH_BOOTSTRAP_AUDIT_ONLY_READY_TO_START_PERSISTENT_SHADOW",
+    "result": "config/mochipoyo_alert_research/m10p2_user_local_bootstrap_result_20260727.json",
+    "package_sha256": "ae464486c481741b99b7368f501a9b31d216354c12cefde9ab54cdc0dd9d8dfa",
+    "prospective_start_server_time": "2026.07.27 01:39:00",
+    "m10p_anchor_server_time": "2026.07.24 23:56:00",
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "prefix_integrity_verified": true,
+    "pre_start_candidate_eligibility": false,
+    "historical_backfill": false,
+    "session_gap_aware_feed_guard_passed": true
   },
-  "m10p": {
-    "prospective_start_server_time": "2026.07.24 23:56:00",
-    "initializer_after_start": "FORBIDDEN",
-    "updated_guard": "scripts/mochipoyo_alert_research/m10p/python/m10p_guarded_runtime.py",
-    "restart_if_old_process_stopped": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat only",
-    "never_use_bat01": true
-  },
-  "m10p2": {
-    "runtime_created": false,
-    "start_created": false,
-    "readiness_bat": "scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat",
-    "guarded_runtime": "scripts/mochipoyo_alert_research/m10p2/python/m10p2_guarded_runtime.py",
-    "initializer_bat": "scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat",
-    "bootstrap_bat": "scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat",
-    "forever_bat": "scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat",
-    "candidate": "M10J_C0212",
+  "frozen_candidate": {
+    "candidate_id": "M10J_C0212",
     "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "start_rule": "brand-new latest stable CLOSED M1 strictly after M10P start",
-    "reuse_m10p_start": false
+    "decision_timeframe": "M15",
+    "direction": "SHORT",
+    "horizon_minutes": 240,
+    "one_position": true,
+    "threshold_refit_from_prospective_outcomes": false
   },
   "operator_steps": [
     "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Do not rerun M10P BAT01. Its immutable start remains 2026.07.24 23:56:00.",
-    "Check the M10P BAT03 window. If the old process stopped on the weekend wall-clock guard, start scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat again after Pull. If it is still running old code, restart BAT03 so the corrected guard is loaded; never reinitialize M10P.",
-    "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E unchanged.",
-    "Run scripts/mochipoyo_alert_research/m10p2/bat/00_check_start_readiness.bat again.",
-    "If BAT00 reports M10P2 BLOCKED because observed M1 bars exceed a limit, send the full output; that now indicates a genuine feed problem rather than weekend wall time.",
-    "If BAT00 reports M10P2 READY, run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat exactly once.",
-    "After M10P2 INIT PASS, never run M10P2 BAT01 again.",
-    "Then run scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat and upload only M10P2 LATEST/99_UPLOAD_PACKAGE.zip.",
-    "Do not start M10P2 BAT03 before bootstrap review."
+    "Keep M10P BAT03 and collector/M7C/M8C/M9V/M9Y/M10B/M10E running unchanged.",
+    "Do NOT run scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat again. The immutable M10P2 start is already frozen at 2026.07.27 01:39:00 MT5 server time.",
+    "Run scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat.",
+    "Keep the M10P2 window running during normal monitoring.",
+    "If a forced reboot occurs, use scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat and restart in the printed order. M10P2 is step 10 and uses BAT03 only.",
+    "Do not change C0212 thresholds from prospective outcomes and do not call C0212 live-ready from historical or early fresh results."
   ],
+  "review_gates": {
+    "operational_resolved": 5,
+    "interim_resolved": 10,
+    "formal_resolved": 20,
+    "automatic_live_promotion": false
+  },
+  "parallel_monitoring": {
+    "M10P": {
+      "candidate": "M10L_H240_C056 + M10N_G013",
+      "start": "2026.07.24 23:56:00",
+      "keep_unchanged": true
+    },
+    "M10P2": {
+      "candidate": "M10J_C0212",
+      "start": "2026.07.27 01:39:00",
+      "keep_unchanged_after_start": true
+    }
+  },
+  "forced_reboot_recovery": {
+    "status": "UPDATED_WITH_M10P2_SAFE_WRAPPER",
+    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2"],
+    "m10p_initializer_after_reboot": "FORBIDDEN",
+    "m10p2_initializer_after_reboot": "FORBIDDEN",
+    "m10p_restart": "03_run_shadow_forever.bat only",
+    "m10p2_restart": "03_run_shadow_forever.bat only"
+  },
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
