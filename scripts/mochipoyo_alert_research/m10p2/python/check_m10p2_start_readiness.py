@@ -7,7 +7,9 @@ THIS = Path(__file__).resolve()
 if str(THIS.parent) not in sys.path:
     sys.path.insert(0, str(THIS.parent))
 
-import m10p2_runtime as r
+import m10p2_guarded_runtime as g
+
+r = g.impl
 
 
 def main() -> int:
@@ -35,19 +37,23 @@ def main() -> int:
             print("[M10P2 BLOCKED] M10P runtime anchor is unsafe or unexpected.")
             return 2
 
-        first = r.current_feed_snapshots(root)
-        latest = {tf: r.pt(str(item["last_server_open"])) for tf, item in first.items()}
+        snapshots = r.current_feed_snapshots(root)
+        latest = {tf: r.pt(str(item["last_server_open"])) for tf, item in snapshots.items()}
         latest_m1 = latest["M1"]
         m10p_start = r.pt(str(m10p["prospective_start_server_time"]))
 
         print(f"[M10P2 CHECK] latest CLOSED M1 = {r.ft(latest_m1)}")
         print(f"[M10P2 CHECK] M10P frozen start = {r.ft(m10p_start)}")
 
-        for tf, time_value in latest.items():
-            lag = (latest_m1 - time_value).total_seconds()
-            if lag < 0 or lag > r.LAG[tf]:
-                print(f"[M10P2 BLOCKED] feed stale/out-of-order: {tf} lag={lag}s")
-                return 2
+        health = g.observed_feed_health(root, snapshots)
+        for tf in ("M5", "M15", "H1", "H4", "D1"):
+            row = health[tf]
+            print(
+                f"[M10P2 FEED] {tf} last={row['last_server_open']} "
+                f"observed_m1_bars={row['observed_m1_bars_after_tf']} "
+                f"limit={row['allowed_observed_m1_bars']} "
+                f"wall_lag={row['wall_lag_seconds']}s"
+            )
 
         if latest_m1 <= m10p_start:
             print("[M10P2 WAIT] No newer CLOSED M1 exists yet.")
@@ -55,7 +61,7 @@ def main() -> int:
             print("[NEXT] Run this readiness check again only after the live GOLD CSV advances.")
             return 3
 
-        print("[M10P2 READY] A newer CLOSED M1 exists. BAT01 may now be run exactly once.")
+        print("[M10P2 READY] A newer CLOSED M1 exists and observed-trading-time feed health passed.")
         print("[SAFE] This readiness check did not create or modify any runtime/start/state.")
         return 0
     except Exception as exc:
