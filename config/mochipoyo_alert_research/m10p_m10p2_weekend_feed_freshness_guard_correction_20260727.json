@@ -1,0 +1,61 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "incident": "M10P_M10P2_WEEKEND_WALL_CLOCK_FEED_LAG_FALSE_BLOCK",
+  "recorded_date": "2026-07-27",
+  "status": "CORRECTED_AUDIT_ONLY_NO_START_OR_THRESHOLD_CHANGE",
+  "observed_user_output": {
+    "latest_closed_m1": "2026.07.27 01:25:00",
+    "m10p_frozen_start": "2026.07.24 23:56:00",
+    "blocked_timeframe": "H1",
+    "reported_wall_lag_seconds": 181500.0
+  },
+  "root_cause": "The feed freshness guard measured higher-timeframe staleness using absolute wall-clock elapsed seconds from the latest CLOSED higher-timeframe bar to latest CLOSED M1. This incorrectly counted weekend/market-closed time as if tradable M1 bars should have existed. Immediately after market reopen, M1 may be current while the first new H1 remains open and therefore is correctly absent from the CLOSED-row H1 CSV.",
+  "correction": {
+    "principle": "Measure feed age in actually observed M1 trading bars, not wall-clock elapsed time.",
+    "preserved_limits": {
+      "M1_observed_m1_bars": 0,
+      "M5_observed_m1_bars": 10,
+      "M15_observed_m1_bars": 30,
+      "H1_observed_m1_bars": 120,
+      "H4_observed_m1_bars": 480,
+      "D1_observed_m1_bars": 2880
+    },
+    "weekend_market_closed_minutes_count_toward_lag": false,
+    "true_stale_exporter_still_fail_closed": true,
+    "candidate_formula_changed": false,
+    "candidate_thresholds_changed": false,
+    "prospective_start_changed": false,
+    "historical_backfill_enabled": false
+  },
+  "files": {
+    "m10p_guard": "scripts/mochipoyo_alert_research/m10p/python/m10p_guarded_runtime.py",
+    "m10p2_guard": "scripts/mochipoyo_alert_research/m10p2/python/m10p2_guarded_runtime.py",
+    "m10p2_readiness": "scripts/mochipoyo_alert_research/m10p2/python/check_m10p2_start_readiness.py",
+    "m10p2_bat01": "scripts/mochipoyo_alert_research/m10p2/bat/01_initialize_fresh_shadow.bat",
+    "m10p2_bat02": "scripts/mochipoyo_alert_research/m10p2/bat/02_run_bootstrap_once_and_open_results.bat",
+    "m10p2_bat03": "scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat"
+  },
+  "m10p": {
+    "immutable_start": "2026.07.24 23:56:00",
+    "initializer_must_never_run_again": true,
+    "restart_after_code_pull_if_process_stopped": "BAT03_ONLY",
+    "historical_backfill": false
+  },
+  "m10p2": {
+    "runtime_created_before_correction": false,
+    "start_created_before_correction": false,
+    "bat01_allowed_after_readiness_ready": true,
+    "bat01_forbidden_after_first_init_pass": true,
+    "start_must_be_strictly_after_m10p": true,
+    "reuse_m10p_start": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "modify_existing_frozen_start": false
+  }
+}
