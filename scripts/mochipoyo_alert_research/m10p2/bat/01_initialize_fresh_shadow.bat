@@ -10,9 +10,10 @@ echo.
 echo Keep collector / M7C / M8C / M9V / M9Y / M10B / M10E / M10P running unchanged.
 echo This freezes a BRAND-NEW C0212 MT5-server start. It does NOT reuse M10P start.
 echo No historical backfill. No Discord. No MT5 orders.
+echo Feed freshness is measured in observed M1 trading bars, so market-closed weekend time is ignored.
 echo.
 
-python "scripts\mochipoyo_alert_research\m10p2\python\m10p2_runtime.py" initialize
+python "scripts\mochipoyo_alert_research\m10p2\python\m10p2_guarded_runtime.py" initialize
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" (
