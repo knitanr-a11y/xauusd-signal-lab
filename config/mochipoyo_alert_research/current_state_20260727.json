@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10Q_PASS_ZERO_FRESH_CANDIDATES_M10V_PREREGISTERED_WAIT_FOR_FRESH_GATES_AUDIT_ONLY",
+  "status": "M10Q_PASS_ZERO_FRESH_CANDIDATES_M10V_PREREGISTERED_M10W0_GOLD_LONG_INVENTORY_READY_AUDIT_ONLY",
   "running_monitors": {
     "collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -22,6 +22,11 @@
     "M10E_mt5_server": "2026.07.24 22:06:00",
     "M10P_mt5_server": "2026.07.24 23:56:00",
     "M10P2_mt5_server": "2026.07.27 01:39:00"
+  },
+  "research_scope": {
+    "new_candidate_expectancy_research": "XAUUSD_GOLD_ONLY",
+    "btc_in_M10_line": false,
+    "M7C_background_scope": "BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_TRACK_KEEP_UNCHANGED"
   },
   "M10P": {
     "candidate": "M10L_H240_C056 + M10N_G013",
@@ -62,8 +67,19 @@
     "file": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json",
     "execution_gate": {"M10P_min_resolved":20,"M10P2_min_resolved":20,"integrity_pass_required":true},
     "common_window_start_mt5_server": "2026.07.27 01:39:00",
-    "single_capital_policy": "chronological first-come-first-served; exact-same-timestamp same-direction becomes one position with dual attribution; no double size/PnL",
     "execute_now": false
+  },
+  "M10W0": {
+    "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+    "status": "IMPLEMENTED_PENDING_USER_LOCAL_READ_ONLY_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m10w0_gold_long_reference_inventory_contract_20260727.json",
+    "script": "scripts/mochipoyo_alert_research/m10w0/python/run_m10w0_gold_long_reference_inventory.py",
+    "operator": "scripts/mochipoyo_alert_research/m10w0/bat/01_run_gold_long_reference_inventory.bat",
+    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10A",
+    "scope": "XAUUSD_GOLD_ONLY",
+    "purpose": "Inventory actual frozen M10A LONG evidence before deciding which LONG arms are eligible for future M10W historical LONG+SHORT reconstruction.",
+    "selection_decision_made": false,
+    "reads_M10P_or_M10P2_fresh_outcomes_for_selection": false
   },
   "feed_guard": {
     "measure": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
@@ -78,8 +94,7 @@
     "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
     "pc_off_gap_backfill": false
   },
-  "M10Q_operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_ZERO_CANDIDATES_M10V_PREREG_FROZEN_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_M10W0_GOLD_LONG_INVENTORY_NEXT_20260727.md",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
