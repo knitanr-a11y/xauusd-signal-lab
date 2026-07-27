@@ -1,0 +1,14 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "status":"M10W16_PASS_M10W17_NEITHER_REGIME_DIRECTIONAL_OPPORTUNITY_NEXT",
+  "stage":"M10W17_NEITHER_REGIME_DIRECTIONAL_OPPORTUNITY_AUDIT_ONLY",
+  "immediate_action":"Keep all existing forward monitors running unchanged. Fetch/Pull the latest feature/mochipoyo-alert-research and run only M10W17.",
+  "operator":"scripts/mochipoyo_alert_research/m10w17/bat/01_run_neither_regime_directional_opportunity_audit.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W17/LATEST/99_UPLOAD_PACKAGE.zip",
+  "purpose":"Test the already frozen M10W14 NEITHER regime buckets for stable 240-minute directional opportunity across 2023-24 train, 2025 validation and 2026 test before designing another event trigger.",
+  "frozen_rules":{"bucket_cuts_change":false,"bucket_merge_after_results":false,"direction_flip_after_results":false,"existing_family_refit":false},
+  "M10P_BAT01":"FORBIDDEN",
+  "M10P2_BAT01":"FORBIDDEN",
+  "M10V_before_both_20":"FORBIDDEN",
+  "scope":"GOLD_XAUUSD_ONLY"
+}
