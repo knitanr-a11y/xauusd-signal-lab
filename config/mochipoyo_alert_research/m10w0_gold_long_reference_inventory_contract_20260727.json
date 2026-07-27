@@ -1,0 +1,35 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_READ_ONLY",
+  "date": "2026-07-27",
+  "scope": {
+    "ticker": "XAUUSD",
+    "purpose": "Inventory and preserve the existing historical/deterministic M10A GOLD LONG reference artifacts before deciding which frozen LONG arms are eligible for future M10W integrated LONG+SHORT reconstruction.",
+    "source_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10A",
+    "fresh_forward_outputs_used_for_candidate_selection": false,
+    "btc_in_scope": false
+  },
+  "required_inventory": [
+    "source file path, size, SHA256",
+    "JSON top-level keys plus stage/status/arm-like structures",
+    "CSV row count and columns",
+    "CSV min/max times where detectable",
+    "arm/branch/direction-like distinct values",
+    "verbatim copy of source JSON/CSV/TXT/LOG artifacts into one upload package"
+  ],
+  "decision_rule": "M10W0 itself does not select or reject a LONG arm. It only exposes the frozen evidence. Eligibility is decided after user-local evidence review, without using M10P/M10P2 prospective outcomes.",
+  "prohibitions": {
+    "modify_M10A_source": false,
+    "modify_running_monitors": false,
+    "read_M10P_or_M10P2_fresh_results_for_selection": false,
+    "threshold_refit": false,
+    "historical_backfill": false,
+    "btc_research": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_promotion": false
+  }
+}
