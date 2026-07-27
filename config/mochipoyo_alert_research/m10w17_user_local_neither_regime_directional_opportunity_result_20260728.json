@@ -1,0 +1,19 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W17_NEITHER_REGIME_DIRECTIONAL_OPPORTUNITY_AUDIT_ONLY",
+  "status":"PASS_TWO_STABLE_LONG_OPPORTUNITY_BUCKETS",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(56).zip","sha256":"79e3d8ec3f57f2d88f65b08c71a4eff324f7e0c9cd92b56c077be54ea1c261de","size_bytes":522870,"built_at_utc":"2026-07-27T23:01:03Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "coverage_grid_rows":81329,
+  "sampled_neither_before_exact_m1_gap_filter":6632,
+  "exact_m1_gap_count":434,
+  "resolved_directional_ledger_rows":12396,
+  "evaluated_bucket_direction_pairs":72,
+  "stable_opportunity_pass_count":2,
+  "stable_opportunities":[
+    {"bucket":"D1_BULLISH|H4_POSITIVE|H1_MACD_POSITIVE|ATR_HIGH_GE_0P67","direction":"LONG","train":{"count":249,"pf":1.2229806472573443,"net_bps":694.1569037322136},"validation_2025":{"count":207,"pf":1.3841527762810943,"net_bps":1017.6094058147863},"test_2026":{"count":34,"pf":2.2809144068127374,"net_bps":611.5246188720984},"all":{"count":490,"pf":1.3723542165384244,"net_bps":2323.2909284190982,"fixed0p20_pf":1.37034158003251,"plus2bps_pf":1.2004017818194836,"plus2bps_net_bps":1343.2909284190982}},
+    {"bucket":"D1_BULLISH|H4_POSITIVE|H1_MACD_POSITIVE|ATR_LOW_LT_0P33","direction":"LONG","train":{"count":300,"pf":1.2884113743037153,"net_bps":910.1560443515945},"validation_2025":{"count":262,"pf":1.36694067932189,"net_bps":1179.0756099555874},"test_2026":{"count":52,"pf":1.149145360303556,"net_bps":130.8027586105139},"all":{"count":614,"pf":1.3063793637777734,"net_bps":2220.034412917696,"fixed0p20_pf":1.3000171350274528,"plus2bps_pf":1.126371044904125,"plus2bps_net_bps":992.0344129176958}}
+  ],
+  "interpretation":{"passing_bucket_is_trade_signal":false,"new_event_trigger_created":false,"important_for_BLC1":"HIGH ATR is not universally bearish for aligned bullish regimes; M10W17 shows stable unconditional LONG opportunity in the HIGH bucket. Therefore the weak HIGH-ATR subset observed inside BLC1 points to a trigger-regime interaction rather than a claim that high ATR itself is bad."},
+  "guardrails":{"audit_only":true,"existing_monitor_modification":false,"threshold_refit":false,"historical_backfill_into_existing_forward":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
