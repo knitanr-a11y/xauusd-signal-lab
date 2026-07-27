@@ -1,14 +1,16 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W5_PASS_M10W6_M10B_CURRENT_REVIEW_NEXT",
-  "stage":"M10W6_M10B_CURRENT_FRESH_MULTITIMEFRAME_REVIEW_AUDIT_ONLY",
-  "immediate_action":"Keep all existing monitors running unchanged and upload the current M10B LATEST 99_UPLOAD_PACKAGE.zip for read-only review.",
-  "source_package":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10B/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W5_result":"config/mochipoyo_alert_research/m10w5_m10e_current_fresh_checkpoint_result_20260727.json",
-  "M10W6_contract":"config/mochipoyo_alert_research/m10w6_m10b_current_fresh_multitimeframe_review_contract_20260727.json",
-  "M10B_start":"2026.07.24 20:54:00",
+  "status":"M10W6_PASS_M10W7_M9V_CURRENT_GOLD_BRANCH_REVIEW_NEXT",
+  "stage":"M10W7_M9V_CURRENT_GOLD_BRANCH_MATERIALIZATION_REVIEW_AUDIT_ONLY",
+  "immediate_action":"Keep all existing monitors running unchanged. Upload the current M9V LATEST 99_UPLOAD_PACKAGE.zip for read-only GOLD branch materialization review. Do not run any M9V initializer or reset.",
+  "source_package":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M9V/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W6_result":"config/mochipoyo_alert_research/m10w6_m10b_current_fresh_multitimeframe_result_20260727.json",
+  "M10W7_contract":"config/mochipoyo_alert_research/m10w7_m9v_current_gold_branch_materialization_review_contract_20260727.json",
+  "M9V_start":"2026.07.24 11:04:00",
+  "review_branches":["S1_M5","S2_M15","S3_H1","S4_H4"],
+  "known_downstream_state":{"M10B_S1_M5_resolved":1,"M10B_S3_H1_resolved":0,"M10B_S4_H4_resolved":0,"M10E_S3_H1_resolved":0},
   "scope":"GOLD_XAUUSD_ONLY",
   "M10V_before_both_20":"FORBIDDEN",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W5_HEALTH_PASS_M10W6_M10B_FRESH_REVIEW_NEXT_20260727.md",
-  "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W6_PASS_M10W7_M9V_BRANCH_REVIEW_NEXT_20260727.md",
+  "safety":{"audit_only":true,"M9V_reset":false,"M9V_reinitialize":false,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
