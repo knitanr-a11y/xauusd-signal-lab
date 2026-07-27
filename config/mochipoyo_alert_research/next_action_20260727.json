@@ -1,16 +1,15 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W3_PASS_M10W4_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_NEXT",
-  "stage":"M10W4_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_AUDIT_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Run read-only M10W4 to decompose which accepted trades differ between baseline-H1 and filtered-H1 portfolio scenarios, especially the 2025 net decline. Do not tune thresholds or read fresh/SHORT outcomes for selection.",
-  "operator":"scripts/mochipoyo_alert_research/m10w4/bat/01_run_gold_long_portfolio_difference_forensics.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W4/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W3_result":{"file":"config/mochipoyo_alert_research/m10w3_user_local_result_20260727.json","package_sha256":"1c8646f028c17ce9c4b34158bcd32809b6b5a172b61ad7d3f5025469cedb8248","CORE_BASELINE_pf":1.9623457969195994,"CORE_FILTERED_pf":2.2149685287726144,"CORE_net_delta_filtered_minus_baseline_bps":226.13691679048497,"CORE_dd_delta_filtered_minus_baseline_bps":-75.83556455314118,"EXTENDED_BASELINE_pf":2.3542115764696034,"EXTENDED_FILTERED_pf":2.6330860824329076,"EXTENDED_net_delta_filtered_minus_baseline_bps":182.55358877610252,"EXTENDED_dd_delta_filtered_minus_baseline_bps":-20.09567791556111,"CORE_2025_net_delta_bps":-151.19319640495496,"EXTENDED_2025_net_delta_bps":-88.76657754841199,"filtered_H1_replace_operational_now":false},
-  "M10W4_rules":{"scope":"XAUUSD_GOLD_ONLY","read_only":true,"new_filter_search":false,"threshold_refit":false,"compare_actual_accepted_trade_sets":true,"normalize_H1_trade_identity_across_M10A_M10D":true,"focus_2025":true,"reads_M10E_fresh_outcomes_for_selection":false,"reads_SHORT_ledgers":false,"reads_M10P_or_M10P2":false,"modify_running_monitors":false,"historical_backfill":false},
-  "after_M10W4":{"if_pass":"Upload only M10W4 LATEST/99_UPLOAD_PACKAGE.zip. Review baseline-only and filtered-only PnL by family/year and the 2025 changed-trade ledger before freezing historical H1 challenger/portfolio status. M10E fresh remains required before operational H1 replacement.","if_blocked":"Send complete console output. Do not edit source ledgers, thresholds, starts, or running monitors to force a pass."},
-  "fresh_parallel":{"M10P_resolved":0,"M10P_next_gate":5,"M10P2_resolved":0,"M10P2_next_gate":5,"M10V_before_both_20":"FORBIDDEN","M10Q_operator":"scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat"},
+  "status":"M10W4_PASS_M10W5_CURRENT_M10E_FRESH_CHECKPOINT_REVIEW_NEXT",
+  "stage":"M10W5_M10E_H1_FILTER_FRESH_CHECKPOINT_REVIEW_AUDIT_ONLY",
+  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Do not run any initializer. Open the current M10E LATEST folder and upload its existing 99_UPLOAD_PACKAGE.zip for read-only review. M10E must continue from its immutable start 2026.07.24 22:06:00.",
+  "source_package":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10E/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W4_result":{"file":"config/mochipoyo_alert_research/m10w4_user_local_result_20260727.json","package_sha256":"9d133b694edc3bd0d74f7dbdf96ae2dc24990e7e8bf1c8aada99f40849d0656c","CORE_baseline_only_net_bps":-122.31532948079386,"CORE_filtered_only_net_bps":103.82158730969108,"CORE_2025_net_delta_bps":-151.19319640495507,"EXTENDED_2025_net_delta_bps":-88.76657754841202,"2025_cause":"baseline-only H1 accepted trades are net positive in 2025; freed-capacity M5/H4 gains do not fully replace that positive H1 net"},
+  "M10W5_contract":"config/mochipoyo_alert_research/m10w5_m10e_fresh_checkpoint_review_contract_20260727.json",
+  "M10E_review":{"immutable_start_mt5_server":"2026.07.24 22:06:00","arms":["E0_H1_BASELINE_RUNNER50","E1_H1_FILTERED_RUNNER50"],"fixed_filter":"m5_macd_bps_slope <= -0.1308 AND h1_ema30_minus_ema40_bps >= 17.3333","review_gates":[5,10,20],"below_5":"health/accumulation only","5":"operational integrity only","10":"interim descriptive fresh review","20":"formal fresh baseline-vs-filtered review; no automatic replacement"},
+  "fresh_SHORT_parallel":{"M10P_resolved":0,"M10P_next_gate":5,"M10P2_resolved":0,"M10P2_next_gate":5,"M10V_before_both_20":"FORBIDDEN","M10Q_operator":"scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat"},
   "scope":{"new_M10_research":"GOLD_XAUUSD_ONLY","BTC_in_new_M10_research":false,"M7C_dual_symbol_background":"KEEP_FROZEN_UNCHANGED"},
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W3_PASS_M10W4_DIFFERENCE_FORENSICS_NEXT_20260727.md",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W4_PASS_M10W5_M10E_FRESH_REVIEW_NEXT_20260727.md",
   "recovery":"scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-  "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "safety":{"audit_only":true,"M10E_reset":false,"M10E_reinitialize":false,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
