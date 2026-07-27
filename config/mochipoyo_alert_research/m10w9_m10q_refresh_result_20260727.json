@@ -1,0 +1,64 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W9_M10Q_DUAL_SHORT_CHECKPOINT_REFRESH_AUDIT_ONLY",
+  "status": "PASS_AUDITOR_WITH_STALE_M10P_M10P2_OUTPUT_ANOMALY_REQUIRES_DIAGNOSTIC",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(49).zip",
+    "sha256": "d8d83d038bebc0e32bfdda87f7800d70a50a09eedfb0ad8e90fcbcd9c27bc662",
+    "size_bytes": 1639,
+    "built_at_utc": "2026-07-27T18:04:05Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "M10Q": {
+    "status": "PASS_READ_ONLY_DUAL_FRESH_CHECKPOINT_AUDIT",
+    "M10P": {
+      "start_mt5_server": "2026.07.24 23:56:00",
+      "candidate": 0,
+      "accepted": 0,
+      "resolved": 0,
+      "open": 0,
+      "entry_gap": 0,
+      "exit_gap": 0,
+      "overlap": 0,
+      "next_gate": 5,
+      "reported_latest_M1_mt5_server": "2026.07.27 03:45:00"
+    },
+    "M10P2": {
+      "start_mt5_server": "2026.07.27 01:39:00",
+      "candidate": 0,
+      "accepted": 0,
+      "resolved": 0,
+      "open": 0,
+      "entry_gap": 0,
+      "exit_gap": 0,
+      "overlap": 0,
+      "next_gate": 5,
+      "reported_latest_M1_mt5_server": "2026.07.27 03:45:00"
+    }
+  },
+  "cross_monitor_freshness_evidence": {
+    "recent_M9Y_M1_mt5_server": "2026.07.27 20:50:00",
+    "M10P_and_M10P2_reported_M1_mt5_server": "2026.07.27 03:45:00",
+    "difference_minutes": 1025,
+    "interpretation": "M10Q executed successfully but it read stale M10P/M10P2 LATEST summaries. The zero candidate counts cannot be treated as current market evidence until the persistent shadow output/update state is diagnosed."
+  },
+  "diagnostic_conclusion": {
+    "do_not_claim_no_short_condition_currently": true,
+    "do_not_reset_or_reinitialize": true,
+    "do_not_change_start_or_threshold": true,
+    "next": "Run M10W10 read-only local runtime/output freshness diagnostic before any BAT03 restart decision."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "M10P_reset": false,
+    "M10P2_reset": false,
+    "M10V_execute": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
