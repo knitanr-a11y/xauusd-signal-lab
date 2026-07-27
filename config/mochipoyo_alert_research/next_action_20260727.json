@@ -1,46 +1,39 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10Q_PASS_CONTINUE_DUAL_FRESH_UNCHANGED_M10V_PREREGISTERED_WAIT_FOR_20_20",
-  "stage": "M10Q_DUAL_SHORT_FRESH_CHECKPOINT_AUDIT",
-  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. No M10Q review gate has been reached yet: both fresh SHORT families remain at 0 resolved. Do not tune, merge, reset, or backfill. Continue accumulating fresh evidence and rerun the read-only M10Q audit at future checkpoints.",
-  "M10Q_result": {
-    "file": "config/mochipoyo_alert_research/m10q_user_local_checkpoint_result_20260727.json",
-    "package_sha256": "f68789868c25b1994c4eb0421f975db1a3dadaa9b4404be39bfb04288ff40815",
+  "status": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_LOCAL_AUDIT_NEXT",
+  "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Continue GOLD/XAUUSD-only research by running the read-only M10W0 inventory of existing M10A LONG historical/deterministic artifacts. Do not select a LONG arm until the package is reviewed.",
+  "operator": "scripts/mochipoyo_alert_research/m10w0/bat/01_run_gold_long_reference_inventory.bat",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W0/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W0_rules": {
+    "scope": "XAUUSD_GOLD_ONLY",
+    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10A",
+    "read_only": true,
+    "selection_decision_made_before_review": false,
+    "reads_M10P_or_M10P2_fresh_outcomes_for_selection": false,
+    "modify_running_monitors": false,
+    "threshold_refit": false,
+    "historical_backfill": false
+  },
+  "after_M10W0": {
+    "if_pass": "Upload only M10W0 LATEST/99_UPLOAD_PACKAGE.zip. Review actual M10A evidence, then freeze an explicit M10W-eligible LONG arm inventory before any LONG+SHORT historical portfolio reconstruction.",
+    "if_blocked": "Send the complete console output. Do not rename/delete/rebuild M10A evidence and do not change running monitors to force a pass.",
+    "M10W_execution_now": false
+  },
+  "fresh_parallel": {
     "M10P_resolved": 0,
     "M10P_next_gate": 5,
     "M10P2_resolved": 0,
     "M10P2_next_gate": 5,
-    "runtime_modified": false,
-    "prospective_start_modified": false,
-    "threshold_modified": false
+    "M10V_before_20_20": "FORBIDDEN",
+    "M10Q_operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat"
   },
-  "operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
-  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
-  "when_to_run_M10Q": [
-    "when either monitor approaches or reaches 5 resolved",
-    "at 10 and 20 resolved checkpoints",
-    "for M10P also at 40 and 60 resolved",
-    "after forced-reboot recovery to verify continuity",
-    "before any future stage transition"
-  ],
-  "M10V_preregistration": {
-    "file": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json",
-    "status": "FROZEN_PREREGISTRATION_ONLY_DO_NOT_EXECUTE_YET",
-    "minimum_M10P_resolved": 20,
-    "minimum_M10P2_resolved": 20,
-    "both_integrity_pass_required": true,
-    "common_window_start_mt5_server": "2026.07.27 01:39:00",
-    "threshold_optimization": false,
-    "execute_now": false
+  "scope_clarification": {
+    "new_M10_research": "GOLD_XAUUSD_ONLY",
+    "BTC_in_new_research": false,
+    "M7C_dual_symbol_collection": "KEEP_FROZEN_UNCHANGED_AS_BACKGROUND_SOURCE_FIDELITY_TRACK"
   },
-  "after_future_M10Q": {
-    "if_no_gate_reached": "Continue both fresh shadows unchanged.",
-    "if_5_reached": "Perform operational integrity review only; do not make an efficacy or promotion claim.",
-    "if_10_reached": "Perform interim descriptive review without threshold changes.",
-    "if_both_20_reached_and_integrity_passes": "Perform each formal 20-resolved review first, then M10V may be executed according to the frozen preregistration.",
-    "M10V_before_20_20": "FORBIDDEN"
-  },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_ZERO_CANDIDATES_M10V_PREREG_FROZEN_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_M10W0_GOLD_LONG_INVENTORY_NEXT_20260727.md",
   "recovery": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
   "safety": {
     "audit_only": true,
