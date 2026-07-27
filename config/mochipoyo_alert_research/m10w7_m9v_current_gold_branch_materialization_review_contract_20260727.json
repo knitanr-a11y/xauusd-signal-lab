@@ -1,0 +1,41 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W7_M9V_CURRENT_GOLD_BRANCH_MATERIALIZATION_REVIEW_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_RUN",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Read the already-running M9V current LATEST package to explain fresh branch materialization feeding M10B/M10E without changing M9V or any downstream monitor.",
+  "source_package":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M9V/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M9V_start_mt5_server":"2026.07.24 11:04:00",
+  "branches":["S1_M5","S2_M15","S3_H1","S4_H4"],
+  "required_review":[
+    "runtime/start integrity",
+    "branch candidate counts after start",
+    "resolved/open state if reported",
+    "direction counts",
+    "earliest/latest candidate timestamps",
+    "why M10B has one S1_M5 materialization while S3_H1/S4_H4 remain zero",
+    "whether any S2_M15 materialization exists",
+    "no inference from pre-start candidates"
+  ],
+  "relationship":{
+    "M10B_current":"one resolved S1_M5 downstream entry; zero H1/H4",
+    "M10E_current":"zero post-start resolved S3_H1 materialization",
+    "M10P_M10P2":"not used for selection",
+    "M10V_execution":false
+  },
+  "safety":{
+    "audit_only":true,
+    "read_only":true,
+    "M9V_reset":false,
+    "M9V_reinitialize":false,
+    "historical_backfill":false,
+    "threshold_refit":false,
+    "modify_running_monitors":false,
+    "btc_in_scope":false,
+    "discord_send":false,
+    "mt5_order":false,
+    "live_ready":false,
+    "final_signal":false,
+    "automatic_live_promotion":false
+  }
+}
