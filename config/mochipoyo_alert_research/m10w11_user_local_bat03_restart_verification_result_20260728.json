@@ -1,0 +1,60 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W11_M10P_M10P2_BAT03_RESTART_VERIFICATION_AUDIT_ONLY",
+  "status": "PASS_RESTART_VERIFIED_CURRENT_SHORT_ZERO_VALID",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(51).zip",
+    "sha256": "038d35f9348ac5988b56c325a05ed04d086992cd1d28feadc00e96e8d3f4f3d4",
+    "size_bytes": 1650,
+    "built_at_utc": "2026-07-27T18:30:42Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "M10P": {
+    "prospective_start_server_time": "2026.07.24 23:56:00",
+    "latest_server_open": {"M1":"2026.07.27 21:28:00","M5":"2026.07.27 21:20:00","M15":"2026.07.27 21:00:00","H1":"2026.07.27 20:00:00","H4":"2026.07.27 16:00:00","D1":"2026.07.24 00:00:00"},
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "next_review_gate": 5
+  },
+  "M10P2": {
+    "prospective_start_server_time": "2026.07.27 01:39:00",
+    "latest_server_open": {"M1":"2026.07.27 21:29:00","M5":"2026.07.27 21:25:00","M15":"2026.07.27 21:15:00","H1":"2026.07.27 20:00:00","H4":"2026.07.27 16:00:00","D1":"2026.07.24 00:00:00"},
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "next_review_gate": 5
+  },
+  "interpretation": {
+    "BAT03_restart_verified": true,
+    "outputs_are_current": true,
+    "previous_stale_anomaly_resolved": true,
+    "current_zero_candidate_counts_are_valid_market_evidence": true,
+    "efficacy_claim_allowed": false,
+    "reason": "Both persistent shadows advanced from stale M1 03:45 to the current 21:28/21:29 frontier while preserving immutable starts. Therefore zero matches are now a valid current prospective observation, but zero matches provide no performance evidence."
+  },
+  "guardrails": {
+    "read_only_checkpoint": true,
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "prospective_start_modified": false,
+    "runtime_reset": false,
+    "M10P_BAT01": "FORBIDDEN",
+    "M10P2_BAT01": "FORBIDDEN",
+    "M10V_before_both_20": "FORBIDDEN",
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
