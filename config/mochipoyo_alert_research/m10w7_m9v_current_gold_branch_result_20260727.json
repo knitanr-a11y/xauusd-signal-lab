@@ -1,0 +1,34 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W7_M9V_CURRENT_GOLD_BRANCH_MATERIALIZATION_REVIEW_AUDIT_ONLY",
+  "status":"PASS_HEALTH_BRANCH_MATERIALIZATION_DESCRIPTIVE_ONLY",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(47).zip","sha256":"4987c9f2644292d374862a735fddd662415fe272420f7916acb45c0058b63eff","size_bytes":9974,"built_at_utc":"2026-07-27T17:33:02Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "M9V":{
+    "status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time":"2026.07.24 11:04:00",
+    "runtime_contract_version":"M9V_RUNTIME_V2_APPEND_SAFE_PREFIX",
+    "candidate_count":8,
+    "confirmation_metadata_count":1,
+    "branch_metrics":{
+      "S1_M5":{"resolved":3,"open":0,"win_rate":1.0,"net_bps":96.37005971071366,"pf":null},
+      "S2_M15":{"resolved":5,"open":0,"win_rate":0.6,"pf":2.648779324614659,"net_bps":68.61940277571058,"max_dd_bps":40.05831984240061},
+      "S3_H1":{"resolved":0,"open":0,"net_bps":0.0},
+      "S4_H4":{"resolved":0,"open":0,"net_bps":0.0}
+    },
+    "arm_metrics":{
+      "V0_M15_ONLY":{"resolved":5,"pf":2.648779324614659,"net_bps":68.61940277571058},
+      "V1_M15_PLUS_H1":{"resolved":5,"pf":2.648779324614659,"net_bps":68.61940277571058},
+      "V2_ALL_TIMEFRAMES":{"resolved":7,"pf":2.9086111094880263,"net_bps":79.43316155711958}
+    },
+    "review_readiness":{"operational_checkpoint":false,"interim_checkpoint":false,"minimum_H1_S3_candidates":false,"formal_portfolio_checkpoint":false},
+    "rejected_first_turns":{"total":9,"M5":8,"H4":1,"H1":0,"M15":0},
+    "H4_rejected_case":{"proxy_primary_time":"2026.07.24 12:00:00","turn_entry_time":"2026.07.24 12:07:00","native_exit_time":"2026.07.27 08:00:00","return_bps":84.56586645496482,"d1_bullish_stack":false,"d1_rci9_threshold":-42.5,"interpretation":"H4 first-turn existed but S4_H4 branch condition failed because D1 EMA20>EMA30>EMA40 bullish stack was false."},
+    "H1_zero_scope_note":"The package proves zero S3_H1 branch candidates and zero H1 rejected-first-turn rows. It does not by itself prove that zero post-start H1 LONG episodes existed, because an episode can exist without a qualifying first-turn.",
+    "downstream_consistency":{"M10B_start":"2026.07.24 20:54:00","S1_M5_candidates_after_M10B_start":1,"M10B_observed_S1_M5_resolved":1,"S3_H1_candidates":0,"M10B_H1_resolved":0,"M10E_H1_resolved":0,"S4_H4_candidates":0,"M10B_H4_resolved":0,"consistent":true}
+  },
+  "data_quality":{"point":0.01,"closed_rows_contract":true,"nearest_m1_fallback":false,"prefix_integrity_verified":true,"latest_server_open":{"M1":"2026.07.27 20:30:00","M5":"2026.07.27 20:25:00","M15":"2026.07.27 20:15:00","H1":"2026.07.27 19:00:00","H4":"2026.07.27 16:00:00","D1":"2026.07.24 00:00:00"}},
+  "interpretation":{"M9V_health_pass":true,"downstream_zero_H1_H4_explained_at_branch_materialization_level":true,"efficacy_claim_allowed":false,"reason":"M9V is generating fresh GOLD branches normally, but current evidence is small. S3_H1 and S4_H4 have not materialized as branch candidates, so M10B/M10E zero counts are not downstream failures. S2_M15 has five resolved fresh candidates and is now the most informative existing branch for the next read-only payoff review."},
+  "next":"Review the already-running M9Y GOLD payoff fresh prospective shadow current LATEST package read-only. M9Y uses post-start S2_M15 candidates and must remain unchanged from its immutable start 2026.07.24 12:45:00.",
+  "guardrails":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"M9V_reset":false,"M9V_reinitialize":false,"modify_running_monitors":false,"btc_in_scope":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
