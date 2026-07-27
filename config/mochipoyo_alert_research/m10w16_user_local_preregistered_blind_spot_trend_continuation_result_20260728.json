@@ -1,0 +1,59 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W16_PREREGISTERED_BLIND_SPOT_TREND_CONTINUATION_EVALUATION_AUDIT_ONLY",
+  "status":"PASS_EVALUATION_NO_ROBUST_OR_STRONG_CANDIDATE",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(55).zip","sha256":"12c933fef6b183c231efba95af562446d38bf842cdc6823ea965f0b5c95d9cd2","size_bytes":224669,"built_at_utc":"2026-07-27T22:47:34Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "preregistration_contract":"config/mochipoyo_alert_research/m10w15_blind_spot_trend_continuation_hypothesis_preregistration_20260728.json",
+  "formula_refit_after_results":false,
+  "BSC1_SHORT_BEAR_TREND_PULLBACK_ZERO_CROSS":{
+    "classification":"INSUFFICIENT_DENSITY",
+    "candidate_count":394,
+    "accepted_rows":227,
+    "resolved_count":208,
+    "exit_gap_count":18,
+    "overlap_skip_count":167,
+    "candidate_year_counts":{"2023":234,"2024":9,"2025":0,"2026":151},
+    "resolved_split_metrics":{
+      "TRAIN_2023_2024":{"count":130,"actual_pf":1.1530811919508455,"actual_net_bps":157.0662356265629,"fixed0p20_pf":1.113944965703434,"plus2bps_pf":0.9116196336602602,"plus2bps_net_bps":-102.9337643734371},
+      "VALIDATION_2025":{"count":0,"actual_pf":null,"actual_net_bps":0.0},
+      "TEST_2026":{"count":78,"actual_pf":1.1066112285362593,"actual_net_bps":187.9108248653117,"fixed0p20_pf":1.11377251202944,"plus2bps_pf":1.0173963762040221,"plus2bps_net_bps":31.910824865311692},
+      "ALL":{"count":208,"actual_pf":1.1237092239306934,"actual_net_bps":344.97706049187457,"fixed0p20_pf":1.1138368830761693,"plus1bps_pf":1.047369435692154,"plus2bps_pf":0.9763178342267902,"plus2bps_net_bps":-71.0229395081254}
+    },
+    "structural_density_crosscheck_from_M10W14_outcome_blind_grid":{
+      "required_regime":"D1 bearish stack AND H4 EMA20-EMA30 negative AND H1 MACD line negative",
+      "regime_M15_window_counts":{"2023":3058,"2024":160,"2025":0,"2026":1928},
+      "trigger_candidate_counts":{"2023":234,"2024":9,"2025":0,"2026":151},
+      "trigger_rate_within_regime":{"2023":0.07652060170045781,"2024":0.05625,"2025":null,"2026":0.0783195020746888},
+      "interpretation":"The 2025 zero is not an implementation failure. The preregistered bearish regime itself is absent in the M10W14 causal M15 grid for 2025. The trigger rate is similar in the years where the regime exists, but the family is too regime-dependent to satisfy cross-year density/robustness requirements."
+    },
+    "advance_to_fresh_shadow":false
+  },
+  "BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS":{
+    "classification":"WEAK_OR_INCONSISTENT",
+    "candidate_count":1862,
+    "accepted_rows":1024,
+    "resolved_count":965,
+    "exit_gap_count":59,
+    "overlap_skip_count":838,
+    "candidate_year_counts":{"2023":311,"2024":572,"2025":825,"2026":154},
+    "resolved_split_metrics":{
+      "TRAIN_2023_2024":{"count":468,"actual_pf":1.1958195083121563,"actual_net_bps":1104.6896157224883,"fixed0p20_pf":1.1859480625714875,"plus2bps_pf":1.0275894181005467,"plus2bps_net_bps":168.68961572248824},
+      "VALIDATION_2025":{"count":423,"actual_pf":1.2407617162342903,"actual_net_bps":1411.1920718799367,"fixed0p20_pf":1.2363809576179068,"plus2bps_pf":1.089564228938312,"plus2bps_net_bps":565.1920718799367},
+      "TEST_2026":{"count":74,"actual_pf":1.0113371405757994,"actual_net_bps":20.806860133171973,"fixed0p20_pf":1.0102074373804601,"plus1bps_pf":0.9715385870540524,"plus1bps_net_bps":-53.19313986682803,"plus2bps_pf":0.9331697173131642,"plus2bps_net_bps":-127.19313986682803},
+      "ALL":{"count":965,"actual_pf":1.19018488431914,"actual_net_bps":2536.688547735597,"fixed0p20_pf":1.1839700899555445,"plus1bps_pf":1.1136606315004742,"plus2bps_pf":1.0423429240032587,"plus2bps_net_bps":606.688547735597}
+    },
+    "interpretation":"The symmetric bullish continuation family is positive in 2023-2025 but loses robustness in 2026 and fails the preregistered ROBUST gate. It must not advance or be tuned from these outcomes.",
+    "advance_to_fresh_shadow":false
+  },
+  "overall_interpretation":{
+    "M10W14_coverage_map_overturned_prior_performance_concern":false,
+    "first_blind_spot_hypotheses_overturned_prior_performance_concern":false,
+    "BSC1_failure_mode":"CROSS_YEAR_REGIME_DENSITY_INSTABILITY_PLUS_COST_FRAGILITY",
+    "BLC1_failure_mode":"OUT_OF_SAMPLE_2026_EDGE_DECAY_AND_COST_FRAGILITY",
+    "no_formula_change_after_results":true,
+    "no_fresh_shadow_authorized":true,
+    "next_research_principle":"Do not keep inventing event triggers directly from outcomes. First test whether the already frozen M10W14 NEITHER regime buckets themselves contain stable directional opportunity across train/validation/test using a preregistered regime-episode sampling and selection rule. Only then design a new event trigger."
+  },
+  "guardrails":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
