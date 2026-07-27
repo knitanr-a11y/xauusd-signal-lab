@@ -1,0 +1,35 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W2_M10D_H1_FILTERED_REFERENCE_INVENTORY_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_NOT_RUN",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Inventory actual user-local M10D deterministic historical H1 compound-loss filter evidence before deciding whether filtered H1 or baseline H1 should represent the H1 LONG family in later GOLD portfolio reconstruction.",
+  "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10D",
+  "expected_context": {
+    "M10E_contract": "config/mochipoyo_alert_research/m10e_h1_compound_loss_filter_fresh_prospective_shadow_contract_20260725.json",
+    "filter_direction": "EXCLUDE_H1_LONG_ENTRY",
+    "m5_macd_bps_slope_le": -0.1308,
+    "h1_ema30_minus_ema40_bps_ge": 17.3333,
+    "exclude_when": "both conditions true",
+    "fresh_M10E_must_continue_unchanged": true
+  },
+  "required_inventory": ["file path/size/SHA256","JSON structures and relevant fields","CSV row counts/columns/time ranges/distinct arm/status/direction-like values","readable source artifacts in one upload package"],
+  "selection_policy": {
+    "select_filtered_H1_before_package_review": false,
+    "use_M10E_fresh_outcomes_for_historical_selection": false,
+    "use_M10P_or_M10P2_outcomes": false,
+    "modify_M10D_source": false
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "modify_running_monitors": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
