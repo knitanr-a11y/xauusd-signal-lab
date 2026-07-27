@@ -1,0 +1,45 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W17_NEITHER_REGIME_DIRECTIONAL_OPPORTUNITY_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_EXECUTED",
+  "recorded_at_utc":"2026-07-28T00:00:00Z",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Before inventing another event trigger, test whether the already outcome-blind M10W14 NEITHER regime buckets themselves contain stable 240-minute directional opportunity across train/validation/test. This is exploratory research on fixed buckets, not support for existing families.",
+  "inputs":{
+    "coverage_grid":"M10W14/LATEST/02_m15_coverage_grid.csv",
+    "frozen_gold_M1":"verified M10A/M10W14 GOLD history",
+    "regime_bucket_definition_frozen_by_M10W14":true,
+    "coverage_filter":"NEITHER only"
+  },
+  "regime_key":["d1_ema_stack","h4_ema20_minus_ema30_sign","h1_macd_line_sign","h1_atr_pct100_tercile"],
+  "sampling":{
+    "horizon_minutes":240,
+    "per_bucket_non_overlap":"For each exact regime bucket independently, take the first eligible NEITHER M15 decision, then do not take another observation for that same bucket until at least 240 minutes later.",
+    "entry_time":"exact M1 timestamp equal to M15 decision_time",
+    "exit_time":"exact M1 timestamp +240 minutes",
+    "nearest_fallback":false,
+    "both_directions_evaluated":true,
+    "actual_spread_execution":true,
+    "fixed_spread_sensitivity_usd":0.20,
+    "extra_cost_bps":[1.0,2.0]
+  },
+  "splits":{"TRAIN":"2023-2024","VALIDATION":"2025","TEST":"2026 available frozen history"},
+  "selection_rule_frozen_before_run":{
+    "density_gate":{"minimum_train_count":60,"minimum_validation_count":30,"minimum_test_count":20},
+    "train_discovery":{"minimum_actual_pf":1.15,"net_positive":true},
+    "validation_confirmation":{"minimum_actual_pf":1.08,"net_positive":true},
+    "test_confirmation":{"minimum_actual_pf":1.08,"net_positive":true},
+    "all_sample_cost_robustness":{"minimum_fixed0p20_pf":1.10,"minimum_extra2bps_pf":1.02,"extra2bps_net_positive":true},
+    "stable_opportunity":"All density, train, validation, test and cost-robustness conditions pass for the same exact bucket and direction.",
+    "no_bucket_merging_after_results":true,
+    "no_threshold_change_after_results":true,
+    "no_direction_flip_after_results":true
+  },
+  "multiple_bucket_policy":"Evaluate every pre-existing exact M10W14 regime bucket under the same frozen rule. Do not create new cut points or combine adjacent buckets after outcomes. Passing buckets remain research-exposed hypotheses and require a later preregistered event-entry design plus fresh prospective validation.",
+  "interpretation":{
+    "pass_does_not_equal_trade_signal":true,
+    "failure_meaning":"If no exact NEITHER regime bucket shows stable directionality, the coarse EMA/MACD/ATR regime space itself is not supplying a robust blind-spot edge and future research should add genuinely new information rather than tune current thresholds.",
+    "success_meaning":"If one or more exact buckets pass across all frozen splits and costs, later work may design a causal event trigger inside that bucket, frozen before outcome testing."
+  },
+  "safety":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
