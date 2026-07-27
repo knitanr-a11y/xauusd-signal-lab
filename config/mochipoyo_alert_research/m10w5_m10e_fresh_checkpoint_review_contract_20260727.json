@@ -1,0 +1,58 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W5_M10E_H1_FILTER_FRESH_CHECKPOINT_REVIEW_AUDIT_ONLY",
+  "status": "FROZEN_REVIEW_CONTRACT_WAITING_FOR_CURRENT_M10E_PACKAGE",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Review the already-running M10E fresh baseline-vs-filtered H1 shadow without resetting, backfilling, refitting, or changing its thresholds/start.",
+  "source": {
+    "stage": "M10E_H1_COMPOUND_LOSS_FILTER_FRESH_PROSPECTIVE_SHADOW",
+    "current_package": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10E/LATEST/99_UPLOAD_PACKAGE.zip",
+    "prospective_start_mt5_server": "2026.07.24 22:06:00",
+    "expected_status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY"
+  },
+  "fixed_filter": {
+    "m5_macd_bps_slope_le": -0.1308,
+    "h1_ema30_minus_ema40_bps_ge": 17.3333,
+    "exclude_when": "both conditions true",
+    "change_allowed": false
+  },
+  "arms": ["E0_H1_BASELINE_RUNNER50", "E1_H1_FILTERED_RUNNER50"],
+  "review_gates": {
+    "operational_accepted": 5,
+    "interim_accepted": 10,
+    "formal_accepted": 20,
+    "automatic_promotion": false
+  },
+  "review_requirements": [
+    "prospective start unchanged",
+    "prefix integrity/data quality pass",
+    "no pre-start/backfill contamination",
+    "fixed filter unchanged",
+    "accepted/resolved/open counts coherent for both arms",
+    "excluded-before-one-position count reported",
+    "baseline versus filtered PF/net/payoff/DD/tail only when resolved sample exists",
+    "no efficacy or replacement claim before predeclared gates",
+    "M10W4 historical evidence may be context only and must not be used to alter M10E"
+  ],
+  "interpretation_policy": {
+    "below_5_accepted": "HEALTH_AND_ACCUMULATION_ONLY",
+    "5_to_9_accepted": "OPERATIONAL_INTEGRITY_REVIEW_ONLY",
+    "10_to_19_accepted": "INTERIM_DESCRIPTIVE_FRESH_REVIEW_NO_REPLACEMENT",
+    "20_or_more_accepted": "FORMAL_FRESH_BASELINE_VS_FILTERED_REVIEW; still no automatic operational replacement"
+  },
+  "safety": {
+    "audit_only": true,
+    "M10E_reset": false,
+    "M10E_reinitialize": false,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "reads_SHORT_for_selection": false,
+    "modifies_M10P_or_M10P2": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
