@@ -1,0 +1,11 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W8_M9Y_CURRENT_GOLD_PAYOFF_REVIEW_AUDIT_ONLY",
+  "status":"FROZEN_READ_ONLY_REVIEW_NOT_RUNTIME_CHANGE",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Review the current already-running M9Y GOLD payoff fresh shadow after M9V S2_M15 materialized five resolved candidates. Determine current reclaim/payoff arm accumulation without changing M9Y or using the result for automatic promotion.",
+  "source":{"package":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M9Y/LATEST/99_UPLOAD_PACKAGE.zip","immutable_start_mt5_server":"2026.07.24 12:45:00","upstream":"M9V S2_M15 read-only"},
+  "required_review":["runtime_integrity","prefix_integrity","historical_backfill_false","base_candidate_count","reclaim_candidate_count","pending_or_skipped_counts","arm accepted/resolved/open","native_vs_N6_vs_runner50_vs_runner75 descriptive metrics","review_gate_readiness"],
+  "interpretation_rules":{"small_n":"descriptive only; no rule change","no_candidate":"health/accumulation only","do_not_refit_N6":true,"do_not_change_runner_share":true,"do_not_reuse_historical_outcomes":true,"automatic_live_promotion":false},
+  "safety":{"audit_only":true,"M9Y_reset":false,"M9Y_reinitialize":false,"historical_backfill":false,"threshold_refit":false,"modify_running_monitors":false,"btc_in_scope":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
