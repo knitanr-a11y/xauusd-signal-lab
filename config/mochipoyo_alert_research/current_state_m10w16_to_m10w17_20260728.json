@@ -1,0 +1,27 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "status":"M10W16_PASS_NO_ROBUST_CANDIDATE_M10W17_READY_AUDIT_ONLY",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "M10W16_result":"config/mochipoyo_alert_research/m10w16_user_local_preregistered_blind_spot_trend_continuation_result_20260728.json",
+  "M10W16_package_sha256":"12c933fef6b183c231efba95af562446d38bf842cdc6823ea965f0b5c95d9cd2",
+  "M10W16_summary":{
+    "BSC1":"INSUFFICIENT_DENSITY; 2025 required bearish regime absent; all actual PF 1.1237; +2bps PF 0.9763",
+    "BLC1":"WEAK_OR_INCONSISTENT; 2025 PF 1.2408 but 2026 PF 1.0113 and +2bps PF 0.9332",
+    "fresh_shadow_authorized":false
+  },
+  "M10W17":{
+    "stage":"M10W17_NEITHER_REGIME_DIRECTIONAL_OPPORTUNITY_AUDIT_ONLY",
+    "contract":"config/mochipoyo_alert_research/m10w17_neither_regime_directional_opportunity_contract_20260728.json",
+    "operator":"scripts/mochipoyo_alert_research/m10w17/bat/01_run_neither_regime_directional_opportunity_audit.bat",
+    "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W17/LATEST/99_UPLOAD_PACKAGE.zip"
+  },
+  "policy":{
+    "do_not_tune_BSC1_or_BLC1":true,
+    "do_not_modify_existing_forward_monitors":true,
+    "new_trigger_only_after_stable_regime_opportunity":true,
+    "fresh_prospective_validation_required_for_final_support":true,
+    "M10P_BAT01":"FORBIDDEN",
+    "M10P2_BAT01":"FORBIDDEN",
+    "M10V_before_both_20":"FORBIDDEN"
+  }
+}
