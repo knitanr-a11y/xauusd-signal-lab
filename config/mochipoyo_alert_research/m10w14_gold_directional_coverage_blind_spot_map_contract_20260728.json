@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W14_GOLD_DIRECTIONAL_COVERAGE_AND_BLIND_SPOT_MAP_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_NOT_EXECUTED",
+  "recorded_at_utc": "2026-07-28T00:00:00Z",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Outcome-blind map of where the currently frozen LONG and SHORT candidate families do and do not provide directional candidate coverage across GOLD market regimes. This stage must not use trade outcomes, PF, PnL, win rate, future path labels, or threshold rescue.",
+  "research_question": "Are the previously disappointing candidate results partly caused by structural blind spots or directional/regime coverage imbalance rather than only weak within-family expectancy?",
+  "coverage_anchor": {
+    "canonical_grid": "M15_SERVER_TIME_WINDOWS",
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_row_contract": "CLOSED",
+    "family_presence_rule": "A family is present in a canonical M15 window when its causal frozen candidate decision/first-turn timestamp falls inside that M15 window. Presence is candidate availability only, not an entry or profit claim.",
+    "coverage_classes": ["LONG_ONLY", "SHORT_ONLY", "BOTH", "NEITHER"]
+  },
+  "frozen_families": {
+    "LONG": [
+      "M10A_M5_S1_UPSTREAM_LONG_BRANCH",
+      "M10A_M15_S2_UPSTREAM_LONG_BRANCH",
+      "M10A_H1_S3_UPSTREAM_LONG_BRANCH",
+      "M10A_H4_S4_UPSTREAM_LONG_BRANCH"
+    ],
+    "SHORT": [
+      "M10P_C056_G013_EXACT_FROZEN_FORMULA",
+      "M10P2_C0212_EXACT_FROZEN_FORMULA"
+    ]
+  },
+  "regime_axes": {
+    "d1_ema_stack": ["BULLISH_20_GT_30_GT_40", "BEARISH_20_LT_30_LT_40", "MIXED"],
+    "h4_ema20_minus_ema30_sign": ["POSITIVE", "NEGATIVE", "ZERO"],
+    "h1_macd_line_sign": ["POSITIVE", "NEGATIVE", "ZERO"],
+    "h1_atr_pct100_tercile": ["LOW_LT_0P33", "MID_0P33_TO_LT_0P67", "HIGH_GE_0P67"]
+  },
+  "outputs_required": [
+    "overall directional coverage counts and rates",
+    "per-family M15-window presence counts",
+    "regime-by-regime LONG_ONLY/SHORT_ONLY/BOTH/NEITHER counts",
+    "regimes ranked by NEITHER count and NEITHER fraction",
+    "directional imbalance by regime",
+    "year-by-year coverage decomposition",
+    "audit proving no trade outcomes or future labels were read or computed"
+  ],
+  "interpretation_rules": {
+    "coverage_is_not_edge": true,
+    "neither_is_not_failure": true,
+    "long_or_short_presence_is_not_performance_support": true,
+    "no_new_candidate_formula_in_M10W14": true,
+    "no_threshold_change": true,
+    "next_only_after_review": "M10W15 may pre-register independent blind-spot hypotheses before any outcome evaluation. Candidate rules must be frozen before their performance is inspected."
+  },
+  "relationship_to_forward": {
+    "keep_all_existing_monitors_running_unchanged": true,
+    "M10P_BAT01": "FORBIDDEN",
+    "M10P2_BAT01": "FORBIDDEN",
+    "M10V_before_both_20": "FORBIDDEN",
+    "fresh_forward_results_used_for_M10W14_selection": false
+  },
+  "safety": {
+    "audit_only": true,
+    "read_only": true,
+    "trade_outcomes_read": false,
+    "pf_or_pnl_computed": false,
+    "future_path_labels": false,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "runtime_reset": false,
+    "modify_running_monitors": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
