@@ -1,0 +1,73 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W19_BLC1_ATR_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "status":"PASS_INITIAL_FRESH_START_CLEAN_ZERO_BASELINE",
+  "uploaded_package":{
+    "filename":"99_UPLOAD_PACKAGE(58).zip",
+    "sha256":"b375b80577e1db4d07ae9f89430d71b680a682e0b07ecb6842a5203553b8e5fb",
+    "size_bytes":4024,
+    "built_at_utc":"2026-07-27T23:34:12Z"
+  },
+  "scope":"XAUUSD_GOLD_ONLY",
+  "prospective_start_server_time":"2026.07.28 02:31:00",
+  "runtime":{
+    "runtime_contract_version":"M10W19_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "runtime_created_at_utc":"2026-07-27T23:33:41Z",
+    "contract_sha256":"f72dba42f631fdc052bb8ef1d364404228263d80ae497cf735e100bd91ada368",
+    "reset_allowed":false,
+    "restart_safe":true,
+    "historical_backfill_allowed":false,
+    "pre_start_candidate_eligibility":false,
+    "audit_only":true
+  },
+  "latest_server_open":{
+    "M1":"2026.07.28 02:31:00",
+    "M15":"2026.07.28 02:15:00",
+    "H1":"2026.07.28 01:00:00",
+    "H4":"2026.07.27 20:00:00",
+    "D1":"2026.07.27 00:00:00"
+  },
+  "feed_health":{
+    "M1":{"observed_m1_bars_after_tf":0,"allowed_observed_m1_bars":0},
+    "M15":{"observed_m1_bars_after_tf":16,"allowed_observed_m1_bars":30},
+    "H1":{"observed_m1_bars_after_tf":91,"allowed_observed_m1_bars":120},
+    "H4":{"observed_m1_bars_after_tf":330,"allowed_observed_m1_bars":480},
+    "D1":{"observed_m1_bars_after_tf":1471,"allowed_observed_m1_bars":2880}
+  },
+  "data_quality":{
+    "closed_rows_contract":true,
+    "prefix_integrity_verified":true,
+    "exact_m1_entry_only":true,
+    "exact_m1_exit_only":true,
+    "nearest_m1_fallback":false,
+    "historical_backfill":false
+  },
+  "arms":{
+    "W0_BLC1_BASELINE":{"candidate_match_count":0,"accepted_count":0,"resolved_count":0,"open_count":0,"entry_data_gap_count":0,"exit_data_gap_count":0},
+    "W1_BLC1_ATR_FILTERED":{"candidate_match_count":0,"accepted_count":0,"resolved_count":0,"open_count":0,"entry_data_gap_count":0,"exit_data_gap_count":0,"atr_gate_lt":0.67}
+  },
+  "review_readiness":{"operational_20":false,"interim_60":false,"formal_120":false,"automatic_live_promotion":false},
+  "interpretation":{
+    "initial_zero_is_performance_evidence":false,
+    "initial_zero_meaning":"Clean prospective baseline immediately after start freeze; no post-start BLC1 candidate had yet occurred.",
+    "fresh_comparison_started":true,
+    "M10W19_BAT01_may_be_run_again":false,
+    "next":"Keep BAT03 running unchanged. Do not change the BLC1 formula, ATR gate, start or review thresholds. Review at filtered 20/60/120 resolved or on an integrity anomaly."
+  },
+  "guardrails":{
+    "audit_only":true,
+    "historical_backfill":false,
+    "existing_forward_modified":false,
+    "threshold_or_gate_refit":false,
+    "M10W19_BAT01":"FORBIDDEN_AFTER_THIS_START",
+    "M10W19_restart":"BAT03_ONLY",
+    "M10P_BAT01":"FORBIDDEN",
+    "M10P2_BAT01":"FORBIDDEN",
+    "M10V_before_both_20":"FORBIDDEN",
+    "discord_send":false,
+    "mt5_order":false,
+    "live_ready":false,
+    "final_signal":false,
+    "automatic_live_promotion":false
+  }
+}
