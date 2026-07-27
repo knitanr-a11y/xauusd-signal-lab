@@ -1,28 +1,16 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W13_PASS_M10W14_DIRECTIONAL_COVERAGE_MAP_NEXT",
-  "stage":"M10W14_GOLD_DIRECTIONAL_COVERAGE_AND_BLIND_SPOT_MAP_AUDIT_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only M10W14. M10W14 maps existing GOLD LONG/SHORT candidate-family coverage across M15 regime windows without reading or computing trade outcomes, PF/PnL, win rate, or future labels.",
-  "operator":"scripts/mochipoyo_alert_research/m10w14/bat/01_run_gold_directional_coverage_blind_spot_map.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W14/LATEST/99_UPLOAD_PACKAGE.zip",
-  "contract":"config/mochipoyo_alert_research/m10w14_gold_directional_coverage_blind_spot_map_contract_20260728.json",
-  "research_logic":{
-    "existing_family_threshold_rescue":"STOP",
-    "coverage_map_is_edge_claim":false,
-    "goal":"Identify structural directional/regime blind spots before inventing any new candidate family.",
-    "M10W14_new_candidate_formula_creation":false,
-    "M10W15_after_review":"Pre-register independent blind-spot hypotheses before any performance evaluation.",
-    "final_support_requirement":"Any genuinely new family must ultimately pass a brand-new fresh prospective shadow; research-exposed historical results alone cannot overturn the previous concern."
-  },
-  "coverage_families":{
-    "LONG":["M5_S1","M15_S2","H1_S3","H4_S4"],
-    "SHORT":["M10P_C056_G013","M10P2_C0212"]
-  },
-  "fresh_monitors_continue":true,
-  "M10P_BAT01":"FORBIDDEN",
-  "M10P2_BAT01":"FORBIDDEN",
-  "M10V_before_both_20":"FORBIDDEN",
-  "scope":"GOLD_XAUUSD_ONLY",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W13_PASS_M10W14_DIRECTIONAL_COVERAGE_NEXT_20260728.md",
-  "safety":{"audit_only":true,"read_only":true,"trade_outcomes_read":false,"pf_or_pnl_computed":false,"future_path_labels":false,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "status":"M10W14_PASS_M10W15_HYPOTHESES_FROZEN_M10W16_NEXT",
+  "stage":"M10W16_PREREGISTERED_BLIND_SPOT_TREND_CONTINUATION_EVALUATION_AUDIT_ONLY",
+  "immediate_action":"Keep all existing forward monitors running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only the M10W16 preregistered evaluation. Do not modify either formula after results.",
+  "operator":"scripts/mochipoyo_alert_research/m10w16/bat/01_run_preregistered_blind_spot_trend_continuation_evaluation.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W16/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W14_result":"config/mochipoyo_alert_research/m10w14_user_local_directional_coverage_result_20260728.json",
+  "M10W15_contract":"config/mochipoyo_alert_research/m10w15_blind_spot_trend_continuation_hypothesis_preregistration_20260728.json",
+  "frozen_families":{"SHORT":"BSC1_SHORT_BEAR_TREND_PULLBACK_ZERO_CROSS","LONG":"BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS"},
+  "evaluation":{"splits":["TRAIN_2023_2024","VALIDATION_2025","TEST_2026"],"actual_spread":true,"fixed0p20":true,"extra_cost_bps":[1,2],"horizon_minutes":240,"one_position_per_family":true,"formula_refit_after_results":false},
+  "advance_rule":"Only ROBUST_CANDIDATE or STRONG_CANDIDATE may advance to a brand-new fresh prospective shadow. Historical performance alone is not final support.",
+  "M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","scope":"GOLD_XAUUSD_ONLY",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W14_PASS_M10W15_FROZEN_M10W16_EVALUATION_NEXT_20260728.md",
+  "safety":{"audit_only":true,"existing_forward_modified":false,"historical_backfill":false,"existing_threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
