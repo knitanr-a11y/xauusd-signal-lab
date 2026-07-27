@@ -1,0 +1,53 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W6_M10B_CURRENT_FRESH_MULTITIMEFRAME_REVIEW_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_READ_ONLY_REVIEW",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Review the already-running M10B GOLD multi-timeframe fresh prospective shadow current LATEST package without resetting, reinitializing, refitting, or modifying any monitor.",
+  "source_package": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10B/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10B_immutable_start_mt5_server": "2026.07.24 20:54:00",
+  "arms": [
+    "B0_M5_ENTRY_NATIVE",
+    "B1_M5_RUNNER75",
+    "B2_H1_ENTRY_NATIVE",
+    "B3_H1_RUNNER50",
+    "B4_H4_ENTRY_NATIVE"
+  ],
+  "required_review": [
+    "prospective_start_unchanged",
+    "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prefix_integrity_verified",
+    "closed_rows_contract",
+    "upstream_resolved_post_start_by_M5_H1_H4",
+    "entry_candidate_counts_by_M5_H1_H4",
+    "accepted_resolved_open_by_arm",
+    "PF_net_payoff_DD_loss_streak_when_resolved_exists",
+    "review_readiness_flags",
+    "no_backfill_no_reset_no_live_promotion"
+  ],
+  "interpretation_rules": {
+    "zero_or_below_gate": "health/accumulation only; no efficacy claim",
+    "review_only": true,
+    "do_not_change_historical_LONG_selection_from_low_n_fresh": true,
+    "do_not_modify_M10B": true
+  },
+  "relationships": {
+    "M10E": "keep running unchanged; M10W5 found zero fresh H1 materialized as of 2026-07-27T17:12:57Z",
+    "M10P_M10P2": "keep running unchanged; do not read or modify for M10W6",
+    "M10V": "20/20 execution gate unchanged and not bypassed"
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "M10B_reset": false,
+    "M10B_reinitialize": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "btc_in_scope": false
+  }
+}
