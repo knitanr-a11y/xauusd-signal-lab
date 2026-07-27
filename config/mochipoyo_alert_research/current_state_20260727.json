@@ -2,56 +2,17 @@
   "project":"MOCHIPOYO_ALERT_RESEARCH",
   "repository":"knitanr-a11y/xauusd-signal-lab",
   "branch":"feature/mochipoyo-alert-research",
-  "status":"M10W13_PASS_M10W14_DIRECTIONAL_COVERAGE_MAP_READY_AUDIT_ONLY",
+  "status":"M10W14_PASS_M10W15_HYPOTHESES_FROZEN_M10W16_EVALUATION_READY_AUDIT_ONLY",
   "running_or_preserved_monitors":{
-    "collector":"KEEP_UNCHANGED",
-    "M7C":"KEEP_UNCHANGED",
-    "M8C":"KEEP_UNCHANGED",
-    "M9V":"KEEP_UNCHANGED",
-    "M9Y":"KEEP_UNCHANGED",
-    "M10B":"KEEP_UNCHANGED",
-    "M10E":"KEEP_UNCHANGED",
-    "M10P":"BAT03_RESTART_VERIFIED_KEEP_RUNNING_UNCHANGED",
-    "M10P2":"BAT03_RESTART_VERIFIED_KEEP_RUNNING_UNCHANGED"
+    "collector":"KEEP_UNCHANGED","M7C":"KEEP_UNCHANGED","M8C":"KEEP_UNCHANGED","M9V":"KEEP_UNCHANGED","M9Y":"KEEP_UNCHANGED","M10B":"KEEP_UNCHANGED","M10E":"KEEP_UNCHANGED","M10P":"KEEP_RUNNING_UNCHANGED","M10P2":"KEEP_RUNNING_UNCHANGED"
   },
   "immutable_starts":{"M7C_utc":"2026-07-20T14:54:15Z","M9V_mt5_server":"2026.07.24 11:04:00","M9Y_mt5_server":"2026.07.24 12:45:00","M10B_mt5_server":"2026.07.24 20:54:00","M10E_mt5_server":"2026.07.24 22:06:00","M10P_mt5_server":"2026.07.24 23:56:00","M10P2_mt5_server":"2026.07.27 01:39:00"},
-  "research_scope":{"new_M10_research":"XAUUSD_GOLD_ONLY","btc_in_new_M10_research":false,"M7C_background_scope":"BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_KEEP_UNCHANGED"},
-  "LONG_fresh_state":{
-    "M9V":{"result":"config/mochipoyo_alert_research/m10w7_m9v_current_gold_branch_result_20260727.json","branches":{"S1_M5":3,"S2_M15":5,"S3_H1":0,"S4_H4":0}},
-    "M9Y":{"result":"config/mochipoyo_alert_research/m10w8_m9y_current_gold_payoff_result_20260727.json","Y0_resolved":3,"N6_flagged":0,"operational_gate":20,"efficacy_claim":false},
-    "M10B":{"result":"config/mochipoyo_alert_research/m10w6_m10b_current_fresh_multitimeframe_result_20260727.json","M5_resolved":1,"H1_resolved":0,"H4_resolved":0},
-    "M10E":{"result":"config/mochipoyo_alert_research/m10w5_m10e_current_fresh_checkpoint_result_20260727.json","H1_resolved":0}
-  },
-  "SHORT_fresh_state":{
-    "M10P":{"start":"2026.07.24 23:56:00","latest_verified_candidate":0,"resolved":0,"next_gate":5},
-    "M10P2":{"start":"2026.07.27 01:39:00","latest_verified_candidate":0,"resolved":0,"next_gate":5},
-    "current_zero_counts_valid_market_evidence":true,
-    "performance_inference_allowed":false,
-    "M10V_before_20_20":"FORBIDDEN"
-  },
-  "M10W13":{
-    "status":"PASS_FROZEN_HISTORICAL_WAITING_TIME_WITHIN_NORMAL_RANGE_NO_THRESHOLD_ACTION",
-    "result":"config/mochipoyo_alert_research/m10w13_user_local_historical_activation_interval_result_20260728.json",
-    "further_historical_threshold_drilldown_recommended":false
-  },
-  "research_policy":{
-    "existing_family_threshold_rescue":"STOP",
-    "fresh_forward_gate_monitoring":"CONTINUE",
-    "independent_blind_spot_research":"ALLOWED_IF_OUTCOME_BLIND_FIRST",
-    "coverage_map_is_not_edge":true,
-    "new_family_must_be_preregistered_before_outcome_evaluation":true,
-    "fresh_forward_required_for_final_support":true
-  },
-  "M10W14":{
-    "stage":"M10W14_GOLD_DIRECTIONAL_COVERAGE_AND_BLIND_SPOT_MAP_AUDIT_ONLY",
-    "status":"IMPLEMENTED_READY_FOR_USER_LOCAL_OUTCOME_BLIND_RUN",
-    "contract":"config/mochipoyo_alert_research/m10w14_gold_directional_coverage_blind_spot_map_contract_20260728.json",
-    "script":"scripts/mochipoyo_alert_research/m10w14/python/run_m10w14_gold_directional_coverage_blind_spot_map.py",
-    "operator":"scripts/mochipoyo_alert_research/m10w14/bat/01_run_gold_directional_coverage_blind_spot_map.bat",
-    "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W14/LATEST/99_UPLOAD_PACKAGE.zip",
-    "purpose":"Outcome-blind structural map of existing LONG/SHORT candidate-family coverage and blind spots across GOLD regimes. No trade outcomes, PF/PnL, future labels, threshold rescue, or new formula creation in this stage."
-  },
-  "recovery":{"operator":"scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat","M10P_restart":"BAT03_ONLY_NEVER_BAT01","M10P2_restart":"BAT03_ONLY_NEVER_BAT01","pc_off_raw_csv_gap_backfill":false},
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W13_PASS_M10W14_DIRECTIONAL_COVERAGE_NEXT_20260728.md",
-  "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "scope":"XAUUSD_GOLD_ONLY",
+  "M10W14":{"status":"PASS_OUTCOME_BLIND_DIRECTIONAL_COVERAGE_MAP_WITH_STRUCTURAL_BEAR_TREND_SHORT_BLIND_SPOT","result":"config/mochipoyo_alert_research/m10w14_user_local_directional_coverage_result_20260728.json","package_sha256":"bab606b95fee01ee9b7437a5e66e91d6b5529353961713243afbbdb8d3b8b1ef","eligible_M15_windows":81329,"coverage":{"LONG_ONLY":2749,"SHORT_ONLY":4378,"BOTH":177,"NEITHER":74025},"primary_blind_spot":{"definition":"D1 bearish stack + H4 EMA20-30 negative + H1 MACD line negative","windows":5146,"short_presence":19,"short_presence_rate":0.003692188107267781,"neither_fraction":0.9891181492421298},"coverage_is_not_edge":true},
+  "M10W15":{"status":"HYPOTHESES_FROZEN_BEFORE_OUTCOME_EVALUATION","contract":"config/mochipoyo_alert_research/m10w15_blind_spot_trend_continuation_hypothesis_preregistration_20260728.json","families":["BSC1_SHORT_BEAR_TREND_PULLBACK_ZERO_CROSS","BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS"],"formula_change_after_outcomes":false,"ATR_entry_filter":false},
+  "M10W16":{"status":"IMPLEMENTED_READY_FOR_USER_LOCAL_RUN","script":"scripts/mochipoyo_alert_research/m10w16/python/run_m10w16_preregistered_blind_spot_trend_continuation_evaluation.py","operator":"scripts/mochipoyo_alert_research/m10w16/bat/01_run_preregistered_blind_spot_trend_continuation_evaluation.bat","output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W16/LATEST/99_UPLOAD_PACKAGE.zip","evaluation":"2023-24 train / 2025 validation / 2026 test; actual spread, fixed0.20, +1/+2bps; preregistered tiers"},
+  "research_policy":{"existing_candidate_rescue":"STOP","new_independent_hypothesis_preregister_before_outcomes":true,"historical_result_not_final_support":true,"fresh_shadow_required_for_robust_or_strong_candidate":true,"do_not_tune_failed_M10W15_family":true},
+  "M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W14_PASS_M10W15_FROZEN_M10W16_EVALUATION_NEXT_20260728.md",
+  "safety":{"audit_only":true,"historical_backfill":false,"existing_threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
