@@ -1,19 +1,28 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W10_PASS_M10W11_BAT03_RESTART_VERIFICATION_NEXT",
-  "stage":"M10W11_M10P_M10P2_BAT03_RESTART_VERIFICATION_AUDIT_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E unchanged. Start M10P using existing BAT03 only, confirm its first PASS cycle, then start M10P2 using existing BAT03 only and confirm its first PASS cycle. Never run either BAT01. After both PASS, run the existing read-only M10Q checkpoint once and upload M10Q LATEST 99_UPLOAD_PACKAGE.zip.",
-  "M10P_operator":"scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat",
-  "M10P2_operator":"scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat",
-  "M10Q_operator":"scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
-  "M10Q_output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W10_result":"config/mochipoyo_alert_research/m10w10_user_local_runtime_freshness_diagnostic_result_20260728.json",
-  "M10W11_contract":"config/mochipoyo_alert_research/m10w11_m10p_m10p2_bat03_restart_verification_contract_20260728.json",
-  "diagnostic_basis":{"M10P_lock":false,"M10P_integrity":true,"M10P_feed_guard":true,"M10P2_lock":false,"M10P2_integrity":true,"M10P2_feed_guard":true,"raw_M1":"2026.07.27 21:15:00"},
-  "immutable_starts":{"M10P":"2026.07.24 23:56:00","M10P2":"2026.07.27 01:39:00"},
-  "restart_semantics":{"restart_safe":true,"deterministic_post_start_rebuild":true,"change_start":false,"change_threshold":false,"BAT01":"FORBIDDEN"},
+  "status":"M10W11_PASS_M10W12_DUAL_SHORT_THRESHOLD_DISTANCE_NEXT",
+  "stage":"M10W12_DUAL_SHORT_THRESHOLD_ACTIVATION_DISTANCE_AUDIT_ONLY",
+  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only the M10W12 read-only threshold activation-distance audit. Do not change thresholds, starts, runtimes, or candidate formulas.",
+  "operator":"scripts/mochipoyo_alert_research/m10w12/bat/01_run_dual_short_threshold_activation_distance_audit.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W12/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W11_result":"config/mochipoyo_alert_research/m10w11_user_local_bat03_restart_verification_result_20260728.json",
+  "M10W12_contract":"config/mochipoyo_alert_research/m10w12_dual_short_threshold_activation_distance_contract_20260728.json",
+  "current_SHORT_state":{
+    "M10P":{"start":"2026.07.24 23:56:00","latest_M1":"2026.07.27 21:28:00","candidate":0,"resolved":0,"next_gate":5},
+    "M10P2":{"start":"2026.07.27 01:39:00","latest_M1":"2026.07.27 21:29:00","candidate":0,"resolved":0,"next_gate":5},
+    "zero_counts_are_current":true,
+    "performance_inference":false
+  },
+  "M10W12_questions":[
+    "How often has each frozen condition activated individually since its immutable start?",
+    "How often have the frozen seed/regime subgroups activated jointly?",
+    "Which frozen condition legs have never activated?",
+    "What are the raw signed margins on the closest near-miss decisions?",
+    "Does the independently reconstructed all-condition count exactly equal the running shadow candidate_match_count?"
+  ],
+  "near_miss_rule":"Descriptive only. Never use prospective near-miss distances to rescue/refit thresholds.",
   "M10V_before_both_20":"FORBIDDEN",
   "scope":"GOLD_XAUUSD_ONLY",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W10_DIAGNOSTIC_PASS_M10W11_BAT03_RESTART_NEXT_20260728.md",
-  "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W11_PASS_M10W12_THRESHOLD_DISTANCE_NEXT_20260728.md",
+  "safety":{"audit_only":true,"read_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
