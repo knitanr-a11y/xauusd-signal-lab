@@ -1,0 +1,68 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10Q_DUAL_SHORT_FRESH_CHECKPOINT_AUDIT",
+  "status": "PASS_USER_LOCAL_READ_ONLY_DUAL_FRESH_CHECKPOINT_AUDIT",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(39).zip",
+    "sha256": "f68789868c25b1994c4eb0421f975db1a3dadaa9b4404be39bfb04288ff40815",
+    "size_bytes": 1639
+  },
+  "built_at_utc": "2026-07-27T09:02:13Z",
+  "M10P": {
+    "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW",
+    "prospective_start_server_time": "2026.07.24 23:56:00",
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "reached_review_gates": [],
+    "next_review_gate": 5,
+    "latest_server_open": {"M1":"2026.07.27 03:45:00","M5":"2026.07.27 03:35:00","M15":"2026.07.27 03:30:00","H1":"2026.07.27 02:00:00","H4":"2026.07.24 20:00:00","D1":"2026.07.24 00:00:00"},
+    "actual_count": 0,
+    "actual_net_bps": 0.0,
+    "fixed0p20_count": 0,
+    "fixed0p20_net_bps": 0.0
+  },
+  "M10P2": {
+    "stage": "M10P2_C0212_FRESH_PROSPECTIVE_SHADOW",
+    "prospective_start_server_time": "2026.07.27 01:39:00",
+    "candidate_match_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "reached_review_gates": [],
+    "next_review_gate": 5,
+    "latest_server_open": {"M1":"2026.07.27 03:45:00","M5":"2026.07.27 03:35:00","M15":"2026.07.27 03:30:00","H1":"2026.07.27 02:00:00","H4":"2026.07.24 20:00:00","D1":"2026.07.24 00:00:00"},
+    "actual_count": 0,
+    "actual_net_bps": 0.0,
+    "fixed0p20_count": 0,
+    "fixed0p20_net_bps": 0.0
+  },
+  "decision": {
+    "M10P_gate_reached": false,
+    "M10P2_gate_reached": false,
+    "continue_both_fresh_shadows_unchanged": true,
+    "threshold_refit": false,
+    "begin_M10V_now": false,
+    "reason": "Neither independent fresh SHORT family has reached the first predeclared 5-resolved operational checkpoint."
+  },
+  "guardrails": {
+    "read_only": true,
+    "audit_only": true,
+    "runtime_modified": false,
+    "prospective_start_modified": false,
+    "threshold_modified": false,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
