@@ -1,0 +1,19 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W4_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_RUN",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Explain the M10W3 baseline-vs-filtered portfolio delta without changing the H1 filter. Decompose accepted-trade set changes by family and year, with explicit focus on the 2025 net decline despite higher PF and lower DD.",
+  "source":{
+    "root":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W3/LATEST",
+    "CORE_BASELINE":{"file":"06_core_baseline_accepted.csv","sha256":"bebdcfa104ada3400b8c1abf241b8a553a1cebb9731709a0fb3bac4cb211a51d"},
+    "CORE_FILTERED":{"file":"08_core_filtered_accepted.csv","sha256":"68ebfdffb6a1383e8eaa6bd1e1cd0ee06abef22f824a20fec8e1c9396631d0be"},
+    "EXTENDED_BASELINE":{"file":"10_extended_baseline_accepted.csv","sha256":"15ab87f8f8a3cedbbe16cda74c7cd18c7e40b3219b238efe6a7f818142dfc111"},
+    "EXTENDED_FILTERED":{"file":"12_extended_filtered_accepted.csv","sha256":"58be8b455101d7d2d92c569170b79ed910cc159390e50c35b915da62275d1d41"}
+  },
+  "comparison_pairs":[["CORE_BASELINE","CORE_FILTERED"],["EXTENDED_BASELINE","EXTENDED_FILTERED"]],
+  "canonical_identity":"M5/H4 use family+trade_id+entry_time. H1 baseline M10A_H1_Txxxx and filtered M10D_H1_Txxxx are normalized to H1+Txxxx+entry_time so unchanged H1 trades compare as the same event.",
+  "required_outputs":["common_trade_count","baseline_only_count_and_pnl","filtered_only_count_and_pnl","difference_by_year","difference_by_family","2025_baseline_only_and_filtered_only_ledgers","common_trade_return_parity_check","top_positive_and_negative_removed_or_added_trades"],
+  "rules":{"threshold_change":false,"new_filter_search":false,"post_outcome_rescue":false,"read_fresh_M10E":false,"read_SHORT":false,"read_M10P_or_M10P2":false,"modify_running_monitors":false},
+  "safety":{"audit_only":true,"historical_backfill":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
