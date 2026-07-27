@@ -1,0 +1,44 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W9_M10Q_DUAL_SHORT_CHECKPOINT_REFRESH_AUDIT_ONLY",
+  "status": "FROZEN_READ_ONLY_REFRESH_CONTRACT",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Refresh the already-existing read-only M10Q checkpoint after additional fresh market time, without modifying M10P or M10P2 and without changing any threshold, start, ledger, or runtime.",
+  "operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
+  "targets": {
+    "M10P": {"candidate":"M10L_H240_C056 + M10N_G013","immutable_start_mt5_server":"2026.07.24 23:56:00","review_gates":[5,10,20,40,60]},
+    "M10P2": {"candidate":"M10J_C0212","immutable_start_mt5_server":"2026.07.27 01:39:00","review_gates":[5,10,20]}
+  },
+  "interpretation_rules": {
+    "below_5": "health/accumulation only; no efficacy claim",
+    "at_5": "operational integrity review only",
+    "at_10": "interim descriptive fresh review",
+    "at_20": "first formal fresh review under the predeclared contracts",
+    "M10V_execution_gate": "FORBIDDEN until BOTH M10P >=20 resolved and M10P2 >=20 resolved with integrity PASS"
+  },
+  "must_not_change": [
+    "M10P start",
+    "M10P2 start",
+    "candidate formulas",
+    "thresholds",
+    "one-position rules",
+    "ledgers",
+    "runtime manifests",
+    "historical_backfill policy",
+    "M10V preregistration"
+  ],
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "M10P_reset": false,
+    "M10P2_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
