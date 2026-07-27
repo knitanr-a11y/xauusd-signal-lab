@@ -1,0 +1,82 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W3_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_AUDIT_ONLY",
+  "status": "PASS_USER_LOCAL_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(43).zip",
+    "sha256": "1c8646f028c17ce9c4b34158bcd32809b6b5a172b61ad7d3f5025469cedb8248",
+    "size_bytes": 105682,
+    "built_at_utc": "2026-07-27T16:54:58Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "source_hashes": {
+    "M5_RUNNER75": "e9fe20d31e02359f853e94f1afd9f3a8b295ccda6cef81e8e4617dea42eaac86",
+    "H1_BASELINE_RUNNER50": "bfeaa63735faec23b6904ea52314e42b7a881f62b413a9c161225bdd17dd3b81",
+    "H1_FILTERED_RUNNER50": "95dbfdc51c5e73b623d5bd8b676c40eab42e955521a155c08f8a3a59470b780f",
+    "H4_ENTRY": "e450764550f6a983ab618457639776405f3e63ea2527e8f6c8976cdb7f60a3d5"
+  },
+  "single_capital": {
+    "CORE_BASELINE": {"count":935,"win_rate":0.6363636363636364,"pf":1.9623457969195994,"net_bps":4790.23195080417,"payoff":1.1213404553826283,"max_dd_bps":328.823565707667,"max_losing_streak":6,"skips":61},
+    "CORE_FILTERED": {"count":913,"win_rate":0.6418400876232202,"pf":2.2149685287726144,"net_bps":5016.368867594655,"payoff":1.2359977967724316,"max_dd_bps":252.98800115452582,"max_losing_streak":6,"skips":54},
+    "EXTENDED_BASELINE": {"count":906,"win_rate":0.6401766004415012,"pf":2.3542115764696034,"net_bps":6812.558036499913,"payoff":1.3232292653949838,"max_dd_bps":377.40347495196903,"max_losing_streak":6,"skips":147},
+    "EXTENDED_FILTERED": {"count":887,"win_rate":0.644870349492672,"pf":2.6330860824329076,"net_bps":6995.111625276016,"payoff":1.4500386642768635,"max_dd_bps":357.3077970364079,"max_losing_streak":6,"skips":137}
+  },
+  "filtered_minus_baseline": {
+    "CORE": {"count":-22,"pf":0.252622731853015,"net_bps":226.13691679048497,"payoff":0.11465734138980332,"max_dd_bps":-75.83556455314118,"skips":-7},
+    "EXTENDED": {"count":-19,"pf":0.2788745059633042,"net_bps":182.55358877610252,"payoff":0.1268093988818797,"max_dd_bps":-20.09567791556111,"skips":-10}
+  },
+  "plus_2bps_cost": {
+    "CORE_BASELINE": {"pf":1.5074543873537531,"net_bps":2920.23195080417,"max_dd_bps":434.231887316256},
+    "CORE_FILTERED": {"pf":1.6537892185855279,"net_bps":3190.368867594655,"max_dd_bps":316.78073386896904},
+    "EXTENDED_BASELINE": {"pf":1.8662724162448228,"net_bps":5000.558036499913,"max_dd_bps":461.4034749519689},
+    "EXTENDED_FILTERED": {"pf":2.043549203823986,"net_bps":5221.111625276016,"max_dd_bps":421.3077970364078}
+  },
+  "yearly_filtered_minus_baseline": {
+    "CORE": {
+      "2023": {"pf":0.2914612714075311,"net_bps":166.12743725948962,"max_dd_bps":-31.99144913664145},
+      "2024": {"pf":0.31457073924114143,"net_bps":103.30848783160127,"max_dd_bps":0.0},
+      "2025": {"pf":0.12733651505224053,"net_bps":-151.19319640495496,"max_dd_bps":-166.8369901604815},
+      "2026": {"pf":0.29416515959852774,"net_bps":107.89418810434904,"max_dd_bps":-108.57491124032799}
+    },
+    "EXTENDED": {
+      "2023": {"pf":0.24274968864330515,"net_bps":166.12743725948962,"max_dd_bps":-50.103760004821766},
+      "2024": {"pf":0.18928963159381995,"net_bps":10.23114998934534,"max_dd_bps":0.0},
+      "2025": {"pf":0.34326024112243436,"net_bps":-88.76657754841199,"max_dd_bps":-166.8369901604824},
+      "2026": {"pf":0.3120700616283214,"net_bps":94.96157907567931,"max_dd_bps":-108.57491124032799}
+    }
+  },
+  "overlap": {
+    "exact_same_entry_timestamp_count_all_pairs_all_scenarios": 0,
+    "CORE_baseline_M5_H1_overlap_count": 62,
+    "CORE_filtered_M5_H1_overlap_count": 55,
+    "EXTENDED_baseline_H1_H4_overlap_count": 17,
+    "EXTENDED_filtered_H1_H4_overlap_count": 11
+  },
+  "interpretation": {
+    "filtered_H1_improves_portfolio_historically": true,
+    "filtered_H1_historical_challenger_strengthened": true,
+    "replace_operational_H1_now": false,
+    "retain_baseline_reference": true,
+    "M10E_fresh_required_before_operational_replacement": true,
+    "2025_net_tradeoff_requires_forensics": true,
+    "reason": "Filtered H1 improves PF, total net, payoff and DD in both CORE and EXTENDED single-capital historical portfolios and remains stronger under +2 bps cost. However 2025 net declines in both portfolio views and the filter is research-exposed historical evidence. Keep baseline and filtered H1, and inspect changed accepted-trade composition before any historical portfolio freeze; operational replacement still requires independent M10E fresh evidence."
+  },
+  "next": "Run M10W4 read-only portfolio-difference forensics to decompose baseline-only versus filtered-only accepted trades by family/year, especially the 2025 net decline, without threshold tuning or reading fresh outcomes.",
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "reads_SHORT_ledgers": false,
+    "reads_M10E_fresh_outcomes_for_selection": false,
+    "reads_M10P_or_M10P2": false,
+    "executes_M10V": false,
+    "M10V_20_20_gate_unchanged": true,
+    "modify_running_monitors": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
