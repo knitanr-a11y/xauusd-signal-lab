@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W0_GOLD_LONG_INVENTORY_PASS_M10W1_LONG_INTERACTION_READY_AUDIT_ONLY",
+  "status": "M10W1_GOLD_LONG_INTERACTION_PASS_M10W2_M10D_H1_FILTER_INVENTORY_NEXT_AUDIT_ONLY",
   "running_monitors": {
     "collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -37,31 +37,28 @@
   "M10W0": {
     "status": "PASS_USER_LOCAL_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10w0_user_local_result_20260727.json",
-    "package_sha256": "a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251",
-    "source_stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
-    "historical_research_exposed": true,
-    "fresh_forward_validated": false,
-    "commission": "NOT_MODELED",
-    "swap": "NOT_MODELED",
-    "LONG_classification": {
-      "M5_ENTRY": "BASELINE_REFERENCE_ONLY",
-      "M5_RUNNER75": "CORE_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
-      "H1_ENTRY": "BASELINE_REFERENCE_ONLY",
-      "H1_RUNNER50": "CORE_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
-      "H4_ENTRY": "LOW_FREQUENCY_PREMIUM_REFERENCE_SENSITIVITY"
-    }
+    "package_sha256": "a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251"
   },
   "M10W1": {
-    "stage": "M10W1_GOLD_LONG_FAMILY_HISTORICAL_INTERACTION_AUDIT_ONLY",
-    "status": "IMPLEMENTED_PENDING_USER_LOCAL_RUN",
-    "contract": "config/mochipoyo_alert_research/m10w1_gold_long_family_interaction_contract_20260727.json",
-    "script": "scripts/mochipoyo_alert_research/m10w1/python/run_m10w1_gold_long_family_interaction_audit.py",
-    "operator": "scripts/mochipoyo_alert_research/m10w1/bat/01_run_gold_long_family_interaction_audit.bat",
-    "CORE": ["M5_RUNNER75","H1_RUNNER50"],
-    "EXTENDED_REFERENCE_SENSITIVITY": ["M5_RUNNER75","H1_RUNNER50","H4_ENTRY"],
-    "reads_SHORT_ledgers": false,
-    "reads_M10P_or_M10P2_fresh_outcomes": false,
-    "executes_M10V": false
+    "status": "PASS_USER_LOCAL_GOLD_LONG_FAMILY_INTERACTION_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10w1_user_local_result_20260727.json",
+    "package_sha256": "00dfd7663daebeebfd3b048b393e4d94afb0825b7e94e48dbd1db959f97e42e7",
+    "CORE_single_capital": {"families":["M5_RUNNER75","H1_RUNNER50"],"count":935,"pf":1.9623457969195994,"net_bps":4790.23195080417,"max_dd_bps":328.823565707667,"plus_2bps_pf":1.5074543873537531},
+    "EXTENDED_single_capital": {"families":["M5_RUNNER75","H1_RUNNER50","H4_ENTRY"],"count":906,"pf":2.3542115764696034,"net_bps":6812.558036499913,"max_dd_bps":377.40347495196903,"plus_2bps_pf":1.8662724162448228},
+    "exact_same_entry_timestamp_count": 0,
+    "interpretation": "Retain CORE and EXTENDED sensitivity separately. Do not promote H4 to core solely from historical-exposed results."
+  },
+  "M10W2": {
+    "stage": "M10W2_M10D_H1_FILTERED_REFERENCE_INVENTORY_AUDIT_ONLY",
+    "status": "IMPLEMENTED_PENDING_USER_LOCAL_READ_ONLY_AUDIT",
+    "contract": "config/mochipoyo_alert_research/m10w2_m10d_h1_filtered_reference_inventory_contract_20260727.json",
+    "script": "scripts/mochipoyo_alert_research/m10w2/python/run_m10w2_m10d_h1_filtered_reference_inventory.py",
+    "operator": "scripts/mochipoyo_alert_research/m10w2/bat/01_run_m10d_h1_filtered_reference_inventory.bat",
+    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10D",
+    "purpose": "Inventory actual M10D deterministic historical H1 compound-loss filter evidence before choosing baseline versus filtered H1 as future LONG family representative.",
+    "expected_filter": {"m5_macd_bps_slope_le":-0.1308,"h1_ema30_minus_ema40_bps_ge":17.3333,"exclude_when":"both conditions true"},
+    "reads_M10E_fresh_outcomes_for_selection": false,
+    "reads_M10P_or_M10P2": false
   },
   "recovery": {
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
@@ -70,7 +67,7 @@
     "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
     "pc_off_gap_backfill": false
   },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W0_PASS_M10W1_GOLD_LONG_INTERACTION_NEXT_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W1_PASS_M10W2_M10D_H1_FILTER_INVENTORY_NEXT_20260727.md",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
