@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W10_M10P_M10P2_RUNTIME_FRESHNESS_DIAGNOSTIC_AUDIT_ONLY",
+  "status": "PASS_DIAGNOSTIC_BAT03_RESTART_SAFE_PRESERVE_STARTS",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(50).zip",
+    "sha256": "35688bb0c011c4d6fc9a50bf72333e590fd71a7735c3814a979f19fe5d3a6529",
+    "size_bytes": 13804,
+    "built_at_utc": "2026-07-27T18:17:40Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "raw_feed": {
+    "M1": "2026.07.27 21:15:00",
+    "M5": "2026.07.27 21:10:00",
+    "M15": "2026.07.27 21:00:00",
+    "H1": "2026.07.27 20:00:00",
+    "H4": "2026.07.27 16:00:00",
+    "D1": "2026.07.24 00:00:00"
+  },
+  "M10P": {
+    "classification": "LOOP_NOT_RUNNING_LOCK_ABSENT",
+    "immutable_start_mt5_server": "2026.07.24 23:56:00",
+    "last_cycle_at_utc": "2026-07-27T00:46:08Z",
+    "cycle_count": 2380,
+    "summary_latest_M1": "2026.07.27 03:45:00",
+    "raw_latest_M1": "2026.07.27 21:15:00",
+    "stale_minutes": 1050.0,
+    "lock_exists": false,
+    "runtime_integrity_pass": true,
+    "current_observed_feed_guard_pass": true,
+    "BAT03_restart_safe": true,
+    "BAT01_forbidden": true
+  },
+  "M10P2": {
+    "classification": "LOOP_NOT_RUNNING_LOCK_ABSENT",
+    "immutable_start_mt5_server": "2026.07.27 01:39:00",
+    "last_cycle_at_utc": "2026-07-27T00:46:21Z",
+    "cycle_count": 101,
+    "summary_latest_M1": "2026.07.27 03:45:00",
+    "raw_latest_M1": "2026.07.27 21:15:00",
+    "stale_minutes": 1050.0,
+    "lock_exists": false,
+    "runtime_integrity_pass": true,
+    "current_observed_feed_guard_pass": true,
+    "BAT03_restart_safe": true,
+    "BAT01_forbidden": true
+  },
+  "restart_contract_interpretation": {
+    "M10P_restart_safe_declared": true,
+    "M10P2_restart_safe_declared": true,
+    "rebuild_post_start_deterministically_each_cycle": true,
+    "delayed_rebuild_after_loop_exit_is_not_pre_start_historical_backfill": true,
+    "gap_quarantine_change_required": false,
+    "reason": "Both frozen contracts explicitly declare restart_safe=true and deterministic rebuild of post-start data each cycle. The raw feed continued prospectively, starts and thresholds remained frozen, runtime integrity passes, current feed guards pass, and no stale lock remains."
+  },
+  "authorized_next": {
+    "M10P": "RUN_EXISTING_BAT03_ONLY",
+    "M10P2": "RUN_EXISTING_BAT03_ONLY_AFTER_M10P",
+    "after_both_first_PASS": "RUN_EXISTING_M10Q_READ_ONLY_CHECKPOINT_ONCE",
+    "M10V_before_both_20": "FORBIDDEN"
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "lock_delete": false,
+    "runtime_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
