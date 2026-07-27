@@ -1,0 +1,82 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W12_DUAL_SHORT_THRESHOLD_ACTIVATION_DISTANCE_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_READY_FOR_LOCAL_RUN",
+  "purpose": "Explain the current zero-match state of the two frozen GOLD SHORT families without changing thresholds, starts, formulas, or forward runtimes. Measure causal post-start decision-level condition activation, raw signed margins to each frozen threshold, and near-miss structure only.",
+  "scope": {
+    "ticker": "XAUUSD",
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_csv_row_contract": "CLOSED",
+    "btc_in_scope": false
+  },
+  "sources": {
+    "M10P_runtime_manifest": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p_runtime/m10p_runtime_manifest.json",
+    "M10P2_runtime_manifest": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p2_runtime/m10p2_runtime_manifest.json",
+    "M10P_latest_summary": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P/LATEST/01_summary.json",
+    "M10P2_latest_summary": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P2/LATEST/01_summary.json",
+    "raw_data_root": "Resolve from M8B LATEST/06_symbol_metadata.json exactly as frozen runtimes do"
+  },
+  "frozen_candidates": {
+    "M10P_C056_G013": {
+      "decision_timeframe": "H1",
+      "direction": "SHORT",
+      "conditions": {
+        "h1_macd_hist_bps_ge": 3.637199446,
+        "h1_macd_line_bps_le": -7.667425443,
+        "h1_ret3_bps_ge": 18.70087437,
+        "d1_macd_hist_bps_ge": -14.25480242
+      },
+      "start_from_runtime_manifest_only": true
+    },
+    "M10P2_C0212": {
+      "decision_timeframe": "M15",
+      "direction": "SHORT",
+      "conditions": {
+        "h4_ema20_30_bps_ge": 37.61355979,
+        "h1_atr_pct100_ge": 0.8
+      },
+      "start_from_runtime_manifest_only": true
+    }
+  },
+  "required_outputs": {
+    "per_family_summary": [
+      "prospective_start_server_time",
+      "latest_decision_time",
+      "decision_count",
+      "condition_pass_counts",
+      "joint_subgroup_pass_counts",
+      "all_conditions_pass_count",
+      "latest_decision_values_and_signed_margins"
+    ],
+    "near_miss": {
+      "max_rows_per_family": 20,
+      "ranking": "More frozen conditions passed first; ties use smaller sum of normalized failed deficits. This ranking is descriptive only and may not be used to refit thresholds.",
+      "include": ["decision_time","raw_feature_values","pass_flags","signed_margin_to_each_threshold","failed_condition_count"]
+    },
+    "full_decision_ledger": true
+  },
+  "interpretation_rules": {
+    "zero_all_conditions_but_individual_conditions_activate": "Detector is not dead; the frozen conjunction has simply not occurred in the observed post-start interval.",
+    "one_or_more_conditions_never_activate": "Describe which frozen leg has not activated. Do not weaken it from this prospective sample.",
+    "all_conditions_pass_count_positive": "Cross-check against M10P/M10P2 candidate_match_count. Any mismatch is an integrity issue, not permission to change thresholds.",
+    "performance_inference": false,
+    "threshold_refit_from_output": false
+  },
+  "safety": {
+    "audit_only": true,
+    "read_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "start_reset": false,
+    "runtime_reset": false,
+    "modify_M10P": false,
+    "modify_M10P2": false,
+    "stop_or_restart_monitors": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "M10V_execute": false
+  }
+}
