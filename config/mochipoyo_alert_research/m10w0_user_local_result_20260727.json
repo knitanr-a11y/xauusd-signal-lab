@@ -23,11 +23,21 @@
   },
   "frozen_raw_hashes": {
     "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
-    "M5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "M5": "c47c0a136e8a953bf219bfbcb80a79ccac3afb04a0ed6e825843eba143948d",
     "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
     "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
     "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
     "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "correction_note": {
+    "date": "2026-07-27",
+    "field": "frozen_raw_hashes.M5",
+    "type": "TRANSCRIPTION_ONLY",
+    "previous_recorded_value": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "correct_value": "c47c0a136e8a953bf219bfbcb80a79ccac3afb04a0ed6e825843eba143948d",
+    "strategy_logic_changed": false,
+    "raw_data_changed": false,
+    "start_or_threshold_changed": false
   },
   "key_source_hashes": {
     "01_summary.json": "459040fbe81631eaef06db91b5d5b6435da14d89ecab88345430caa21a5f5da6",
