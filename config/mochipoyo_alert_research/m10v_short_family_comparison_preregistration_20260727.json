@@ -1,0 +1,78 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10V_SHORT_FAMILY_COMPARISON_PREREGISTRATION_ONLY",
+  "status": "FROZEN_PREREGISTRATION_NOT_EXECUTION_AUTHORIZATION",
+  "date": "2026-07-27",
+  "purpose": "Freeze the future comparison method before observing enough fresh outcomes. This file does not authorize running M10V now and does not modify M10P or M10P2.",
+  "families": {
+    "M10P": {
+      "candidate": "M10L_H240_C056 + M10N_G013",
+      "prospective_start_server_time": "2026.07.24 23:56:00",
+      "direction": "SHORT",
+      "horizon_minutes": 240,
+      "one_position": true
+    },
+    "M10P2": {
+      "candidate": "M10J_C0212",
+      "prospective_start_server_time": "2026.07.27 01:39:00",
+      "direction": "SHORT",
+      "horizon_minutes": 240,
+      "one_position": true
+    }
+  },
+  "execution_gate": {
+    "M10P_minimum_resolved": 20,
+    "M10P2_minimum_resolved": 20,
+    "both_integrity_checks_must_pass": true,
+    "no_unresolved_runtime_or_prefix_violation": true,
+    "thresholds_unchanged": true,
+    "starts_unchanged": true,
+    "historical_backfill": false,
+    "reason": "20 resolved is the predeclared first formal fresh review point for both independent families."
+  },
+  "windows": {
+    "standalone_view": "Retain each family's full own fresh window for standalone metrics.",
+    "common_comparison_window_start_server_time": "2026.07.27 01:39:00",
+    "common_window_rule": "For direct family comparison and portfolio interaction, use only decisions at or after the later immutable start so both families were prospectively observable.",
+    "time_basis": "MT5 server time"
+  },
+  "required_views": [
+    "standalone full-fresh metrics for each family",
+    "common-window standalone metrics for each family",
+    "signal count and accepted trade count",
+    "exposure overlap minutes",
+    "simultaneous candidate and simultaneous accepted-trade counts",
+    "daily entry-date PnL correlation on the common window",
+    "leave-one-family-out net/PF/DD contribution",
+    "raw independent-arm combined metrics",
+    "deterministic single-capital combined metrics",
+    "actual-spread primary metrics",
+    "fixed-$0.20 spread sensitivity metrics"
+  ],
+  "single_capital_policy": {
+    "order": "chronological first-come-first-served by decision_time",
+    "active_position_rule": "While an accepted 240-minute position is active, later candidate entries from either family are skipped for the single-capital view.",
+    "same_timestamp_same_direction_rule": "If both families qualify at the exact same decision timestamp, materialize one SHORT position only and attribute the event to both families for overlap accounting; do not double size or double PnL.",
+    "tie_break_not_used_for_pnl": true,
+    "risk_sizing": "one normalized unit; no post-outcome sizing optimization"
+  },
+  "correlation_policy": {
+    "daily_bucket": "MT5-server entry date",
+    "missing_family_pnl_on_day": 0.0,
+    "report_correlation_only_if_at_least_10_common_window_calendar_days_have_any_trade": true,
+    "do_not_use_correlation_to_refit_thresholds": true
+  },
+  "prohibitions": {
+    "execute_M10V_before_gate": true,
+    "threshold_optimization": false,
+    "candidate_rescue_filtering": false,
+    "change_starts": false,
+    "historical_backfill": false,
+    "nearest_m1_fallback": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_promotion": false
+  }
+}
