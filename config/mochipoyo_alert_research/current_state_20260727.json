@@ -2,7 +2,7 @@
   "project":"MOCHIPOYO_ALERT_RESEARCH",
   "repository":"knitanr-a11y/xauusd-signal-lab",
   "branch":"feature/mochipoyo-alert-research",
-  "status":"M10W10_DIAGNOSTIC_PASS_M10W11_BAT03_RESTART_VERIFICATION_READY_AUDIT_ONLY",
+  "status":"M10W11_BAT03_RESTART_VERIFIED_CURRENT_SHORT_ZERO_M10W12_ACTIVATION_DISTANCE_NEXT_AUDIT_ONLY",
   "running_or_preserved_monitors":{
     "collector":"KEEP_UNCHANGED",
     "M7C":"KEEP_UNCHANGED",
@@ -11,8 +11,8 @@
     "M9Y":"KEEP_UNCHANGED",
     "M10B":"KEEP_UNCHANGED",
     "M10E":"KEEP_UNCHANGED",
-    "M10P":"LOOP_NOT_RUNNING_RUNTIME_INTEGRITY_PASS_BAT03_RESTART_AUTHORIZED",
-    "M10P2":"LOOP_NOT_RUNNING_RUNTIME_INTEGRITY_PASS_BAT03_RESTART_AUTHORIZED"
+    "M10P":"BAT03_RESTART_VERIFIED_KEEP_RUNNING_UNCHANGED",
+    "M10P2":"BAT03_RESTART_VERIFIED_KEEP_RUNNING_UNCHANGED"
   },
   "immutable_starts":{"M7C_utc":"2026-07-20T14:54:15Z","M9V_mt5_server":"2026.07.24 11:04:00","M9Y_mt5_server":"2026.07.24 12:45:00","M10B_mt5_server":"2026.07.24 20:54:00","M10E_mt5_server":"2026.07.24 22:06:00","M10P_mt5_server":"2026.07.24 23:56:00","M10P2_mt5_server":"2026.07.27 01:39:00"},
   "research_scope":{"new_M10_research":"XAUUSD_GOLD_ONLY","btc_in_new_M10_research":false,"M7C_background_scope":"BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_KEEP_UNCHANGED"},
@@ -22,32 +22,40 @@
     "M10B":{"result":"config/mochipoyo_alert_research/m10w6_m10b_current_fresh_multitimeframe_result_20260727.json","M5_resolved":1,"H1_resolved":0,"H4_resolved":0},
     "M10E":{"result":"config/mochipoyo_alert_research/m10w5_m10e_current_fresh_checkpoint_result_20260727.json","H1_resolved":0}
   },
-  "M10W9":{
-    "status":"PASS_AUDITOR_WITH_STALE_M10P_M10P2_OUTPUT_ANOMALY",
-    "result":"config/mochipoyo_alert_research/m10w9_m10q_refresh_result_20260727.json",
-    "package_sha256":"d8d83d038bebc0e32bfdda87f7800d70a50a09eedfb0ad8e90fcbcd9c27bc662",
-    "zero_counts_current_market_evidence":false
+  "historical_LONG_state":{
+    "M10W0":"PASS_REFERENCE_INVENTORY",
+    "M10W1":"PASS_LONG_FAMILY_INTERACTION",
+    "M10W2":"PASS_H1_FILTERED_REFERENCE_INVENTORY_HISTORICAL_CHALLENGER_ONLY",
+    "M10W3":"PASS_BASELINE_VS_FILTERED_H1_PORTFOLIO",
+    "M10W4":"PASS_PORTFOLIO_DIFFERENCE_FORENSICS"
   },
+  "M10W9":{"status":"PASS_AUDITOR_WITH_STALE_M10P_M10P2_OUTPUT_ANOMALY","result":"config/mochipoyo_alert_research/m10w9_m10q_refresh_result_20260727.json","zero_counts_current_market_evidence":false},
   "M10W10":{
     "status":"PASS_DIAGNOSTIC_BAT03_RESTART_SAFE_PRESERVE_STARTS",
     "result":"config/mochipoyo_alert_research/m10w10_user_local_runtime_freshness_diagnostic_result_20260728.json",
     "package_sha256":"c5af5b33a6a97f594b625e602668a8e2f6d0c6ebd3b2e6b18d255e4819b071e9",
-    "raw_M1":"2026.07.27 21:15:00",
-    "M10P":{"last_cycle_at_utc":"2026-07-27T00:46:08Z","cycle_count":2380,"summary_M1":"2026.07.27 03:45:00","stale_minutes":1050.0,"lock_exists":false,"integrity_pass":true,"feed_guard_pass":true},
-    "M10P2":{"last_cycle_at_utc":"2026-07-27T00:46:21Z","cycle_count":101,"summary_M1":"2026.07.27 03:45:00","stale_minutes":1050.0,"lock_exists":false,"integrity_pass":true,"feed_guard_pass":true},
-    "restart_safe_contract_verified":true,
-    "gap_quarantine_change_required":false
+    "restart_safe_contract_verified":true
   },
   "M10W11":{
-    "stage":"M10W11_M10P_M10P2_BAT03_RESTART_VERIFICATION_AUDIT_ONLY",
-    "status":"OPERATOR_ACTION_READY",
-    "contract":"config/mochipoyo_alert_research/m10w11_m10p_m10p2_bat03_restart_verification_contract_20260728.json",
-    "sequence":["M10P BAT03","M10P2 BAT03","M10Q read-only checkpoint"],
-    "M10P_BAT01":"FORBIDDEN",
-    "M10P2_BAT01":"FORBIDDEN",
+    "status":"PASS_RESTART_VERIFIED_CURRENT_SHORT_ZERO_VALID",
+    "result":"config/mochipoyo_alert_research/m10w11_user_local_bat03_restart_verification_result_20260728.json",
+    "package_sha256":"038d35f9348ac5988b56c325a05ed04d086992cd1d28feadc00e96e8d3f4f3d4",
+    "M10P":{"start":"2026.07.24 23:56:00","latest_M1":"2026.07.27 21:28:00","candidate":0,"accepted":0,"resolved":0,"open":0,"next_gate":5},
+    "M10P2":{"start":"2026.07.27 01:39:00","latest_M1":"2026.07.27 21:29:00","candidate":0,"accepted":0,"resolved":0,"open":0,"next_gate":5},
+    "current_zero_counts_valid_market_evidence":true,
+    "performance_inference_allowed":false,
     "M10V_before_20_20":"FORBIDDEN"
   },
+  "M10W12":{
+    "stage":"M10W12_DUAL_SHORT_THRESHOLD_ACTIVATION_DISTANCE_AUDIT_ONLY",
+    "status":"IMPLEMENTED_READY_FOR_USER_LOCAL_READ_ONLY_RUN",
+    "contract":"config/mochipoyo_alert_research/m10w12_dual_short_threshold_activation_distance_contract_20260728.json",
+    "script":"scripts/mochipoyo_alert_research/m10w12/python/run_m10w12_dual_short_threshold_activation_distance_audit.py",
+    "operator":"scripts/mochipoyo_alert_research/m10w12/bat/01_run_dual_short_threshold_activation_distance_audit.bat",
+    "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W12/LATEST/99_UPLOAD_PACKAGE.zip",
+    "purpose":"Explain current zero-match state by frozen-condition activation and signed threshold margins only; no threshold rescue/refit."
+  },
   "recovery":{"operator":"scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat","M10P_restart":"BAT03_ONLY_NEVER_BAT01","M10P2_restart":"BAT03_ONLY_NEVER_BAT01","pc_off_raw_csv_gap_backfill":false},
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W10_DIAGNOSTIC_PASS_M10W11_BAT03_RESTART_NEXT_20260728.md",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W11_PASS_M10W12_THRESHOLD_DISTANCE_NEXT_20260728.md",
   "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
