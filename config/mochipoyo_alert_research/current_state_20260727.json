@@ -2,7 +2,7 @@
   "project":"MOCHIPOYO_ALERT_RESEARCH",
   "repository":"knitanr-a11y/xauusd-signal-lab",
   "branch":"feature/mochipoyo-alert-research",
-  "status":"M10W12_PASS_M10W13_FROZEN_HISTORICAL_SHORT_ACTIVATION_INTERVAL_CALIBRATION_READY_AUDIT_ONLY",
+  "status":"M10W13_PASS_WAIT_FOR_PREDECLARED_FRESH_GATES_AUDIT_ONLY",
   "running_or_preserved_monitors":{
     "collector":"KEEP_UNCHANGED",
     "M7C":"KEEP_UNCHANGED",
@@ -22,45 +22,40 @@
     "M10B":{"result":"config/mochipoyo_alert_research/m10w6_m10b_current_fresh_multitimeframe_result_20260727.json","M5_resolved":1,"H1_resolved":0,"H4_resolved":0},
     "M10E":{"result":"config/mochipoyo_alert_research/m10w5_m10e_current_fresh_checkpoint_result_20260727.json","H1_resolved":0}
   },
-  "historical_LONG_state":{
-    "M10W0":"PASS_REFERENCE_INVENTORY",
-    "M10W1":"PASS_LONG_FAMILY_INTERACTION",
-    "M10W2":"PASS_H1_FILTERED_REFERENCE_INVENTORY_HISTORICAL_CHALLENGER_ONLY",
-    "M10W3":"PASS_BASELINE_VS_FILTERED_H1_PORTFOLIO",
-    "M10W4":"PASS_PORTFOLIO_DIFFERENCE_FORENSICS"
-  },
-  "M10W9":{"status":"PASS_AUDITOR_WITH_STALE_M10P_M10P2_OUTPUT_ANOMALY","result":"config/mochipoyo_alert_research/m10w9_m10q_refresh_result_20260727.json","zero_counts_current_market_evidence":false},
-  "M10W10":{"status":"PASS_DIAGNOSTIC_BAT03_RESTART_SAFE_PRESERVE_STARTS","result":"config/mochipoyo_alert_research/m10w10_user_local_runtime_freshness_diagnostic_result_20260728.json","package_sha256":"c5af5b33a6a97f594b625e602668a8e2f6d0c6ebd3b2e6b18d255e4819b071e9","restart_safe_contract_verified":true},
-  "M10W11":{
-    "status":"PASS_RESTART_VERIFIED_CURRENT_SHORT_ZERO_VALID",
-    "result":"config/mochipoyo_alert_research/m10w11_user_local_bat03_restart_verification_result_20260728.json",
-    "package_sha256":"038d35f9348ac5988b56c325a05ed04d086992cd1d28feadc00e96e8d3f4f3d4",
-    "M10P":{"start":"2026.07.24 23:56:00","latest_M1":"2026.07.27 21:28:00","candidate":0,"resolved":0,"next_gate":5},
-    "M10P2":{"start":"2026.07.27 01:39:00","latest_M1":"2026.07.27 21:29:00","candidate":0,"resolved":0,"next_gate":5},
+  "historical_LONG_state":{"M10W0":"PASS_REFERENCE_INVENTORY","M10W1":"PASS_LONG_FAMILY_INTERACTION","M10W2":"PASS_H1_FILTERED_REFERENCE_INVENTORY_HISTORICAL_CHALLENGER_ONLY","M10W3":"PASS_BASELINE_VS_FILTERED_H1_PORTFOLIO","M10W4":"PASS_PORTFOLIO_DIFFERENCE_FORENSICS"},
+  "SHORT_fresh_state":{
+    "M10P":{"start":"2026.07.24 23:56:00","latest_verified_candidate":0,"resolved":0,"next_gate":5},
+    "M10P2":{"start":"2026.07.27 01:39:00","latest_verified_candidate":0,"resolved":0,"next_gate":5},
     "current_zero_counts_valid_market_evidence":true,
     "performance_inference_allowed":false,
     "M10V_before_20_20":"FORBIDDEN"
   },
-  "M10W12":{
-    "status":"PASS_READ_ONLY_THRESHOLD_ACTIVATION_DISTANCE_AUDIT",
-    "result":"config/mochipoyo_alert_research/m10w12_user_local_threshold_activation_distance_result_20260728.json",
-    "package_sha256":"4c7420ac6210809daee9dc5a783753922c9a807d2a5445f98173f89e14041dbe",
-    "M10P":{"decision_count":21,"all_conditions":0,"condition_pass_counts":{"hist":4,"line":0,"ret3":6,"d1_hist":21},"primary_bottleneck":"h1_macd_line_bps_le"},
-    "M10P2":{"decision_count":81,"all_conditions":0,"condition_pass_counts":{"h4_ema20_30":0,"h1_atr_pct100":12},"primary_bottleneck":"h4_ema20_30_bps_ge"},
-    "candidate_crosscheck_pass":true,
-    "threshold_change_allowed":false,
-    "performance_inference_allowed":false
-  },
+  "M10W10":{"status":"PASS_DIAGNOSTIC_BAT03_RESTART_SAFE_PRESERVE_STARTS","result":"config/mochipoyo_alert_research/m10w10_user_local_runtime_freshness_diagnostic_result_20260728.json"},
+  "M10W11":{"status":"PASS_RESTART_VERIFIED_CURRENT_SHORT_ZERO_VALID","result":"config/mochipoyo_alert_research/m10w11_user_local_bat03_restart_verification_result_20260728.json"},
+  "M10W12":{"status":"PASS_READ_ONLY_THRESHOLD_ACTIVATION_DISTANCE_AUDIT","result":"config/mochipoyo_alert_research/m10w12_user_local_threshold_activation_distance_result_20260728.json","M10P_primary_bottleneck":"h1_macd_line_bps_le","M10P2_primary_bottleneck":"h4_ema20_30_bps_ge","threshold_change_allowed":false},
   "M10W13":{
-    "stage":"M10W13_FROZEN_HISTORICAL_SHORT_ACTIVATION_INTERVAL_CALIBRATION_AUDIT_ONLY",
-    "status":"IMPLEMENTED_READY_FOR_USER_LOCAL_RUN",
-    "contract":"config/mochipoyo_alert_research/m10w13_frozen_historical_short_activation_interval_calibration_contract_20260728.json",
-    "script":"scripts/mochipoyo_alert_research/m10w13/python/run_m10w13_frozen_historical_short_activation_interval_calibration.py",
-    "operator":"scripts/mochipoyo_alert_research/m10w13/bat/01_run_frozen_historical_short_activation_interval_calibration.bat",
-    "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W13/LATEST/99_UPLOAD_PACKAGE.zip",
-    "purpose":"Compare current 21-H1 and 81-M15 zero-match runs with frozen historical activation/no-match decision-run distributions only. No outcomes or refit."
+    "status":"PASS_FROZEN_HISTORICAL_WAITING_TIME_WITHIN_NORMAL_RANGE_NO_THRESHOLD_ACTION",
+    "result":"config/mochipoyo_alert_research/m10w13_user_local_historical_activation_interval_result_20260728.json",
+    "package_sha256":"3b42b91c7466d50fece292ea0d38a0b751503256c23cb753a372c922f6ec89bd",
+    "M10P":{"historical_activation_rate":0.008025053826580544,"current_zero_decisions":21,"historical_zero_median":111.5,"p90":529.6999999999999,"p95":689.1999999999996,"p99":1096.1300000000012,"max":2038,"current_percentile":0.2857142857142857,"historical_bottleneck_leg_pass_rate":0.23385202583675865,"classification":"WITHIN_HISTORICAL_P90_RANGE_BELOW_MEDIAN"},
+    "M10P2":{"historical_activation_rate":0.054371749314512656,"current_zero_decisions":81,"historical_zero_median":56.0,"p90":1875.6000000000008,"p95":3307.699999999987,"p99":7045.839999999991,"max":12460,"current_percentile":0.5984251968503937,"historical_bottleneck_leg_pass_rate":0.15067196203076394,"activation_clustering":true,"classification":"WITHIN_HISTORICAL_P90_RANGE"},
+    "detectors_dead":false,
+    "current_zero_runs_unusually_long":false,
+    "threshold_change_allowed":false,
+    "performance_inference_allowed":false,
+    "further_historical_threshold_drilldown_recommended":false
+  },
+  "next_policy":{
+    "status":"WAIT_FOR_PREDECLARED_FRESH_GATES",
+    "new_historical_threshold_research":"STOP",
+    "keep_all_forward_monitors_running":true,
+    "M9Y_operational_gate_Y0_accepted":20,
+    "M9Y_N6_review_gate":10,
+    "M10P_formal_gate":20,
+    "M10P2_formal_gate":20,
+    "M10V_requires_both_20_and_integrity_pass":true
   },
   "recovery":{"operator":"scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat","M10P_restart":"BAT03_ONLY_NEVER_BAT01","M10P2_restart":"BAT03_ONLY_NEVER_BAT01","pc_off_raw_csv_gap_backfill":false},
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W12_PASS_M10W13_HISTORICAL_ACTIVATION_INTERVAL_NEXT_20260728.md",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W13_PASS_WAIT_FOR_FRESH_GATES_20260728.md",
   "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
