@@ -1,0 +1,54 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W11_M10P_M10P2_BAT03_RESTART_VERIFICATION_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_OPERATOR_ACTION_READY",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Resume the two frozen SHORT prospective shadows after the M10W10 diagnostic proved both loops are not running while runtime integrity and current feed guards pass. Preserve immutable starts and verify the first post-restart materialization using the existing read-only M10Q auditor.",
+  "prerequisite":{
+    "M10W10_result":"config/mochipoyo_alert_research/m10w10_user_local_runtime_freshness_diagnostic_result_20260728.json",
+    "M10P_lock_absent":true,
+    "M10P_runtime_integrity_pass":true,
+    "M10P_current_feed_guard_pass":true,
+    "M10P2_lock_absent":true,
+    "M10P2_runtime_integrity_pass":true,
+    "M10P2_current_feed_guard_pass":true
+  },
+  "immutable_starts":{
+    "M10P_mt5_server":"2026.07.24 23:56:00",
+    "M10P2_mt5_server":"2026.07.27 01:39:00"
+  },
+  "operator_sequence":[
+    "scripts\\mochipoyo_alert_research\\m10p\\bat\\03_run_shadow_forever.bat",
+    "scripts\\mochipoyo_alert_research\\m10p2\\bat\\03_run_shadow_forever.bat",
+    "scripts\\mochipoyo_alert_research\\m10q\\bat\\01_run_dual_fresh_checkpoint_audit.bat"
+  ],
+  "verification":{
+    "M10P_first_console_cycle_must_PASS":true,
+    "M10P2_first_console_cycle_must_PASS":true,
+    "M10Q_must_be_run_after_both_first_PASS":true,
+    "M10Q_upload":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
+    "expected_latest_M1_behavior":"M10P and M10P2 summaries advance from 2026.07.27 03:45:00 to the current raw feed frontier after restart-safe deterministic post-start rebuild.",
+    "outcome_interpretation":"Any candidate/resolved rows materialized after restart remain prospective frozen-rule evidence because both contracts explicitly declare restart_safe and deterministic rebuild of post-start data each cycle. No thresholds or starts may change."
+  },
+  "forbidden":[
+    "M10P BAT01",
+    "M10P2 BAT01",
+    "delete runtime manifests",
+    "delete runtime state",
+    "change prospective starts",
+    "change candidate thresholds",
+    "run M10V before both families have at least 20 resolved and integrity PASS"
+  ],
+  "safety":{
+    "audit_only":true,
+    "historical_backfill":false,
+    "threshold_refit":false,
+    "start_reset":false,
+    "runtime_reset":false,
+    "discord_send":false,
+    "mt5_order":false,
+    "live_ready":false,
+    "final_signal":false,
+    "automatic_live_promotion":false
+  }
+}
