@@ -1,0 +1,29 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W19_BLC1_ATR_FILTER_FRESH_PROSPECTIVE_SHADOW",
+  "status":"DESIGN_FROZEN_NOT_STARTED",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Fresh prospective two-arm validation of whether the post-hoc M10W18 H1 ATR gate reduces BLC1 losses without changing the frozen BLC1 formula.",
+  "arms":{
+    "W0_BLC1_BASELINE":{"formula":"Exact M10W15 BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS","gate":"NONE"},
+    "W1_BLC1_ATR_FILTERED":{"formula":"Exact M10W15 BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS","gate":"ACCEPT only when h1_atr_pct100 < 0.67; exclude >=0.67 or unavailable"}
+  },
+  "candidate":{
+    "direction":"LONG",
+    "decision_grid":"M15 close -> next M15 open",
+    "regime":["D1 EMA20 > EMA30 > EMA40 using fully closed D1 bars","H4 EMA20 > EMA30 using fully closed H4 bars","H1 TORYS MACD line(6,13,4) > 0 using fully closed H1 bars"],
+    "trigger":"Just-closed M15 TORYS MACD histogram crosses from <0 on previous closed M15 bar to >=0 on current closed M15 bar.",
+    "atr_gate_boundary":0.67,
+    "atr_percentile":"Wilder ATR14 percentile rank over trailing 100 fully closed H1 bars, same method as M10W14/M10W17/M10W18",
+    "horizon_minutes":240,
+    "one_position_per_arm":true,
+    "exact_m1_entry_exit":true,
+    "nearest_fallback":false
+  },
+  "data":{"live_file_map":{"M1":"goldsharp_m1.csv","M15":"goldsharp_m15.csv","H1":"goldsharp_h1.csv","H4":"goldsharp_h4.csv","D1":"goldsharp_d1.csv"},"newest_row_contract":"CLOSED","time_basis":"MT5_SERVER_TIME","historical_backfill":false},
+  "fresh_start":{"initialize_once_from_current_stable_M1_frontier":true,"immutable_after_initialization":true,"pre_start_candidate_eligibility":false,"restart_safe":true,"rebuild_post_start_deterministically_each_cycle":true},
+  "review_gates":{"operational_filtered_resolved":20,"interim_filtered_resolved":60,"formal_filtered_resolved":120,"automatic_live_promotion":false},
+  "metrics":["candidate_match_count","accepted_count","resolved_count","open_count","entry_data_gap_count","exit_data_gap_count","win_rate","profit_factor","net_bps","average_win_bps","average_loss_bps","payoff_ratio","max_drawdown_bps","max_losing_streak","fixed0p20","plus1bps","plus2bps","baseline_minus_filtered comparison"],
+  "decision_rule":{"historical_M10W18_support_is_not_fresh_support":true,"no_gate_or_formula_change_after_start":true,"fresh_comparison_required":true,"promotion_from_20_or_60":"FORBIDDEN","formal_review_at_filtered_120_only":"REVIEW_NOT_AUTO_PROMOTION"},
+  "safety":{"audit_only":true,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"historical_backfill":false,"entry_gate_enabled":false,"collector_reset":false,"m7c_reset":false,"m8c_reset":false,"m9v_reset":false,"m9y_reset":false,"m10b_reset":false,"m10e_reset":false,"m10p_reset":false,"m10p2_reset":false,"existing_forward_modified":false,"automatic_live_promotion":false}
+}
