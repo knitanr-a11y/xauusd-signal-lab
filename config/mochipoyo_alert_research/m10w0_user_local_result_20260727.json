@@ -1,0 +1,89 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+  "status": "PASS_USER_LOCAL_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(40).zip",
+    "sha256": "a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251",
+    "size_bytes": 198044,
+    "built_at_utc": "2026-07-27T14:12:22Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "m10a_source": {
+    "stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
+    "status": "PASS_DETERMINISTIC_HISTORICAL_REPRODUCTION_ONLY",
+    "sample": "research-exposed 2023-01-03 through 2026-06-19 GOLD history; not fresh forward evidence",
+    "newest_csv_row_contract": "CLOSED",
+    "nearest_m1_fallback": false,
+    "historical_spread_used": true,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "historical_research_exposed": true,
+    "fresh_forward_validated": false
+  },
+  "frozen_raw_hashes": {
+    "M1": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "M5": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+    "M15": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+    "H1": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+    "H4": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+    "D1": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6"
+  },
+  "key_source_hashes": {
+    "01_summary.json": "459040fbe81631eaef06db91b5d5b6435da14d89ecab88345430caa21a5f5da6",
+    "07_m5_runner75_ledger.csv": "e9fe20d31e02359f853e94f1afd9f3a8b295ccda6cef81e8e4617dea42eaac86",
+    "09_h1_runner50_ledger.csv": "bfeaa63735faec23b6904ea52314e42b7a881f62b413a9c161225bdd17dd3b81",
+    "10_h4_entry_ledger.csv": "e450764550f6a983ab618457639776405f3e63ea2527e8f6c8976cdb7f60a3d5",
+    "12_data_quality.json": "973c05ae9561f3ca7a1e129db7bf60059017111305c618e7fe40180c2b2c9c32"
+  },
+  "references": {
+    "M5_ENTRY": {"count":842,"win_rate":0.665083135391924,"pf":1.537338444576352,"net_bps":1840.0164551487157,"payoff":0.7741597167330916,"max_dd_bps":227.3232304692574,"max_losing_streak":6},
+    "M5_RUNNER75": {"count":837,"win_rate":0.6296296296296297,"pf":1.6651962763806494,"net_bps":2391.6184777845438,"payoff":0.9795272214003818,"max_dd_bps":211.06607310179675,"max_losing_streak":7,"overlap_skips":5},
+    "H1_ENTRY": {"count":171,"win_rate":0.7192982456140351,"pf":2.814130403928734,"net_bps":2729.099509562968,"payoff":1.0981972308014571,"max_dd_bps":271.583159570446,"max_losing_streak":4},
+    "H1_RUNNER50": {"count":159,"win_rate":0.6792452830188679,"pf":2.8303858342555084,"net_bps":2802.7492248852354,"payoff":1.3365710883984345,"max_dd_bps":271.583159570446,"max_losing_streak":5,"overlap_skips":12},
+    "H4_ENTRY": {"count":57,"win_rate":0.7543859649122807,"pf":4.668798744063922,"net_bps":2471.5965387548117,"payoff":1.5200740096952303,"max_dd_bps":270.9863310584244,"max_losing_streak":2}
+  },
+  "plus_2bps_cost_pf": {
+    "M5_ENTRY": 1.038055,
+    "M5_RUNNER75": 1.166406,
+    "H1_ENTRY": 2.481900,
+    "H1_RUNNER50": 2.515706,
+    "H4_ENTRY": 4.351631
+  },
+  "yearly_pf": {
+    "M5_RUNNER75": {"2023":1.215350,"2024":2.003679,"2025":1.748315,"2026":1.661960},
+    "H1_RUNNER50": {"2023":2.679064,"2024":2.943511,"2025":2.950331,"2026":2.574638},
+    "H4_ENTRY": {"2023":1.460687,"2024":24.924949,"2025":3.973977,"2026":4.042065}
+  },
+  "ledger_time_ranges": {
+    "M5_RUNNER75": {"first_actual_entry":"2023.01.10 12:04:00","last_actual_entry":"2026.06.17 19:13:00"},
+    "H1_RUNNER50": {"first_actual_entry":"2023.07.11 06:14:00","last_actual_entry":"2026.03.02 22:03:00"},
+    "H4_ENTRY": {"first_actual_entry":"2023.11.28 16:15:00","last_actual_entry":"2026.03.02 12:45:00"}
+  },
+  "classification": {
+    "M5_ENTRY": "BASELINE_REFERENCE_ONLY; same M5 entry family as M5_RUNNER75; do not double-count in a portfolio",
+    "M5_RUNNER75": "ELIGIBLE_PRIMARY_M10A_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
+    "H1_ENTRY": "BASELINE_REFERENCE_ONLY; same H1 entry family as H1_RUNNER50; do not double-count in a portfolio",
+    "H1_RUNNER50": "ELIGIBLE_PRIMARY_M10A_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
+    "H4_ENTRY": "ELIGIBLE_LOW_FREQUENCY_PREMIUM_REFERENCE_FOR_SENSITIVITY; not core until independently justified"
+  },
+  "decision": {
+    "inventory_pass": true,
+    "M10W_full_LONG_SHORT_execution_now": false,
+    "M10V_gate_bypassed": false,
+    "next": "Run a GOLD LONG-only historical interaction audit using M5_RUNNER75 + H1_RUNNER50 as the core view and H4_ENTRY as a separately reported low-frequency sensitivity view. Do not read or combine SHORT fresh outcomes."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "reads_M10P_or_M10P2_for_selection": false,
+    "threshold_refit": false,
+    "btc_in_scope": false,
+    "running_monitors_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
