@@ -1,0 +1,72 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W1_GOLD_LONG_FAMILY_HISTORICAL_INTERACTION_AUDIT_ONLY",
+  "status": "PASS_USER_LOCAL_GOLD_LONG_FAMILY_INTERACTION_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(41).zip",
+    "sha256": "00dfd7663daebeebfd3b048b393e4d94afb0825b7e94e48dbd1db959f97e42e7",
+    "size_bytes": 54411,
+    "built_at_utc": "2026-07-27T16:15:58Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "source_hashes": {
+    "M5_RUNNER75": "e9fe20d31e02359f853e94f1afd9f3a8b295ccda6cef81e8e4617dea42eaac86",
+    "H1_RUNNER50": "bfeaa63735faec23b6904ea52314e42b7a881f62b413a9c161225bdd17dd3b81",
+    "H4_ENTRY": "e450764550f6a983ab618457639776405f3e63ea2527e8f6c8976cdb7f60a3d5"
+  },
+  "CORE": {
+    "families": ["M5_RUNNER75", "H1_RUNNER50"],
+    "independent": {"count":996,"win_rate":0.6375502008032129,"pf":2.013220480811329,"net_bps":5194.367702669779,"payoff":1.1445237694061257,"max_dd_bps":351.5424724355285,"max_losing_streak":7},
+    "single_capital": {"count":935,"win_rate":0.6363636363636364,"pf":1.9623457969195994,"net_bps":4790.23195080417,"payoff":1.1213404553826283,"max_dd_bps":328.823565707667,"max_losing_streak":6},
+    "single_capital_skip_count":61,
+    "accepted_by_family":{"M5_RUNNER75":783,"H1_RUNNER50":152},
+    "skip_blocking":{"M5_blocked_by_H1":54,"H1_blocked_by_M5":7}
+  },
+  "EXTENDED_REFERENCE_SENSITIVITY": {
+    "families": ["M5_RUNNER75", "H1_RUNNER50", "H4_ENTRY"],
+    "independent": {"count":1053,"win_rate":0.6438746438746439,"pf":2.321656048452766,"net_bps":7665.964241424591,"payoff":1.2841017967106008,"max_dd_bps":408.6469046020211,"max_losing_streak":8},
+    "single_capital": {"count":906,"win_rate":0.6401766004415012,"pf":2.3542115764696034,"net_bps":6812.558036499913,"payoff":1.3232292653949838,"max_dd_bps":377.40347495196903,"max_losing_streak":6},
+    "single_capital_skip_count":147,
+    "accepted_by_family":{"M5_RUNNER75":716,"H1_RUNNER50":146,"H4_ENTRY":44},
+    "skip_blocking":{"M5_blocked_by_H4":70,"M5_blocked_by_H1":51,"H4_blocked_by_H1":9,"H1_blocked_by_M5":7,"H1_blocked_by_H4":6,"H4_blocked_by_M5":4},
+    "delta_vs_CORE_single_capital":{"count":-29,"pf":0.391865779550004,"net_bps":2022.3260856957431,"max_dd_bps":48.57990924430203,"payoff":0.20188881001235548}
+  },
+  "pairwise_overlap": [
+    {"a":"M5_RUNNER75","b":"H1_RUNNER50","overlap_count":62,"overlap_minutes":2880.0,"exact_same_entry_timestamp_count":0},
+    {"a":"M5_RUNNER75","b":"H4_ENTRY","overlap_count":90,"overlap_minutes":9526.0,"exact_same_entry_timestamp_count":0},
+    {"a":"H1_RUNNER50","b":"H4_ENTRY","overlap_count":17,"overlap_minutes":8142.0,"exact_same_entry_timestamp_count":0}
+  ],
+  "cost_sensitivity_single_capital": {
+    "CORE":{"plus_0p5_pf":1.8391250719365786,"plus_1p0_pf":1.7220070335863793,"plus_1p5_pf":1.6113680144753548,"plus_2p0_pf":1.5074543873537531},
+    "EXTENDED":{"plus_0p5_pf":2.2236139316135217,"plus_1p0_pf":2.0984886485714527,"plus_1p5_pf":1.9792027605275635,"plus_2p0_pf":1.8662724162448228}
+  },
+  "yearly_pf_single_capital": {
+    "CORE":{"2023":1.6292776038231376,"2024":2.300606697187588,"2025":2.1218367871962807,"2026":1.6819667023925697},
+    "EXTENDED":{"2023":1.5866827084914177,"2024":2.9692555517879486,"2025":2.853490506027157,"2026":1.917439488292065}
+  },
+  "interpretation": {
+    "core_long_view_retained": true,
+    "extended_H4_view_retained_as_sensitivity": true,
+    "promote_H4_to_core_now": false,
+    "reason": "H4 materially improves historical single-capital PF/net/payoff but increases DD and blocks many higher-frequency M5/H1 entries; H4 remains low-frequency and historical-exposed, so retain both core and extended views pending further evidence.",
+    "M10W_full_LONG_SHORT_execution_now": false,
+    "M10V_gate_bypassed": false
+  },
+  "next": "Audit M10D historical H1 compound-loss filtered evidence read-only before freezing the H1 representative for any later GOLD LONG portfolio reconstruction.",
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "reads_SHORT_ledgers": false,
+    "reads_M10P_or_M10P2_fresh_outcomes": false,
+    "executes_M10V": false,
+    "M10V_20_20_gate_unchanged": true,
+    "modify_running_monitors": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
