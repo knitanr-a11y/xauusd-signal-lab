@@ -1,39 +1,43 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_LOCAL_AUDIT_NEXT",
-  "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
-  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Continue GOLD/XAUUSD-only research by running the read-only M10W0 inventory of existing M10A LONG historical/deterministic artifacts. Do not select a LONG arm until the package is reviewed.",
-  "operator": "scripts/mochipoyo_alert_research/m10w0/bat/01_run_gold_long_reference_inventory.bat",
-  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W0/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W0_rules": {
-    "scope": "XAUUSD_GOLD_ONLY",
-    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10A",
-    "read_only": true,
-    "selection_decision_made_before_review": false,
-    "reads_M10P_or_M10P2_fresh_outcomes_for_selection": false,
-    "modify_running_monitors": false,
-    "threshold_refit": false,
-    "historical_backfill": false
+  "status": "M10W0_PASS_M10W1_GOLD_LONG_INTERACTION_LOCAL_AUDIT_NEXT",
+  "stage": "M10W1_GOLD_LONG_FAMILY_HISTORICAL_INTERACTION_AUDIT_ONLY",
+  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Run the read-only GOLD-only M10W1 LONG family interaction audit. This stage reads only frozen M10A LONG ledgers and does not read SHORT ledgers or M10P/M10P2 fresh outcomes.",
+  "operator": "scripts/mochipoyo_alert_research/m10w1/bat/01_run_gold_long_family_interaction_audit.bat",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W1/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W1": {
+    "contract": "config/mochipoyo_alert_research/m10w1_gold_long_family_interaction_contract_20260727.json",
+    "CORE": ["M5_RUNNER75","H1_RUNNER50"],
+    "EXTENDED_REFERENCE_SENSITIVITY": ["M5_RUNNER75","H1_RUNNER50","H4_ENTRY"],
+    "M5_ENTRY": "BASELINE_REFERENCE_ONLY_NOT_DOUBLE_COUNTED",
+    "H1_ENTRY": "BASELINE_REFERENCE_ONLY_NOT_DOUBLE_COUNTED",
+    "single_capital": "chronological first-come-first-served; while active later LONG family entries are skipped",
+    "exact_same_entry_timestamp": "FAIL_CLOSED",
+    "cost_sensitivity_extra_bps": [0.5,1.0,1.5,2.0],
+    "reads_SHORT_ledgers": false,
+    "reads_M10P_or_M10P2_fresh_outcomes": false,
+    "executes_M10V": false,
+    "modify_running_monitors": false
   },
-  "after_M10W0": {
-    "if_pass": "Upload only M10W0 LATEST/99_UPLOAD_PACKAGE.zip. Review actual M10A evidence, then freeze an explicit M10W-eligible LONG arm inventory before any LONG+SHORT historical portfolio reconstruction.",
-    "if_blocked": "Send the complete console output. Do not rename/delete/rebuild M10A evidence and do not change running monitors to force a pass.",
-    "M10W_execution_now": false
+  "after_M10W1": {
+    "if_pass": "Upload only M10W1 LATEST/99_UPLOAD_PACKAGE.zip. Review LONG-family overlap, independent-arm and single-capital results before freezing any future LONG portfolio rule.",
+    "if_blocked": "Send complete console output. Do not alter M10A source ledgers or running monitors to force a pass.",
+    "M10W_full_LONG_SHORT_execution_now": false
   },
   "fresh_parallel": {
     "M10P_resolved": 0,
     "M10P_next_gate": 5,
     "M10P2_resolved": 0,
     "M10P2_next_gate": 5,
-    "M10V_before_20_20": "FORBIDDEN",
+    "M10V_before_both_20": "FORBIDDEN",
     "M10Q_operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat"
   },
-  "scope_clarification": {
+  "scope": {
     "new_M10_research": "GOLD_XAUUSD_ONLY",
-    "BTC_in_new_research": false,
-    "M7C_dual_symbol_collection": "KEEP_FROZEN_UNCHANGED_AS_BACKGROUND_SOURCE_FIDELITY_TRACK"
+    "BTC_in_new_M10_research": false,
+    "M7C_dual_symbol_background": "KEEP_FROZEN_UNCHANGED"
   },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_M10W0_GOLD_LONG_INVENTORY_NEXT_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W0_PASS_M10W1_GOLD_LONG_INTERACTION_NEXT_20260727.md",
   "recovery": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
   "safety": {
     "audit_only": true,
