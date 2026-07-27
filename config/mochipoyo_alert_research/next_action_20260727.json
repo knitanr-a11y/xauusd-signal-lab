@@ -1,28 +1,28 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W11_PASS_M10W12_DUAL_SHORT_THRESHOLD_DISTANCE_NEXT",
-  "stage":"M10W12_DUAL_SHORT_THRESHOLD_ACTIVATION_DISTANCE_AUDIT_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only the M10W12 read-only threshold activation-distance audit. Do not change thresholds, starts, runtimes, or candidate formulas.",
-  "operator":"scripts/mochipoyo_alert_research/m10w12/bat/01_run_dual_short_threshold_activation_distance_audit.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W12/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W11_result":"config/mochipoyo_alert_research/m10w11_user_local_bat03_restart_verification_result_20260728.json",
-  "M10W12_contract":"config/mochipoyo_alert_research/m10w12_dual_short_threshold_activation_distance_contract_20260728.json",
-  "current_SHORT_state":{
-    "M10P":{"start":"2026.07.24 23:56:00","latest_M1":"2026.07.27 21:28:00","candidate":0,"resolved":0,"next_gate":5},
-    "M10P2":{"start":"2026.07.27 01:39:00","latest_M1":"2026.07.27 21:29:00","candidate":0,"resolved":0,"next_gate":5},
-    "zero_counts_are_current":true,
+  "status":"M10W12_PASS_M10W13_HISTORICAL_ACTIVATION_INTERVAL_CALIBRATION_NEXT",
+  "stage":"M10W13_FROZEN_HISTORICAL_SHORT_ACTIVATION_INTERVAL_CALIBRATION_AUDIT_ONLY",
+  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only M10W13. It reads frozen research-exposed GOLD history for activation/no-match waiting-time calibration only; it must not read trade outcomes or change thresholds/starts/runtimes.",
+  "operator":"scripts/mochipoyo_alert_research/m10w13/bat/01_run_frozen_historical_short_activation_interval_calibration.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W13/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W12_result":"config/mochipoyo_alert_research/m10w12_user_local_threshold_activation_distance_result_20260728.json",
+  "M10W13_contract":"config/mochipoyo_alert_research/m10w13_frozen_historical_short_activation_interval_calibration_contract_20260728.json",
+  "current_SHORT_activation_state":{
+    "M10P":{"current_zero_match_decisions":21,"hist_leg_pass":4,"line_leg_pass":0,"ret3_leg_pass":6,"d1_hist_leg_pass":21,"primary_bottleneck":"h1_macd_line_bps_le"},
+    "M10P2":{"current_zero_match_decisions":81,"h4_ema20_30_leg_pass":0,"h1_atr_pct100_leg_pass":12,"primary_bottleneck":"h4_ema20_30_bps_ge"},
+    "candidate_crosscheck_pass":true,
+    "threshold_change":false,
     "performance_inference":false
   },
-  "M10W12_questions":[
-    "How often has each frozen condition activated individually since its immutable start?",
-    "How often have the frozen seed/regime subgroups activated jointly?",
-    "Which frozen condition legs have never activated?",
-    "What are the raw signed margins on the closest near-miss decisions?",
-    "Does the independently reconstructed all-condition count exactly equal the running shadow candidate_match_count?"
+  "M10W13_questions":[
+    "How often did each exact frozen family activate over the frozen 2023-2026 decision stream?",
+    "What were the historical zero-match run-length median/p90/p95/p99/max values in decision counts?",
+    "Where do the current 21 H1 decisions and 81 M15 decisions with zero matches sit inside those historical run-length distributions?",
+    "Were the same individual bottleneck legs historically intermittent rather than permanently inactive?"
   ],
-  "near_miss_rule":"Descriptive only. Never use prospective near-miss distances to rescue/refit thresholds.",
+  "interpretation_rule":"Historical activation density is waiting-time context only, not fresh support and not permission to refit/rescue thresholds.",
   "M10V_before_both_20":"FORBIDDEN",
   "scope":"GOLD_XAUUSD_ONLY",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W11_PASS_M10W12_THRESHOLD_DISTANCE_NEXT_20260728.md",
-  "safety":{"audit_only":true,"read_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W12_PASS_M10W13_HISTORICAL_ACTIVATION_INTERVAL_NEXT_20260728.md",
+  "safety":{"audit_only":true,"read_only":true,"trade_outcomes_read":false,"pf_or_pnl_computed":false,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
