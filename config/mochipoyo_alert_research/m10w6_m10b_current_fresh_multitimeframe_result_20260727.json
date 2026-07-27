@@ -1,0 +1,79 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W6_M10B_CURRENT_FRESH_MULTITIMEFRAME_REVIEW_AUDIT_ONLY",
+  "status": "PASS_HEALTH_WITH_ONE_FRESH_M5_RESOLVED_NOT_EFFICACY_GATE",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(46).zip",
+    "sha256": "55480be53b8e1c5a7723d4dadd785cc7fa82648224459689a73a0a40e87b0824",
+    "size_bytes": 5603,
+    "built_at_utc": "2026-07-27T17:18:40Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "M10B": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 20:54:00",
+    "runtime_contract_version": "M10B_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "upstream_resolved_post_start": {"S1_M5":1,"S3_H1":0,"S4_H4":0},
+    "entry_candidate_counts": {"M5":1,"H1":0,"H4":0},
+    "skipped_reclaim_counts": {"M5":0,"H1":0,"H4":0},
+    "arms": {
+      "B0_M5_ENTRY_NATIVE": {"accepted":1,"resolved":1,"open":0,"net_bps":16.179968029941268,"win_rate":1.0},
+      "B1_M5_RUNNER75": {"accepted":1,"resolved":1,"open":0,"net_bps":4.867392490934632,"win_rate":1.0},
+      "B2_H1_ENTRY_NATIVE": {"accepted":0,"resolved":0,"open":0},
+      "B3_H1_RUNNER50": {"accepted":0,"resolved":0,"open":0},
+      "B4_H4_ENTRY_NATIVE": {"accepted":0,"resolved":0,"open":0}
+    },
+    "first_fresh_m5_trade": {
+      "trade_id": "M9V_C000005",
+      "actual_entry_time_mt5_server": "2026.07.27 04:46:00",
+      "native_exit_time_mt5_server": "2026.07.27 05:00:00",
+      "runner_exit_time_mt5_server": "2026.07.27 05:10:00",
+      "native_return_bps": 16.179968029941268,
+      "runner_return_bps": 1.0965339779324197,
+      "runner75_weighted_return_bps": 4.867392490934632,
+      "runner_eligible": true,
+      "interpretation": "This single fresh trade favored native exit over runner75. n=1 is descriptive only and is not evidence to change the frozen runner rule."
+    },
+    "review_readiness": {
+      "M5_operational": false,
+      "M5_interim": false,
+      "M5_formal": false,
+      "H1_operational": false,
+      "H1_interim": false,
+      "H1_formal": false,
+      "H4_descriptive": false
+    }
+  },
+  "data_quality": {
+    "point": 0.01,
+    "closed_rows_contract": true,
+    "prefix_integrity_verified": true,
+    "latest_server_open": {"M1":"2026.07.27 20:17:00","M5":"2026.07.27 20:10:00","M15":"2026.07.27 20:00:00","H1":"2026.07.27 19:00:00","H4":"2026.07.27 16:00:00","D1":"2026.07.24 00:00:00"}
+  },
+  "interpretation": {
+    "health_pass": true,
+    "fresh_M5_materialized": true,
+    "fresh_H1_materialized": false,
+    "fresh_H4_materialized": false,
+    "efficacy_claim_allowed": false,
+    "runner_rule_change_allowed": false,
+    "reason": "Only one resolved M5 trade exists. H1/H4 remain at zero. Continue M10B unchanged and inspect upstream M9V branch-level fresh materialization before drawing any efficacy conclusion."
+  },
+  "next": "Review current M9V GOLD fresh branch-candidate LATEST read-only to quantify S1_M5/S3_H1/S4_H4 and other branch materialization after the immutable M9V start. Do not reset or reinitialize M9V.",
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "M10B_reset": false,
+    "M10B_reinitialize": false,
+    "reads_M10P_or_M10P2_for_selection": false,
+    "executes_M10V": false,
+    "modify_running_monitors": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
