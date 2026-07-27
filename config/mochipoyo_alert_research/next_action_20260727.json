@@ -1,32 +1,46 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_READ_ONLY_CHECKPOINT_NEXT",
+  "status": "M10Q_PASS_CONTINUE_DUAL_FRESH_UNCHANGED_M10V_PREREGISTERED_WAIT_FOR_20_20",
   "stage": "M10Q_DUAL_SHORT_FRESH_CHECKPOINT_AUDIT",
-  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Use the M10Q read-only checkpoint audit to snapshot both fresh SHORT families without changing starts, thresholds, runtimes, or ledgers.",
+  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. No M10Q review gate has been reached yet: both fresh SHORT families remain at 0 resolved. Do not tune, merge, reset, or backfill. Continue accumulating fresh evidence and rerun the read-only M10Q audit at future checkpoints.",
+  "M10Q_result": {
+    "file": "config/mochipoyo_alert_research/m10q_user_local_checkpoint_result_20260727.json",
+    "package_sha256": "f68789868c25b1994c4eb0421f975db1a3dadaa9b4404be39bfb04288ff40815",
+    "M10P_resolved": 0,
+    "M10P_next_gate": 5,
+    "M10P2_resolved": 0,
+    "M10P2_next_gate": 5,
+    "runtime_modified": false,
+    "prospective_start_modified": false,
+    "threshold_modified": false
+  },
   "operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
   "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10Q/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10P": {
-    "start": "2026.07.24 23:56:00",
-    "review_gates_resolved": [5, 10, 20, 40, 60],
-    "no_pf2_claim_before": 20
-  },
-  "M10P2": {
-    "start": "2026.07.27 01:39:00",
-    "review_gates_resolved": [5, 10, 20],
-    "no_formal_claim_before": 20
-  },
   "when_to_run_M10Q": [
-    "after starting or recovering the dual fresh monitors to verify continuity",
-    "whenever a fresh checkpoint review is desired",
-    "when either monitor appears to have reached 5, 10, 20, 40, or 60 resolved as applicable",
+    "when either monitor approaches or reaches 5 resolved",
+    "at 10 and 20 resolved checkpoints",
+    "for M10P also at 40 and 60 resolved",
+    "after forced-reboot recovery to verify continuity",
     "before any future stage transition"
   ],
-  "after_M10Q": {
-    "if_no_gate_reached": "Continue both fresh shadows unchanged; do not tune or merge them.",
-    "if_gate_reached": "Upload M10Q 99_UPLOAD_PACKAGE.zip and perform the predeclared review for that gate without threshold refit.",
-    "M10V": "Do not begin SHORT-family combination/portfolio comparison until sufficient independent fresh characterization exists for both families."
+  "M10V_preregistration": {
+    "file": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json",
+    "status": "FROZEN_PREREGISTRATION_ONLY_DO_NOT_EXECUTE_YET",
+    "minimum_M10P_resolved": 20,
+    "minimum_M10P2_resolved": 20,
+    "both_integrity_pass_required": true,
+    "common_window_start_mt5_server": "2026.07.27 01:39:00",
+    "threshold_optimization": false,
+    "execute_now": false
   },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_NEXT_20260727.md",
+  "after_future_M10Q": {
+    "if_no_gate_reached": "Continue both fresh shadows unchanged.",
+    "if_5_reached": "Perform operational integrity review only; do not make an efficacy or promotion claim.",
+    "if_10_reached": "Perform interim descriptive review without threshold changes.",
+    "if_both_20_reached_and_integrity_passes": "Perform each formal 20-resolved review first, then M10V may be executed according to the frozen preregistration.",
+    "M10V_before_20_20": "FORBIDDEN"
+  },
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_ZERO_CANDIDATES_M10V_PREREG_FROZEN_20260727.md",
   "recovery": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
   "safety": {
     "audit_only": true,
