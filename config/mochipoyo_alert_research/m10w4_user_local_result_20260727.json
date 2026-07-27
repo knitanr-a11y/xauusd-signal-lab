@@ -1,0 +1,80 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W4_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_AUDIT_ONLY",
+  "status": "PASS_USER_LOCAL_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_AUDIT_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(44).zip",
+    "sha256": "9d133b694edc3bd0d74f7dbdf96ae2dc24990e7e8bf1c8aada99f40849d0656c",
+    "size_bytes": 8069,
+    "built_at_utc": "2026-07-27T17:05:59Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "CORE_FILTERED_MINUS_BASELINE": {
+    "common_count": 905,
+    "baseline_only": {"count":30,"net_bps":-122.31532948079386,"wins":13,"losses":17,"best_bps":90.77764421692179,"worst_bps":-243.15505662614993},
+    "filtered_only": {"count":8,"net_bps":103.82158730969108,"wins":4,"losses":4,"best_bps":75.96199222357572,"worst_bps":-7.341776584861114},
+    "by_family": {
+      "baseline_only_H1": {"count":30,"net_bps":-122.31532948079386},
+      "filtered_only_H1": {"count":1,"net_bps":31.065274091960497},
+      "filtered_only_M5": {"count":7,"net_bps":72.7563132177306}
+    },
+    "by_year_filtered_minus_baseline_net_bps": {"2023":166.12743725948962,"2024":103.30848783160141,"2025":-151.19319640495507,"2026":107.894188104349},
+    "common_return_parity_pass": true
+  },
+  "EXTENDED_FILTERED_MINUS_BASELINE": {
+    "common_count": 877,
+    "baseline_only": {"count":29,"net_bps":9.783840738063628,"wins":14,"losses":15,"best_bps":90.77764421692179,"worst_bps":-243.15505662614993},
+    "filtered_only": {"count":10,"net_bps":192.33742951416585,"wins":6,"losses":4,"best_bps":75.96199222357572,"worst_bps":-7.341776584861114},
+    "by_family": {
+      "baseline_only_H1": {"count":27,"net_bps":-16.305382609868058},
+      "baseline_only_M5": {"count":2,"net_bps":26.089223347931686},
+      "filtered_only_H1": {"count":1,"net_bps":31.065274091960497},
+      "filtered_only_H4": {"count":2,"net_bps":88.51584220447477},
+      "filtered_only_M5": {"count":7,"net_bps":72.7563132177306}
+    },
+    "by_year_filtered_minus_baseline_net_bps": {"2023":166.12743725948962,"2024":10.231149989345418,"2025":-88.76657754841202,"2026":94.9615790756792},
+    "common_return_parity_pass": true
+  },
+  "2025_forensics": {
+    "CORE": {
+      "baseline_only_H1": {"count":15,"net_bps":223.30628731745364,"wins":9,"gross_win_bps":504.4395038569071,"losses":6,"gross_loss_bps":-281.1332165394535,"worst_trade_bps":-243.15505662614993},
+      "filtered_only_M5": {"count":5,"net_bps":72.11309091249855},
+      "net_delta_filtered_minus_baseline_bps": -151.19319640495507,
+      "interpretation": "The 2025 net decline is a capacity/composition tradeoff: the filter removes one very large H1 loss but also removes nine H1 winners whose aggregate gains exceed the removed losses; freed capacity adds M5 gains but does not fully replace the removed positive H1 net."
+    },
+    "EXTENDED": {
+      "baseline_only_H1": {"count":15,"net_bps":223.30628731745364},
+      "baseline_only_M5": {"count":2,"net_bps":26.089223347931686},
+      "filtered_only_M5": {"count":5,"net_bps":72.11309091249855},
+      "filtered_only_H4": {"count":2,"net_bps":88.51584220447477},
+      "net_delta_filtered_minus_baseline_bps": -88.76657754841202
+    }
+  },
+  "interpretation": {
+    "historical_challenger_strengthened": true,
+    "all_period_improvement_explained_by_trade_composition": true,
+    "2025_tradeoff_explained": true,
+    "replace_operational_H1_now": false,
+    "retain_baseline_reference": true,
+    "retain_filtered_H1_historical_challenger": true,
+    "M10E_fresh_required_before_operational_replacement": true,
+    "reason": "Across all years, baseline-only CORE trades total -122.3 bps while filtered-only trades add +103.8 bps, explaining the historical portfolio improvement. The 2025 exception is not an integrity failure: baseline-only H1 trades are net-positive that year, so filtering sacrifices profitable H1 capacity despite removing a large loss. Fresh M10E remains the deciding evidence for operational replacement."
+  },
+  "next": "Review the already-running M10E fresh baseline-vs-filtered H1 shadow using its current read-only LATEST upload package. Do not reset M10E and do not wait for historical refitting; use the predeclared 5/10/20 fresh gates.",
+  "guardrails": {
+    "audit_only": true,
+    "threshold_refit": false,
+    "new_filter_search": false,
+    "historical_backfill": false,
+    "reads_SHORT_ledgers": false,
+    "reads_M10E_fresh_outcomes_for_M10W4_selection": false,
+    "reads_M10P_or_M10P2": false,
+    "modify_running_monitors": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
