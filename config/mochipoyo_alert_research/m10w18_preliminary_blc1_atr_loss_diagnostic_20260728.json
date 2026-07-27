@@ -1,0 +1,12 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W18_PRELIMINARY_BLC1_ATR_LOSS_DIAGNOSTIC",
+  "status":"POSTHOC_DIAGNOSTIC_NOT_EXACT_RESIMULATION",
+  "sources":["M10W16 BLC1 resolved ledger","M10W14 outcome-blind M15 coverage grid"],
+  "scope":"XAUUSD_GOLD_ONLY",
+  "method":"Join the already accepted/resolved BLC1 ledger to the pre-existing M10W14 H1 ATR tercile at the same decision timestamp. This suppresses rows descriptively but does NOT rebuild one-position capacity after exclusions, so it is not the final filtered portfolio result.",
+  "high_atr_subset":{"all":{"count":306,"actual_pf":0.8938938985572519,"actual_net_bps":-553.4600337513504},"validation_2025":{"count":139,"actual_pf":0.8398429445333672,"actual_net_bps":-374.39344246246964},"test_2026":{"count":29,"actual_pf":0.5292212985911221,"actual_net_bps":-532.4245539035378}},
+  "low_mid_retained_subset":{"train_2023_2024":{"count":323,"actual_pf":1.195710953876657,"actual_net_bps":739.3097268430004,"fixed0p20_pf":1.1848121748173195,"plus2bps_pf":1.0227289892208893,"plus2bps_net_bps":93.30972684300039},"validation_2025":{"count":284,"actual_pf":1.506736007486973,"actual_net_bps":1785.5855143424062,"fixed0p20_pf":1.5012861849392645,"plus2bps_pf":1.3184164019918398,"plus2bps_net_bps":1217.5855143424062},"test_2026":{"count":45,"actual_pf":1.7854624599870381,"actual_net_bps":553.2314140367097,"fixed0p20_pf":1.7825977305415144,"plus2bps_pf":1.6208531413206035,"plus2bps_net_bps":463.23141403670974},"all":{"count":652,"actual_pf":1.3844968085913805,"actual_net_bps":3078.126655222117,"fixed0p20_pf":1.3763849194652307,"plus1bps_pf":1.2909836015777707,"plus2bps_pf":1.204502808991504,"plus2bps_net_bps":1774.1266552221161}},
+  "baseline_reference_from_M10W16":{"test_2026_pf":1.0113371405757994,"all_pf":1.19018488431914,"all_plus2bps_pf":1.0423429240032587},
+  "interpretation":{"loss_reduction_potential":"MATERIAL","adoption_allowed":false,"reason":"The HIGH ATR subset is weak, while simple suppression leaves much stronger low/mid metrics, especially in 2025/2026. But the observation is post-hoc and does not account for newly freed one-position capacity. M10W18 exact re-simulation is required."}
+}
