@@ -1,93 +1,18 @@
 {
-  "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "repository": "knitanr-a11y/xauusd-signal-lab",
-  "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W2_H1_FILTER_INVENTORY_PASS_M10W3_BASELINE_VS_FILTERED_LONG_PORTFOLIO_READY_AUDIT_ONLY",
-  "running_monitors": {
-    "collector": "RUNNING_KEEP_UNCHANGED",
-    "M7C": "RUNNING_KEEP_UNCHANGED",
-    "M8C": "RUNNING_KEEP_UNCHANGED",
-    "M9V": "RUNNING_KEEP_UNCHANGED",
-    "M9Y": "RUNNING_KEEP_UNCHANGED",
-    "M10B": "RUNNING_KEEP_UNCHANGED",
-    "M10E": "RUNNING_KEEP_UNCHANGED",
-    "M10P": "RUNNING_KEEP_UNCHANGED",
-    "M10P2": "RUNNING_KEEP_UNCHANGED"
-  },
-  "immutable_starts": {
-    "M7C_utc": "2026-07-20T14:54:15Z",
-    "M9V_mt5_server": "2026.07.24 11:04:00",
-    "M9Y_mt5_server": "2026.07.24 12:45:00",
-    "M10B_mt5_server": "2026.07.24 20:54:00",
-    "M10E_mt5_server": "2026.07.24 22:06:00",
-    "M10P_mt5_server": "2026.07.24 23:56:00",
-    "M10P2_mt5_server": "2026.07.27 01:39:00"
-  },
-  "research_scope": {
-    "new_M10_research": "XAUUSD_GOLD_ONLY",
-    "btc_in_new_M10_research": false,
-    "M7C_background_scope": "BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_KEEP_UNCHANGED"
-  },
-  "fresh_SHORT_parallel": {
-    "M10P": {"candidate":"M10L_H240_C056 + M10N_G013","resolved":0,"next_gate":5,"start":"2026.07.24 23:56:00"},
-    "M10P2": {"candidate":"M10J_C0212","resolved":0,"next_gate":5,"start":"2026.07.27 01:39:00"},
-    "M10V_before_20_20": "FORBIDDEN",
-    "M10V_preregistration": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json"
-  },
-  "M10W0": {
-    "status": "PASS_USER_LOCAL_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10w0_user_local_result_20260727.json",
-    "package_sha256": "a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251",
-    "M5_hash_transcription_correction_commit": "752a056abd800187dd6180e882fb32da9228e74c"
-  },
-  "M10W1": {
-    "status": "PASS_USER_LOCAL_GOLD_LONG_FAMILY_INTERACTION_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10w1_user_local_result_20260727.json",
-    "package_sha256": "00dfd7663daebeebfd3b048b393e4d94afb0825b7e94e48dbd1db959f97e42e7",
-    "CORE_single_capital": {"families":["M5_RUNNER75","H1_RUNNER50"],"count":935,"pf":1.9623457969195994,"net_bps":4790.23195080417,"max_dd_bps":328.823565707667,"plus_2bps_pf":1.5074543873537531},
-    "EXTENDED_single_capital": {"families":["M5_RUNNER75","H1_RUNNER50","H4_ENTRY"],"count":906,"pf":2.3542115764696034,"net_bps":6812.558036499913,"max_dd_bps":377.40347495196903,"plus_2bps_pf":1.8662724162448228},
-    "exact_same_entry_timestamp_count": 0
-  },
-  "M10W2": {
-    "status": "PASS_USER_LOCAL_M10D_H1_FILTERED_REFERENCE_INVENTORY_AUDIT_ONLY",
-    "result": "config/mochipoyo_alert_research/m10w2_user_local_result_20260727.json",
-    "package_sha256": "59f728be1ce5c9da495025b50074bfc6bcc09c825bbffdf914ceaef9ac02f0b5",
-    "fixed_filter": {"m5_macd_bps_slope_le":-0.1308,"h1_ema30_minus_ema40_bps_ge":17.3333},
-    "baseline": {"count":159,"pf":2.8303858342555084,"net_bps":2802.7492248852354,"max_dd_bps":271.583159570446,"payoff":1.3365710883984345},
-    "filtered": {"count":130,"pf":5.40115388326192,"net_bps":2956.12982845799,"max_dd_bps":101.7430435392024,"payoff":1.9129086669885969,"plus_2bps_pf":4.615218553164897},
-    "historical_challenger_only": true,
-    "replace_baseline_now": false,
-    "reason": "Strong historical improvement but research-exposed; 2025 net declines despite PF improvement. M10E fresh evidence is required before operational H1 replacement."
-  },
-  "M10W3": {
-    "stage": "M10W3_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_AUDIT_ONLY",
-    "status": "IMPLEMENTED_PENDING_USER_LOCAL_RUN",
-    "contract": "config/mochipoyo_alert_research/m10w3_gold_long_baseline_vs_filtered_h1_portfolio_contract_20260727.json",
-    "script": "scripts/mochipoyo_alert_research/m10w3/python/run_m10w3_gold_long_baseline_vs_filtered_h1_portfolio_audit.py",
-    "operator": "scripts/mochipoyo_alert_research/m10w3/bat/01_run_gold_long_baseline_vs_filtered_h1_portfolio_audit.bat",
-    "scenarios": ["CORE_BASELINE","CORE_FILTERED","EXTENDED_BASELINE","EXTENDED_FILTERED"],
-    "reads_SHORT_ledgers": false,
-    "reads_M10E_fresh_outcomes_for_selection": false,
-    "reads_M10P_or_M10P2": false,
-    "executes_M10V": false
-  },
-  "recovery": {
-    "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
-    "restart_order": ["MT5/CSV", "collector", "M7C", "M8C", "M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2"],
-    "M10P_restart": "BAT03_ONLY_NEVER_BAT01",
-    "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
-    "pc_off_gap_backfill": false
-  },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W2_PASS_M10W3_LONG_PORTFOLIO_COMPARISON_NEXT_20260727.md",
-  "safety": {
-    "audit_only": true,
-    "historical_backfill": false,
-    "threshold_refit": false,
-    "start_reset": false,
-    "discord_send": false,
-    "mt5_order": false,
-    "live_ready": false,
-    "final_signal": false,
-    "automatic_live_promotion": false
-  }
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "repository":"knitanr-a11y/xauusd-signal-lab",
+  "branch":"feature/mochipoyo-alert-research",
+  "status":"M10W3_LONG_PORTFOLIO_PASS_M10W4_DIFFERENCE_FORENSICS_READY_AUDIT_ONLY",
+  "running_monitors":{"collector":"RUNNING_KEEP_UNCHANGED","M7C":"RUNNING_KEEP_UNCHANGED","M8C":"RUNNING_KEEP_UNCHANGED","M9V":"RUNNING_KEEP_UNCHANGED","M9Y":"RUNNING_KEEP_UNCHANGED","M10B":"RUNNING_KEEP_UNCHANGED","M10E":"RUNNING_KEEP_UNCHANGED","M10P":"RUNNING_KEEP_UNCHANGED","M10P2":"RUNNING_KEEP_UNCHANGED"},
+  "immutable_starts":{"M7C_utc":"2026-07-20T14:54:15Z","M9V_mt5_server":"2026.07.24 11:04:00","M9Y_mt5_server":"2026.07.24 12:45:00","M10B_mt5_server":"2026.07.24 20:54:00","M10E_mt5_server":"2026.07.24 22:06:00","M10P_mt5_server":"2026.07.24 23:56:00","M10P2_mt5_server":"2026.07.27 01:39:00"},
+  "research_scope":{"new_M10_research":"XAUUSD_GOLD_ONLY","btc_in_new_M10_research":false,"M7C_background_scope":"BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_KEEP_UNCHANGED"},
+  "fresh_SHORT_parallel":{"M10P":{"candidate":"M10L_H240_C056 + M10N_G013","resolved":0,"next_gate":5,"start":"2026.07.24 23:56:00"},"M10P2":{"candidate":"M10J_C0212","resolved":0,"next_gate":5,"start":"2026.07.27 01:39:00"},"M10V_before_20_20":"FORBIDDEN","M10V_preregistration":"config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json"},
+  "M10W0":{"status":"PASS_USER_LOCAL_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY","result":"config/mochipoyo_alert_research/m10w0_user_local_result_20260727.json","package_sha256":"a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251","M5_hash_transcription_correction_commit":"752a056abd800187dd6180e882fb32da9228e74c"},
+  "M10W1":{"status":"PASS_USER_LOCAL_GOLD_LONG_FAMILY_INTERACTION_AUDIT_ONLY","result":"config/mochipoyo_alert_research/m10w1_user_local_result_20260727.json","package_sha256":"00dfd7663daebeebfd3b048b393e4d94afb0825b7e94e48dbd1db959f97e42e7"},
+  "M10W2":{"status":"PASS_USER_LOCAL_M10D_H1_FILTERED_REFERENCE_INVENTORY_AUDIT_ONLY","result":"config/mochipoyo_alert_research/m10w2_user_local_result_20260727.json","package_sha256":"59f728be1ce5c9da495025b50074bfc6bcc09c825bbffdf914ceaef9ac02f0b5","historical_challenger_only":true,"replace_baseline_now":false},
+  "M10W3":{"status":"PASS_USER_LOCAL_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_AUDIT_ONLY","result":"config/mochipoyo_alert_research/m10w3_user_local_result_20260727.json","package_sha256":"1c8646f028c17ce9c4b34158bcd32809b6b5a172b61ad7d3f5025469cedb8248","CORE_BASELINE":{"count":935,"pf":1.9623457969195994,"net_bps":4790.23195080417,"max_dd_bps":328.823565707667,"plus_2bps_pf":1.5074543873537531},"CORE_FILTERED":{"count":913,"pf":2.2149685287726144,"net_bps":5016.368867594655,"max_dd_bps":252.98800115452582,"plus_2bps_pf":1.6537892185855279},"EXTENDED_BASELINE":{"count":906,"pf":2.3542115764696034,"net_bps":6812.558036499913,"max_dd_bps":377.40347495196903,"plus_2bps_pf":1.8662724162448228},"EXTENDED_FILTERED":{"count":887,"pf":2.6330860824329076,"net_bps":6995.111625276016,"max_dd_bps":357.3077970364079,"plus_2bps_pf":2.043549203823986},"2025_net_delta_core_filtered_minus_baseline_bps":-151.19319640495496,"2025_net_delta_extended_filtered_minus_baseline_bps":-88.76657754841199,"exact_same_entry_timestamp_count":0,"interpretation":"Filtered H1 improves historical portfolio PF/net/DD/payoff overall and under +2bps, but 2025 net declines. Keep baseline and filtered challenger; M10E fresh remains required before operational replacement."},
+  "M10W4":{"stage":"M10W4_GOLD_LONG_PORTFOLIO_DIFFERENCE_FORENSICS_AUDIT_ONLY","status":"IMPLEMENTED_PENDING_USER_LOCAL_RUN","contract":"config/mochipoyo_alert_research/m10w4_gold_long_portfolio_difference_forensics_contract_20260727.json","script":"scripts/mochipoyo_alert_research/m10w4/python/run_m10w4_gold_long_portfolio_difference_forensics.py","operator":"scripts/mochipoyo_alert_research/m10w4/bat/01_run_gold_long_portfolio_difference_forensics.bat","purpose":"Decompose baseline-only versus filtered-only accepted trades by family/year, especially 2025, without threshold tuning or fresh/SHORT outcomes."},
+  "recovery":{"operator":"scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat","restart_order":["MT5/CSV","collector","M7C","M8C","M9V","M9Y","M10B","M10E","M10P","M10P2"],"M10P_restart":"BAT03_ONLY_NEVER_BAT01","M10P2_restart":"BAT03_ONLY_NEVER_BAT01","pc_off_gap_backfill":false},
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W3_PASS_M10W4_DIFFERENCE_FORENSICS_NEXT_20260727.md",
+  "safety":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
