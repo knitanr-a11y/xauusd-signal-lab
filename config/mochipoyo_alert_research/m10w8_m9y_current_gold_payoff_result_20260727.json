@@ -1,0 +1,84 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W8_M9Y_CURRENT_GOLD_PAYOFF_REVIEW_AUDIT_ONLY",
+  "status": "PASS_HEALTH_WITH_THREE_FRESH_W1_RESOLVED_NOT_REVIEW_GATE",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(48).zip",
+    "sha256": "5dcc552e54c839629a1bcb1e5e5a07c563ff62c9d700304347f535c72dd3b9a1",
+    "size_bytes": 8312,
+    "built_at_utc": "2026-07-27T17:52:38Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "M9Y": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 12:45:00",
+    "runtime_contract_version": "M9Y_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "upstream_s2_post_start_count": 5,
+    "w1_candidate_count": 3,
+    "pending_count": 0,
+    "skipped_reclaim_count": 2,
+    "overlap_skip_count": 0,
+    "materialization_fraction": 0.6,
+    "arms": {
+      "Y0_W1_NATIVE_EXIT": {"accepted":3,"resolved":3,"open":0,"win_rate":0.6666666666666666,"pf":0.438957656202415,"net_bps":-22.474413652973737,"payoff":0.2194788281012075,"max_dd_bps":40.0583198424006},
+      "Y1_W1_N6_NATIVE_EXIT": {"accepted":3,"resolved":3,"open":0,"win_rate":0.6666666666666666,"pf":0.438957656202415,"net_bps":-22.474413652973737,"payoff":0.2194788281012075,"max_dd_bps":40.0583198424006},
+      "Y2_W1_N6_RUNNER50": {"accepted":3,"resolved":3,"open":0,"win_rate":0.6666666666666666,"pf":0.4179239432008693,"net_bps":-23.316988855862917,"payoff":0.20896197160043464,"max_dd_bps":40.0583198424006},
+      "Y3_W1_N6_RUNNER75": {"accepted":3,"resolved":3,"open":0,"win_rate":0.6666666666666666,"pf":0.4074070867000964,"net_bps":-23.738276457307506,"payoff":0.2037035433500482,"max_dd_bps":40.0583198424006}
+    },
+    "n6": {
+      "flagged_count": 0,
+      "minimum_for_risk_review": 10,
+      "interpretation": "No fresh N6 risk-sizing effect has been observed. Y1/Y2/Y3 risk weights remain 1.0x on all three accepted trades."
+    },
+    "runner": {
+      "eligible_count": 1,
+      "first_trade_native_return_bps": 14.80001670099133,
+      "first_trade_runner_return_bps": 13.114866286545048,
+      "first_trade_runner50_weighted_bps": 13.957441493768189,
+      "first_trade_runner75_weighted_bps": 13.536153890156618,
+      "interpretation": "The only runner-eligible fresh trade favored native exit slightly. n=1 is descriptive only and does not support changing the frozen runner rule."
+    },
+    "skipped_reclaim": {
+      "count": 2,
+      "upstream_native_returns_bps": [85.55630056118807, -1.559985763051481],
+      "interpretation": "One skipped upstream candidate later had a large native gain and one had a small loss. These post-outcome observations must not be used to widen or refit the frozen 0.10 ATR / 10 minute W1 reclaim rule."
+    },
+    "review_readiness": {
+      "operational_Y0_20": false,
+      "interim_Y0_60": false,
+      "minimum_N6_flagged_10": false,
+      "formal_Y0_120": false
+    }
+  },
+  "data_quality": {
+    "point": 0.01,
+    "closed_rows_contract": true,
+    "nearest_m1_fallback": false,
+    "prefix_integrity_verified": true,
+    "latest_server_open": {"M1":"2026.07.27 20:50:00","M5":"2026.07.27 20:45:00","M15":"2026.07.27 20:30:00","H1":"2026.07.27 19:00:00","H4":"2026.07.27 16:00:00"}
+  },
+  "interpretation": {
+    "health_pass": true,
+    "efficacy_claim_allowed": false,
+    "n6_review_allowed": false,
+    "runner_rule_change_allowed": false,
+    "reclaim_rule_change_allowed": false,
+    "reason": "Only three W1 trades are resolved versus a predeclared operational checkpoint of 20, and no N6 flagged entry has occurred. Continue M9Y unchanged. Do not infer efficacy or adapt W1/N6/runner rules from these early fresh outcomes."
+  },
+  "next": "Refresh the existing read-only M10Q dual SHORT checkpoint after the additional fresh market interval. Keep M9Y/M10B/M10E/M10P/M10P2 and all upstream monitors unchanged.",
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "M9Y_reset": false,
+    "M9Y_reinitialize": false,
+    "modify_running_monitors": false,
+    "reads_M10P_or_M10P2_for_M9Y_selection": false,
+    "btc_in_scope": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
