@@ -1,0 +1,87 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W20_HIGH_ATR_BULLISH_ENTRY_HYPOTHESIS_PREREGISTRATION_AUDIT_ONLY",
+  "status":"HYPOTHESES_FROZEN_BEFORE_ENTRY_OUTCOME_EVALUATION",
+  "recorded_at_utc":"2026-07-28T00:00:00Z",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "basis":{
+    "source":"M10W17 outcome-exposed stable opportunity bucket",
+    "bucket":"D1_BULLISH|H4_POSITIVE|H1_MACD_POSITIVE|ATR_HIGH_GE_0P67",
+    "important_caveat":"The regime bucket itself was selected after M10W17 outcome screening. Therefore all M10W21 historical entry results are research-exposed screening only and require a new independent fresh prospective shadow before support.",
+    "why_new_entry_research":"M10W17 found stable LONG directionality in this HIGH-ATR aligned-bull regime, while M10W18 found the BLC1 M15 MACD-histogram zero-cross entry was weak specifically in HIGH ATR. The working question is whether entry timing, rather than direction/regime, caused the BLC1 weakness."
+  },
+  "common_regime_at_decision":[
+    "D1 EMA20 > EMA30 > EMA40 using only fully closed D1 bars",
+    "H4 EMA20 > EMA30 using only fully closed H4 bars",
+    "H1 TORYS MACD line(6,13,4) > 0 using only fully closed H1 bars",
+    "H1 Wilder ATR14 percentile rank over trailing 100 fully closed H1 bars >= 0.67"
+  ],
+  "common_execution":{
+    "direction":"LONG",
+    "time_basis":"MT5_SERVER_TIME",
+    "newest_row_contract":"CLOSED",
+    "decision":"Next M15 open immediately after the trigger bar closes",
+    "entry":"Exact M1 at decision timestamp, ask = M1 open + spread_points*point",
+    "exit":"Exact M1 240 minutes after entry, bid = M1 open",
+    "horizon_minutes":240,
+    "one_position_per_family":true,
+    "nearest_m1_fallback":false,
+    "fixed_spread_sensitivity_usd":0.20,
+    "extra_cost_sensitivity_bps":[1.0,2.0]
+  },
+  "frozen_families":{
+    "HBR1_LONG_HIGH_ATR_1H_BREAKOUT":{
+      "concept":"Momentum continuation using price structure rather than BLC1 MACD-histogram zero-cross.",
+      "trigger":"On the just-closed M15 bar, close is strictly above the maximum HIGH of the immediately preceding four fully closed M15 bars.",
+      "lookback_bars":4,
+      "threshold_tuning":false
+    },
+    "HER1_LONG_HIGH_ATR_EMA20_RECLAIM":{
+      "concept":"Pullback recovery using price/EMA reclaim rather than BLC1 MACD-histogram zero-cross.",
+      "trigger":"Previous fully closed M15 close <= previous M15 EMA20, current just-closed M15 close > current M15 EMA20, and current M15 EMA20 > current M15 EMA30.",
+      "ema_periods":[20,30],
+      "threshold_tuning":false
+    },
+    "HRC1_LONG_HIGH_ATR_RCI9_OVERSOLD_TURN":{
+      "concept":"Oversold pullback turn using the pre-existing project/manual RCI9 -80 reference rather than BLC1 MACD-histogram zero-cross.",
+      "trigger":"Previous fully closed M15 RCI9 <= -80 and current just-closed M15 RCI9 > previous M15 RCI9.",
+      "rci_period":9,
+      "oversold_reference":-80.0,
+      "threshold_tuning":false
+    }
+  },
+  "frozen_evaluation":{
+    "train":"2023-2024",
+    "validation":"2025",
+    "test":"2026 available frozen history",
+    "metrics":["candidate_count","accepted_count","resolved_count","win_rate","profit_factor","net_bps","average_win_bps","average_loss_bps","payoff_ratio","max_drawdown_bps","max_losing_streak","fixed0p20","plus1bps","plus2bps"],
+    "screening_tiers":{
+      "STRONG_RESEARCH_SCREEN":{"minimum_count_each_split":20,"minimum_pf_each_split":1.30,"minimum_all_pf":1.50,"minimum_fixed0p20_all_pf":1.40,"minimum_extra2bps_all_pf":1.20,"all_splits_net_positive":true},
+      "ROBUST_RESEARCH_SCREEN":{"minimum_count_each_split":20,"minimum_pf_each_split":1.10,"minimum_all_pf":1.30,"minimum_fixed0p20_all_pf":1.20,"minimum_extra2bps_all_pf":1.05,"all_splits_net_positive":true},
+      "WEAK_OR_INCONSISTENT":"Any family not meeting ROBUST_RESEARCH_SCREEN unless REJECT applies.",
+      "REJECT":"Any adequately populated split PF <= 1.0, or all-sample fixed0p20 PF <= 1.0, or all-sample +2bps PF <= 1.0.",
+      "INSUFFICIENT_DENSITY":"Any split has fewer than 20 resolved trades."
+    },
+    "multiple_hypothesis_policy":"Exactly these three frozen families are screened. Do not add variants after results, do not combine triggers after results, do not choose new thresholds, and do not alter the 240-minute horizon. Any family passing ROBUST/STRONG may only advance to a brand-new fresh prospective multi-arm shadow; historical ranking is not final support.",
+    "formula_change_after_results":false
+  },
+  "explicitly_forbidden_after_results":[
+    "change ATR 0.67 boundary",
+    "change breakout lookback from 4 bars",
+    "change EMA20/EMA30 periods or reclaim definition",
+    "change RCI9 -80 reference",
+    "add session/time-of-day filter",
+    "add additional indicator filters",
+    "combine HBR1/HER1/HRC1 conditions",
+    "change 240-minute horizon",
+    "runner/exit optimization",
+    "alter M10W19 BLC1 or its fresh start"
+  ],
+  "relationship_to_running_forward":{
+    "M10W19":"KEEP_RUNNING_UNCHANGED",
+    "M10P":"KEEP_RUNNING_UNCHANGED",
+    "M10P2":"KEEP_RUNNING_UNCHANGED",
+    "all_other_monitors":"KEEP_RUNNING_UNCHANGED"
+  },
+  "safety":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
