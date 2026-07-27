@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10Q_PASS_ZERO_FRESH_CANDIDATES_M10V_PREREGISTERED_M10W0_GOLD_LONG_INVENTORY_READY_AUDIT_ONLY",
+  "status": "M10W0_GOLD_LONG_INVENTORY_PASS_M10W1_LONG_INTERACTION_READY_AUDIT_ONLY",
   "running_monitors": {
     "collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -24,68 +24,44 @@
     "M10P2_mt5_server": "2026.07.27 01:39:00"
   },
   "research_scope": {
-    "new_candidate_expectancy_research": "XAUUSD_GOLD_ONLY",
-    "btc_in_M10_line": false,
-    "M7C_background_scope": "BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_TRACK_KEEP_UNCHANGED"
+    "new_M10_research": "XAUUSD_GOLD_ONLY",
+    "btc_in_new_M10_research": false,
+    "M7C_background_scope": "BTCUSD_AND_XAUUSD_FROZEN_SOURCE_FIDELITY_KEEP_UNCHANGED"
   },
-  "M10P": {
-    "candidate": "M10L_H240_C056 + M10N_G013",
-    "formula": "h1_macd_hist_bps >= 3.637199446 AND h1_macd_line_bps <= -7.667425443 AND h1_ret3_bps >= 18.70087437 AND d1_macd_hist_bps >= -14.25480242",
-    "direction": "SHORT",
-    "horizon_minutes": 240,
-    "one_position": true,
-    "review_gates": [5, 10, 20, 40, 60],
-    "latest_checkpoint": {"candidate":0,"accepted":0,"resolved":0,"open":0,"entry_gap":0,"exit_gap":0,"overlap":0,"next_gate":5}
-  },
-  "M10P2": {
-    "candidate": "M10J_C0212",
-    "formula": "h4_ema20_30_bps >= 37.61355979 AND h1_atr_pct100 >= 0.8",
-    "direction": "SHORT",
-    "decision_timeframe": "M15",
-    "horizon_minutes": 240,
-    "one_position": true,
-    "review_gates": [5, 10, 20],
-    "latest_checkpoint": {"candidate":0,"accepted":0,"resolved":0,"open":0,"entry_gap":0,"exit_gap":0,"overlap":0,"next_gate":5}
-  },
-  "M10P1_reproduction": {
-    "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
-    "trade_count": 318,
-    "all_pf": 1.4839437156621065,
-    "fixed0p20_all_pf": 1.4816933419152243,
-    "max_reference_abs_diff": 0.0
-  },
-  "M10Q": {
-    "status": "PASS_USER_LOCAL_READ_ONLY_DUAL_FRESH_CHECKPOINT_AUDIT",
-    "result": "config/mochipoyo_alert_research/m10q_user_local_checkpoint_result_20260727.json",
-    "uploaded_package_sha256": "f68789868c25b1994c4eb0421f975db1a3dadaa9b4404be39bfb04288ff40815",
-    "built_at_utc": "2026-07-27T09:02:13Z",
-    "gate_reached": false,
-    "interpretation": "NO_FRESH_CONDITION_YET_CONTINUE_UNCHANGED"
-  },
-  "M10V_preregistration": {
-    "status": "FROZEN_PREREGISTRATION_NOT_EXECUTION_AUTHORIZATION",
-    "file": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json",
-    "execution_gate": {"M10P_min_resolved":20,"M10P2_min_resolved":20,"integrity_pass_required":true},
-    "common_window_start_mt5_server": "2026.07.27 01:39:00",
-    "execute_now": false
+  "fresh_SHORT_parallel": {
+    "M10P": {"candidate":"M10L_H240_C056 + M10N_G013","resolved":0,"next_gate":5,"start":"2026.07.24 23:56:00"},
+    "M10P2": {"candidate":"M10J_C0212","resolved":0,"next_gate":5,"start":"2026.07.27 01:39:00"},
+    "M10V_before_20_20": "FORBIDDEN",
+    "M10V_preregistration": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json"
   },
   "M10W0": {
-    "stage": "M10W0_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
-    "status": "IMPLEMENTED_PENDING_USER_LOCAL_READ_ONLY_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m10w0_gold_long_reference_inventory_contract_20260727.json",
-    "script": "scripts/mochipoyo_alert_research/m10w0/python/run_m10w0_gold_long_reference_inventory.py",
-    "operator": "scripts/mochipoyo_alert_research/m10w0/bat/01_run_gold_long_reference_inventory.bat",
-    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10A",
-    "scope": "XAUUSD_GOLD_ONLY",
-    "purpose": "Inventory actual frozen M10A LONG evidence before deciding which LONG arms are eligible for future M10W historical LONG+SHORT reconstruction.",
-    "selection_decision_made": false,
-    "reads_M10P_or_M10P2_fresh_outcomes_for_selection": false
+    "status": "PASS_USER_LOCAL_GOLD_LONG_REFERENCE_INVENTORY_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10w0_user_local_result_20260727.json",
+    "package_sha256": "a69ae0d6470ff472966f5d0be1ed01bff8926b87b47983a249f926731336f251",
+    "source_stage": "M10A_GOLD_MULTI_TIMEFRAME_PAYOFF_DETERMINISTIC_REPRODUCTION",
+    "historical_research_exposed": true,
+    "fresh_forward_validated": false,
+    "commission": "NOT_MODELED",
+    "swap": "NOT_MODELED",
+    "LONG_classification": {
+      "M5_ENTRY": "BASELINE_REFERENCE_ONLY",
+      "M5_RUNNER75": "CORE_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
+      "H1_ENTRY": "BASELINE_REFERENCE_ONLY",
+      "H1_RUNNER50": "CORE_LONG_FAMILY_REPRESENTATIVE_HISTORICAL_ONLY",
+      "H4_ENTRY": "LOW_FREQUENCY_PREMIUM_REFERENCE_SENSITIVITY"
+    }
   },
-  "feed_guard": {
-    "measure": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
-    "limits": {"M1": 0, "M5": 10, "M15": 30, "H1": 120, "H4": 480, "D1": 2880},
-    "candidate_or_threshold_change": false,
-    "start_change": false
+  "M10W1": {
+    "stage": "M10W1_GOLD_LONG_FAMILY_HISTORICAL_INTERACTION_AUDIT_ONLY",
+    "status": "IMPLEMENTED_PENDING_USER_LOCAL_RUN",
+    "contract": "config/mochipoyo_alert_research/m10w1_gold_long_family_interaction_contract_20260727.json",
+    "script": "scripts/mochipoyo_alert_research/m10w1/python/run_m10w1_gold_long_family_interaction_audit.py",
+    "operator": "scripts/mochipoyo_alert_research/m10w1/bat/01_run_gold_long_family_interaction_audit.bat",
+    "CORE": ["M5_RUNNER75","H1_RUNNER50"],
+    "EXTENDED_REFERENCE_SENSITIVITY": ["M5_RUNNER75","H1_RUNNER50","H4_ENTRY"],
+    "reads_SHORT_ledgers": false,
+    "reads_M10P_or_M10P2_fresh_outcomes": false,
+    "executes_M10V": false
   },
   "recovery": {
     "operator": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
@@ -94,11 +70,12 @@
     "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
     "pc_off_gap_backfill": false
   },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_M10W0_GOLD_LONG_INVENTORY_NEXT_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W0_PASS_M10W1_GOLD_LONG_INTERACTION_NEXT_20260727.md",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
-    "threshold_refit_from_prospective": false,
+    "threshold_refit": false,
+    "start_reset": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
