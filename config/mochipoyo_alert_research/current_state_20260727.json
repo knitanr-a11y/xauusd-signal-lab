@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_CHECKPOINT_AUDITOR_READY_AUDIT_ONLY",
+  "status": "M10Q_PASS_ZERO_FRESH_CANDIDATES_M10V_PREREGISTERED_WAIT_FOR_FRESH_GATES_AUDIT_ONLY",
   "running_monitors": {
     "collector": "RUNNING_KEEP_UNCHANGED",
     "M7C": "RUNNING_KEEP_UNCHANGED",
@@ -29,7 +29,8 @@
     "direction": "SHORT",
     "horizon_minutes": 240,
     "one_position": true,
-    "review_gates": [5, 10, 20, 40, 60]
+    "review_gates": [5, 10, 20, 40, 60],
+    "latest_checkpoint": {"candidate":0,"accepted":0,"resolved":0,"open":0,"entry_gap":0,"exit_gap":0,"overlap":0,"next_gate":5}
   },
   "M10P2": {
     "candidate": "M10J_C0212",
@@ -38,7 +39,8 @@
     "decision_timeframe": "M15",
     "horizon_minutes": 240,
     "one_position": true,
-    "review_gates": [5, 10, 20]
+    "review_gates": [5, 10, 20],
+    "latest_checkpoint": {"candidate":0,"accepted":0,"resolved":0,"open":0,"entry_gap":0,"exit_gap":0,"overlap":0,"next_gate":5}
   },
   "M10P1_reproduction": {
     "status": "PASS_USER_LOCAL_DETERMINISTIC_REPRODUCTION_AUDIT_ONLY",
@@ -46,6 +48,22 @@
     "all_pf": 1.4839437156621065,
     "fixed0p20_all_pf": 1.4816933419152243,
     "max_reference_abs_diff": 0.0
+  },
+  "M10Q": {
+    "status": "PASS_USER_LOCAL_READ_ONLY_DUAL_FRESH_CHECKPOINT_AUDIT",
+    "result": "config/mochipoyo_alert_research/m10q_user_local_checkpoint_result_20260727.json",
+    "uploaded_package_sha256": "f68789868c25b1994c4eb0421f975db1a3dadaa9b4404be39bfb04288ff40815",
+    "built_at_utc": "2026-07-27T09:02:13Z",
+    "gate_reached": false,
+    "interpretation": "NO_FRESH_CONDITION_YET_CONTINUE_UNCHANGED"
+  },
+  "M10V_preregistration": {
+    "status": "FROZEN_PREREGISTRATION_NOT_EXECUTION_AUTHORIZATION",
+    "file": "config/mochipoyo_alert_research/m10v_short_family_comparison_preregistration_20260727.json",
+    "execution_gate": {"M10P_min_resolved":20,"M10P2_min_resolved":20,"integrity_pass_required":true},
+    "common_window_start_mt5_server": "2026.07.27 01:39:00",
+    "single_capital_policy": "chronological first-come-first-served; exact-same-timestamp same-direction becomes one position with dual attribution; no double size/PnL",
+    "execute_now": false
   },
   "feed_guard": {
     "measure": "SESSION_GAP_AWARE_OBSERVED_M1_BAR_AGE",
@@ -60,13 +78,8 @@
     "M10P2_restart": "BAT03_ONLY_NEVER_BAT01",
     "pc_off_gap_backfill": false
   },
-  "M10Q": {
-    "status": "IMPLEMENTED_READ_ONLY_CHECKPOINT_AUDITOR",
-    "script": "scripts/mochipoyo_alert_research/m10q/python/run_m10q_dual_fresh_checkpoint_audit.py",
-    "bat": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
-    "purpose": "Read M10P and M10P2 LATEST, verify immutable starts/safety flags, report fresh metrics and next review gate, and create one upload package without modifying either forward runtime."
-  },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10P_M10P2_DUAL_FRESH_RUNNING_M10Q_NEXT_20260727.md",
+  "M10Q_operator": "scripts/mochipoyo_alert_research/m10q/bat/01_run_dual_fresh_checkpoint_audit.bat",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10Q_PASS_ZERO_CANDIDATES_M10V_PREREG_FROZEN_20260727.md",
   "safety": {
     "audit_only": true,
     "historical_backfill": false,
