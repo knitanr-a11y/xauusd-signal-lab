@@ -1,0 +1,56 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W15_BLIND_SPOT_TREND_CONTINUATION_HYPOTHESIS_PREREGISTRATION_AUDIT_ONLY",
+  "status":"HYPOTHESES_FROZEN_BEFORE_OUTCOME_EVALUATION",
+  "recorded_at_utc":"2026-07-28T00:00:00Z",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "basis":"M10W14 outcome-blind coverage map only. No trade outcome, PF, PnL, win rate, future path label, or threshold rescue was used to choose these formulas.",
+  "common":{
+    "time_basis":"MT5_SERVER_TIME",
+    "newest_row_contract":"CLOSED",
+    "decision_grid":"M15 close -> next M15 open",
+    "entry":"Exact M1 execution at the next M15 open timestamp. LONG enters at ask=M1 open + spread_points*point; SHORT enters at bid=M1 open.",
+    "exit":"Fixed 240 minutes after entry at exact M1 timestamp. LONG exits bid=M1 open; SHORT exits ask=M1 open + spread_points*point.",
+    "nearest_m1_fallback":false,
+    "horizon_minutes":240,
+    "one_position_per_family":true,
+    "overlap_rule":"Later same-family candidates inside the active 240-minute interval are skipped.",
+    "fixed_spread_sensitivity_usd":0.20,
+    "extra_cost_sensitivity_bps":[1.0,2.0],
+    "no_ATR_entry_filter":true,
+    "reason_no_ATR_filter":"Avoid using M10W14 regime density to cherry-pick high/low volatility after seeing coverage. ATR may be reported descriptively only."
+  },
+  "families":{
+    "BSC1_SHORT_BEAR_TREND_PULLBACK_ZERO_CROSS":{
+      "direction":"SHORT",
+      "structural_hypothesis":"A missing aligned-bear trend-continuation family may have edge when a lower-timeframe pullback ends inside a fully bearish D1/H4/H1 context.",
+      "regime_at_decision":["D1 EMA20 < EMA30 < EMA40 using only fully closed D1 bars","H4 EMA20 < EMA30 using only fully closed H4 bars","H1 TORYS MACD line(6,13,4) < 0 using only fully closed H1 bars"],
+      "trigger":"On the just-closed M15 bar, TORYS MACD histogram crosses from >0 on the previous closed M15 bar to <=0 on the current closed M15 bar.",
+      "decision":"Next M15 open immediately after the trigger bar closes.",
+      "threshold_tuning":false
+    },
+    "BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS":{
+      "direction":"LONG",
+      "structural_hypothesis":"Symmetric control: an aligned-bull trend-continuation family may have edge when a lower-timeframe pullback ends inside a fully bullish D1/H4/H1 context.",
+      "regime_at_decision":["D1 EMA20 > EMA30 > EMA40 using only fully closed D1 bars","H4 EMA20 > EMA30 using only fully closed H4 bars","H1 TORYS MACD line(6,13,4) > 0 using only fully closed H1 bars"],
+      "trigger":"On the just-closed M15 bar, TORYS MACD histogram crosses from <0 on the previous closed M15 bar to >=0 on the current closed M15 bar.",
+      "decision":"Next M15 open immediately after the trigger bar closes.",
+      "threshold_tuning":false
+    }
+  },
+  "frozen_evaluation":{
+    "train":"2023-2024",
+    "validation":"2025",
+    "test":"2026 available frozen history",
+    "metrics":["count","win_rate","profit_factor","net_bps","average_win_bps","average_loss_bps","payoff_ratio","max_drawdown_bps","max_losing_streak"],
+    "decision_tiers":{
+      "STRONG_CANDIDATE":{"minimum_count_each_split":20,"minimum_pf_each_split":1.30,"minimum_all_pf":1.50,"minimum_fixed0p20_all_pf":1.40,"minimum_extra2bps_all_pf":1.20,"all_splits_net_positive":true},
+      "ROBUST_CANDIDATE":{"minimum_count_each_split":20,"minimum_pf_each_split":1.10,"minimum_all_pf":1.30,"minimum_fixed0p20_all_pf":1.20,"minimum_extra2bps_all_pf":1.05,"all_splits_net_positive":true},
+      "WEAK_OR_INCONSISTENT":"Any family not meeting ROBUST_CANDIDATE.",
+      "REJECT":"Any split PF <= 1.0 with adequate count, or all-sample fixed0p20 PF <= 1.0, or all-sample extra2bps PF <= 1.0."
+    },
+    "no_formula_change_after_results":true,
+    "fresh_shadow_rule":"Only a ROBUST_CANDIDATE or STRONG_CANDIDATE may advance to a new independent fresh prospective shadow. Historical support alone is not final support."
+  },
+  "safety":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
