@@ -1,0 +1,30 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W14_GOLD_DIRECTIONAL_COVERAGE_AND_BLIND_SPOT_MAP_AUDIT_ONLY",
+  "status":"PASS_OUTCOME_BLIND_DIRECTIONAL_COVERAGE_MAP_WITH_STRUCTURAL_BEAR_TREND_SHORT_BLIND_SPOT",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(54).zip","sha256":"bab606b95fee01ee9b7437a5e66e91d6b5529353961713243afbbdb8d3b8b1ef","size_bytes":322953,"built_at_utc":"2026-07-27T22:32:37Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "data_contract":{"canonical_grid":"M15_SERVER_TIME_WINDOWS","eligible_grid_windows":81329,"trade_outcomes_read":false,"pf_or_pnl_computed":false,"future_path_labels_used":false,"threshold_refit":false,"new_candidate_formula_created_in_M10W14":false},
+  "overall_coverage":{"LONG_ONLY":{"count":2749,"rate":0.033800981199818024},"SHORT_ONLY":{"count":4378,"rate":0.05383073688352248},"BOTH":{"count":177,"rate":0.0021763454610286615},"NEITHER":{"count":74025,"rate":0.9101919364556308}},
+  "family_presence":{"LONG_M5_S1":1255,"LONG_M15_S2":1488,"LONG_H1_S3":191,"LONG_H4_S4":70,"SHORT_M10P_C056_G013":164,"SHORT_M10P2_C0212":4422},
+  "structural_findings":{
+    "coverage_sparsity_caveat":"NEITHER means no candidate event timestamp in that M15 window. It is not evidence of missed profit and not a holding-period coverage measure.",
+    "combined_short_presence_windows":4555,
+    "combined_short_composition":{"h4_ema20_minus_ema30_positive":{"count":4509,"fraction":0.989901207464325},"h1_atr_high_ge_0p67":{"count":4501,"fraction":0.98814489571899},"d1_bullish_stack":{"count":4090,"fraction":0.897914379802415}},
+    "C0212_composition":{"presence_windows":4422,"h4_positive_fraction":1.0,"high_atr_fraction":1.0,"d1_bullish_fraction":0.9032112166440525},
+    "C056_G013_composition":{"presence_windows":164,"h1_macd_negative_fraction":1.0,"h4_positive_fraction":0.7195121951219512,"d1_bullish_fraction":0.7560975609756098,"high_atr_fraction":0.6707317073170732},
+    "bear_trend_aligned_blind_spot":{"definition":"D1 EMA20<EMA30<EMA40 AND H4 EMA20-EMA30 negative AND H1 MACD line negative","decision_count":5146,"short_presence_count":19,"short_presence_rate":0.003692188107267781,"long_presence_count":37,"long_presence_rate":0.007190050524679362,"neither_count":5090,"neither_fraction":0.9891181492421298,"by_atr":{"LOW":{"decision_count":1570,"short_rate":0.0025477707006369425},"MID":{"decision_count":1720,"short_rate":0.0034883720930232558},"HIGH":{"decision_count":1856,"short_rate":0.004849137931034483}}},
+    "bull_trend_aligned_low_mid_blind_spot":{"definition":"D1 bullish stack AND H4 positive AND H1 MACD positive AND H1 ATR<0.67","decision_count":15176,"long_presence_count":838,"long_presence_rate":0.05521876647337902,"short_presence_count":0,"neither_count":14338,"neither_fraction":0.944781233526621},
+    "long_directional_bias":{"combined_long_presence_windows":2926,"h1_macd_positive_fraction":0.9408749145591251,"d1_bullish_fraction":0.7416267942583732},
+    "yearly_any_direction_fraction":{"2023":0.053832,"2024":0.078764,"2025":0.124305,"2026":0.115357}
+  },
+  "interpretation":{
+    "coverage_map_overturns_previous_performance_concern":false,
+    "why_it_matters":"The map reveals that the existing SHORT stack is structurally concentrated in H4-positive/high-ATR/often-D1-bullish regimes and barely represents aligned bearish trend continuation. This creates a legitimate independent hypothesis-generation target without modifying existing candidates.",
+    "primary_new_research_target":"BEAR_TREND_CONTINUATION_SHORT",
+    "symmetric_control_target":"BULL_TREND_CONTINUATION_LONG",
+    "performance_claim_allowed":false,
+    "next":"Freeze exactly two symmetric trend-continuation hypotheses before any outcome evaluation, then evaluate them without tuning."
+  },
+  "guardrails":{"audit_only":true,"historical_backfill":false,"threshold_refit":false,"start_reset":false,"runtime_reset":false,"modify_running_monitors":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
