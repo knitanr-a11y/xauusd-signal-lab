@@ -1,0 +1,51 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W10_M10P_M10P2_RUNTIME_FRESHNESS_DIAGNOSTIC_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_READY_TO_RUN_READ_ONLY",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "trigger": "M10W9 M10Q refresh built at 2026-07-27T18:04:05Z still reported M10P/M10P2 latest M1 2026.07.27 03:45:00 while other GOLD monitors had advanced to at least 20:50:00.",
+  "purpose": "Diagnose whether M10P/M10P2 persistent loops are stopped, blocked, stale-locked, or otherwise not updating outputs, without changing starts, thresholds, runtimes, ledgers, locks, or monitor state.",
+  "checks": [
+    "current raw live six-file tail snapshots",
+    "M10P and M10P2 LATEST summary timestamps and file mtimes",
+    "runtime state cycle_count and last_cycle_at_utc",
+    "runtime manifest immutable start and contract integrity",
+    "shadow loop lock existence and recorded PID",
+    "best-effort Windows PID existence check",
+    "current observed-M1 feed-health guard for M10P and M10P2",
+    "frozen prefix/runtime chronology integrity",
+    "raw M1 versus LATEST reported M1 staleness minutes"
+  ],
+  "read_only_source_paths": [
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p_runtime",
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/m10p2_runtime",
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P/LATEST",
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P2/LATEST",
+    "MT5 goldsharp M1/M5/M15/H1/H4/D1 files resolved from M8B symbol metadata"
+  ],
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W10/LATEST/99_UPLOAD_PACKAGE.zip",
+  "forbidden": [
+    "M10P BAT01",
+    "M10P2 BAT01",
+    "automatic BAT03 restart before diagnostic review",
+    "lock deletion",
+    "runtime/state deletion or rewrite",
+    "start change",
+    "threshold change",
+    "historical backfill",
+    "M10V execution"
+  ],
+  "safety": {
+    "audit_only": true,
+    "runtime_modified": false,
+    "lock_modified": false,
+    "monitor_restart": false,
+    "historical_backfill": false,
+    "threshold_refit": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
