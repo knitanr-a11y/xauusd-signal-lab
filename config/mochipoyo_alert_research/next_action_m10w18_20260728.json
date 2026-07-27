@@ -1,0 +1,15 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "status":"M10W17_PASS_M10W18_BLC1_LOSS_REDUCTION_NEXT",
+  "stage":"M10W18_BLC1_HIGH_ATR_LOSS_REDUCTION_CHALLENGER_AUDIT_ONLY",
+  "immediate_action":"Keep all existing forward monitors running unchanged. Fetch/Pull latest feature/mochipoyo-alert-research, then run only the M10W18 exact BLC1 loss-reduction challenger.",
+  "operator":"scripts/mochipoyo_alert_research/m10w18/bat/01_run_blc1_high_atr_loss_reduction_challenger.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W18/LATEST/99_UPLOAD_PACKAGE.zip",
+  "contract":"config/mochipoyo_alert_research/m10w18_blc1_high_atr_loss_reduction_challenger_contract_20260728.json",
+  "preliminary_diagnostic":"config/mochipoyo_alert_research/m10w18_preliminary_blc1_atr_loss_diagnostic_20260728.json",
+  "M10W17_result":"config/mochipoyo_alert_research/m10w17_user_local_neither_regime_directional_opportunity_result_20260728.json",
+  "rule":"Exact BLC1 formula unchanged; accept only h1_atr_pct100 < 0.67, using the pre-existing M10W14 outcome-blind tercile boundary. Rebuild one-position allocation from the full candidate stream after the gate.",
+  "interpretation":"This is post-hoc research-exposed historical research. Even if it improves all historical splits, historical results alone cannot validate or promote it. A new independent fresh prospective shadow is required before support.",
+  "scope":"GOLD_XAUUSD_ONLY",
+  "safety":{"audit_only":true,"existing_forward_modified":false,"historical_backfill":false,"existing_threshold_refit":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
