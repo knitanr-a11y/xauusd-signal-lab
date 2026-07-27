@@ -1,0 +1,25 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W18_BLC1_HIGH_ATR_LOSS_REDUCTION_CHALLENGER_AUDIT_ONLY",
+  "status":"POSTHOC_RESEARCH_EXPOSED_CHALLENGER_FROZEN_BEFORE_EXACT_RESIMULATION",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "source_family":"BLC1_LONG_BULL_TREND_PULLBACK_ZERO_CROSS",
+  "why_this_stage_exists":"The user asked whether BLC1 could improve by removing losses. A diagnostic join of the already resolved M10W16 BLC1 ledger to the outcome-blind M10W14 H1 ATR terciles showed the HIGH_GE_0P67 subset was materially weak, especially in 2025 and 2026. Because this observation was made after outcomes were seen, it is not clean historical validation and cannot authorize adoption by itself.",
+  "frozen_challenger":{
+    "name":"BLC1_EXCLUDE_H1_ATR_HIGH_GE_0P67",
+    "entry_formula":"Keep the exact frozen BLC1 regime and M15 zero-cross trigger unchanged.",
+    "loss_reduction_gate":"At the BLC1 decision time, using only the fully closed H1 bar available then, compute Wilder ATR14 percentile rank over the trailing 100 fully closed H1 bars exactly as M10W14/M10W17. ACCEPT only when h1_atr_pct100 < 0.67. EXCLUDE when h1_atr_pct100 >= 0.67 or unavailable.",
+    "threshold_origin":"0.67 is the pre-existing outcome-blind M10W14 tercile boundary; no new numeric threshold search is allowed.",
+    "no_other_filter":true,
+    "horizon_minutes":240,
+    "one_position_per_family":true,
+    "exact_M1_entry_exit":true,
+    "nearest_fallback":false
+  },
+  "exact_resimulation_requirement":"Apply the gate to the full BLC1 candidate stream BEFORE one-position allocation, then rebuild accepted/overlap/gap ledgers from scratch so capacity freed by excluded HIGH-ATR candidates can be used by later eligible candidates.",
+  "comparisons":["BLC1_BASELINE","BLC1_EXCLUDE_H1_ATR_HIGH_GE_0P67","EXCLUDED_HIGH_ATR_SUBSET"],
+  "splits":["TRAIN_2023_2024","VALIDATION_2025","TEST_2026","ALL"],
+  "costs":{"actual_spread":true,"fixed_spread_usd":0.20,"extra_cost_bps":[1.0,2.0]},
+  "decision_rule":{"historical_result_is_research_exposed":true,"historical_improvement_can_authorize_live":false,"historical_improvement_can_authorize_existing_monitor_change":false,"fresh_prospective_shadow_required_before_support":true,"formula_or_gate_change_after_exact_results":false},
+  "safety":{"audit_only":true,"existing_forward_modified":false,"historical_backfill_into_existing_forward":false,"existing_threshold_refit":false,"M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
