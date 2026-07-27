@@ -1,0 +1,64 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W5_M10E_H1_FILTER_FRESH_CHECKPOINT_REVIEW_AUDIT_ONLY",
+  "status": "PASS_HEALTH_ONLY_NO_FRESH_H1_MATERIALIZED_YET",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(45).zip",
+    "sha256": "5746d32d2d7cfb44fd4fe40bf98f49bf541662aa725472b46eb973244b24727c",
+    "size_bytes": 4329,
+    "built_at_utc": "2026-07-27T17:12:57Z"
+  },
+  "scope": "XAUUSD_GOLD_ONLY",
+  "M10E": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 22:06:00",
+    "runtime_contract_version": "M10E_RUNTIME_V1_APPEND_SAFE_PREFIX",
+    "fixed_filter": {
+      "m5_macd_bps_slope_le": -0.1308,
+      "h1_ema30_minus_ema40_bps_ge": 17.3333,
+      "feature_decision_time": "actual H1 reclaim entry; latest fully closed M5/H1 only"
+    },
+    "upstream_resolved_post_start": 0,
+    "h1_entry_candidate_count": 0,
+    "skipped_reclaim_count": 0,
+    "compound_excluded_before_one_position": 0,
+    "arms": {
+      "E0_H1_BASELINE_RUNNER50": {"accepted": 0, "resolved": 0, "open": 0},
+      "E1_H1_FILTERED_RUNNER50": {"accepted": 0, "resolved": 0, "open": 0}
+    },
+    "review_readiness": {"operational_5": false, "interim_10": false, "formal_20": false},
+    "interpretation": "No fresh H1 candidate has materialized because the upstream M9V post-start resolved S3_H1 set is still empty. This is not evidence for or against the filter. Continue unchanged from the immutable start."
+  },
+  "data_quality": {
+    "point": 0.01,
+    "closed_rows_contract": true,
+    "prefix_integrity_verified": true,
+    "latest_server_open": {
+      "M1": "2026.07.27 20:11:00",
+      "M5": "2026.07.27 20:05:00",
+      "M15": "2026.07.27 19:45:00",
+      "H1": "2026.07.27 19:00:00",
+      "H4": "2026.07.27 16:00:00",
+      "D1": "2026.07.24 00:00:00"
+    }
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "pre_start_primary_candidate_eligibility": false,
+    "future_outcome_used_in_entry_gate": false,
+    "mae_mfe_exit_path_used_as_filter_feature": false,
+    "m9v_modified_or_reset": false,
+    "m9y_modified_or_reset": false,
+    "m10b_modified_or_reset": false,
+    "M10E_reset": false,
+    "M10E_reinitialize": false,
+    "threshold_refit": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  },
+  "next": "Continue M10E unchanged. No efficacy claim before fresh materialization. In parallel, review the already-running M10B GOLD multi-timeframe fresh shadow current LATEST package read-only."
+}
