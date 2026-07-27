@@ -1,36 +1,44 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10W1_PASS_M10W2_M10D_H1_FILTERED_REFERENCE_INVENTORY_NEXT",
-  "stage": "M10W2_M10D_H1_FILTERED_REFERENCE_INVENTORY_AUDIT_ONLY",
-  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Run the read-only GOLD-only M10W2 inventory of existing M10D deterministic historical H1 compound-loss filter evidence. Do not choose baseline versus filtered H1 until the package is reviewed.",
-  "operator": "scripts/mochipoyo_alert_research/m10w2/bat/01_run_m10d_h1_filtered_reference_inventory.bat",
-  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W2/LATEST/99_UPLOAD_PACKAGE.zip",
-  "M10W1_result": {
-    "file": "config/mochipoyo_alert_research/m10w1_user_local_result_20260727.json",
-    "package_sha256": "00dfd7663daebeebfd3b048b393e4d94afb0825b7e94e48dbd1db959f97e42e7",
-    "CORE_single_capital_pf": 1.9623457969195994,
-    "CORE_single_capital_net_bps": 4790.23195080417,
-    "CORE_plus_2bps_pf": 1.5074543873537531,
-    "EXTENDED_single_capital_pf": 2.3542115764696034,
-    "EXTENDED_single_capital_net_bps": 6812.558036499913,
-    "EXTENDED_plus_2bps_pf": 1.8662724162448228,
-    "exact_same_entry_timestamp_count": 0
+  "status": "M10W2_PASS_M10W3_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_NEXT",
+  "stage": "M10W3_GOLD_LONG_BASELINE_VS_FILTERED_H1_PORTFOLIO_AUDIT_ONLY",
+  "immediate_action": "Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2 running unchanged. Run the read-only GOLD-only M10W3 portfolio scenario audit comparing baseline H1 versus M10D filtered H1 with M5 fixed and H4 as an optional extended sensitivity. Do not use SHORT or fresh outcomes for selection.",
+  "operator": "scripts/mochipoyo_alert_research/m10w3/bat/01_run_gold_long_baseline_vs_filtered_h1_portfolio_audit.bat",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W3/LATEST/99_UPLOAD_PACKAGE.zip",
+  "M10W2_result": {
+    "file": "config/mochipoyo_alert_research/m10w2_user_local_result_20260727.json",
+    "package_sha256": "59f728be1ce5c9da495025b50074bfc6bcc09c825bbffdf914ceaef9ac02f0b5",
+    "baseline_pf": 2.8303858342555084,
+    "filtered_pf": 5.40115388326192,
+    "baseline_net_bps": 2802.7492248852354,
+    "filtered_net_bps": 2956.12982845799,
+    "baseline_dd_bps": 271.583159570446,
+    "filtered_dd_bps": 101.7430435392024,
+    "filtered_plus_2bps_pf": 4.615218553164897,
+    "replace_baseline_now": false
   },
-  "M10W2_rules": {
-    "scope": "XAUUSD_GOLD_ONLY",
-    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10D",
-    "expected_filter": "exclude H1 LONG when m5_macd_bps_slope <= -0.1308 AND h1_ema30_minus_ema40_bps >= 17.3333",
-    "read_only": true,
-    "select_filtered_H1_before_review": false,
+  "M10W3_scenarios": {
+    "CORE_BASELINE": ["M5_RUNNER75","H1_BASELINE_RUNNER50"],
+    "CORE_FILTERED": ["M5_RUNNER75","H1_FILTERED_RUNNER50"],
+    "EXTENDED_BASELINE": ["M5_RUNNER75","H1_BASELINE_RUNNER50","H4_ENTRY"],
+    "EXTENDED_FILTERED": ["M5_RUNNER75","H1_FILTERED_RUNNER50","H4_ENTRY"]
+  },
+  "M10W3_rules": {
+    "single_capital": "chronological first-come-first-served; later LONG entry skipped while active",
+    "exact_same_entry_timestamp": "FAIL_CLOSED",
+    "extra_cost_sensitivity_bps": [0.5,1.0,1.5,2.0],
+    "do_not_replace_baseline_from_historical_M10W3_alone": true,
+    "M10E_fresh_required_before_operational_H1_replacement": true,
+    "reads_SHORT_ledgers": false,
     "reads_M10E_fresh_outcomes_for_selection": false,
     "reads_M10P_or_M10P2": false,
     "modify_running_monitors": false,
     "threshold_refit": false,
     "historical_backfill": false
   },
-  "after_M10W2": {
-    "if_pass": "Upload only M10W2 LATEST/99_UPLOAD_PACKAGE.zip. Review actual M10D baseline/filtered H1 evidence and freeze the H1 LONG representative status before further LONG portfolio reconstruction.",
-    "if_blocked": "Send complete console output. Do not alter M10D source or running monitor files to force a pass."
+  "after_M10W3": {
+    "if_pass": "Upload only M10W3 LATEST/99_UPLOAD_PACKAGE.zip. Compare filtered-minus-baseline portfolio deltas in CORE and EXTENDED views, yearly stability and cost sensitivity, then freeze the historical H1 challenger status without overriding M10E fresh validation.",
+    "if_blocked": "Send complete console output. Do not edit source ledgers, thresholds, or monitors to force a pass."
   },
   "fresh_parallel": {
     "M10P_resolved": 0,
@@ -45,7 +53,7 @@
     "BTC_in_new_M10_research": false,
     "M7C_dual_symbol_background": "KEEP_FROZEN_UNCHANGED"
   },
-  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W1_PASS_M10W2_M10D_H1_FILTER_INVENTORY_NEXT_20260727.md",
+  "handoff": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W2_PASS_M10W3_LONG_PORTFOLIO_COMPARISON_NEXT_20260727.md",
   "recovery": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
   "safety": {
     "audit_only": true,
