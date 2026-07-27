@@ -1,0 +1,63 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W13_FROZEN_HISTORICAL_SHORT_ACTIVATION_INTERVAL_CALIBRATION_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_EXECUTED",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Using only the already-frozen research-exposed 2023-2026 GOLD OHLC data and the exact unchanged SHORT formulas, quantify activation density and no-match/inter-arrival decision streaks. Compare the current M10W12 zero-match run lengths descriptively. Do not use trade outcomes and do not rescue/refit thresholds.",
+  "families":{
+    "M10P_C056_G013":{
+      "decision_timeframe":"H1",
+      "formula":{"h1_macd_hist_bps_ge":3.637199446,"h1_macd_line_bps_le":-7.667425443,"h1_ret3_bps_ge":18.70087437,"d1_macd_hist_bps_ge":-14.25480242},
+      "current_zero_match_decisions_from_M10W12":21
+    },
+    "M10P2_C0212":{
+      "decision_timeframe":"M15",
+      "formula":{"h4_ema20_30_bps_ge":37.61355979,"h1_atr_pct100_ge":0.8},
+      "current_zero_match_decisions_from_M10W12":81
+    }
+  },
+  "frozen_historical_source":{
+    "root_resolution":"M10A_GOLD_DATA_ROOT override, otherwise M8B LATEST mt5_files_root/gold_v3_2023_2026",
+    "required_files":["M15","H1","H4","D1"],
+    "verify_frozen_sha256":true,
+    "research_exposed_history":true,
+    "fresh_forward_evidence":false
+  },
+  "required_outputs":[
+    "eligible decision count and activation count/rate by family",
+    "activation counts by calendar year",
+    "activation decision timestamps",
+    "zero-match run lengths including leading/between/trailing runs",
+    "inter-activation spacing in decision counts",
+    "median/p75/p90/p95/p99/max zero-run lengths when available",
+    "current M10W12 zero-run length versus historical run-length empirical percentile and historical maximum",
+    "condition-leg pass counts over the frozen historical sample for context"
+  ],
+  "interpretation_rules":{
+    "performance_inference":false,
+    "historical_activation_density_is_not_fresh_support":true,
+    "current_zero_run_may_be_called_historically_ordinary_or_unusual_only_descriptively":true,
+    "no_iid_or_binomial_assumption":true,
+    "no_threshold_rescue_from_historical_or_fresh_waiting_time":true,
+    "no_formula_change":true
+  },
+  "safety":{
+    "audit_only":true,
+    "read_only":true,
+    "trade_outcomes_read":false,
+    "pf_or_pnl_computed":false,
+    "historical_backfill_into_forward":false,
+    "threshold_refit":false,
+    "start_reset":false,
+    "runtime_reset":false,
+    "modify_running_monitors":false,
+    "M10P_BAT01":"FORBIDDEN",
+    "M10P2_BAT01":"FORBIDDEN",
+    "M10V_before_both_20":"FORBIDDEN",
+    "discord_send":false,
+    "mt5_order":false,
+    "live_ready":false,
+    "final_signal":false,
+    "automatic_live_promotion":false
+  }
+}
