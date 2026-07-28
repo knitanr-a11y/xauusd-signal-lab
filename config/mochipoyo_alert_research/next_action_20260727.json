@@ -1,22 +1,18 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W19_RUNNING_M10W20_HYPOTHESES_FROZEN_M10W21_NEXT",
-  "stage":"M10W21_PREREGISTERED_HIGH_ATR_BULLISH_ENTRY_EVALUATION_AUDIT_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 running unchanged. M10W19 start remains immutable at 2026.07.28 02:31:00 and BAT01 is permanently forbidden. Fetch/Pull latest feature/mochipoyo-alert-research, then run only the M10W21 preregistered historical screen.",
-  "operator":"scripts/mochipoyo_alert_research/m10w21/bat/01_run_preregistered_high_atr_bullish_entry_evaluation.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W21/LATEST/99_UPLOAD_PACKAGE.zip",
-  "preregistration":"config/mochipoyo_alert_research/m10w20_high_atr_bullish_entry_hypothesis_preregistration_20260728.json",
-  "target_regime":"D1 bullish stack + H4 EMA20>EMA30 + H1 MACD line>0 + H1 ATR percentile100>=0.67",
-  "frozen_families":{
-    "HBR1":"M15 close above prior four M15 highs (1-hour price breakout)",
-    "HER1":"M15 EMA20 reclaim from below with EMA20>EMA30",
-    "HRC1":"M15 RCI9 previous <= -80 and current turns upward"
-  },
-  "evaluation":{"splits":["TRAIN_2023_2024","VALIDATION_2025","TEST_2026"],"actual_spread":true,"fixed0p20":true,"extra_cost_bps":[1,2],"horizon_minutes":240,"one_position_per_family":true,"historical_clean_validation":false,"fresh_shadow_required_for_any_pass":true},
-  "forbidden_after_results":["new trigger variants","ATR boundary change","breakout lookback change","EMA period change","RCI threshold change","time/session filter","trigger combination","horizon/exit/runner tuning","M10W19 modification"],
+  "status":"M10W21_NO_ADVANCING_ENTRY_FAMILY_M10W22_NEXT",
+  "stage":"M10W22_HIGH_ATR_BULLISH_NEW_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 running unchanged. M10W19 start remains immutable at 2026.07.28 02:31:00 and BAT01 remains permanently forbidden. Fetch/Pull latest feature/mochipoyo-alert-research, then run only M10W22. M10W22 is outcome-blind and audits lower-timeframe volume, candle morphology, micro-momentum/range, spread state and real-volume availability inside the frozen HIGH-ATR bullish regime.",
+  "operator":"scripts/mochipoyo_alert_research/m10w22/bat/01_run_high_atr_bullish_new_causal_information_availability_audit.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W22/LATEST/99_UPLOAD_PACKAGE.zip",
+  "contract":"config/mochipoyo_alert_research/m10w22_high_atr_bullish_new_causal_information_availability_contract_20260728.json",
+  "M10W21_result":"config/mochipoyo_alert_research/m10w21_user_local_preregistered_high_atr_bullish_entry_result_20260728.json",
+  "M10W21_conclusion":{"HBR1":"REJECT","HER1":"REJECT","HRC1":"INSUFFICIENT_DENSITY","advancing_families":[],"do_not_tune_these_triggers":true},
+  "M10W22_forbidden":["future return computation","PF/PnL/win-loss computation","outcome correlation","profit-ranked feature selection","entry formula creation","feature threshold selection","M10W19 modification"],
+  "next_after_review":"If causal features are available, dense and non-degenerate, M10W23 may preregister at most three simple microstructure entry families before any outcome evaluation. Otherwise change information source rather than tune the failed M10W20 triggers.",
   "M10W19":{"start":"2026.07.28 02:31:00","keep_BAT03_running":true,"BAT01":"FORBIDDEN","review_gates_filtered_resolved":[20,60,120]},
   "M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN",
   "scope":"GOLD_XAUUSD_ONLY",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W19_RUNNING_M10W20_FROZEN_M10W21_NEXT_20260728.md",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W21_NO_ADVANCE_M10W22_CAUSAL_INFORMATION_NEXT_20260728.md",
   "safety":{"audit_only":true,"existing_forward_modified":false,"historical_backfill":false,"existing_threshold_refit":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
