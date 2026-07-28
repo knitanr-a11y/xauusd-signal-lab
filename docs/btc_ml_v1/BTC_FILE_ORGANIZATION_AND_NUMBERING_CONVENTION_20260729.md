@@ -2,7 +2,7 @@
 
 Date: 2026-07-29  
 Repository: `knitanr-a11y/xauusd-signal-lab`  
-Primary branch for the BTC4/BTC5/BTC6/BTC7R/BTC9R family: `main`
+Active research branch: `feature/mochipoyo-alert-research`
 
 ## 1. 目的
 
@@ -22,10 +22,14 @@ Primary branch for the BTC4/BTC5/BTC6/BTC7R/BTC9R family: `main`
 
 ## 2. もちぽよアラート研究との分離
 
-`mochipoyo_alert_research` と `btc_ml_v1` は同じリポジトリ内に存在するが、研究正本は別である。
+`mochipoyo_alert_research` と `btc_ml_v1` は同じリポジトリ・同じ作業ブランチ内に存在するが、研究正本は別である。
 
 - `mochipoyo_alert_research`: もちぽよ由来のgenuine source、proxy、M7C/M8C等のmulti-asset forward研究
 - `btc_ml_v1`: BTC4/BTC5/BTC6/BTC7R/BTC9R stacking・availability・候補別評価研究
+
+現在の正式作業ブランチは `feature/mochipoyo-alert-research` である。フォルダを分離することは、作業ブランチを `main` へ変更することを意味しない。ブランチ変更はユーザーの明示指示なしに行わない。
+
+Stage 01のPythonが出力する `INFERRED_WITH_MAIN_LOGIC` およびコードコメント内の `current-main` は、既存BTC関数の由来・再利用契約を示す固定表現であり、実行対象ブランチが `main` であることを意味しない。
 
 禁止:
 
@@ -33,6 +37,7 @@ Primary branch for the BTC4/BTC5/BTC6/BTC7R/BTC9R family: `main`
 - BTC ML V1のStageを `scripts/mochipoyo_alert_research` 配下へ新規追加する
 - もちぽよ/GOLDの候補条件、payoff、runnerルールをBTC ML V1へ根拠なく移植する
 - BTC ML V1の候補条件をもちぽよ側へ自動反映する
+- ユーザー確認なしに作業ブランチを `main` へ変更する
 
 フォルダ操作体系は共通化するが、研究データ、契約、候補定義、prospective start、runtime stateは統合しない。
 
