@@ -1,0 +1,14 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "status":"M10W24B_POSTRUN_AUDIT_CORRECTION_RERUN_NEXT",
+  "stage":"M10W24B_NEITHER_COHORT_SCOPE_CORRECTION_AUDIT_ONLY_POSTRUN_RERUN",
+  "scope":"GOLD_XAUUSD_ONLY",
+  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 running unchanged. Keep M10W19 BAT03 running and never rerun its BAT01. Fetch/Pull latest feature/mochipoyo-alert-research, then rerun only M10W24B. This rerun is an audit-integrity correction only: it must prove exact decision_time join completeness with unmatched=0 and apply the already-frozen M10W23 REJECT wording before sparse-other-split density fallback. Do not alter any signal formula, threshold, cohort definition, horizon, execution, cost, split or decision tier.",
+  "operator":"scripts/mochipoyo_alert_research/m10w24b/bat/01_run_neither_cohort_scope_correction.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W24B/LATEST/99_UPLOAD_PACKAGE.zip",
+  "required_success_evidence":["status PASS","broader row count remains 8648 unless source artifact identity itself has unexpectedly changed","coverage_join_matched_rows equals broader rows","coverage_join_unmatched_rows=0","corrected coverage_class=NEITHER cohort reported","MVI1/MWR1/MMO1 candidate formulas unchanged","entry_data_gap_count=0","exact M1 entry and +240 minute scheduled exit unchanged","one-position-per-family unchanged","actual/fixed0p20/+1bps/+2bps metrics reproduced","MMO1 remains ROBUST_CANDIDATE or STRONG_CANDIDATE before any fresh-shadow design"],
+  "expected_from_initial_metrics_only":{"MVI1":"INSUFFICIENT_DENSITY because 2026 resolved=19; no rescue","MWR1":"REJECT because train n119 PF=0.8841006751 under frozen REJECT rule","MMO1":"STRONG_CANDIDATE if rerun reproduces initial metrics"},
+  "after_rerun":"If integrity PASS and MMO1 remains ROBUST/STRONG, freeze a brand-new independent fresh prospective MMO1 shadow with a new immutable start created only at user-local initialization. Historical M10W24B is research-exposed and must not be treated as final support. If MMO1 no longer meets the frozen tier because of a genuine reproducibility issue, do not tune/rescue it.",
+  "do_not_run_or_change":{"M10P_BAT01":true,"M10P2_BAT01":true,"M10W19_BAT01":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true,"historical_threshold_rescue":true,"MVI1_variant_search":true,"MWR1_variant_search":true,"MMO1_threshold_tuning":true,"existing_prospective_start_reset":true},
+  "safety":{"audit_only":true,"historical_backfill":false,"nearest_m1_fallback":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
