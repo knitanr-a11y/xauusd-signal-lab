@@ -1,0 +1,62 @@
+{
+  "status": "GOLD_V3_280_HTF_EXPANSION_PRECURSOR_FOUND_SHADOW_ONLY_NO_ACTIVE_PROMOTION_AUDIT_ONLY",
+  "event_contract": {
+    "timeframe": "H1",
+    "horizon_minutes": 240,
+    "mfe_atr_min": 2.0,
+    "final_atr_min": 0.75,
+    "mae_atr_max": 1.25,
+    "mfe_to_mae_min": 1.5,
+    "onset_dedup_hours": 3
+  },
+  "event_counts": {
+    "total": 1561,
+    "CONT": 513,
+    "REV": 540,
+    "NEUTRAL": 508
+  },
+  "calibrated_model": {
+    "calibration": "immediately preceding 6 months; threshold applied unchanged to following year",
+    "REV_q95_lift": {
+      "2024": 2.5450310559006213,
+      "2025": 2.666986469050849,
+      "2026": 3.088461538461538
+    },
+    "CONT_q95_lift": {
+      "2024": 2.1387833429284204,
+      "2025": 2.816517857142857,
+      "2026": 0.0
+    }
+  },
+  "shadow_research_candidate": {
+    "name": "REV_LONG_Q95_BRK6_E175_SHADOW_RESEARCH",
+    "direction": "LONG",
+    "context": "prior closed H4 trend is DOWN; model predicts opposite-direction H1 expansion",
+    "score_gate": "REV model score >= prior 6-month calibration q95",
+    "trigger": "M5 close breaks prior 6 M5 highs with signed body >=0.20; enter next M5 open",
+    "execution": {
+      "tp_atr": 1.75,
+      "sl_atr": 1.0,
+      "max_holding_minutes": 360,
+      "m1_first_touch": true,
+      "same_m1": "SL",
+      "base_priority_preemption": true,
+      "rollover_overlay": true
+    },
+    "activation": "SHADOW_RESEARCH_ONLY",
+    "formal_failure_reasons": [
+      "small sample: 12/17/11 trades",
+      "profit concentration in a few large winners",
+      "2026 integrated DD 76.20 > base 52.48"
+    ]
+  },
+  "selected_active_addition": "NONE",
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
