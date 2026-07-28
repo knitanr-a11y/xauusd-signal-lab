@@ -1,0 +1,92 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W30_LOW_ATR_POST_RESULT_COVARIATE_SHIFT_DIAGNOSTIC_AUDIT_ONLY",
+  "status": "PASS_MATERIAL_2026_COVARIATE_SCALE_SHIFT_DIAGNOSTIC_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "source": {
+    "uploaded_package": "99_UPLOAD_PACKAGE(71).zip",
+    "package_sha256": "e9f63f4e8a83e35c5c1274edf41b5abcacb9a65e90280382077955491b80ce1b",
+    "feature_file": "02_low_atr_bullish_causal_neither_feature_rows.csv",
+    "feature_sha256": "03f0185694485eab2b5e50ab93c2f354a91cdd8b0706f7710b66c2b1173648cd",
+    "rows": 7480,
+    "splits": {"TRAIN_2023_2024": 3640, "VALIDATION_2025": 3193, "TEST_2026": 647},
+    "outcome_or_trade_columns_present": false
+  },
+  "method": {
+    "reference": "TRAIN_2023_2024",
+    "PSI": "train-decile bins with duplicate-edge collapse and epsilon 1e-6",
+    "PSI_bands": {"LOW": "<0.10", "MODERATE": ">=0.10 and <0.25", "SEVERE": ">=0.25"},
+    "KS": "descriptive two-sample empirical CDF distance",
+    "profit_conditioned_feature_selection": false
+  },
+  "validation_2025_vs_train": {
+    "severe_features": [
+      {"feature": "last_closed_m1_spread_bps", "psi": 3.506354843216077, "ks_distance": 0.778694}
+    ],
+    "moderate_features": [
+      {"feature": "m5_range3_bps", "psi": 0.1204912152570927, "ks_distance": 0.156283}
+    ]
+  },
+  "test_2026_vs_train": {
+    "severe_features": [
+      {"feature": "last_closed_m1_spread_bps", "psi": 10.782749125116759, "ks_distance": 0.9891808346213292, "train_median": 0.7311516641752442, "test_median": 0.3857712145235147},
+      {"feature": "m5_range3_bps", "psi": 1.4680140481533421, "ks_distance": 0.4807539446643002, "train_median": 8.522793264631058, "test_median": 16.124936791550557},
+      {"feature": "m1_range5_bps", "psi": 1.335003385659758, "ks_distance": 0.45840905616794336, "train_median": 4.714409615284675, "test_median": 8.489686712749696},
+      {"feature": "m5_ret3_bps", "psi": 0.33395916355834243, "ks_distance": 0.13151230531446922, "train_median": 0.049625125871921555, "test_median": 0.1927837198012483}
+    ],
+    "moderate_features": [
+      {"feature": "m1_ret5_bps", "psi": 0.2395858428949679, "ks_distance": 0.12971279107291472, "train_median": -0.0420320877825286, "test_median": -0.2570790676337253},
+      {"feature": "h1_atr_pct100", "psi": 0.22351781377848168, "ks_distance": 0.21297195848973288, "train_median": 0.14, "test_median": 0.08}
+    ],
+    "severe_count": 4,
+    "moderate_count": 2
+  },
+  "frozen_formula_density": {
+    "TRAIN_2023_2024": {
+      "LMVI1": {"pass_count": 408, "pass_fraction": 0.11208791208791209},
+      "LMWR1": {"pass_count": 287, "pass_fraction": 0.07884615384615384},
+      "LMMO1": {"pass_count": 725, "pass_fraction": 0.19917582417582416}
+    },
+    "VALIDATION_2025": {
+      "LMVI1": {"pass_count": 334, "pass_fraction": 0.10460382085812715},
+      "LMWR1": {"pass_count": 262, "pass_fraction": 0.08205449420607579},
+      "LMMO1": {"pass_count": 744, "pass_fraction": 0.23300970873786409}
+    },
+    "TEST_2026": {
+      "LMVI1": {"pass_count": 65, "pass_fraction": 0.10046367851622875},
+      "LMWR1": {"pass_count": 57, "pass_fraction": 0.08809891808346214},
+      "LMMO1": {"pass_count": 141, "pass_fraction": 0.21792890262751158}
+    }
+  },
+  "interpretation": {
+    "material_2026_covariate_scale_shift_present": true,
+    "formula_trigger_density_collapsed": false,
+    "range_scale_roughly_doubled_in_2026": true,
+    "spread_bps_shift_is_partly_price_level_sensitive": true,
+    "M10W29_outcome_failure_rescued": false,
+    "M10W29_family_advance_authorized": false,
+    "post_result_formula_or_threshold_tuning_authorized": false,
+    "next": "Audit availability and stability of genuinely scale-normalized causal pre-entry features. Do not refit or rescue the failed M10W29 formulas."
+  },
+  "implementation": {
+    "contract": "config/mochipoyo_alert_research/m10w30_low_atr_post_result_covariate_shift_audit_contract_20260728.json",
+    "runner": "scripts/mochipoyo_alert_research/m10w30/python/run_low_atr_covariate_shift_audit.py",
+    "operator": "scripts/mochipoyo_alert_research/m10w30/bat/01_run_covariate_shift_audit.bat"
+  },
+  "guardrails": {
+    "post_result_diagnostic_only": true,
+    "trade_ledger_read": false,
+    "future_return_read_or_computed": false,
+    "pf_or_pnl_read_or_computed": false,
+    "win_loss_label_read": false,
+    "fresh_shadow_authorized": false,
+    "M10W26_modified": false,
+    "existing_monitor_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
