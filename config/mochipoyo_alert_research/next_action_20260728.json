@@ -1,31 +1,22 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10W34_FIRST_CYCLE_PASS_CORRECT_INITIAL_HEALTH_PACKAGE_NEXT",
+  "status": "M10W34_INITIAL_HEALTH_PASS_FRESH_ACCUMULATION_AND_READ_ONLY_CHECKPOINT_NEXT",
   "stage": "M10W34_SNDX1_LOW_ATR_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW",
   "scope": "GOLD_XAUUSD_ONLY",
-  "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00.",
-  "M10W34_status": "Initialized at immutable MT5-server start 2026.07.28 18:19:00. First cycle PASS with candidates=0, accepted=0, resolved=0, open=0. Initial zero is normal. BAT01 is permanently forbidden.",
-  "M10W34_initial_cycle_evidence": "config/mochipoyo_alert_research/m10w34_initial_cycle_evidence_health_package_pending_20260728.json",
-  "uploaded_wrong_package_sha256": "989ed1fe07b8612b68a7482fc46693d9e5a1244c1a6352c536bf73c6ef9fbd55",
-  "uploaded_wrong_package_interpretation": "This was a wrapper/archive of M10W34 output LATEST, not the M10W34_INITIAL_HEALTH package. It verifies initialization and first cycle but not process/lock/loop-health checks.",
+  "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00. At 20 resolved, run its existing read-only checkpoint/health audit.",
+  "M10W34_status": "PASS initial health from immutable MT5-server start 2026.07.28 18:19:00. Exactly one process and one lock; 7 successful cycles; waiting=0; terminal failures=0; all private snapshot and shared journal checks PASS. Initial resolved=0 is normal.",
+  "M10W34_initial_health_result": "config/mochipoyo_alert_research/m10w34_user_local_initial_health_result_20260728.json",
+  "M10W34_initial_health_package_sha256": "dfee3076f45e53e31ccbb097e88416702aff53c650348d0e9fe3531cb6c799c4",
   "immediate_action": [
     "Keep collector, M7C, M8C and all nine loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26/M10W34 running unchanged.",
-    "Do not Fetch/Pull merely for this evidence correction; no runtime code change is required.",
-    "Do not run M10W34 BAT01 again.",
-    "While M10W34 BAT03 remains running, run scripts/mochipoyo_alert_research/m10w34/bat/05_audit_initial_health.bat once.",
-    "Require console status [M10W34 HEALTH] PASS_M10W34_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY.",
-    "Upload the generated file itself, not a manually zipped LATEST folder: %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_INITIAL_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip."
+    "No BAT or upload is required immediately after this initial-health PASS.",
+    "Never run M10W34 BAT01 again.",
+    "Watch the M10W34 BAT03 console count. When RESOLVED first reaches 20, Fetch/Pull the latest branch and run scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat while M10W34 remains running.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip at the 20-resolved operational gate.",
+    "Repeat the same read-only checkpoint at 60 resolved and 120 resolved only when each gate is reached. No automatic promotion follows any gate."
   ],
-  "expected_health_package_contents": [
-    "00_READ_ME_FIRST.txt",
-    "01_summary.json",
-    "02_runtime_manifest.json",
-    "03_runtime_state.json",
-    "04_prestart_causal_engine_audit.json",
-    "05_snapshot_receipt.json",
-    "06_loop_log_tail.txt",
-    "07_audit.log"
-  ],
+  "checkpoint_operator": "scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat",
+  "checkpoint_output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip",
   "review_gates": {
     "operational_resolved": 20,
     "interim_resolved": 60,
@@ -35,7 +26,7 @@
   "authorization": {
     "M10W34_BAT01": false,
     "M10W34_BAT03_keep_running": true,
-    "M10W34_BAT05_read_only_initial_health": true,
+    "M10W34_BAT06_read_only_checkpoint_at_gate": true,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
   },
@@ -47,6 +38,7 @@
     "prospective_start_reset": true,
     "historical_backfill_before_start": true,
     "formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
+    "checkpoint_before_requested_gate_unless_diagnosing_an_incident": true,
     "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
   },
   "safety": {
