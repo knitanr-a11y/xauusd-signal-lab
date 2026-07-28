@@ -1,15 +1,15 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"FRESH_LOOP_MASS_STOP_READ_ONLY_DIAGNOSTIC_NEXT",
-  "stage":"FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY",
+  "status":"FRESH_LOOP_ROLLING_M1_PRESERVED_START_RECOVERY_IMPLEMENTATION_NEXT",
+  "stage":"FRESH_LOOP_ROLLING_M1_PRESERVED_START_RECOVERY_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
-  "immediate_action":"Fetch/Pull latest feature/mochipoyo-alert-research. Do not restart, recover, delete locks or rerun any initializer yet. Run the read-only diagnostic BAT once. It inspects M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 process command lines, locks, immutable runtime manifests, state/status files, output timestamps, M9V/M9Y log tails and current GOLD CSV frontiers without changing anything.",
-  "operator":"scripts/mochipoyo_alert_research/recovery/bat/02_audit_stopped_fresh_loops.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/FRESH_LOOP_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
-  "upload":"Upload only 99_UPLOAD_PACKAGE.zip from FRESH_LOOP_DIAGNOSTIC/LATEST.",
-  "why":"Code audit confirms all seven loops are operationally brittle: one cycle exception exits the forever process. The exact local cause may be transient feed/read failure, stale lock after abrupt stop, or a hard integrity failure. Those cases must be distinguished before recovery or retry behavior is changed.",
-  "after_review":{"stale_lock_only":"Use the existing forced-reboot recovery BAT, which archives/removes stale locks only after proving no protected process is running, then restart BAT03 in preserved order.","no_lock_transient_exit":"Freeze a reliability correction that retries only explicitly transient read/feed conditions and continues to fail closed on immutable contract/prefix violations.","hard_integrity_failure":"Do not restart blindly; resolve the exact integrity mismatch without resetting starts or backfilling."},
-  "research_state":"M10W25B passed and froze a 5913-row causal NEITHER pre-entry cohort, but M10W25C and M10W26 are paused until forward-loop health is restored.",
-  "do_not_run_or_change":{"M9V_initializer":true,"M9Y_BAT01":true,"M10B_BAT01":true,"M10E_BAT01":true,"M10P_BAT01":true,"M10P2_BAT01":true,"M10W19_BAT01":true,"manual_lock_deletion":true,"prospective_start_reset":true,"historical_backfill":true,"M10W25C_before_health_review":true,"M10W26_fresh_start":true},
-  "safety":{"audit_only":true,"diagnostic_only":true,"lock_removal":false,"process_start_or_stop":false,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "immediate_action":"Do not restart any stopped loop yet. Implement and pre-audit the frozen rolling-M1 recovery contract for M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19. Existing runtime manifests and prospective starts must remain byte-for-byte unchanged. The repair must replace full-file append-only M1 validation with advancing overlap-checkpoint validation, retain strict higher-timeframe prefix checks, and retry explicitly transient CSV PermissionError/replacement reads for up to 90 seconds while continuing to fail closed on genuine integrity violations.",
+  "diagnostic_result":"config/mochipoyo_alert_research/fresh_loop_mass_stop_diagnostic_result_20260728.json",
+  "recovery_contract":"config/mochipoyo_alert_research/fresh_loop_rolling_m1_recovery_contract_20260728.json",
+  "root_cause":{"M9V":"frozen M1 prefix expected 151494 rows but rolling live file had 150000","M9Y":"Permission denied on M1 during same replacement window","all_locks_absent":true,"all_starts_preserved":true,"forced_reboot_recovery_required":false},
+  "implementation_acceptance":["No initializer or runtime-manifest edit","Exact existing starts remain present in current M1","At least 10 M1 rows before each start remain","Per-loop 4096-row rolling overlap checkpoint sidecar","Previous overlap hash must match before checkpoint advance","Strict non-M1 frozen prefix checks unchanged","Transient access retry does not swallow contract/start/timestamp/overlap failures","A one-time migration audit produces a receipt before BAT03 restart"],
+  "after_migration_pass":{"restart_order":["M9V BAT03","M9Y BAT03","M10B BAT03","M10E BAT03","M10P BAT03","M10P2 BAT03","M10W19 BAT03"],"BAT01":"FORBIDDEN","forced_reboot_recovery":"NOT_USED","historical_backfill":false},
+  "research_state":"M10W25B passed and froze the 5913-row causal NEITHER cohort. M10W25C/M10W26 remain paused until all seven repaired loops pass health review.",
+  "do_not_run_or_change":{"M9V_initializer":true,"M9Y_BAT01":true,"M10B_BAT01":true,"M10E_BAT01":true,"M10P_BAT01":true,"M10P2_BAT01":true,"M10W19_BAT01":true,"forced_reboot_recovery_now":true,"manual_lock_deletion":true,"prospective_start_reset":true,"historical_backfill":true,"M10W25C_before_health_restore":true,"M10W26_fresh_start":true},
+  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
