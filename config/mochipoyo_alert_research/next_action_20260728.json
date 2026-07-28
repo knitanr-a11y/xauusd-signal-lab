@@ -1,28 +1,31 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10W34_GUARDED_INITIALIZE_ONCE_AND_INITIAL_HEALTH_NEXT",
+  "status": "M10W34_FIRST_CYCLE_PASS_CORRECT_INITIAL_HEALTH_PACKAGE_NEXT",
   "stage": "M10W34_SNDX1_LOW_ATR_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW",
   "scope": "GOLD_XAUUSD_ONLY",
   "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00.",
-  "M10W33_result": "config/mochipoyo_alert_research/m10w33_user_local_result_20260728.json",
-  "M10W33_package_sha256": "fa41d4717e32e5f02cade9043928e27d2d023b13148f7d80b53cdd84edb33a13",
-  "M10W33_decision": "SNDX1 is ROBUST_CANDIDATE; SNRI1 and SNRC1 are REJECT. Historical support is not fresh support.",
-  "M10W34_contract": "config/mochipoyo_alert_research/m10w34_sndx1_fresh_prospective_shadow_contract_20260728.json",
-  "M10W34_implementation_audit": "config/mochipoyo_alert_research/m10w34_prestart_implementation_audit_20260728.json",
+  "M10W34_status": "Initialized at immutable MT5-server start 2026.07.28 18:19:00. First cycle PASS with candidates=0, accepted=0, resolved=0, open=0. Initial zero is normal. BAT01 is permanently forbidden.",
+  "M10W34_initial_cycle_evidence": "config/mochipoyo_alert_research/m10w34_initial_cycle_evidence_health_package_pending_20260728.json",
+  "uploaded_wrong_package_sha256": "989ed1fe07b8612b68a7482fc46693d9e5a1244c1a6352c536bf73c6ef9fbd55",
+  "uploaded_wrong_package_interpretation": "This was a wrapper/archive of M10W34 output LATEST, not the M10W34_INITIAL_HEALTH package. It verifies initialization and first cycle but not process/lock/loop-health checks.",
   "immediate_action": [
-    "Keep collector, M7C, M8C and all eight existing loops running unchanged.",
-    "Fetch/Pull feature/mochipoyo-alert-research.",
-    "Run scripts/mochipoyo_alert_research/m10w34/bat/01_initialize_fresh_start_once.bat exactly once.",
-    "Require both [M10W34 PRESTART ENGINE PASS] and [M10W34 INIT PASS]. If BLOCKED, do not clean up or retry blindly.",
-    "After INIT PASS, never run M10W34 BAT01 again. Run scripts/mochipoyo_alert_research/m10w34/bat/03_run_shadow_forever.bat and keep it open.",
-    "After first [M10W34 PASS], run scripts/mochipoyo_alert_research/m10w34/bat/05_audit_initial_health.bat while the loop remains running.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_INITIAL_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip."
+    "Keep collector, M7C, M8C and all nine loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26/M10W34 running unchanged.",
+    "Do not Fetch/Pull merely for this evidence correction; no runtime code change is required.",
+    "Do not run M10W34 BAT01 again.",
+    "While M10W34 BAT03 remains running, run scripts/mochipoyo_alert_research/m10w34/bat/05_audit_initial_health.bat once.",
+    "Require console status [M10W34 HEALTH] PASS_M10W34_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY.",
+    "Upload the generated file itself, not a manually zipped LATEST folder: %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_INITIAL_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip."
   ],
-  "expected_initialization_output": [
-    "[M10W34 PRESTART ENGINE PASS] six causal coverage families and SNDX1 feature engine verified",
-    "[M10W34 INIT PASS] fresh start=<MT5 server time>"
+  "expected_health_package_contents": [
+    "00_READ_ME_FIRST.txt",
+    "01_summary.json",
+    "02_runtime_manifest.json",
+    "03_runtime_state.json",
+    "04_prestart_causal_engine_audit.json",
+    "05_snapshot_receipt.json",
+    "06_loop_log_tail.txt",
+    "07_audit.log"
   ],
-  "expected_first_cycle_output": "[M10W34 PASS] CANDIDATES=<n> ACCEPTED=<n> RESOLVED=<n> OPEN=<n>",
   "review_gates": {
     "operational_resolved": 20,
     "interim_resolved": 60,
@@ -30,16 +33,14 @@
     "automatic_live_promotion": false
   },
   "authorization": {
-    "M10W34_BAT01_exactly_once_before_initialization": true,
-    "M10W34_BAT03_after_INIT_PASS": true,
-    "M10W34_BAT05_after_first_PASS": true,
+    "M10W34_BAT01": false,
+    "M10W34_BAT03_keep_running": true,
+    "M10W34_BAT05_read_only_initial_health": true,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
   },
   "do_not_run_or_change": {
-    "existing_loop_BAT01_or_initializer": true,
-    "M10W34_BAT01_after_initialization": true,
-    "M10W34_BAT03_before_INIT_PASS": true,
+    "any_loop_BAT01_or_initializer": true,
     "stop_or_restart_healthy_loops": true,
     "force_close_or_taskkill_loops": true,
     "manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion": true,
