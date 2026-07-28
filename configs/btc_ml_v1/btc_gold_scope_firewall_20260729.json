@@ -1,10 +1,11 @@
 {
   "project": "BTC_ML_V1",
-  "contract": "BTC_GOLD_SCOPE_FIREWALL_20260729",
-  "status": "ACTIVE_HARD_SCOPE_FIREWALL",
+  "contract": "BTC_GOLD_SCOPE_FIREWALL_20260729_V2_DUAL_TRACK_AWARE",
+  "status": "ACTIVE_HARD_MUTATION_FIREWALL_WITH_M7C_SCOPE_ACKNOWLEDGED",
   "repository": "knitanr-a11y/xauusd-signal-lab",
-  "required_branch": "main",
-  "purpose": "Keep BTC4/BTC5/BTC6/BTC7R/BTC9R fresh-forward research completely isolated from GOLD and Mochipoyo research and runtimes.",
+  "authoritative_base_branch": "main",
+  "btc_working_branch": "feature/btc-fresh-forward-research",
+  "purpose": "Keep BTC4/BTC5/BTC6/BTC7R/BTC9R fresh-forward work isolated from GOLD/M10 mutations while explicitly preserving the legitimate running M7C BTCUSD/XAUUSD background track.",
   "btc_research_scope": {
     "symbol": "BTCUSD#",
     "candidate_ids": [
@@ -27,9 +28,17 @@
       "scripts/btc_ml_v1/research/reproduce_btc_stacking_portfolio.py",
       "RUN_BTC_STACKING_REPRODUCTION.bat"
     ],
-    "support_path_rule": "Support paths may be inspected only to reuse canonical BTC file resolution, broker-time conversion, and candidate engines. They must not be modified during availability Stage 01."
+    "support_path_rule": "Support paths may be inspected only to reuse canonical BTC file resolution, broker-time conversion, and candidate engines. They must not be modified during availability Stage FF01."
   },
-  "hard_forbidden_paths_and_entities": [
+  "known_separate_m7c_background": {
+    "branch": "feature/mochipoyo-alert-research",
+    "symbols": ["BTCUSD", "XAUUSD"],
+    "immutable_start_utc": "2026-07-20T14:54:15Z",
+    "scope_reference": "docs/mochipoyo_alert_research/SCOPE_CLARIFICATION_M10_GOLD_ONLY_M7C_DUAL_SOURCE_BACKGROUND_20260727.md",
+    "rule": "The existence and scope of M7C may be acknowledged through the V2 handoff and dual-track contract. FF01 does not read its runtime outputs or alter its files/processes.",
+    "keep_running": ["collector", "M7C", "M8C"]
+  },
+  "hard_forbidden_mutation_paths_and_entities": [
     "docs/mochipoyo_alert_research/**",
     "config/mochipoyo_alert_research/**",
     "scripts/mochipoyo_alert_research/**",
@@ -41,22 +50,39 @@
     "scripts/gold_ml_v1/**",
     "M10W24B",
     "any M10W stage",
-    "any GOLD or XAUUSD candidate, contract, runtime, checkpoint, lock, state, journal, snapshot, collector or BAT"
+    "any GOLD or XAUUSD candidate, contract, runtime, checkpoint, lock, state, journal, snapshot, collector or BAT",
+    "M7C or M8C runtime, start, formula, matching rules, gates, state, lock, journal or process"
   ],
+  "read_policy": {
+    "allowed_scope_acknowledgement": [
+      "configs/btc_ml_v1/btc_dual_track_scope_20260729.json",
+      "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_DUAL_TRACK_FF01_M7C_PRESERVED_20260729.md",
+      "feature/mochipoyo-alert-research:docs/mochipoyo_alert_research/SCOPE_CLARIFICATION_M10_GOLD_ONLY_M7C_DUAL_SOURCE_BACKGROUND_20260727.md"
+    ],
+    "forbidden_for_ff01": [
+      "M10W24B implementation or result files",
+      "other M10W implementation or result files",
+      "M7C/M8C runtime outputs as FF01 data",
+      "GOLD current state or next action as authority for BTC FF01"
+    ],
+    "rule": "Knowing that M7C exists is required; using or modifying M7C/GOLD evidence in FF01 is forbidden."
+  },
   "forbidden_actions": {
-    "checkout_or_modify_feature_mochipoyo_branch": true,
-    "read_old_gold_handoff_to_decide_btc_work": true,
-    "repository_wide_search_for_m10w_or_gold": true,
-    "start_stop_restart_or_taskkill_gold_processes": true,
-    "modify_gold_files": true,
-    "modify_or_delete_files_csv": true,
+    "work_directly_on_main": true,
+    "checkout_existing_gold_working_folder_to_btc_branch": true,
+    "merge_feature_mochipoyo_into_btc_ff01_branch": true,
+    "start_stop_restart_or_taskkill_gold_or_m7c_processes": true,
+    "modify_gold_mochipoyo_m7c_or_m8c_files": true,
+    "modify_or_delete_source_csv": true,
     "modify_existing_btc_operational_runtime_in_stage01": true,
     "run_btc_reproduction_against_fresh_extended_csv": true,
     "use_skip_input_hash_check_as_fresh_evaluator": true,
     "change_candidate_rules_thresholds_tp_sl_exit_spread_pip_lots_or_overlap_policy": true,
     "orders_or_discord_or_live_ready_or_final_signal": true,
-    "use_btc10r_or_demo_runtime_lots_in_five_candidate_research": true
+    "use_btc10r_or_demo_runtime_lots_in_five_candidate_research": true,
+    "cross_track_m7c_btc_ml_v1_mixing_without_contract": true,
+    "broaden_gold_m10_to_btc": true
   },
-  "incident_rule": "If any requested BTC action appears to require reading or changing a forbidden path or a running GOLD process, stop without touching it and ask the user. Do not infer permission from an old handoff.",
-  "precedence": "This firewall overrides older BTC or GOLD handoffs for the BTC fresh-forward project."
+  "incident_rule": "If a BTC FF01 action appears to require changing a running GOLD/M7C/M8C process or forbidden path, stop without touching it and ask the user. Do not infer permission from an old handoff.",
+  "precedence": "This V2 firewall and the dual-track contract override the earlier all-read-forbidden wording and older BTC or GOLD handoffs for the BTC fresh-forward project."
 }
