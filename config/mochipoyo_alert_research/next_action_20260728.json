@@ -1,20 +1,29 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W25C_RESUME_FROM_FROZEN_M10W25B_CAUSAL_NEITHER_COHORT_NEXT",
-  "stage":"M10W25C_AUDIT_ONLY",
+  "status":"M10W26_GUARDED_USER_LOCAL_INITIALIZE_ONCE_AND_INITIAL_HEALTH_NEXT",
+  "stage":"M10W26_MMO1_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
   "operational_health_result":"config/mochipoyo_alert_research/bounded_csv_v4_restart_health_user_local_result_20260728.json",
   "operational_health_package_sha256":"fae9353ea2dd5a1096978afc95478f27c8450c1938de808c23bd2d687a4f505b",
-  "operational_health":"PASS; M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 are all RUNNING through run_bounded_adapter_loop_v4.py with one process and one lock each, zero waiting/terminal failures, preserved runtime hashes and starts, valid shared journals, and valid per-loop private snapshot receipts/files.",
+  "M10W25C_result":"config/mochipoyo_alert_research/m10w25c_independent_reproduction_result_20260728.json",
+  "M10W25C_decision":"PASS; the exact frozen M10W23 MMO1 formula remains STRONG_CANDIDATE on the 5913-row prefix-causal NEITHER cohort. Historical support is not fresh support, so an independent fresh shadow is required.",
+  "M10W26_contract":"config/mochipoyo_alert_research/m10w26_mmo1_causal_neither_fresh_prospective_shadow_contract_20260728.json",
+  "M10W26_implementation_audit":"config/mochipoyo_alert_research/m10w26_prestart_implementation_audit_20260728.json",
   "immediate_action":[
-    "Keep all seven V4 BAT03 windows running unchanged.",
-    "Resume M10W25C exactly from the frozen M10W25B causal NEITHER cohort of 5913 pre-entry rows.",
-    "Before any M10W25C code or execution, read the existing M10W25C handoff/contract and the M10W25B formal result; do not infer or refit thresholds from prospective outcomes.",
-    "Preserve the M10W25B cohort, H4 boundary classification, causal exclusions, exact-M1 rules, MT5 server time, closed-row contract and audit-only guardrails.",
-    "Do not create or start M10W26 and do not modify the seven running forward monitors."
+    "Keep collector, M7C, M8C and the seven healthy V4 loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 running unchanged.",
+    "Fetch/Pull the latest feature/mochipoyo-alert-research branch.",
+    "Run scripts/mochipoyo_alert_research/m10w26/bat/01_initialize_fresh_start_once.bat exactly once. V2 first audits all six frozen M10W25 causal coverage families on a verified M10W26 private snapshot; it creates a new M10W26-only immutable start only after the prestart audit passes.",
+    "Require both [M10W26 PRESTART ENGINE PASS] and [M10W26 INIT PASS]. If BLOCKED appears, do not clean up, edit, delete, reset or retry blindly; preserve the full screen and files.",
+    "After INIT PASS, never run M10W26 BAT01 again. Start scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat and keep the window open.",
+    "Wait for the first [M10W26 PASS] cycle, then while the loop remains running execute scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W26_INITIAL_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip."
   ],
-  "M10W25B_anchor":{"result":"config/mochipoyo_alert_research/m10w25b_user_local_result_20260728.json","status":"PASS_H4_BOUNDARY_CLASSIFIED_CAUSAL_NEITHER_COHORT_FROZEN_AUDIT_ONLY","causal_neither_preentry_rows":5913,"exact_m1_primary_exit_missing":21,"other_logic_mismatch":0},
-  "authorization":{"M10W25C":true,"M10W26":false,"M10V":false},
-  "do_not_run_or_change":{"any_BAT01_or_initializer":true,"stop_or_restart_healthy_v4_loops":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_lock_adapter_snapshot_or_journal_deletion":true,"runtime_manifest_edit":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W26":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
-  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "expected_initialization_output":["[M10W26 PRESTART ENGINE PASS] six causal coverage families verified before start freeze","[M10W26 INIT PASS] fresh start=<MT5 server time>"],
+  "expected_first_cycle_output":"[M10W26 PASS] CANDIDATES=<n> ACCEPTED=<n> RESOLVED=<n> OPEN=<n>",
+  "operators":{"readme":"scripts/mochipoyo_alert_research/m10w26/bat/00_READ_ME_FIRST.txt","initialize_once":"scripts/mochipoyo_alert_research/m10w26/bat/01_initialize_fresh_start_once.bat","once_audit_helper":"scripts/mochipoyo_alert_research/m10w26/bat/02_run_shadow_once.bat","persistent":"scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat","normal_stop":"scripts/mochipoyo_alert_research/m10w26/bat/04_stop_shadow_forever.bat","initial_health":"scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat"},
+  "initial_health_acceptance":["exactly one V2 M10W26 process","M10W26 lock present","frozen runtime V2 and implementation SHA inventory valid","runtime/state/start receipt/prestart audit start values agree","RUNNING with successful_cycles >= 1 and terminal failures = 0","LATEST output PASS at the immutable start","private snapshot receipt and six file SHA/size values valid and not ahead of shared journals","all six shared journals verify"],
+  "review_gates":{"operational_resolved":20,"interim_resolved":60,"formal_resolved":120,"automatic_live_promotion":false},
+  "authorization":{"M10W26_BAT01_exactly_once_before_initialization":true,"M10W26_BAT03_after_INIT_PASS":true,"M10W26_BAT05_after_first_PASS":true,"M10W26_live_or_final_promotion":false,"M10V":false},
+  "do_not_run_or_change":{"existing_loop_BAT01_or_initializer":true,"M10W26_BAT01_after_initialization":true,"M10W26_BAT03_before_INIT_PASS":true,"stop_or_restart_healthy_v4_loops":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_runtime_state_prestart_audit_lock_STOP_adapter_snapshot_or_journal_edit_or_deletion":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
+  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"formula_change":false,"threshold_change":false,"horizon_change":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
