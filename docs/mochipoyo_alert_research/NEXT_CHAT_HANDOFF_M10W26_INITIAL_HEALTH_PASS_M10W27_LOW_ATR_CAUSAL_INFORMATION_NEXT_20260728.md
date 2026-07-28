@@ -132,10 +132,6 @@ It does **not**:
 2. Fetch/Pull `feature/mochipoyo-alert-research`.
 3. Run:
 
-`script/mochipoyo_alert_research/m10w27/bat/01_run_low_atr_bullish_neither_causal_information_availability_audit.bat`
-
-Correct path:
-
 `scripts/mochipoyo_alert_research/m10w27/bat/01_run_low_atr_bullish_neither_causal_information_availability_audit.bat`
 
 4. Upload only:
