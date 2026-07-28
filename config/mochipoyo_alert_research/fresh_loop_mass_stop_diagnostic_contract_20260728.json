@@ -1,0 +1,17 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_READY",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "trigger":"User reported M9V, M9Y, M10B, M10E, M10P, M10P2 and M10W19 loops all stopped while collector/M7C/M8C and other processes remained running.",
+  "known_implementation_risk":"All seven fresh-shadow loops are fail-closed and currently terminate the forever process after a single cycle exception. Transient CSV read/update races, temporary feed staleness, upstream LATEST replacement races or an abrupt process termination can therefore stop persistent monitoring. An abrupt termination can also leave a stale exclusive lock.",
+  "purpose":"Collect the exact local process, lock, runtime, status/state, output timestamp, log-tail and GOLD CSV frontier evidence before any recovery or runtime behavior change.",
+  "targets":["M9V","M9Y","M10B","M10E","M10P","M10P2","M10W19"],
+  "classification":["RUNNING","STOPPED_STALE_LOCK_POSSIBLE","STOPPED_NO_LOCK","STOPPED_RUNTIME_MISSING"],
+  "required_evidence":["Windows command lines for matching loop processes","lock existence/content/mtime","runtime manifest existence and immutable prospective start","state/status JSON where available","latest output summary status/build time/server frontier","M9V/M9Y persistent log tails","current goldsharp M1/M5/M15/H1/H4/D1 last rows and file mtimes"],
+  "diagnostic_only":true,
+  "mutations_forbidden":["remove lock","start or stop process","rewrite runtime manifest","reset or move prospective start","modify state/output/history","modify MT5 CSV","rerun any initializer"],
+  "after_review":"Classify the common stop cause. Only then may a separate frozen reliability correction distinguish transient retryable conditions from hard integrity failures. Existing fail-closed integrity checks must not be weakened blindly.",
+  "safety":{"audit_only":true,"historical_backfill":false,"nearest_m1_fallback":false,"existing_forward_modified":false,"runtime_reset":false,"start_reset":false,"lock_removal":false,"process_start_or_stop":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
