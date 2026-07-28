@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "status": "ALL_NINE_FORWARD_LOOPS_FRESH_ACCUMULATION_AND_REVIEW_GATE_WATCH_NEXT",
+  "stage": "M9V_PLUS_MULTI_LOOP_FRESH_PROSPECTIVE_MONITORING",
+  "scope": "GOLD_XAUUSD_ONLY",
+  "recovery_result": {
+    "status": "PASS_M10P_PRESERVED_START_RECOVERY_HEALTHY_RUNNING_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10p_preserved_start_recovery_health_user_local_result_20260729.json",
+    "package_sha256": "5cc7e2ab4c6432ba019969a37452b7c58df38cf1a31b82ba009c0a13d457a92f",
+    "preserved_start": "2026.07.24 23:56:00",
+    "M10P_recovery_BAT02_may_run_again": false
+  },
+  "immediate_action": [
+    "Keep collector, M7C, M8C and all nine loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26/M10W34 running unchanged.",
+    "Keep the M10P preserved-start recovery window open; it is now the active M10P loop window.",
+    "Keep the read-only V3 dashboard open if convenient. It refreshes every 60 seconds and may be closed without affecting any loop.",
+    "No BAT or upload is required immediately after the M10P recovery health PASS.",
+    "When any row first displays REACHED or FORMAL, send the complete dashboard before running a checkpoint BAT.",
+    "For M10P and M10P2, review gates are resolved 5/10/20. M10V remains forbidden until both have at least 20 resolved and integrity PASS.",
+    "For M10W26 and M10W34, review gates are resolved 20/60/120. Use only their read-only checkpoint BAT after the gate is reviewed.",
+    "Never run M10P BAT01 or M10P recovery BAT02 again."
+  ],
+  "dashboard": {
+    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "version": "V3_FILE_SHARE_DELETE_NULL_SAFE",
+    "read_only": true,
+    "refresh_seconds": 60,
+    "rule": "A REACHED label requires dashboard review before any checkpoint. It is not automatic authorization or promotion."
+  },
+  "review_gates": {
+    "M9V": "V0/V1/V2 maximum accepted 20/60/120",
+    "M9Y": "Y0 accepted 20/60/120",
+    "M10B": "M5 accepted 20/60/120; H1 accepted 5/10/20; H4 descriptive accepted 5",
+    "M10E": "E0 accepted 5/10/20",
+    "M10P": "resolved 5/10/20",
+    "M10P2": "resolved 5/10/20",
+    "M10W19": "filtered resolved 20/60/120",
+    "M10W26": "resolved 20/60/120",
+    "M10W34": "resolved 20/60/120"
+  },
+  "authorization": {
+    "all_nine_loops_keep_running": true,
+    "dashboard_v3_optional_read_only": true,
+    "checkpoint_only_after_reviewed_gate": true,
+    "M10P_BAT01": false,
+    "M10P_recovery_BAT02": false,
+    "M10P_recovery_health_BAT03_repeat": false,
+    "M10W26_BAT01": false,
+    "M10W34_BAT01": false,
+    "M10V": false
+  },
+  "do_not_run_or_change": {
+    "any_loop_BAT01_or_initializer": true,
+    "M10P_recovery_BAT02_again": true,
+    "stop_or_restart_healthy_loops": true,
+    "force_close_or_taskkill_loops": true,
+    "manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion": true,
+    "prospective_start_reset": true,
+    "historical_backfill_before_start": true,
+    "formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
+    "dashboard_as_automatic_checkpoint_or_promotion_authorization": true,
+    "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
+  },
+  "safety": {
+    "audit_only": true,
+    "runtime_reset": false,
+    "start_reset": false,
+    "existing_forward_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
