@@ -1,24 +1,58 @@
 {
-  "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W27_PASS_M10W29_PREREGISTERED_LOW_ATR_EVALUATION_NEXT",
-  "stage":"M10W29_PREREGISTERED_LOW_ATR_BULLISH_NEITHER_MICROSTRUCTURE_EVALUATION_AUDIT_ONLY",
-  "scope":"GOLD_XAUUSD_ONLY",
-  "M10W26_status":"PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY; keep running unchanged from immutable MT5-server start 2026.07.28 15:58:00.",
-  "M10W27_result":"config/mochipoyo_alert_research/m10w27_user_local_result_20260728.json",
-  "M10W27_package_sha256":"e9f63f4e8a83e35c5c1274edf41b5abcacb9a65e90280382077955491b80ce1b",
-  "M10W27_decision":"PASS; 7480 prefix-causal low-ATR bullish NEITHER rows, all numeric causal features sufficiently dense, zero degenerate features, zero source timing violations, real volume unusable, and no outcomes/future path read.",
-  "M10W28_contract":"config/mochipoyo_alert_research/m10w28_low_atr_microstructure_preregistration_20260728.json",
-  "M10W28_decision":"Freeze all three exact M10W23 semantic formulas together before low-ATR outcomes, rather than selecting only the known high-ATR winner.",
-  "immediate_action":[
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "status": "M10W29_NO_ADVANCE_M10W30_DIAGNOSED_M10W31_OUTCOME_BLIND_INFORMATION_NEXT",
+  "stage": "M10W31_LOW_ATR_SCALE_NORMALIZED_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "scope": "GOLD_XAUUSD_ONLY",
+  "M10W26_status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY; keep running unchanged from immutable MT5-server start 2026.07.28 15:58:00.",
+  "M10W29_result": "config/mochipoyo_alert_research/m10w29_user_local_result_20260728.json",
+  "M10W29_package_sha256": "9584283d1a7079d50f33f360a616d1ff9b91dcf1e6a69797ef366f5e57919840",
+  "M10W29_decision": "PASS execution integrity, but no family advances. LMVI1 and LMMO1 are REJECT; LMWR1 is WEAK_OR_INCONSISTENT. Formula/threshold/session/ATR/horizon/exit rescue is forbidden.",
+  "M10W30_result": "config/mochipoyo_alert_research/m10w30_independent_covariate_shift_result_20260728.json",
+  "M10W30_decision": "Post-result diagnostic only: material 2026 scale drift exists in range and bps representations, while frozen formula trigger densities remain broadly stable. This does not rescue or advance an M10W29 family.",
+  "M10W31_contract": "config/mochipoyo_alert_research/m10w31_scale_normalized_causal_information_availability_contract_20260728.json",
+  "M10W31_purpose": "On the exact M10W27 7480-row cohort, audit availability and cross-split stability of H1-ATR-normalized range/return/spread/location features plus already scale-free controls. No entry formula or threshold is created.",
+  "immediate_action": [
     "Keep collector, M7C, M8C and all eight loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26 running unchanged.",
     "Fetch/Pull the latest feature/mochipoyo-alert-research branch.",
-    "Run scripts/mochipoyo_alert_research/m10w29/bat/01_run_low_atr_micro_eval.bat.",
-    "The operator evaluates all three frozen formulas using exact M1 entry/exit, 240-minute horizon, one position per family, actual spread, fixed $0.20 and +1/+2bps sensitivity, without tuning.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W29/LATEST/99_UPLOAD_PACKAGE.zip.",
+    "Run scripts/mochipoyo_alert_research/m10w31/bat/01_run_scale_normalized_information_audit.bat.",
+    "The audit must preserve the exact 7480 decision-time set and must not read returns, PF, PnL, win/loss labels, trade ledgers or future paths.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W31/LATEST/99_UPLOAD_PACKAGE.zip.",
     "Continue M10W26 without intervention. At 20 resolved, run its read-only BAT05 checkpoint."
   ],
-  "operators":{"M10W29":"scripts/mochipoyo_alert_research/m10w29/bat/01_run_low_atr_micro_eval.bat","M10W26_persistent":"scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat","M10W26_checkpoint":"scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat"},
-  "authorization":{"M10W29_user_local_execution":true,"M10W29_post_result_formula_or_threshold_change":false,"M10W26_keep_running":true,"M10W26_BAT01":false,"M10V":false},
-  "do_not_run_or_change":{"any_existing_loop_BAT01_or_initializer":true,"M10W26_BAT01_or_reinitialize":true,"stop_or_restart_healthy_loops":true,"force_close_or_taskkill_loops":true,"manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W29_formula_threshold_feature_session_spread_ATR_horizon_exit_or_runner_tuning":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
-  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "operators": {
+    "M10W31": "scripts/mochipoyo_alert_research/m10w31/bat/01_run_scale_normalized_information_audit.bat",
+    "M10W26_persistent": "scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat",
+    "M10W26_checkpoint": "scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat"
+  },
+  "authorization": {
+    "M10W31_user_local_outcome_blind_execution": true,
+    "M10W31_entry_formula_or_threshold_creation": false,
+    "M10W26_keep_running": true,
+    "M10W26_BAT01": false,
+    "M10V": false
+  },
+  "do_not_run_or_change": {
+    "any_existing_loop_BAT01_or_initializer": true,
+    "M10W26_BAT01_or_reinitialize": true,
+    "stop_or_restart_healthy_loops": true,
+    "force_close_or_taskkill_loops": true,
+    "manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion": true,
+    "prospective_start_reset": true,
+    "historical_backfill_before_start": true,
+    "M10W29_formula_threshold_feature_session_spread_ATR_horizon_exit_or_runner_tuning": true,
+    "M10W31_future_return_or_outcome_use": true,
+    "M10W31_entry_formula_or_threshold_creation_before_result_review": true,
+    "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
+  },
+  "safety": {
+    "audit_only": true,
+    "runtime_reset": false,
+    "start_reset": false,
+    "existing_forward_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
 }
