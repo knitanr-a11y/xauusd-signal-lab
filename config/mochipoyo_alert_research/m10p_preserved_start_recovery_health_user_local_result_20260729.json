@@ -1,0 +1,75 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_PRESERVED_START_RECOVERY_HEALTH_AUDIT",
+  "status": "PASS_M10P_PRESERVED_START_RECOVERY_HEALTHY_RUNNING_AUDIT_ONLY",
+  "recorded_at": "2026-07-29",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "user_upload": {
+    "filename": "99_UPLOAD_PACKAGE(78).zip",
+    "sha256": "5cc7e2ab4c6432ba019969a37452b7c58df38cf1a31b82ba009c0a13d457a92f",
+    "built_at_utc": "2026-07-28T19:01:07Z"
+  },
+  "recovery": {
+    "version": "M10P_PRESERVED_START_RECOVERY_V2_SELF_QUERY_EXCLUDED",
+    "incident_classification": "OPERATIONAL_STATUS_PUBLICATION_RACE_NOT_RESEARCH_FAILURE",
+    "BAT01_run": false,
+    "initializer_run": false,
+    "preserved_start_server_time": "2026.07.24 23:56:00",
+    "runtime_reset": false,
+    "start_reset": false,
+    "historical_backfill_before_start": false
+  },
+  "health": {
+    "status": "RUNNING",
+    "process_alive": true,
+    "lock_present": true,
+    "pid": 16252,
+    "lock_pid_matches_health_pid": true,
+    "recovery_cycles": 1,
+    "successful_recovery_cycles": 1,
+    "waiting_transient_cycles": 0,
+    "failed_terminal_cycles": 0,
+    "started_at_utc": "2026-07-28T18:59:40Z",
+    "updated_at_utc": "2026-07-28T19:00:03Z"
+  },
+  "integrity": {
+    "all_start_fields_exact_match": true,
+    "runtime_sha256": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "latest_runtime_copy_sha256": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "runtime_copy_exact_match": true,
+    "state_summary_counts_exact_match": true,
+    "health_summary_counts_exact_match": true,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "runtime_or_start_modified": false
+  },
+  "metrics_at_health_audit": {
+    "candidate_match_count": 2,
+    "accepted_count": 1,
+    "resolved_count": 0,
+    "open_count": 1,
+    "overlap_skip_count": 1,
+    "open_trade": {
+      "trade_id": "M10P_T000001",
+      "decision_time": "2026.07.28 19:00:00",
+      "entry_time": "2026.07.28 19:00:00",
+      "scheduled_exit_time": "2026.07.28 23:00:00",
+      "status": "OPEN",
+      "latest_M1_at_audit": "2026.07.28 21:58:00",
+      "open_status_causally_consistent": true
+    }
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false,
+    "M10P_BAT01_permanently_forbidden": true,
+    "M10P_recovery_BAT02_may_run_again": false,
+    "manual_lock_runtime_state_start_journal_edit_or_delete": false
+  },
+  "decision": "M10P_RECOVERY_ACCEPTED_RETURN_TO_FRESH_ACCUMULATION",
+  "next": "Keep M10P recovery window and all other healthy loops running. Use the read-only V3 dashboard. At M10P resolved 5/10/20 or any other loop review gate, send the full dashboard before running a checkpoint. M10V remains forbidden until M10P and M10P2 each have at least 20 resolved with integrity PASS."
+}
