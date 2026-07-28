@@ -1,0 +1,36 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W24B_NEITHER_COHORT_SCOPE_CORRECTION_AUDIT_ONLY",
+  "status":"CORRECTION_FROZEN_BEFORE_CORRECTED_OUTCOME_RERUN",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "why":"M10W17 stable directional opportunity was discovered only inside exact M10W14 coverage_class=NEITHER buckets. M10W22 accidentally rebuilt only the regime conditions and omitted the NEITHER coverage filter, so M10W24 evaluated a broader cohort. This stage restores the original parent cohort without changing formulas, thresholds, horizon, execution or decision tiers.",
+  "parent_chain":{
+    "M10W14":"M15 coverage grid with coverage_class LONG_ONLY/SHORT_ONLY/BOTH/NEITHER",
+    "M10W17":"NEITHER-only stable directional opportunity audit",
+    "M10W22":"outcome-blind causal feature rows, broader high-ATR bullish regime due omitted NEITHER join",
+    "M10W23":"three outcome-blind formulas frozen before any M10W24 outcome evaluation",
+    "M10W24":"broader-cohort result, not confirmatory for original NEITHER blind spot"
+  },
+  "scope_correction":{
+    "join":"Exact decision_time join between M10W22 02_target_regime_causal_feature_rows.csv and M10W14 02_m15_coverage_grid.csv",
+    "required_coverage_class":"NEITHER",
+    "other_regime_conditions":"Already frozen in M10W22 feature rows; no regime threshold change",
+    "formula_change":false,
+    "threshold_change":false,
+    "family_change":false,
+    "horizon_change":false,
+    "execution_change":false,
+    "decision_tier_change":false
+  },
+  "frozen_families_from_M10W23":["MVI1_LONG_M5_VOLUME_IMPULSE","MWR1_LONG_M5_PULLBACK_REJECTION","MMO1_LONG_M1_MICRO_MOMENTUM"],
+  "evaluation":"Use exact M10W23 formulas and decision tiers; 2023-2024 train / 2025 validation / 2026 test; exact M1; 240-minute horizon; one position per family; actual spread; fixed0p20; +1/+2bps.",
+  "interpretation":{
+    "corrected_historical_result_is_clean_independent_validation":false,
+    "reason":"Broader-cohort M10W24 outcomes are already known, although the formulas were frozen outcome-blind and NEITHER was a pre-existing parent-scope requirement rather than a newly selected filter.",
+    "formula_tuning_after_corrected_result":"FORBIDDEN",
+    "cohort_tuning_after_corrected_result":"FORBIDDEN",
+    "fresh_shadow_required_for_any_support":true,
+    "only_existing_ROBUST_or_STRONG_tiers_may_justify_fresh_shadow":true
+  },
+  "safety":{"audit_only":true,"existing_monitor_modification":false,"historical_backfill_into_existing_forward":false,"existing_threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
