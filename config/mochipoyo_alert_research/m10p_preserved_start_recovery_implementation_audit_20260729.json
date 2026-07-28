@@ -1,0 +1,79 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_PRESERVED_START_RECOVERY_IMPLEMENTATION_AUDIT",
+  "status": "PASS_IMPLEMENTED_AWAITING_USER_LOCAL_RECOVERY_AND_HEALTH_AUDIT",
+  "recorded_at": "2026-07-29",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "incident_result": "config/mochipoyo_alert_research/m10p_blocked_user_local_diagnostic_result_20260729.json",
+  "preserved_start_mt5_server": "2026.07.24 23:56:00",
+  "root_cause": "Windows status JSON publication race after a successful M10P cycle; not a research, candidate, source or runtime integrity failure.",
+  "implementation": {
+    "base_recovery": {
+      "path": "scripts/mochipoyo_alert_research/m10p_incident/python/recover_m10p_preserved_start.py",
+      "commit": "8d2a9660c95c96c113ace5cf613591374df945be",
+      "blob": "a122ef3c6a8f03822de491fa72ff3b47590dcaf5"
+    },
+    "active_recovery_v2": {
+      "path": "scripts/mochipoyo_alert_research/m10p_incident/python/recover_m10p_preserved_start_v2.py",
+      "commit": "76350e6cbc9945aa98a9571a7e812b945e001091",
+      "blob": "90c864740868db32f7f27b2e38d02d3fffddf6db",
+      "self_query_powershell_excluded": true
+    },
+    "recovery_bat": {
+      "path": "scripts/mochipoyo_alert_research/m10p_incident/bat/02_recover_m10p_preserved_start_once.bat",
+      "commit": "f55aed88274c80d7424b72465feae2cc2d947017",
+      "blob": "68dd7779305fc7ad6460f022b4976293c3bac60d"
+    },
+    "health_audit": {
+      "path": "scripts/mochipoyo_alert_research/m10p_incident/python/audit_m10p_recovery_health.py",
+      "commit": "7a21e83be0f0eede5ffb26d7cc5756bfa047b697",
+      "blob": "981f1b8075b739bbc1d70ed7e6fc5d3d413ee037"
+    },
+    "health_bat": {
+      "path": "scripts/mochipoyo_alert_research/m10p_incident/bat/03_audit_m10p_recovery_health_read_only.bat",
+      "commit": "e1334f7fe5b1d66a4ee8c2e9d587b34221fcd49d",
+      "blob": "d0766677ee83a6a833f642779d1d6c13c1568580"
+    },
+    "dashboard_v3": {
+      "path": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v3.py",
+      "commit": "ad2f21c969a9519dd741a6b1cfa4dadde83b00d6",
+      "windows_FILE_SHARE_DELETE": true
+    }
+  },
+  "recovery_preflight": [
+    "Require M10P lock absent.",
+    "Require no existing M10P bounded-loop process.",
+    "Require runtime, state, start receipt, blocked status, LATEST summary, runtime copy and trade ledger.",
+    "Require all start fields and bounded-adapter expected start equal 2026.07.24 23:56:00.",
+    "Require runtime bytes exactly equal LATEST runtime copy.",
+    "Require frozen runtime, audit-only, reset false and historical backfill false.",
+    "Require state and LATEST summary PASS with identical counts and zero entry/exit gaps.",
+    "Require reviewed PermissionError WinError 5 status-publication signature only.",
+    "Write recovery evidence only to a separate M10P_PRESERVED_START_RECOVERY output directory."
+  ],
+  "operational_fix": {
+    "dashboard_reader": "CreateFileW with FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE",
+    "status_writer": "Unique temporary path, transient Windows share-error retry for 15 seconds, and telemetry skip rather than research-loop termination if publication remains briefly unavailable.",
+    "candidate_logic_change": false,
+    "formula_or_threshold_change": false,
+    "horizon_or_execution_change": false
+  },
+  "authorization": {
+    "M10P_BAT01": false,
+    "M10P_preserved_start_recovery_BAT02_once": true,
+    "M10P_recovery_health_BAT03_after_first_PASS": true,
+    "runtime_reset": false,
+    "start_reset": false,
+    "manual_lock_edit_or_delete": false,
+    "other_eight_loops_keep_running": true
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill_before_start": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
