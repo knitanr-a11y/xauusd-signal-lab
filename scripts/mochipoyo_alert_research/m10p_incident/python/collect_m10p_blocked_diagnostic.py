@@ -95,7 +95,7 @@ def process_inventory() -> dict[str, Any]:
         "-Command",
         "$ErrorActionPreference='Stop'; "
         "$rows = Get-CimInstance Win32_Process | "
-        "Where-Object { $_.CommandLine -match '(?i)(--loop\\s+M10P|m10p_guarded_runtime|m10p_runtime\\.py)' } | "
+        "Where-Object { $_.CommandLine -match '(?i)(--loop\\s+M10P(?:\\s|$)|m10p_guarded_runtime|[\\\\/]m10p_runtime\\.py)' } | "
         "Select-Object ProcessId,Name,CreationDate,CommandLine; "
         "@($rows) | ConvertTo-Json -Depth 4 -Compress",
     ]
