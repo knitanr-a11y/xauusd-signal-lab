@@ -1,0 +1,55 @@
+{
+  "project": "BTC_RESEARCH_DUAL_TRACK_SCOPE",
+  "recorded_at": "2026-07-29",
+  "status": "ACTIVE_TWO_TRACK_SEPARATION_WITH_M7C_PRESERVATION",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "track_a_btc_ml_v1": {
+    "purpose": "Frozen five-candidate BTC stacking research and fresh-forward availability/performance evaluation.",
+    "authoritative_base_branch": "main",
+    "working_branch": "feature/btc-fresh-forward-research",
+    "symbol": "BTCUSD#",
+    "candidate_ids": [
+      "BTC4_RISK_CAP_400",
+      "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+      "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080"
+    ],
+    "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
+    "current_next_stage": "BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY"
+  },
+  "track_b_mochipoyo_m7c": {
+    "purpose": "Frozen genuine-source prospective source-fidelity/background collection track.",
+    "branch": "feature/mochipoyo-alert-research",
+    "symbols": ["BTCUSD", "XAUUSD"],
+    "immutable_start_utc": "2026-07-20T14:54:15Z",
+    "status": "RUNNING_UNCHANGED_BACKGROUND_TRACK",
+    "explicit_contract": "docs/mochipoyo_alert_research/SCOPE_CLARIFICATION_M10_GOLD_ONLY_M7C_DUAL_SOURCE_BACKGROUND_20260727.md",
+    "preservation_rules": [
+      "Do not remove BTCUSD from M7C.",
+      "Do not refit M7C for BTC ML V1 or GOLD M10 research.",
+      "Do not reset the M7C prospective start, runtime, formula, matching rules or review gates.",
+      "Keep collector, M7C and M8C running unchanged unless a separately diagnosed incident is explicitly reviewed."
+    ]
+  },
+  "m10_scope": {
+    "branch": "feature/mochipoyo-alert-research",
+    "active_candidate_value_research_scope": "XAUUSD_GOLD_ONLY",
+    "rule": "Do not broaden M10 candidate, threshold, payoff or portfolio research to BTCUSD unless the user explicitly opens a new M10 BTC scope."
+  },
+  "separation_rules": [
+    "Track A and Track B are both legitimate BTC-related research but they answer different questions.",
+    "M7C BTC observations do not automatically become BTC4/BTC5/BTC6/BTC7R/BTC9R features, filters, entries or outcomes.",
+    "BTC ML V1 results do not modify M7C source matching, formulas, starts, gates or runtime.",
+    "M7C BTC observations do not automatically enter GOLD M10 candidate discovery, threshold design or portfolio research.",
+    "Do not merge feature/mochipoyo-alert-research into the BTC FF01 working branch merely to access M7C.",
+    "A future cross-track comparison requires a separate preregistered stage and explicit user authorization."
+  ],
+  "current_authorization": {
+    "btc_ml_v1_ff01": true,
+    "modify_m7c_or_m8c": false,
+    "stop_or_restart_m7c_or_m8c": false,
+    "cross_track_feature_or_outcome_mixing": false,
+    "m10_btc_expansion": false
+  }
+}
