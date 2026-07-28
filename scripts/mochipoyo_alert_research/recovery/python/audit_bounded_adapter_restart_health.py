@@ -22,15 +22,9 @@ import bounded_csv_source_adapter as adapter
 import run_bounded_adapter_loop as runner
 import migrate_bounded_csv_source_adapter as migration
 
-OUTPUT_NAMES = {
-    "M9V": "M9V",
-    "M9Y": "M9Y",
-    "M10B": "M10B",
-    "M10E": "M10E",
-    "M10P": "M10P",
-    "M10P2": "M10P2",
-    "M10W19": "M10W19",
-}
+OUTPUT_NAMES = {loop: loop for loop in runner.LOOPS}
+V4_PROCESS_TOKEN = "run_bounded_adapter_loop_v4.py"
+V4_SNAPSHOT_VERSION = "BOUNDED_CSV_PER_LOOP_SNAPSHOT_V1"
 
 
 def utc_text() -> str:
@@ -70,6 +64,57 @@ def tail(path: Path, lines: int = 120) -> str:
         return f"[TAIL ERROR] {type(exc).__name__}: {exc}\n"
 
 
+def process_uses_v4(processes: list[dict[str, Any]]) -> bool:
+    return bool(processes) and all(
+        V4_PROCESS_TOKEN.lower() in str(row.get("CommandLine", "")).lower()
+        for row in processes
+    )
+
+
+def snapshot_health(local_root: Path, loop: str, journals: dict[str, Any]) -> dict[str, Any]:
+    directory = adapter.adapter_root(local_root) / "loop_snapshots" / loop
+    receipt_path = directory / "00_snapshot_receipt.json"
+    receipt = read_json(receipt_path) or {}
+    fingerprints = receipt.get("journal_fingerprints", {})
+    files: dict[str, Any] = {}
+    all_files_match = True
+    for timeframe, filename in adapter.FILE_MAP.items():
+        path = directory / filename
+        expected = journals.get(timeframe, {})
+        current_sha = adapter.sha256_file(path) if path.is_file() else None
+        current_size = path.stat().st_size if path.is_file() else None
+        receipt_tf = fingerprints.get(timeframe, {}) if isinstance(fingerprints, dict) else {}
+        match = (
+            path.is_file()
+            and current_sha == expected.get("sha256")
+            and current_size == expected.get("size_bytes")
+            and receipt_tf.get("sha256") == expected.get("sha256")
+            and receipt_tf.get("size_bytes") == expected.get("size_bytes")
+        )
+        all_files_match = all_files_match and match
+        files[timeframe] = {
+            **file_info(path),
+            "sha256": current_sha,
+            "expected_sha256": expected.get("sha256"),
+            "fingerprint_match": match,
+        }
+    receipt_ok = (
+        receipt.get("status") == "PASS_PRIVATE_LOOP_SNAPSHOT"
+        and receipt.get("snapshot_version") == V4_SNAPSHOT_VERSION
+        and receipt.get("loop") == loop
+        and receipt.get("runtime_or_start_modified") is False
+        and receipt.get("historical_backfill_before_start") is False
+    )
+    return {
+        "directory": str(directory),
+        "receipt": {**file_info(receipt_path), "payload": receipt},
+        "files": files,
+        "receipt_ok": receipt_ok,
+        "all_files_match_current_verified_journal": all_files_match,
+        "healthy": receipt_ok and all_files_match,
+    }
+
+
 def main() -> int:
     try:
         local_value = os.environ.get("LOCALAPPDATA", "").strip()
@@ -88,9 +133,7 @@ def main() -> int:
         archive.mkdir(parents=True, exist_ok=False)
 
         loops: dict[str, Any] = {}
-        healthy = 0
-        review = 0
-        blocked = 0
+        healthy = review = blocked = 0
         for loop, spec in runner.LOOPS.items():
             marker = migration.PROCESS_MARKERS[loop]
             processes = migration.running_processes(marker)
@@ -109,6 +152,7 @@ def main() -> int:
             status_name = str(status.get("status", ""))
             successful = int(status.get("successful_cycles", 0) or 0)
             process_ok = bool(processes)
+            process_v4_ok = process_uses_v4(processes)
             lock_ok = lock_path.is_file()
             runtime_ok = runtime_sha == expected_runtime_sha and start == expected_start
             output_ok = (
@@ -117,14 +161,17 @@ def main() -> int:
             )
             status_ok = status_name == "RUNNING" and successful >= 1
             waiting_transient = status_name == "WAITING_TRANSIENT_SOURCE"
-            if process_ok and lock_ok and runtime_ok and status_ok and output_ok:
-                classification = "HEALTHY_RUNNING_FIRST_CYCLE_PASS"
+            private_snapshot = snapshot_health(local_root, loop, journals)
+            snapshot_ok = bool(private_snapshot["healthy"])
+
+            if process_ok and process_v4_ok and lock_ok and runtime_ok and status_ok and output_ok and snapshot_ok:
+                classification = "HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS"
                 healthy += 1
-            elif process_ok and lock_ok and runtime_ok and waiting_transient:
-                classification = "RUNNING_WAITING_TRANSIENT_REVIEW"
+            elif process_ok and process_v4_ok and lock_ok and runtime_ok and waiting_transient and snapshot_ok:
+                classification = "RUNNING_V4_WAITING_TRANSIENT_REVIEW"
                 review += 1
             else:
-                classification = "BLOCKED_OR_INCOMPLETE_REVIEW"
+                classification = "BLOCKED_OR_INCOMPLETE_V4_REVIEW"
                 blocked += 1
 
             log_name = f"{loop}_bounded_log_tail.txt"
@@ -133,6 +180,7 @@ def main() -> int:
                 "classification": classification,
                 "process_marker": marker,
                 "processes": processes,
+                "process_uses_v4": process_v4_ok,
                 "lock": file_info(lock_path),
                 "runtime": {
                     **file_info(runtime_path),
@@ -145,23 +193,26 @@ def main() -> int:
                 },
                 "status": {**file_info(status_path), "payload": status},
                 "latest_output_summary": {**file_info(output_summary_path), "payload": output},
+                "private_snapshot": private_snapshot,
                 "log": {**file_info(log_path), "tail_file": log_name},
             }
 
         all_healthy = healthy == len(runner.LOOPS)
         summary = {
             "project": "MOCHIPOYO_ALERT_RESEARCH",
-            "stage": "FRESH_LOOP_BOUNDED_CSV_RESTART_HEALTH_AUDIT_ONLY",
-            "status": "PASS_ALL_SEVEN_HEALTHY_RUNNING" if all_healthy else "REVIEW_REQUIRED_NOT_ALL_SEVEN_HEALTHY",
+            "stage": "FRESH_LOOP_BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_RESTART_HEALTH_AUDIT_ONLY",
+            "status": "PASS_ALL_SEVEN_V4_PRIVATE_SNAPSHOT_HEALTHY" if all_healthy else "REVIEW_REQUIRED_NOT_ALL_SEVEN_V4_HEALTHY",
             "built_at_utc": utc_text(),
             "source_root": str(source_root),
             "xauusd_point": point,
             "adapter_manifest_status": manifest.get("status"),
+            "required_process_token": V4_PROCESS_TOKEN,
+            "required_snapshot_version": V4_SNAPSHOT_VERSION,
             "journal_fingerprints_verified": journals,
             "classification_counts": {
-                "HEALTHY_RUNNING_FIRST_CYCLE_PASS": healthy,
-                "RUNNING_WAITING_TRANSIENT_REVIEW": review,
-                "BLOCKED_OR_INCOMPLETE_REVIEW": blocked,
+                "HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS": healthy,
+                "RUNNING_V4_WAITING_TRANSIENT_REVIEW": review,
+                "BLOCKED_OR_INCOMPLETE_V4_REVIEW": blocked,
             },
             "all_seven_healthy": all_healthy,
             "loops": loops,
@@ -173,8 +224,8 @@ def main() -> int:
             "restart_or_initializer_run_by_audit": False,
         }
         (archive / "00_READ_ME_FIRST.txt").write_text(
-            "Read-only post-restart health audit for M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19.\n"
-            "It checks processes, locks, immutable runtime hashes/starts, bounded-adapter loop status, first successful cycles, latest outputs and journal fingerprints.\n"
+            "Read-only V4 post-restart health audit for M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19.\n"
+            "It requires seven V4 processes and verifies each private snapshot against the current shared-journal SHA256 fingerprints.\n"
             "It does not start/stop loops, remove locks, update journals, reset runtimes or change starts.\n",
             encoding="utf-8",
         )
@@ -183,7 +234,7 @@ def main() -> int:
         (archive / "03_migration_receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         (archive / "04_audit.log").write_text("\n".join([
             f"status={summary['status']}",
-            f"healthy={healthy}",
+            f"healthy_v4={healthy}",
             f"waiting_transient={review}",
             f"blocked_or_incomplete={blocked}",
             f"all_seven_healthy={str(all_healthy).lower()}",
@@ -199,12 +250,12 @@ def main() -> int:
         latest = output_root / "LATEST"
         shutil.rmtree(latest, ignore_errors=True)
         shutil.copytree(archive, latest)
-        print(f"[HEALTH AUDIT] {summary['status']} healthy={healthy}/7 waiting={review} blocked={blocked}")
+        print(f"[V4 HEALTH AUDIT] {summary['status']} healthy={healthy}/7 waiting={review} blocked={blocked}")
         print("[OUTPUT]", latest)
-        print("[SAFE] Read-only audit; no process, lock, journal, runtime or start was modified.")
+        print("[SAFE] Read-only audit; no process, lock, journal, snapshot, runtime or start was modified.")
         return 0 if all_healthy else 3
     except Exception as exc:
-        print(f"[HEALTH AUDIT BLOCKED] {type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"[V4 HEALTH AUDIT BLOCKED] {type(exc).__name__}: {exc}", file=sys.stderr)
         print("[SAFE] No intentional process, lock, journal, runtime or start mutation was performed.", file=sys.stderr)
         return 2
 
