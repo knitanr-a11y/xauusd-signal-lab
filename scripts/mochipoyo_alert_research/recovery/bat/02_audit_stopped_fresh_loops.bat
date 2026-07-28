@@ -8,6 +8,7 @@ for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss
 set "ARCH=%BASE%\archive\%STAMP%"
 set "LATEST=%BASE%\LATEST"
 set "PKG=%BASE%\99_UPLOAD_PACKAGE.zip"
+set "ZIPLOG=%BASE%\zip_command.log"
 
 if not defined LOCALAPPDATA (
   echo [STOP] LOCALAPPDATA is unavailable.
@@ -113,8 +114,10 @@ call :capture "M8B_symbol_metadata" "%META%"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$result=[ordered]@{metadata_path=$env:META;metadata_exists=(Test-Path -LiteralPath $env:META);files=[ordered]@{}}; if(Test-Path -LiteralPath $env:META){try{$m=Get-Content -Raw -LiteralPath $env:META ^| ConvertFrom-Json; $root=[string]$m.mt5_files_root; $result.data_root=$root; $map=[ordered]@{M1='goldsharp_m1.csv';M5='goldsharp_m5.csv';M15='goldsharp_m15.csv';H1='goldsharp_h1.csv';H4='goldsharp_h4.csv';D1='goldsharp_d1.csv'}; foreach($k in $map.Keys){$p=Join-Path $root $map[$k]; $row=[ordered]@{path=$p;exists=(Test-Path -LiteralPath $p)}; if($row.exists){$f=Get-Item -LiteralPath $p; $row.size_bytes=$f.Length; $row.modified_at=$f.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'); $row.last_row=(Get-Content -LiteralPath $p -Tail 1 -ErrorAction Stop)}; $result.files[$k]=$row}}catch{$result.error=$_.Exception.Message}}; $result ^| ConvertTo-Json -Depth 8" > "%ARCH%\04_feed_frontiers.json" 2>&1
 
 if exist "%PKG%" del /q "%PKG%" >nul 2>&1
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path (Join-Path $env:ARCH '*') -DestinationPath $env:PKG -Force" > "%ARCH%\05_zip_command.log" 2>&1
+if exist "%ZIPLOG%" del /q "%ZIPLOG%" >nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path (Join-Path $env:ARCH '*') -DestinationPath $env:PKG -Force" > "%ZIPLOG%" 2>&1
 if not exist "%PKG%" (
+  copy /y "%ZIPLOG%" "%ARCH%\05_zip_command.log" >nul 2>&1
   echo [STOP] Diagnostic files were collected, but ZIP creation failed.
   echo Folder: %ARCH%
   pause
@@ -140,7 +143,7 @@ set "LABEL=%~1"
 set "SRC=%~2"
 if exist "%SRC%" (
   for %%F in ("%SRC%") do echo PRESENT %LABEL% size=%%~zF modified=%%~tF path=%SRC%>>"%INV%"
-  copy /y "%SRC%" "%ARCH%\%LABEL%%%~x2" >nul
+  copy /y "%SRC%" "%ARCH%\%LABEL%.txt" >nul
 ) else (
   echo MISSING %LABEL% path=%SRC%>>"%INV%"
 )
