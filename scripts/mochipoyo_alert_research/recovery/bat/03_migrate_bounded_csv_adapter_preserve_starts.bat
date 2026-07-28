@@ -3,11 +3,12 @@ setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0\..\..\..\..\.."
 
 echo ============================================================
-echo MOCHIPOYO - BOUNDED CSV ADAPTER ONE-TIME MIGRATION
-echo PRESERVE ALL FROZEN STARTS - AUDIT ONLY
+echo MOCHIPOYO - BOUNDED CSV ADAPTER ONE-TIME MIGRATION V2
+echo PRESERVE ALL FROZEN STARTS - VERIFIED JOURNALS - AUDIT ONLY
 echo ============================================================
 echo.
 echo This reads the current bounded MT5 CSVs and creates verified local journals.
+echo It verifies every journal SHA256 before and after any adapter update.
 echo It does NOT run BAT01, restart loops, edit runtime manifests,
 echo reset prospective starts, backfill pre-start candidates, send Discord,
 echo or place MT5 orders.
@@ -15,7 +16,7 @@ echo.
 echo Required: M9V M9Y M10B M10E M10P M10P2 M10W19 must all be stopped.
 echo.
 
-python "scripts\mochipoyo_alert_research\recovery\python\migrate_bounded_csv_source_adapter.py"
+python "scripts\mochipoyo_alert_research\recovery\python\migrate_bounded_csv_source_adapter_v2.py"
 set "RC=%ERRORLEVEL%"
 
 echo.
