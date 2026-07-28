@@ -5,12 +5,39 @@ from typing import Any
 
 import bounded_csv_source_adapter as adapter
 
+_CACHE: dict[str, dict[str, Any]] = {}
+
+
+def _journal_stats(local_root: Path) -> dict[str, tuple[int, int]]:
+    root = adapter.journal_root(local_root)
+    output: dict[str, tuple[int, int]] = {}
+    for timeframe, filename in adapter.FILE_MAP.items():
+        path = root / filename
+        if not path.is_file():
+            raise adapter.AdapterIntegrityError(f"bounded CSV adapter journal missing: {timeframe} {path}")
+        stat = path.stat()
+        output[timeframe] = (stat.st_size, stat.st_mtime_ns)
+    return output
+
 
 def verify_journals(local_root: Path) -> dict[str, Any]:
-    manifest = adapter.load_json(adapter.manifest_path(local_root))
+    manifest_file = adapter.manifest_path(local_root)
+    manifest = adapter.load_json(manifest_file)
     expected_all = manifest.get("journals")
     if not isinstance(expected_all, dict):
         raise adapter.AdapterIntegrityError("bounded CSV adapter journal fingerprints are missing")
+
+    cache_key = str(local_root.resolve())
+    manifest_sha = adapter.sha256_file(manifest_file)
+    stats = _journal_stats(local_root)
+    cached = _CACHE.get(cache_key)
+    if (
+        cached is not None
+        and cached.get("manifest_sha256") == manifest_sha
+        and cached.get("journal_stats") == stats
+    ):
+        return dict(cached["verified"])
+
     root = adapter.journal_root(local_root)
     verified: dict[str, Any] = {}
     for timeframe, filename in adapter.FILE_MAP.items():
@@ -18,14 +45,12 @@ def verify_journals(local_root: Path) -> dict[str, Any]:
         expected = expected_all.get(timeframe)
         if not isinstance(expected, dict):
             raise adapter.AdapterIntegrityError(f"bounded CSV adapter journal fingerprint missing: {timeframe}")
-        if not path.is_file():
-            raise adapter.AdapterIntegrityError(f"bounded CSV adapter journal missing: {timeframe} {path}")
-        stat = path.stat()
+        stat_size, stat_mtime_ns = stats[timeframe]
         expected_size = int(expected.get("size_bytes", -1))
-        if stat.st_size != expected_size:
+        if stat_size != expected_size:
             raise adapter.AdapterIntegrityError(
                 f"bounded CSV adapter journal size changed outside verified update: "
-                f"{timeframe} current={stat.st_size} expected={expected_size}"
+                f"{timeframe} current={stat_size} expected={expected_size}"
             )
         current_sha = adapter.sha256_file(path)
         expected_sha = str(expected.get("sha256", ""))
@@ -35,12 +60,18 @@ def verify_journals(local_root: Path) -> dict[str, Any]:
             )
         verified[timeframe] = {
             "path": str(path),
-            "size_bytes": stat.st_size,
+            "size_bytes": stat_size,
+            "mtime_ns": stat_mtime_ns,
             "sha256": current_sha,
             "row_count": expected.get("row_count"),
             "first_server_open": expected.get("first_server_open"),
             "last_server_open": expected.get("last_server_open"),
         }
+    _CACHE[cache_key] = {
+        "manifest_sha256": manifest_sha,
+        "journal_stats": stats,
+        "verified": dict(verified),
+    }
     return verified
 
 
