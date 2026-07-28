@@ -4,11 +4,15 @@ for %%I in ("%~dp0\..\..\..\..") do set "REPO_ROOT=%%~fI"
 cd /d "%REPO_ROOT%"
 
 set "CORE=scripts\mochipoyo_alert_research\m10w26\python\m10w26_runtime.py"
-set "OPERATOR=scripts\mochipoyo_alert_research\m10w26\python\run_m10w26_private_snapshot.py"
+set "COREV2=scripts\mochipoyo_alert_research\m10w26\python\m10w26_runtime_v2.py"
+set "BASEOP=scripts\mochipoyo_alert_research\m10w26\python\run_m10w26_private_snapshot.py"
+set "OPERATOR=scripts\mochipoyo_alert_research\m10w26\python\run_m10w26_private_snapshot_v2.py"
 if not exist "%CORE%" goto :missing
+if not exist "%COREV2%" goto :missing
+if not exist "%BASEOP%" goto :missing
 if not exist "%OPERATOR%" goto :missing
 
-python -c "import ast,pathlib; [ast.parse(pathlib.Path(p).read_text(encoding='utf-8')) for p in (r'%CORE%',r'%OPERATOR%')]"
+python -c "import ast,pathlib; [ast.parse(pathlib.Path(p).read_text(encoding='utf-8')) for p in (r'%CORE%',r'%COREV2%',r'%BASEOP%',r'%OPERATOR%')]"
 if errorlevel 1 (
   echo [M10W26 LOOP BLOCKED] Python syntax preflight failed.
   pause
@@ -16,8 +20,9 @@ if errorlevel 1 (
 )
 
 echo ============================================================
-echo M10W26 MMO1 CAUSAL-NEITHER FRESH PROSPECTIVE SHADOW
-echo BOUNDED CSV PRIVATE VERIFIED SNAPSHOT - AUDIT ONLY
+echo M10W26 MMO1 CAUSAL-NEITHER FRESH PROSPECTIVE SHADOW V2
+echo PRESTART-AUDITED / BOUNDED CSV PRIVATE VERIFIED SNAPSHOT
+echo AUDIT ONLY
 echo ============================================================
 echo.
 echo Keep this window OPEN.
@@ -42,8 +47,10 @@ pause
 exit /b %RC%
 
 :missing
-echo [M10W26 LOOP BLOCKED] Required implementation files are missing.
+echo [M10W26 LOOP BLOCKED] Required V2 implementation files are missing.
 if not exist "%CORE%" echo MISSING: %CORE%
+if not exist "%COREV2%" echo MISSING: %COREV2%
+if not exist "%BASEOP%" echo MISSING: %BASEOP%
 if not exist "%OPERATOR%" echo MISSING: %OPERATOR%
 echo Confirm branch feature/mochipoyo-alert-research, Fetch origin, and Pull origin.
 echo Do not rerun BAT01 if M10W26 was already initialized.
