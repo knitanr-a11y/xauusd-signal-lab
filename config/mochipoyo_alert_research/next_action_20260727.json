@@ -13,6 +13,6 @@
   "M10W19":{"start":"2026.07.28 02:31:00","keep_BAT03_running":true,"BAT01":"FORBIDDEN","review_gates_filtered_resolved":[20,60,120]},
   "M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN",
   "scope":"GOLD_XAUUSD_ONLY",
-  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M10W24_SCOPE_MISMATCH_M10W24B_NEITHER_CORRECTION_NEXT_20260728.md",
+  "handoff":"docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_COMPLETE_M10W24B_NEITHER_CORRECTION_READY_20260728.md",
   "safety":{"audit_only":true,"existing_forward_modified":false,"historical_backfill":false,"existing_threshold_refit":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
