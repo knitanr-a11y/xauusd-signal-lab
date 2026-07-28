@@ -1,0 +1,16 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W27_LOW_ATR_BULLISH_NEITHER_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status":"PASS_IMPLEMENTED_READY_FOR_USER_LOCAL_OUTCOME_BLIND_AUDIT",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "contract":"config/mochipoyo_alert_research/m10w27_low_atr_bullish_neither_causal_information_availability_contract_20260728.json",
+  "runner":"scripts/mochipoyo_alert_research/m10w27/python/run_m10w27_low_atr_bullish_neither_causal_information_availability_audit.py",
+  "operator":"scripts/mochipoyo_alert_research/m10w27/bat/01_run_low_atr_bullish_neither_causal_information_availability_audit.bat",
+  "implementation":{"python_syntax_preflight":"PASS","reuses_exact_M10W22_feature_definitions":true,"reuses_exact_M10W25_prefix_causal_long_and_short_family_engines":true,"ATR_boundary":"h1_atr_pct100 < 0.33","coverage_requirement":"prefix-causal NEITHER","M15_decision_grid":true,"fully_closed_source_alignment":true,"M1_M5_bar_opening_at_decision_forbidden":true,"future_return_code_present":false,"PF_or_PnL_code_present":false,"entry_formula_code_present":false,"feature_threshold_selection_code_present":false},
+  "required_local_inputs":{"frozen_GOLD_2023_2026_files":true,"M10A_frozen_hash_contract":true,"existing_eight_forward_loops_need_not_be_stopped":true},
+  "expected_output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W27/LATEST/99_UPLOAD_PACKAGE.zip",
+  "decision":{"user_local_execution_authorized":true,"M10W26_keep_running_unchanged":true,"M10W26_BAT01_forbidden":true,"result_review_required_before_any_low_ATR_entry_preregistration":true},
+  "not_yet_done":{"user_local_frozen_data_execution":true,"causal_neither_row_count_unknown_until_execution":true,"feature_distribution_review":true,"entry_formula_preregistration":true,"outcome_evaluation":true,"fresh_shadow":true},
+  "guardrails":{"audit_only":true,"trade_outcomes_read":false,"future_return_computed":false,"PF_or_PnL_computed":false,"historical_backfill_into_forward":false,"existing_monitor_modified":false,"formula_or_threshold_refit":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
