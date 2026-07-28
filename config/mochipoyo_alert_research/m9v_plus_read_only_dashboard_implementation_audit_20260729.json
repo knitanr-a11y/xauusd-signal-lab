@@ -1,0 +1,57 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_PLUS_READ_ONLY_FORWARD_STATUS_DASHBOARD",
+  "status": "PASS_IMPLEMENTED_READ_ONLY_OPTIONAL_OPERATOR_TOOL",
+  "recorded_at": "2026-07-29",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Display the health and review-count progress of all nine M9V-and-later prospective loops in one auto-refreshing console without modifying any research evidence or process.",
+  "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+  "implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard.py",
+  "git": {
+    "implementation_commit": "42c0fb8c878aca166973540ac752760437acbd1c",
+    "implementation_blob": "112deb5ba16b754145752bcdc0824f03b5caa20e",
+    "bat_commit": "2113d3cbdb80e327c17ddd2d2801e3274c1cb192",
+    "bat_blob": "776a437a1b2c4ec1dbc1234a39c908c32da07caa"
+  },
+  "displayed_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
+  "read_sources": [
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/<LOOP>/LATEST/01_summary.json",
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/<loop>/latest_<loop>_shadow_loop_status.json",
+    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/<loop>_runtime/<loop>_shadow_loop.lock"
+  ],
+  "display": [
+    "loop health",
+    "lock and PID",
+    "immutable prospective start",
+    "loop-specific candidate/accepted/resolved progress",
+    "loop-specific review thresholds",
+    "latest status age"
+  ],
+  "refresh_seconds": 60,
+  "validation": {
+    "python_ast_parse": "PASS",
+    "python_py_compile_isolated_copy": "PASS",
+    "synthetic_nine_summary_schema_test": "PASS",
+    "missing_or_invalid_file_fail_visible": true,
+    "windows_pid_liveness_read_only_check": true
+  },
+  "operator_rule": "A REACHED label means send the dashboard screenshot for review before running any checkpoint BAT. It is not authorization for automatic checkpoint execution or promotion.",
+  "mutations": {
+    "local_output_write": false,
+    "runtime_or_state_write": false,
+    "start_write": false,
+    "lock_write_or_delete": false,
+    "journal_or_snapshot_write": false,
+    "process_start_or_stop": false,
+    "formula_or_threshold_change": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "automatic_live_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "optional_convenience_tool": true,
+    "all_nine_monitors_remain_unchanged": true,
+    "any_initializer_remains_forbidden": true
+  }
+}
