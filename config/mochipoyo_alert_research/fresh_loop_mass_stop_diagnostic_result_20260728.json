@@ -1,7 +1,7 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY",
-  "status": "ROOT_CAUSE_CONFIRMED_ROLLING_M1_PREFIX_AND_TRANSIENT_READ_FAILURE",
+  "status": "ROOT_CAUSE_CONFIRMED_ALL_TIMEFRAME_BOUNDED_REWRITE_AND_TRANSIENT_READ_FAILURE",
   "recorded_at": "2026-07-28",
   "scope": "XAUUSD_GOLD_ONLY",
   "uploaded_package": {
@@ -10,6 +10,7 @@
     "size_bytes": 23458,
     "built_local": "2026-07-28 18:53:34 JST"
   },
+  "source_contract_addendum": "config/mochipoyo_alert_research/live_csv_bounded_rewrite_export_addendum_20260728.json",
   "preservation": {
     "locks_present": false,
     "all_runtime_manifests_present": true,
@@ -24,19 +25,19 @@
       "failed_cycle": 4673,
       "failed_at_utc": "2026-07-28T04:02:28Z",
       "error": "frozen prefix shortened for goldsharp_m1.csv: expected 151494 rows, got 150000",
-      "classification": "FALSE_HARD_BLOCK_FROM_APPEND_ONLY_ASSUMPTION_ON_ROLLING_M1"
+      "classification": "FALSE_HARD_BLOCK_FROM_APPEND_ONLY_ASSUMPTION_ON_BOUNDED_REWRITE_SOURCE"
     },
     "M9Y": {
       "last_successful_cycle": 4750,
       "failed_cycle": 4751,
       "failed_at_utc": "2026-07-28T04:02:03Z",
       "error": "Permission denied while opening goldsharp_m1.csv",
-      "classification": "TRANSIENT_CSV_REPLACE_OR_WRITE_CONTENTION_NOT_RETRIED_LONG_ENOUGH"
+      "classification": "TRANSIENT_CSV_REBUILD_OR_WRITE_CONTENTION_NOT_RETRIED_LONG_ENOUGH"
     },
     "M10B_M10E_M10P2_M10W19": {
       "last_successful_outputs_utc": "2026-07-28T04:01:11Z..2026-07-28T04:02:05Z",
       "locks_present": false,
-      "classification": "PROCESS_EXIT_AT_SAME_M1_REWRITE_WINDOW_CONSISTENT_WITH_SHARED_IO_OR_PREFIX_FAILURE",
+      "classification": "PROCESS_EXIT_AT_SAME_REBUILD_WINDOW_CONSISTENT_WITH_SHARED_IO_OR_PREFIX_FAILURE",
       "exact_exception_recoverable_from_existing_logs": false
     },
     "M10P": {
@@ -47,19 +48,28 @@
       "same_brittle_forever_design_confirmed": true
     }
   },
-  "frozen_m1_prefix_rows": {
-    "M9V": 151494,
-    "M9Y": 151595,
-    "M10B": 152084,
-    "M10E": 152156,
-    "M10P": 152266,
-    "M10P2": 152307,
-    "M10W19": 153738
+  "ea_export_caps": {
+    "append_lookback_bars": 20,
+    "M1": 150000,
+    "M5": 90000,
+    "M15": 30000,
+    "H1": 20000,
+    "H4": 10000,
+    "D1": 5000
   },
-  "observed_current_m1_rows_at_failure": 150000,
+  "frozen_prefix_rows": {
+    "M9V": {"M1":151494,"M5":90299,"M15":30100,"H1":20025,"H4":10006,"D1":5001},
+    "M9Y": {"M1":151595,"M5":90319,"M15":30107,"H1":20026,"H4":10007},
+    "M10B": {"M1":152084,"M5":90417,"M15":30139,"H1":20034,"H4":10009,"D1":5001},
+    "M10E": {"M1":152156,"M5":90431,"M15":30144,"H1":20036,"H4":10009,"D1":5001},
+    "M10P": {"M1":152266,"M5":90453,"M15":30151,"H1":20037,"H4":10009,"D1":5001},
+    "M10P2": {"M1":152307,"M5":90462,"M15":30154,"H1":20038,"H4":10010,"D1":5002},
+    "M10W19": {"M1":153738,"M15":30250,"H1":20062,"H4":10016,"D1":5003}
+  },
   "root_cause": {
-    "primary": "The live M1 CSV is retained as a rolling file whose head can be removed. The monitors incorrectly require every initialization-time row to remain forever and therefore classify a harmless head truncation before all prospective starts as a frozen-prefix integrity failure.",
-    "secondary": "A short PermissionError/read-contention during CSV replacement is treated as a terminal forever-loop failure.",
+    "primary": "At every MT5 start, the EA rebuilds every timeframe CSV to its configured bounded bar count. During runtime it refreshes/appends with a 20-bar lookback. The monitors incorrectly treat all files as permanent append-only files and require every initialization-time row to remain at the same prefix position forever.",
+    "why_M1_failed_first": "M1 was the first file checked and its rebuilt count of exactly 150000 was already below every frozen M1 prefix count. The same invalid assumption applies to M5, M15, H1, H4 and D1 and would fail those files as their configured caps are restored.",
+    "secondary": "A short PermissionError/read-contention during full rebuild or overlap refresh is treated as a terminal forever-loop failure.",
     "strategy_or_threshold_failure": false,
     "prospective_start_corruption": false,
     "historical_backfill": false
@@ -67,10 +77,9 @@
   "required_correction": {
     "preserve_existing_starts": true,
     "do_not_edit_runtime_manifests": true,
-    "M1_integrity": "Replace full-file append-only prefix validation with rolling-window overlap validation. The exact prospective start and sufficient pre-start M1 lookback must remain present; subsequent cycles must verify an advancing overlap checkpoint hash.",
-    "higher_timeframes": "Keep strict frozen-prefix validation while their initialization prefixes remain physically present.",
-    "transient_io": "Retry PermissionError and unstable replacement reads without ending the forever loop; continue to fail closed on contract, runtime, start, timestamp-order, overlap-hash or genuine source-integrity violations.",
-    "restart": "After correction and one-time preserved-start migration audit, restart BAT03 only in dependency order. Never rerun BAT01."
+    "all_timeframe_integrity": "Replace row-position full-prefix validation for M1/M5/M15/H1/H4/D1 with timestamp-keyed rolling overlap checkpoint validation. For each timeframe, the frozen last-server-open anchor and enough pre-anchor context must remain present at migration, and every later cycle must hash-match the previous overlapping canonical rows before advancing.",
+    "transient_io": "Retry PermissionError, sharing violations and unstable rebuild snapshots without ending the forever loop; continue to fail closed on contract, runtime, start, source path, point, timestamp-order, duplicate, anchor or overlap-hash violations.",
+    "restart": "After correction and one-time preserved-start all-timeframe migration audit, restart BAT03 only in dependency order. Never rerun BAT01."
   },
   "guardrails": {
     "audit_only": true,
