@@ -1,0 +1,89 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W30_LOW_ATR_POST_RESULT_COVARIATE_SHIFT_DIAGNOSTIC_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_POST_RESULT_DIAGNOSTIC_NOT_EXECUTED",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "basis": {
+    "M10W27": "Outcome-blind 7480-row low-ATR bullish prefix-causal NEITHER feature inventory.",
+    "M10W29": "All three preregistered microstructure families failed to advance; 2026 test deterioration is already known.",
+    "interpretation_limit": "This stage is post-result diagnosis, not independent confirmation and not a candidate-selection stage."
+  },
+  "source": {
+    "path": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W27/LATEST/02_low_atr_bullish_causal_neither_feature_rows.csv",
+    "expected_sha256": "03f0185694485eab2b5e50ab93c2f354a91cdd8b0706f7710b66c2b1173648cd",
+    "expected_rows": 7480,
+    "train": [2023, 2024],
+    "validation": [2025],
+    "test": [2026]
+  },
+  "numeric_features": [
+    "h1_atr_pct100",
+    "m5_tick_volume_ratio20",
+    "m5_body_ratio",
+    "m5_close_location",
+    "m5_lower_wick_ratio",
+    "m5_upper_wick_ratio",
+    "m5_ret3_bps",
+    "m5_range3_bps",
+    "m1_ret5_bps",
+    "m1_up_close_count5",
+    "m1_close_location",
+    "m1_range5_bps",
+    "last_closed_m1_spread_bps"
+  ],
+  "diagnostics": {
+    "population_stability_index": {
+      "reference_bins": "train 2023-2024 deciles with duplicate-edge collapse",
+      "epsilon": 0.000001,
+      "descriptive_bands": {"LOW_LT": 0.10, "MODERATE_GE": 0.10, "SEVERE_GE": 0.25},
+      "bands_are_not_entry_thresholds": true
+    },
+    "two_sample_KS": "Descriptive empirical CDF distance only; no profit-conditioned feature selection.",
+    "summary_statistics": ["count", "missing_fraction", "mean", "median", "p25", "p75", "minimum", "maximum"],
+    "frozen_formula_density": [
+      "LMVI1 exact M10W28 formula pass count/fraction by split",
+      "LMWR1 exact M10W28 formula pass count/fraction by split",
+      "LMMO1 exact M10W28 formula pass count/fraction by split"
+    ]
+  },
+  "required_outputs": [
+    "feature PSI and KS for validation and test versus train",
+    "split summary statistics",
+    "frozen formula pass densities by split",
+    "audit proving no trade ledger, return, PF, PnL or win/loss label was read",
+    "interpretation separating covariate drift from outcome evidence"
+  ],
+  "decision_rules": {
+    "may_explain_instability": true,
+    "may_rescue_M10W29_family": false,
+    "may_change_formula_or_threshold": false,
+    "may_add_session_or_time_filter": false,
+    "may_change_ATR_boundary": false,
+    "may_change_horizon_or_exit": false,
+    "may_authorize_fresh_shadow": false,
+    "next_if_material_scale_drift": "Only an outcome-blind availability audit of genuinely scale-normalized causal information may be designed. Any later historical evaluation remains exploratory and requires independent fresh prospective support."
+  },
+  "relationship_to_forward": {
+    "M10W26_keep_running_unchanged": true,
+    "M10W26_start": "2026.07.28 15:58:00",
+    "M10W26_BAT01": "PERMANENTLY_FORBIDDEN",
+    "existing_seven_loops_keep_running": true,
+    "M10V_before_M10P_and_M10P2_each_20_resolved_plus_integrity_PASS": "FORBIDDEN"
+  },
+  "safety": {
+    "audit_only": true,
+    "trade_outcomes_read": false,
+    "future_return_computed": false,
+    "pf_or_pnl_computed": false,
+    "win_loss_label_read": false,
+    "profit_ranked_feature_selection": false,
+    "historical_backfill": false,
+    "existing_monitor_modification": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
