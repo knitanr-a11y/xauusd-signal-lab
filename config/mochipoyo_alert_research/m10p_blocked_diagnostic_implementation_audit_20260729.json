@@ -1,0 +1,58 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_BLOCKED_DIAGNOSTIC_READ_ONLY",
+  "status": "PASS_IMPLEMENTED_AWAITING_USER_LOCAL_DIAGNOSTIC_PACKAGE",
+  "recorded_at": "2026-07-29",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "observed_incident": {
+    "source": "user-pasted M9V+ read-only dashboard",
+    "dashboard_local_time": "2026-07-29 02:36 JST",
+    "M10P_health": "BLOCKED",
+    "M10P_lock_present": false,
+    "M10P_pid": null,
+    "M10P_start_mt5_server": "2026.07.24 23:56:00",
+    "accepted_count": 1,
+    "resolved_count": 0,
+    "open_count": 1,
+    "status_age_minutes_approx": 47,
+    "other_eight_loops_displayed_running": true
+  },
+  "interpretation": {
+    "m10p_fail_closed_stopped": true,
+    "cause_known": false,
+    "initializer_or_reset_authorized": false,
+    "restart_authorized_before_diagnostic_review": false,
+    "manual_lock_runtime_state_journal_or_snapshot_change_authorized": false,
+    "m10p_immutable_start_preserved": true
+  },
+  "operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat",
+  "implementation": "scripts/mochipoyo_alert_research/m10p_incident/python/collect_m10p_blocked_diagnostic.py",
+  "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
+  "git": {
+    "python_commit": "c2a59335c92d0d2a02deb305ee1a0cdadc2bca70",
+    "python_blob": "c5febf54d6fa08a69274dc0ec87ebdacf5afaa4c",
+    "bat_commit": "fa3e3efc251796b47f1df3d9b80e6f53e2b6a3b9",
+    "bat_blob": "62b1f69605f75c8bb3d31870563637fc7f0d60bc"
+  },
+  "read_sources": [
+    "M10P loop status and bounded-adapter log tail",
+    "M10P runtime manifest, runtime state and immutable start receipt",
+    "M10P lock existence",
+    "M10P LATEST summary, candidate/trade/overlap ledgers, data quality and audit log",
+    "best-effort read-only Windows process inventory for M10P command-line markers"
+  ],
+  "mutations": {
+    "m10p_process_start_or_stop": false,
+    "initializer_run": false,
+    "runtime_or_state_write": false,
+    "start_write": false,
+    "lock_write_or_delete": false,
+    "journal_or_snapshot_write": false,
+    "m10p_latest_write": false,
+    "other_loop_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "diagnostic_output_only": true
+  },
+  "next": "Fetch/Pull, run the read-only diagnostic BAT once, upload only its 99_UPLOAD_PACKAGE.zip, then diagnose before authorizing any preserved-start recovery."
+}
