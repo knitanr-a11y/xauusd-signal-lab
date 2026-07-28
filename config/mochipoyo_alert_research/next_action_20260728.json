@@ -1,63 +1,65 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10W34_INITIAL_HEALTH_PASS_FRESH_ACCUMULATION_AND_READ_ONLY_CHECKPOINT_NEXT",
-  "stage": "M10W34_SNDX1_LOW_ATR_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "M10P_BLOCKED_FAIL_CLOSED_READ_ONLY_DIAGNOSTIC_NEXT",
+  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW_INCIDENT_DIAGNOSIS",
   "scope": "GOLD_XAUUSD_ONLY",
-  "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00. At 20 resolved, run its existing read-only checkpoint/health audit.",
-  "M10W34_status": "PASS initial health from immutable MT5-server start 2026.07.28 18:19:00. Exactly one process and one lock; 7 successful cycles; waiting=0; terminal failures=0; all private snapshot and shared journal checks PASS. Initial resolved=0 is normal.",
-  "M10W34_initial_health_result": "config/mochipoyo_alert_research/m10w34_user_local_initial_health_result_20260728.json",
-  "M10W34_initial_health_package_sha256": "dfee3076f45e53e31ccbb097e88416702aff53c650348d0e9fe3531cb6c799c4",
-  "optional_dashboard": {
-    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
-    "implementation_audit": "config/mochipoyo_alert_research/m9v_plus_read_only_dashboard_implementation_audit_20260729.json",
-    "refresh_seconds": 60,
-    "scope": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
-    "read_only": true,
-    "rule": "When the dashboard shows REACHED, send its screenshot for review before running any checkpoint BAT. The dashboard does not authorize automatic checkpoint execution or promotion."
+  "observed_incident": {
+    "dashboard_local_time": "2026-07-29 02:36 JST",
+    "M10P_health": "BLOCKED",
+    "M10P_lock_present": false,
+    "M10P_pid": null,
+    "M10P_start_mt5_server": "2026.07.24 23:56:00",
+    "accepted_count": 1,
+    "resolved_count": 0,
+    "open_count": 1,
+    "other_eight_loops_running": true,
+    "cause_known": false
   },
   "immediate_action": [
-    "Keep collector, M7C, M8C and all nine loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26/M10W34 running unchanged.",
-    "No checkpoint BAT or upload is required immediately after this initial-health PASS.",
-    "For one-screen monitoring, Fetch/Pull the latest branch and optionally run scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat. It refreshes every 60 seconds and may be closed with Ctrl+C without affecting any monitor.",
-    "Never run M10W34 BAT01 again.",
-    "When the dashboard or M10W34 BAT03 first shows M10W34 RESOLVED=20, send the dashboard screenshot before running a checkpoint.",
-    "After review authorization, run scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat while M10W34 remains running.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip at the authorized 20-resolved operational gate.",
-    "Repeat the same read-only checkpoint at 60 resolved and 120 resolved only when each gate is reached and reviewed. No automatic promotion follows any gate."
+    "Keep collector, M7C, M8C and the eight healthy loops M9V/M9Y/M10B/M10E/M10P2/M10W19/M10W26/M10W34 running unchanged.",
+    "Do not run M10P BAT01, do not restart M10P, do not create/delete its lock, and do not edit its runtime/state/start/journals/snapshots.",
+    "Fetch/Pull the latest feature/mochipoyo-alert-research branch.",
+    "Run scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat once.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip.",
+    "Wait for diagnostic review before any preserved-start recovery or restart decision."
   ],
-  "checkpoint_operator": "scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat",
-  "checkpoint_output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip",
-  "review_gates": {
-    "operational_resolved": 20,
-    "interim_resolved": 60,
-    "formal_resolved": 120,
-    "automatic_live_promotion": false
+  "diagnostic": {
+    "implementation_audit": "config/mochipoyo_alert_research/m10p_blocked_diagnostic_implementation_audit_20260729.json",
+    "operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat",
+    "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
+    "read_only_with_respect_to_monitors_and_evidence": true,
+    "diagnostic_output_only": true
+  },
+  "background_monitoring": {
+    "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00.",
+    "M10W34_status": "Keep running unchanged from immutable start 2026.07.28 18:19:00.",
+    "dashboard_operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "dashboard_read_only": true
   },
   "authorization": {
-    "M9V_plus_dashboard_optional_read_only": true,
-    "M10W34_BAT01": false,
-    "M10W34_BAT03_keep_running": true,
-    "M10W34_BAT06_read_only_checkpoint_at_reviewed_gate": true,
-    "M10W34_live_or_final_promotion": false,
+    "M10P_read_only_diagnostic": true,
+    "M10P_restart": false,
+    "M10P_BAT01": false,
+    "M10P_runtime_or_start_reset": false,
+    "M10W26_keep_running": true,
+    "M10W34_keep_running": true,
     "M10V": false
   },
   "do_not_run_or_change": {
     "any_loop_BAT01_or_initializer": true,
-    "stop_or_restart_healthy_loops": true,
+    "M10P_restart_before_diagnostic_review": true,
+    "stop_or_restart_the_other_eight_healthy_loops": true,
     "force_close_or_taskkill_loops": true,
     "manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion": true,
     "prospective_start_reset": true,
     "historical_backfill_before_start": true,
     "formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
-    "checkpoint_before_requested_and_reviewed_gate_unless_diagnosing_an_incident": true,
-    "dashboard_as_automatic_checkpoint_or_promotion_authorization": true,
     "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
   },
   "safety": {
     "audit_only": true,
     "runtime_reset": false,
     "start_reset": false,
-    "existing_forward_modified": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
