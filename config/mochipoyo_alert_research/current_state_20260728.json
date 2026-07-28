@@ -2,15 +2,24 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W34_INITIAL_HEALTH_PASS_RUNNING_FRESH_ACCUMULATION_AUDIT_ONLY",
+  "status": "M10P_BLOCKED_FAIL_CLOSED_DIAGNOSTIC_PENDING_M10W34_RUNNING_AUDIT_ONLY",
   "scope": "XAUUSD_GOLD_ONLY",
   "observed_monitor_state": {
-    "running_private_snapshot_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
-    "M10W34_exactly_one_process": true,
-    "M10W34_lock_present": true,
+    "running_private_snapshot_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P2", "M10W19", "M10W26", "M10W34"],
+    "blocked_private_snapshot_loops": ["M10P"],
+    "M10P_dashboard_observed_local_time": "2026-07-29 02:36 JST",
+    "M10P_status": "BLOCKED",
+    "M10P_lock_present": false,
+    "M10P_pid": null,
+    "M10P_status_age_minutes_approx": 47,
+    "M10P_accepted_count": 1,
+    "M10P_resolved_count": 0,
+    "M10P_open_count": 1,
+    "M10W34_exactly_one_process_at_initial_health": true,
+    "M10W34_lock_present_at_initial_health": true,
     "M10W34_successful_cycles_at_initial_health": 7,
     "M10W34_terminal_failures_at_initial_health": 0,
-    "keep_all_running_unchanged": true
+    "keep_other_eight_running_unchanged": true
   },
   "immutable_starts": {
     "M7C_utc": "2026-07-20T14:54:15Z",
@@ -23,6 +32,17 @@
     "M10W19_mt5_server": "2026.07.28 02:31:00",
     "M10W26_mt5_server": "2026.07.28 15:58:00",
     "M10W34_mt5_server": "2026.07.28 18:19:00"
+  },
+  "M10P_incident": {
+    "status": "BLOCKED_FAIL_CLOSED_CAUSE_NOT_YET_DIAGNOSED",
+    "immutable_start": "2026.07.24 23:56:00",
+    "implementation_audit": "config/mochipoyo_alert_research/m10p_blocked_diagnostic_implementation_audit_20260729.json",
+    "diagnostic_operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat",
+    "diagnostic_output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
+    "BAT01_permanently_forbidden": true,
+    "restart_before_diagnostic_review": false,
+    "runtime_or_start_reset": false,
+    "manual_lock_runtime_state_journal_or_snapshot_edit_or_delete": false
   },
   "M10W26": {
     "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
@@ -61,7 +81,7 @@
     "automatic_live_promotion": false
   },
   "read_only_dashboard": {
-    "status": "PASS_IMPLEMENTED_OPTIONAL_READ_ONLY_OPERATOR_TOOL",
+    "status": "PASS_V2_NULL_SAFE_PID_AND_COUNT_FIX_OPTIONAL_READ_ONLY_TOOL",
     "implementation_audit": "config/mochipoyo_alert_research/m9v_plus_read_only_dashboard_implementation_audit_20260729.json",
     "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
     "displayed_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
@@ -71,6 +91,9 @@
     "reached_label_requires_review_before_checkpoint": true
   },
   "research_authorization": {
+    "M10P_read_only_diagnostic": true,
+    "M10P_restart_before_diagnostic_review": false,
+    "M10P_BAT01": false,
     "M10W26_keep_running": true,
     "M10W34_keep_running": true,
     "M10W34_read_only_checkpoint_at_review_gates": true,
@@ -82,6 +105,7 @@
   "forbidden": {
     "any_existing_loop_BAT01_or_initializer": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
     "stop_or_restart_healthy_loops_without_incident": true,
+    "M10P_restart_before_read_only_diagnostic_review": true,
     "force_close_or_taskkill_loops": true,
     "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
     "prospective_start_reset": true,
