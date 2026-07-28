@@ -1,0 +1,22 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"FRESH_LOOP_MASS_STOP_OPERATIONAL_INCIDENT",
+  "status":"DIAGNOSTIC_REQUIRED_BEFORE_RECOVERY_OR_RELIABILITY_PATCH",
+  "recorded_at":"2026-07-28",
+  "user_observation":{"stopped":["M9V","M9Y","M10B","M10E","M10P","M10P2","M10W19"],"other_loops_running":true},
+  "code_audit_findings":{
+    "M9V":"A one-shot exit code 2 immediately stops the persistent loop.",
+    "M9Y":"A one-shot exit code 2 immediately returns from the persistent loop.",
+    "M10B":"Any exception from once() propagates out of forever() and exits the process.",
+    "M10E":"Any exception from once() propagates out of forever() and exits the process.",
+    "M10P":"Any exception from once() propagates out of forever() and exits the process.",
+    "M10P2":"Any exception from once() propagates out of forever() and exits the process.",
+    "M10W19":"Any exception from once() propagates out of forever() and exits the process.",
+    "common":"The seven loops do not currently distinguish temporary read/feed/update races from hard immutable-contract or prefix-integrity failures before deciding to terminate. Abrupt termination can also leave a stale exclusive lock."
+  },
+  "most_plausible_common_trigger_classes":["temporary GOLD CSV exporter pause or stale timeframe","CSV being replaced/read during write","upstream M9V LATEST replacement race","Windows sleep/reboot/process termination","hard frozen-prefix integrity mismatch"],
+  "not_yet_known":"The exact local trigger cannot be selected from code alone. Local status/log/lock/feed frontier evidence is required before changing retry behavior or clearing locks.",
+  "diagnostic":{"contract":"config/mochipoyo_alert_research/fresh_loop_mass_stop_diagnostic_contract_20260728.json","operator":"scripts/mochipoyo_alert_research/recovery/bat/02_audit_stopped_fresh_loops.bat","output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/FRESH_LOOP_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip","read_only":true},
+  "do_not_do_before_review":["Do not rerun any initializer/BAT01.","Do not delete any lock manually.","Do not reset or move any prospective start.","Do not blindly add infinite retry around hard integrity failures.","Do not run M10W25C or create M10W26 fresh start while the seven forward loops are stopped."],
+  "safety":{"audit_only":true,"historical_backfill":false,"runtime_reset":false,"start_reset":false,"lock_removal":false,"process_start_or_stop":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false}
+}
