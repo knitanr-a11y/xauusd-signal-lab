@@ -1,0 +1,29 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W25_NEITHER_PREFIX_CAUSAL_LIVE_PARITY_AUDIT_ONLY",
+  "status":"IMPLEMENTATION_REVIEW_PASS_READY_FOR_USER_LOCAL_RUN",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "contract":"config/mochipoyo_alert_research/m10w25_neither_prefix_causal_live_parity_audit_contract_20260728.json",
+  "implementation":"scripts/mochipoyo_alert_research/m10w25/python/run_m10w25_neither_prefix_causal_live_parity_audit.py",
+  "operator":"scripts/mochipoyo_alert_research/m10w25/bat/01_run_neither_prefix_causal_live_parity_audit.bat",
+  "review":{
+    "historical_bar_source":"Exact M10A frozen GOLD M1/M5/M15/H1/H4/D1 with frozen SHA256 verification.",
+    "historical_coverage_source":"M10W14 02_m15_coverage_grid.csv only.",
+    "M10W24B_source":"02_corrected_neither_feature_rows.csv only; explicit trade/outcome columns are rejected.",
+    "M10W24B_trade_ledger_read":false,
+    "PF_or_PnL_read":false,
+    "future_return_read_or_computed":false,
+    "future_path_label_read":false,
+    "LONG_primary_materialization":"Chronological state machine using exact replay_m7c transition rules. Active LONG first-turn can be recognized before the eventual episode exit; future exit is not required.",
+    "same_timestamp_exit_precedence":"Primary exit event is processed before first-turn evaluation at the same timestamp, reproducing historical d < exit_time boundary.",
+    "first_turn_off_by_one":"Earliest causal materialization remains entry M1 index +2, matching historical current_index starts at entry_index+1 and turn_bar=current_index+1.",
+    "branch_filters":"Calls exact frozen_core select_s1/select_s2/select_s3/select_s4 using only indices whose nominal close time <= decision.",
+    "SHORT_presence":"Calls exact frozen M10W13 M10P/M10P2 formulas and verifies nominal source close <= decision.",
+    "canonical_window":"Exact M10W14 floor-to-M15 presence semantics.",
+    "target_reference":"D1 bullish / H4 positive / H1 MACD positive / ATR HIGH_GE_0P67; expected 8648 rows and retrospective NEITHER 5917.",
+    "fresh_start_created":false,
+    "existing_monitor_modified":false
+  },
+  "decision":"Run M10W25 once. A PASS or MISMATCH both produce an audit package. Do not create M10W26 fresh start until the package is reviewed.",
+  "safety":{"audit_only":true,"outcome_blind":true,"historical_backfill":false,"nearest_m1_fallback":false,"threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
