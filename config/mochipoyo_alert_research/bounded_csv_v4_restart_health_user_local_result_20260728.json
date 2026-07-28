@@ -1,0 +1,54 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_RESTART_HEALTH_AUDIT_ONLY",
+  "status": "PASS_ALL_SEVEN_V4_PRIVATE_SNAPSHOT_HEALTHY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(69).zip",
+    "sha256": "fae9353ea2dd5a1096978afc95478f27c8450c1938de808c23bd2d687a4f505b",
+    "size_bytes": 19653
+  },
+  "health_summary": {
+    "all_seven_healthy": true,
+    "healthy_v4_private_snapshot_count": 7,
+    "waiting_transient_count": 0,
+    "blocked_or_incomplete_count": 0,
+    "required_process_token": "run_bounded_adapter_loop_v4.py",
+    "required_snapshot_version": "BOUNDED_CSV_PER_LOOP_SNAPSHOT_V1",
+    "maximum_snapshot_age_seconds": 300,
+    "runtime_hashes_and_starts_preserved": true,
+    "shared_journal_fingerprints_verified": true,
+    "mutations_performed_by_health_audit": false
+  },
+  "loops": {
+    "M9V": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":4,"successful_cycles":4,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.24 11:04:00","snapshot_receipt_ok":true,"snapshot_age_seconds":55.485343,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M9Y": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":3,"successful_cycles":3,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.24 12:45:00","snapshot_receipt_ok":true,"snapshot_age_seconds":63.427517,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M10B": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":3,"successful_cycles":3,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.24 20:54:00","snapshot_receipt_ok":true,"snapshot_age_seconds":48.348777,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M10E": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":2,"successful_cycles":2,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.24 22:06:00","snapshot_receipt_ok":true,"snapshot_age_seconds":65.336322,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M10P": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":2,"successful_cycles":2,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.24 23:56:00","snapshot_receipt_ok":true,"snapshot_age_seconds":28.328168,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M10P2": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":1,"successful_cycles":1,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.27 01:39:00","snapshot_receipt_ok":true,"snapshot_age_seconds":67.318807,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true},
+    "M10W19": {"classification":"HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS","process_count":1,"lock_exists":true,"process_uses_v4":true,"runtime_sha_match":true,"start_match":true,"status":"RUNNING","cycles":1,"successful_cycles":1,"waiting_transient_cycles":0,"failed_terminal_cycles":0,"latest_output_status":"PASS_FRESH_PROSPECTIVE_AUDIT_ONLY","prospective_start_server_time":"2026.07.28 02:31:00","snapshot_receipt_ok":true,"snapshot_age_seconds":29.203297,"all_snapshot_files_match_receipt":true,"snapshot_not_ahead_of_shared_journal":true}
+  },
+  "decision": {
+    "operational_health_restored": true,
+    "keep_all_seven_v4_loops_running": true,
+    "M10W25C_authorized": true,
+    "M10W26_authorized": false,
+    "M10V_authorized": false,
+    "BAT01_or_initializer": "FORBIDDEN"
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill_before_start": false,
+    "nearest_m1_fallback": false,
+    "runtime_reset": false,
+    "start_reset": false,
+    "manual_lock_adapter_snapshot_or_journal_deletion": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
