@@ -1,0 +1,71 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_ROLLING_M1_PRESERVED_START_RECOVERY_AUDIT_ONLY",
+  "status": "DESIGN_FROZEN_NOT_EXECUTED",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "affected_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
+  "immutable_starts": {
+    "M9V": "2026.07.24 11:04:00",
+    "M9Y": "2026.07.24 12:45:00",
+    "M10B": "2026.07.24 20:54:00",
+    "M10E": "2026.07.24 22:06:00",
+    "M10P": "2026.07.24 23:56:00",
+    "M10P2": "2026.07.27 01:39:00",
+    "M10W19": "2026.07.28 02:31:00"
+  },
+  "problem": {
+    "M1_retention": "goldsharp_m1.csv can roll its oldest rows and was observed at exactly 150000 rows after runtimes froze prefixes of 151494..153738 rows.",
+    "incorrect_old_assumption": "All initialization-time CSV rows remain physically present forever.",
+    "transient_read": "CSV replacement can temporarily raise PermissionError and the persistent loop currently exits after one failed cycle."
+  },
+  "rolling_M1_integrity_contract": {
+    "full_old_prefix_required": false,
+    "exact_prospective_start_must_exist": true,
+    "minimum_pre_start_M1_rows": 10,
+    "timestamps_strictly_ascending": true,
+    "duplicates_forbidden": true,
+    "nearest_M1_fallback": false,
+    "overlap_checkpoint": {
+      "per_loop_sidecar": true,
+      "runtime_manifest_unchanged": true,
+      "checkpoint_rows": 4096,
+      "first_bootstrap": "Allowed only while the exact frozen start remains in the current M1 file and the existing last successful output/start metadata are internally consistent.",
+      "later_cycles": "The previous checkpoint end must still exist and the exact overlapping canonical rows must hash-match before the checkpoint advances.",
+      "if_overlap_missing_or_changed": "FAIL_CLOSED"
+    }
+  },
+  "non_M1_integrity_contract": {
+    "strict_frozen_prefix_continues": true,
+    "rolling_fallback_not_authorized": true
+  },
+  "transient_IO_contract": {
+    "retryable": ["PermissionError", "sharing violation", "file replacement in progress", "unstable double-read snapshot"],
+    "retry_window_seconds": 90,
+    "retry_interval_seconds": 1,
+    "retry_does_not_change_start": true,
+    "terminal_failures": ["runtime or contract mismatch", "prospective start changed", "timestamp non-ascending", "duplicate timestamp", "rolling overlap hash mismatch", "exact start missing", "source path changed", "point changed"]
+  },
+  "migration_audit": {
+    "all_loop_processes_must_be_absent": true,
+    "all_loop_locks_must_be_absent": true,
+    "all_runtime_manifests_and_starts_must_match": true,
+    "no_initializer": true,
+    "no_start_rewrite": true,
+    "create_only_integrity_sidecars_and_receipt": true,
+    "restart_after_pass": ["M9V BAT03", "M9Y BAT03", "M10B BAT03", "M10E BAT03", "M10P BAT03", "M10P2 BAT03", "M10W19 BAT03"]
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "manual_lock_deletion": false,
+    "runtime_manifest_edit": false,
+    "prospective_start_reset": false,
+    "BAT01_rerun": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
