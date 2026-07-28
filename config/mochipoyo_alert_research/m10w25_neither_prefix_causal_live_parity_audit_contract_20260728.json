@@ -1,0 +1,47 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W25_NEITHER_PREFIX_CAUSAL_LIVE_PARITY_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_EXECUTED",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Prove that the M10W24B parent coverage_class=NEITHER cohort can be reproduced at each decision using only information available by that decision, before freezing any MMO1 fresh prospective start.",
+  "why_required":"M10W14 historical LONG coverage first calls replay_m7c(), which only appends a primary episode after its exit is observed, and then finds the first-turn retrospectively inside that completed episode. The first-turn rule and branch filters are causal, but directly reusing the completed-pair historical implementation in a fresh runtime would delay presence until a future episode exit. M10W25 replaces only the materialization mechanism with a chronological prefix state machine and compares it to the frozen historical coverage map without reading outcomes.",
+  "sources":{
+    "frozen_gold_bars":"Exact M10A frozen 2023-2026 M1/M5/M15/H1/H4/D1 files and SHA256 contract.",
+    "historical_coverage_grid":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W14/LATEST/02_m15_coverage_grid.csv",
+    "corrected_preentry_feature_rows":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W24B/LATEST/02_corrected_neither_feature_rows.csv",
+    "forbidden_sources":["M10W24B 03_trade_ledger_all_families.csv","any PF/PnL/win-loss output","any +240m outcome","any future path label"]
+  },
+  "historical_reference_counts":{"M10W14_eligible_grid_windows":81329,"M10W22_high_atr_bullish_rows":8648,"M10W24B_retrospective_NEITHER_rows":5917},
+  "frozen_coverage_families":{
+    "LONG":["LONG_M5_S1","LONG_M15_S2","LONG_H1_S3","LONG_H4_S4"],
+    "SHORT":["SHORT_M10P_C056_G013","SHORT_M10P2_C0212"]
+  },
+  "prefix_causal_long_reproduction":{
+    "primary_state_machine":"Exact M10A replay_m7c RCI9/EMA20/30/40 transition rules processed chronologically at each timeframe next-bar open, without requiring a future exit to materialize an active episode.",
+    "first_turn":"Exact M10W14 first-turn condition. At decision t use only already observed M1 bars; a raw first-turn is consumed once per active LONG primary episode exactly as the historical break-after-first-turn rule.",
+    "same_timestamp_exit_precedence":"If a primary exit transition occurs at the same timestamp as a potential first-turn materialization, apply the exit first so no turn is emitted at or after the historical exit boundary.",
+    "branch_filters":"Apply the exact frozen M5_S1/M15_S2/H1_S3/H4_S4 branch filters using selected fully closed source bars and their trailing quantiles only.",
+    "future_exit_reference":false,
+    "completed_pair_required":false
+  },
+  "prefix_causal_short_reproduction":"Use exact frozen M10W13 M10P C056+G013 and M10P2 C0212 decision formulas. Their source bars are already fully closed by decision and no future exit/outcome is used.",
+  "target_scope":{"d1_ema_stack":"BULLISH_20_GT_30_GT_40","h4_ema20_minus_ema30_sign":"POSITIVE","h1_macd_line_sign":"POSITIVE","h1_atr_pct100_tercile":"HIGH_GE_0P67","required_coverage_class":"NEITHER"},
+  "required_outputs":[
+    "full causal coverage grid using the six frozen family-presence definitions",
+    "per-family historical-vs-causal presence mismatch counts over all M10W14 grid rows",
+    "coverage_class mismatch rows over all grid rows",
+    "HIGH-ATR bullish target family-presence and coverage-class mismatch counts",
+    "exact symmetric difference between causal target NEITHER decisions and M10W24B corrected pre-entry feature decision set",
+    "audit proving no outcome file, future return, future episode exit or future path label was used"
+  ],
+  "decision_rule":{
+    "PASS_FOR_MMO1_FRESH_DESIGN":"All 8648 target-regime rows are present, historical target NEITHER count is 5917, target per-family presence mismatch count is 0, target coverage_class mismatch count is 0, and causal target NEITHER decision set exactly equals the 5917 M10W24B pre-entry feature decisions.",
+    "MISMATCH":"Any target family-presence mismatch, target coverage-class mismatch, target-count mismatch, or target-NEITHER decision-set symmetric difference >0.",
+    "full_grid_mismatch_outside_target":"Report descriptively. It does not authorize changing the MMO1 target scope or any frozen family. If target parity is exact, unrelated outside-target mismatches do not by themselves block an MMO1-only fresh design, but must remain documented.",
+    "on_pass":"M10W26 may freeze a brand-new MMO1 fresh prospective shadow design. It still must initialize from a new stable live M1 frontier and cannot use pre-start history as prospective evidence.",
+    "on_mismatch":"Do not read outcomes and do not tune. M10W26 fresh start is forbidden. Freeze a separate causal-cohort correction contract before any performance re-evaluation."
+  },
+  "unchanged":{"MMO1_formula":true,"MMO1_thresholds":true,"LONG_direction":true,"high_atr_bullish_regime":true,"coverage_family_formulas":true,"240_minute_horizon":true,"exact_M1_execution":true,"one_position_per_family":true,"cost_rules":true,"M10W19":true,"M10P":true,"M10P2":true},
+  "safety":{"audit_only":true,"outcome_blind":true,"trade_outcomes_read":false,"future_return_computed":false,"future_episode_exit_used_for_presence":false,"historical_backfill_into_forward":false,"nearest_m1_fallback":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"new_prospective_start_created":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
