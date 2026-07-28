@@ -1,0 +1,65 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W34_INITIAL_CYCLE_EVIDENCE_REVIEW_AUDIT_ONLY",
+  "status": "PASS_INITIAL_CYCLE_EVIDENCE_HEALTH_PACKAGE_STILL_REQUIRED_AUDIT_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(75).zip",
+    "sha256": "989ed1fe07b8612b68a7482fc46693d9e5a1244c1a6352c536bf73c6ef9fbd55",
+    "size_bytes": 14110,
+    "package_type": "M10W34_LATEST_DIRECTORY_WRAPPER_NOT_M10W34_INITIAL_HEALTH_PACKAGE"
+  },
+  "verified_from_uploaded_evidence": {
+    "prospective_start_server_time": "2026.07.28 18:19:00",
+    "runtime_contract_version": "M10W34_RUNTIME_V1_PRESTART_CAUSAL_ENGINE_AND_IMPLEMENTATION_FROZEN",
+    "runtime_status": "FROZEN_FRESH_START",
+    "first_cycle_status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "first_cycle_built_at_utc": "2026-07-28T15:24:41Z",
+    "latest_M1_server_open": "2026.07.28 18:23:00",
+    "candidate_count": 0,
+    "accepted_count": 0,
+    "resolved_count": 0,
+    "open_count": 0,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "overlap_skip_count": 0,
+    "causal_short_source_timing_violation_count": 0,
+    "private_snapshot_receipt_status": "PASS_PRIVATE_LOOP_SNAPSHOT",
+    "private_snapshot_version": "M10W34_PRIVATE_VERIFIED_SNAPSHOT_V1",
+    "historical_backfill": false,
+    "pre_start_candidate_eligibility": false,
+    "nearest_m1_fallback": false,
+    "formula_or_threshold_changed": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "not_verifiable_from_this_package": {
+    "exactly_one_running_M10W34_process": true,
+    "M10W34_lock_present": true,
+    "loop_status_RUNNING_and_successful_cycles": true,
+    "terminal_failure_count_zero": true,
+    "prestart_audit_file_and_start_equality": true,
+    "current_shared_journal_integrity": true,
+    "all_private_snapshot_files_match_receipt_at_health_audit_time": true
+  },
+  "decision": {
+    "M10W34_BAT01_permanently_forbidden": true,
+    "M10W34_keep_running_unchanged": true,
+    "initial_zero_is_normal": true,
+    "initial_health_pass_not_yet_declared": true,
+    "required_next_evidence": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_INITIAL_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip",
+    "do_not_rerun_initializer": true,
+    "do_not_stop_or_restart": true
+  },
+  "guardrails": {
+    "audit_only": true,
+    "runtime_reset": false,
+    "start_reset": false,
+    "historical_backfill": false,
+    "existing_monitor_modified": false,
+    "automatic_live_promotion": false
+  }
+}
