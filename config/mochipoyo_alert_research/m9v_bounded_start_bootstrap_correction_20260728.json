@@ -1,0 +1,61 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M9V_BOUNDED_SOURCE_START_BOOTSTRAP_CORRECTION_AUDIT_ONLY",
+  "status": "IMPLEMENTED_RETRY_M9V_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "observed_failure": {
+    "loop": "M9V",
+    "error": "M9VContractError: state-at-start changed after freeze: M15",
+    "classification": "FALSE_HARD_BLOCK_FROM_RECOMPUTING_PRE_START_STATE_MACHINE_AFTER_BOUNDED_HEAD_TRUNCATION",
+    "m9y_or_later_started": false
+  },
+  "root_cause": {
+    "migration_integrity_failure": false,
+    "runtime_or_start_corruption": false,
+    "journal_overlap_or_sha_failure": false,
+    "details": "The verified migration journal is seeded from the current bounded M15 source. MT5 restart legitimately removed the oldest approximately 100 M15 rows compared with the original 30100-row freeze. The legacy M9V audit replayed the full pre-start state machine from the newer bounded head and compared that recomputed path-dependent state with the immutable runtime state_at_start. Row content at retained timestamps was not shown to have changed; the invalid operation was recomputing the frozen bootstrap from a different bounded head."
+  },
+  "correction": {
+    "helper": "scripts/mochipoyo_alert_research/common/python/m9v_bounded_start_bootstrap.py",
+    "runner": "scripts/mochipoyo_alert_research/common/python/run_bounded_adapter_loop_v3.py",
+    "operator": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "bootstrap_authority": "existing M9V runtime state_at_start and inherited_active_primary_time",
+    "pre_start_replay_from_bounded_head": false,
+    "post_start_replay": "Use verified journal indicator context and replay only decisions strictly after the immutable start, initialized from the frozen runtime state.",
+    "pre_start_inherited_episode_candidate_eligible": false,
+    "historical_backfill": false,
+    "runtime_manifest_edit": false,
+    "prospective_start_edit": false,
+    "journal_edit_outside_verified_adapter": false
+  },
+  "preserved_fail_closed_checks": [
+    "runtime manifest SHA and exact start",
+    "source root and XAUUSD point",
+    "journal SHA256 and size",
+    "strict timestamp order and duplicate rejection",
+    "timestamp-keyed canonical overlap",
+    "contract and chronology anchors"
+  ],
+  "verification": {
+    "source_review": "PASS",
+    "isolated_frozen_ACTIVE_LONG_bootstrap_and_post_start_exit_test": "PASS",
+    "bat_required_file_preflight": true,
+    "bat_AST_syntax_preflight": true,
+    "user_local_M9V_retry": "PENDING"
+  },
+  "next": {
+    "authorized": "Pull latest branch and rerun M9V BAT03 only.",
+    "require_before_M9Y": "M9V must print a successful PASS cycle and remain running.",
+    "m9y_m10b_m10e_m10p_m10p2_m10w19": "KEEP_STOPPED_UNTIL_M9V_PASS",
+    "bat01_or_initializer": "FORBIDDEN"
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
