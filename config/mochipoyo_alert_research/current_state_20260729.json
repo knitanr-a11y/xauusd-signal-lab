@@ -1,0 +1,111 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/mochipoyo-alert-research",
+  "status": "ALL_NINE_FORWARD_LOOPS_RUNNING_M10P_PRESERVED_START_RECOVERY_HEALTH_PASS_AUDIT_ONLY",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "observed_monitor_state": {
+    "running_private_snapshot_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
+    "M10P_recovered_from_operational_status_publication_race": true,
+    "M10P_status_at_recovery_health": "RUNNING",
+    "M10P_lock_present": true,
+    "M10P_process_alive": true,
+    "M10P_recovery_successful_cycles": 1,
+    "M10P_recovery_terminal_failures": 0,
+    "keep_all_nine_running_unchanged": true
+  },
+  "immutable_starts": {
+    "M7C_utc": "2026-07-20T14:54:15Z",
+    "M9V_mt5_server": "2026.07.24 11:04:00",
+    "M9Y_mt5_server": "2026.07.24 12:45:00",
+    "M10B_mt5_server": "2026.07.24 20:54:00",
+    "M10E_mt5_server": "2026.07.24 22:06:00",
+    "M10P_mt5_server": "2026.07.24 23:56:00",
+    "M10P2_mt5_server": "2026.07.27 01:39:00",
+    "M10W19_mt5_server": "2026.07.28 02:31:00",
+    "M10W26_mt5_server": "2026.07.28 15:58:00",
+    "M10W34_mt5_server": "2026.07.28 18:19:00"
+  },
+  "M10P": {
+    "status": "PASS_PRESERVED_START_RECOVERY_HEALTHY_RUNNING_AUDIT_ONLY",
+    "incident_root_cause": "PermissionError WinError 5 while publishing operational status JSON after a successful cycle",
+    "research_or_integrity_failure": false,
+    "recovery_health_result": "config/mochipoyo_alert_research/m10p_preserved_start_recovery_health_user_local_result_20260729.json",
+    "recovery_health_package_sha256": "5cc7e2ab4c6432ba019969a37452b7c58df38cf1a31b82ba009c0a13d457a92f",
+    "start": "2026.07.24 23:56:00",
+    "runtime_sha256": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "runtime_copy_exact_match": true,
+    "state_summary_counts_exact_match": true,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "metrics_at_health": {
+      "candidate_match_count": 2,
+      "accepted_count": 1,
+      "resolved_count": 0,
+      "open_count": 1,
+      "overlap_skip_count": 1
+    },
+    "review_gates": {"operational_resolved": 5, "interim_resolved": 10, "formal_resolved": 20},
+    "BAT01_permanently_forbidden": true,
+    "preserved_start_recovery_BAT02_may_run_again": false,
+    "keep_recovery_window_running": true
+  },
+  "M10P2": {
+    "status": "RUNNING_FRESH_ACCUMULATION_AUDIT_ONLY",
+    "start": "2026.07.27 01:39:00",
+    "review_gates": {"operational_resolved": 5, "interim_resolved": 10, "formal_resolved": 20}
+  },
+  "M10W26": {
+    "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
+    "start": "2026.07.28 15:58:00",
+    "review_gates": {"operational_resolved": 20, "interim_resolved": 60, "formal_resolved": 120},
+    "BAT01_permanently_forbidden": true
+  },
+  "M10W34": {
+    "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
+    "start": "2026.07.28 18:19:00",
+    "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "review_gates": {"operational_resolved": 20, "interim_resolved": 60, "formal_resolved": 120},
+    "BAT01_permanently_forbidden": true
+  },
+  "read_only_dashboard": {
+    "status": "PASS_V3_WINDOWS_DELETE_SHARE_SAFE_NULL_SAFE_OPTIONAL_READ_ONLY_TOOL",
+    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "active_implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v3.py",
+    "windows_FILE_SHARE_DELETE": true,
+    "refresh_seconds": 60,
+    "read_only": true
+  },
+  "research_authorization": {
+    "keep_all_nine_running": true,
+    "dashboard_v3_read_only": true,
+    "review_gate_checkpoint_only_after_dashboard_review": true,
+    "M10P_BAT01": false,
+    "M10P_recovery_BAT02": false,
+    "M10W26_BAT01": false,
+    "M10W34_BAT01": false,
+    "M10V": false
+  },
+  "forbidden": {
+    "any_existing_loop_BAT01_or_initializer": true,
+    "run_M10P_recovery_BAT02_again": true,
+    "stop_or_restart_healthy_loops_without_incident": true,
+    "force_close_or_taskkill_loops": true,
+    "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
+    "prospective_start_reset": true,
+    "historical_backfill_before_start": true,
+    "formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
+    "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
+  },
+  "safety": {
+    "audit_only": true,
+    "nearest_m1_fallback": false,
+    "runtime_reset": false,
+    "start_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
