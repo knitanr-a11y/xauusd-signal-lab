@@ -1,0 +1,20 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W27_LOW_ATR_BULLISH_NEITHER_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status":"PASS_OUTCOME_BLIND_LOW_ATR_BULLISH_CAUSAL_NEITHER_INFORMATION_AUDIT_ONLY",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(71).zip","sha256":"e9f63f4e8a83e35c5c1274edf41b5abcacb9a65e90280382077955491b80ce1b","size_bytes":823139,"built_at_utc":"2026-07-28T13:28:40Z"},
+  "target_regime":"D1 bullish; H4 EMA20>EMA30; H1 MACD line>0; H1 ATR pct100<0.33; prefix-causal coverage=NEITHER",
+  "causal_neither_row_count":7480,
+  "year_counts":{"2023":1562,"2024":2078,"2025":3193,"2026":647},
+  "coverage":{"broader_low_atr_bullish_regime_count":7893,"causal_neither_count":7480,"excluded_LONG_ONLY":413,"excluded_SHORT_ONLY":0,"excluded_BOTH":0,"lower_timeframe_source_timing_violation_count":0,"short_source_timing_violation_count":0,"future_return_computed":false,"future_path_read":false},
+  "feature_quality":{"degenerate_feature_count":0,"all_numeric_features_dense":true,"m1_close_location_available_fraction":0.9998663101604278,"real_volume_M1_nonzero_fraction":0.0,"real_volume_M5_nonzero_fraction":0.0,"real_volume_usable":false},
+  "outcome_blind_density_for_exact_M10W23_formulas":{
+    "MVI1_LONG_M5_VOLUME_IMPULSE":{"all":807,"2023":176,"2024":232,"2025":334,"2026":65},
+    "MWR1_LONG_M5_PULLBACK_REJECTION":{"all":606,"2023":107,"2024":180,"2025":262,"2026":57},
+    "MMO1_LONG_M1_MICRO_MOMENTUM":{"all":1610,"2023":309,"2024":416,"2025":744,"2026":141}
+  },
+  "interpretation":{"causal_information_available":true,"entry_formula_created_in_M10W27":false,"threshold_selected_in_M10W27":false,"trade_outcomes_read":false,"future_return_computed":false,"pf_or_pnl_computed":false,"win_loss_label_read":false,"feature_profit_ranking":false,"M10W28_preregistration_authorized":true},
+  "guardrails":{"audit_only":true,"M10W26_modified":false,"existing_monitors_modified":false,"historical_backfill_into_forward":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
