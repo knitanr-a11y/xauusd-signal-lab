@@ -1,0 +1,90 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10P_BLOCKED_DIAGNOSTIC_RESULT",
+  "status": "PASS_OPERATIONAL_STATUS_PUBLICATION_RACE_PRESERVED_START_RECOVERY_AUTHORIZED_AUDIT_ONLY",
+  "recorded_at": "2026-07-29",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "user_upload": {
+    "filename": "99_UPLOAD_PACKAGE(77).zip",
+    "sha256": "365941e42fd9fdd73b0ac1d30febb85c7640b92f7308e5acb7882d75d45d5a30",
+    "size_bytes": 15189,
+    "file_count": 16,
+    "package_status": "PASS_DIAGNOSTIC_PACKAGE_CREATED_READ_ONLY",
+    "all_expected_evidence_present": true
+  },
+  "incident": {
+    "loop": "M10P",
+    "immutable_start_mt5_server": "2026.07.24 23:56:00",
+    "blocked_at_utc": "2026-07-28T17:35:23Z",
+    "loop_status": "BLOCKED",
+    "stop_reason": "UNCLASSIFIED_TERMINAL_FAILURE",
+    "successful_cycles_before_stop": 251,
+    "failed_terminal_cycles": 1,
+    "waiting_transient_cycles": 0,
+    "root_cause": "PermissionError WinError 5 while atomically replacing logs/m10p/latest_m10p_shadow_loop_status.json after a successful M10P research cycle",
+    "failing_operation": "os.replace(latest_m10p_shadow_loop_status.json.tmp, latest_m10p_shadow_loop_status.json)",
+    "classification": "OPERATIONAL_STATUS_PUBLICATION_RACE_NOT_RESEARCH_OR_INTEGRITY_FAILURE",
+    "likely_reader_race": "The newly opened dashboard was reading the operational status file near the publication instant. Windows replacement was denied for the single attempt. Dashboard V3 now uses FILE_SHARE_DELETE and recovery status publication retries transient sharing failures.",
+    "candidate_logic_failure": false,
+    "runtime_integrity_failure": false,
+    "source_integrity_failure": false,
+    "data_gap_failure": false
+  },
+  "last_successful_research_state": {
+    "status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "built_at_utc": "2026-07-28T17:35:23Z",
+    "latest_m1_server_open": "2026.07.28 20:33:00",
+    "candidate_match_count": 2,
+    "accepted_count": 1,
+    "resolved_count": 0,
+    "open_count": 1,
+    "overlap_skip_count": 1,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0,
+    "accepted_trade": {
+      "trade_id": "M10P_T000001",
+      "decision_time": "2026.07.28 19:00:00",
+      "scheduled_exit_time": "2026.07.28 23:00:00",
+      "status_at_stop": "OPEN",
+      "entry_bid": 4046.16
+    },
+    "overlap_skip": {
+      "candidate_id": "M10P_20260728_200000",
+      "reason": "ONE_POSITION_ACTIVE"
+    }
+  },
+  "integrity": {
+    "runtime_manifest_sha256": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "latest_runtime_copy_sha256": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "runtime_copy_exact_match": true,
+    "runtime_state_summary_counts_match": true,
+    "runtime_start_state_receipt_status_summary_start_all_match": true,
+    "lock_present_at_diagnostic": false,
+    "m10p_loop_process_present_at_diagnostic": false,
+    "runtime_or_start_modified": false,
+    "historical_backfill_before_start": false,
+    "nearest_m1_fallback": false,
+    "discord_send": false,
+    "mt5_order": false
+  },
+  "decision": {
+    "M10P_BAT01": false,
+    "runtime_or_start_reset": false,
+    "manual_lock_edit_or_delete": false,
+    "preserved_start_recovery_authorized": true,
+    "preserved_start": "2026.07.24 23:56:00",
+    "deterministic_post_start_rebuild_authorized": true,
+    "recovery_operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/02_recover_m10p_preserved_start_once.bat",
+    "post_recovery_health_operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/03_audit_m10p_recovery_health_read_only.bat",
+    "dashboard_operator_v3": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat"
+  },
+  "safety": {
+    "audit_only": true,
+    "other_eight_loops_continue_unchanged": true,
+    "formula_or_threshold_change": false,
+    "entry_exit_horizon_change": false,
+    "automatic_live_promotion": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
