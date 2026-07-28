@@ -15,19 +15,27 @@ Important input distinction
 
 Run order
 ---------
-1. Run 01_run_availability_audit.bat once.
-2. On success, the same 01 BAT automatically opens the LATEST folder.
-3. Upload only 99_UPLOAD_PACKAGE.zip from the opened LATEST folder to ChatGPT.
-4. 02_open_latest_results.bat is only for reopening LATEST later.
+1. Pull the latest feature/mochipoyo-alert-research branch in GitHub Desktop.
+2. Run 01_run_availability_audit.bat once.
+3. The BAT verifies that all four output files are present, non-empty, the JSON is readable, and the ZIP is valid.
+4. Only after that verification succeeds, the same 01 BAT opens the LATEST folder.
+5. Upload only 99_UPLOAD_PACKAGE.zip from the opened LATEST folder to ChatGPT.
+6. 02_open_latest_results.bat is only for reopening and re-verifying LATEST later.
 
 Success display
 ---------------
-[BTC_ML_V1_01] SUCCESS: availability audit complete.
+[BTC_ML_V1_01] SUCCESS: availability audit complete and all four output files were verified.
+
+The command window remains open after success until a key is pressed.
+It must not disappear immediately after opening Explorer.
 
 Error behavior
 --------------
-- On BLOCKED, FAILED, missing LATEST, or Explorer-open failure, the command window pauses and remains visible.
-- Copy or photograph the displayed error before closing the window.
+- An empty LATEST directory is never treated as success.
+- On BLOCKED, FAILED, missing output, zero-byte output, invalid JSON, invalid ZIP, or missing LATEST, the folder is not opened as success.
+- The command window pauses and remains visible so the error can be copied or photographed.
+- A persistent console log is kept at:
+  %LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\01_fresh_forward_availability\last_run_console.log
 - Do not run any evaluator after an error.
 
 Do not run simultaneously
@@ -37,6 +45,7 @@ Run only one copy of 01 at a time. 02 only opens the result folder and may be us
 Output location
 ---------------
 %LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\01_fresh_forward_availability\
+  last_run_console.log
   LATEST\
     00_READ_ME_FIRST.txt
     01_availability_summary.json
