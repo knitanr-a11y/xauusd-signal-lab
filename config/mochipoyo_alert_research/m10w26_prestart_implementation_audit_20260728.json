@@ -1,0 +1,94 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W26_MMO1_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW_PRESTART_IMPLEMENTATION_AUDIT_ONLY",
+  "status":"PASS_IMPLEMENTATION_READY_USER_LOCAL_INITIALIZE_ONCE_NEXT_AUDIT_ONLY",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "basis":{
+    "M10W25C_result":"config/mochipoyo_alert_research/m10w25c_independent_reproduction_result_20260728.json",
+    "M10W25C_status":"PASS_CAUSAL_NEITHER_EXACT_FORMULA_REEVALUATION_MMO1_STRONG_CANDIDATE_AUDIT_ONLY",
+    "causal_NEITHER_rows":5913,
+    "MMO1_historical_classification":"STRONG_CANDIDATE",
+    "historical_support_is_not_fresh_support":true
+  },
+  "frozen_contract":"config/mochipoyo_alert_research/m10w26_mmo1_causal_neither_fresh_prospective_shadow_contract_20260728.json",
+  "frozen_candidate":{
+    "family":"MMO1_LONG_M1_MICRO_MOMENTUM",
+    "direction":"LONG",
+    "formula":["m1_ret5_bps > 0.0","m1_up_close_count5 >= 3","m1_close_location >= 0.60"],
+    "target_regime":"D1 EMA20>EMA30>EMA40; H4 EMA20>EMA30; H1 MACD line(6,13)>0; H1 Wilder ATR14 pct100>=0.67",
+    "causal_coverage_class":"NEITHER",
+    "coverage_families":["LONG_M5_S1","LONG_M15_S2","LONG_H1_S3","LONG_H4_S4","SHORT_M10P_C056_G013","SHORT_M10P2_C0212"],
+    "entry":"exact M1 decision-time ask",
+    "exit":"exact M1 decision+240m bid",
+    "one_position":true,
+    "nearest_m1_fallback":false
+  },
+  "implementation":{
+    "runtime_base":"scripts/mochipoyo_alert_research/m10w26/python/m10w26_runtime.py",
+    "runtime_v2":"scripts/mochipoyo_alert_research/m10w26/python/m10w26_runtime_v2.py",
+    "private_snapshot_operator_base":"scripts/mochipoyo_alert_research/m10w26/python/run_m10w26_private_snapshot.py",
+    "private_snapshot_operator_v2":"scripts/mochipoyo_alert_research/m10w26/python/run_m10w26_private_snapshot_v2.py",
+    "initializer":"scripts/mochipoyo_alert_research/m10w26/bat/01_initialize_fresh_start_once.bat",
+    "once_operator":"scripts/mochipoyo_alert_research/m10w26/bat/02_run_shadow_once.bat",
+    "forever_operator":"scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat",
+    "stop_operator":"scripts/mochipoyo_alert_research/m10w26/bat/04_stop_shadow_forever.bat",
+    "initial_health_operator":"scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat",
+    "initial_health_audit":"scripts/mochipoyo_alert_research/m10w26/python/audit_m10w26_initial_health.py"
+  },
+  "prestart_guards":{
+    "reviewed_bounded_adapter_migration_required":true,
+    "verified_private_snapshot_required":true,
+    "six_family_causal_engine_dry_run_required_before_start_write":true,
+    "short_source_timing_violation_count_must_equal_zero":true,
+    "long_future_exit_reference_must_be_false":true,
+    "long_completed_pair_required_must_be_false":true,
+    "all_required_implementation_sha256_values_frozen_in_runtime":true,
+    "initializer_runtime_state_receipt_transactional":true,
+    "incomplete_new_M10W26_runtime_self_rollback":true,
+    "existing_runtime_or_start_rollback_or_mutation":false
+  },
+  "runtime_model":{
+    "new_M10W26_only_start":true,
+    "source":"bounded adapter shared journal copied to M10W26-only private verified snapshot under update lock",
+    "rebuild_all_post_start_decisions_each_cycle":true,
+    "historical_backfill":false,
+    "pre_start_candidate_eligibility":false,
+    "restart_only_with_BAT03_after_initialization":true,
+    "normal_stop_only_with_BAT04":true
+  },
+  "initial_health_acceptance":[
+    "exactly one run_m10w26_private_snapshot_v2.py process",
+    "M10W26 lock present",
+    "runtime V2 frozen and implementation SHA inventory verifies",
+    "runtime/state/start receipt/prestart audit start values agree",
+    "loop status RUNNING with successful_cycles >= 1 and terminal failures = 0",
+    "LATEST summary PASS_FRESH_PROSPECTIVE_AUDIT_ONLY at immutable start",
+    "M10W26 private snapshot receipt PASS and all six file SHA/size values match",
+    "private snapshot not ahead of verified shared journal",
+    "all six shared journals verify"
+  ],
+  "static_review":{
+    "python_AST_and_compile_check":"PASS_IN_ISOLATED_MIRROR",
+    "contract_and_import_path_review":"PASS",
+    "existing_seven_loop_changes":"NONE",
+    "user_local_M10W26_prestart_engine_executed":false,
+    "user_local_M10W26_start_created":false,
+    "user_local_M10W26_first_cycle_executed":false,
+    "user_local_M10W26_health_reviewed":false
+  },
+  "authorization":{
+    "M10W26_BAT01_initialize_exactly_once":true,
+    "M10W26_BAT03_after_INIT_PASS":true,
+    "M10W26_BAT05_after_first_cycle_PASS":true,
+    "M10W26_BAT01_after_initialization":false,
+    "M10V":false,
+    "automatic_live_promotion":false
+  },
+  "relationship_to_existing":{
+    "keep_running_unchanged":["collector","M7C","M8C","M9V","M9Y","M10B","M10E","M10P","M10P2","M10W19"],
+    "existing_runtime_or_start_modified":false,
+    "M10W19_modified":false
+  },
+  "safety":{"audit_only":true,"formula_change":false,"threshold_change":false,"horizon_change":false,"runtime_reset":false,"start_reset":false,"manual_lock_or_journal_deletion":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
