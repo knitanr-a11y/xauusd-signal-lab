@@ -16,6 +16,8 @@ Active research branch: `feature/mochipoyo-alert-research`
 - 最新結果は常に `LATEST` へまとめる
 - 過去結果は実行時刻別の `archive` に保存する
 - 通常提出物は `99_UPLOAD_PACKAGE.zip` 1個へまとめる
+- 提出物を作る実行BATは、成功後に同じBATから `LATEST` フォルダを自動で開く
+- エラー、BLOCKED、FAILED時は `pause` してコマンド画面を残し、メッセージを確認できるようにする
 - リポジトリ直下へ新しいBTC研究BATを置かない
 
 説明上だけ番号を付け、実ファイル名には番号を付けない運用は禁止する。
@@ -66,12 +68,17 @@ scripts/btc_ml_v1/<stage_name>/
 - ユーザーが操作するファイルだけを置く
 - 実行順がエクスプローラー上で分かる番号付き名称にする
 - 同じStage内へ似た意味の無番号BATを重複作成しない
+- エラー、BLOCKED、FAILED、必要出力欠落、結果フォルダopen失敗の各経路では、エラー内容を表示して `pause` 後に終了する
+- 提出物を生成する主実行BATは、成功後に `LATEST` を自動で開く
+- 結果再表示用BATは、後から `LATEST` を開き直す補助導線として残してよい
 - `00_READ_ME_FIRST.txt` に次を必ず書く
   - 起動する番号と順番
   - 1回だけか常時実行か
   - 同時実行の可否
   - 成功表示
   - BLOCKED/FAILED時の停止条件
+  - エラー時に画面が残ること
+  - 成功後にどのBATが結果フォルダを開くか
   - `LATEST` の場所
   - 提出するファイル
 
@@ -103,7 +110,8 @@ scripts/btc_ml_v1/<stage_name>/
 
 - 常に最新の完了結果だけを置く
 - ユーザーには通常 `LATEST` だけを案内する
-- `02_open_latest_results.bat` 等で直接開けるようにする
+- 提出物生成が成功したら、主実行BATから自動で開く
+- `02_open_latest_results.bat` 等で後から直接開き直せるようにする
 - 更新前の結果は `archive` に残す
 
 ### archive
@@ -169,6 +177,8 @@ Output:
 
 Stage 01はavailability read-onlyであり、fresh performance evaluator、candidate engine、reproduction、collector、Discord、MT5 order、live-ready、final-signalを実行しない。
 
+`01_run_availability_audit.bat` は、成功後に同じBATから `LATEST` を自動で開く。エラーまたは出力欠落時は `pause` して画面を残す。`02_open_latest_results.bat` は、提出時または後日の確認時に `LATEST` を開き直す補助BATであり、エラー時は同様に画面を残す。
+
 ## 8. 今後の引き継ぎ必須事項
 
 BTC ML V1の引き継ぎには次を記載する。
@@ -177,6 +187,8 @@ BTC ML V1の引き継ぎには次を記載する。
 - 現在のStage番号とStage名
 - ユーザーが起動する番号付きBATの正確な場所
 - 起動順と実行回数
+- 成功後に結果フォルダを開くBAT
+- エラー時に画面が残ること
 - `LATEST` の正確な場所
 - `99_UPLOAD_PACKAGE.zip` の正確な場所
 - 成功表示と停止条件
