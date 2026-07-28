@@ -4,7 +4,7 @@ chcp 65001 >nul
 for %%I in ("%~dp0\..\..\..\..") do set "REPO_ROOT=%%~fI"
 cd /d "%REPO_ROOT%"
 
-set "DASHBOARD=scripts\mochipoyo_alert_research\dashboard\python\forward_status_dashboard_v2.py"
+set "DASHBOARD=scripts\mochipoyo_alert_research\dashboard\python\forward_status_dashboard_v3.py"
 if not exist "%DASHBOARD%" (
   echo [DASHBOARD BLOCKED] Missing: %DASHBOARD%
   echo Confirm branch feature/mochipoyo-alert-research, Fetch origin, and Pull origin.
@@ -20,14 +20,15 @@ if errorlevel 1 (
   exit /b 2
 )
 
-title MOCHIPOYO M9V+ READ-ONLY STATUS DASHBOARD V2
+title MOCHIPOYO M9V+ READ-ONLY STATUS DASHBOARD V3
 mode con: cols=170 lines=42 >nul 2>&1
 
 echo ============================================================
-echo MOCHIPOYO M9V+ FORWARD STATUS DASHBOARD V2 - READ ONLY
+echo MOCHIPOYO M9V+ FORWARD STATUS DASHBOARD V3 - READ ONLY
 echo ============================================================
 echo Shows M9V, M9Y, M10B, M10E, M10P, M10P2, M10W19, M10W26, and M10W34.
 echo Refreshes every 60 seconds. Ctrl+C closes only this dashboard.
+echo Windows status files are opened with FILE_SHARE_DELETE so dashboard reads cannot block loop os.replace publication.
 echo PID or count null/missing values are displayed safely and never stop the remaining rows.
 echo It never initializes, stops, restarts, resets, edits, deletes, tunes, sends Discord, or places MT5 orders.
 echo.
