@@ -1,0 +1,88 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY",
+  "status": "ROOT_CAUSE_CONFIRMED_ROLLING_M1_PREFIX_AND_TRANSIENT_READ_FAILURE",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(66).zip",
+    "sha256": "3852dfe5a3997f7d157aae4a9cd2a340a63b20bd1614ba4d4f48f006ca1489f1",
+    "size_bytes": 23458,
+    "built_local": "2026-07-28 18:53:34 JST"
+  },
+  "preservation": {
+    "locks_present": false,
+    "all_runtime_manifests_present": true,
+    "all_prospective_starts_preserved": true,
+    "runtime_or_start_modified_by_diagnostic": false,
+    "forced_reboot_recovery_required": false,
+    "initializer_rerun_required": false
+  },
+  "confirmed_failures": {
+    "M9V": {
+      "last_successful_cycle": 4672,
+      "failed_cycle": 4673,
+      "failed_at_utc": "2026-07-28T04:02:28Z",
+      "error": "frozen prefix shortened for goldsharp_m1.csv: expected 151494 rows, got 150000",
+      "classification": "FALSE_HARD_BLOCK_FROM_APPEND_ONLY_ASSUMPTION_ON_ROLLING_M1"
+    },
+    "M9Y": {
+      "last_successful_cycle": 4750,
+      "failed_cycle": 4751,
+      "failed_at_utc": "2026-07-28T04:02:03Z",
+      "error": "Permission denied while opening goldsharp_m1.csv",
+      "classification": "TRANSIENT_CSV_REPLACE_OR_WRITE_CONTENTION_NOT_RETRIED_LONG_ENOUGH"
+    },
+    "M10B_M10E_M10P2_M10W19": {
+      "last_successful_outputs_utc": "2026-07-28T04:01:11Z..2026-07-28T04:02:05Z",
+      "locks_present": false,
+      "classification": "PROCESS_EXIT_AT_SAME_M1_REWRITE_WINDOW_CONSISTENT_WITH_SHARED_IO_OR_PREFIX_FAILURE",
+      "exact_exception_recoverable_from_existing_logs": false
+    },
+    "M10P": {
+      "last_successful_output_utc": "2026-07-27T20:01:32Z",
+      "locks_present": false,
+      "classification": "EARLIER_PROCESS_EXIT_WITHOUT_PERSISTED_EXCEPTION_LOG",
+      "exact_exception_recoverable": false,
+      "same_brittle_forever_design_confirmed": true
+    }
+  },
+  "frozen_m1_prefix_rows": {
+    "M9V": 151494,
+    "M9Y": 151595,
+    "M10B": 152084,
+    "M10E": 152156,
+    "M10P": 152266,
+    "M10P2": 152307,
+    "M10W19": 153738
+  },
+  "observed_current_m1_rows_at_failure": 150000,
+  "root_cause": {
+    "primary": "The live M1 CSV is retained as a rolling file whose head can be removed. The monitors incorrectly require every initialization-time row to remain forever and therefore classify a harmless head truncation before all prospective starts as a frozen-prefix integrity failure.",
+    "secondary": "A short PermissionError/read-contention during CSV replacement is treated as a terminal forever-loop failure.",
+    "strategy_or_threshold_failure": false,
+    "prospective_start_corruption": false,
+    "historical_backfill": false
+  },
+  "required_correction": {
+    "preserve_existing_starts": true,
+    "do_not_edit_runtime_manifests": true,
+    "M1_integrity": "Replace full-file append-only prefix validation with rolling-window overlap validation. The exact prospective start and sufficient pre-start M1 lookback must remain present; subsequent cycles must verify an advancing overlap checkpoint hash.",
+    "higher_timeframes": "Keep strict frozen-prefix validation while their initialization prefixes remain physically present.",
+    "transient_io": "Retry PermissionError and unstable replacement reads without ending the forever loop; continue to fail closed on contract, runtime, start, timestamp-order, overlap-hash or genuine source-integrity violations.",
+    "restart": "After correction and one-time preserved-start migration audit, restart BAT03 only in dependency order. Never rerun BAT01."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "manual_lock_deletion": false,
+    "forced_reboot_recovery_now": false,
+    "initializer_rerun": false,
+    "prospective_start_reset": false,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
