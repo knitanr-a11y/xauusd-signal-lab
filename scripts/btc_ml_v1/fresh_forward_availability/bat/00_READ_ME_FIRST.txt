@@ -9,11 +9,19 @@ The internal Python implementation is kept separately under the sibling python f
 Run order
 ---------
 1. Run 01_run_availability_audit.bat once.
-2. Success display:
-   [BTC_ML_V1_01] SUCCESS: availability audit complete.
-3. On BLOCKED or FAILED, stop and check the LATEST report. Do not run any evaluator.
-4. Run 02_open_latest_results.bat to open the newest result folder.
-5. Upload only 99_UPLOAD_PACKAGE.zip from LATEST to ChatGPT.
+2. On success, the same 01 BAT automatically opens the LATEST folder.
+3. Upload only 99_UPLOAD_PACKAGE.zip from the opened LATEST folder to ChatGPT.
+4. 02_open_latest_results.bat is only for reopening LATEST later.
+
+Success display
+---------------
+[BTC_ML_V1_01] SUCCESS: availability audit complete.
+
+Error behavior
+--------------
+- On BLOCKED, FAILED, missing LATEST, or Explorer-open failure, the command window pauses and remains visible.
+- Copy or photograph the displayed error before closing the window.
+- Do not run any evaluator after an error.
 
 Do not run simultaneously
 -------------------------
