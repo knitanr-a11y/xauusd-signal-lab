@@ -1,18 +1,21 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M9V_V3_IMMUTABLE_START_BOOTSTRAP_RETRY_NEXT",
-  "stage":"M9V_BOUNDED_SOURCE_START_BOOTSTRAP_CORRECTION_AUDIT_ONLY",
+  "status":"BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_GRACEFUL_UPGRADE_NEXT",
+  "stage":"FRESH_LOOP_BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_RESTART_HEALTH_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
-  "migration_result":"config/mochipoyo_alert_research/bounded_csv_adapter_migration_user_local_result_20260728.json",
-  "migration_review":"PASS; runtime hashes, starts, anchors and six verified journals remain accepted.",
-  "incident_result":"config/mochipoyo_alert_research/m9v_bounded_start_bootstrap_correction_20260728.json",
-  "observed_failure":"The first M9V V2 restart stopped on state-at-start changed after freeze: M15. This was caused by recomputing the path-dependent pre-start state machine from the current bounded M15 head after the oldest approximately 100 M15 rows had legitimately rolled off.",
-  "correction":"V3 treats the existing runtime state_at_start and inherited_active_primary_time as the authoritative bootstrap, uses retained verified journal rows only for indicator context, and replays decisions strictly after the immutable start. It does not reconstruct missing old head rows or backfill candidates.",
-  "immediate_action":"Confirm M9Y/M10B/M10E/M10P/M10P2/M10W19 remain stopped. Fetch/Pull the latest feature/mochipoyo-alert-research branch, then rerun only the existing M9V BAT03. The BAT verifies required V3 files and parses their Python syntax before starting. Keep the window open and report the first M9V PASS line or any new BLOCKED output.",
-  "operator":"scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
-  "expected_header":"BOUNDED CSV VERIFIED JOURNAL V3 - IMMUTABLE START BOOTSTRAP",
-  "pass_requirement":"M9V prints [M9V PASS], status becomes RUNNING with successful_cycles >= 1, and the process remains alive.",
-  "after_M9V_pass":[
+  "health_incident_result":"config/mochipoyo_alert_research/bounded_csv_v2_restart_health_incident_result_20260728.json",
+  "uploaded_health_package_sha256":"50557ccea4eb3ba2343daaf3ac9d8375be26adcf3dd7effdd5591850df46f3d5",
+  "observed":"Six loops were healthy at the audit instant. M9Y completed three successful cycles and then stopped on WinError 5 because one process read the shared M1 journal while another process attempted os.replace and rollback on the same Windows path. Runtime hashes, starts, candidate outputs and verified shared-journal fingerprints remained intact.",
+  "correction":"All seven BAT03 launchers now use run_bounded_adapter_loop_v4.py. The shared verified journals are adapter-write targets only. Every loop reads a separately copied private snapshot materialized under the adapter update lock and verified by size and SHA256. Temporary PermissionError/WinError 5/32/33 is classified as transient rather than a start/reset event.",
+  "immediate_action":[
+    "Fetch/Pull the latest feature/mochipoyo-alert-research branch so the V4 runner, updated BAT03 launchers, updated health audit and graceful stop operator are present.",
+    "Run scripts/mochipoyo_alert_research/recovery/bat/05_stop_bounded_adapter_loops_for_v4_upgrade.bat once. It sends normal STOP files and waits for all seven loop processes and locks to disappear. It does not stop collector/M7C/M8C, kill processes, or delete locks.",
+    "After STOP PASS, Fetch/Pull once more if GitHub Desktop shows new remote changes.",
+    "Restart BAT03 in order: M9V, M9Y, M10B, M10E, M10P, M10P2, M10W19. Confirm each shows the V4 PRIVATE VERIFIED SNAPSHOT header and at least one PASS before starting the next.",
+    "Run scripts/mochipoyo_alert_research/recovery/bat/04_audit_bounded_adapter_restart_health.bat and upload its LATEST/99_UPLOAD_PACKAGE.zip."
+  ],
+  "restart_order":[
+    {"order":1,"loop":"M9V","operator":"scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat"},
     {"order":2,"loop":"M9Y","operator":"scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat"},
     {"order":3,"loop":"M10B","operator":"scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat"},
     {"order":4,"loop":"M10E","operator":"scripts/mochipoyo_alert_research/m10e/bat/03_run_shadow_forever.bat"},
@@ -20,7 +23,8 @@
     {"order":6,"loop":"M10P2","operator":"scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat"},
     {"order":7,"loop":"M10W19","operator":"scripts/mochipoyo_alert_research/m10w19/bat/03_run_shadow_forever.bat"}
   ],
-  "after_all_seven_pass":"Run scripts/mochipoyo_alert_research/recovery/bat/04_audit_bounded_adapter_restart_health.bat and upload its 99_UPLOAD_PACKAGE.zip.",
-  "do_not_run_or_change":{"M9Y_or_later_before_M9V_PASS":true,"any_BAT01_or_initializer":true,"forced_reboot_recovery_now":true,"manual_lock_or_adapter_deletion":true,"runtime_manifest_edit":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W25C_before_health_PASS":true,"M10W26_before_health_PASS":true},
+  "V4_health_requirement":["Seven process command lines use run_bounded_adapter_loop_v4.py","Seven locks present","Seven runtime hashes and starts unchanged","Seven status files RUNNING with successful_cycles >= 1","Seven latest outputs PASS at immutable starts","Each loop private snapshot receipt is valid and its six files match the receipt SHA256 fingerprints","Shared six journal fingerprints remain valid"],
+  "research_state":"M10W25C and M10W26 remain paused until the V4 health package passes all seven loops.",
+  "do_not_run_or_change":{"any_BAT01_or_initializer":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_lock_adapter_snapshot_or_journal_deletion":true,"runtime_manifest_edit":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W25C_before_V4_health_PASS":true,"M10W26_before_V4_health_PASS":true},
   "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
