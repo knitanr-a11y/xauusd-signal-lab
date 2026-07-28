@@ -1,0 +1,45 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W25B_H4_S4_BOUNDARY_AND_CAUSAL_NEITHER_COHORT_CORRECTION_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_EXECUTED",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Outcome-blindly explain the 21 LONG_H4_S4 historical-vs-prefix-causal presence mismatches found by M10W25 and freeze the corrected live-causal HIGH-ATR bullish coverage_class=NEITHER pre-entry cohort before any formula outcome re-evaluation or fresh start.",
+  "inputs":{
+    "frozen_gold_bars":"Exact M10A frozen 2023-2026 M1/M5/M15/H1/H4/D1 files and SHA256 contract.",
+    "M10W25_summary":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W25/LATEST/01_summary.json",
+    "M10W25_comparison":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W25/LATEST/02_causal_coverage_grid_comparison.csv",
+    "M10W22_broader_preentry_features":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W22/LATEST/02_target_regime_causal_feature_rows.csv",
+    "M10W24B_historical_neither_preentry_features":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W24B/LATEST/02_corrected_neither_feature_rows.csv",
+    "forbidden":["M10W24B 03_trade_ledger_all_families.csv","M10W24B summary performance metrics","PF","PnL","win/loss","+240m returns","future path labels"]
+  },
+  "frozen_reference_counts":{"full_grid_rows":81329,"target_rows":8648,"M10W25_full_H4_S4_mismatches":21,"M10W25_target_H4_S4_mismatches":7,"historical_target_neither":5917,"prefix_causal_target_neither":5913,"historical_only_target_neither_rows":4,"causal_only_target_neither_rows":0},
+  "root_cause_audit":{
+    "reconstruct_H4_primary_episodes_chronologically":true,
+    "reconstruct_prefix_causal_selected_H4_S4_turns":true,
+    "compare_each_of_21_mismatch_windows_to_completed_replay_m7c_pairs":true,
+    "classifications":["EXACT_M1_PRIMARY_ENTRY_MISSING","EXACT_M1_PRIMARY_EXIT_MISSING","TERMINAL_UNCOMPLETED_EPISODE","SAME_TIMESTAMP_EXIT_PRECEDENCE","OTHER_LOGIC_MISMATCH"],
+    "no_future_exit_needed_for_causal_presence":true,
+    "do_not_assume_cause_before_audit":true
+  },
+  "causal_cohort_correction":{
+    "join_key":"Exact decision_time",
+    "source_rows":"M10W22 broader HIGH-ATR bullish pre-entry feature rows",
+    "coverage_source":"M10W25 prefix-causal coverage_class",
+    "retain":"causal_coverage_class=NEITHER",
+    "expected_rows":5913,
+    "expected_removed_from_M10W24B":4,
+    "expected_added_to_M10W24B":0,
+    "outcome_columns_forbidden":true,
+    "formula_application_in_this_stage":false,
+    "performance_evaluation_in_this_stage":false
+  },
+  "decision_rule":{
+    "PASS_CAUSAL_COHORT_FROZEN":"All 8648 M10W22 decision times exact-match one M10W25 target comparison row; causal NEITHER count=5913; difference versus M10W24B is exactly four historical-only rows and zero causal-only rows; all four removals are historical NEITHER -> causal LONG_ONLY caused only by prefix-causal LONG_H4_S4 presence; no outcome source is read.",
+    "ROOT_CAUSE_STATUS":"Report the exact boundary classification for all 21 full-grid H4_S4 mismatches. A non-empty OTHER_LOGIC_MISMATCH blocks later formula re-evaluation until separately resolved.",
+    "on_pass":"M10W25C may re-evaluate the exact frozen M10W23 MVI1/MWR1/MMO1 formulas on the corrected 5913-row causal cohort with no tuning. M10W26 fresh start remains forbidden until that re-evaluation is reviewed.",
+    "on_block":"Do not read outcomes, tune, or create a fresh start. Freeze a narrower implementation correction first."
+  },
+  "unchanged":{"MVI1_formula":true,"MWR1_formula":true,"MMO1_formula":true,"all_thresholds":true,"LONG_direction":true,"high_atr_bullish_regime":true,"240_minute_horizon":true,"exact_M1_execution":true,"one_position_per_family":true,"cost_rules":true,"split_rules":true,"M10W19":true,"M10P":true,"M10P2":true},
+  "safety":{"audit_only":true,"outcome_blind":true,"trade_outcomes_read":false,"future_return_computed":false,"historical_backfill_into_forward":false,"nearest_m1_fallback":false,"existing_forward_modified":false,"existing_threshold_refit":false,"new_prospective_start_created":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
