@@ -29,17 +29,22 @@
   "implementation": "scripts/mochipoyo_alert_research/m10p_incident/python/collect_m10p_blocked_diagnostic.py",
   "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
   "git": {
-    "python_commit": "c2a59335c92d0d2a02deb305ee1a0cdadc2bca70",
-    "python_blob": "c5febf54d6fa08a69274dc0ec87ebdacf5afaa4c",
+    "python_commit": "793dd5d43f17d62e2dd114eded4d47aaf3358abe",
+    "python_blob": "02c61d94adaaecb5c2358dc9927f02a6b8f0eeb9",
     "bat_commit": "fa3e3efc251796b47f1df3d9b80e6f53e2b6a3b9",
     "bat_blob": "62b1f69605f75c8bb3d31870563637fc7f0d60bc"
+  },
+  "validation": {
+    "python_ast_preflight_in_bat": true,
+    "M10P_process_match_excludes_M10P2": true,
+    "missing_evidence_is_recorded_not_mutated": true
   },
   "read_sources": [
     "M10P loop status and bounded-adapter log tail",
     "M10P runtime manifest, runtime state and immutable start receipt",
     "M10P lock existence",
     "M10P LATEST summary, candidate/trade/overlap ledgers, data quality and audit log",
-    "best-effort read-only Windows process inventory for M10P command-line markers"
+    "best-effort read-only Windows process inventory for exact M10P command-line markers"
   ],
   "mutations": {
     "m10p_process_start_or_stop": false,
