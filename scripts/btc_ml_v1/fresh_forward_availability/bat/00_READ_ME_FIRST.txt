@@ -18,21 +18,21 @@ Run order
 1. Pull the latest feature/mochipoyo-alert-research branch in GitHub Desktop.
 2. Run 01_run_availability_audit.bat once.
 3. The BAT verifies that all four output files are present, non-empty, the JSON is readable, and the ZIP is valid.
-4. Only after that verification succeeds, the same 01 BAT opens the LATEST folder.
-5. Upload only 99_UPLOAD_PACKAGE.zip from the opened LATEST folder to ChatGPT.
-6. 02_open_latest_results.bat is only for reopening and re-verifying LATEST later.
+4. Only after that verification succeeds, Explorer opens with 99_UPLOAD_PACKAGE.zip selected.
+5. Upload only that selected 99_UPLOAD_PACKAGE.zip to ChatGPT.
+6. 02_open_latest_results.bat is only for reopening and re-verifying the same package later.
 
 Success display
 ---------------
 [BTC_ML_V1_01] SUCCESS: availability audit complete and all four output files were verified.
 
-The command window remains open after success until a key is pressed.
+The command window shows a real disk file listing and remains open after success until a key is pressed.
 It must not disappear immediately after opening Explorer.
 
 Error behavior
 --------------
 - An empty LATEST directory is never treated as success.
-- On BLOCKED, FAILED, missing output, zero-byte output, invalid JSON, invalid ZIP, or missing LATEST, the folder is not opened as success.
+- On BLOCKED, FAILED, missing output, zero-byte output, invalid JSON, invalid ZIP, or missing LATEST, Explorer is not opened as success.
 - The command window pauses and remains visible so the error can be copied or photographed.
 - A persistent console log is kept at:
   %LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\01_fresh_forward_availability\last_run_console.log
@@ -40,7 +40,7 @@ Error behavior
 
 Do not run simultaneously
 -------------------------
-Run only one copy of 01 at a time. 02 only opens the result folder and may be used after 01 finishes.
+Run only one copy of 01 at a time. 02 only re-verifies and opens the result package and may be used after 01 finishes.
 
 Output location
 ---------------
