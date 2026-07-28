@@ -1,0 +1,21 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W22_HIGH_ATR_BULLISH_NEW_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status":"DESIGN_FROZEN_NOT_EXECUTED",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "purpose":"Outcome-blind audit of genuinely different causal information available before entry inside the M10W17 stable HIGH-ATR bullish opportunity regime, after HBR1/HER1/HRC1 failed to produce an advancing entry family.",
+  "target_regime":"D1 EMA20>EMA30>EMA40 AND H4 EMA20>EMA30 AND H1 TORYS MACD line(6,13,4)>0 AND H1 Wilder ATR14 percentile100>=0.67",
+  "causal_alignment":"For an M15 decision timestamp, use only lower-timeframe bars whose nominal close time is <= the decision. Never use the M1/M5 bar opening exactly at decision before it closes.",
+  "information_groups":{
+    "M5_volume":["tick_volume_ratio20"],
+    "M5_candle_morphology":["body_ratio","close_location","lower_wick_ratio","upper_wick_ratio"],
+    "M5_micro_momentum_range":["ret3_bps","range3_bps"],
+    "M1_micro_momentum_range":["ret5_bps","up_close_count5","close_location","range5_bps"],
+    "execution_state":["last_closed_m1_spread_bps"],
+    "real_volume_availability":["M1 real_volume nonzero fraction","M5 real_volume nonzero fraction"]
+  },
+  "required_outputs":["target-regime decision count by year","feature availability/missingness by year and all","p05/p25/p50/p75/p95/min/max for every causal numeric feature","unique-value/variance checks","real-volume nonzero availability","audit proving no +240m return, PF, PnL, win/loss label or future path was read or computed"],
+  "interpretation_rules":{"this_stage_creates_entry_formula":false,"this_stage_ranks_features_by_profit":false,"outcome_correlation_forbidden":true,"future_return_computation_forbidden":true,"feature_threshold_selection_forbidden":true,"next":"Only after this audit may M10W23 preregister at most three simple microstructure entry families using features that are causally available, sufficiently dense and non-degenerate. Their thresholds must come from fixed structural definitions or outcome-blind distribution cuts, never from profit ranking."},
+  "relationship_to_forward":{"M10W19_keep_running_unchanged":true,"M10W19_start":"2026.07.28 02:31:00","M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN"},
+  "safety":{"audit_only":true,"trade_outcomes_read":false,"pf_or_pnl_computed":false,"future_path_labels":false,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
