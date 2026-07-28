@@ -1,0 +1,35 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W24B_NEITHER_COHORT_SCOPE_CORRECTION_AUDIT_ONLY",
+  "status":"POSTRUN_AUDIT_CORRECTION_FROZEN_NO_SIGNAL_RULE_CHANGE",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "trigger":"Audit of the first M10W24B user-local package identified two reproducibility issues that do not change any signal formula, threshold, cohort definition, horizon, execution rule, cost model, split or decision tier: exact coverage-join completeness was not explicitly enforced/reported, and the implementation returned INSUFFICIENT_DENSITY before evaluating the already-frozen per-split REJECT rule.",
+  "initial_package":{"filename":"99_UPLOAD_PACKAGE(62).zip","sha256":"6ec0cdcaa481899f401d5277ba87bea37f3269f71e3c364df2bd57f223605665","built_at_utc":"2026-07-28T01:29:19Z","broader_rows":8648,"corrected_neither_rows":5917},
+  "allowed_corrections":{
+    "exact_join_completeness":"Require every M10W22 target-regime decision_time to match exactly one M10W14 coverage-grid decision_time before filtering coverage_class=NEITHER. Duplicate decision_time or any unmatched broader row must BLOCK. Report matched/unmatched counts and broader coverage-class counts.",
+    "classification_precedence":"Apply the frozen M10W23 REJECT rule to any split whose resolved count is at least the frozen minimum_count_each_split and whose actual PF <= 1.0, or to all-sample fixed-$0.20 / +2bps PF <= 1.0, before using INSUFFICIENT_DENSITY for a different sparse split.",
+    "package_audit_metadata":"Report that this is a postrun audit correction and that formula/threshold/cohort/metric rules were unchanged."
+  },
+  "frozen_unchanged":[
+    "MVI1 formula and thresholds",
+    "MWR1 formula and thresholds",
+    "MMO1 formula and thresholds",
+    "LONG direction",
+    "coverage_class=NEITHER parent scope",
+    "exact M1 execution",
+    "240-minute horizon",
+    "one-position-per-family",
+    "actual spread primary",
+    "fixed-$0.20 sensitivity",
+    "+1bps and +2bps sensitivity",
+    "2023-2024 train / 2025 validation / 2026 test",
+    "STRONG / ROBUST / REJECT numeric thresholds",
+    "M10W19 / M10P / M10P2 and all existing prospective starts"
+  ],
+  "expected_classification_effect_on_initial_metrics":{"MVI1_LONG_M5_VOLUME_IMPULSE":"UNCHANGED_INSUFFICIENT_DENSITY","MWR1_LONG_M5_PULLBACK_REJECTION":"RAW_SCRIPT_INSUFFICIENT_DENSITY_BUT_FROZEN_RULE_IMPLIES_REJECT_FROM_TRAIN_N119_PF0P8841006751","MMO1_LONG_M1_MICRO_MOMENTUM":"UNCHANGED_STRONG_CANDIDATE"},
+  "outcome_tuning":false,
+  "threshold_rescue":false,
+  "fresh_shadow_rule":"Only an unchanged ROBUST_CANDIDATE or STRONG_CANDIDATE after the corrected audit may justify a brand-new fresh prospective shadow. Historical M10W24B remains research-exposed and is not final support.",
+  "safety":{"audit_only":true,"historical_backfill":false,"nearest_m1_fallback":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
