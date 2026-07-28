@@ -1,0 +1,110 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W33_PREREGISTERED_LOW_ATR_SCALE_NORMALIZED_ENTRY_EVALUATION_AUDIT_ONLY",
+  "status": "PASS_ONE_ROBUST_SNDX1_CANDIDATE_FRESH_SHADOW_AUTHORIZED_AUDIT_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(74).zip",
+    "sha256": "fa41d4717e32e5f02cade9043928e27d2d023b13148f7d80b53cdd84edb33a13",
+    "size_bytes": 234854,
+    "built_at_utc": "2026-07-28T14:28:25Z"
+  },
+  "source": {
+    "feature_sha256": "8ad229791f1fb1a14760e715c65d03b4431bcea5f261155cd49dfb028175cc52",
+    "feature_rows": 7480,
+    "target_regime": "D1 EMA20>EMA30>EMA40 AND H4 EMA20>EMA30 AND H1 TORYS MACD line(6,13,4)>0 AND H1 Wilder ATR14 percentile100<0.33 AND prefix-causal coverage_class=NEITHER"
+  },
+  "execution": {
+    "exact_M1_entry": true,
+    "exact_M1_exit_plus_minutes": 240,
+    "nearest_M1_fallback": false,
+    "one_position_per_family": true,
+    "actual_spread": true,
+    "fixed_spread_usd": 0.2,
+    "extra_cost_bps": [1.0, 2.0],
+    "formula_change": false,
+    "threshold_change": false,
+    "horizon_change": false
+  },
+  "families": {
+    "SNRI1_LONG_M5_NORMALIZED_RANGE_IMPULSE": {
+      "classification": "REJECT",
+      "candidate_count": 1012,
+      "accepted_count": 404,
+      "resolved_count": 398,
+      "overlap_skip_count": 608,
+      "train_pf": 1.1524860570766733,
+      "validation_pf": 2.2754026470687436,
+      "test_count": 32,
+      "test_pf": 0.860647595217167,
+      "test_net_bps": -90.8876108780251,
+      "all_pf": 1.48275779839987,
+      "all_net_bps": 2337.9821656847025,
+      "all_fixed0p20_pf": 1.4722865318515812,
+      "all_plus2bps_pf": 1.2964002405873043,
+      "advance": false
+    },
+    "SNRC1_LONG_M15_NORMALIZED_RECLAIM_CONTINUATION": {
+      "classification": "REJECT",
+      "candidate_count": 833,
+      "accepted_count": 357,
+      "resolved_count": 342,
+      "overlap_skip_count": 476,
+      "train_pf": 1.7224619188872006,
+      "validation_pf": 1.248178060785662,
+      "test_count": 31,
+      "test_pf": 0.720876332322408,
+      "test_net_bps": -186.9361784633081,
+      "all_pf": 1.3503307435225937,
+      "all_net_bps": 1395.8790675166845,
+      "all_fixed0p20_pf": 1.343944832935186,
+      "all_plus2bps_pf": 1.164787599099203,
+      "advance": false
+    },
+    "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION": {
+      "classification": "ROBUST_CANDIDATE",
+      "candidate_count": 914,
+      "accepted_count": 365,
+      "resolved_count": 361,
+      "overlap_skip_count": 549,
+      "train_pf": 1.6040678267998565,
+      "validation_pf": 1.7746476466865864,
+      "test_count": 32,
+      "test_pf": 1.187204916615982,
+      "test_net_bps": 106.2531107767192,
+      "all_pf": 1.6253362465216399,
+      "all_net_bps": 2803.8644134511537,
+      "all_fixed0p20_pf": 1.6144854774102277,
+      "all_plus2bps_pf": 1.434674977064231,
+      "advance": true
+    }
+  },
+  "independent_ledger_recalculation": {
+    "trade_ledger_rows": 1126,
+    "overlap_rows": 1633,
+    "resolved_counts_match": true,
+    "split_PF_and_net_match": true,
+    "all_sample_actual_fixed_and_plus2_match": true
+  },
+  "decision": {
+    "advancing_family_count": 1,
+    "advancing_family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "fresh_shadow_authorized": true,
+    "historical_result_is_fresh_support": false,
+    "automatic_live_promotion": false,
+    "M10W29_families_remain_closed": true,
+    "post_result_tuning_forbidden": true
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "existing_monitor_modified": false,
+    "M10W26_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
