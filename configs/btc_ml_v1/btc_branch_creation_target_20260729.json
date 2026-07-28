@@ -1,0 +1,7 @@
+{
+  "project": "BTC_ML_V1",
+  "status": "TARGET_BRANCH_CREATION_FROM_CORRECTED_MAIN",
+  "recorded_at": "2026-07-29",
+  "target_branch": "feature/btc-fresh-forward-research",
+  "target_base_commit": "3d2803393ec3e4045bf16a558013f6d25d0e558d"
+}
