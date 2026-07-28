@@ -6,6 +6,13 @@ Purpose
 This folder contains only the user-facing BAT files for the BTC4/BTC5/BTC6/BTC7R/BTC9R fresh data availability audit.
 The internal Python implementation is kept separately under the sibling python folder.
 
+Important input distinction
+---------------------------
+- Current fresh-forward readiness is decided from post-cutoff M5/M15/H1/D1/H4 data.
+- BTC4 current readiness requires post-cutoff H4 and M5 data.
+- The old 2017-start H4 file belonged to BTCUSD_H4_WARMUP_PACKAGE.zip and was used only for exact historical BTC4 stacking reproduction.
+- That old package is optional in Stage 01. Its absence does not block current fresh-forward readiness and the user does not need to create C:\BTC_REPRO manually.
+
 Run order
 ---------
 1. Run 01_run_availability_audit.bat once.
