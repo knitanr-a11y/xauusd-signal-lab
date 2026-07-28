@@ -1,0 +1,70 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_BOUNDED_CSV_PRESERVED_START_RECOVERY_AUDIT_ONLY",
+  "status": "IMPLEMENTATION_COMPLETE_USER_LOCAL_MIGRATION_PENDING",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "implemented_files": {
+    "source_adapter": "scripts/mochipoyo_alert_research/common/python/bounded_csv_source_adapter.py",
+    "journal_integrity_v2": "scripts/mochipoyo_alert_research/common/python/bounded_csv_journal_integrity.py",
+    "persistent_runner_core": "scripts/mochipoyo_alert_research/common/python/run_bounded_adapter_loop.py",
+    "persistent_runner_v2": "scripts/mochipoyo_alert_research/common/python/run_bounded_adapter_loop_v2.py",
+    "migration_core": "scripts/mochipoyo_alert_research/recovery/python/migrate_bounded_csv_source_adapter.py",
+    "migration_v2": "scripts/mochipoyo_alert_research/recovery/python/migrate_bounded_csv_source_adapter_v2.py",
+    "migration_bat": "scripts/mochipoyo_alert_research/recovery/bat/03_migrate_bounded_csv_adapter_preserve_starts.bat"
+  },
+  "bat03_routes": {
+    "M9V": "scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat",
+    "M9Y": "scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat",
+    "M10B": "scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat",
+    "M10E": "scripts/mochipoyo_alert_research/m10e/bat/03_run_shadow_forever.bat",
+    "M10P": "scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat",
+    "M10P2": "scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat",
+    "M10W19": "scripts/mochipoyo_alert_research/m10w19/bat/03_run_shadow_forever.bat"
+  },
+  "implemented_behavior": {
+    "all_timeframes": ["M1", "M5", "M15", "H1", "H4", "D1"],
+    "raw_source_model": "BOUNDED_REWRITE_WITH_20_BAR_REFRESH_OVERLAP",
+    "verified_append_only_journal": true,
+    "canonical_identity": "time/open/high/low/close/tick_volume/spread/real_volume",
+    "source_head_truncation_allowed": true,
+    "existing_timestamp_content_change": "FAIL_CLOSED",
+    "missing_journal_tail_overlap": "FAIL_CLOSED",
+    "journal_size_or_sha_change_outside_adapter": "FAIL_CLOSED",
+    "runtime_manifest_hash_change": "FAIL_CLOSED",
+    "prospective_start_change": "FAIL_CLOSED",
+    "transient_read_retry_seconds": 90,
+    "transient_retry_exhaustion": "WAITING_TRANSIENT_SOURCE_PROCESS_REMAINS_ALIVE",
+    "terminal_integrity_failure": "PERSIST_STATUS_AND_STOP_EXIT2",
+    "process_markers_preserved_for_existing_recovery_detection": true,
+    "safe_migration_package_rebuild": true
+  },
+  "verification": {
+    "python_syntax_compile": "PASS",
+    "isolated_synthetic_migration": "PASS",
+    "isolated_synthetic_new_M1_append": "PASS",
+    "isolated_same_size_old_journal_tamper_detection": "PASS_FAIL_CLOSED",
+    "live_user_runtime_or_start_touched": false,
+    "live_MT5_CSV_touched": false,
+    "user_local_migration_executed": false,
+    "user_local_restart_executed": false
+  },
+  "next": {
+    "operator": "scripts/mochipoyo_alert_research/recovery/bat/03_migrate_bounded_csv_adapter_preserve_starts.bat",
+    "upload": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/BOUNDED_CSV_SOURCE_ADAPTER_MIGRATION/LATEST/99_UPLOAD_PACKAGE.zip",
+    "restart_authorized_before_package_review": false
+  },
+  "safety": {
+    "audit_only": true,
+    "BAT01_rerun": false,
+    "runtime_manifest_edit": false,
+    "prospective_start_reset": false,
+    "historical_backfill_before_start": false,
+    "nearest_m1_fallback": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
