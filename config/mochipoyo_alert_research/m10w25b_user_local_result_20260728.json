@@ -1,0 +1,12 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W25B_H4_S4_BOUNDARY_AND_CAUSAL_NEITHER_COHORT_CORRECTION_AUDIT_ONLY",
+  "status":"PASS_H4_BOUNDARY_CLASSIFIED_CAUSAL_NEITHER_COHORT_FROZEN_AUDIT_ONLY",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(65).zip","sha256":"520922aa9c3bf9e6d7fd9901f44a44f13fbccd7fa6e79b1cb8ad57278f22ae54","size_bytes":616539,"built_at_utc":"2026-07-28T09:04:03Z"},
+  "integrity":{"verified_frozen_file_hashes":true,"outcome_files_read":false,"future_return_computed":false,"formula_application":false,"threshold_refit":false,"new_prospective_start_created":false,"existing_forward_modified":false},
+  "root_cause":{"full_H4_S4_mismatch_count":21,"target_H4_S4_mismatch_count":7,"classification_counts":{"EXACT_M1_PRIMARY_EXIT_MISSING":21},"other_logic_mismatch_count":0,"all_mismatches_explained":true},
+  "causal_cohort":{"broader_target_preentry_rows":8648,"historical_NEITHER_preentry_rows":5917,"causal_NEITHER_preentry_rows":5913,"removed_historical_only_rows":4,"added_causal_only_rows":0,"join_unmatched_rows":0,"removed_decision_times":["2024.05.15 21:45:00","2024.05.21 20:00:00","2025.01.21 22:15:00","2025.04.24 06:15:00"]},
+  "decision":{"M10W25C_authorized_after_operational_health_restored":true,"M10W26_fresh_start_authorized_now":false,"research_progress_paused_for_mass_loop_stop_diagnostic":true},
+  "guardrails":{"audit_only":true,"historical_backfill":false,"existing_forward_modified":false,"existing_threshold_refit":false,"new_prospective_start_created":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
