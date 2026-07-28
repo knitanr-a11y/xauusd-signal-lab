@@ -1,0 +1,108 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W32_LOW_ATR_SCALE_NORMALIZED_ENTRY_PREREGISTRATION_AUDIT_ONLY",
+  "status": "HYPOTHESES_FROZEN_BEFORE_OUTCOME_EVALUATION",
+  "recorded_at_utc": "2026-07-28T14:20:00Z",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "basis": {
+    "M10W31": "Outcome-blind availability and cross-split stability audit on the exact 7480-row M10W27 cohort.",
+    "selection_policy": "Use only features with low train-versus-test PSI below 0.10 and causal availability. Do not use M10W29 outcomes, profit correlations or profit-ranked thresholds.",
+    "M10W29_status": "All three prior low-ATR families remain closed and are not rescued or modified.",
+    "excluded_features": ["h1_atr14_usd", "h1_atr14_bps", "last_closed_m1_spread_usd", "last_closed_m1_spread_over_h1_atr14"]
+  },
+  "exact_parent_cohort": {
+    "source": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W31/LATEST/02_scale_normalized_feature_rows.csv",
+    "expected_sha256": "8ad229791f1fb1a14760e715c65d03b4431bcea5f261155cd49dfb028175cc52",
+    "expected_rows": 7480,
+    "decision_time_set_must_match_M10W27": true,
+    "target": "D1 EMA20>EMA30>EMA40 AND H4 EMA20>EMA30 AND H1 TORYS MACD line(6,13,4)>0 AND H1 Wilder ATR14 percentile100<0.33 AND prefix-causal coverage_class=NEITHER"
+  },
+  "common": {
+    "direction": "LONG",
+    "decision_grid": "Exact M10W31 decision timestamps",
+    "entry": "Exact M1 execution at decision timestamp; ask=M1 open + spread_points*point",
+    "exit": "Exact M1 timestamp +240 minutes; bid=M1 open",
+    "horizon_minutes": 240,
+    "nearest_m1_fallback": false,
+    "one_position_per_family": true,
+    "fixed_spread_sensitivity_usd": 0.20,
+    "extra_cost_sensitivity_bps": [1.0, 2.0]
+  },
+  "families": {
+    "SNRI1_LONG_M5_NORMALIZED_RANGE_IMPULSE": {
+      "formula": [
+        "m5_range3_over_h1_atr14 >= 0.40",
+        "m5_ret3_over_h1_atr14 > 0.0",
+        "m5_close_location >= 0.6666666666666666"
+      ],
+      "semantic_rationale": "The last three closed M5 bars cover at least 40% of current H1 ATR, have positive net direction and finish with the latest M5 close in the upper third.",
+      "threshold_origin": "Semantic/no-outcome. 0.40 means local three-bar range is at least forty percent of H1 ATR; sign and close-location thresholds are directional definitions."
+    },
+    "SNRC1_LONG_M15_NORMALIZED_RECLAIM_CONTINUATION": {
+      "formula": [
+        "m15_close_minus_ema20_over_h1_atr14 >= 0.0",
+        "m15_close_minus_ema20_over_h1_atr14 <= 0.50",
+        "m5_ret3_over_h1_atr14 > 0.0",
+        "m5_close_location >= 0.60"
+      ],
+      "semantic_rationale": "The last closed M15 is above but no more than half an H1 ATR above EMA20, while the closed M5 sequence turns positive and the latest M5 closes in its upper 40%.",
+      "threshold_origin": "Semantic/no-outcome. Zero is EMA20 reclaim; one-half ATR limits extension; positive return and upper-close thresholds define continuation confirmation."
+    },
+    "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION": {
+      "formula": [
+        "m5_range3_over_h1_atr14 >= 0.40",
+        "m1_range5_over_h1_atr14 >= 0.20",
+        "m1_ret5_over_h1_atr14 > 0.0",
+        "m1_close_location >= 0.60"
+      ],
+      "semantic_rationale": "Both the closed M5 and M1 windows show non-trivial expansion relative to H1 ATR, with positive five-minute M1 direction and the latest closed M1 finishing in its upper 40%.",
+      "threshold_origin": "Semantic/no-outcome. 0.40 and 0.20 represent forty and twenty percent of H1 ATR at the two closed-bar scales."
+    }
+  },
+  "outcome_blind_density_check": {
+    "SNRI1": {"TRAIN_2023_2024": 494, "VALIDATION_2025": 439, "TEST_2026": 79, "ALL": 1012},
+    "SNRC1": {"TRAIN_2023_2024": 428, "VALIDATION_2025": 323, "TEST_2026": 82, "ALL": 833},
+    "SNDX1": {"TRAIN_2023_2024": 431, "VALIDATION_2025": 403, "TEST_2026": 80, "ALL": 914},
+    "note": "Counts were checked only for non-trivial density. No future return, trade ledger, PF, PnL, win/loss label or outcome correlation was read."
+  },
+  "selected_feature_drift_limits": {
+    "all_selected_features_test_PSI_below": 0.05,
+    "maximum_selected_test_PSI": 0.0413440402395257,
+    "spread_or_absolute_ATR_feature_used": false
+  },
+  "frozen_evaluation": {
+    "train": "2023-2024",
+    "validation": "2025",
+    "test": "2026 available frozen history",
+    "metrics": ["count", "win_rate", "profit_factor", "net_bps", "average_win_bps", "average_loss_bps", "payoff_ratio", "max_drawdown_bps", "max_losing_streak"],
+    "decision_tiers": {
+      "STRONG_CANDIDATE": {"minimum_count_each_split": 20, "minimum_pf_each_split": 1.30, "minimum_all_pf": 1.50, "minimum_fixed0p20_all_pf": 1.40, "minimum_extra2bps_all_pf": 1.20, "all_splits_net_positive": true},
+      "ROBUST_CANDIDATE": {"minimum_count_each_split": 20, "minimum_pf_each_split": 1.10, "minimum_all_pf": 1.30, "minimum_fixed0p20_all_pf": 1.20, "minimum_extra2bps_all_pf": 1.05, "all_splits_net_positive": true},
+      "WEAK_OR_INCONSISTENT": "Any family not meeting ROBUST_CANDIDATE.",
+      "REJECT": "Any split PF <=1.0 with adequate count, or all-sample fixed0p20 PF <=1.0, or all-sample extra2bps PF <=1.0."
+    },
+    "interpretation": "Historical evaluation is exploratory because M10W29 outcomes and M10W30 diagnosis were already known. Only ROBUST or STRONG may justify a separate fresh prospective shadow, and historical support alone is never final support."
+  },
+  "forbidden_after_results": [
+    "threshold adjustment",
+    "feature addition or removal",
+    "formula combination search",
+    "session or time filtering",
+    "spread threshold rescue",
+    "ATR boundary change",
+    "horizon exit or runner tuning",
+    "reopening an M10W29 family",
+    "M10W26 modification"
+  ],
+  "safety": {
+    "audit_only": true,
+    "historical_backfill_into_existing_forward": false,
+    "existing_monitor_modification": false,
+    "M10W26_keep_running_unchanged": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
