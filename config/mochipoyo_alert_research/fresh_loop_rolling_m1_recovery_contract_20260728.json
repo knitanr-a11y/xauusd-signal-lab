@@ -1,7 +1,7 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "FRESH_LOOP_BOUNDED_CSV_PRESERVED_START_RECOVERY_AUDIT_ONLY",
-  "status": "DESIGN_FROZEN_NOT_EXECUTED",
+  "status": "IMPLEMENTED_MIGRATION_AUDIT_PENDING",
   "recorded_at": "2026-07-28",
   "scope": "XAUUSD_GOLD_ONLY",
   "source_contract_addendum": "config/mochipoyo_alert_research/live_csv_bounded_rewrite_export_addendum_20260728.json",
@@ -25,8 +25,20 @@
   "problem": {
     "incorrect_old_assumption": "All initialization-time rows in every timeframe CSV remain physically present at the same file prefix forever.",
     "first_observed_failure": "M1 was rebuilt to exactly 150000 rows and failed before the code reached the same invalid checks for M5/M15/H1/H4/D1.",
-    "transient_read": "Full rebuild and 20-bar refresh can temporarily raise PermissionError, sharing violations or unstable reads, and one failed cycle currently exits the persistent process.",
+    "transient_read": "Full rebuild and 20-bar refresh can temporarily raise PermissionError, sharing violations or unstable reads, and one failed cycle previously exited the persistent process.",
     "long_term_risk": "Even a rolling-overlap-only repair would eventually lose an immutable prospective start when it ages beyond a configured source cap. Durable prospective bars must therefore be journaled locally."
+  },
+  "implementation": {
+    "adapter": "scripts/mochipoyo_alert_research/common/python/bounded_csv_source_adapter.py",
+    "journal_integrity_v2": "scripts/mochipoyo_alert_research/common/python/bounded_csv_journal_integrity.py",
+    "persistent_runner": "scripts/mochipoyo_alert_research/common/python/run_bounded_adapter_loop_v2.py",
+    "migration_operator": "scripts/mochipoyo_alert_research/recovery/bat/03_migrate_bounded_csv_adapter_preserve_starts.bat",
+    "migration_python": "scripts/mochipoyo_alert_research/recovery/python/migrate_bounded_csv_source_adapter_v2.py",
+    "bat03_routes_updated": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
+    "legacy_initializers_unchanged": true,
+    "runtime_manifests_unchanged": true,
+    "migration_executed": false,
+    "restart_authorized": false
   },
   "bounded_source_adapter_contract": {
     "local_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/bounded_csv_source_adapter",
@@ -49,16 +61,19 @@
       "nearest_M1_fallback": false,
       "no_initializer": true,
       "no_start_rewrite": true,
-      "create_only_adapter_manifest_journals_checkpoints_and_receipt": true
+      "create_only_adapter_manifest_journals_checkpoints_and_receipt": true,
+      "safe_package_rebuild_after_completed_migration": true
     },
     "subsequent_update": {
       "short_lived_exclusive_adapter_lock": true,
       "read_each_source_to_a_stable_snapshot": true,
       "previous_journal_tail_overlap_must_be_found_by_timestamp": true,
       "all_overlapping_canonical_rows_must_hash_match": true,
+      "verify_full_journal_sha256_before_and_after_update": true,
       "only_strictly_new_closed_timestamps_are_appended": true,
       "source_head_truncation_before_overlap_is_allowed": true,
       "existing_timestamp_content_change": "FAIL_CLOSED",
+      "journal_size_or_sha_change_outside_verified_update": "FAIL_CLOSED",
       "missing_overlap": "FAIL_CLOSED",
       "non_ascending_or_duplicate_timestamp": "FAIL_CLOSED",
       "source_path_or_point_change": "FAIL_CLOSED"
@@ -71,18 +86,20 @@
     }
   },
   "transient_IO_contract": {
-    "retryable": ["PermissionError", "sharing violation", "file rebuild in progress", "unstable double-read snapshot", "temporary missing file during atomic replacement"],
+    "retryable": ["PermissionError", "sharing violation", "file rebuild in progress", "unstable double-read snapshot", "temporary missing file during atomic replacement", "source rebuild not yet caught up to journal tail"],
     "retry_window_seconds": 90,
     "retry_interval_seconds": 1,
     "retry_does_not_change_start_or_journal": true,
-    "after_retry_exhaustion": "Record the exact error and end the affected cycle/loop fail-closed without modifying starts.",
-    "terminal_failures": ["runtime or contract mismatch", "prospective start changed", "source path changed", "point changed", "timestamp non-ascending", "duplicate timestamp", "anchor missing during migration", "journal overlap missing", "overlap canonical hash mismatch"]
+    "after_retry_exhaustion": "Persist WAITING_TRANSIENT_SOURCE and keep the persistent process alive for the next cycle; do not classify the source race as integrity corruption.",
+    "terminal_failures": ["runtime or contract mismatch", "runtime manifest hash changed", "prospective start changed", "source path changed", "point changed", "timestamp non-ascending", "duplicate timestamp", "anchor missing during migration", "journal size or SHA changed outside verified update", "journal overlap missing", "overlap canonical hash mismatch"]
   },
   "persistent_loop_reliability": {
     "persist_last_exception_for_every_loop": true,
     "persist_cycle_status_for_every_loop": true,
-    "do_not_classify_explicitly_retryable_IO_as_integrity_corruption_before_retry_exhaustion": true,
-    "do_not_swallow_terminal_integrity_errors": true
+    "waiting_state_does_not_end_process": true,
+    "do_not_classify_explicitly_retryable_IO_as_integrity_corruption_before_or_after_retry_exhaustion": true,
+    "do_not_swallow_terminal_integrity_errors": true,
+    "compatibility_process_markers_preserved_for_existing_recovery_detection": true
   },
   "migration_audit": {
     "produce_adapter_manifest": true,
@@ -90,7 +107,8 @@
     "produce_per_loop_start_and_anchor_coverage": true,
     "prove_runtime_manifest_byte_hashes_unchanged": true,
     "prove_all_starts_unchanged": true,
-    "restart_after_pass": ["M9V BAT03", "M9Y BAT03", "M10B BAT03", "M10E BAT03", "M10P BAT03", "M10P2 BAT03", "M10W19 BAT03"]
+    "restart_requires_uploaded_package_review": true,
+    "restart_after_reviewed_pass": ["M9V BAT03", "M9Y BAT03", "M10B BAT03", "M10E BAT03", "M10P BAT03", "M10P2 BAT03", "M10W19 BAT03"]
   },
   "safety": {
     "audit_only": true,
@@ -99,6 +117,7 @@
     "runtime_manifest_edit": false,
     "prospective_start_reset": false,
     "BAT01_rerun": false,
+    "BAT03_before_migration_review": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
