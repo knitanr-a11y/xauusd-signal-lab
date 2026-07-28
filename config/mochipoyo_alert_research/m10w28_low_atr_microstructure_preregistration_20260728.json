@@ -1,0 +1,24 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W28_LOW_ATR_BULLISH_NEITHER_MICROSTRUCTURE_ENTRY_PREREGISTRATION_AUDIT_ONLY",
+  "status":"HYPOTHESES_FROZEN_BEFORE_LOW_ATR_OUTCOME_EVALUATION",
+  "recorded_at_utc":"2026-07-28T13:35:00Z",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "basis":"M10W27 outcome-blind causal information availability audit only. No low-ATR future return, PF, PnL, win/loss label, outcome correlation or profit-ranked feature was used. To avoid selecting only the high-ATR historical winner after observing M10W25C, all three exact M10W23 semantic formulas are carried forward together without change.",
+  "target_regime":"D1 EMA20>EMA30>EMA40 AND H4 EMA20>EMA30 AND H1 TORYS MACD line(6,13,4)>0 AND H1 Wilder ATR14 percentile100<0.33 AND prefix-causal coverage_class=NEITHER",
+  "common":{"direction":"LONG","decision_grid":"M15 decision timestamps from M10W27 causal NEITHER rows","entry":"Exact M1 execution at decision timestamp; ask=M1 open + spread_points*point","exit":"Exact M1 timestamp +240 minutes; bid=M1 open","horizon_minutes":240,"nearest_m1_fallback":false,"one_position_per_family":true,"fixed_spread_sensitivity_usd":0.20,"extra_cost_sensitivity_bps":[1.0,2.0]},
+  "families":{
+    "LMVI1_LONG_M5_VOLUME_IMPULSE":{"source_formula":"M10W23 MVI1 exact formula","formula":["m5_tick_volume_ratio20 >= 1.0","m5_body_ratio >= 0.50","m5_close_location >= 0.6666666666666666"],"threshold_origin":"semantic/no-outcome: activity at or above trailing-20 mean, body at least half of range, close in upper third"},
+    "LMWR1_LONG_M5_PULLBACK_REJECTION":{"source_formula":"M10W23 MWR1 exact formula","formula":["m5_ret3_bps <= 0.0","m5_lower_wick_ratio >= 0.40","m5_close_location >= 0.60"],"threshold_origin":"semantic/no-outcome: non-positive prior 15-minute move, lower wick at least 40% of bar, close in upper 40%"},
+    "LMMO1_LONG_M1_MICRO_MOMENTUM":{"source_formula":"M10W23 MMO1 exact formula","formula":["m1_ret5_bps > 0.0","m1_up_close_count5 >= 3","m1_close_location >= 0.60"],"threshold_origin":"semantic/no-outcome: positive five-minute return, majority of five M1 bars up, latest closed M1 closes in upper 40%"}
+  },
+  "outcome_blind_density_check":{
+    "LMVI1":{"all":807,"2023":176,"2024":232,"2025":334,"2026":65},
+    "LMWR1":{"all":606,"2023":107,"2024":180,"2025":262,"2026":57},
+    "LMMO1":{"all":1610,"2023":309,"2024":416,"2025":744,"2026":141},
+    "note":"Counts were checked only for usable density. No low-ATR outcomes were inspected."
+  },
+  "frozen_evaluation":{"train":"2023-2024","validation":"2025","test":"2026 available frozen history","metrics":["count","win_rate","profit_factor","net_bps","average_win_bps","average_loss_bps","payoff_ratio","max_drawdown_bps","max_losing_streak"],"decision_tiers":{"STRONG_CANDIDATE":{"minimum_count_each_split":20,"minimum_pf_each_split":1.30,"minimum_all_pf":1.50,"minimum_fixed0p20_all_pf":1.40,"minimum_extra2bps_all_pf":1.20,"all_splits_net_positive":true},"ROBUST_CANDIDATE":{"minimum_count_each_split":20,"minimum_pf_each_split":1.10,"minimum_all_pf":1.30,"minimum_fixed0p20_all_pf":1.20,"minimum_extra2bps_all_pf":1.05,"all_splits_net_positive":true},"WEAK_OR_INCONSISTENT":"Any family not meeting ROBUST_CANDIDATE.","REJECT":"Any split PF <=1.0 with adequate count, or all-sample fixed0p20 PF <=1.0, or all-sample extra2bps PF <=1.0."},"no_formula_change_after_results":true,"fresh_shadow_rule":"Only ROBUST_CANDIDATE or STRONG_CANDIDATE may advance to a new independent fresh prospective shadow. Historical support alone is not final support."},
+  "forbidden_after_results":["threshold adjustment","select only the high-ATR winner retroactively","feature combination search","feature removal/addition","session/time filter","spread threshold rescue","ATR boundary change","horizon/exit/runner tuning","M10W26 modification"],
+  "safety":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10W26_keep_running_unchanged":true,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
