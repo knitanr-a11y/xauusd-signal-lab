@@ -1,0 +1,62 @@
+{
+  "project": "BTC_ML_V1",
+  "contract": "BTC_GOLD_SCOPE_FIREWALL_20260729",
+  "status": "ACTIVE_HARD_SCOPE_FIREWALL",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "required_branch": "main",
+  "purpose": "Keep BTC4/BTC5/BTC6/BTC7R/BTC9R fresh-forward research completely isolated from GOLD and Mochipoyo research and runtimes.",
+  "btc_research_scope": {
+    "symbol": "BTCUSD#",
+    "candidate_ids": [
+      "BTC4_RISK_CAP_400",
+      "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+      "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+      "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+      "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080"
+    ],
+    "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
+    "allowed_primary_paths": [
+      "START_HERE_BTC_ML_V1_NEXT_CHAT.md",
+      "docs/btc_ml_v1/**",
+      "configs/btc_ml_v1/**",
+      "scripts/btc_ml_v1/**"
+    ],
+    "allowed_read_only_support_paths": [
+      "scripts/run_btc_youtube_candidates_dry_run_cycle.py",
+      "scripts/run_btc_youtube_candidates_operational_forever.py",
+      "scripts/btc_ml_v1/research/reproduce_btc_stacking_portfolio.py",
+      "RUN_BTC_STACKING_REPRODUCTION.bat"
+    ],
+    "support_path_rule": "Support paths may be inspected only to reuse canonical BTC file resolution, broker-time conversion, and candidate engines. They must not be modified during availability Stage 01."
+  },
+  "hard_forbidden_paths_and_entities": [
+    "docs/mochipoyo_alert_research/**",
+    "config/mochipoyo_alert_research/**",
+    "scripts/mochipoyo_alert_research/**",
+    "docs/gold_v3/**",
+    "docs/gold_ml_v1/**",
+    "config/gold_v3/**",
+    "config/gold_ml_v1/**",
+    "scripts/gold_v3/**",
+    "scripts/gold_ml_v1/**",
+    "M10W24B",
+    "any M10W stage",
+    "any GOLD or XAUUSD candidate, contract, runtime, checkpoint, lock, state, journal, snapshot, collector or BAT"
+  ],
+  "forbidden_actions": {
+    "checkout_or_modify_feature_mochipoyo_branch": true,
+    "read_old_gold_handoff_to_decide_btc_work": true,
+    "repository_wide_search_for_m10w_or_gold": true,
+    "start_stop_restart_or_taskkill_gold_processes": true,
+    "modify_gold_files": true,
+    "modify_or_delete_files_csv": true,
+    "modify_existing_btc_operational_runtime_in_stage01": true,
+    "run_btc_reproduction_against_fresh_extended_csv": true,
+    "use_skip_input_hash_check_as_fresh_evaluator": true,
+    "change_candidate_rules_thresholds_tp_sl_exit_spread_pip_lots_or_overlap_policy": true,
+    "orders_or_discord_or_live_ready_or_final_signal": true,
+    "use_btc10r_or_demo_runtime_lots_in_five_candidate_research": true
+  },
+  "incident_rule": "If any requested BTC action appears to require reading or changing a forbidden path or a running GOLD process, stop without touching it and ask the user. Do not infer permission from an old handoff.",
+  "precedence": "This firewall overrides older BTC or GOLD handoffs for the BTC fresh-forward project."
+}
