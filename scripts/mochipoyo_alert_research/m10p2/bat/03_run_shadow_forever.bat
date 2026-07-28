@@ -4,24 +4,26 @@ cd /d "%~dp0\..\..\..\.."
 
 echo ============================================================
 echo M10P2 C0212 Fresh Prospective Shadow - FOREVER
-echo AUDIT ONLY - PRESERVE FROZEN START
+echo BOUNDED CSV VERIFIED JOURNAL - PRESERVED START - AUDIT ONLY
 echo ============================================================
 echo.
-echo Start this ONLY after ChatGPT reviews the M10P2 bootstrap package.
+echo Requires reviewed bounded CSV adapter migration PASS.
 echo Keep collector / M7C / M8C / M9V / M9Y / M10B / M10E / M10P running unchanged.
-echo Do NOT rerun M10P2 BAT01.
+echo Transient MT5 CSV rebuild/read contention waits and retries.
+echo Genuine runtime/start/timestamp/overlap integrity failures stop fail-closed.
+echo Do NOT rerun BAT01.
 echo.
 
-python "scripts\mochipoyo_alert_research\m10p2\python\m10p2_guarded_runtime.py" forever
+python "scripts\mochipoyo_alert_research\common\python\run_bounded_adapter_loop.py" --loop M10P2 --interval-seconds 60 --compat-process-marker m10p2_guarded_runtime.py
 set "RC=%ERRORLEVEL%"
 echo.
 if not "%RC%"=="0" (
   echo [STOP] M10P2 loop was BLOCKED. Do NOT reset/reinitialize anything.
-  echo Send the complete console output to ChatGPT.
+  echo Send the complete console output and latest M10P2 status/log to ChatGPT.
   pause
   exit /b %RC%
 )
 
-echo [DONE] M10P2 loop stopped gracefully.
+echo [DONE] M10P2 loop stopped gracefully. Runtime manifest and frozen start were preserved.
 pause
 exit /b 0
