@@ -2,16 +2,17 @@
 setlocal EnableExtensions DisableDelayedExpansion
 for %%I in ("%~dp0\..\..\..\..") do set "REPO_ROOT=%%~fI"
 cd /d "%REPO_ROOT%"
-set "OPERATOR=scripts\mochipoyo_alert_research\m10w26\python\run_m10w26_private_snapshot.py"
+set "OPERATOR=scripts\mochipoyo_alert_research\m10w26\python\run_m10w26_private_snapshot_v2.py"
 
 if not exist "%OPERATOR%" (
   echo [M10W26 ONCE BLOCKED] Missing: %OPERATOR%
+  echo Confirm branch feature/mochipoyo-alert-research, Fetch origin, and Pull origin.
   pause
   exit /b 2
 )
 
 echo ============================================================
-echo M10W26 MMO1 CAUSAL-NEITHER SHADOW - ONE CYCLE - AUDIT ONLY
+echo M10W26 MMO1 CAUSAL-NEITHER SHADOW V2 - ONE CYCLE - AUDIT ONLY
 echo ============================================================
 echo Keep all existing loops running. BAT01 must already have passed exactly once.
 echo.
