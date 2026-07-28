@@ -1,0 +1,18 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W24B_NEITHER_COHORT_SCOPE_CORRECTION_AUDIT_ONLY",
+  "status":"PASS_POSTRUN_AUDIT_CORRECTION_RERUN_VERIFIED",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(63).zip","sha256":"64abd06458457bcea49d655fca6d6a7655c02f931dc687f9a4c4c4d2a9d292ee","size_bytes":765819,"built_at_utc":"2026-07-28T01:45:26Z"},
+  "coverage_join":{"broader_rows":8648,"matched_rows":8648,"unmatched_rows":0,"corrected_NEITHER_rows":5917,"coverage_class_counts":{"NEITHER":5917,"LONG_ONLY":461,"SHORT_ONLY":2121,"BOTH":149},"decision_time_unique":true},
+  "independent_package_checks":{"formula_candidate_counts":{"MVI1":487,"MWR1":432,"MMO1":1359},"candidate_counts_reproduced":true,"all_materialized_directions":"LONG","all_entry_time_equals_decision_time":true,"all_scheduled_exit_minutes":240,"minimum_materialized_trade_spacing_minutes_per_family":240,"m1_or_m5_source_at_or_after_decision_count":0,"entry_data_gap_all_families":0,"summary_metrics_reproduced_from_resolved_trade_ledger":true},
+  "families":{
+    "MVI1_LONG_M5_VOLUME_IMPULSE":{"classification":"INSUFFICIENT_DENSITY","candidate_count":487,"accepted_count":263,"resolved_count":239,"test_2026_resolved":19,"all_pf":1.5960959306425802,"all_fixed0p20_pf":1.586679263842722,"all_plus2bps_pf":1.4003245165896938,"advance_to_fresh_shadow":false},
+    "MWR1_LONG_M5_PULLBACK_REJECTION":{"classification":"REJECT","candidate_count":432,"accepted_count":266,"resolved_count":231,"train_resolved":119,"train_pf":0.8841006751159696,"all_pf":1.1843049088361761,"all_fixed0p20_pf":1.1808676781560337,"all_plus2bps_pf":1.0468427529406625,"advance_to_fresh_shadow":false},
+    "MMO1_LONG_M1_MICRO_MOMENTUM":{"classification":"STRONG_CANDIDATE","candidate_count":1359,"accepted_count":437,"resolved_count":399,"train_pf":1.5140710841811578,"validation_2025_pf":1.5477690866192844,"test_2026_pf":2.5573099358480706,"all_pf":1.6157633608895041,"all_net_bps":2706.487897296921,"all_fixed0p20_pf":1.612104671177304,"all_plus1bps_pf":1.5042419912313767,"all_plus2bps_pf":1.40082034826659,"advance_to_fresh_shadow":true}
+  },
+  "interpretation":{"postrun_integrity_correction_reproduced":true,"formula_change":false,"threshold_change":false,"cohort_change":false,"horizon_change":false,"cost_change":false,"historical_result_is_clean_independent_validation":false,"MMO1_historical_support_requires_brand_new_fresh_shadow":true,"fresh_start_not_authorized_until_NEITHER_live_parity_is_audited":true},
+  "new_issue_found_before_fresh_start":"M10W14 historical LONG coverage is built from completed replay_m7c episodes, so direct reuse of its historical implementation would wait for future episode exit before materializing a first-turn presence. The first-turn condition itself is causal, but fresh NEITHER needs an explicit prefix-causal state-machine reproduction audit before a new start is frozen.",
+  "next":"M10W25_NEITHER_PREFIX_CAUSAL_LIVE_PARITY_AUDIT_ONLY",
+  "guardrails":{"audit_only":true,"trade_outcomes_for_M10W25":false,"historical_backfill":false,"nearest_m1_fallback":false,"existing_forward_modified":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
