@@ -1,0 +1,111 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W29_PREREGISTERED_LOW_ATR_BULLISH_NEITHER_MICROSTRUCTURE_EVALUATION_AUDIT_ONLY",
+  "status": "PASS_NO_ADVANCING_LOW_ATR_MICROSTRUCTURE_ENTRY_FAMILY_AUDIT_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(72).zip",
+    "sha256": "9584283d1a7079d50f33f360a616d1ff9b91dcf1e6a69797ef366f5e57919840",
+    "size_bytes": 208498,
+    "built_at_utc": "2026-07-28T13:45:55Z"
+  },
+  "source": {
+    "M10W27_feature_rows": 7480,
+    "M10W27_feature_sha256": "03f0185694485eab2b5e50ab93c2f354a91cdd8b0706f7710b66c2b1173648cd",
+    "target_regime": "D1 EMA20>EMA30>EMA40 AND H4 EMA20>EMA30 AND H1 TORYS MACD line(6,13,4)>0 AND H1 Wilder ATR14 percentile100<0.33 AND prefix-causal coverage_class=NEITHER"
+  },
+  "execution": {
+    "direction": "LONG",
+    "exact_M1_entry": true,
+    "exact_M1_exit_plus_minutes": 240,
+    "nearest_M1_fallback": false,
+    "one_position_per_family": true,
+    "actual_spread": true,
+    "fixed_spread_usd": 0.20,
+    "extra_cost_bps": [1.0, 2.0],
+    "formula_change": false,
+    "threshold_change": false,
+    "horizon_change": false
+  },
+  "families": {
+    "LMVI1_LONG_M5_VOLUME_IMPULSE": {
+      "classification": "REJECT",
+      "candidate_count": 807,
+      "accepted_count": 393,
+      "resolved_count": 379,
+      "overlap_skip_count": 414,
+      "train_actual_pf": 1.3091098369320284,
+      "validation_actual_pf": 1.7043736121354376,
+      "test_actual_count": 32,
+      "test_actual_pf": 0.8791958114998707,
+      "test_actual_net_bps": -75.20075261970965,
+      "all_actual_pf": 1.4076241372835898,
+      "all_actual_net_bps": 1938.347392895345,
+      "all_fixed0p20_pf": 1.3970469833678376,
+      "all_plus2bps_pf": 1.2308656611612798,
+      "advance": false
+    },
+    "LMWR1_LONG_M5_PULLBACK_REJECTION": {
+      "classification": "WEAK_OR_INCONSISTENT",
+      "candidate_count": 606,
+      "accepted_count": 327,
+      "resolved_count": 317,
+      "overlap_skip_count": 279,
+      "train_actual_pf": 1.3960565065766821,
+      "validation_actual_pf": 1.6490746716031186,
+      "test_actual_count": 27,
+      "test_actual_pf": 1.0486208441209173,
+      "test_actual_net_bps": 19.2421876830677,
+      "all_actual_pf": 1.4574238418173455,
+      "all_actual_net_bps": 1555.2533081815866,
+      "all_fixed0p20_pf": 1.4477229581288138,
+      "all_plus2bps_pf": 1.2498928727610508,
+      "advance": false
+    },
+    "LMMO1_LONG_M1_MICRO_MOMENTUM": {
+      "classification": "REJECT",
+      "candidate_count": 1610,
+      "accepted_count": 501,
+      "resolved_count": 487,
+      "overlap_skip_count": 1109,
+      "train_actual_pf": 1.5118623913976423,
+      "validation_actual_pf": 1.3643752726685285,
+      "test_actual_count": 41,
+      "test_actual_pf": 0.5806072055646669,
+      "test_actual_net_bps": -355.73913496810894,
+      "all_actual_pf": 1.3191463893084718,
+      "all_actual_net_bps": 1962.7342119298544,
+      "all_fixed0p20_pf": 1.3106922226957938,
+      "all_plus2bps_pf": 1.1492086417960663,
+      "advance": false
+    }
+  },
+  "independent_ledger_recalculation": {
+    "row_count": 1221,
+    "overlap_row_count": 1802,
+    "family_resolved_counts_match_summary": true,
+    "family_actual_pf_match_summary": true,
+    "family_actual_net_bps_match_summary": true
+  },
+  "decision": {
+    "M10W29_passed_execution_integrity": true,
+    "advancing_family_count": 0,
+    "fresh_shadow_authorized_from_M10W29": false,
+    "post_result_threshold_or_formula_rescue_forbidden": true,
+    "M10W26_modified": false,
+    "historical_result_is_fresh_support": false,
+    "automatic_live_promotion": false,
+    "next": "Run a post-result diagnostic-only covariate-shift audit using pre-entry M10W27 features. It may explain instability but may not authorize formula, threshold, session, ATR, horizon or exit tuning."
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "existing_monitor_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
