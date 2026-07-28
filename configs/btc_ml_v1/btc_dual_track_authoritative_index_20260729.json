@@ -1,0 +1,22 @@
+{
+  "project": "BTC_ML_V1",
+  "status": "AUTHORITATIVE_DUAL_TRACK_INDEX",
+  "recorded_at": "2026-07-29",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "documents": [
+    "START_HERE_BTC_ML_V1_NEXT_CHAT.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_DUAL_TRACK_FF01_M7C_PRESERVED_20260729.md",
+    "configs/btc_ml_v1/current_state_20260729.json",
+    "configs/btc_ml_v1/next_action_20260729.json",
+    "configs/btc_ml_v1/btc_dual_track_scope_20260729.json",
+    "configs/btc_ml_v1/btc_working_branch_policy_20260729.json",
+    "configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json",
+    "docs/btc_ml_v1/BTC_DUAL_TRACK_BRANCH_AND_SCOPE_CORRECTION_20260729.md"
+  ],
+  "supersedes": [
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md",
+    "earlier wording that required direct work on main",
+    "earlier wording that failed to acknowledge the legitimate M7C BTCUSD/XAUUSD background track"
+  ]
+}
