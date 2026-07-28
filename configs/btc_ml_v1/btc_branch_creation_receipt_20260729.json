@@ -1,8 +1,0 @@
-{
-  "project": "BTC_ML_V1",
-  "status": "PENDING_REMOTE_BRANCH_CREATION",
-  "recorded_at": "2026-07-29",
-  "authoritative_base_branch": "main",
-  "planned_working_branch": "feature/btc-fresh-forward-research",
-  "planned_base_commit": "12c1eb7dd1cecbcf4d2a0d6847c988f7901bafc7"
-}
