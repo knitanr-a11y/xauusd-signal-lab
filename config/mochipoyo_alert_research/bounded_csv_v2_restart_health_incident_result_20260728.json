@@ -1,0 +1,77 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_BOUNDED_CSV_V2_RESTART_HEALTH_AUDIT_ONLY",
+  "status": "REVIEW_REQUIRED_M9Y_SHARED_JOURNAL_WINDOWS_CONTENTION_V4_CORRECTION_IMPLEMENTED",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(68).zip",
+    "sha256": "50557ccea4eb3ba2343daaf3ac9d8375be26adcf3dd7effdd5591850df46f3d5",
+    "size_bytes": 16657
+  },
+  "health_result": {
+    "all_seven_healthy": false,
+    "healthy_running_first_cycle_pass": ["M9V", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
+    "blocked": ["M9Y"],
+    "runtime_hashes_and_starts_preserved": true,
+    "shared_journal_fingerprints_verified": true,
+    "candidate_or_strategy_failure": false
+  },
+  "M9V": {
+    "status": "RUNNING",
+    "successful_cycles": 4,
+    "failed_terminal_cycles": 0,
+    "v3_immutable_start_bootstrap_passed": true,
+    "latest_output_status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 11:04:00"
+  },
+  "M9Y": {
+    "status": "BLOCKED_AFTER_THREE_SUCCESSFUL_CYCLES",
+    "successful_cycles": 3,
+    "failed_terminal_cycles": 1,
+    "latest_output_status_before_stop": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "prospective_start_server_time": "2026.07.24 12:45:00",
+    "error": "PermissionError WinError 5 while replacing shared goldsharp_m1.csv journal, followed by PermissionError while rollback attempted to replace the same shared journal path",
+    "journal_corruption_detected": false,
+    "runtime_or_start_modified": false
+  },
+  "root_cause": {
+    "type": "WINDOWS_SHARED_JOURNAL_READER_WRITER_PATH_CONTENTION",
+    "detail": "All seven processes used a serialized adapter lock for writers, but strategy cycles read the same shared journal paths after the writer lock was released. On Windows, another process holding goldsharp_m1.csv open for reading could prevent os.replace of that shared path during a later adapter append and could also prevent rollback replacement.",
+    "why_only_M9Y_stopped_in_package": "M9Y encountered the first observed collision after three successful cycles. The other six were healthy at the audit instant but remained exposed to the same shared-path race.",
+    "migration_failure": false,
+    "bounded_source_overlap_failure": false,
+    "runtime_or_start_corruption": false
+  },
+  "V4_correction": {
+    "runner": "scripts/mochipoyo_alert_research/common/python/run_bounded_adapter_loop_v4.py",
+    "source_model": "SHARED_VERIFIED_JOURNAL_IS_ADAPTER_WRITE_TARGET_ONLY",
+    "strategy_read_model": "PER_LOOP_PRIVATE_VERIFIED_SNAPSHOT",
+    "snapshot_locking": "Snapshot copies are materialized while holding the existing adapter update lock.",
+    "snapshot_verification": "Every copied timeframe file must match current verified shared-journal size and SHA256.",
+    "M9V_bootstrap": "Existing immutable runtime state_at_start remains authoritative.",
+    "transient_windows_IO": "PermissionError and WinError 5/32/33 are converted to AdapterTransientError so a temporary collision waits rather than resets or reinitializes.",
+    "bat03_routes_updated": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
+    "health_audit_updated": true
+  },
+  "upgrade_operator": {
+    "graceful_stop": "scripts/mochipoyo_alert_research/recovery/bat/05_stop_bounded_adapter_loops_for_v4_upgrade.bat",
+    "behavior": "Requests normal STOP-file shutdown, waits for all seven process markers and locks to disappear, and does not kill processes or delete locks.",
+    "restart_order": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
+    "post_restart_health": "scripts/mochipoyo_alert_research/recovery/bat/04_audit_bounded_adapter_restart_health.bat"
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill_before_start": false,
+    "runtime_manifest_edit": false,
+    "prospective_start_reset": false,
+    "manual_lock_deletion": false,
+    "process_force_kill": false,
+    "BAT01_or_initializer": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
