@@ -1,25 +1,24 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W26_RUNNING_INITIAL_HEALTH_PASS_M10W27_OUTCOME_BLIND_LOW_ATR_CAUSAL_INFORMATION_NEXT",
-  "stage":"M10W27_LOW_ATR_BULLISH_NEITHER_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status":"M10W27_PASS_M10W29_PREREGISTERED_LOW_ATR_EVALUATION_NEXT",
+  "stage":"M10W29_PREREGISTERED_LOW_ATR_BULLISH_NEITHER_MICROSTRUCTURE_EVALUATION_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
-  "M10W26_initial_health_result":"config/mochipoyo_alert_research/m10w26_user_local_initial_health_result_20260728.json",
-  "M10W26_initial_health_package_sha256":"656fd48b036076cf2a9f702ad45fafd55adf805d22837acecbff9fa6a5bc7833",
-  "M10W26_status":"PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY; immutable MT5-server start 2026.07.28 15:58:00; exactly one V2 process and one lock; successful_cycles=1; terminal_failures=0; initial candidates/resolved=0 is normal immediately after start.",
-  "M10W27_contract":"config/mochipoyo_alert_research/m10w27_low_atr_bullish_neither_causal_information_availability_contract_20260728.json",
-  "M10W27_implementation_audit":"config/mochipoyo_alert_research/m10w27_preexecution_implementation_audit_20260728.json",
-  "M10W27_purpose":"Outcome-blind causal M1/M5 information inventory for the second stable M10W17 opportunity bucket: D1 bullish, H4 positive, H1 MACD positive, H1 ATR percentile100<0.33 and prefix-causal coverage=NEITHER. No entry formula or threshold is created in this stage.",
+  "M10W26_status":"PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY; keep running unchanged from immutable MT5-server start 2026.07.28 15:58:00.",
+  "M10W27_result":"config/mochipoyo_alert_research/m10w27_user_local_result_20260728.json",
+  "M10W27_package_sha256":"e9f63f4e8a83e35c5c1274edf41b5abcacb9a65e90280382077955491b80ce1b",
+  "M10W27_decision":"PASS; 7480 prefix-causal low-ATR bullish NEITHER rows, all numeric causal features sufficiently dense, zero degenerate features, zero source timing violations, real volume unusable, and no outcomes/future path read.",
+  "M10W28_contract":"config/mochipoyo_alert_research/m10w28_low_atr_microstructure_preregistration_20260728.json",
+  "M10W28_decision":"Freeze all three exact M10W23 semantic formulas together before low-ATR outcomes, rather than selecting only the known high-ATR winner.",
   "immediate_action":[
-    "Keep collector, M7C, M8C and all eight private-snapshot loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26 running unchanged.",
+    "Keep collector, M7C, M8C and all eight loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26 running unchanged.",
     "Fetch/Pull the latest feature/mochipoyo-alert-research branch.",
-    "Run scripts/mochipoyo_alert_research/m10w27/bat/01_run_low_atr_bullish_neither_causal_information_availability_audit.bat.",
-    "The audit must not stop any loop and must not read or calculate future returns, PF, PnL, labels or outcome correlations.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W27/LATEST/99_UPLOAD_PACKAGE.zip.",
-    "Continue M10W26 without intervention. When M10W26 reaches 20 resolved, rerun its read-only BAT05 health audit and upload the new package for the operational review gate."
+    "Run scripts/mochipoyo_alert_research/m10w29/bat/01_run_low_atr_micro_eval.bat.",
+    "The operator evaluates all three frozen formulas using exact M1 entry/exit, 240-minute horizon, one position per family, actual spread, fixed $0.20 and +1/+2bps sensitivity, without tuning.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W29/LATEST/99_UPLOAD_PACKAGE.zip.",
+    "Continue M10W26 without intervention. At 20 resolved, run its read-only BAT05 checkpoint."
   ],
-  "operators":{"M10W27":"scripts/mochipoyo_alert_research/m10w27/bat/01_run_low_atr_bullish_neither_causal_information_availability_audit.bat","M10W26_persistent":"scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat","M10W26_read_only_checkpoint":"scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat","M10W26_normal_stop_only_if_explicitly_needed":"scripts/mochipoyo_alert_research/m10w26/bat/04_stop_shadow_forever.bat"},
-  "M10W26_review_gates":{"operational_resolved":20,"interim_resolved":60,"formal_resolved":120,"automatic_live_promotion":false},
-  "authorization":{"M10W27_user_local_outcome_blind_execution":true,"M10W26_keep_running":true,"M10W26_BAT01":false,"M10W26_live_or_final_promotion":false,"M10V":false},
-  "do_not_run_or_change":{"any_existing_loop_BAT01_or_initializer":true,"M10W26_BAT01_or_reinitialize":true,"stop_or_restart_healthy_loops":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_runtime_state_prestart_audit_lock_STOP_adapter_snapshot_or_journal_edit_or_deletion":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W27_future_return_or_outcome_use":true,"M10W27_entry_formula_or_threshold_creation":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
-  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"formula_change":false,"threshold_change":false,"horizon_change":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "operators":{"M10W29":"scripts/mochipoyo_alert_research/m10w29/bat/01_run_low_atr_micro_eval.bat","M10W26_persistent":"scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat","M10W26_checkpoint":"scripts/mochipoyo_alert_research/m10w26/bat/05_audit_initial_health.bat"},
+  "authorization":{"M10W29_user_local_execution":true,"M10W29_post_result_formula_or_threshold_change":false,"M10W26_keep_running":true,"M10W26_BAT01":false,"M10V":false},
+  "do_not_run_or_change":{"any_existing_loop_BAT01_or_initializer":true,"M10W26_BAT01_or_reinitialize":true,"stop_or_restart_healthy_loops":true,"force_close_or_taskkill_loops":true,"manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W29_formula_threshold_feature_session_spread_ATR_horizon_exit_or_runner_tuning":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
+  "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
