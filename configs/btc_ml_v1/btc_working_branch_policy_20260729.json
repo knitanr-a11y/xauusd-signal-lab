@@ -1,0 +1,15 @@
+{
+  "project": "BTC_ML_V1",
+  "status": "BTC_DEDICATED_WORKING_BRANCH_REQUIRED",
+  "recorded_at": "2026-07-29",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "base_commit_after_dual_track_correction": "44bc79fcbced6a9df24c2ed1a5b3820280eb1d3c",
+  "rules": [
+    "Do not implement FF01 directly on main.",
+    "Do not use feature/mochipoyo-alert-research as the BTC ML V1 working branch.",
+    "Use a separate clone or worktree so the running GOLD/MOCHIPOYO folder remains on feature/mochipoyo-alert-research.",
+    "Do not merge feature/mochipoyo-alert-research into feature/btc-fresh-forward-research.",
+    "Preserve the separate M7C dual-source BTCUSD/XAUUSD background track unchanged."
+  ]
+}
