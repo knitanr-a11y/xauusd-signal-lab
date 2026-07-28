@@ -95,13 +95,30 @@ def main() -> int:
             loop: adapter.sha256_file(local_root / relative)
             for loop, (relative, _) in adapter.RUNTIME_SPECS.items()
         }
-        receipt = adapter.migrate(local_root, source_root, point)
+        existing_manifest = adapter.manifest_path(local_root).is_file()
+        existing_receipt = adapter.receipt_path(local_root).is_file()
+        if existing_manifest != existing_receipt:
+            raise RuntimeError(
+                "partial adapter migration evidence exists; do not delete it manually. "
+                "Send the screen output to ChatGPT."
+            )
+        migration_reused = existing_manifest and existing_receipt
+        if migration_reused:
+            receipt = adapter.load_json(adapter.receipt_path(local_root))
+            if receipt.get("status") != "PASS_MIGRATION_READY_FOR_REVIEW":
+                raise RuntimeError("existing bounded CSV migration receipt is not PASS")
+            for loop in adapter.RUNTIME_SPECS:
+                adapter.validate_loop(local_root, loop, source_root, point)
+            adapter.ensure_updated(local_root, source_root, point, retry_window_seconds=90.0)
+        else:
+            receipt = adapter.migrate(local_root, source_root, point)
+
         after_hashes = {
             loop: adapter.sha256_file(local_root / relative)
             for loop, (relative, _) in adapter.RUNTIME_SPECS.items()
         }
         if before_hashes != after_hashes:
-            raise RuntimeError("runtime manifest hash changed during adapter migration")
+            raise RuntimeError("runtime manifest hash changed during adapter migration/package rebuild")
 
         output_root = local_root / "outputs" / "BOUNDED_CSV_SOURCE_ADAPTER_MIGRATION"
         archive = output_root / "archive" / utc_stamp()
@@ -120,7 +137,8 @@ def main() -> int:
             "runtime_hashes_after": after_hashes,
             "runtime_hashes_unchanged": before_hashes == after_hashes,
             "loop_coverage": receipt.get("loop_coverage"),
-            "journal_fingerprints": receipt.get("journal_fingerprints"),
+            "journal_fingerprints": manifest.get("journals"),
+            "migration_reused_for_package_rebuild": migration_reused,
             "processes_started_or_stopped": False,
             "locks_removed": False,
             "runtime_or_start_modified": False,
@@ -130,7 +148,7 @@ def main() -> int:
         }
         (archive / "00_READ_ME_FIRST.txt").write_text(
             "One-time audit-only migration for bounded MT5 CSV sources.\n"
-            "It seeded verified append-only journals from the current bounded source, preserved all seven runtime manifests and starts, and did not restart any loop.\n"
+            "It seeded or revalidated verified append-only journals from the current bounded source, preserved all seven runtime manifests and starts, and did not restart any loop.\n"
             "Upload this ZIP for review before running any BAT03.\n",
             encoding="utf-8",
         )
@@ -144,6 +162,7 @@ def main() -> int:
             f"source_root={source_root}",
             "all_loop_processes_absent=true",
             "all_loop_locks_absent=true",
+            f"migration_reused_for_package_rebuild={str(migration_reused).lower()}",
             "runtime_hashes_unchanged=true",
             "prospective_starts_unchanged=true",
             "historical_backfill_before_starts=false",
@@ -158,7 +177,8 @@ def main() -> int:
         latest = output_root / "LATEST"
         shutil.rmtree(latest, ignore_errors=True)
         shutil.copytree(archive, latest)
-        print("[MIGRATION PASS] Bounded CSV adapter journals are seeded; all starts/runtime hashes are preserved.")
+        action = "revalidated and package rebuilt" if migration_reused else "seeded"
+        print(f"[MIGRATION PASS] Bounded CSV adapter journals are {action}; all starts/runtime hashes are preserved.")
         print("[OUTPUT]", latest)
         print("[NEXT] Upload 99_UPLOAD_PACKAGE.zip. Do not run any BAT03 until reviewed.")
         return 0
