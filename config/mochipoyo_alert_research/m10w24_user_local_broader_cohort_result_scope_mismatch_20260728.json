@@ -1,0 +1,30 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W24_PREREGISTERED_HIGH_ATR_BULLISH_MICROSTRUCTURE_ENTRY_EVALUATION_AUDIT_ONLY",
+  "status":"PASS_EXECUTION_BUT_SCOPE_MISMATCH_WITH_M10W17_NEITHER_PARENT_NOT_CONFIRMATORY_FOR_BLIND_SPOT",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(61).zip","sha256":"167935382d79f780ab1f1d0f01dd8672b3186390a06cfb6d485cfcdba9d36c8a","size_bytes":197439,"built_at_utc":"2026-07-28T01:00:26Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "execution_integrity":{"status":"PASS_PREREGISTERED_MICROSTRUCTURE_ENTRY_EVALUATION_AUDIT_ONLY","target_regime_row_count":8648,"entry_data_gap_all_families":0,"formula_change_after_results":false,"M10W19_modified":false},
+  "scope_mismatch":{
+    "M10W17_parent_contract":"M10W17 tested stable opportunity inside M10W14 coverage_class=NEITHER exact regime buckets and explicitly said later event-entry work should be inside that passing bucket.",
+    "M10W22_implementation":"Rebuilt the D1 bullish + H4 positive + H1 MACD positive + ATR>=0.67 regime directly from frozen bars but did not join/filter M10W14 coverage_class=NEITHER.",
+    "effect":"M10W22 feature rows and therefore M10W24 evaluation included M15 windows outside the original NEITHER blind-spot cohort.",
+    "cause_classification":"COHORT_SCOPE_IMPLEMENTATION_DRIFT_NOT_FORMULA_OR_THRESHOLD_FAILURE",
+    "M10W24_can_reject_NEITHER_microstructure_hypotheses":false
+  },
+  "broader_cohort_results":{
+    "MVI1":{"classification":"REJECT","resolved":320,"train_pf":1.050641882845682,"validation_2025_pf":1.0792929631932253,"test_2026_pf":1.107935544837206,"all_pf":1.0736167150131444,"all_fixed0p20_pf":1.0684535839540124,"all_plus2bps_pf":0.9596505481722449,"all_net_bps":404.90868358217176,"all_plus2bps_net_bps":-235.0913164178282},
+    "MWR1":{"classification":"REJECT","resolved":304,"train_pf":0.8847533357980893,"validation_2025_pf":1.147494558078935,"test_2026_pf":1.6623476589025517,"all_pf":1.0823411942311616,"all_fixed0p20_pf":1.0793751409957593,"all_plus2bps_pf":0.9580157483769481,"all_net_bps":394.6871947473446,"all_plus2bps_net_bps":-213.31280525265538},
+    "MMO1":{"classification":"REJECT","resolved":511,"train_pf":0.9803526694291222,"validation_2025_pf":1.0840603464067042,"test_2026_pf":2.093354048533689,"all_pf":1.1361539136638843,"all_fixed0p20_pf":1.1338305684701782,"all_plus2bps_pf":1.0028386354159649,"all_net_bps":1045.2079559692665,"all_plus2bps_net_bps":23.20795596926644}
+  },
+  "interpretation":{
+    "broader_cohort_advancing_families":[],
+    "do_not_tune_MVI1_MWR1_MMO1":true,
+    "do_not_interpret_as_NEITHER_failure":true,
+    "required_correction":"Restore the pre-existing M10W14 coverage_class=NEITHER cohort by exact decision_time join, keep the exact M10W23 formulas and all evaluation rules unchanged, then rerun as M10W24B scope-correction audit.",
+    "scope_correction_is_not_threshold_rescue":true,
+    "corrected_historical_result_will_remain_research_exposed":true,
+    "fresh_prospective_required_for_any_support":true
+  },
+  "guardrails":{"audit_only":true,"existing_forward_modified":false,"historical_backfill":false,"threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
