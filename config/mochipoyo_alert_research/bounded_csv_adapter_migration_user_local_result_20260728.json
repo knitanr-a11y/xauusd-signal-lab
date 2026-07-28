@@ -1,0 +1,78 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "FRESH_LOOP_BOUNDED_CSV_PRESERVED_START_MIGRATION_AUDIT_ONLY",
+  "status": "PASS_ALL_STARTS_RUNTIME_HASHES_ANCHORS_AND_JOURNALS_PRESERVED",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(67).zip",
+    "sha256": "0b6ab96bb8460a829a9b5bf49d985a55bf1688c125697577d4fbd0e752a4f3a2",
+    "size_bytes": 8498,
+    "built_at_utc": "2026-07-28T10:59:28Z"
+  },
+  "migration": {
+    "adapter_version": "BOUNDED_CSV_SOURCE_ADAPTER_V1",
+    "source_model": "BOUNDED_REWRITE_WITH_20_BAR_REFRESH_OVERLAP",
+    "source_root": "MT5_FILES_ROOT_FROM_M8B_METADATA",
+    "xauusd_point": 0.01,
+    "migration_reused_for_package_rebuild": false,
+    "processes_started_or_stopped": false,
+    "locks_removed": false,
+    "runtime_or_start_modified": false,
+    "historical_backfill_before_starts": false,
+    "candidate_eligibility_before_start": false
+  },
+  "immutable_starts": {
+    "M9V": "2026.07.24 11:04:00",
+    "M9Y": "2026.07.24 12:45:00",
+    "M10B": "2026.07.24 20:54:00",
+    "M10E": "2026.07.24 22:06:00",
+    "M10P": "2026.07.24 23:56:00",
+    "M10P2": "2026.07.27 01:39:00",
+    "M10W19": "2026.07.28 02:31:00"
+  },
+  "runtime_hashes_unchanged": true,
+  "runtime_manifest_sha256s": {
+    "M9V": "07731d1071b7fb6f063d70464782163a74acf2330062bd0d27c2d49b87b5b04a",
+    "M9Y": "8c2ed46125e1d61a699245102c82d9b5e85447d71fe5ac5b6edf8c2be365fd10",
+    "M10B": "f35361e6dc6fed73e6a7119d715c63007c9f3b64026d4cf26c946fc401f36fb1",
+    "M10E": "0e5c15caf142026198bc8321eb003c8fd9a32457f9eb8c1b0b1a139c8dd0bccf",
+    "M10P": "7c175a4262deb0c0e5889fc5c5a77b225b04ec8e83ff6fab4fefc74ab87cbc66",
+    "M10P2": "8b3144d52188fa933eb5ab4b59e99fc5f1b958aa38dd19daef1c7cfcf043aada",
+    "M10W19": "9ccd61286dc7c6c0781d91ecb76260b95cb1f50ba4dc75a02b1204ab3afe7e3f"
+  },
+  "coverage": {
+    "all_seven_exact_M1_starts_present": true,
+    "all_used_timeframe_frozen_anchors_present": true,
+    "minimum_pre_start_context_satisfied": true,
+    "strict_ascending_and_no_duplicates_reported": true
+  },
+  "journal_fingerprints": {
+    "M1": {"row_count":150417,"first_server_open":"2026.02.24 01:08:00","last_server_open":"2026.07.28 13:58:00","sha256":"38e8e73d780eaae81beb18a5d7c9b2e0ad324c47c0584ff668564283fb87a930","size_bytes":9166519},
+    "M5": {"row_count":90885,"first_server_open":"2025.04.14 21:40:00","last_server_open":"2026.07.28 13:50:00","sha256":"91908e7d96ee54e13e45757770637efb6d01aff3292862a67ac98581a27deb41","size_bytes":5591138},
+    "M15": {"row_count":30295,"first_server_open":"2025.04.14 22:15:00","last_server_open":"2026.07.28 13:30:00","sha256":"d474992964d6f475e6c52446e907fb5df539e9465576b32ffbc9dd0963d00047","size_bytes":1877017},
+    "H1": {"row_count":20073,"first_server_open":"2023.03.03 08:00:00","last_server_open":"2026.07.28 12:00:00","sha256":"ce85d113c59455a31f639ef15a80d0616710be188ad68f2c474c199f8f6b092e","size_bytes":1251954},
+    "H4": {"row_count":10019,"first_server_open":"2020.01.31 04:00:00","last_server_open":"2026.07.28 08:00:00","sha256":"a49e99550d2f01612c5ff36913330fc5cbc996af26be73363f4e8063eb718893","size_bytes":629215},
+    "D1": {"row_count":5003,"first_server_open":"2007.05.01 00:00:00","last_server_open":"2026.07.27 00:00:00","sha256":"80a98fc6bd72c90f95f2acb14e0bab1603498f367f68baa5ea26f87187c01105","size_bytes":313468}
+  },
+  "decision": {
+    "migration_review": "PASS",
+    "BAT03_restart_authorized": true,
+    "restart_order": ["M9V","M9Y","M10B","M10E","M10P","M10P2","M10W19"],
+    "BAT01_or_initializer": "FORBIDDEN",
+    "post_restart_health_review_required": true,
+    "M10W25C_or_M10W26_before_health_PASS": false
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill_before_start": false,
+    "runtime_reset": false,
+    "start_reset": false,
+    "nearest_m1_fallback": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
