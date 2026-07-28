@@ -1,0 +1,85 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W34_SNDX1_LOW_ATR_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "DESIGN_FROZEN_NOT_STARTED",
+  "recorded_at_utc": "2026-07-28T14:35:00Z",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "historical_basis": {
+    "M10W33_package_sha256": "fa41d4717e32e5f02cade9043928e27d2d023b13148f7d80b53cdd84edb33a13",
+    "M10W33_result_status": "PASS_PREREGISTERED_SCALE_NORMALIZED_EVALUATION_AUDIT_ONLY",
+    "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "classification": "ROBUST_CANDIDATE",
+    "historical_support_is_fresh_support": false,
+    "automatic_promotion": false
+  },
+  "data": {
+    "live_file_map": {
+      "M1": "goldsharp_m1.csv",
+      "M5": "goldsharp_m5.csv",
+      "M15": "goldsharp_m15.csv",
+      "H1": "goldsharp_h1.csv",
+      "H4": "goldsharp_h4.csv",
+      "D1": "goldsharp_d1.csv"
+    },
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_row_closed": true,
+    "historical_backfill": false,
+    "private_snapshot_required": true
+  },
+  "target_regime": {
+    "D1": "EMA20>EMA30>EMA40",
+    "H4": "EMA20>EMA30",
+    "H1_MACD": "TORYS line(6,13)>0",
+    "H1_ATR_percentile100": "<0.33",
+    "causal_coverage_class": "NEITHER"
+  },
+  "candidate": {
+    "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "direction": "LONG",
+    "formula": [
+      "m5_range3_over_h1_atr14 >= 0.40",
+      "m1_range5_over_h1_atr14 >= 0.20",
+      "m1_ret5_over_h1_atr14 > 0.0",
+      "m1_close_location >= 0.60"
+    ],
+    "horizon_minutes": 240,
+    "one_position_per_arm": true,
+    "nearest_m1_fallback": false,
+    "entry": "exact M1 open at decision plus actual spread",
+    "exit": "exact M1 open at decision+240m"
+  },
+  "causal_coverage": {
+    "required_class": "NEITHER",
+    "families": [
+      "LONG_M5_S1",
+      "LONG_M15_S2",
+      "LONG_H1_S3",
+      "LONG_H4_S4",
+      "SHORT_M10P_C056_G013",
+      "SHORT_M10P2_C0212"
+    ]
+  },
+  "review_gates": {
+    "operational_resolved": 20,
+    "interim_resolved": 60,
+    "formal_resolved": 120,
+    "minimum_actual_profit_factor_for_review": 1.1,
+    "minimum_actual_plus2bps_profit_factor_for_review": 1.05,
+    "automatic_live_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "entry_gate_enabled": false,
+    "historical_backfill": false,
+    "existing_forward_modified": false,
+    "existing_threshold_refit": false,
+    "runtime_reset": false,
+    "start_reset": false,
+    "manual_lock_or_journal_deletion": false,
+    "automatic_live_promotion": false
+  }
+}
