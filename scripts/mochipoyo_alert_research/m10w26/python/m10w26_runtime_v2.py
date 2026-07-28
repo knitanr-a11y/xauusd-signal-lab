@@ -12,11 +12,16 @@ base.RUNTIME_VERSION = RUNTIME_VERSION
 
 
 def implementation_paths() -> dict[str, Path]:
+    stage = base.MR / "m10w26"
     return {
         "m10w26_runtime_base": base.THIS,
         "m10w26_runtime_v2": Path(__file__).resolve(),
-        "m10w26_operator_base": base.MR / "m10w26" / "python" / "run_m10w26_private_snapshot.py",
-        "m10w26_operator_v2": base.MR / "m10w26" / "python" / "run_m10w26_private_snapshot_v2.py",
+        "m10w26_operator_base": stage / "python" / "run_m10w26_private_snapshot.py",
+        "m10w26_operator_v2": stage / "python" / "run_m10w26_private_snapshot_v2.py",
+        "m10w26_bat01_initialize": stage / "bat" / "01_initialize_fresh_start_once.bat",
+        "m10w26_bat02_once": stage / "bat" / "02_run_shadow_once.bat",
+        "m10w26_bat03_forever": stage / "bat" / "03_run_shadow_forever.bat",
+        "m10w26_bat04_stop": stage / "bat" / "04_stop_shadow_forever.bat",
         "m10w22_feature_core": base.MR / "m10w22" / "python" / "run_high_atr_bullish_new_causal_information_availability_audit.py",
         "m10w25_coverage_core": base.MR / "m10w25" / "python" / "run_m10w25_neither_prefix_causal_live_parity_audit.py",
         "m10w13_short_core": base.MR / "m10w13" / "python" / "run_m10w13_frozen_historical_short_activation_interval_calibration.py",
@@ -124,8 +129,13 @@ def initialize(snapshot_root: Path, point: float) -> int:
         for path in protected:
             path.unlink(missing_ok=True)
         raise base.M10W26Error("M10W26 initialization did not produce a complete runtime transaction")
-    runtime_payload = base.load_json(paths["runtime"])
-    verify_implementation_freeze(runtime_payload)
+    try:
+        runtime_payload = base.load_json(paths["runtime"])
+        verify_implementation_freeze(runtime_payload)
+    except Exception:
+        for path in protected:
+            path.unlink(missing_ok=True)
+        raise
     return 0
 
 
