@@ -11,7 +11,17 @@ echo This BAT does NOT remove locks, restart loops, reset runtimes,
 echo change prospective starts, alter state/history, or touch MT5 CSVs.
 echo.
 
-python "scripts\mochipoyo_alert_research\recovery\python\audit_stopped_fresh_loops.py"
+set "OPERATOR=scripts\mochipoyo_alert_research\recovery\python\recover_after_forced_reboot_with_m10w19.py"
+if not exist "%OPERATOR%" (
+  echo [STOP] Required existing recovery operator is missing:
+  echo %CD%\%OPERATOR%
+  echo Confirm branch feature/mochipoyo-alert-research and Pull origin again.
+  echo Do not delete locks or rerun any initializer.
+  pause
+  exit /b 2
+)
+
+python "%OPERATOR%" --diagnostic-only
 set "RC=%ERRORLEVEL%"
 
 echo.
