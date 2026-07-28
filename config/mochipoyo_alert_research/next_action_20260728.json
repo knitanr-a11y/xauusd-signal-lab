@@ -1,54 +1,81 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "status": "M10P_BLOCKED_FAIL_CLOSED_READ_ONLY_DIAGNOSTIC_NEXT",
-  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW_INCIDENT_DIAGNOSIS",
+  "status": "M10P_PRESERVED_START_RECOVERY_AND_HEALTH_AUDIT_NEXT",
+  "stage": "M10P_C056_G013_FRESH_PROSPECTIVE_SHADOW_OPERATIONAL_RECOVERY",
   "scope": "GOLD_XAUUSD_ONLY",
-  "observed_incident": {
-    "dashboard_local_time": "2026-07-29 02:36 JST",
-    "M10P_health": "BLOCKED",
-    "M10P_lock_present": false,
-    "M10P_pid": null,
-    "M10P_start_mt5_server": "2026.07.24 23:56:00",
-    "accepted_count": 1,
-    "resolved_count": 0,
-    "open_count": 1,
-    "other_eight_loops_running": true,
-    "cause_known": false
+  "diagnostic_result": {
+    "status": "PASS_OPERATIONAL_STATUS_PUBLICATION_RACE_PRESERVED_START_RECOVERY_AUTHORIZED_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10p_blocked_user_local_diagnostic_result_20260729.json",
+    "package_sha256": "365941e42fd9fdd73b0ac1d30febb85c7640b92f7308e5acb7882d75d45d5a30",
+    "root_cause": "PermissionError WinError 5 publishing operational status JSON after successful cycle 251",
+    "research_or_integrity_failure": false,
+    "immutable_start": "2026.07.24 23:56:00",
+    "runtime_copy_exact_match": true,
+    "entry_data_gap_count": 0,
+    "exit_data_gap_count": 0
   },
   "immediate_action": [
     "Keep collector, M7C, M8C and the eight healthy loops M9V/M9Y/M10B/M10E/M10P2/M10W19/M10W26/M10W34 running unchanged.",
-    "Do not run M10P BAT01, do not restart M10P, do not create/delete its lock, and do not edit its runtime/state/start/journals/snapshots.",
+    "Close only the old dashboard V2 window with Ctrl+C or its normal close path; do not close any monitor loop.",
     "Fetch/Pull the latest feature/mochipoyo-alert-research branch.",
-    "Run scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat once.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip.",
-    "Wait for diagnostic review before any preserved-start recovery or restart decision."
+    "Start the dashboard again with scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat. It now uses V3 FILE_SHARE_DELETE reads.",
+    "Run scripts/mochipoyo_alert_research/m10p_incident/bat/02_recover_m10p_preserved_start_once.bat exactly once.",
+    "Keep the M10P recovery window open. BAT01 is not used and the start remains 2026.07.24 23:56:00.",
+    "Wait until the recovery window shows at least one [M10P PASS] and the V3 dashboard shows M10P RUNNING with lock=Y.",
+    "While M10P remains running, run scripts/mochipoyo_alert_research/m10p_incident/bat/03_audit_m10p_recovery_health_read_only.bat once.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_RECOVERY_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip."
   ],
-  "diagnostic": {
-    "implementation_audit": "config/mochipoyo_alert_research/m10p_blocked_diagnostic_implementation_audit_20260729.json",
-    "operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/01_collect_m10p_blocked_diagnostic_read_only.bat",
-    "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_BLOCKED_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
-    "read_only_with_respect_to_monitors_and_evidence": true,
-    "diagnostic_output_only": true
+  "recovery": {
+    "implementation_audit": "config/mochipoyo_alert_research/m10p_preserved_start_recovery_implementation_audit_20260729.json",
+    "operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/02_recover_m10p_preserved_start_once.bat",
+    "initializer": false,
+    "preserved_start": "2026.07.24 23:56:00",
+    "runtime_or_start_reset": false,
+    "manual_lock_change": false,
+    "deterministic_post_start_rebuild": true,
+    "status_publication_retry_seconds": 15,
+    "status_publication_failure_does_not_terminate_research_loop": true
+  },
+  "post_recovery_health": {
+    "operator": "scripts/mochipoyo_alert_research/m10p_incident/bat/03_audit_m10p_recovery_health_read_only.bat",
+    "output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10P_RECOVERY_HEALTH/LATEST/99_UPLOAD_PACKAGE.zip",
+    "required": [
+      "M10P status RUNNING",
+      "M10P lock present with live PID",
+      "at least one successful recovery cycle",
+      "zero terminal recovery failures",
+      "all start fields remain 2026.07.24 23:56:00",
+      "runtime exactly matches LATEST runtime copy",
+      "state and summary counts match",
+      "zero entry/exit data gaps"
+    ]
+  },
+  "dashboard_v3": {
+    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "active_implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v3.py",
+    "windows_FILE_SHARE_DELETE": true,
+    "read_only": true,
+    "refresh_seconds": 60
   },
   "background_monitoring": {
     "M10W26_status": "Keep running unchanged from immutable start 2026.07.28 15:58:00.",
     "M10W34_status": "Keep running unchanged from immutable start 2026.07.28 18:19:00.",
-    "dashboard_operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
-    "dashboard_read_only": true
+    "review_gate_actions": "No checkpoint BAT is authorized merely by this recovery. Continue normal reviewed gate procedure."
   },
   "authorization": {
-    "M10P_read_only_diagnostic": true,
-    "M10P_restart": false,
+    "M10P_preserved_start_recovery_BAT02_once": true,
+    "M10P_recovery_health_BAT03": true,
     "M10P_BAT01": false,
     "M10P_runtime_or_start_reset": false,
+    "dashboard_v3_optional_read_only": true,
     "M10W26_keep_running": true,
     "M10W34_keep_running": true,
     "M10V": false
   },
   "do_not_run_or_change": {
     "any_loop_BAT01_or_initializer": true,
-    "M10P_restart_before_diagnostic_review": true,
     "stop_or_restart_the_other_eight_healthy_loops": true,
+    "run_M10P_recovery_BAT02_more_than_once_or_while_lock_exists": true,
     "force_close_or_taskkill_loops": true,
     "manual_runtime_state_lock_snapshot_adapter_or_journal_edit_or_deletion": true,
     "prospective_start_reset": true,
@@ -60,6 +87,7 @@
     "audit_only": true,
     "runtime_reset": false,
     "start_reset": false,
+    "existing_forward_formula_modified": false,
     "discord_send": false,
     "mt5_order": false,
     "live_ready": false,
