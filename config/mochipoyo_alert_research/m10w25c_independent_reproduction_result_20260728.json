@@ -1,0 +1,26 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W25C_CAUSAL_NEITHER_EXACT_FROZEN_FORMULA_REEVALUATION_AUDIT_ONLY",
+  "status":"PASS_CAUSAL_NEITHER_EXACT_FORMULA_REEVALUATION_MMO1_STRONG_CANDIDATE_AUDIT_ONLY",
+  "recorded_at":"2026-07-28",
+  "scope":"XAUUSD_GOLD_ONLY",
+  "source_packages":{
+    "M10W24B":{"filename":"99_UPLOAD_PACKAGE(63).zip","historical_feature_sha256":"53cd0146a52faaba35cf1e8a19268e4cfb74edcdc68561d30af826fa0e0359b4","trade_ledger_sha256":"8e5091cbe20dc9e600e62663a112f92bbb730aab066b131f9ed2aaf7abfad20a","overlap_ledger_sha256":"70fe38ddb97d89f0756905f898d81693b08e68d8406691a9118d34424c33adc6"},
+    "M10W25B":{"filename":"99_UPLOAD_PACKAGE(65).zip","package_sha256":"520922aa9c3bf9e6d7fd9901f44a44f13fbccd7fa6e79b1cb8ad57278f22ae54","causal_feature_sha256":"fcf5163814c8ddcc21e84accb520e0007236550d7792a0dd5630a424b0f2634c"}
+  },
+  "cohort":{"historical_NEITHER_rows":5917,"causal_NEITHER_rows":5913,"removed_rows":4,"newly_accepted_without_frozen_outcome":0},
+  "frozen_rules":{
+    "MVI1_LONG_M5_VOLUME_IMPULSE":"m5_tick_volume_ratio20 >= 1.0 AND m5_body_ratio >= 0.5 AND m5_close_location >= 2/3 AND m1_ret5_bps >= 1.0",
+    "MWR1_LONG_M5_PULLBACK_REJECTION":"m5_lower_wick_ratio >= 0.4 AND m5_close_location >= 0.6 AND m5_ret3_bps <= 0.0",
+    "MMO1_LONG_M1_MICRO_MOMENTUM":"m1_ret5_bps > 0.0 AND m1_up_close_count5 >= 3 AND m1_close_location >= 0.6"
+  },
+  "execution":{"direction":"LONG","horizon_hours":4,"one_position_per_family":true,"formula_change":false,"threshold_change":false,"horizon_change":false},
+  "families":{
+    "MVI1_LONG_M5_VOLUME_IMPULSE":{"classification":"INSUFFICIENT_DENSITY","candidate_count":487,"accepted_count":263,"resolved_count":239,"overlap_skip_count":224,"all_actual":{"win_rate":0.5606694560669456,"profit_factor":1.5960959306425802,"net_bps":1721.798959632532,"max_drawdown_bps":330.33646434939726},"all_actual_plus2bps":{"profit_factor":1.4003245165896938,"net_bps":1243.798959632532},"advance":false},
+    "MWR1_LONG_M5_PULLBACK_REJECTION":{"classification":"REJECT","candidate_count":431,"accepted_count":265,"resolved_count":230,"overlap_skip_count":166,"train_actual":{"count":118,"profit_factor":0.8775441350248934,"net_bps":-195.73035094778015},"all_actual":{"win_rate":0.5565217391304348,"profit_factor":1.1812525926774213,"net_bps":622.311773286339},"all_actual_plus2bps":{"profit_factor":1.0445170087430562},"advance":false},
+    "MMO1_LONG_M1_MICRO_MOMENTUM":{"classification":"STRONG_CANDIDATE","candidate_count":1359,"accepted_count":437,"resolved_count":399,"overlap_skip_count":922,"train_actual":{"count":202,"profit_factor":1.5140710841811578,"net_bps":1074.3900045945431},"validation_actual":{"count":166,"profit_factor":1.5477690866192844,"net_bps":1062.4410743715084},"test_actual":{"count":31,"win_rate":0.6774193548387096,"profit_factor":2.5573099358480706,"net_bps":569.6568183308691},"all_actual":{"count":399,"win_rate":0.5538847117794486,"profit_factor":1.6157633608895041,"net_bps":2706.487897296921,"max_drawdown_bps":413.70010028063484,"max_losing_streak":6},"all_actual_plus2bps":{"profit_factor":1.40082034826659,"net_bps":1908.4878972969207},"advance":true}
+  },
+  "decision":{"M10W25C_pass":true,"MMO1_remains_strong_candidate_on_prefix_causal_cohort":true,"M10W26_fresh_shadow_contract_design_authorized":true,"M10W26_new_start_created":false,"M10W19_modified":false},
+  "implementation":{"runner":"scripts/mochipoyo_alert_research/m10w25c/python/run_m10w25c_causal_formula_reevaluation.py","operator":"scripts/mochipoyo_alert_research/m10w25c/bat/01_run_causal_formula_reevaluation.bat"},
+  "guardrails":{"audit_only":true,"historical_backfill_into_forward":false,"existing_forward_modified":false,"new_prospective_start_created":false,"BAT01_existing_loops":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
