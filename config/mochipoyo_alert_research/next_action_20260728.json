@@ -7,13 +7,23 @@
   "M10W34_status": "PASS initial health from immutable MT5-server start 2026.07.28 18:19:00. Exactly one process and one lock; 7 successful cycles; waiting=0; terminal failures=0; all private snapshot and shared journal checks PASS. Initial resolved=0 is normal.",
   "M10W34_initial_health_result": "config/mochipoyo_alert_research/m10w34_user_local_initial_health_result_20260728.json",
   "M10W34_initial_health_package_sha256": "dfee3076f45e53e31ccbb097e88416702aff53c650348d0e9fe3531cb6c799c4",
+  "optional_dashboard": {
+    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "implementation_audit": "config/mochipoyo_alert_research/m9v_plus_read_only_dashboard_implementation_audit_20260729.json",
+    "refresh_seconds": 60,
+    "scope": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
+    "read_only": true,
+    "rule": "When the dashboard shows REACHED, send its screenshot for review before running any checkpoint BAT. The dashboard does not authorize automatic checkpoint execution or promotion."
+  },
   "immediate_action": [
     "Keep collector, M7C, M8C and all nine loops M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19/M10W26/M10W34 running unchanged.",
-    "No BAT or upload is required immediately after this initial-health PASS.",
+    "No checkpoint BAT or upload is required immediately after this initial-health PASS.",
+    "For one-screen monitoring, Fetch/Pull the latest branch and optionally run scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat. It refreshes every 60 seconds and may be closed with Ctrl+C without affecting any monitor.",
     "Never run M10W34 BAT01 again.",
-    "Watch the M10W34 BAT03 console count. When RESOLVED first reaches 20, Fetch/Pull the latest branch and run scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat while M10W34 remains running.",
-    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip at the 20-resolved operational gate.",
-    "Repeat the same read-only checkpoint at 60 resolved and 120 resolved only when each gate is reached. No automatic promotion follows any gate."
+    "When the dashboard or M10W34 BAT03 first shows M10W34 RESOLVED=20, send the dashboard screenshot before running a checkpoint.",
+    "After review authorization, run scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat while M10W34 remains running.",
+    "Upload only %LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip at the authorized 20-resolved operational gate.",
+    "Repeat the same read-only checkpoint at 60 resolved and 120 resolved only when each gate is reached and reviewed. No automatic promotion follows any gate."
   ],
   "checkpoint_operator": "scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat",
   "checkpoint_output": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W34_CHECKPOINT/LATEST/99_UPLOAD_PACKAGE.zip",
@@ -24,9 +34,10 @@
     "automatic_live_promotion": false
   },
   "authorization": {
+    "M9V_plus_dashboard_optional_read_only": true,
     "M10W34_BAT01": false,
     "M10W34_BAT03_keep_running": true,
-    "M10W34_BAT06_read_only_checkpoint_at_gate": true,
+    "M10W34_BAT06_read_only_checkpoint_at_reviewed_gate": true,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
   },
@@ -38,7 +49,8 @@
     "prospective_start_reset": true,
     "historical_backfill_before_start": true,
     "formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
-    "checkpoint_before_requested_gate_unless_diagnosing_an_incident": true,
+    "checkpoint_before_requested_and_reviewed_gate_unless_diagnosing_an_incident": true,
+    "dashboard_as_automatic_checkpoint_or_promotion_authorization": true,
     "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
   },
   "safety": {
