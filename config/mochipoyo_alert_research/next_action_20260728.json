@@ -1,15 +1,15 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"M10W25B_H4_S4_BOUNDARY_AND_CAUSAL_NEITHER_CORRECTION_NEXT",
-  "stage":"M10W25B_H4_S4_BOUNDARY_AND_CAUSAL_NEITHER_COHORT_CORRECTION_AUDIT_ONLY",
+  "status":"FRESH_LOOP_MASS_STOP_READ_ONLY_DIAGNOSTIC_NEXT",
+  "stage":"FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
-  "immediate_action":"Keep collector/M7C/M8C/M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 running unchanged. Keep M10W19 BAT03 running and never rerun its BAT01. Fetch/Pull latest feature/mochipoyo-alert-research, then run M10W25B BAT01 once. M10W25B is outcome-blind: it classifies the 21 LONG_H4_S4 historical-vs-prefix-causal mismatches by exact M1 entry/exit boundary or other cause, then exact-joins the M10W22 8648 pre-entry feature rows to M10W25 causal coverage and retains causal coverage_class=NEITHER only.",
-  "operator":"scripts/mochipoyo_alert_research/m10w25b/bat/01_run_h4_s4_boundary_and_causal_neither_cohort_correction.bat",
-  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/M10W25B/LATEST/99_UPLOAD_PACKAGE.zip",
-  "required_reference_counts":{"full_grid_rows":81329,"target_high_atr_bullish_rows":8648,"full_H4_S4_mismatch_rows":21,"target_H4_S4_mismatch_rows":7,"historical_target_neither_rows":5917,"expected_causal_target_neither_rows":5913,"expected_removed_historical_only_rows":4,"expected_added_causal_only_rows":0},
-  "pass_rule":"All 21 mismatch windows receive a boundary classification with OTHER_LOGIC_MISMATCH=0; all 8648 pre-entry rows exact-match the target comparison; causal NEITHER=5913; difference versus M10W24B is exactly four historical-only removals and zero additions; all removals are historical NEITHER to causal LONG_ONLY caused only by LONG_H4_S4 presence; no outcome source is read.",
-  "on_pass":"Do not start MMO1. Freeze M10W25C exact frozen-formula re-evaluation on the corrected 5913-row causal pre-entry cohort. M10W26 fresh start remains forbidden until that result is reviewed.",
-  "on_block":"Do not read outcomes, tune any formula, or create a fresh start. Resolve the reported boundary/logic mismatch under a separate frozen correction.",
-  "do_not_run_or_change":{"M10P_BAT01":true,"M10P2_BAT01":true,"M10W19_BAT01":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true,"MMO1_threshold_tuning":true,"MVI1_rescue":true,"MWR1_rescue":true,"existing_prospective_start_reset":true,"historical_backfill":true,"M10W24B_trade_ledger_read_in_M10W25B":true,"fresh_MMO1_start_before_M10W25C_review":true},
-  "safety":{"audit_only":true,"outcome_blind":true,"nearest_m1_fallback":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+  "immediate_action":"Fetch/Pull latest feature/mochipoyo-alert-research. Do not restart, recover, delete locks or rerun any initializer yet. Run the read-only diagnostic BAT once. It inspects M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 process command lines, locks, immutable runtime manifests, state/status files, output timestamps, M9V/M9Y log tails and current GOLD CSV frontiers without changing anything.",
+  "operator":"scripts/mochipoyo_alert_research/recovery/bat/02_audit_stopped_fresh_loops.bat",
+  "output":"%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/outputs/FRESH_LOOP_DIAGNOSTIC/LATEST/99_UPLOAD_PACKAGE.zip",
+  "upload":"Upload only 99_UPLOAD_PACKAGE.zip from FRESH_LOOP_DIAGNOSTIC/LATEST.",
+  "why":"Code audit confirms all seven loops are operationally brittle: one cycle exception exits the forever process. The exact local cause may be transient feed/read failure, stale lock after abrupt stop, or a hard integrity failure. Those cases must be distinguished before recovery or retry behavior is changed.",
+  "after_review":{"stale_lock_only":"Use the existing forced-reboot recovery BAT, which archives/removes stale locks only after proving no protected process is running, then restart BAT03 in preserved order.","no_lock_transient_exit":"Freeze a reliability correction that retries only explicitly transient read/feed conditions and continues to fail closed on immutable contract/prefix violations.","hard_integrity_failure":"Do not restart blindly; resolve the exact integrity mismatch without resetting starts or backfilling."},
+  "research_state":"M10W25B passed and froze a 5913-row causal NEITHER pre-entry cohort, but M10W25C and M10W26 are paused until forward-loop health is restored.",
+  "do_not_run_or_change":{"M9V_initializer":true,"M9Y_BAT01":true,"M10B_BAT01":true,"M10E_BAT01":true,"M10P_BAT01":true,"M10P2_BAT01":true,"M10W19_BAT01":true,"manual_lock_deletion":true,"prospective_start_reset":true,"historical_backfill":true,"M10W25C_before_health_review":true,"M10W26_fresh_start":true},
+  "safety":{"audit_only":true,"diagnostic_only":true,"lock_removal":false,"process_start_or_stop":false,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
