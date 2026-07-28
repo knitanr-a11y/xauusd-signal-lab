@@ -1,0 +1,84 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W31_LOW_ATR_SCALE_NORMALIZED_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status": "PASS_SCALE_NORMALIZED_CAUSAL_INFORMATION_AVAILABLE_AUDIT_ONLY",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "uploaded_package": {
+    "filename": "99_UPLOAD_PACKAGE(73).zip",
+    "sha256": "7483f46087c5ed8cfb673dc0c34976a57387885738e5ecaa6a568f89b6612120",
+    "size_bytes": 965332,
+    "built_at_utc": "2026-07-28T14:07:33Z"
+  },
+  "parent": {
+    "M10W27_feature_sha256": "03f0185694485eab2b5e50ab93c2f354a91cdd8b0706f7710b66c2b1173648cd",
+    "M10W31_feature_sha256": "8ad229791f1fb1a14760e715c65d03b4431bcea5f261155cd49dfb028175cc52",
+    "exact_rows": 7480,
+    "split_rows": {"TRAIN_2023_2024": 3640, "VALIDATION_2025": 3193, "TEST_2026": 647},
+    "decision_time_set_match": true
+  },
+  "causal_integrity": {
+    "missing_context_count": 0,
+    "nonpositive_h1_atr_count": 0,
+    "source_timing_violation_count": 0,
+    "future_return_computed": false,
+    "trade_outcome_read": false,
+    "pf_or_pnl_read_or_computed": false,
+    "win_loss_label_read": false,
+    "entry_formula_created_in_M10W31": false,
+    "threshold_selected_in_M10W31": false
+  },
+  "availability": {
+    "all_features_available_at_least_99p9pct": true,
+    "degenerate_feature_count": 0
+  },
+  "cross_split_stability": {
+    "validation": {"low_PSI_feature_count": 12, "moderate_PSI_feature_count": 1, "severe_PSI_feature_count": 4},
+    "test": {"low_PSI_feature_count": 13, "moderate_PSI_feature_count": 0, "severe_PSI_feature_count": 4},
+    "stable_features_eligible_for_semantic_preregistration": [
+      "m5_range3_over_h1_atr14",
+      "m1_range5_over_h1_atr14",
+      "m5_ret3_over_h1_atr14",
+      "m1_ret5_over_h1_atr14",
+      "m15_close_minus_ema20_over_h1_atr14",
+      "m5_close_location",
+      "m1_close_location",
+      "m1_up_close_count5",
+      "m5_body_ratio",
+      "m5_tick_volume_ratio20",
+      "m5_lower_wick_ratio",
+      "m5_upper_wick_ratio"
+    ],
+    "excluded_from_new_family_design_due_material_drift": [
+      "h1_atr14_usd",
+      "h1_atr14_bps",
+      "last_closed_m1_spread_usd",
+      "last_closed_m1_spread_over_h1_atr14"
+    ],
+    "test_severe_PSI": {
+      "h1_atr14_bps": 12.43386493664841,
+      "h1_atr14_usd": 12.420792284681397,
+      "last_closed_m1_spread_over_h1_atr14": 10.124549164522346,
+      "last_closed_m1_spread_usd": 3.9027654752431147
+    }
+  },
+  "decision": {
+    "M10W31_pass": true,
+    "M10W29_family_rescued": false,
+    "at_most_three_semantic_scale_normalized_families_may_be_preregistered": true,
+    "historical_evaluation_is_exploratory": true,
+    "fresh_prospective_support_required_for_any_advancement": true,
+    "M10W26_modified": false,
+    "automatic_live_promotion": false
+  },
+  "guardrails": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "existing_monitor_modified": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
