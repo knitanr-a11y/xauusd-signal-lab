@@ -1,30 +1,20 @@
 {
   "project":"MOCHIPOYO_ALERT_RESEARCH",
-  "status":"BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_GRACEFUL_UPGRADE_NEXT",
-  "stage":"FRESH_LOOP_BOUNDED_CSV_V4_PRIVATE_SNAPSHOT_RESTART_HEALTH_AUDIT_ONLY",
+  "status":"M10W25C_RESUME_FROM_FROZEN_M10W25B_CAUSAL_NEITHER_COHORT_NEXT",
+  "stage":"M10W25C_AUDIT_ONLY",
   "scope":"GOLD_XAUUSD_ONLY",
-  "health_incident_result":"config/mochipoyo_alert_research/bounded_csv_v2_restart_health_incident_result_20260728.json",
-  "uploaded_health_package_sha256":"50557ccea4eb3ba2343daaf3ac9d8375be26adcf3dd7effdd5591850df46f3d5",
-  "observed":"Six loops were healthy at the audit instant. M9Y completed three successful cycles and then stopped on WinError 5 because one process read the shared M1 journal while another process attempted os.replace and rollback on the same Windows path. Runtime hashes, starts, candidate outputs and verified shared-journal fingerprints remained intact.",
-  "correction":"All seven BAT03 launchers now use run_bounded_adapter_loop_v4.py. The shared verified journals are adapter-write targets only. Every loop reads a separately copied private snapshot materialized under the adapter update lock and verified by size and SHA256. Temporary PermissionError/WinError 5/32/33 is classified as transient rather than a start/reset event.",
+  "operational_health_result":"config/mochipoyo_alert_research/bounded_csv_v4_restart_health_user_local_result_20260728.json",
+  "operational_health_package_sha256":"fae9353ea2dd5a1096978afc95478f27c8450c1938de808c23bd2d687a4f505b",
+  "operational_health":"PASS; M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19 are all RUNNING through run_bounded_adapter_loop_v4.py with one process and one lock each, zero waiting/terminal failures, preserved runtime hashes and starts, valid shared journals, and valid per-loop private snapshot receipts/files.",
   "immediate_action":[
-    "Fetch/Pull the latest feature/mochipoyo-alert-research branch so the V4 runner, updated BAT03 launchers, updated health audit and graceful stop operator are present.",
-    "Run scripts/mochipoyo_alert_research/recovery/bat/05_stop_bounded_adapter_loops_for_v4_upgrade.bat once. It sends normal STOP files and waits for all seven loop processes and locks to disappear. It does not stop collector/M7C/M8C, kill processes, or delete locks.",
-    "After STOP PASS, Fetch/Pull once more if GitHub Desktop shows new remote changes.",
-    "Restart BAT03 in order: M9V, M9Y, M10B, M10E, M10P, M10P2, M10W19. Confirm each shows the V4 PRIVATE VERIFIED SNAPSHOT header and at least one PASS before starting the next.",
-    "Run scripts/mochipoyo_alert_research/recovery/bat/04_audit_bounded_adapter_restart_health.bat and upload its LATEST/99_UPLOAD_PACKAGE.zip."
+    "Keep all seven V4 BAT03 windows running unchanged.",
+    "Resume M10W25C exactly from the frozen M10W25B causal NEITHER cohort of 5913 pre-entry rows.",
+    "Before any M10W25C code or execution, read the existing M10W25C handoff/contract and the M10W25B formal result; do not infer or refit thresholds from prospective outcomes.",
+    "Preserve the M10W25B cohort, H4 boundary classification, causal exclusions, exact-M1 rules, MT5 server time, closed-row contract and audit-only guardrails.",
+    "Do not create or start M10W26 and do not modify the seven running forward monitors."
   ],
-  "restart_order":[
-    {"order":1,"loop":"M9V","operator":"scripts/mochipoyo_alert_research/m9v/bat/03_run_shadow_forever.bat"},
-    {"order":2,"loop":"M9Y","operator":"scripts/mochipoyo_alert_research/m9y/bat/03_run_shadow_forever.bat"},
-    {"order":3,"loop":"M10B","operator":"scripts/mochipoyo_alert_research/m10b/bat/03_run_shadow_forever.bat"},
-    {"order":4,"loop":"M10E","operator":"scripts/mochipoyo_alert_research/m10e/bat/03_run_shadow_forever.bat"},
-    {"order":5,"loop":"M10P","operator":"scripts/mochipoyo_alert_research/m10p/bat/03_run_shadow_forever.bat"},
-    {"order":6,"loop":"M10P2","operator":"scripts/mochipoyo_alert_research/m10p2/bat/03_run_shadow_forever.bat"},
-    {"order":7,"loop":"M10W19","operator":"scripts/mochipoyo_alert_research/m10w19/bat/03_run_shadow_forever.bat"}
-  ],
-  "V4_health_requirement":["Seven process command lines use run_bounded_adapter_loop_v4.py","Seven locks present","Seven runtime hashes and starts unchanged","Seven status files RUNNING with successful_cycles >= 1","Seven latest outputs PASS at immutable starts","Each loop private snapshot receipt is valid and its six files match the receipt SHA256 fingerprints","Shared six journal fingerprints remain valid"],
-  "research_state":"M10W25C and M10W26 remain paused until the V4 health package passes all seven loops.",
-  "do_not_run_or_change":{"any_BAT01_or_initializer":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_lock_adapter_snapshot_or_journal_deletion":true,"runtime_manifest_edit":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W25C_before_V4_health_PASS":true,"M10W26_before_V4_health_PASS":true},
+  "M10W25B_anchor":{"result":"config/mochipoyo_alert_research/m10w25b_user_local_result_20260728.json","status":"PASS_H4_BOUNDARY_CLASSIFIED_CAUSAL_NEITHER_COHORT_FROZEN_AUDIT_ONLY","causal_neither_preentry_rows":5913,"exact_m1_primary_exit_missing":21,"other_logic_mismatch":0},
+  "authorization":{"M10W25C":true,"M10W26":false,"M10V":false},
+  "do_not_run_or_change":{"any_BAT01_or_initializer":true,"stop_or_restart_healthy_v4_loops":true,"force_close_or_taskkill_loops":true,"forced_reboot_recovery_now":true,"manual_lock_adapter_snapshot_or_journal_deletion":true,"runtime_manifest_edit":true,"prospective_start_reset":true,"historical_backfill_before_start":true,"M10W26":true,"M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS":true},
   "safety":{"audit_only":true,"runtime_reset":false,"start_reset":false,"existing_forward_modified":false,"discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
 }
