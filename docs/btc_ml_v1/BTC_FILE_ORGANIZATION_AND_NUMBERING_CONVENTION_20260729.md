@@ -147,7 +147,7 @@ scripts/btc_ml_v1/<stage_name>/
 
 既存のBTC operational runtime、Discord/demo関連、永続state、既存BAT、既存ログは、整理目的だけでrename、移動、再生成しない。変更が必要な場合は、参照先、起動契約、永続state、再起動手順を別途精査したうえで行う。
 
-## 7. Stage 01の正式配置
+## 7. Stage 01の正式配置と入力契約
 
 Fresh-forward availability audit:
 
@@ -177,6 +177,28 @@ Output:
 
 Stage 01はavailability read-onlyであり、fresh performance evaluator、candidate engine、reproduction、collector、Discord、MT5 order、live-ready、final-signalを実行しない。
 
+### fresh-forward入力可否
+
+現在のfresh-forward可否は、cutoff `2026-07-02 02:15:00 UTC` より後の現在データだけで判定する。
+
+- BTC4: post-cutoff H4 + M5
+- BTC5: post-cutoff M5
+- BTC6: post-cutoff M15
+- BTC7R: post-cutoff M5 + M15 + H1
+- BTC9R: post-cutoff M5 + M15 + H1 + D1
+
+### 2017開始H4の扱い
+
+`BTCUSD_H4_WARMUP_PACKAGE.zip` に由来する2017開始H4は、旧BTC4/stackingを生入力から完全再現するための履歴用warmupである。
+
+- 現在MT5が通常出力するfresh CSVではない
+- Stage 01のfresh-forward入力可否には不要
+- 存在しなくてもBTC4 fresh-forward readinessをBLOCKEDにしない
+- 完全な過去再現を改めて行う場合だけ別途必要
+- `C:\BTC_REPRO` は過去再現時のローカル展開例であり、ユーザーが新規作成すべき標準フォルダではない
+
+Stage 01ではこの履歴パッケージの存在を `historical_reproduction_context` に参考情報として分離し、candidate readinessへ混入させない。
+
 `01_run_availability_audit.bat` は、成功後に同じBATから `LATEST` を自動で開く。エラーまたは出力欠落時は `pause` して画面を残す。`02_open_latest_results.bat` は、提出時または後日の確認時に `LATEST` を開き直す補助BATであり、エラー時は同様に画面を残す。
 
 ## 8. 今後の引き継ぎ必須事項
@@ -192,6 +214,7 @@ BTC ML V1の引き継ぎには次を記載する。
 - `LATEST` の正確な場所
 - `99_UPLOAD_PACKAGE.zip` の正確な場所
 - 成功表示と停止条件
+- fresh-forward入力とhistorical reproduction入力を分離したか
 - 既存runtimeを変更したか否か
 - もちぽよ/GOLD研究を変更したか否か
 - 次Stageを開始してよい条件
