@@ -1,19 +1,21 @@
 {
   "project": "BTC_ML_V1",
   "repository": "knitanr-a11y/xauusd-signal-lab",
-  "branch": "main",
-  "status": "BTC_FIVE_CANDIDATES_REPRODUCED_FRESH_FORWARD_AVAILABILITY_NOT_YET_VERIFIED",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "status": "BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED",
   "recorded_at": "2026-07-29",
-  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md",
+  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_DUAL_TRACK_FF01_M7C_PRESERVED_20260729.md",
+  "dual_track_scope": "configs/btc_ml_v1/btc_dual_track_scope_20260729.json",
   "scope_firewall": "configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json",
   "formal_minimum_baseline_commit": "dc29fbf5345e26c7890b5ab836a0dd3182e99fe9",
   "cleanup_state": {
     "main_cleanup_commit_before_new_handoff": "0c23fd107680f0f323e956b5f7bbbddc6639243e",
-    "cleanup_meaning": "Misplaced or superseded BTC Stage 01 files from the failed chat were removed from main before this new handoff was created.",
+    "cleanup_meaning": "Misplaced or superseded BTC Stage 01 files from the failed chat were removed from main before the corrected dual-track handoff was created.",
     "gold_m10w24b_was_restored_by_user": true,
     "gold_changes_authorized": false
   },
-  "frozen_research": {
+  "track_a_btc_ml_v1": {
     "symbol": "BTCUSD#",
     "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
     "candidate_rules_frozen": true,
@@ -63,6 +65,20 @@
     "reproduction_pass": true,
     "reproduction_report_sha256": "45fcde35def8d82e2ff67f11fc7131fbf8f3112eeccb761706bfb3e37f4e1989"
   },
+  "track_b_mochipoyo_m7c": {
+    "branch": "feature/mochipoyo-alert-research",
+    "symbols": ["BTCUSD", "XAUUSD"],
+    "immutable_start_utc": "2026-07-20T14:54:15Z",
+    "status": "RUNNING_UNCHANGED_BACKGROUND_TRACK",
+    "collector_m7c_m8c_keep_running": true,
+    "m7c_btc_removed_or_refit_authorized": false,
+    "automatic_use_in_btc_ml_v1": false,
+    "automatic_use_in_gold_m10": false
+  },
+  "m10_scope": {
+    "active_candidate_value_research": "XAUUSD_GOLD_ONLY",
+    "btc_expansion_authorized": false
+  },
   "current_unknown": {
     "local_fresh_csv_availability_verified": false,
     "m5_post_cutoff_verified": false,
@@ -80,6 +96,7 @@
     "performance_evaluation_authorized": false,
     "new_candidate_search_authorized": false,
     "lot_design_authorized": false,
+    "cross_track_comparison_authorized": false,
     "live_or_order_work_authorized": false
   },
   "global_contract": {
