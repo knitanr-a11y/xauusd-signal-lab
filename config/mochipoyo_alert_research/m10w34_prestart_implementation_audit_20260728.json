@@ -1,0 +1,77 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W34_SNDX1_LOW_ATR_CAUSAL_NEITHER_FRESH_PROSPECTIVE_SHADOW",
+  "status": "PASS_IMPLEMENTATION_READY_USER_LOCAL_INITIALIZE_ONCE_NOT_YET_EXECUTED",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "historical_anchor": {
+    "result": "config/mochipoyo_alert_research/m10w33_user_local_result_20260728.json",
+    "package_sha256": "fa41d4717e32e5f02cade9043928e27d2d023b13148f7d80b53cdd84edb33a13",
+    "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "classification": "ROBUST_CANDIDATE",
+    "historical_support_is_fresh_support": false
+  },
+  "implementation": {
+    "contract": "config/mochipoyo_alert_research/m10w34_sndx1_fresh_prospective_shadow_contract_20260728.json",
+    "runtime": "scripts/mochipoyo_alert_research/m10w34/python/m10w34_runtime.py",
+    "private_snapshot_operator": "scripts/mochipoyo_alert_research/m10w34/python/run_m10w34_private_snapshot.py",
+    "initial_health_audit": "scripts/mochipoyo_alert_research/m10w34/python/audit_m10w34_initial_health.py",
+    "initialize_once": "scripts/mochipoyo_alert_research/m10w34/bat/01_initialize_fresh_start_once.bat",
+    "once": "scripts/mochipoyo_alert_research/m10w34/bat/02_run_shadow_once.bat",
+    "forever": "scripts/mochipoyo_alert_research/m10w34/bat/03_run_shadow_forever.bat",
+    "safe_stop": "scripts/mochipoyo_alert_research/m10w34/bat/04_stop_shadow_forever.bat",
+    "initial_health": "scripts/mochipoyo_alert_research/m10w34/bat/05_audit_initial_health.bat"
+  },
+  "prestart_checks": {
+    "python_AST_preflight_in_BAT01_and_BAT03": true,
+    "contract_exact_formula_validation": true,
+    "all_six_prefix_causal_coverage_families_required": true,
+    "short_family_source_timing_violation_must_equal_zero": true,
+    "long_family_future_exit_reference_must_be_false": true,
+    "post_start_dry_run_rows_must_equal_zero": true,
+    "private_snapshot_stable_double_read": true,
+    "implementation_SHA_inventory_frozen_in_runtime": true,
+    "runtime_state_receipt_transactional_creation": true,
+    "incomplete_new_runtime_self_rollback": true
+  },
+  "execution_contract": {
+    "time_basis": "MT5_SERVER_TIME",
+    "newest_row_closed": true,
+    "target": "D1 bullish + H4 EMA20>EMA30 + H1 MACD line>0 + H1 ATR percentile100<0.33 + prefix-causal NEITHER",
+    "formula": [
+      "m5_range3_over_h1_atr14 >= 0.40",
+      "m1_range5_over_h1_atr14 >= 0.20",
+      "m1_ret5_over_h1_atr14 > 0.0",
+      "m1_close_location >= 0.60"
+    ],
+    "exact_M1_entry": true,
+    "exact_M1_exit_plus_minutes": 240,
+    "nearest_M1_fallback": false,
+    "one_position": true,
+    "M10W34_specific_trade_ids": true
+  },
+  "isolation": {
+    "dedicated_runtime_directory": "m10w34_runtime",
+    "dedicated_private_snapshot": "bounded_csv_source_adapter/loop_snapshots/M10W34",
+    "dedicated_lock_and_STOP": true,
+    "existing_eight_loops_modified": false,
+    "M10W26_modified": false,
+    "new_start_created": false
+  },
+  "authorization": {
+    "BAT01_exactly_once": true,
+    "BAT03_only_after_INIT_PASS": true,
+    "BAT05_only_after_first_PASS": true,
+    "automatic_live_promotion": false
+  },
+  "safety": {
+    "audit_only": true,
+    "historical_backfill": false,
+    "runtime_reset": false,
+    "start_reset": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
