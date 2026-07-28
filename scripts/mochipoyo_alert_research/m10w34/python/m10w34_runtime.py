@@ -314,7 +314,37 @@ def verify_runtime(local_root: Path, snapshot_root: Path, point: float, contract
     return current
 
 def build_ledger(candidates: list[dict[str, Any]], m1: list[c.Bar], point: float) -> tuple[list[dict[str, Any]],list[dict[str, Any]]]:
-    return common.build_ledger(candidates,m1,point)
+    by_time = {bar.time: bar for bar in m1}
+    latest = m1[-1].time
+    trades: list[dict[str, Any]] = []
+    overlaps: list[dict[str, Any]] = []
+    active_until: datetime | None = None
+    active_id: str | None = None
+    sequence = 0
+    for row in sorted(candidates, key=lambda item: parse_time(str(item["decision_time"]))):
+        decision = parse_time(str(row["decision_time"]))
+        if active_until is not None and decision < active_until:
+            overlaps.append({"active_trade_id":active_id,"skipped_candidate_id":row["candidate_id"],"skipped_decision_time":row["decision_time"],"reason":"ONE_POSITION_ACTIVE"})
+            continue
+        entry = by_time.get(decision)
+        if entry is None:
+            trades.append({**row,"trade_id":None,"status":"ENTRY_DATA_GAP","actual_return_bps":None,"fixed0p20_return_bps":None})
+            continue
+        sequence += 1
+        trade_id = f"M10W34_T{sequence:06d}"
+        exit_time = decision + HORIZON
+        active_until = exit_time
+        active_id = trade_id
+        exit_bar = by_time.get(exit_time)
+        if exit_bar is None:
+            status = "EXIT_DATA_GAP" if latest >= exit_time else "OPEN"
+            trades.append({**row,"trade_id":trade_id,"status":status,"entry_bid_open":float(entry.open),"entry_spread_points":int(entry.spread),"actual_return_bps":None,"fixed0p20_return_bps":None})
+            continue
+        actual_entry = float(entry.open) + int(entry.spread) * point
+        fixed_entry = float(entry.open) + FIXED_SPREAD_USD
+        exit_bid = float(exit_bar.open)
+        trades.append({**row,"trade_id":trade_id,"status":"RESOLVED","entry_bid_open":float(entry.open),"entry_spread_points":int(entry.spread),"exit_bid_open":exit_bid,"exit_spread_points":int(exit_bar.spread),"actual_return_bps":directional_bps(actual_entry,exit_bid),"fixed0p20_return_bps":directional_bps(fixed_entry,exit_bid)})
+    return trades, overlaps
 
 def initialize(snapshot_root: Path, point: float) -> int:
     local_root = Path(os.environ.get("LOCALAPPDATA",""))/"xauusd_signal_lab"/"mochipoyo_alert_research"
