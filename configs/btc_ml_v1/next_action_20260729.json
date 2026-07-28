@@ -1,22 +1,26 @@
 {
   "project": "BTC_ML_V1",
-  "status": "BTC_FF01_FRESH_FORWARD_AVAILABILITY_AUDIT_ONLY_NEXT",
+  "status": "BTC_FF01_FRESH_FORWARD_AVAILABILITY_AUDIT_ONLY_NEXT_WITH_M7C_BACKGROUND_PRESERVED",
   "stage": "BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY",
-  "branch": "main",
-  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_DUAL_TRACK_FF01_M7C_PRESERVED_20260729.md",
+  "dual_track_scope": "configs/btc_ml_v1/btc_dual_track_scope_20260729.json",
   "scope_firewall": "configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json",
-  "objective": "Determine, without changing any strategy or runtime, which frozen BTC4/BTC5/BTC6/BTC7R/BTC9R candidates have sufficient local closed-bar data after the exclusive UTC cutoff 2026-07-02 02:15:00.",
+  "objective": "Determine, without changing any strategy or runtime, which frozen BTC4/BTC5/BTC6/BTC7R/BTC9R candidates have sufficient local closed-bar data after the exclusive UTC cutoff 2026-07-02 02:15:00 while preserving the separate running M7C BTCUSD/XAUUSD background track unchanged.",
   "phase_0_no_write_verification": [
-    "Confirm repository knitanr-a11y/xauusd-signal-lab and branch main.",
-    "Confirm the cleanup commit 0c23fd107680f0f323e956b5f7bbbddc6639243e is an ancestor of the current main.",
-    "Read START_HERE_BTC_ML_V1_NEXT_CHAT.md, the authoritative handoff, current_state, next_action and scope firewall first.",
-    "Do not read or search any GOLD, Mochipoyo, M10W or M10W24B file.",
-    "Inspect only allowed BTC paths to determine whether a current equivalent availability audit already exists.",
+    "Confirm repository knitanr-a11y/xauusd-signal-lab, authoritative base main and working branch feature/btc-fresh-forward-research.",
+    "Confirm the cleanup commit 0c23fd107680f0f323e956b5f7bbbddc6639243e is an ancestor of the working branch.",
+    "Read START_HERE, the V2 authoritative handoff, current_state, next_action, dual_track_scope and scope firewall first.",
+    "Acknowledge that feature/mochipoyo-alert-research contains a legitimate frozen M7C dual-source BTCUSD/XAUUSD background track.",
+    "Do not checkout, merge, modify, stop, restart or reset feature/mochipoyo-alert-research, collector, M7C, M8C or any GOLD loop.",
+    "Do not read M10W24B or M10W implementation as a basis for BTC FF01.",
+    "Inspect only allowed BTC ML V1 paths to determine whether a current equivalent availability audit already exists.",
     "Inspect existing BTC support code only for canonical file resolution and broker-server-time to UTC conversion."
   ],
   "phase_1_minimal_implementation_if_needed": {
     "authorized": true,
-    "condition": "Only if no current equivalent BTC-only availability audit exists after cleanup.",
+    "condition": "Only if no current equivalent BTC ML V1 availability audit exists after cleanup.",
     "allowed_paths": [
       "scripts/btc_ml_v1/fresh_forward_availability/python/audit_btc_fresh_forward_availability.py",
       "scripts/btc_ml_v1/fresh_forward_availability/bat/00_READ_ME_FIRST.txt",
@@ -38,7 +42,8 @@
       "Reuse the latest main canonical broker-time freshness conversion; do not invent a second UTC conversion.",
       "Do not run candidate engines or calculate fresh performance.",
       "Do not start a collector, loop, dashboard, Discord send or MT5 order.",
-      "Do not modify existing BTC operational runtime or persistent state."
+      "Do not modify existing BTC operational runtime or persistent state.",
+      "Do not read M7C output as an input to FF01 and do not alter the M7C background track."
     ],
     "required_timeframe_audit": [
       "M5",
@@ -91,6 +96,7 @@
     "Do not tune candidate conditions, thresholds, TP, SL, exit order, spread, pip definition or overlap policy.",
     "Do not decide BTC5/BTC6/BTC7R/BTC9R lots.",
     "Do not add BTC10R or replace any of the frozen five candidates.",
+    "Do not design or run a cross-track M7C versus BTC ML V1 comparison.",
     "Wait for the user to upload 99_UPLOAD_PACKAGE.zip and for explicit review before Stage BTC_FF02."
   ],
   "stage_ff02_not_yet_authorized": {
@@ -98,5 +104,10 @@
     "authorized": false,
     "entry_boundary": "entry_dt > 2026-07-02 02:15:00 UTC",
     "rule": "Stage FF02 may only be designed after FF01 results identify candidate-specific READY inputs and the user explicitly authorizes continuation."
+  },
+  "cross_track_stage_not_yet_authorized": {
+    "purpose": "Any later comparison between M7C BTC observations and BTC ML V1 candidates.",
+    "authorized": false,
+    "rule": "Requires a separate preregistered contract and explicit user approval; it is not part of FF01 or FF02."
   }
 }
