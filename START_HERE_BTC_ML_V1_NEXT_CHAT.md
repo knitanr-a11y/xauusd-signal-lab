@@ -1,23 +1,29 @@
 # START HERE — BTC ML V1 next chat
 
 Repository: `knitanr-a11y/xauusd-signal-lab`  
-Required branch: `main`
+Authoritative base branch: `main`  
+Working branch: `feature/btc-fresh-forward-research`
 
 ## Read first, in this exact order
 
 1. `START_HERE_BTC_ML_V1_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_DUAL_TRACK_FF01_M7C_PRESERVED_20260729.md`
 3. `configs/btc_ml_v1/current_state_20260729.json`
 4. `configs/btc_ml_v1/next_action_20260729.json`
-5. `configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json`
+5. `configs/btc_ml_v1/btc_dual_track_scope_20260729.json`
+6. `configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json`
 
-Then read only the BTC reproduction and evaluation files listed by the authoritative handoff.
+Then read only the BTC reproduction and evaluation files listed by the authoritative V2 handoff.
 
 ## Current formal state
 
 ```text
-BTC_FIVE_CANDIDATES_REPRODUCED_FRESH_FORWARD_AVAILABILITY_NOT_YET_VERIFIED
+BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED
 ```
+
+## Two legitimate BTC-related tracks
+
+### Track A — BTC ML V1
 
 Frozen candidates:
 
@@ -33,36 +39,41 @@ Exclusive fresh-forward cutoff:
 entry_dt > 2026-07-02 02:15:00 UTC
 ```
 
-## Only next stage
+Track A uses `main` as the authoritative base, but new work is done on `feature/btc-fresh-forward-research`, not directly on `main`.
+
+### Track B — MOCHIPOYO M7C background
+
+`feature/mochipoyo-alert-research` contains a frozen dual-source M7C track for:
+
+- `BTCUSD`
+- `XAUUSD`
+
+M7C immutable start:
+
+```text
+2026-07-20T14:54:15Z
+```
+
+Keep collector, M7C and M8C running unchanged. Do not remove BTCUSD, reset the start, refit formulas, change matching rules or merge this branch into the BTC FF01 branch.
+
+The active M10 candidate/value line remains XAUUSD/GOLD-only. M7C BTC observations do not automatically enter BTC ML V1 or GOLD M10 research.
+
+## Only next stage for Track A
 
 ```text
 BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY
 ```
 
-First perform no-write verification inside the allowed BTC scope. If no equivalent current audit exists, implement only the minimal BTC-only FF01 audit defined by the handoff and next-action contract. Stop after producing the availability package.
+First perform no-write verification inside the allowed BTC ML V1 scope. If no equivalent current audit exists, implement only the minimal BTC-only FF01 audit defined by the V2 handoff and next-action contract. Stop after producing the availability package.
 
 Do not implement or run fresh performance evaluation, candidate tuning, lot design, new candidate search, collector, loop, dashboard, Discord, MT5 order, live-ready or final-signal work.
 
-## Hard GOLD firewall
+## Branch and process safety
 
-During BTC work, do not read, search or modify:
+Use a separate clone or worktree for `feature/btc-fresh-forward-research`.
 
-```text
-docs/mochipoyo_alert_research/**
-config/mochipoyo_alert_research/**
-scripts/mochipoyo_alert_research/**
-docs/gold_v3/**
-docs/gold_ml_v1/**
-config/gold_v3/**
-config/gold_ml_v1/**
-scripts/gold_v3/**
-scripts/gold_ml_v1/**
-M10W24B
-any M10W stage
-```
+Do not checkout the existing GOLD/MOCHIPOYO working folder away from `feature/mochipoyo-alert-research`. Do not stop, restart, taskkill, edit or delete its collector, M7C, M8C, M9V+ loops, BATs, runtimes, states, locks, journals, snapshots or checkpoints.
 
-Do not switch to `feature/mochipoyo-alert-research`. Do not touch any GOLD process, collector, BAT, runtime, state, lock, journal, snapshot or checkpoint.
+FF01 does not require reading M10W24B or any M10W implementation.
 
-Cleanup commit `0c23fd107680f0f323e956b5f7bbbddc6639243e` must be an ancestor of the working `main`.
-
-This file and the 20260729 handoff/current-state/next-action/firewall override older BTC handoffs when they conflict.
+This file and the V2 20260729 handoff/current-state/next-action/dual-track-scope/firewall override older BTC handoffs when they conflict.
