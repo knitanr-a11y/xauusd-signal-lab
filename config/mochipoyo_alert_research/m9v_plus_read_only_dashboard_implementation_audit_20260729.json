@@ -1,31 +1,37 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "M9V_PLUS_READ_ONLY_FORWARD_STATUS_DASHBOARD",
-  "status": "PASS_V2_NULL_SAFE_PID_AND_COUNT_FIX_OPTIONAL_READ_ONLY_TOOL",
+  "status": "PASS_V3_WINDOWS_DELETE_SHARE_SAFE_NULL_SAFE_OPTIONAL_READ_ONLY_TOOL",
   "recorded_at": "2026-07-29",
   "scope": "XAUUSD_GOLD_ONLY",
-  "purpose": "Display the health and review-count progress of all nine M9V-and-later prospective loops in one auto-refreshing console without modifying any research evidence or process.",
+  "purpose": "Display the health and review-count progress of all nine M9V-and-later prospective loops in one auto-refreshing console without modifying research evidence or blocking atomic status publication.",
   "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
   "base_implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard.py",
-  "active_v2_implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v2.py",
+  "null_safe_v2": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v2.py",
+  "active_v3_implementation": "scripts/mochipoyo_alert_research/dashboard/python/forward_status_dashboard_v3.py",
   "git": {
     "base_implementation_commit": "42c0fb8c878aca166973540ac752760437acbd1c",
     "base_implementation_blob": "112deb5ba16b754145752bcdc0824f03b5caa20e",
     "v2_fix_commit": "3fa1a50a5066041ef2903777fa87ad14f2b919bc",
     "v2_fix_blob": "b691b8cf4b0fd61bd8f928ad2bff0afb723d32f2",
-    "active_bat_commit": "0222d3847e683924b83a8a50a29ae854a73e6785",
-    "active_bat_blob": "874c483829d34afa4d872f9e4617d02a9ae1180a"
+    "v3_delete_share_commit": "ad2f21c969a9519dd741a6b1cfa4dadde83b00d6",
+    "active_bat_commit": "92c7868f1fe060c6f9427bd99af4d059b9467b06"
   },
-  "observed_v1_incident": {
-    "status": "CORRECTED_IN_V2",
-    "observed_console_error": "TypeError: '>' not supported between instances of 'NoneType' and 'int'",
-    "position": "After M10E row while resolving M10P health/PID display",
-    "root_cause": "The V1 health display used status PID or lock PID and then compared the result with zero. When both PID sources were absent or unreadable, the fallback value was None and the dashboard evaluated None > 0.",
-    "research_monitor_effect": false,
-    "runtime_start_lock_journal_output_effect": false,
-    "fix": "Normalize absent/unreadable status and lock PIDs to zero before comparison; display pid=- when unknown. Normalize gate counts through integer(..., default=0).",
-    "rerun_initializer_required": false,
-    "monitor_restart_required": false
+  "incidents_and_fixes": {
+    "v1_null_pid": {
+      "status": "CORRECTED_IN_V2",
+      "error": "TypeError comparing None PID with zero",
+      "research_monitor_effect": false,
+      "fix": "Normalize absent PIDs and counts to zero/unknown markers."
+    },
+    "windows_status_publication_race": {
+      "status": "CORRECTED_IN_V3_AND_M10P_RECOVERY_OPERATOR",
+      "observed_loop": "M10P",
+      "error": "PermissionError WinError 5 replacing latest_m10p_shadow_loop_status.json after a successful cycle",
+      "research_logic_or_integrity_effect": false,
+      "v3_fix": "Open status/summary/lock JSON with CreateFileW FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE so dashboard reads cannot deny os.replace publication.",
+      "writer_fix": "M10P preserved-start recovery retries transient status publication and does not terminate the research loop if telemetry publication remains briefly unavailable."
+    }
   },
   "displayed_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
   "read_sources": [
@@ -35,7 +41,7 @@
   ],
   "display": [
     "loop health",
-    "lock and PID or an explicit unknown marker",
+    "lock and PID or explicit unknown marker",
     "immutable prospective start",
     "loop-specific candidate/accepted/resolved progress",
     "loop-specific review thresholds",
@@ -43,7 +49,8 @@
   ],
   "refresh_seconds": 60,
   "validation": {
-    "v2_python_ast_parse_by_BAT": "REQUIRED_BEFORE_EXECUTION",
+    "v3_python_ast_parse_by_BAT": "REQUIRED_BEFORE_EXECUTION",
+    "windows_FILE_SHARE_DELETE": true,
     "null_status_pid": "NORMALIZED_TO_ZERO",
     "null_or_unreadable_lock_pid": "NORMALIZED_TO_ZERO",
     "null_review_count": "NORMALIZED_TO_ZERO",
@@ -66,7 +73,7 @@
   "safety": {
     "audit_only": true,
     "optional_convenience_tool": true,
-    "all_nine_monitors_remain_unchanged": true,
+    "all_monitor_research_logic_unchanged": true,
     "any_initializer_remains_forbidden": true
   }
 }
