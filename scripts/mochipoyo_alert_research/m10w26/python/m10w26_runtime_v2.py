@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -41,15 +40,12 @@ def initialize(snapshot_root: Path, point: float) -> int:
         if row.get("future_exit_reference") is not False or row.get("completed_pair_required") is not False:
             raise base.M10W26Error(f"unsafe causal long diagnostic: {family}")
 
-    result = base.initialize(snapshot_root, point)
-    if result != 0:
-        return result
     audit_path = paths["directory"] / "m10w26_prestart_causal_engine_audit.json"
     payload: dict[str, Any] = {
         "project": "MOCHIPOYO_ALERT_RESEARCH",
         "stage": base.STAGE,
-        "status": "PASS_PRESTART_CAUSAL_ENGINE_AUDIT",
-        "prospective_start_server_time": base.fmt_time(start),
+        "status": "PASS_PRESTART_CAUSAL_ENGINE_AUDIT_START_NOT_YET_FROZEN",
+        "prospective_start_candidate_server_time": base.fmt_time(start),
         "runtime_contract_version": RUNTIME_VERSION,
         "private_snapshot": snapshot,
         "long_family_diagnostics": long_diagnostics,
@@ -65,7 +61,7 @@ def initialize(snapshot_root: Path, point: float) -> int:
     }
     base.atomic_json(audit_path, payload)
     print("[M10W26 PRESTART ENGINE PASS] six causal coverage families verified before start freeze")
-    return 0
+    return base.initialize(snapshot_root, point)
 
 
 def once(snapshot_root: Path, point: float) -> int:
