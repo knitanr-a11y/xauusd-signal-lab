@@ -32,13 +32,12 @@ KNOWN_TERMINAL = Path(
     r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files"
 )
 KNOWN_HISTORY = Path(r"C:\BTC_REPRO\history")
-KNOWN_WARMUP = Path(r"C:\BTC_REPRO\h4_warmup\btcusdsharp_h4.csv")
 
 
 def load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"cannot load existing main module: {path}")
+        raise RuntimeError(f"cannot load existing BTC module: {path}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
     spec.loader.exec_module(module)
@@ -142,14 +141,18 @@ def exact_file(directory: Path, filename: str) -> list[Path]:
     return sorted(p for p in directory.iterdir() if p.is_file() and p.name.lower() == filename.lower())
 
 
-def discover(resolver: Any, args: argparse.Namespace) -> tuple[dict[str, list[Path]], list[dict[str, Any]]]:
+def discover(
+    resolver: Any,
+    args: argparse.Namespace,
+) -> tuple[dict[str, list[Path]], list[dict[str, Any]]]:
     found = {tf: [] for tf in TFS}
     locations: list[dict[str, Any]] = []
     seen: set[str] = set()
+
     for label, directory in (
         ("REPOSITORY_FILES", args.repo_files_dir),
         ("KNOWN_MT5_TERMINAL_FILES", args.terminal_files_dir),
-        ("KNOWN_REPRO_HISTORY", args.repro_history_dir),
+        ("OPTIONAL_REPRO_HISTORY", args.repro_history_dir),
     ):
         item = {
             "label": label,
@@ -178,22 +181,27 @@ def discover(resolver: Any, args: argparse.Namespace) -> tuple[dict[str, list[Pa
             elif matches and key(matches[0]) not in seen:
                 seen.add(key(matches[0]))
                 found[tf].append(matches[0])
+
+    historical_path: Path | None = args.historical_h4_warmup_csv
     locations.append(
         {
-            "label": "KNOWN_BTC4_H4_WARMUP",
-            "path": str(args.h4_warmup_csv.expanduser().resolve()),
-            "exists": args.h4_warmup_csv.is_file(),
+            "label": "OPTIONAL_EXACT_REPRODUCTION_H4_WARMUP",
+            "path": "" if historical_path is None else str(historical_path.expanduser().resolve()),
+            "exists": bool(historical_path is not None and historical_path.is_file()),
             "resolution_errors": [],
+            "required_for_fresh_forward_availability": False,
+            "required_for_exact_historical_reproduction": True,
         }
     )
-    if args.h4_warmup_csv.is_file() and key(args.h4_warmup_csv) not in seen:
-        found["H4"].append(args.h4_warmup_csv)
+    if historical_path is not None and historical_path.is_file() and key(historical_path) not in seen:
+        found["H4"].append(historical_path)
+
     return found, locations
 
 
 def infer_clock(freshness: Any, records: list[dict[str, Any]]) -> dict[str, Any]:
     refs = []
-    # Exact current-main reference set: BTC4/BTC5 use M5 synthetic entry; BTC6 uses M15.
+    # Existing BTC reference logic: BTC4/BTC5 use M5 synthetic entry; BTC6 uses M15.
     for row in records:
         if row["timeframe"] not in {"M5", "M15"} or row["read_error"]:
             continue
@@ -230,11 +238,10 @@ def choose_latest(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     return max(valid, key=lambda r: pd.Timestamp(r["latest_closed_time_utc"]), default=None)
 
 
-def readiness(selected: dict[str, dict[str, Any] | None], warmup_ok: bool) -> dict[str, Any]:
+def fresh_readiness(selected: dict[str, dict[str, Any] | None]) -> dict[str, Any]:
     fresh = {tf: bool(selected[tf] and int(selected[tf]["rows_after_cutoff_utc"] or 0) > 0) for tf in TFS}
     checks = {
         "BTC4_RISK_CAP_400": {
-            "H4_WARMUP_2017": warmup_ok,
             "H4_AFTER_CUTOFF": fresh["H4"],
             "M5_AFTER_CUTOFF": fresh["M5"],
         },
@@ -263,6 +270,45 @@ def readiness(selected: dict[str, dict[str, Any] | None], warmup_ok: bool) -> di
     return result
 
 
+def historical_reproduction_context(h4_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    valid = [
+        row
+        for row in h4_rows
+        if not row["read_error"] and row["first_time_broker_server"]
+    ]
+    exact_candidates = [
+        row
+        for row in valid
+        if pd.Timestamp(row["first_time_broker_server"]) <= pd.Timestamp("2017-01-02 04:00:00")
+    ]
+    selected = min(
+        exact_candidates,
+        key=lambda row: pd.Timestamp(row["first_time_broker_server"]),
+        default=None,
+    )
+    earliest = min(
+        valid,
+        key=lambda row: pd.Timestamp(row["first_time_broker_server"]),
+        default=None,
+    )
+    return {
+        "purpose": "Exact historical BTC4 stacking reproduction only",
+        "source_package_name": "BTCUSD_H4_WARMUP_PACKAGE.zip",
+        "reference_expected_first_time_broker_server": "2017-01-02 04:00:00",
+        "required_for_fresh_forward_availability": False,
+        "required_for_exact_historical_reproduction": True,
+        "status": "AVAILABLE" if selected is not None else "NOT_PRESENT_INFORMATIONAL",
+        "selected_path": "" if selected is None else selected["path"],
+        "selected_first_time_broker_server": "" if selected is None else selected["first_time_broker_server"],
+        "earliest_h4_path_seen": "" if earliest is None else earliest["path"],
+        "earliest_h4_first_time_broker_server_seen": "" if earliest is None else earliest["first_time_broker_server"],
+        "interpretation": (
+            "Missing this package does not block the fresh-forward input audit. "
+            "It only means an exact from-history reproduction cannot be rerun from the files inspected here."
+        ),
+    }
+
+
 def report_text(summary: dict[str, Any]) -> str:
     lines = [
         "BTC fresh forward availability read-only audit",
@@ -289,19 +335,25 @@ def report_text(summary: dict[str, Any]) -> str:
                 f"  latest_server={row['latest_closed_time_broker_server']} latest_utc={row['latest_closed_time_utc']}",
                 f"  after_cutoff={row['rows_after_cutoff_utc']} order_violations={row['ascending_order_violations']} duplicates={row['duplicate_timestamp_count']} read_error={row['read_error'] or 'NONE'}",
             ]
+
+    history = summary["historical_reproduction_context"]["btc4_h4_2017_warmup"]
     lines += [
         "",
-        "H4",
-        "--",
-        f"long_warmup_2017: {'PASS' if summary['h4_checks']['long_warmup']['meets_2017_start'] else 'BLOCKED'}",
-        f"fresh_tail_after_cutoff: {'PASS' if summary['h4_checks']['fresh_tail']['available_after_cutoff'] else 'BLOCKED'}",
+        "Historical exact-reproduction context (informational only)",
+        "---------------------------------------------------------",
+        f"BTC4 2017 H4 warmup: {history['status']}",
+        "This is not required for current fresh-forward availability.",
+        "It is only required to rerun the old exact historical reproduction from raw inputs.",
         "",
-        "Candidate readiness",
-        "-------------------",
+        "Candidate fresh-forward input readiness",
+        "---------------------------------------",
     ]
     for candidate, value in summary["candidate_readiness"].items():
         lines.append(f"{candidate}: {value['status']} missing={','.join(value['missing_requirements']) or 'NONE'}")
-    lines += ["", "STOP: availability audit complete; fresh performance evaluator was not created or run."]
+    lines += [
+        "",
+        "STOP: availability audit complete; fresh performance evaluator was not created or run.",
+    ]
     return "\n".join(lines) + "\n"
 
 
@@ -319,6 +371,8 @@ def read_me_text(summary: dict[str, Any]) -> str:
             "99_UPLOAD_PACKAGE.zip         upload this single file to ChatGPT",
             "",
             "This stage is availability-only and read-only.",
+            "The old 2017 H4 warmup package is reported separately as historical reproduction context.",
+            "Its absence does not block current fresh-forward input readiness.",
             "No candidate engine, performance evaluator, collector, Discord, MT5 order, live-ready or final-signal action was run.",
             "",
             "After uploading 99_UPLOAD_PACKAGE.zip, stop. Do not run a fresh evaluator unless separately instructed.",
@@ -340,7 +394,7 @@ def replace_latest(archive_dir: Path, latest_dir: Path, filenames: Sequence[str]
 
 def write_outputs(summary: dict[str, Any], output_root: Path) -> dict[str, str]:
     root = output_root.expanduser().resolve()
-    run_id = datetime.now(UTC).strftime("%Y%m%d_%H%M%S_UTC")
+    run_id = datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f_UTC")
     archive_dir = root / "archive" / run_id
     latest_dir = root / "LATEST"
     archive_dir.mkdir(parents=True, exist_ok=False)
@@ -374,7 +428,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--repo-files-dir", type=Path, default=ROOT / "Files")
     parser.add_argument("--terminal-files-dir", type=Path, default=KNOWN_TERMINAL)
     parser.add_argument("--repro-history-dir", type=Path, default=KNOWN_HISTORY)
-    parser.add_argument("--h4-warmup-csv", type=Path, default=KNOWN_WARMUP)
+    parser.add_argument(
+        "--historical-h4-warmup-csv",
+        type=Path,
+        default=None,
+        help=(
+            "Optional exact-reproduction-only BTC4 H4 history. "
+            "Not required for fresh-forward availability."
+        ),
+    )
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     return parser.parse_args(argv)
 
@@ -385,7 +447,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     resolver = load_module("_btc_existing_resolver", RESOLVER_PY)
     paths, locations = discover(resolver, args)
 
-    records, parsed = [], {}
+    records: list[dict[str, Any]] = []
+    parsed: dict[str, pd.Series | None] = {}
     for tf, candidates in paths.items():
         for path in candidates:
             row, times = read_times(path)
@@ -407,39 +470,36 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     grouped = {tf: [r for r in records if r["timeframe"] == tf] for tf in TFS}
     selected = {tf: choose_latest(grouped[tf]) for tf in TFS}
-    warmups = [r for r in grouped["H4"] if not r["read_error"] and r["first_time_broker_server"]]
-    warmup = min(warmups, key=lambda r: pd.Timestamp(r["first_time_broker_server"]), default=None)
-    warmup_ok = bool(warmup and pd.Timestamp(warmup["first_time_broker_server"]).year <= 2017)
-    h4_tail = selected["H4"]
+    history_context = historical_reproduction_context(grouped["H4"])
 
     summary = {
-        "schema_version": "btc_fresh_forward_availability_v2",
+        "schema_version": "btc_fresh_forward_availability_v3",
         "stage": "BTC_ML_V1_01_FRESH_FORWARD_AVAILABILITY_READ_ONLY_AUDIT",
         "generated_at_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
         "repository_commit": current_commit(),
         "cutoff_utc": text_time(CUTOFF),
         "known_locations": locations,
         "broker_clock": clock,
-        "timeframes": {tf: {"inspected_files": grouped[tf], "selected_fresh_tail": selected[tf]} for tf in TFS},
-        "h4_checks": {
-            "long_warmup": {
-                "meets_2017_start": warmup_ok,
-                "path": "" if warmup is None else warmup["path"],
-                "first_time_broker_server": "" if warmup is None else warmup["first_time_broker_server"],
-                "reference_expected_first_time": "2017-01-02 04:00:00",
-            },
-            "fresh_tail": {
-                "available_after_cutoff": bool(h4_tail and int(h4_tail["rows_after_cutoff_utc"] or 0) > 0),
-                "path": "" if h4_tail is None else h4_tail["path"],
-                "rows_after_cutoff_utc": None if h4_tail is None else h4_tail["rows_after_cutoff_utc"],
-            },
+        "timeframes": {
+            tf: {
+                "inspected_files": grouped[tf],
+                "selected_fresh_tail": selected[tf],
+            }
+            for tf in TFS
         },
-        "candidate_readiness": readiness(selected, warmup_ok),
+        "historical_reproduction_context": {
+            "btc4_h4_2017_warmup": history_context,
+        },
+        "candidate_readiness": fresh_readiness(selected),
         "definitions": {
+            "candidate_readiness": "fresh-forward input availability only",
             "rows_after_cutoff_utc": "strictly greater than cutoff",
             "ascending_order_violations": "adjacent decreases in original CSV order",
             "duplicate_timestamp_count": "duplicates beyond first occurrence",
             "latest_csv_row": "closed by contract",
+            "historical_2017_h4_warmup": (
+                "separate exact historical reproduction input; not a current fresh-forward readiness gate"
+            ),
         },
         "output_contract": {
             "layout": "LOCALAPPDATA/xauusd_signal_lab/btc_ml_v1/outputs/01_fresh_forward_availability/{LATEST,archive}",
@@ -478,6 +538,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "audit_complete": True,
                 **written,
                 "candidate_readiness": summary["candidate_readiness"],
+                "historical_reproduction_context": summary["historical_reproduction_context"],
             },
             ensure_ascii=False,
             indent=2,
