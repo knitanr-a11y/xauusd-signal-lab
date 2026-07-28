@@ -2,10 +2,10 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W33_ONE_ROBUST_SNDX1_M10W34_IMPLEMENTED_INITIALIZE_ONCE_NEXT_AUDIT_ONLY",
+  "status": "M10W34_INITIALIZED_FIRST_CYCLE_PASS_INITIAL_HEALTH_PACKAGE_PENDING_AUDIT_ONLY",
   "scope": "XAUUSD_GOLD_ONLY",
   "observed_monitor_state": {
-    "running_private_snapshot_loops": [
+    "running_private_snapshot_loops_expected": [
       "M9V",
       "M9Y",
       "M10B",
@@ -13,8 +13,10 @@
       "M10P",
       "M10P2",
       "M10W19",
-      "M10W26"
+      "M10W26",
+      "M10W34"
     ],
+    "M10W34_process_and_lock_health_verification_pending_correct_package": true,
     "keep_all_running_unchanged": true
   },
   "immutable_starts": {
@@ -27,7 +29,7 @@
     "M10P2_mt5_server": "2026.07.27 01:39:00",
     "M10W19_mt5_server": "2026.07.28 02:31:00",
     "M10W26_mt5_server": "2026.07.28 15:58:00",
-    "M10W34_mt5_server": null
+    "M10W34_mt5_server": "2026.07.28 18:19:00"
   },
   "M10W26": {
     "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
@@ -41,11 +43,7 @@
   },
   "M10W29": {
     "status": "NO_ADVANCE",
-    "families_permanently_closed": [
-      "LMVI1",
-      "LMWR1",
-      "LMMO1"
-    ]
+    "families_permanently_closed": ["LMVI1", "LMWR1", "LMMO1"]
   },
   "M10W33": {
     "status": "PASS_ONE_ROBUST_SNDX1_CANDIDATE_FRESH_SHADOW_AUTHORIZED_AUDIT_ONLY",
@@ -57,23 +55,32 @@
     "post_result_tuning_forbidden": true
   },
   "M10W34": {
-    "status": "DESIGN_FROZEN_IMPLEMENTED_USER_LOCAL_INITIALIZE_ONCE_NOT_YET_EXECUTED",
+    "status": "INITIALIZED_FIRST_CYCLE_PASS_HEALTH_PACKAGE_PENDING",
     "contract": "config/mochipoyo_alert_research/m10w34_sndx1_fresh_prospective_shadow_contract_20260728.json",
     "implementation_audit": "config/mochipoyo_alert_research/m10w34_prestart_implementation_audit_20260728.json",
+    "initial_cycle_evidence": "config/mochipoyo_alert_research/m10w34_initial_cycle_evidence_health_package_pending_20260728.json",
     "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
-    "new_start_created": false,
-    "BAT01_initialize_exactly_once_authorized": true,
-    "BAT03_after_INIT_PASS_authorized": true,
-    "BAT05_after_first_PASS_authorized": true
+    "start": "2026.07.28 18:19:00",
+    "runtime_contract_version": "M10W34_RUNTIME_V1_PRESTART_CAUSAL_ENGINE_AND_IMPLEMENTATION_FROZEN",
+    "first_cycle_status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
+    "first_cycle_candidate_count": 0,
+    "first_cycle_resolved_count": 0,
+    "initial_zero_interpretation": "NORMAL_INITIAL_ZERO",
+    "BAT01_permanently_forbidden": true,
+    "BAT03_keep_running": true,
+    "correct_initial_health_package_received": false,
+    "automatic_live_promotion": false
   },
   "research_authorization": {
     "M10W26_keep_running": true,
-    "M10W34_initialize_once": true,
+    "M10W34_keep_running": true,
+    "M10W34_read_only_initial_health_audit": true,
+    "M10W34_BAT01": false,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
   },
   "forbidden": {
-    "existing_loop_BAT01_or_initializer": [
+    "any_existing_loop_BAT01_or_initializer": [
       "M9V",
       "M9Y",
       "M10B",
@@ -81,10 +88,9 @@
       "M10P",
       "M10P2",
       "M10W19",
-      "M10W26"
+      "M10W26",
+      "M10W34"
     ],
-    "M10W34_BAT01_more_than_once": true,
-    "M10W34_BAT03_before_INIT_PASS": true,
     "stop_or_restart_healthy_loops_without_incident": true,
     "force_close_or_taskkill_loops": true,
     "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
