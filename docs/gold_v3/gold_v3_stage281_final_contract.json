@@ -1,0 +1,72 @@
+{
+  "status": "GOLD_V3_281_M15_MEDIUM_FREQUENCY_NEAR_MISS_NO_ACTIVE_PROMOTION_AUDIT_ONLY",
+  "preserved_stage280": {
+    "name": "REV_LONG_Q95_BRK6_E175_SHADOW_RESEARCH",
+    "state": "UNCHANGED_SHADOW_RESEARCH_ONLY"
+  },
+  "stage281_search": {
+    "decision_grid": "every closed M15 decision time",
+    "decision_count": 81321,
+    "models": ["FAST2H", "MED4H"],
+    "subtypes": ["CONT", "REV"],
+    "directions": ["LONG", "SHORT"],
+    "score_quantiles": [0.8, 0.85, 0.9, 0.95],
+    "m5_triggers": ["BRK3", "BRK6", "EMA8", "EMA20"],
+    "exit_contracts": ["E125_100_4H", "E175_100_6H", "E225_125_8H"],
+    "candidate_cells": 360,
+    "candidate_only_pass": 37,
+    "formal_active_pass": 0
+  },
+  "medium_frequency_near_miss": {
+    "name": "M15_CONT_LONG_Q85_EMA20_E225_AFTER_BASE_LOSS_72H_SHADOW_NEAR_MISS",
+    "family": "MED4H",
+    "subtype": "CONT",
+    "direction": "LONG",
+    "score_gate": "previous-six-month calibrated q85",
+    "trigger": "M5 EMA20 reclaim; next M5 open",
+    "cooldown_minutes": 120,
+    "execution": {
+      "tp_atr": 2.25,
+      "sl_atr": 1.25,
+      "max_holding_minutes": 480,
+      "m1_first_touch": true,
+      "same_m1": "SL",
+      "rollover_overlay": true,
+      "base_priority": true
+    },
+    "causal_synergy_gate": {
+      "last_resolved_base_trade_pnl": "< 0",
+      "hours_since_last_resolved_base_exit": "<= 72",
+      "resolved_only": true
+    },
+    "all_period": {
+      "n": 83,
+      "win": 0.5662650602409639,
+      "pf_cost060": 1.737683612773256,
+      "sum_cost060": 246.0652550327445,
+      "dd_cost060": 58.86841775943793,
+      "pf_cost100": 1.6117437204617984,
+      "sum_cost100": 212.86525503274447
+    },
+    "activation": "SHADOW_NEAR_MISS_ONLY",
+    "formal_failure_reasons": [
+      "2025 integrated DD 58.46 exceeds the fixed allowance 56.08 by about 2.38 USD",
+      "2026 integrated DD rises to 90.10 USD",
+      "2026 candidate profit is positive but concentrated in a few winners"
+    ]
+  },
+  "rev_medium_regime_failure": {
+    "name": "FAST2H_REV_LONG_Q90_EMA20_E225_IDLE12H_DD20_DIAGNOSTIC",
+    "state": "DIAGNOSTIC_ONLY_NOT_RETAINED_AS_ROBUST_CANDIDATE",
+    "reason": "very strong in 2024/2025 but candidate PF 0.710 and negative sum in 2026"
+  },
+  "selected_active_addition": "NONE",
+  "flags": {
+    "audit_only": true,
+    "live_ready": false,
+    "final_signal": false,
+    "mt5_order": false,
+    "discord": false,
+    "partial_close": false
+  }
+}
