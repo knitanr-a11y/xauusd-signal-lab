@@ -1,0 +1,35 @@
+{
+  "project":"MOCHIPOYO_ALERT_RESEARCH",
+  "stage":"M10W22_HIGH_ATR_BULLISH_NEW_CAUSAL_INFORMATION_AVAILABILITY_AUDIT_ONLY",
+  "status":"PASS_OUTCOME_BLIND_CAUSAL_INFORMATION_AVAILABLE_REAL_VOLUME_UNUSABLE",
+  "uploaded_package":{"filename":"99_UPLOAD_PACKAGE(60).zip","sha256":"3bc8fa6bd442a899fc2ee5281b672d24c0d8e2e9e69651ea228c3273f5c156ae","size_bytes":910463,"built_at_utc":"2026-07-28T00:45:49Z"},
+  "scope":"XAUUSD_GOLD_ONLY",
+  "target_regime_decision_count":8648,
+  "year_counts":{"2023":1356,"2024":2688,"2025":3744,"2026":860},
+  "causal_features":{
+    "m5_tick_volume_ratio20":{"available_fraction":1.0,"unique_count":8633,"p25":0.7167083757214585,"p50":0.8931805142594393,"p75":1.1039290009282121},
+    "m5_body_ratio":{"available_fraction":1.0,"unique_count":8231,"p25":0.24999999999998984,"p50":0.4663299239179456,"p75":0.6818181818176321},
+    "m5_close_location":{"available_fraction":1.0,"unique_count":7995,"p25":0.24358148294987764,"p50":0.5313592657342359,"p75":0.797738655180351},
+    "m5_lower_wick_ratio":{"available_fraction":1.0,"unique_count":7706,"p25":0.09210526315774417,"p50":0.22656250000002892,"p75":0.41558441558441656},
+    "m5_upper_wick_ratio":{"available_fraction":1.0,"unique_count":7701,"p25":0.08541181517349357,"p50":0.21392861584383502,"p75":0.3967109445578007},
+    "m5_ret3_bps":{"available_fraction":1.0,"unique_count":8629,"p25":-4.764328798811945,"p50":0.5062764452890001,"p75":5.907381095272557},
+    "m5_range3_bps":{"available_fraction":1.0,"unique_count":8647,"p25":8.61763836018793,"p50":13.156608524874528,"p75":20.516197899363355},
+    "m1_ret5_bps":{"available_fraction":1.0,"unique_count":8613,"p25":-2.737259370493572,"p50":0.22245140623766702,"p75":3.184557627541329},
+    "m1_up_close_count5":{"available_fraction":1.0,"unique_count":6,"p25":2.0,"p50":3.0,"p75":3.0},
+    "m1_close_location":{"available_fraction":0.9998843663274746,"unique_count":6410,"p25":0.21153846153848957,"p50":0.5054945054943737,"p75":0.8},
+    "m1_range5_bps":{"available_fraction":1.0,"unique_count":8647,"p25":4.597222528474721,"p50":7.035855743409311,"p75":10.891159297611821},
+    "last_closed_m1_spread_bps":{"available_fraction":1.0,"unique_count":8540,"p25":0.47603215317449765,"p50":0.606981808253271,"p75":0.7836699677445442}
+  },
+  "real_volume":{"M1_nonzero_fraction":0.0,"M5_nonzero_fraction":0.0,"usable":false},
+  "degenerate_features":[],
+  "interpretation":{
+    "trade_outcomes_read":false,
+    "future_return_computed":false,
+    "pf_or_pnl_computed":false,
+    "feature_profit_ranking":false,
+    "causal_information_available":true,
+    "real_volume_unusable":true,
+    "next":"Pre-register at most three simple microstructure entry families using only available causal information, then evaluate without tuning."
+  },
+  "guardrails":{"audit_only":true,"historical_backfill_into_existing_forward":false,"existing_monitor_modification":false,"existing_threshold_refit":false,"M10W19_BAT01":"FORBIDDEN","M10P_BAT01":"FORBIDDEN","M10P2_BAT01":"FORBIDDEN","M10V_before_both_20":"FORBIDDEN","discord_send":false,"mt5_order":false,"live_ready":false,"final_signal":false,"automatic_live_promotion":false}
+}
