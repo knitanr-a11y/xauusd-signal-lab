@@ -1,0 +1,6 @@
+timeframe,old_rows,new_rows,overlap_rows,all_equal,max_abs_diff_open,max_abs_diff_high,max_abs_diff_low,max_abs_diff_close,max_abs_diff_tick_volume,max_abs_diff_spread,max_abs_diff_real_volume
+M5,245327,245471,245327,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+M15,81781,81829,81781,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+H1,20459,20471,20459,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+H4,5352,5355,5352,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+D1,894,894,894,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0
