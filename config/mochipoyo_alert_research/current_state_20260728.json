@@ -38,6 +38,7 @@
     "status": "PASS_ONE_ROBUST_SNDX1_CANDIDATE_FRESH_SHADOW_AUTHORIZED_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10w33_user_local_result_20260728.json",
     "advancing_family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
+    "classification": "ROBUST_CANDIDATE",
     "historical_support_is_fresh_support": false,
     "post_result_tuning_forbidden": true
   },
@@ -59,10 +60,21 @@
     "BAT03_keep_running": true,
     "automatic_live_promotion": false
   },
+  "read_only_dashboard": {
+    "status": "PASS_IMPLEMENTED_OPTIONAL_READ_ONLY_OPERATOR_TOOL",
+    "implementation_audit": "config/mochipoyo_alert_research/m9v_plus_read_only_dashboard_implementation_audit_20260729.json",
+    "operator": "scripts/mochipoyo_alert_research/dashboard/bat/01_watch_all_forward_status.bat",
+    "displayed_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
+    "refresh_seconds": 60,
+    "read_only": true,
+    "may_be_closed_without_affecting_monitors": true,
+    "reached_label_requires_review_before_checkpoint": true
+  },
   "research_authorization": {
     "M10W26_keep_running": true,
     "M10W34_keep_running": true,
     "M10W34_read_only_checkpoint_at_review_gates": true,
+    "M9V_plus_read_only_dashboard_optional": true,
     "M10W34_BAT01": false,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
@@ -74,6 +86,7 @@
     "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
     "prospective_start_reset": true,
     "historical_backfill_before_start": true,
+    "dashboard_reached_label_as_automatic_checkpoint_or_promotion_authorization": true,
     "M10W29_family_rescue": true,
     "M10W33_or_M10W34_formula_threshold_session_ATR_horizon_exit_tuning": true,
     "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
