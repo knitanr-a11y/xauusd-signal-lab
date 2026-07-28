@@ -1,0 +1,47 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "M10W33_PREREGISTERED_LOW_ATR_SCALE_NORMALIZED_ENTRY_EVALUATION_AUDIT_ONLY",
+  "status": "IMPLEMENTED_READY_FOR_USER_LOCAL_EXECUTION",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "contract": "config/mochipoyo_alert_research/m10w32_scale_normalized_entry_preregistration_20260728.json",
+  "runner": "scripts/mochipoyo_alert_research/m10w33/python/run_scale_normalized_entry_eval.py",
+  "operator": "scripts/mochipoyo_alert_research/m10w33/bat/01_run_scale_normalized_entry_eval.bat",
+  "input_guards": {
+    "M10W31_feature_sha256": "8ad229791f1fb1a14760e715c65d03b4431bcea5f261155cd49dfb028175cc52",
+    "expected_rows": 7480,
+    "duplicate_decision_time_forbidden": true,
+    "outcome_or_trade_columns_forbidden_in_feature_source": true,
+    "frozen_M1_sha_verified": true,
+    "nearest_M1_fallback": false
+  },
+  "execution": {
+    "direction": "LONG",
+    "entry": "exact M1 decision timestamp ask",
+    "exit": "exact M1 decision timestamp plus 240 minutes bid",
+    "one_position_per_family": true,
+    "actual_spread": true,
+    "fixed0p20_sensitivity": true,
+    "plus1bps_and_plus2bps_sensitivity": true,
+    "train": "2023-2024",
+    "validation": "2025",
+    "test": "2026"
+  },
+  "frozen_families": [
+    "SNRI1_LONG_M5_NORMALIZED_RANGE_IMPULSE",
+    "SNRC1_LONG_M15_NORMALIZED_RECLAIM_CONTINUATION",
+    "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION"
+  ],
+  "safety": {
+    "audit_only": true,
+    "M10W29_family_rescue": false,
+    "M10W26_modified": false,
+    "existing_monitor_modified": false,
+    "historical_backfill": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false,
+    "automatic_live_promotion": false
+  }
+}
