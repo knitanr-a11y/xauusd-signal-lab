@@ -1,0 +1,52 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "LIVE_CSV_BOUNDED_REWRITE_EXPORT_CONTRACT_ADDENDUM",
+  "status": "USER_CONFIRMED_SOURCE_BEHAVIOR",
+  "recorded_at": "2026-07-28",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "ea_inputs": {
+    "InpAppendLookbackBars": 20,
+    "InpBarsToExportM1": 150000,
+    "InpBarsToExportM5": 90000,
+    "InpBarsToExportM15": 30000,
+    "InpBarsToExportH1": 20000,
+    "InpBarsToExportH4": 10000,
+    "InpBarsToExportD1": 5000
+  },
+  "confirmed_behavior": {
+    "on_mt5_start": "Each timeframe CSV is rebuilt from the configured number of bars.",
+    "during_runtime": "The exporter appends/refreshes using a 20-bar lookback.",
+    "source_model": "BOUNDED_REWRITE_WITH_OVERLAP_NOT_APPEND_ONLY",
+    "all_timeframes_can_drop_old_head_rows": true,
+    "row_position_is_not_a_stable_identity": true,
+    "timestamp_plus_canonical_row_is_the_integrity_identity": true
+  },
+  "observed_frozen_counts_above_restart_caps": {
+    "M9V": {"M1":151494,"M5":90299,"M15":30100,"H1":20025,"H4":10006,"D1":5001},
+    "M9Y": {"M1":151595,"M5":90319,"M15":30107,"H1":20026,"H4":10007},
+    "M10B": {"M1":152084,"M5":90417,"M15":30139,"H1":20034,"H4":10009,"D1":5001},
+    "M10E": {"M1":152156,"M5":90431,"M15":30144,"H1":20036,"H4":10009,"D1":5001},
+    "M10P": {"M1":152266,"M5":90453,"M15":30151,"H1":20037,"H4":10009,"D1":5001},
+    "M10P2": {"M1":152307,"M5":90462,"M15":30154,"H1":20038,"H4":10010,"D1":5002},
+    "M10W19": {"M1":153738,"M15":30250,"H1":20062,"H4":10016,"D1":5003}
+  },
+  "implications": {
+    "full_initial_prefix_must_remain_forever": false,
+    "strict_prefix_by_row_number_for_any_timeframe": false,
+    "exact_time_anchors_and_overlap_hashes_required_for_all_timeframes": true,
+    "temporary_permission_or_replacement_read_errors_are_retryable": true,
+    "timestamp_order_duplicate_or_overlap_content_changes_remain_fail_closed": true,
+    "prospective_starts_remain_immutable": true,
+    "historical_backfill_authorized": false
+  },
+  "safety": {
+    "audit_only": true,
+    "runtime_manifest_edit": false,
+    "prospective_start_reset": false,
+    "BAT01_rerun": false,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
