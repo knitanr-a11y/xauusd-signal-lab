@@ -1,0 +1,102 @@
+{
+  "project": "BTC_ML_V1",
+  "status": "BTC_FF01_FRESH_FORWARD_AVAILABILITY_AUDIT_ONLY_NEXT",
+  "stage": "BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY",
+  "branch": "main",
+  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md",
+  "scope_firewall": "configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json",
+  "objective": "Determine, without changing any strategy or runtime, which frozen BTC4/BTC5/BTC6/BTC7R/BTC9R candidates have sufficient local closed-bar data after the exclusive UTC cutoff 2026-07-02 02:15:00.",
+  "phase_0_no_write_verification": [
+    "Confirm repository knitanr-a11y/xauusd-signal-lab and branch main.",
+    "Confirm the cleanup commit 0c23fd107680f0f323e956b5f7bbbddc6639243e is an ancestor of the current main.",
+    "Read START_HERE_BTC_ML_V1_NEXT_CHAT.md, the authoritative handoff, current_state, next_action and scope firewall first.",
+    "Do not read or search any GOLD, Mochipoyo, M10W or M10W24B file.",
+    "Inspect only allowed BTC paths to determine whether a current equivalent availability audit already exists.",
+    "Inspect existing BTC support code only for canonical file resolution and broker-server-time to UTC conversion."
+  ],
+  "phase_1_minimal_implementation_if_needed": {
+    "authorized": true,
+    "condition": "Only if no current equivalent BTC-only availability audit exists after cleanup.",
+    "allowed_paths": [
+      "scripts/btc_ml_v1/fresh_forward_availability/python/audit_btc_fresh_forward_availability.py",
+      "scripts/btc_ml_v1/fresh_forward_availability/bat/00_READ_ME_FIRST.txt",
+      "scripts/btc_ml_v1/fresh_forward_availability/bat/01_run_availability_audit.bat",
+      "scripts/btc_ml_v1/fresh_forward_availability/bat/02_open_latest_results.bat",
+      "docs/btc_ml_v1/BTC_FF01_FRESH_FORWARD_AVAILABILITY_AUDIT_CONTRACT_20260729.md",
+      "configs/btc_ml_v1/btc_ff01_fresh_forward_availability_contract_20260729.json"
+    ],
+    "forbidden_placement": [
+      "repository root",
+      "scripts/mochipoyo_alert_research",
+      "any GOLD directory"
+    ],
+    "runtime_behavior": [
+      "Read existing CSV files only.",
+      "Do not copy, append, rewrite, merge, truncate, rename or delete source CSV files.",
+      "Do not scan the whole PC recursively.",
+      "Use only known BTC data locations and explicit user-supplied paths.",
+      "Reuse the latest main canonical broker-time freshness conversion; do not invent a second UTC conversion.",
+      "Do not run candidate engines or calculate fresh performance.",
+      "Do not start a collector, loop, dashboard, Discord send or MT5 order.",
+      "Do not modify existing BTC operational runtime or persistent state."
+    ],
+    "required_timeframe_audit": [
+      "M5",
+      "M15",
+      "H1",
+      "D1",
+      "H4 fresh tail",
+      "H4 long warmup"
+    ],
+    "required_fields_per_timeframe": [
+      "actual file path",
+      "file size",
+      "row count",
+      "first raw MT5 broker-server timestamp",
+      "latest raw closed-bar timestamp",
+      "selected broker UTC offset and inference evidence",
+      "latest UTC-converted closed-bar timestamp",
+      "rows strictly after 2026-07-02 02:15:00 UTC",
+      "non-ascending timestamp count",
+      "duplicate timestamp count",
+      "read error or ambiguity"
+    ],
+    "h4_contract": [
+      "Verify separately whether the BTC4 warmup starts in 2017 or earlier as required by the frozen reference.",
+      "Verify separately whether an H4 fresh tail extends beyond the cutoff.",
+      "The warmup and fresh tail may be separate files at this stage; do not merge them during availability audit."
+    ],
+    "candidate_readiness": {
+      "BTC4_RISK_CAP_400": ["H4 long warmup", "H4 fresh tail after cutoff", "M5 after cutoff"],
+      "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786": ["M5 after cutoff"],
+      "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886": ["M15 after cutoff"],
+      "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110": ["M5 after cutoff", "M15 after cutoff", "H1 after cutoff"],
+      "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080": ["M5 after cutoff", "M15 after cutoff", "H1 after cutoff", "D1 after cutoff"]
+    },
+    "readiness_rule": "Classify each candidate independently as READY or BLOCKED and list exact missing or ambiguous inputs. Missing one timeframe must not block candidates that do not need it.",
+    "output_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/01_fresh_forward_availability",
+    "latest_files": [
+      "00_READ_ME_FIRST.txt",
+      "01_availability_summary.json",
+      "02_availability_report.txt",
+      "99_UPLOAD_PACKAGE.zip"
+    ],
+    "raw_csv_in_zip": false
+  },
+  "mandatory_stop_after_stage01": [
+    "Stop after the availability package is produced or after a clear BLOCKED report.",
+    "Do not implement or run a fresh performance evaluator yet.",
+    "Do not use reproduce_btc_stacking_portfolio.py on extended fresh CSV files.",
+    "Do not use --skip-input-hash-check as a fresh evaluator.",
+    "Do not tune candidate conditions, thresholds, TP, SL, exit order, spread, pip definition or overlap policy.",
+    "Do not decide BTC5/BTC6/BTC7R/BTC9R lots.",
+    "Do not add BTC10R or replace any of the frozen five candidates.",
+    "Wait for the user to upload 99_UPLOAD_PACKAGE.zip and for explicit review before Stage BTC_FF02."
+  ],
+  "stage_ff02_not_yet_authorized": {
+    "name": "FROZEN_FIVE_CANDIDATE_FRESH_FORWARD_PERFORMANCE_EVALUATION",
+    "authorized": false,
+    "entry_boundary": "entry_dt > 2026-07-02 02:15:00 UTC",
+    "rule": "Stage FF02 may only be designed after FF01 results identify candidate-specific READY inputs and the user explicitly authorizes continuation."
+  }
+}
