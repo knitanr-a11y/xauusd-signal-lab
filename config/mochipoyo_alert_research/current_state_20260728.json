@@ -2,21 +2,14 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W34_INITIALIZED_FIRST_CYCLE_PASS_INITIAL_HEALTH_PACKAGE_PENDING_AUDIT_ONLY",
+  "status": "M10W34_INITIAL_HEALTH_PASS_RUNNING_FRESH_ACCUMULATION_AUDIT_ONLY",
   "scope": "XAUUSD_GOLD_ONLY",
   "observed_monitor_state": {
-    "running_private_snapshot_loops_expected": [
-      "M9V",
-      "M9Y",
-      "M10B",
-      "M10E",
-      "M10P",
-      "M10P2",
-      "M10W19",
-      "M10W26",
-      "M10W34"
-    ],
-    "M10W34_process_and_lock_health_verification_pending_correct_package": true,
+    "running_private_snapshot_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
+    "M10W34_exactly_one_process": true,
+    "M10W34_lock_present": true,
+    "M10W34_successful_cycles_at_initial_health": 7,
+    "M10W34_terminal_failures_at_initial_health": 0,
     "keep_all_running_unchanged": true
   },
   "immutable_starts": {
@@ -35,11 +28,7 @@
     "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
     "start": "2026.07.28 15:58:00",
     "BAT01_permanently_forbidden": true,
-    "review_gates": {
-      "operational_resolved": 20,
-      "interim_resolved": 60,
-      "formal_resolved": 120
-    }
+    "review_gates": {"operational_resolved": 20, "interim_resolved": 60, "formal_resolved": 120}
   },
   "M10W29": {
     "status": "NO_ADVANCE",
@@ -48,49 +37,38 @@
   "M10W33": {
     "status": "PASS_ONE_ROBUST_SNDX1_CANDIDATE_FRESH_SHADOW_AUTHORIZED_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10w33_user_local_result_20260728.json",
-    "package_sha256": "fa41d4717e32e5f02cade9043928e27d2d023b13148f7d80b53cdd84edb33a13",
     "advancing_family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
-    "classification": "ROBUST_CANDIDATE",
     "historical_support_is_fresh_support": false,
     "post_result_tuning_forbidden": true
   },
   "M10W34": {
-    "status": "INITIALIZED_FIRST_CYCLE_PASS_HEALTH_PACKAGE_PENDING",
+    "status": "PASS_INITIAL_HEALTHY_RUNNING_AUDIT_ONLY",
     "contract": "config/mochipoyo_alert_research/m10w34_sndx1_fresh_prospective_shadow_contract_20260728.json",
     "implementation_audit": "config/mochipoyo_alert_research/m10w34_prestart_implementation_audit_20260728.json",
-    "initial_cycle_evidence": "config/mochipoyo_alert_research/m10w34_initial_cycle_evidence_health_package_pending_20260728.json",
+    "initial_health_result": "config/mochipoyo_alert_research/m10w34_user_local_initial_health_result_20260728.json",
+    "initial_health_package_sha256": "dfee3076f45e53e31ccbb097e88416702aff53c650348d0e9fe3531cb6c799c4",
     "family": "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION",
     "start": "2026.07.28 18:19:00",
     "runtime_contract_version": "M10W34_RUNTIME_V1_PRESTART_CAUSAL_ENGINE_AND_IMPLEMENTATION_FROZEN",
-    "first_cycle_status": "PASS_FRESH_PROSPECTIVE_AUDIT_ONLY",
-    "first_cycle_candidate_count": 0,
-    "first_cycle_resolved_count": 0,
+    "initial_candidate_count": 0,
+    "initial_resolved_count": 0,
     "initial_zero_interpretation": "NORMAL_INITIAL_ZERO",
+    "review_gates": {"operational_resolved": 20, "interim_resolved": 60, "formal_resolved": 120},
+    "checkpoint_operator": "scripts/mochipoyo_alert_research/m10w34/bat/06_audit_checkpoint_read_only.bat",
     "BAT01_permanently_forbidden": true,
     "BAT03_keep_running": true,
-    "correct_initial_health_package_received": false,
     "automatic_live_promotion": false
   },
   "research_authorization": {
     "M10W26_keep_running": true,
     "M10W34_keep_running": true,
-    "M10W34_read_only_initial_health_audit": true,
+    "M10W34_read_only_checkpoint_at_review_gates": true,
     "M10W34_BAT01": false,
     "M10W34_live_or_final_promotion": false,
     "M10V": false
   },
   "forbidden": {
-    "any_existing_loop_BAT01_or_initializer": [
-      "M9V",
-      "M9Y",
-      "M10B",
-      "M10E",
-      "M10P",
-      "M10P2",
-      "M10W19",
-      "M10W26",
-      "M10W34"
-    ],
+    "any_existing_loop_BAT01_or_initializer": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26", "M10W34"],
     "stop_or_restart_healthy_loops_without_incident": true,
     "force_close_or_taskkill_loops": true,
     "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
