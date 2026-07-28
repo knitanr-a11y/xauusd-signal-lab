@@ -2,6 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
+  "handoff_document": "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_ALL_NINE_RUNNING_M10P_RECOVERY_PASS_REVIEW_GATE_WATCH_20260729.md",
   "status": "ALL_NINE_FORWARD_LOOPS_RUNNING_M10P_PRESERVED_START_RECOVERY_HEALTH_PASS_AUDIT_ONLY",
   "scope": "XAUUSD_GOLD_ONLY",
   "observed_monitor_state": {
