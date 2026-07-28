@@ -1,9 +1,10 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
-  "stage": "FRESH_LOOP_ROLLING_M1_PRESERVED_START_RECOVERY_AUDIT_ONLY",
+  "stage": "FRESH_LOOP_BOUNDED_CSV_PRESERVED_START_RECOVERY_AUDIT_ONLY",
   "status": "DESIGN_FROZEN_NOT_EXECUTED",
   "recorded_at": "2026-07-28",
   "scope": "XAUUSD_GOLD_ONLY",
+  "source_contract_addendum": "config/mochipoyo_alert_research/live_csv_bounded_rewrite_export_addendum_20260728.json",
   "affected_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19"],
   "immutable_starts": {
     "M9V": "2026.07.24 11:04:00",
@@ -14,50 +15,86 @@
     "M10P2": "2026.07.27 01:39:00",
     "M10W19": "2026.07.28 02:31:00"
   },
-  "problem": {
-    "M1_retention": "goldsharp_m1.csv can roll its oldest rows and was observed at exactly 150000 rows after runtimes froze prefixes of 151494..153738 rows.",
-    "incorrect_old_assumption": "All initialization-time CSV rows remain physically present forever.",
-    "transient_read": "CSV replacement can temporarily raise PermissionError and the persistent loop currently exits after one failed cycle."
+  "ea_source_model": {
+    "type": "BOUNDED_REWRITE_WITH_20_BAR_REFRESH_OVERLAP",
+    "configured_caps": {"M1":150000,"M5":90000,"M15":30000,"H1":20000,"H4":10000,"D1":5000},
+    "append_lookback_bars": 20,
+    "all_timeframes_can_drop_old_head_rows": true,
+    "row_number_prefix_is_not_a_valid_permanent_integrity_contract": true
   },
-  "rolling_M1_integrity_contract": {
-    "full_old_prefix_required": false,
-    "exact_prospective_start_must_exist": true,
-    "minimum_pre_start_M1_rows": 10,
-    "timestamps_strictly_ascending": true,
-    "duplicates_forbidden": true,
-    "nearest_M1_fallback": false,
-    "overlap_checkpoint": {
-      "per_loop_sidecar": true,
-      "runtime_manifest_unchanged": true,
-      "checkpoint_rows": 4096,
-      "first_bootstrap": "Allowed only while the exact frozen start remains in the current M1 file and the existing last successful output/start metadata are internally consistent.",
-      "later_cycles": "The previous checkpoint end must still exist and the exact overlapping canonical rows must hash-match before the checkpoint advances.",
-      "if_overlap_missing_or_changed": "FAIL_CLOSED"
+  "problem": {
+    "incorrect_old_assumption": "All initialization-time rows in every timeframe CSV remain physically present at the same file prefix forever.",
+    "first_observed_failure": "M1 was rebuilt to exactly 150000 rows and failed before the code reached the same invalid checks for M5/M15/H1/H4/D1.",
+    "transient_read": "Full rebuild and 20-bar refresh can temporarily raise PermissionError, sharing violations or unstable reads, and one failed cycle currently exits the persistent process.",
+    "long_term_risk": "Even a rolling-overlap-only repair would eventually lose an immutable prospective start when it ages beyond a configured source cap. Durable prospective bars must therefore be journaled locally."
+  },
+  "bounded_source_adapter_contract": {
+    "local_root": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/bounded_csv_source_adapter",
+    "shared_verified_journal": true,
+    "runtime_manifests_unchanged": true,
+    "source_path_and_XAUUSD_point_frozen_in_adapter_manifest": true,
+    "timeframes": ["M1","M5","M15","H1","H4","D1"],
+    "canonical_identity": "time plus all canonical OHLCV/spread fields",
+    "initial_migration": {
+      "all_seven_loop_processes_absent": true,
+      "all_seven_loop_locks_absent": true,
+      "all_runtime_manifests_and_starts_match": true,
+      "M1_exact_prospective_start_for_every_loop_must_exist": true,
+      "each_runtime_frozen_last_server_open_anchor_for_each_used_timeframe_must_exist": true,
+      "timestamps_strictly_ascending": true,
+      "duplicates_forbidden": true,
+      "seed_journal_from_current_verified_bounded_files": true,
+      "pre_start_rows_are_context_only_not_candidate_eligible": true,
+      "post_start_closed_rows_present_in_source_may_be_caught_up": true,
+      "nearest_M1_fallback": false,
+      "no_initializer": true,
+      "no_start_rewrite": true,
+      "create_only_adapter_manifest_journals_checkpoints_and_receipt": true
+    },
+    "subsequent_update": {
+      "short_lived_exclusive_adapter_lock": true,
+      "read_each_source_to_a_stable_snapshot": true,
+      "previous_journal_tail_overlap_must_be_found_by_timestamp": true,
+      "all_overlapping_canonical_rows_must_hash_match": true,
+      "only_strictly_new_closed_timestamps_are_appended": true,
+      "source_head_truncation_before_overlap_is_allowed": true,
+      "existing_timestamp_content_change": "FAIL_CLOSED",
+      "missing_overlap": "FAIL_CLOSED",
+      "non_ascending_or_duplicate_timestamp": "FAIL_CLOSED",
+      "source_path_or_point_change": "FAIL_CLOSED"
+    },
+    "journal_use": {
+      "loops_read_verified_journal_not_raw_bounded_history_for_reconstruction": true,
+      "raw_bounded_CSV_remains_the_new-bar_source_and_overlap_integrity_witness": true,
+      "prospective_start_can_age_out_of_raw_source_without_losing_journaled_forward_evidence": true,
+      "historical_backfill_before_each_immutable_start": false
     }
   },
-  "non_M1_integrity_contract": {
-    "strict_frozen_prefix_continues": true,
-    "rolling_fallback_not_authorized": true
-  },
   "transient_IO_contract": {
-    "retryable": ["PermissionError", "sharing violation", "file replacement in progress", "unstable double-read snapshot"],
+    "retryable": ["PermissionError", "sharing violation", "file rebuild in progress", "unstable double-read snapshot", "temporary missing file during atomic replacement"],
     "retry_window_seconds": 90,
     "retry_interval_seconds": 1,
-    "retry_does_not_change_start": true,
-    "terminal_failures": ["runtime or contract mismatch", "prospective start changed", "timestamp non-ascending", "duplicate timestamp", "rolling overlap hash mismatch", "exact start missing", "source path changed", "point changed"]
+    "retry_does_not_change_start_or_journal": true,
+    "after_retry_exhaustion": "Record the exact error and end the affected cycle/loop fail-closed without modifying starts.",
+    "terminal_failures": ["runtime or contract mismatch", "prospective start changed", "source path changed", "point changed", "timestamp non-ascending", "duplicate timestamp", "anchor missing during migration", "journal overlap missing", "overlap canonical hash mismatch"]
+  },
+  "persistent_loop_reliability": {
+    "persist_last_exception_for_every_loop": true,
+    "persist_cycle_status_for_every_loop": true,
+    "do_not_classify_explicitly_retryable_IO_as_integrity_corruption_before_retry_exhaustion": true,
+    "do_not_swallow_terminal_integrity_errors": true
   },
   "migration_audit": {
-    "all_loop_processes_must_be_absent": true,
-    "all_loop_locks_must_be_absent": true,
-    "all_runtime_manifests_and_starts_must_match": true,
-    "no_initializer": true,
-    "no_start_rewrite": true,
-    "create_only_integrity_sidecars_and_receipt": true,
+    "produce_adapter_manifest": true,
+    "produce_per_timeframe_journal_fingerprints": true,
+    "produce_per_loop_start_and_anchor_coverage": true,
+    "prove_runtime_manifest_byte_hashes_unchanged": true,
+    "prove_all_starts_unchanged": true,
     "restart_after_pass": ["M9V BAT03", "M9Y BAT03", "M10B BAT03", "M10E BAT03", "M10P BAT03", "M10P2 BAT03", "M10W19 BAT03"]
   },
   "safety": {
     "audit_only": true,
-    "historical_backfill": false,
+    "historical_backfill_before_start": false,
     "manual_lock_deletion": false,
     "runtime_manifest_edit": false,
     "prospective_start_reset": false,
