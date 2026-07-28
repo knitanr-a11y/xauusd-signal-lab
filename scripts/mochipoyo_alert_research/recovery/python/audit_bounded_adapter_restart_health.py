@@ -25,6 +25,7 @@ import migrate_bounded_csv_source_adapter as migration
 OUTPUT_NAMES = {loop: loop for loop in runner.LOOPS}
 V4_PROCESS_TOKEN = "run_bounded_adapter_loop_v4.py"
 V4_SNAPSHOT_VERSION = "BOUNDED_CSV_PER_LOOP_SNAPSHOT_V1"
+MAX_SNAPSHOT_AGE_SECONDS = 300.0
 
 
 def utc_text() -> str:
@@ -33,6 +34,13 @@ def utc_text() -> str:
 
 def utc_stamp() -> str:
     return datetime.now(UTC).strftime("%Y%m%d_%H%M%SZ")
+
+
+def parse_utc(value: Any) -> datetime | None:
+    try:
+        return datetime.strptime(str(value), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    except Exception:
+        return None
 
 
 def read_json(path: Path) -> dict[str, Any] | None:
@@ -76,28 +84,53 @@ def snapshot_health(local_root: Path, loop: str, journals: dict[str, Any]) -> di
     receipt_path = directory / "00_snapshot_receipt.json"
     receipt = read_json(receipt_path) or {}
     fingerprints = receipt.get("journal_fingerprints", {})
+    created = parse_utc(receipt.get("created_at_utc"))
+    age_seconds = None if created is None else (datetime.now(UTC) - created).total_seconds()
+    fresh = age_seconds is not None and -5.0 <= age_seconds <= MAX_SNAPSHOT_AGE_SECONDS
+
     files: dict[str, Any] = {}
-    all_files_match = True
+    all_files_match_receipt = True
+    all_snapshots_not_ahead = True
     for timeframe, filename in adapter.FILE_MAP.items():
         path = directory / filename
-        expected = journals.get(timeframe, {})
-        current_sha = adapter.sha256_file(path) if path.is_file() else None
-        current_size = path.stat().st_size if path.is_file() else None
+        current_shared = journals.get(timeframe, {})
         receipt_tf = fingerprints.get(timeframe, {}) if isinstance(fingerprints, dict) else {}
-        match = (
+        snapshot_sha = adapter.sha256_file(path) if path.is_file() else None
+        snapshot_size = path.stat().st_size if path.is_file() else None
+        matches_receipt = (
             path.is_file()
-            and current_sha == expected.get("sha256")
-            and current_size == expected.get("size_bytes")
-            and receipt_tf.get("sha256") == expected.get("sha256")
-            and receipt_tf.get("size_bytes") == expected.get("size_bytes")
+            and snapshot_sha == receipt_tf.get("sha256")
+            and snapshot_size == receipt_tf.get("size_bytes")
         )
-        all_files_match = all_files_match and match
+        snapshot_rows = int(receipt_tf.get("row_count", -1) or -1)
+        shared_rows = int(current_shared.get("row_count", -1) or -1)
+        snapshot_first = receipt_tf.get("first_server_open")
+        shared_first = current_shared.get("first_server_open")
+        snapshot_last = receipt_tf.get("last_server_open")
+        shared_last = current_shared.get("last_server_open")
+        not_ahead = (
+            snapshot_rows >= 0
+            and shared_rows >= snapshot_rows
+            and snapshot_first == shared_first
+            and isinstance(snapshot_last, str)
+            and isinstance(shared_last, str)
+            and snapshot_last <= shared_last
+        )
+        all_files_match_receipt = all_files_match_receipt and matches_receipt
+        all_snapshots_not_ahead = all_snapshots_not_ahead and not_ahead
         files[timeframe] = {
             **file_info(path),
-            "sha256": current_sha,
-            "expected_sha256": expected.get("sha256"),
-            "fingerprint_match": match,
+            "sha256": snapshot_sha,
+            "receipt_sha256": receipt_tf.get("sha256"),
+            "matches_snapshot_receipt": matches_receipt,
+            "snapshot_row_count": snapshot_rows,
+            "current_shared_row_count": shared_rows,
+            "snapshot_last_server_open": snapshot_last,
+            "current_shared_last_server_open": shared_last,
+            "snapshot_not_ahead_of_shared": not_ahead,
+            "equals_current_shared_sha256": snapshot_sha == current_shared.get("sha256"),
         }
+
     receipt_ok = (
         receipt.get("status") == "PASS_PRIVATE_LOOP_SNAPSHOT"
         and receipt.get("snapshot_version") == V4_SNAPSHOT_VERSION
@@ -108,10 +141,14 @@ def snapshot_health(local_root: Path, loop: str, journals: dict[str, Any]) -> di
     return {
         "directory": str(directory),
         "receipt": {**file_info(receipt_path), "payload": receipt},
+        "snapshot_age_seconds": age_seconds,
+        "maximum_allowed_age_seconds": MAX_SNAPSHOT_AGE_SECONDS,
+        "fresh": fresh,
         "files": files,
         "receipt_ok": receipt_ok,
-        "all_files_match_current_verified_journal": all_files_match,
-        "healthy": receipt_ok and all_files_match,
+        "all_files_match_snapshot_receipt": all_files_match_receipt,
+        "all_snapshots_not_ahead_of_current_shared_journal": all_snapshots_not_ahead,
+        "healthy": receipt_ok and fresh and all_files_match_receipt and all_snapshots_not_ahead,
     }
 
 
@@ -208,6 +245,7 @@ def main() -> int:
             "adapter_manifest_status": manifest.get("status"),
             "required_process_token": V4_PROCESS_TOKEN,
             "required_snapshot_version": V4_SNAPSHOT_VERSION,
+            "maximum_snapshot_age_seconds": MAX_SNAPSHOT_AGE_SECONDS,
             "journal_fingerprints_verified": journals,
             "classification_counts": {
                 "HEALTHY_RUNNING_V4_PRIVATE_SNAPSHOT_PASS": healthy,
@@ -225,7 +263,7 @@ def main() -> int:
         }
         (archive / "00_READ_ME_FIRST.txt").write_text(
             "Read-only V4 post-restart health audit for M9V/M9Y/M10B/M10E/M10P/M10P2/M10W19.\n"
-            "It requires seven V4 processes and verifies each private snapshot against the current shared-journal SHA256 fingerprints.\n"
+            "It requires seven V4 processes and verifies each fresh private snapshot against its own receipt and against a current shared journal that may be newer but never older.\n"
             "It does not start/stop loops, remove locks, update journals, reset runtimes or change starts.\n",
             encoding="utf-8",
         )
