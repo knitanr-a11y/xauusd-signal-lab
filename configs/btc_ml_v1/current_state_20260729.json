@@ -1,0 +1,96 @@
+{
+  "project": "BTC_ML_V1",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "main",
+  "status": "BTC_FIVE_CANDIDATES_REPRODUCED_FRESH_FORWARD_AVAILABILITY_NOT_YET_VERIFIED",
+  "recorded_at": "2026-07-29",
+  "authoritative_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_FRESH_FORWARD_AVAILABILITY_GOLD_FIREWALL_20260729.md",
+  "scope_firewall": "configs/btc_ml_v1/btc_gold_scope_firewall_20260729.json",
+  "formal_minimum_baseline_commit": "dc29fbf5345e26c7890b5ab836a0dd3182e99fe9",
+  "cleanup_state": {
+    "main_cleanup_commit_before_new_handoff": "0c23fd107680f0f323e956b5f7bbbddc6639243e",
+    "cleanup_meaning": "Misplaced or superseded BTC Stage 01 files from the failed chat were removed from main before this new handoff was created.",
+    "gold_m10w24b_was_restored_by_user": true,
+    "gold_changes_authorized": false
+  },
+  "frozen_research": {
+    "symbol": "BTCUSD#",
+    "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
+    "candidate_rules_frozen": true,
+    "post_cutoff_data_used_for_rule_selection": false,
+    "candidates": [
+      {
+        "id": "BTC4_RISK_CAP_400",
+        "timeframe": "H4",
+        "lot": 0.02,
+        "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE"
+      },
+      {
+        "id": "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+        "timeframe": "M5",
+        "lot": null,
+        "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE"
+      },
+      {
+        "id": "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+        "timeframe": "M15",
+        "lot": null,
+        "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE"
+      },
+      {
+        "id": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+        "timeframe": "M15",
+        "lot": null,
+        "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE"
+      },
+      {
+        "id": "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080",
+        "timeframe": "M15",
+        "lot": null,
+        "status": "ADOPTED_STACKING_CANDIDATE_NOT_LIVE"
+      }
+    ],
+    "portfolio_all_evaluated": {
+      "trades": 185,
+      "wins": 130,
+      "losses": 55,
+      "win_rate_pct": 70.270270,
+      "profit_factor": 2.583416,
+      "total_pips": 6967.744594,
+      "max_drawdown_pips": 345.176061,
+      "maximum_simultaneous_positions_observed": 3
+    },
+    "reproduction_pass": true,
+    "reproduction_report_sha256": "45fcde35def8d82e2ff67f11fc7131fbf8f3112eeccb761706bfb3e37f4e1989"
+  },
+  "current_unknown": {
+    "local_fresh_csv_availability_verified": false,
+    "m5_post_cutoff_verified": false,
+    "m15_post_cutoff_verified": false,
+    "h1_post_cutoff_verified": false,
+    "d1_post_cutoff_verified": false,
+    "h4_fresh_tail_post_cutoff_verified": false,
+    "h4_2017_warmup_available_verified": false,
+    "candidate_readiness_verified": false
+  },
+  "next_stage": {
+    "id": "BTC_FF01",
+    "name": "FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY",
+    "implementation_exists": false,
+    "performance_evaluation_authorized": false,
+    "new_candidate_search_authorized": false,
+    "lot_design_authorized": false,
+    "live_or_order_work_authorized": false
+  },
+  "global_contract": {
+    "time_is_bar_open": true,
+    "closed_bars_only": true,
+    "pip_contract": "$10 price movement = 1 pip",
+    "primary_spread_usd": 30,
+    "global_one_position_cap": false,
+    "orders_enabled": false,
+    "discord_enabled": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
