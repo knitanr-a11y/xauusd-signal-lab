@@ -1,44 +1,44 @@
 {
-  "schema_version": 1,
-  "action_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
-  "date": "2026-06-28",
+  "schema_version": 2,
+  "action_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1-PARITY-REBUILD",
+  "date": "2026-06-29",
   "mode": "assistant_research_and_implementation_audit_only",
-  "status": "READY_FOR_NEXT_CHAT",
-  "title": "Start new reproducible independent candidate discovery",
-  "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md",
-  "objective": "Find reproducible independent LONG and SHORT sleeves that can add trade count and total R to the current four live-capable sleeves without pretending to recover P16 or P19.",
-  "first_deliverables": [
-    "config/gold_ml_v1/new_candidate_discovery_v1_contract_20260628.json",
-    "candidate-family specification document",
-    "deterministic raw proposal builder",
-    "label-free density and overlap audit",
-    "closed-bar causality and historical/live parity tests"
-  ],
+  "status": "USER_PC_HISTORICAL_REBUILD_REQUIRED",
+  "title": "Rebuild V1 after state-machine parity repair",
+  "reason": "The frozen state-machine addendum forbids rearming the same candidate on a confirmation, invalidation or expiry clearing bar. The prior generator violated that rule, so its proposal registry and all downstream summaries are invalidated.",
+  "repair": {
+    "generator_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "candidate_definition_changed": false,
+    "threshold_changed": false,
+    "performance_guided_change": false
+  },
   "required_order": [
-    "freeze current four-live-sleeve benchmark and six-sleeve historical reference",
-    "commit discovery contract before performance inspection",
-    "build causal raw proposal generators",
-    "save all raw proposals before deduplication or outcome filtering",
-    "run label-free density regime direction time and overlap audit",
-    "freeze definitions and hashes",
-    "join labels only after freeze",
-    "evaluate with expanding purged walk-forward and Strong/Extreme costs",
-    "persist any future model pipeline feature order calibration thresholds and proposal scores",
-    "keep all outputs audit-only"
+    "run the new synthetic state-machine tests",
+    "rerun the deterministic raw proposal generator on the authorized historical CSV root",
+    "persist the complete raw registry before deduplication or outcome handling",
+    "rebuild and hash-freeze the full label-free audit",
+    "verify 2026 prefix replay parity",
+    "freeze reproducible expanding purged walk-forward evaluation code and split manifest",
+    "only then join the pinned frozen ML-03 labels and recompute reporting layers"
   ],
-  "do_not_repeat": [
-    "ML05A density v2",
-    "P16 or P19 exact recovery attempts without new artifacts",
-    "Batch024",
-    "GML1-PROV-030-A"
+  "invalidated_outputs_must_not_be_used": [
+    "previous 5180 raw proposal count",
+    "previous label-free registry hash",
+    "previous labeled performance summaries",
+    "previous ML threshold and score summary",
+    "previous no-survivor conclusion"
   ],
-  "local_user_action_required_now": false,
+  "local_user_action_required_now": true,
+  "local_action": "Run the repaired audit branch against the historical source that exists only on the user PC; do not run the live runtime as part of this rebuild.",
   "live_runtime_may_continue_separately": true,
   "live_runtime_modification_allowed": false,
-  "live_runtime_modification_exception": "Only a demonstrated defect may be fixed during discovery.",
-  "labels_may_be_inspected_before_density_freeze": false,
   "audit_only": true,
+  "live_ready": false,
   "final_signal": false,
   "discord": false,
-  "mt5_order": false
+  "mt5_order": false,
+  "automatic_retraining": false,
+  "automatic_promotion": false,
+  "automatic_registration": false
 }

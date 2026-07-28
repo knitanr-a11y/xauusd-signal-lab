@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-29",
+  "status": "PINNED_LABEL_REFERENCE_LABEL_JOIN_BLOCKED_PENDING_REPAIRED_LABEL_FREE_FREEZE",
+  "label_contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+  "label_contract_blob_sha": "30ab773d1ba01047469eb9a0a661480bc634ae31",
+  "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+  "label_id": "MLR1_LABEL_6H_TP1P5_SL1P0_ATR14",
+  "target_atr": 1.5,
+  "protective_atr": 1.0,
+  "horizon_hours": 6,
+  "same_m1_priority": "PROTECTIVE",
+  "exact_m1_required": true,
+  "next_m1_fallback": false,
+  "resolved_only": true,
+  "join_keys": ["decision_time", "direction"],
+  "use_during_current_stage": "REFERENCE_ONLY_NO_LABEL_JOIN_NO_OUTCOME_READ",
+  "release_condition": "The repaired raw proposal registry and complete label-free audit are persisted and hash-frozen, and a compliant reproducible evaluation contract and implementation are committed.",
+  "controls": {
+    "audit_only": true,
+    "labels_joined_after_invalidation": false,
+    "candidate_performance_reviewed_after_invalidation": false,
+    "model_trained_after_invalidation": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "schema_version": 2,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-29",
+  "formal_stage": "GML1_NEW_INDEPENDENT_CANDIDATE_DISCOVERY_V1_AUDIT_ONLY",
+  "status": "IMPLEMENTATION_PARITY_REPAIR_COMMITTED_REBUILD_REQUIRED_RESULTS_INVALIDATED",
+  "repository": {
+    "full_name": "knitanr-a11y/xauusd-signal-lab",
+    "base_ref": "main",
+    "authoritative_main_commit_at_start": "57741a078d8a91c825c49e6460a1cfe99d019aad",
+    "authoritative_handoff": "docs/gold_ml_v1/NEXT_CHAT_HANDOFF_GML1_LIVE_AUDIT_AND_NEW_CANDIDATE_DISCOVERY_20260628.md",
+    "initial_contract_commit": "279441ef9566c993f6c86fc003be370d5b64b7db"
+  },
+  "purpose": "Discover reproducible independent LONG and SHORT sleeves without pretending to recover P16 or P19.",
+  "frozen_benchmarks": {
+    "current_four_live_capable": ["A_CORE", "B_STATE", "P18", "W024A"],
+    "historical_six_sleeve_reference": ["A_CORE", "B_STATE", "P16", "P18", "P19", "W024A"]
+  },
+  "definition_policy": {
+    "candidate_family_specification_changed_by_repair": false,
+    "numeric_thresholds_changed_by_repair": false,
+    "observed_outcomes_used_for_repair": false,
+    "repair_scope": "IMPLEMENT_THE_ALREADY_FROZEN_CLEARING_BAR_MUST_NOT_REARM_RULE_ONLY"
+  },
+  "demonstrated_defect": {
+    "id": "NCD_V1_SAME_BAR_PENDING_REARM",
+    "affected_candidates": [
+      "GML1-NCD-001-L",
+      "GML1-NCD-001-S",
+      "GML1-NCD-002-L",
+      "GML1-NCD-002-S",
+      "GML1-NCD-003-L",
+      "GML1-NCD-003-S",
+      "GML1-NCD-005-L",
+      "GML1-NCD-005-S"
+    ],
+    "contract_rule": "After confirmation, invalidation or expiry, the clearing bar is not reused as a new setup bar for the same candidate ID.",
+    "prior_behavior": "The pending state was cleared and the setup-creation block could rearm the same candidate on the same M15 row.",
+    "impact": "The prior raw proposal registry, hashes, label-free counts and all downstream labeled or ML results are non-authoritative.",
+    "repair_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "tests": [
+      "invalidation clearing bar does not rearm",
+      "confirmation clearing bar emits once and does not rearm",
+      "expiry clearing bar does not rearm"
+    ]
+  },
+  "invalidated_until_rebuilt": [
+    "raw proposal row count and registry hash",
+    "label-free density and overlap audit",
+    "2026 prefix replay hash and counts",
+    "resolved label join",
+    "raw and deduplicated performance",
+    "one-position performance",
+    "machine-learning scores, threshold and confirmation result",
+    "incremental portfolio conclusion",
+    "no-survivor conclusion"
+  ],
+  "required_rebuild_order": [
+    "run synthetic state-machine tests",
+    "rerun deterministic raw proposal generation from authorized historical source",
+    "save all raw proposals before deduplication, one-position handling or outcome filtering",
+    "complete and hash-freeze the full label-free density and overlap audit",
+    "verify closed-bar prefix parity",
+    "freeze the evaluation implementation and expanding purged walk-forward split manifest",
+    "join the pinned frozen ML-03 label registry only after the new label-free freeze",
+    "report raw, dedup, one-position, health-gate-not-applied and resolved-only live-replay layers separately",
+    "keep all results audit-only"
+  ],
+  "p16_p19_policy": {
+    "historical_reference_allowed": true,
+    "fresh_inference_allowed": false,
+    "frozen_exclusion_times_allowed_for_future": false,
+    "substitute_model_allowed": false
+  },
+  "time_contract": {
+    "csv_time": "MT5_SERVER_NAIVE_BAR_OPEN_TIME",
+    "latest_valid_row": "CLOSED_BY_CONTRACT",
+    "m15_decision_time": "bar_open_plus_15_minutes",
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "higher_timeframe_join": "source_bar_close_time_le_decision_time",
+    "same_m1_priority": "PROTECTIVE",
+    "horizon": "wall_clock",
+    "resolved_history_rule": "exit_dt_le_current_entry_dt_only"
+  },
+  "controls": {
+    "audit_only": true,
+    "live_runtime_modified": false,
+    "candidate_stack_modified": false,
+    "candidate_promoted": false,
+    "model_promoted": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "next_action": "Run the repaired generator on the authorized user-PC historical source and rebuild the label-free artifacts. Do not inspect or reuse the invalidated performance summaries as selection evidence."
+}

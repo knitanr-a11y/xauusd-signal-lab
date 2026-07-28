@@ -1,0 +1,79 @@
+{
+  "schema_version": 2,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-29",
+  "status": "INVALIDATED_METHOD_NOT_COMPLIANT_AND_RAW_REGISTRY_REBUILD_PENDING",
+  "invalidation_reasons": [
+    "The prior raw proposal registry was generated with a state-machine implementation that violated the frozen no-same-bar-rearm rule.",
+    "The prior evaluation chronology was a fixed 2023 train, 2024 threshold, 2025 confirmation and 2026 shadow split, not the expanding purged walk-forward required by the authoritative handoff and initial discovery contract.",
+    "No deterministic label-join/evaluation implementation, purge logic, split manifest, all-proposal score registry or model pipeline artifact was committed with the summaries."
+  ],
+  "label_source": {
+    "contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+    "contract_blob_sha": "30ab773d1ba01047469eb9a0a661480bc634ae31",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "label_id": "MLR1_LABEL_6H_TP1P5_SL1P0_ATR14",
+    "join_keys": ["decision_time", "direction"],
+    "resolved_only": true,
+    "exact_m1_required": true,
+    "next_m1_fallback": false,
+    "same_m1_priority": "PROTECTIVE"
+  },
+  "label_join_blocked_until": [
+    "repaired raw proposal registry is persisted and hash-frozen",
+    "complete label-free density and overlap audit is persisted and hash-frozen",
+    "2026 closed-bar prefix replay passes on the repaired generator",
+    "a separate reproducible expanding purged walk-forward contract is frozen without using performance to choose its folds, purge, features, model or thresholds",
+    "the evaluation implementation and tests are committed"
+  ],
+  "mandatory_reporting_layers": {
+    "raw_resolved": true,
+    "cross_family_dedup": true,
+    "candidate_one_position": true,
+    "dedup_then_one_position": true,
+    "health_gate": "REPORT_SEPARATELY_OR_EXPLICITLY_NOT_APPLIED",
+    "resolved_only_live_replay": "Every decision at time t may use only source features available at t and prior outcomes with exit_dt <= t."
+  },
+  "mandatory_robustness_slices": [
+    "full_period",
+    "recent_months",
+    "high_volatility",
+    "low_volatility",
+    "long",
+    "short",
+    "month_by_month",
+    "negative_month_count",
+    "Strong cost",
+    "Extreme cost",
+    "incremental portfolio value against A_CORE, B_STATE, P18 and W024A"
+  ],
+  "machine_learning": {
+    "allowed_now": false,
+    "reason": "Definitions and label-free artifacts must be rebuilt and frozen first, and a compliant reproducible walk-forward contract must be committed before training.",
+    "required_future_artifacts": [
+      "model pipeline",
+      "scaler or preprocessing pipeline",
+      "exact feature order",
+      "calibration if used",
+      "numeric threshold",
+      "all-proposal score registry",
+      "split and purge manifest",
+      "model manifest",
+      "artifact hashes"
+    ],
+    "automatic_retraining": false
+  },
+  "controls": {
+    "audit_only": true,
+    "labels_joined_after_invalidation": false,
+    "performance_review_authorized": false,
+    "model_training_authorized": false,
+    "automatic_promotion": false,
+    "automatic_registration": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false
+  },
+  "next_action": "Freeze a separate compliant expanding purged walk-forward evaluation contract only after the repaired label-free registry is complete."
+}

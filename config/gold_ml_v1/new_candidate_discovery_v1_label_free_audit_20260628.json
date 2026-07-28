@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-29",
+  "status": "INVALIDATED_BY_STATE_MACHINE_PARITY_DEFECT_REBUILD_REQUIRED",
+  "reason": "The prior raw proposal generator could rearm a candidate on the same M15 bar that confirmed, invalidated or expired its prior pending setup, contrary to the frozen state-machine addendum.",
+  "invalidated_registry": {
+    "previous_sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
+    "previous_rows": 5180,
+    "may_be_used_as_current_truth": false,
+    "may_be_used_for_candidate_selection": false,
+    "may_be_joined_to_labels": false
+  },
+  "repair": {
+    "generator_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "definition_or_threshold_change": false,
+    "same_bar_rearm_blocked_after": ["expiry", "invalidation", "confirmation"]
+  },
+  "required_rebuild_outputs": [
+    "complete deterministic raw proposal CSV.GZ before deduplication, one-position handling or outcome filtering",
+    "generator and source snapshot hashes",
+    "candidate and direction counts",
+    "yearly and monthly density",
+    "server-hour and weekday distributions",
+    "volatility, trend and range regime distributions",
+    "same-decision overlap with each of A_CORE, B_STATE, P18 and W024A",
+    "holding-interval overlap with each frozen benchmark sleeve",
+    "within-family and cross-family duplication",
+    "exact-M1 availability",
+    "2026 closed-bar prefix replay parity"
+  ],
+  "label_embargo": {
+    "active": true,
+    "release_condition": "The repaired raw registry and complete label-free audit are persisted and hash-frozen.",
+    "labels_joined": false,
+    "outcomes_may_be_read": false,
+    "wr_pf_r_may_be_read": false
+  },
+  "controls": {
+    "audit_only": true,
+    "live_runtime_modified": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "next_authorized_step": "RUN_REPAIRED_RAW_PROPOSAL_AND_COMPLETE_LABEL_FREE_AUDIT_ON_USER_PC_HISTORICAL_SOURCE"
+}

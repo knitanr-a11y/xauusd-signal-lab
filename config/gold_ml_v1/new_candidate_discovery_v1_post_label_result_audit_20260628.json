@@ -1,0 +1,76 @@
+{
+  "schema_version": 2,
+  "system_id": "GML1-NEW-INDEPENDENT-CANDIDATE-DISCOVERY-V1",
+  "date": "2026-06-29",
+  "status": "INVALIDATED_NON_AUTHORITATIVE_PENDING_REPAIRED_LABEL_FREE_REBUILD",
+  "invalidation_reason": "All labeled, cost, one-position, ML and portfolio summaries were derived from a raw proposal registry produced by a generator that violated the frozen no-same-bar-rearm state-machine rule.",
+  "previous_provenance_quarantined": {
+    "raw_proposal_registry_sha256": "226389f8befa2829d993c558cd82f55df742af47b58bce2cdcc5e3a1e0e0ee84",
+    "resolved_labeled_rows": 5153,
+    "previous_result_status": "POST_FREEZE_LABEL_AND_ML_AUDIT_COMPLETE_NO_PROMOTION_AUDIT_ONLY",
+    "may_be_used_as_current_performance": false,
+    "may_be_used_for_rejection_or_promotion": false,
+    "may_be_used_to_retune_candidate_definitions": false,
+    "may_be_used_to_select_thresholds": false
+  },
+  "invalidated_conclusions": [
+    "all ten candidates negative in 2024",
+    "ML confirmation gate failed",
+    "2026 prospective ML result",
+    "no candidate recommended",
+    "no-survivor conclusion"
+  ],
+  "repair": {
+    "generator_commit": "afe74e23c761b7769e3c08aff54150cfa5e0bdf5",
+    "test_commit": "175193860e46070b9889ac7224d05058d3a8843d",
+    "performance_guided_change": false,
+    "candidate_definition_changed": false,
+    "label_definition_changed": false
+  },
+  "label_source_for_future_rebuild": {
+    "contract": "config/gold_ml_v1/mlr1_label_contract_v1_20260627.json",
+    "contract_blob_sha": "30ab773d1ba01047469eb9a0a661480bc634ae31",
+    "label_registry_sha256": "c897a00905ca3edc47eff29a159beff21e1c1aafc66c6c41558ba3dfd2a0d7ed",
+    "join_keys": ["decision_time", "direction"],
+    "resolved_only": true,
+    "exact_m1_required": true,
+    "next_m1_fallback": false
+  },
+  "required_reporting_layers_after_rebuild": [
+    "raw resolved",
+    "cross-family dedup",
+    "candidate one-position",
+    "dedup then one-position",
+    "health gate separately or explicitly NOT_APPLIED",
+    "resolved-only live-reproducible replay"
+  ],
+  "required_robustness_after_rebuild": [
+    "full period",
+    "recent months",
+    "high volatility",
+    "low volatility",
+    "LONG",
+    "SHORT",
+    "month by month",
+    "negative month count",
+    "Strong cost",
+    "Extreme cost",
+    "incremental value against the frozen four-sleeve benchmark"
+  ],
+  "resolved_only_rule": "Any adaptive, survival, rolling or health history at current entry time may include only prior results with exit_dt <= current_entry_dt.",
+  "controls": {
+    "audit_only": true,
+    "candidate_stack_modified": false,
+    "live_runtime_modified": false,
+    "candidate_promoted": false,
+    "model_promoted": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "mt5_order": false,
+    "automatic_retraining": false,
+    "automatic_promotion": false,
+    "automatic_registration": false
+  },
+  "next_action": "Do not join labels or recompute performance until the repaired raw registry and complete label-free audit are rebuilt and hash-frozen."
+}
