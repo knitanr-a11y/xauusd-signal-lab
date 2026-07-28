@@ -4,7 +4,7 @@ chcp 65001 >nul
 for %%I in ("%~dp0\..\..\..\..") do set "REPO_ROOT=%%~fI"
 cd /d "%REPO_ROOT%"
 
-set "RECOVERY=scripts\mochipoyo_alert_research\m10p_incident\python\recover_m10p_preserved_start.py"
+set "RECOVERY=scripts\mochipoyo_alert_research\m10p_incident\python\recover_m10p_preserved_start_v2.py"
 if not exist "%RECOVERY%" (
   echo [M10P RECOVERY BLOCKED] Missing: %RECOVERY%
   echo Confirm branch feature/mochipoyo-alert-research, Fetch origin, and Pull origin.
@@ -20,15 +20,16 @@ if errorlevel 1 (
   exit /b 2
 )
 
-title M10P PRESERVED-START RECOVERY - AUDIT ONLY
+title M10P PRESERVED-START RECOVERY V2 - AUDIT ONLY
 mode con: cols=150 lines=42 >nul 2>&1
 
 echo ======================================================================
-echo M10P PRESERVED-START RECOVERY AFTER STATUS PUBLICATION RACE
+echo M10P PRESERVED-START RECOVERY V2 AFTER STATUS PUBLICATION RACE
 echo ======================================================================
 echo This is NOT BAT01 and does not initialize or reset M10P.
 echo It verifies the immutable start 2026.07.24 23:56:00, runtime, state,
 echo start receipt, BLOCKED cause, absent lock, absent old process and LATEST evidence.
+echo The PowerShell inventory query excludes its own process.
 echo It then resumes only M10P from the same preserved start.
 echo Keep the other eight healthy monitor windows running unchanged.
 echo Do not close this recovery window after the first PASS.
