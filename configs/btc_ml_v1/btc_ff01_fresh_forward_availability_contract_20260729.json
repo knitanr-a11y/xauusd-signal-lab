@@ -1,0 +1,153 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY",
+  "recorded_at": "2026-07-29",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "formal_status_before_stage": "BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED",
+  "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
+  "implementation": {
+    "python": "scripts/btc_ml_v1/fresh_forward_availability/python/audit_btc_fresh_forward_availability.py",
+    "bat_readme": "scripts/btc_ml_v1/fresh_forward_availability/bat/00_READ_ME_FIRST.txt",
+    "bat_run": "scripts/btc_ml_v1/fresh_forward_availability/bat/01_run_availability_audit.bat",
+    "bat_open_latest": "scripts/btc_ml_v1/fresh_forward_availability/bat/02_open_latest_results.bat",
+    "user_runs_python_directly": false,
+    "run_bat_opens_latest_after_execution": true,
+    "command_window_stays_open_after_run": true
+  },
+  "allowed_known_inputs": {
+    "repository_files": "<repo>/Files",
+    "known_mt5_terminal_files": "C:/Users/regen/AppData/Roaming/MetaQuotes/Terminal/2FA8A7E69CED7DC259B1AD86A247F675/MQL5/Files",
+    "reproduction_history": "C:/BTC_REPRO/history",
+    "btc4_long_h4_warmup": "C:/BTC_REPRO/h4_warmup/btcusdsharp_h4.csv",
+    "explicit_paths_via_numbered_bat": true,
+    "whole_pc_recursive_search": false,
+    "similar_symbol_substitution": false
+  },
+  "time_contract": {
+    "csv_time_is_bar_open": true,
+    "latest_csv_row_is_closed": true,
+    "naive_timestamp_is_utc": false,
+    "naive_timestamp_meaning": "MT5 broker-server wall-clock",
+    "canonical_conversion_module": "scripts/run_btc_youtube_candidates_dry_run_cycle.py",
+    "canonical_functions_reused": [
+      "_naive_utc",
+      "infer_broker_utc_offset_hours",
+      "_server_time_series_to_utc"
+    ],
+    "independent_fixed_two_or_three_hour_subtraction": false,
+    "post_cutoff_operator": ">"
+  },
+  "required_timeframes": [
+    "M5",
+    "M15",
+    "H1",
+    "D1",
+    "H4_FRESH_TAIL",
+    "H4_LONG_WARMUP_2017"
+  ],
+  "required_fields_per_inspected_file": [
+    "path",
+    "file_size_bytes",
+    "rows",
+    "first_raw_mt5_broker_server_timestamp",
+    "latest_raw_closed_bar_timestamp",
+    "timestamp_timezone_state",
+    "selected_broker_utc_offset_hours",
+    "broker_offset_inference_evidence",
+    "latest_utc_converted_closed_bar_timestamp",
+    "rows_strictly_after_cutoff_utc",
+    "non_ascending_timestamp_count",
+    "duplicate_timestamp_count",
+    "read_error_or_ambiguity"
+  ],
+  "readiness_integrity": {
+    "read_error_blocks_input": true,
+    "unresolved_broker_utc_offset_blocks_input": true,
+    "non_ascending_timestamp_blocks_input": true,
+    "duplicate_timestamp_blocks_input": true,
+    "no_rows_after_cutoff_blocks_fresh_input": true,
+    "candidates_classified_independently": true
+  },
+  "candidate_requirements": {
+    "BTC4_RISK_CAP_400": [
+      "H4_LONG_WARMUP_2017",
+      "H4_AFTER_CUTOFF",
+      "M5_AFTER_CUTOFF"
+    ],
+    "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786": [
+      "M5_AFTER_CUTOFF"
+    ],
+    "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886": [
+      "M15_AFTER_CUTOFF"
+    ],
+    "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110": [
+      "M5_AFTER_CUTOFF",
+      "M15_AFTER_CUTOFF",
+      "H1_AFTER_CUTOFF"
+    ],
+    "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080": [
+      "M5_AFTER_CUTOFF",
+      "M15_AFTER_CUTOFF",
+      "H1_AFTER_CUTOFF",
+      "D1_AFTER_CUTOFF"
+    ]
+  },
+  "output": {
+    "root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/01_fresh_forward_availability",
+    "latest": [
+      "00_READ_ME_FIRST.txt",
+      "01_availability_summary.json",
+      "02_availability_report.txt",
+      "99_UPLOAD_PACKAGE.zip"
+    ],
+    "archive_by_utc_execution_timestamp": true,
+    "zip_contains_raw_csv": false,
+    "normal_user_submission": "LATEST/99_UPLOAD_PACKAGE.zip"
+  },
+  "track_b_preservation": {
+    "branch": "feature/mochipoyo-alert-research",
+    "symbols": [
+      "BTCUSD",
+      "XAUUSD"
+    ],
+    "immutable_start_utc": "2026-07-20T14:54:15Z",
+    "collector_m7c_m8c_keep_running_unchanged": true,
+    "m7c_runtime_used_as_ff01_input": false,
+    "m7c_modified": false,
+    "m8c_modified": false,
+    "m10_scope": "XAUUSD_GOLD_ONLY",
+    "m10w24b_touched": false
+  },
+  "forbidden": {
+    "source_csv_mutation": true,
+    "source_csv_copy_or_merge": true,
+    "candidate_engine_execution": true,
+    "fresh_trade_generation": true,
+    "fresh_performance_evaluation": true,
+    "extended_csv_reproduction_execution": true,
+    "skip_input_hash_check_as_fresh_evaluator": true,
+    "candidate_rule_or_payoff_change": true,
+    "spread_pip_or_overlap_change": true,
+    "lot_or_monetary_dd_design": true,
+    "new_candidate_search_or_btc10r": true,
+    "collector_loop_or_dashboard": true,
+    "discord": true,
+    "mt5_order": true,
+    "live_ready": true,
+    "final_signal": true,
+    "feature_mochipoyo_checkout_merge_or_change": true,
+    "m7c_m8c_stop_restart_or_taskkill": true,
+    "m10w_touch": true
+  },
+  "validation_completed_before_commit": {
+    "python_compile": true,
+    "synthetic_all_five_ready": true,
+    "synthetic_d1_missing_blocks_only_btc9r": true,
+    "synthetic_all_inputs_missing_creates_blocked_package": true,
+    "zip_contains_reports_only": true
+  },
+  "mandatory_stop": "Stop after LATEST/99_UPLOAD_PACKAGE.zip or a clear BLOCKED package is produced. FF02 requires package review and explicit user authorization.",
+  "ff02_authorized": false
+}
