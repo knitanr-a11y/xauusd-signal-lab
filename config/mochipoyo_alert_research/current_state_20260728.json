@@ -2,7 +2,7 @@
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/mochipoyo-alert-research",
-  "status": "M10W29_NO_ADVANCE_M10W30_SCALE_SHIFT_DIAGNOSED_M10W31_INFORMATION_AUDIT_READY_AUDIT_ONLY",
+  "status": "M10W31_PASS_M10W32_FROZEN_M10W33_PREREGISTERED_EVALUATION_READY_AUDIT_ONLY",
   "scope": "XAUUSD_GOLD_ONLY",
   "observed_monitor_state": {
     "running_private_snapshot_loops": ["M9V", "M9Y", "M10B", "M10E", "M10P", "M10P2", "M10W19", "M10W26"],
@@ -33,39 +33,49 @@
   "M10W29": {
     "status": "PASS_NO_ADVANCING_LOW_ATR_MICROSTRUCTURE_ENTRY_FAMILY_AUDIT_ONLY",
     "result": "config/mochipoyo_alert_research/m10w29_user_local_result_20260728.json",
-    "package_sha256": "9584283d1a7079d50f33f360a616d1ff9b91dcf1e6a69797ef366f5e57919840",
     "advancing_family_count": 0,
-    "LMVI1": {"classification": "REJECT", "test_pf": 0.8791958114998707, "all_pf": 1.4076241372835898},
-    "LMWR1": {"classification": "WEAK_OR_INCONSISTENT", "test_pf": 1.0486208441209173, "all_pf": 1.4574238418173455},
-    "LMMO1": {"classification": "REJECT", "test_pf": 0.5806072055646669, "all_pf": 1.3191463893084718},
-    "post_result_tuning_forbidden": true,
-    "fresh_shadow_authorized": false
-  },
-  "M10W30": {
-    "status": "PASS_MATERIAL_2026_COVARIATE_SCALE_SHIFT_DIAGNOSTIC_ONLY",
-    "result": "config/mochipoyo_alert_research/m10w30_independent_covariate_shift_result_20260728.json",
-    "post_result_diagnostic_only": true,
-    "test_severe_PSI_feature_count": 4,
-    "test_moderate_PSI_feature_count": 2,
-    "material_scale_drift": ["last_closed_m1_spread_bps", "m5_range3_bps", "m1_range5_bps", "m5_ret3_bps"],
-    "formula_trigger_density_collapsed": false,
-    "M10W29_family_rescued": false
+    "families_permanently_closed_without_rescue": ["LMVI1", "LMWR1", "LMMO1"]
   },
   "M10W31": {
-    "status": "DESIGN_FROZEN_IMPLEMENTED_READY_FOR_USER_LOCAL_OUTCOME_BLIND_AUDIT",
-    "contract": "config/mochipoyo_alert_research/m10w31_scale_normalized_causal_information_availability_contract_20260728.json",
-    "runner": "scripts/mochipoyo_alert_research/m10w31/python/run_scale_normalized_causal_information_audit.py",
-    "operator": "scripts/mochipoyo_alert_research/m10w31/bat/01_run_scale_normalized_information_audit.bat",
-    "exact_parent_rows": 7480,
-    "entry_formula_created": false,
-    "threshold_selected": false,
-    "future_return_or_outcome_use": false,
+    "status": "PASS_SCALE_NORMALIZED_CAUSAL_INFORMATION_AVAILABLE_AUDIT_ONLY",
+    "result": "config/mochipoyo_alert_research/m10w31_user_local_result_20260728.json",
+    "package_sha256": "7483f46087c5ed8cfb673dc0c34976a57387885738e5ecaa6a568f89b6612120",
+    "exact_rows": 7480,
+    "decision_time_set_match": true,
+    "missing_context_count": 0,
+    "source_timing_violation_count": 0,
+    "degenerate_feature_count": 0,
+    "selected_features_test_PSI_below_0p05": true,
+    "excluded_material_drift_features": ["h1_atr14_usd", "h1_atr14_bps", "last_closed_m1_spread_usd", "last_closed_m1_spread_over_h1_atr14"],
+    "M10W29_family_rescued": false
+  },
+  "M10W32": {
+    "status": "HYPOTHESES_FROZEN_BEFORE_OUTCOME_EVALUATION",
+    "contract": "config/mochipoyo_alert_research/m10w32_scale_normalized_entry_preregistration_20260728.json",
+    "families": [
+      "SNRI1_LONG_M5_NORMALIZED_RANGE_IMPULSE",
+      "SNRC1_LONG_M15_NORMALIZED_RECLAIM_CONTINUATION",
+      "SNDX1_LONG_DUAL_SCALE_NORMALIZED_EXPANSION"
+    ],
+    "outcome_used_for_design": false,
+    "semantic_thresholds_only": true,
+    "spread_or_absolute_ATR_feature_used": false
+  },
+  "M10W33": {
+    "status": "IMPLEMENTED_READY_FOR_USER_LOCAL_PREREGISTERED_EVALUATION_AUDIT_ONLY",
+    "implementation_audit": "config/mochipoyo_alert_research/m10w33_preexecution_implementation_audit_20260728.json",
+    "runner": "scripts/mochipoyo_alert_research/m10w33/python/run_scale_normalized_entry_eval.py",
+    "operator": "scripts/mochipoyo_alert_research/m10w33/bat/01_run_scale_normalized_entry_eval.bat",
+    "formula_change": false,
+    "threshold_change": false,
+    "horizon_change": false,
+    "historical_interpretation": "EXPLORATORY_NOT_FRESH_SUPPORT",
     "user_local_execution_authorized": true
   },
   "research_authorization": {
     "M10W26_keep_running": true,
-    "M10W31_outcome_blind_user_local_execution": true,
-    "M10W31_entry_formula_or_threshold_creation": false,
+    "M10W33_user_local_execution": true,
+    "M10W33_post_result_tuning": false,
     "M10V": false,
     "keep_existing_seven_v4_loops_running": true
   },
@@ -77,8 +87,8 @@
     "manual_lock_runtime_state_snapshot_adapter_or_journal_edit_or_delete": true,
     "prospective_start_reset": true,
     "historical_backfill_before_start": true,
-    "M10W29_formula_threshold_session_ATR_horizon_exit_or_runner_tuning": true,
-    "M10W31_outcome_correlation_or_candidate_creation_before_review": true,
+    "M10W29_family_rescue": true,
+    "M10W33_formula_threshold_feature_session_spread_ATR_horizon_exit_or_runner_tuning": true,
     "M10V_before_M10P_and_M10P2_each_20_resolved_and_integrity_PASS": true
   },
   "safety": {
