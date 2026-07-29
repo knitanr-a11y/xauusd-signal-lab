@@ -32,10 +32,9 @@ KNOWN_TERMINAL = Path(
     r"C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files"
 )
 KNOWN_HISTORY = Path(r"C:\BTC_REPRO\history")
-KNOWN_WARMUP = Path(r"C:\BTC_REPRO\h4_warmup\btcusdsharp_h4.csv")
 
 CANDIDATE_REQUIREMENTS = {
-    "BTC4_RISK_CAP_400": ("H4_LONG_WARMUP_2017", "H4_AFTER_CUTOFF", "M5_AFTER_CUTOFF"),
+    "BTC4_RISK_CAP_400": ("H4_AFTER_CUTOFF", "M5_AFTER_CUTOFF"),
     "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786": ("M5_AFTER_CUTOFF",),
     "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886": ("M15_AFTER_CUTOFF",),
     "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110": (
@@ -74,36 +73,27 @@ def path_key(path: Path) -> str:
     return os.path.normcase(str(path.expanduser().resolve()))
 
 
-def git_dir() -> Path | None:
+def git_identity() -> dict[str, str]:
     marker = ROOT / ".git"
-    if marker.is_dir():
-        return marker
+    result = {"commit": "UNKNOWN_NO_GIT_METADATA", "branch": "UNKNOWN_NO_GIT_METADATA"}
     if marker.is_file():
         text = marker.read_text(encoding="utf-8", errors="replace").strip()
         if text.lower().startswith("gitdir:"):
-            candidate = Path(text.split(":", 1)[1].strip())
-            return candidate if candidate.is_absolute() else (ROOT / candidate).resolve()
-    return None
-
-
-def git_identity() -> dict[str, str]:
-    directory = git_dir()
-    result = {"commit": "UNKNOWN_NO_GIT_METADATA", "branch": "UNKNOWN_NO_GIT_METADATA"}
-    if directory is None:
+            raw = Path(text.split(":", 1)[1].strip())
+            marker = raw if raw.is_absolute() else (ROOT / raw).resolve()
+    if not marker.is_dir():
         return result
     try:
-        head = (directory / "HEAD").read_text(encoding="utf-8", errors="replace").strip()
+        head = (marker / "HEAD").read_text(encoding="utf-8", errors="replace").strip()
         if not head.startswith("ref:"):
-            result["commit"] = head
-            result["branch"] = "DETACHED_HEAD"
-            return result
+            return {"commit": head, "branch": "DETACHED_HEAD"}
         ref = head.split(":", 1)[1].strip()
         result["branch"] = ref.removeprefix("refs/heads/")
-        loose = directory / ref
+        loose = marker / ref
         if loose.is_file():
             result["commit"] = loose.read_text(encoding="utf-8", errors="replace").strip()
             return result
-        packed = directory / "packed-refs"
+        packed = marker / "packed-refs"
         if packed.is_file():
             for line in packed.read_text(encoding="utf-8", errors="replace").splitlines():
                 if not line or line.startswith(("#", "^")):
@@ -114,27 +104,11 @@ def git_identity() -> dict[str, str]:
                     return result
         result["commit"] = "UNKNOWN_GIT_REF_NOT_RESOLVED"
     except Exception as exc:
-        result["commit"] = f"UNKNOWN_GIT_READ_FAILED:{type(exc).__name__}"
-        result["branch"] = "UNKNOWN_GIT_READ_FAILED"
+        result = {
+            "commit": f"UNKNOWN_GIT_READ_FAILED:{type(exc).__name__}",
+            "branch": "UNKNOWN_GIT_READ_FAILED",
+        }
     return result
-
-
-def _read_header(path: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
-    attempts = [
-        {"low_memory": False},
-        {"sep": None, "engine": "python"},
-    ]
-    errors: list[str] = []
-    for kwargs in attempts:
-        try:
-            header = pd.read_csv(path, nrows=0, **kwargs)
-            columns = {str(column).strip().lower(): column for column in header.columns}
-            if "time" in columns:
-                return header, kwargs
-            errors.append(f"missing time column with kwargs={kwargs}: {list(header.columns)}")
-        except Exception as exc:
-            errors.append(f"{type(exc).__name__} with kwargs={kwargs}: {exc}")
-    raise ValueError("; ".join(errors))
 
 
 def read_times(path: Path) -> tuple[dict[str, Any], pd.Series | None]:
@@ -156,22 +130,35 @@ def read_times(path: Path) -> tuple[dict[str, Any], pd.Series | None]:
     }
     try:
         row["file_size_bytes"] = int(resolved.stat().st_size)
-        header, read_kwargs = _read_header(resolved)
-        columns = {str(column).strip().lower(): column for column in header.columns}
-        frame = pd.read_csv(resolved, usecols=[columns["time"]], **read_kwargs)
+        last_error = ""
+        for kwargs in ({"low_memory": False}, {"sep": None, "engine": "python"}):
+            try:
+                header = pd.read_csv(resolved, nrows=0, **kwargs)
+                columns = {str(column).strip().lower(): column for column in header.columns}
+                if "time" not in columns:
+                    raise ValueError(f"missing time column: {list(header.columns)}")
+                frame = pd.read_csv(resolved, usecols=[columns["time"]], **kwargs)
+                break
+            except Exception as exc:
+                last_error = f"{type(exc).__name__}: {exc}"
+        else:
+            raise ValueError(last_error)
+
         times = pd.to_datetime(frame.iloc[:, 0], errors="coerce")
         if len(times) == 0:
             raise ValueError("empty CSV")
         invalid = int(times.isna().sum())
         if invalid:
             raise ValueError(f"invalid time rows: {invalid}")
-        aware_count = int(sum(getattr(value, "tzinfo", None) is not None for value in times))
-        if aware_count == 0:
+
+        aware = [getattr(value, "tzinfo", None) is not None for value in times]
+        if all(not value for value in aware):
             timezone_state = "NAIVE_MT5_BROKER_SERVER_WALL_CLOCK"
-        elif aware_count == len(times):
+        elif all(aware):
             timezone_state = "TIMEZONE_AWARE_INPUT"
         else:
             raise ValueError("mixed naive and timezone-aware timestamps")
+
         row.update(
             rows=int(len(times)),
             first_raw_mt5_broker_server_timestamp=text_time(times.iloc[0]),
@@ -196,11 +183,8 @@ def exact_file(directory: Path, filename: str) -> list[Path]:
 
 
 def add_unique(found: dict[str, list[Path]], timeframe: str, path: Path, seen: set[str]) -> None:
-    if not path.is_file():
-        return
-    token = path_key(path)
-    if token not in seen:
-        seen.add(token)
+    if path.is_file() and path_key(path) not in seen:
+        seen.add(path_key(path))
         found[timeframe].append(path)
 
 
@@ -209,24 +193,22 @@ def discover(resolver: Any, args: argparse.Namespace) -> tuple[dict[str, list[Pa
     locations: list[dict[str, Any]] = []
     seen: set[str] = set()
 
-    explicit_files = {
+    explicit = {
         "M5": args.m5_csv,
         "M15": args.m15_csv,
         "H1": args.h1_csv,
         "D1": args.d1_csv,
-        "H4": args.h4_fresh_csv,
+        "H4": args.h4_csv,
     }
-    for timeframe, path in explicit_files.items():
+    for timeframe, path in explicit.items():
         if path is None:
             continue
-        locations.append(
-            {
-                "label": f"EXPLICIT_{timeframe}_CSV",
-                "path": str(path.expanduser().resolve()),
-                "exists": path.is_file(),
-                "resolution_errors": [] if path.is_file() else ["explicit file does not exist"],
-            }
-        )
+        locations.append({
+            "label": f"EXPLICIT_{timeframe}_CSV",
+            "path": str(path.expanduser().resolve()),
+            "exists": path.is_file(),
+            "resolution_errors": [] if path.is_file() else ["explicit file does not exist"],
+        })
         add_unique(found, timeframe, path, seen)
 
     for label, directory in (
@@ -245,32 +227,23 @@ def discover(resolver: Any, args: argparse.Namespace) -> tuple[dict[str, list[Pa
             continue
         for timeframe in ("M5", "M15", "H4"):
             try:
-                path = Path(resolver.resolve_live_csv(directory, timeframe.lower()))
+                candidate = Path(resolver.resolve_live_csv(directory, timeframe.lower()))
             except FileNotFoundError:
                 continue
             except Exception as exc:
-                item["resolution_errors"].append(f"{timeframe}: {type(exc).__name__}: {exc}")
+                item["resolution_errors"].append(
+                    f"{timeframe}: {type(exc).__name__}: {exc}"
+                )
                 continue
-            add_unique(found, timeframe, path, seen)
+            add_unique(found, timeframe, candidate, seen)
         for timeframe in ("H1", "D1"):
             matches = exact_file(directory, f"btcusdsharp_{timeframe.lower()}.csv")
             if len(matches) > 1:
                 item["resolution_errors"].append(
-                    f"{timeframe}: multiple exact btcusdsharp files: {[path.name for path in matches]}"
+                    f"{timeframe}: multiple exact btcusdsharp files: {[p.name for p in matches]}"
                 )
             elif matches:
                 add_unique(found, timeframe, matches[0], seen)
-
-    warmup = args.h4_warmup_csv
-    locations.append(
-        {
-            "label": "BTC4_LONG_H4_WARMUP",
-            "path": str(warmup.expanduser().resolve()),
-            "exists": warmup.is_file(),
-            "resolution_errors": [] if warmup.is_file() else ["H4 warmup file does not exist"],
-        }
-    )
-    add_unique(found, "H4", warmup, seen)
     return found, locations
 
 
@@ -279,8 +252,8 @@ def infer_clock(
     records: list[dict[str, Any]],
     explicit_offset: float | None,
 ) -> dict[str, Any]:
-    required_functions = ("_naive_utc", "infer_broker_utc_offset_hours", "_server_time_series_to_utc")
-    missing = [name for name in required_functions if not hasattr(freshness, name)]
+    required = ("_naive_utc", "infer_broker_utc_offset_hours", "_server_time_series_to_utc")
+    missing = [name for name in required if not hasattr(freshness, name)]
     if missing:
         return {
             "status": "BLOCKED_CANONICAL_CONVERSION_FUNCTION_MISSING",
@@ -297,28 +270,27 @@ def infer_clock(
             continue
         if int(row["non_ascending_timestamp_count"] or 0) > 0:
             continue
-        latest = row["latest_raw_closed_bar_timestamp"]
-        synthetic = pd.Timestamp(latest) + pd.Timedelta(minutes=TF_MINUTES[row["timeframe"]])
-        references.append((synthetic, row))
+        latest = pd.Timestamp(row["latest_raw_closed_bar_timestamp"])
+        references.append((latest + pd.Timedelta(minutes=TF_MINUTES[row["timeframe"]]), row))
     if not references:
         return {
             "status": "BLOCKED_NO_VALID_M5_M15_REFERENCE",
             "selected_utc_offset_hours": None,
             "implementation": str(FRESHNESS_PY.relative_to(ROOT)),
-            "functions_reused": list(required_functions),
+            "functions_reused": list(required),
         }
 
     reference, source = max(references, key=lambda pair: pair[0])
     now_utc = freshness._naive_utc()
-    inferred_offset, candidate_ages = freshness.infer_broker_utc_offset_hours(reference, now_utc=now_utc)
-    selected_offset = float(explicit_offset) if explicit_offset is not None else float(inferred_offset)
+    inferred, ages = freshness.infer_broker_utc_offset_hours(reference, now_utc=now_utc)
+    selected = float(explicit_offset) if explicit_offset is not None else float(inferred)
     return {
         "status": "READY_CANONICAL_MAIN_CONVERSION",
         "timestamp_contract": "MT5 CSV time is broker-server wall clock; naive values are not UTC",
-        "selected_utc_offset_hours": selected_offset,
+        "selected_utc_offset_hours": selected,
         "selection_mode": "EXPLICIT_CANONICAL_OVERRIDE" if explicit_offset is not None else "AUTO_NEAREST_UTC2_UTC3",
         "offset_candidates_hours": list(getattr(freshness, "BROKER_UTC_OFFSET_CANDIDATES", (2.0, 3.0))),
-        "candidate_reference_ages_minutes": candidate_ages,
+        "candidate_reference_ages_minutes": ages,
         "now_utc": text_time(now_utc),
         "reference": {
             "timeframe": source["timeframe"],
@@ -327,7 +299,7 @@ def infer_clock(
             "synthetic_next_bar_open_broker_server": text_time(reference),
         },
         "implementation": str(FRESHNESS_PY.relative_to(ROOT)),
-        "functions_reused": list(required_functions),
+        "functions_reused": list(required),
     }
 
 
@@ -341,13 +313,16 @@ def apply_clock(
     if offset is None:
         return
     evidence = {
-        "status": clock.get("status"),
-        "selection_mode": clock.get("selection_mode"),
-        "offset_candidates_hours": clock.get("offset_candidates_hours"),
-        "candidate_reference_ages_minutes": clock.get("candidate_reference_ages_minutes"),
-        "reference": clock.get("reference"),
-        "implementation": clock.get("implementation"),
-        "functions_reused": clock.get("functions_reused"),
+        key: clock.get(key)
+        for key in (
+            "status",
+            "selection_mode",
+            "offset_candidates_hours",
+            "candidate_reference_ages_minutes",
+            "reference",
+            "implementation",
+            "functions_reused",
+        )
     }
     for row in records:
         times = parsed.get(path_key(Path(row["path"])))
@@ -360,7 +335,7 @@ def apply_clock(
         row["rows_strictly_after_cutoff_utc"] = int((utc_times > CUTOFF).sum())
 
 
-def row_blocking_reasons(row: dict[str, Any] | None, *, require_after_cutoff: bool) -> list[str]:
+def blocking_reasons(row: dict[str, Any] | None) -> list[str]:
     if row is None:
         return ["NO_MATCHING_BTCUSD_FILE"]
     reasons: list[str] = []
@@ -372,7 +347,7 @@ def row_blocking_reasons(row: dict[str, Any] | None, *, require_after_cutoff: bo
         reasons.append(f"NON_ASCENDING_TIMESTAMPS:{row['non_ascending_timestamp_count']}")
     if int(row["duplicate_timestamp_count"] or 0) > 0:
         reasons.append(f"DUPLICATE_TIMESTAMPS:{row['duplicate_timestamp_count']}")
-    if require_after_cutoff and int(row["rows_strictly_after_cutoff_utc"] or 0) <= 0:
+    if int(row["rows_strictly_after_cutoff_utc"] or 0) <= 0:
         reasons.append("NO_ROWS_STRICTLY_AFTER_CUTOFF_UTC")
     return reasons
 
@@ -380,7 +355,8 @@ def row_blocking_reasons(row: dict[str, Any] | None, *, require_after_cutoff: bo
 def choose_latest(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     valid = [
         row for row in rows
-        if not row["read_error_or_ambiguity"] and row["latest_utc_converted_closed_bar_timestamp"]
+        if not row["read_error_or_ambiguity"]
+        and row["latest_utc_converted_closed_bar_timestamp"]
     ]
     return max(
         valid,
@@ -389,69 +365,30 @@ def choose_latest(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     )
 
 
-def choose_warmup(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    valid = [
-        row for row in rows
-        if not row["read_error_or_ambiguity"] and row["first_raw_mt5_broker_server_timestamp"]
-    ]
-    return min(
-        valid,
-        key=lambda row: pd.Timestamp(row["first_raw_mt5_broker_server_timestamp"]),
-        default=None,
-    )
-
-
-def build_requirement_state(
-    selected: dict[str, dict[str, Any] | None],
-    warmup: dict[str, Any] | None,
-) -> dict[str, dict[str, Any]]:
-    states: dict[str, dict[str, Any]] = {}
+def candidate_readiness(selected: dict[str, dict[str, Any] | None]) -> dict[str, Any]:
+    requirements: dict[str, dict[str, Any]] = {}
     for timeframe in TFS:
         row = selected[timeframe]
-        reasons = row_blocking_reasons(row, require_after_cutoff=True)
-        states[f"{timeframe}_AFTER_CUTOFF"] = {
+        reasons = blocking_reasons(row)
+        requirements[f"{timeframe}_AFTER_CUTOFF"] = {
             "satisfied": not reasons,
             "path": "" if row is None else row["path"],
+            "rows_strictly_after_cutoff_utc": (
+                None if row is None else row["rows_strictly_after_cutoff_utc"]
+            ),
             "blocking_reasons": reasons,
-            "rows_strictly_after_cutoff_utc": None if row is None else row["rows_strictly_after_cutoff_utc"],
         }
 
-    warmup_reasons = row_blocking_reasons(warmup, require_after_cutoff=False)
-    if warmup is not None and not warmup["read_error_or_ambiguity"]:
-        first = warmup["first_raw_mt5_broker_server_timestamp"]
-        if not first or pd.Timestamp(first).year > 2017:
-            warmup_reasons.append("H4_WARMUP_DOES_NOT_START_IN_2017_OR_EARLIER")
-    states["H4_LONG_WARMUP_2017"] = {
-        "satisfied": not warmup_reasons,
-        "path": "" if warmup is None else warmup["path"],
-        "blocking_reasons": warmup_reasons,
-        "first_raw_mt5_broker_server_timestamp": "" if warmup is None else warmup["first_raw_mt5_broker_server_timestamp"],
-        "reference_expected_first_time": "2017-01-02 04:00:00",
-    }
-    return states
-
-
-def candidate_readiness(requirement_states: dict[str, dict[str, Any]]) -> dict[str, Any]:
     result: dict[str, Any] = {}
-    for candidate, requirement_names in CANDIDATE_REQUIREMENTS.items():
-        requirements = {name: requirement_states[name] for name in requirement_names}
-        missing = [name for name, state in requirements.items() if not state["satisfied"]]
+    for candidate, names in CANDIDATE_REQUIREMENTS.items():
+        checks = {name: requirements[name] for name in names}
+        missing = [name for name, check in checks.items() if not check["satisfied"]]
         result[candidate] = {
             "status": "READY" if not missing else "BLOCKED",
-            "requirements": requirements,
+            "requirements": checks,
             "missing_or_ambiguous_requirements": missing,
         }
     return result
-
-
-def location_ambiguities(locations: list[dict[str, Any]], timeframe: str) -> list[str]:
-    prefix = f"{timeframe}:"
-    return [
-        f"{item['label']}:{error}"
-        for item in locations
-        for error in item.get("resolution_errors", [])
-        if str(error).startswith(prefix)
-    ]
 
 
 def report_text(summary: dict[str, Any]) -> str:
@@ -467,6 +404,7 @@ def report_text(summary: dict[str, Any]) -> str:
         f"broker_utc_offset_hours: {summary['broker_clock'].get('selected_utc_offset_hours')}",
         f"broker_clock_status: {summary['broker_clock'].get('status')}",
         "",
+        "Correction: the 2017-start H4 package was historical reproduction-only and is not a fresh-forward readiness requirement.",
         "Safety: source CSV read-only. No fresh trades, performance evaluation, reproduction, collector, Discord, MT5 order, live-ready or final signal.",
         "",
         "Timeframes",
@@ -479,80 +417,61 @@ def report_text(summary: dict[str, Any]) -> str:
         if row is None:
             lines.append("  path=NOT_FOUND")
         else:
-            lines.extend(
-                [
-                    f"  path={row['path']}",
-                    f"  size={row['file_size_bytes']} rows={row['rows']}",
-                    f"  first_server={row['first_raw_mt5_broker_server_timestamp']}",
-                    f"  latest_server_closed={row['latest_raw_closed_bar_timestamp']}",
-                    f"  latest_utc_closed={row['latest_utc_converted_closed_bar_timestamp']}",
-                    f"  after_cutoff={row['rows_strictly_after_cutoff_utc']}",
-                    f"  non_ascending={row['non_ascending_timestamp_count']} duplicates={row['duplicate_timestamp_count']}",
-                    f"  read_error_or_ambiguity={row['read_error_or_ambiguity'] or 'NONE'}",
-                ]
-            )
+            lines.extend([
+                f"  path={row['path']}",
+                f"  size={row['file_size_bytes']} rows={row['rows']}",
+                f"  first_server={row['first_raw_mt5_broker_server_timestamp']}",
+                f"  latest_server_closed={row['latest_raw_closed_bar_timestamp']}",
+                f"  latest_utc_closed={row['latest_utc_converted_closed_bar_timestamp']}",
+                f"  after_cutoff={row['rows_strictly_after_cutoff_utc']}",
+                f"  non_ascending={row['non_ascending_timestamp_count']} duplicates={row['duplicate_timestamp_count']}",
+                f"  read_error_or_ambiguity={row['read_error_or_ambiguity'] or 'NONE'}",
+            ])
         lines.append(f"  blocking_reasons={item['blocking_reasons'] or ['NONE']}")
-        if item["discovery_ambiguities"]:
-            lines.append(f"  discovery_ambiguities={item['discovery_ambiguities']}")
 
-    warmup = summary["h4_checks"]["long_warmup"]
-    lines.extend(
-        [
-            "",
-            "H4 long warmup",
-            "--------------",
-            f"status: {warmup['status']}",
-            f"path: {warmup['path'] or 'NOT_FOUND'}",
-            f"first_server: {warmup['first_raw_mt5_broker_server_timestamp'] or 'UNKNOWN'}",
-            f"blocking_reasons: {warmup['blocking_reasons'] or ['NONE']}",
-            "",
-            "Candidate readiness",
-            "-------------------",
-        ]
-    )
+    lines.extend(["", "Candidate readiness", "-------------------"])
     for candidate, value in summary["candidate_readiness"].items():
         missing = value["missing_or_ambiguous_requirements"] or ["NONE"]
         lines.append(f"{candidate}: {value['status']} missing_or_ambiguous={missing}")
     if summary.get("fatal_error"):
         lines.extend(["", f"fatal_error: {summary['fatal_error']}"])
-    lines.extend(
-        [
-            "",
-            "STOP: FF01 ends here. Upload 99_UPLOAD_PACKAGE.zip. Do not run FF02 or any evaluator without explicit approval.",
-        ]
-    )
+    lines.extend([
+        "",
+        "STOP: FF01 ends here. Upload 99_UPLOAD_PACKAGE.zip. Do not run FF02 or any evaluator without explicit approval.",
+    ])
     return "\n".join(lines) + "\n"
 
 
 def read_me_text(summary: dict[str, Any]) -> str:
-    return "\n".join(
-        [
-            "BTC ML V1 / FF01 fresh-forward availability audit",
-            "=" * 55,
-            f"generated_at_utc: {summary['generated_at_utc']}",
-            f"repository_branch: {summary['repository']['branch']}",
-            f"repository_commit: {summary['repository']['commit']}",
-            f"overall_status: {summary['overall_status']}",
-            "",
-            "Files in this folder:",
-            "01_availability_summary.json  machine-readable complete availability result",
-            "02_availability_report.txt    human-readable candidate-specific READY/BLOCKED report",
-            "99_UPLOAD_PACKAGE.zip         upload this single file to ChatGPT",
-            "",
-            "This stage is availability-only and source-CSV read-only.",
-            "No candidate engine, fresh performance evaluator, reproduction, collector, Discord, MT5 order, live-ready or final-signal action was run.",
-            "",
-            "After uploading 99_UPLOAD_PACKAGE.zip, stop. FF02 is not authorized.",
-        ]
-    ) + "\n"
+    return "\n".join([
+        "BTC ML V1 / FF01 fresh-forward availability audit",
+        "=" * 55,
+        f"generated_at_utc: {summary['generated_at_utc']}",
+        f"repository_branch: {summary['repository']['branch']}",
+        f"repository_commit: {summary['repository']['commit']}",
+        f"overall_status: {summary['overall_status']}",
+        "",
+        "Files in this folder:",
+        "01_availability_summary.json  machine-readable complete availability result",
+        "02_availability_report.txt    human-readable candidate-specific READY/BLOCKED report",
+        "99_UPLOAD_PACKAGE.zip         upload this single file to ChatGPT",
+        "",
+        "The old 2017-start H4 package was historical reproduction-only.",
+        "It is not required for current fresh-forward readiness.",
+        "",
+        "This stage is availability-only and source-CSV read-only.",
+        "No candidate engine, fresh performance evaluator, reproduction, collector, Discord, MT5 order, live-ready or final-signal action was run.",
+        "",
+        "After uploading 99_UPLOAD_PACKAGE.zip, stop. FF02 is not authorized.",
+    ]) + "\n"
 
 
-def replace_latest(archive_dir: Path, latest_dir: Path, filenames: Sequence[str]) -> None:
+def replace_latest(archive_dir: Path, latest_dir: Path, names: Sequence[str]) -> None:
     temp_latest = latest_dir.parent / f"LATEST.__new__.{os.getpid()}"
     if temp_latest.exists():
         shutil.rmtree(temp_latest)
     temp_latest.mkdir(parents=True, exist_ok=False)
-    for name in filenames:
+    for name in names:
         shutil.copy2(archive_dir / name, temp_latest / name)
     if latest_dir.exists():
         shutil.rmtree(latest_dir)
@@ -566,39 +485,46 @@ def write_outputs(summary: dict[str, Any], output_root: Path) -> dict[str, str]:
     latest_dir = root / "LATEST"
     archive_dir.mkdir(parents=True, exist_ok=False)
 
-    readme_path = archive_dir / "00_READ_ME_FIRST.txt"
-    summary_path = archive_dir / "01_availability_summary.json"
-    report_path = archive_dir / "02_availability_report.txt"
-    zip_path = archive_dir / "99_UPLOAD_PACKAGE.zip"
+    readme = archive_dir / "00_READ_ME_FIRST.txt"
+    summary_json = archive_dir / "01_availability_summary.json"
+    report = archive_dir / "02_availability_report.txt"
+    package = archive_dir / "99_UPLOAD_PACKAGE.zip"
 
-    readme_path.write_text(read_me_text(summary), encoding="utf-8")
-    summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str), encoding="utf-8")
-    report_path.write_text(report_text(summary), encoding="utf-8")
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        for path in (readme_path, summary_path, report_path):
+    readme.write_text(read_me_text(summary), encoding="utf-8")
+    summary_json.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
+    report.write_text(report_text(summary), encoding="utf-8")
+    with zipfile.ZipFile(package, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in (readme, summary_json, report):
             archive.write(path, path.name)
 
-    names = [readme_path.name, summary_path.name, report_path.name, zip_path.name]
+    names = [readme.name, summary_json.name, report.name, package.name]
     replace_latest(archive_dir, latest_dir, names)
     return {
         "output_root": str(root),
         "archive_dir": str(archive_dir),
         "latest_dir": str(latest_dir),
-        "availability_summary": str(latest_dir / summary_path.name),
-        "availability_report": str(latest_dir / report_path.name),
-        "upload_package": str(latest_dir / zip_path.name),
+        "availability_summary": str(latest_dir / summary_json.name),
+        "availability_report": str(latest_dir / report.name),
+        "upload_package": str(latest_dir / package.name),
     }
 
 
 def base_summary() -> dict[str, Any]:
     return {
-        "schema_version": "btc_ff01_fresh_forward_availability_v1",
+        "schema_version": "btc_ff01_fresh_forward_availability_v2",
         "stage": "BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY",
-        "formal_status_before_run": "BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED",
         "generated_at_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
         "repository": git_identity(),
         "cutoff_utc_exclusive": text_time(CUTOFF),
         "latest_csv_row_contract": "CLOSED",
+        "historical_h4_warmup_policy": {
+            "status": "NOT_REQUIRED_FOR_FRESH_FORWARD",
+            "purpose": "historical full reproduction only",
+            "old_reference_package": "BTCUSD_H4_WARMUP_PACKAGE.zip",
+        },
         "audit_complete": False,
         "overall_status": "BLOCKED_AUDIT_NOT_COMPLETED",
         "fatal_error": "",
@@ -610,17 +536,8 @@ def base_summary() -> dict[str, Any]:
                 "inspected_files": [],
                 "selected_fresh_tail": None,
                 "blocking_reasons": ["AUDIT_NOT_COMPLETED"],
-                "discovery_ambiguities": [],
             }
             for timeframe in TFS
-        },
-        "h4_checks": {
-            "long_warmup": {
-                "status": "BLOCKED",
-                "path": "",
-                "first_raw_mt5_broker_server_timestamp": "",
-                "blocking_reasons": ["AUDIT_NOT_COMPLETED"],
-            }
         },
         "candidate_readiness": {
             candidate: {
@@ -629,12 +546,6 @@ def base_summary() -> dict[str, Any]:
                 "missing_or_ambiguous_requirements": list(requirements),
             }
             for candidate, requirements in CANDIDATE_REQUIREMENTS.items()
-        },
-        "definitions": {
-            "rows_strictly_after_cutoff_utc": "UTC-converted bar-open timestamp strictly greater than 2026-07-02 02:15:00",
-            "non_ascending_timestamp_count": "adjacent decreases in original CSV order",
-            "duplicate_timestamp_count": "timestamps beyond the first occurrence",
-            "latest_csv_row": "closed by BTC ML V1 CSV contract",
         },
         "safety": {
             "source_csv_access": "READ_ONLY",
@@ -646,14 +557,12 @@ def base_summary() -> dict[str, Any]:
             "fresh_trade_generation_executed": False,
             "fresh_performance_evaluation_executed": False,
             "reproduction_script_executed": False,
-            "skip_input_hash_check_used": False,
             "collector_touched": False,
             "m7c_touched": False,
             "m8c_touched": False,
             "mochipoyo_branch_touched": False,
             "m10w24b_touched": False,
             "gold_touched": False,
-            "btc10r_included": False,
             "orders_enabled": False,
             "discord_enabled": False,
             "live_ready": False,
@@ -679,54 +588,46 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
 
     clock = infer_clock(freshness, records, args.broker_utc_offset_hours)
     apply_clock(freshness, records, parsed, clock)
-
-    grouped = {timeframe: [row for row in records if row["timeframe"] == timeframe] for timeframe in TFS}
+    grouped = {
+        timeframe: [row for row in records if row["timeframe"] == timeframe]
+        for timeframe in TFS
+    }
     selected = {timeframe: choose_latest(grouped[timeframe]) for timeframe in TFS}
-    warmup = choose_warmup(grouped["H4"])
-    requirement_states = build_requirement_state(selected, warmup)
-    readiness = candidate_readiness(requirement_states)
+    readiness = candidate_readiness(selected)
 
     timeframe_summary: dict[str, Any] = {}
     for timeframe in TFS:
         row = selected[timeframe]
-        blocking = row_blocking_reasons(row, require_after_cutoff=True)
+        reasons = blocking_reasons(row)
         timeframe_summary[timeframe] = {
-            "status": "READY" if not blocking else "BLOCKED",
+            "status": "READY" if not reasons else "BLOCKED",
             "inspected_files": grouped[timeframe],
             "selected_fresh_tail": row,
-            "blocking_reasons": blocking,
-            "discovery_ambiguities": location_ambiguities(locations, timeframe),
+            "blocking_reasons": reasons,
         }
 
-    warmup_state = requirement_states["H4_LONG_WARMUP_2017"]
-    ready_count = sum(1 for value in readiness.values() if value["status"] == "READY")
+    ready_count = sum(value["status"] == "READY" for value in readiness.values())
     summary.update(
         audit_complete=True,
         overall_status=(
-            "READY_ALL_FIVE_CANDIDATES" if ready_count == len(readiness)
-            else "READY_SOME_CANDIDATES" if ready_count > 0
+            "READY_ALL_FIVE_CANDIDATES"
+            if ready_count == len(readiness)
+            else "READY_SOME_CANDIDATES"
+            if ready_count > 0
             else "BLOCKED_ALL_CANDIDATES"
         ),
         known_locations=locations,
         broker_clock=clock,
         timeframes=timeframe_summary,
-        h4_checks={
-            "long_warmup": {
-                "status": "READY" if warmup_state["satisfied"] else "BLOCKED",
-                "path": warmup_state["path"],
-                "first_raw_mt5_broker_server_timestamp": warmup_state["first_raw_mt5_broker_server_timestamp"],
-                "reference_expected_first_time": warmup_state["reference_expected_first_time"],
-                "blocking_reasons": warmup_state["blocking_reasons"],
-            },
-            "fresh_tail": requirement_states["H4_AFTER_CUTOFF"],
-        },
         candidate_readiness=readiness,
     )
     return summary
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="BTC FF01 read-only fresh-forward availability audit")
+    parser = argparse.ArgumentParser(
+        description="BTC FF01 read-only fresh-forward availability audit"
+    )
     parser.add_argument("--repo-files-dir", type=Path, default=ROOT / "Files")
     parser.add_argument("--terminal-files-dir", type=Path, default=KNOWN_TERMINAL)
     parser.add_argument("--repro-history-dir", type=Path, default=KNOWN_HISTORY)
@@ -734,8 +635,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--m15-csv", type=Path)
     parser.add_argument("--h1-csv", type=Path)
     parser.add_argument("--d1-csv", type=Path)
-    parser.add_argument("--h4-fresh-csv", type=Path)
-    parser.add_argument("--h4-warmup-csv", type=Path, default=KNOWN_WARMUP)
+    parser.add_argument("--h4-csv", type=Path)
     parser.add_argument("--broker-utc-offset-hours", type=float, choices=(2.0, 3.0))
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     return parser.parse_args(argv)
@@ -752,20 +652,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         summary["overall_status"] = "BLOCKED_FATAL_AUDIT_ERROR"
         exit_code = 2
     written = write_outputs(summary, args.output_root)
-    print(
-        json.dumps(
-            {
-                "audit_complete": summary["audit_complete"],
-                "overall_status": summary["overall_status"],
-                **written,
-                "candidate_readiness": summary["candidate_readiness"],
-                "fatal_error": summary.get("fatal_error", ""),
-            },
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
-    )
+    print(json.dumps({
+        "audit_complete": summary["audit_complete"],
+        "overall_status": summary["overall_status"],
+        **written,
+        "candidate_readiness": summary["candidate_readiness"],
+        "fatal_error": summary.get("fatal_error", ""),
+    }, ensure_ascii=False, indent=2, sort_keys=True))
     return exit_code
 
 
