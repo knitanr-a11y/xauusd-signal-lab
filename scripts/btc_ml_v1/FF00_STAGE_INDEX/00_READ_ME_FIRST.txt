@@ -20,7 +20,10 @@ FF05_candidate_rebuild_search
   Current submitted run is not final because OOS01/OOS02 lacked raw M5/M15 coverage.
 
 RECOVERY_FF05_historical_coverage
-  Search for the exact frozen historical package or CSV hashes before any FF05 rerun.
+  Exact frozen historical package and required CSV hashes were recovered successfully.
+
+RECOVERY_FF05_time_domain
+  Prove whether recovered history is UTC and current terminal history is broker-server UTC+2/+3 DST before any FF05 rerun.
 
 Use only the numbered FF folders for normal manual execution.
 The older unnumbered folders are retained as internal compatibility paths.
@@ -28,5 +31,5 @@ The older unnumbered folders are retained as internal compatibility paths.
 Recovery and incident material begins with RECOVERY_, INCIDENT_, or FORENSIC_
 so that it cannot be buried among normal stage numbers.
 
-Do not rerun FF05 until RECOVERY_FF05 has been reviewed.
+Do not rerun FF05 until RECOVERY_FF05_time_domain has been reviewed.
 Do not run a later FF stage unless ChatGPT explicitly instructs you to do so after reviewing the previous ZIP.
