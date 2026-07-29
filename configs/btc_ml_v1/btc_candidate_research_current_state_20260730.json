@@ -2,8 +2,16 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30",
-  "status": "BTC_REDESIGN_D0_COMPLETE_D1_SOURCE_INVENTORY_NEXT_READ_ONLY",
+  "recorded_at": "2026-07-30T06:31:00+09:00",
+  "status": "BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_READ_ONLY",
+  "handoff_authority": {
+    "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+    "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
+    "maintenance_contract": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md",
+    "old_handoffs": "AUDIT_HISTORY_ONLY",
+    "continuous_updates_required": true
+  },
   "authoritative_design": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
   "authoritative_contract": "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
   "completed": {
@@ -13,7 +21,11 @@
     "fidelity_and_value_layers_separated": true,
     "research_shadow_live_layers_separated": true,
     "ff05_recovery_chain_discontinued_as_active_work": true,
-    "future_data_and_selection_governance_defined": true
+    "future_data_and_selection_governance_defined": true,
+    "D1_preliminary_contract_inventory_complete": true,
+    "stable_next_chat_entry_created": true,
+    "dated_complete_handoff_created": true,
+    "handoff_allowlist_and_denylist_frozen": true
   },
   "preserved_evidence": {
     "FF01_FF04": "PRESERVE_CAUSAL_AND_TIME_SEMANTICS_EVIDENCE",
@@ -27,14 +39,24 @@
     "BTC_research_primary_symbol": "BTCUSD",
     "XAUUSD_use": "SECONDARY_STRUCTURAL_COMPARISON_ONLY",
     "existing_runtime": "KEEP_UNCHANGED",
-    "writes_to_mochipoyo_outputs": false
+    "writes_to_mochipoyo_outputs": false,
+    "general_mochipoyo_branch_search": false
+  },
+  "startup_guards": {
+    "explicit_branch_ref_required": true,
+    "main_or_default_branch_as_current_state": "FORBIDDEN",
+    "repo_wide_search_before_required_read_order": "FORBIDDEN",
+    "AGENTS_md_for_this_BTC_research": "DO_NOT_USE_GOLD_SPECIFIC",
+    "GOLD_paths": "FORBIDDEN",
+    "old_BTC_handoffs": "AUDIT_HISTORY_ONLY",
+    "similar_file_fallback": "FORBIDDEN"
   },
   "currently_forbidden": {
     "run_old_recovery_bat": true,
     "create_FF06": true,
     "design_candidate_formula": true,
     "open_outcomes_for_new_design": true,
-    "evaluate_WR_PF_MFE_MAE": true,
+    "evaluate_WR_PF_DD_MFE_MAE": true,
     "create_shadow_runtime": true,
     "stop_or_modify_collector_M7C_M8C_M9_M10": true,
     "discord_send": true,
@@ -43,6 +65,7 @@
     "automatic_promotion": true
   },
   "next_phase": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
+  "pending_user_evidence": "ONE_ZIP_CONTAINING_EXISTING_M7C_SEVEN_FILES",
   "next_phase_requires_user_bat": false,
   "next_phase_requires_runtime_change": false,
   "later_phases_require_explicit_authorization": true
