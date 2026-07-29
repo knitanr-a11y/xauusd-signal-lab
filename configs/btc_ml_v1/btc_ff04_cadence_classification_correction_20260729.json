@@ -1,0 +1,46 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF04_BAR_TIME_SEMANTICS_AND_CAUSAL_REBUILD_PREREGISTRATION",
+  "recorded_at": "2026-07-29",
+  "incident": {
+    "uploaded_package_status": "FAIL_TIME_SEMANTICS_OR_CAUSAL_SENTINEL",
+    "tests_passed": 17,
+    "tests_failed": 2,
+    "failed_tests": [
+      "M15_SHORT_GAP_CADENCE",
+      "D1_SHORT_GAP_CADENCE"
+    ]
+  },
+  "root_cause": "The v1 audit classified larger irregular market-session or history gaps as cadence failures. A gap larger than the timeframe is not a shortened bar and does not establish close-time interpretation or future reference.",
+  "evidence_already_passed": {
+    "m5_open_to_available": true,
+    "m15_open_to_decision": true,
+    "h1_open_to_available": true,
+    "current_engine_closed_h1_alignment": true,
+    "current_engine_exact_m5_entry": true,
+    "current_engine_exit_observed_at_m5_open_plus_5": true,
+    "latest_rows_closed_under_open_time_semantics": true,
+    "recent_5000_m15_boundaries_exact_m5_open_ratio": 1.0
+  },
+  "corrected_failure_rule": {
+    "positive_interval_shorter_than_timeframe": "FAIL",
+    "interval_equal_to_timeframe": "PASS",
+    "interval_larger_than_timeframe": "SESSION_OR_HISTORY_GAP_WARNING",
+    "non_ascending_or_duplicate_timestamp": "FAIL"
+  },
+  "additional_v2_audit": {
+    "scope": "all M15 decision boundaries overlapping the M5 history",
+    "entry_boundary": "m15.time + 15 minutes",
+    "exact_m5_lookup": true,
+    "missing_exact_m5_action": "NO_TRADE",
+    "nearest_or_later_fallback": false
+  },
+  "implementation": {
+    "python": "scripts/btc_ml_v1/causal_rebuild_foundation/python/audit_btc_bar_time_semantics_v2.py",
+    "bat": "scripts/btc_ml_v1/causal_rebuild_foundation/bat/01_run_bar_time_semantics_audit.bat"
+  },
+  "candidate_logic_changed": false,
+  "candidate_performance_search_executed": false,
+  "preregistration_changed": false,
+  "next_stage_authorized": false
+}
