@@ -1,0 +1,34 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "incident": "SECOND_ISOLATION_FAILURE_REAL_MT5_M5_SELECTED",
+  "submitted_result_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "performance_result_accepted": false,
+  "observed_source": "C:/Users/regen/AppData/Roaming/MetaQuotes/Terminal/2FA8A7E69CED7DC259B1AD86A247F675/MQL5/Files/btcusdsharp_m5.csv",
+  "root_cause": "The V2 child environment still exposed the real user through LOCALAPPDATA-derived discovery. USERPROFILE, HOME, and APPDATA isolation alone was insufficient.",
+  "v3_correction": {
+    "isolate": [
+      "USERPROFILE",
+      "HOME",
+      "APPDATA",
+      "LOCALAPPDATA",
+      "HOMEDRIVE",
+      "HOMEPATH",
+      "TEMP",
+      "TMP"
+    ],
+    "mirror_only_frozen_prerequisite_outputs": true,
+    "place_merged_csv_under_roaming_local_and_home_metaquotes_roots": true,
+    "child_environment_probe_required_before_ff05": true,
+    "postrun_source_path_and_sha_gate_retained": true
+  },
+  "candidate_rules_changed": false,
+  "survivor_thresholds_changed": false,
+  "bootstrap_changed": false,
+  "ff02_losses_used_for_tuning": false,
+  "source_csv_modified": false,
+  "gold_or_mochipoyo_changed": false,
+  "next_action": "RUN_SAME_RECOVERY_BAT_AFTER_PULLING_V3",
+  "next_stage_authorized": false
+}
