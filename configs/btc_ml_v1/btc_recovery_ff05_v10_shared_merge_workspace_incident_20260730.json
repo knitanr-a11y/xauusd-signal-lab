@@ -1,0 +1,32 @@
+{
+  "schema_version": "btc_recovery_ff05_v10_shared_merge_workspace_incident_v1",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "incident_date": "2026-07-30",
+  "affected_upload": "99_UPLOAD_PACKAGE(99).zip",
+  "observed_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "observed_error": "FileNotFoundError for RECOVERY_FF05_full_history_merge/MERGED_FULL_HISTORY/btcusdsharp_m5.csv",
+  "performance_result_accepted": false,
+  "cells_evaluated": 0,
+  "candidate_selection_executed": false,
+  "root_cause_class": "SHARED_MUTABLE_MERGE_WORKSPACE_LIFECYCLE_RACE",
+  "correction": {
+    "version": "V11",
+    "dedicated_merge_root": "RECOVERY_FF05_full_history_merge_V11_DEDICATED",
+    "dedicated_snapshot_root": "RECOVERY_FF05_full_history_rerun_INPUT_V11",
+    "merge_runs_per_execution": 1,
+    "shared_v8_v10_merge_root_used": false,
+    "mt5_csv_discovery_used": false,
+    "sha256_verified_before_evaluation": true,
+    "concurrent_v11_run_rejected": true,
+    "old_v8_v10_process_preflight": true
+  },
+  "unchanged": [
+    "108-cell preregistered grid",
+    "six OOS segments",
+    "bootstrap repetitions and seed",
+    "survivor thresholds",
+    "BTC-only scope",
+    "no live, Discord, lot, or MT5 order action"
+  ],
+  "next_stage_authorized": false
+}
