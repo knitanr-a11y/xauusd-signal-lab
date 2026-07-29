@@ -1,0 +1,142 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF04_BAR_TIME_SEMANTICS_AND_CAUSAL_REBUILD_PREREGISTRATION",
+  "recorded_at": "2026-07-29",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "search_family": "BTC7N_CAUSAL_M15_TREND_IMPULSE_REBUILD_V1",
+  "purpose": "Rebuild a causal BTC M15 trend-impulse candidate without using the six FF02 losses to tune filters.",
+  "historical_evidence_classification": {
+    "all_rows_at_or_before_design_cutoff": "RETROSPECTIVE_RESEARCH_ONLY",
+    "all_rows_after_design_cutoff": "EXCLUDED_FROM_DESIGN_RANKING_AND_DIAGNOSTICS",
+    "design_cutoff_utc_inclusive": "2026-07-02 02:15:00",
+    "old_btc7r_73_77pct": "NOT_UNSEEN_VALIDATION",
+    "ff02_six_losses": "PROSPECTIVE_EVIDENCE_NOT_TUNING_INPUT"
+  },
+  "time_contract": {
+    "csv_time_field": "BAR_OPEN_TIME",
+    "timezone_domain": "NAIVE_MT5_BROKER_SERVER_WALL_CLOCK",
+    "bar_available_time": "time + exact timeframe duration",
+    "m15_signal_bar_fields_available_at": "m15.time + 15 minutes",
+    "higher_timeframe_state_cutoff": "higher.available_time <= signal_m15.time",
+    "higher_timeframe_cutoff_reason": "Conservative: excludes bars closing at the signal M15 close to avoid same-boundary ordering ambiguity.",
+    "entry_time": "m15.time + 15 minutes",
+    "entry_price": "open of the exact M5 row whose time equals entry_time",
+    "nearest_or_next_row_fallback": false,
+    "missing_exact_entry_row": "NO_TRADE",
+    "exit_scan_start": "entry M5 row inclusive",
+    "exit_observation_time": "exit M5 time + 5 minutes",
+    "same_m5_bar_priority": "SL_FIRST",
+    "utc_conversion": "Only after candidate logic, for period boundaries and reporting."
+  },
+  "fixed_structure": {
+    "higher_timeframe": "H1",
+    "signal_timeframe": "M15",
+    "execution_timeframe": "M5",
+    "trend_ema_fast": 50,
+    "trend_ema_slow": 200,
+    "signal_ema": 20,
+    "atr_period": 14,
+    "stop_definition": "signal bar extreme plus 0.1 ATR14 buffer",
+    "stop_atr_buffer": 0.1,
+    "spread_usd": 30.0,
+    "pip_usd": 10.0,
+    "risk_cap_pips": 100.0,
+    "minimum_reward_pips": 50.0,
+    "one_open_position_per_cell": true,
+    "global_portfolio_cap": false
+  },
+  "search_space": {
+    "trend_separation_atr": [0.25, 0.5, 0.75],
+    "impulse_atr_multiple": [1.75, 2.25, 2.75],
+    "close_location_min": [0.8, 0.9],
+    "trend_age_windows_hours": [[0, 48], [24, 96], [48, 168]],
+    "target_r": [1.0, 1.5],
+    "total_cells": 108,
+    "cell_id_order": [
+      "trend_separation_atr",
+      "impulse_atr_multiple",
+      "close_location_min",
+      "trend_age_window",
+      "target_r"
+    ],
+    "no_adaptive_thresholds": true,
+    "no_post_result_cell_addition": true
+  },
+  "evaluation": {
+    "outer_segments_raw_broker_server": [
+      {"id": "OOS01", "start": "2025-02-01 00:00:00", "end_exclusive": "2025-05-01 00:00:00"},
+      {"id": "OOS02", "start": "2025-05-01 00:00:00", "end_exclusive": "2025-07-01 00:00:00"},
+      {"id": "OOS03", "start": "2025-07-01 00:00:00", "end_exclusive": "2025-10-01 00:00:00"},
+      {"id": "OOS04", "start": "2025-10-01 00:00:00", "end_exclusive": "2026-01-01 00:00:00"},
+      {"id": "OOS05", "start": "2026-01-01 00:00:00", "end_exclusive": "2026-04-01 00:00:00"},
+      {"id": "OOS06", "start": "2026-04-01 00:00:00", "end_exclusive_utc_boundary": "2026-07-02 02:15:00"}
+    ],
+    "report_all_108_cells": true,
+    "stitched_oos_only_for_selection": true,
+    "bootstrap": {
+      "method": "calendar-week block bootstrap across the complete 108-cell family",
+      "resamples": 5000,
+      "seed": 7042901,
+      "familywise_adjustment": "max-statistic"
+    },
+    "metrics": [
+      "trades",
+      "wins",
+      "losses",
+      "win_rate",
+      "profit_factor",
+      "total_pips",
+      "total_R",
+      "max_drawdown_R",
+      "year_profit_share",
+      "largest_trade_profit_share",
+      "adjusted_p_value"
+    ]
+  },
+  "survivor_gates": {
+    "minimum_stitched_oos_trades": 40,
+    "minimum_profit_factor": 1.25,
+    "minimum_total_R_exclusive": 0.0,
+    "maximum_drawdown_R": 8.0,
+    "positive_2025_total_R": true,
+    "positive_2026_partial_total_R": true,
+    "maximum_single_year_profit_share": 0.7,
+    "maximum_single_trade_profit_share": 0.25,
+    "maximum_familywise_adjusted_p_value": 0.05,
+    "zero_survivors_action": "NO_CANDIDATE"
+  },
+  "deterministic_selection": {
+    "only_from_survivors": true,
+    "sort_order": [
+      "adjusted_p_value ascending",
+      "bootstrap_lower_confidence_total_R descending",
+      "profit_factor descending",
+      "cell_id ascending"
+    ],
+    "select_count": 1,
+    "manual_override": false
+  },
+  "future_evidence": {
+    "selected_rule_must_be_committed_before_monitoring": true,
+    "prospective_boundary": "timestamp of the later selected-rule freeze commit, not the historical cutoff",
+    "historical_score_can_promote": false,
+    "minimum_future_sample_to_consider_promotion": 30,
+    "promotion_requires_separate_user_authorization": true
+  },
+  "forbidden": [
+    "use any data after 2026-07-02 02:15:00 UTC in design or ranking",
+    "inspect the six FF02 losses to create exclusions",
+    "reinterpret CSV time as bar close time",
+    "use an M15 close value at the M15 open timestamp",
+    "use a higher-timeframe row before its available_time",
+    "nearest future entry-row fallback",
+    "unrecorded search cells or threshold changes",
+    "candidate search before FF04 review",
+    "lot design",
+    "live use",
+    "Discord",
+    "MT5 orders",
+    "GOLD or MOCHIPOYO changes"
+  ],
+  "next_stage_authorized": false
+}
