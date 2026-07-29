@@ -1,0 +1,36 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "submitted_package": "99_UPLOAD_PACKAGE(97).zip",
+  "reported_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "performance_result_accepted": false,
+  "incident": {
+    "type": "MERGED_PAYLOAD_LIFECYCLE_GAP",
+    "fatal_error": "FileNotFoundError for RECOVERY_FF05_full_history_merge/MERGED_FULL_HISTORY/btcusdsharp_m5.csv",
+    "interpretation": "The merge report remained available but the merged CSV payload was not durable at rerun time.",
+    "candidate_search_started": false,
+    "candidate_result_available": false
+  },
+  "correction": {
+    "implementation": "run_RECOVERY_FF05_full_history_rerun_v8.py",
+    "behavior": "Validate merged payload; if missing or invalid, rebuild full history and immediately execute the frozen direct-path FF05 evaluation in the same BAT run.",
+    "mt5_csv_discovery": false,
+    "direct_verified_merged_paths_only": true,
+    "merge_status_required": "READY_FULL_HISTORY_MERGED",
+    "oos_coverage_required_for_all_timeframes": true,
+    "sha_validation_required": true
+  },
+  "unchanged": {
+    "candidate_cells": 108,
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 7042901,
+    "survivor_thresholds": true,
+    "fresh_losses_used_for_tuning": false,
+    "gold_or_mochipoyo_change": false,
+    "live_or_order_action": false
+  },
+  "next_action": "PULL_AND_RUN_THE_SAME_RECOVERY_FF05_RERUN_BAT_V8",
+  "next_stage_authorized": false
+}
