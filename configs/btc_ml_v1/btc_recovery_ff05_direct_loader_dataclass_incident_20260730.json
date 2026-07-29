@@ -1,0 +1,32 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "submitted_package": "99_UPLOAD_PACKAGE(96).zip",
+  "submitted_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "fatal_error": "AttributeError: 'NoneType' object has no attribute '__dict__'",
+  "root_cause": "The frozen FF05 loader was executed by importlib before its module object was registered in sys.modules. Its decompressed source uses postponed annotations and dataclasses, and dataclasses resolves cls.__module__ through sys.modules.",
+  "correction": {
+    "loader_version": "V7",
+    "action": "Register the module in sys.modules before exec_module and remove it again if loading fails.",
+    "mt5_csv_discovery": "BYPASSED",
+    "input_mode": "DIRECT_VERIFIED_MERGED_M5_M15_H1_PATHS"
+  },
+  "result_acceptance": {
+    "performance_result_accepted": false,
+    "cells_evaluated": 0,
+    "candidate_selected": false
+  },
+  "unchanged": {
+    "search_cells": 108,
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 7042901,
+    "survivor_thresholds": true,
+    "merged_history_sha256": true,
+    "ff02_losses_used_for_tuning": false,
+    "gold_or_mochipoyo_changed": false
+  },
+  "next_action": "PULL_V7_AND_RERUN_THE_SAME_RECOVERY_BAT_ONCE",
+  "next_stage_authorized": false
+}
