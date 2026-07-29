@@ -1,0 +1,57 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_TIME_DOMAIN_AUDIT",
+  "authorization": "CONTINUATION_OF_USER_AUTHORIZED_FF05_RECOVERY",
+  "required_prior_state": {
+    "historical_coverage_recovery": "READY_EXACT_HISTORY_RECOVERED",
+    "exact_package_sha256": "9b0b74e9937eca05e895047f5737c6794332af7ec25f2a30b64d9440c9e0dd22",
+    "ff05_result": "BLOCKED_INCOMPLETE_OOS_COVERAGE_NOT_FORMAL_NO_CANDIDATE"
+  },
+  "purpose": "Prove the timestamp domain of the exact recovered history before any FF05 rerun.",
+  "time_contract": {
+    "csv_time_semantics": "BAR_OPEN_TIME",
+    "reference_hypothesis": "UTC_BAR_OPEN_TIME",
+    "current_terminal_hypothesis": "NAIVE_MT5_BROKER_SERVER_BAR_OPEN_WITH_UTC_PLUS_2_PLUS_3_DST",
+    "proof_method": "Exact M5/M15/H1 OHLC comparison for reference timestamp shifts -5 through +5 hours",
+    "required_support": "At least 95 percent of overlapping candidate rows match at reference+2h or reference+3h for every timeframe, with shift0 materially absent",
+    "cutoff_utc": "2026-07-02 02:15:00",
+    "bar_usable_rule": "bar_open_time + exact timeframe duration <= cutoff_utc",
+    "m5_open_exactly_at_cutoff": "EXCLUDED_NOT_CLOSED"
+  },
+  "inputs": {
+    "restored_exact_reference_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\btc_ml_v1\\outputs\\RECOVERY_FF05_historical_coverage\\RESTORED_EXACT_REFERENCE",
+    "current_terminal_paths": "Resolved from the previous FF05 input manifest unless explicitly overridden",
+    "timeframes": ["M5", "M15", "H1"]
+  },
+  "outputs": [
+    "00_READ_ME_FIRST.txt",
+    "01_time_domain_summary.json",
+    "02_time_domain_report.txt",
+    "03_shift_comparison.csv",
+    "04_monthly_offset_evidence.csv",
+    "05_offset_runs.csv",
+    "06_input_manifest.csv",
+    "07_cutoff_availability.csv",
+    "08_self_tests.csv",
+    "99_UPLOAD_PACKAGE.zip"
+  ],
+  "safety": {
+    "source_csv_read_only": true,
+    "stable_current_snapshots": true,
+    "snapshots_deleted_after_run": true,
+    "performance_rerun": false,
+    "search_cells_changed": false,
+    "thresholds_changed": false,
+    "ff02_six_losses_used_for_tuning": false,
+    "live_ready": false,
+    "lot_design": false,
+    "discord": false,
+    "mt5_orders": false,
+    "gold_or_mochipoyo_change": false
+  },
+  "pass_status": "PASS_REFERENCE_HISTORY_IS_UTC_CURRENT_TERMINAL_IS_BROKER_DST",
+  "blocked_status": "BLOCKED_TIME_DOMAIN_NOT_PROVEN",
+  "next_stage_authorized": false
+}
