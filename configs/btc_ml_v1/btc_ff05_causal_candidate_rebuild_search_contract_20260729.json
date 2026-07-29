@@ -1,0 +1,121 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF05_CAUSAL_CANDIDATE_REBUILD_SEARCH",
+  "recorded_at": "2026-07-29",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "search_family": "BTC7N_CAUSAL_M15_TREND_IMPULSE_REBUILD_V1",
+  "authorization": "USER_AUTHORIZED_NEXT_WORK",
+  "required_prior_gate": {
+    "FF04_status_prefix": "PASS_OPEN_TIME_SEMANTICS",
+    "FF04_failed_tests": 0
+  },
+  "time_contract": {
+    "csv_time": "BAR_OPEN_TIME",
+    "raw_domain": "NAIVE_MT5_BROKER_SERVER_WALL_CLOCK",
+    "m15_decision_time": "m15.time + 15 minutes",
+    "entry": "open of exact M5 row at decision_time",
+    "missing_exact_m5": "NO_TRADE",
+    "h1_availability": "h1.time + 60 minutes <= signal M15 open",
+    "exit_observation": "m5.time + 5 minutes",
+    "same_bar_priority": "SL_FIRST",
+    "utc_usage": "cutoff boundary and reporting only"
+  },
+  "cutoff": {
+    "utc_inclusive": "2026-07-02 02:15:00",
+    "rows_after_cutoff": "EXCLUDED_FROM_FEATURES_OUTCOMES_RANKING_AND_DIAGNOSTICS",
+    "ff02_six_losses": "PROSPECTIVE_EVIDENCE_NOT_TUNING_INPUT"
+  },
+  "fixed_structure": {
+    "H1_EMA_fast": 50,
+    "H1_EMA_slow": 200,
+    "H1_EMA200_directional_slope": "current conservatively available H1 EMA200 versus state available one hour earlier",
+    "M15_signal_EMA": 20,
+    "ATR_period": 14,
+    "stop_buffer_ATR": 0.1,
+    "spread_usd": 30.0,
+    "pip_usd": 10.0,
+    "risk_cap_pips": 100.0,
+    "minimum_reward_pips": 50.0,
+    "signal_trigger": "EDGE_ONLY_FIRST_CONSECUTIVE_QUALIFYING_M15_BAR",
+    "position_rule": "ONE_OPEN_POSITION_PER_CELL",
+    "portfolio_cap": false
+  },
+  "search_space": {
+    "trend_separation_atr": [0.25, 0.5, 0.75],
+    "impulse_atr_multiple": [1.75, 2.25, 2.75],
+    "close_location_min": [0.8, 0.9],
+    "trend_age_windows_hours": [[0, 48], [24, 96], [48, 168]],
+    "target_r": [1.0, 1.5],
+    "total_cells": 108,
+    "all_cells_reported": true,
+    "manual_override": false
+  },
+  "evaluation": {
+    "segments": ["OOS01", "OOS02", "OOS03", "OOS04", "OOS05", "OOS06"],
+    "selection_basis": "STITCHED_OOS_ONLY",
+    "drawdown": "CUMULATIVE_R_WITH_INITIAL_ZERO",
+    "weekly_block_bootstrap": {
+      "calendar": "RAW_BROKER_SERVER_WEEK_MONDAY_TO_SUNDAY",
+      "resamples": 5000,
+      "seed": 7042901,
+      "joint_resample_across_all_108_cells": true,
+      "test_statistic": "STUDENTIZED_MEAN_WEEKLY_R",
+      "familywise_method": "MAX_STATISTIC",
+      "adjusted_p_one_sided": true,
+      "lower_bound": "5TH_PERCENTILE_TOTAL_R"
+    }
+  },
+  "survivor_gates": {
+    "minimum_stitched_oos_trades": 40,
+    "minimum_profit_factor": 1.25,
+    "total_R_strictly_positive": true,
+    "maximum_drawdown_R": 8.0,
+    "positive_2025_total_R": true,
+    "positive_2026_partial_total_R": true,
+    "maximum_single_year_profit_share": 0.7,
+    "maximum_single_trade_profit_share": 0.25,
+    "maximum_familywise_adjusted_p_value": 0.05
+  },
+  "selection": {
+    "zero_survivors": "NO_CANDIDATE",
+    "select_count_max": 1,
+    "sort_order": [
+      "familywise_adjusted_p_value ascending",
+      "bootstrap_lower_95pct_one_sided_total_R descending",
+      "profit_factor descending",
+      "cell_id ascending"
+    ],
+    "selected_survivor_status": "RESEARCH_ONLY_PENDING_SEPARATE_RULE_FREEZE",
+    "promotion_authorized": false,
+    "live_ready": false
+  },
+  "outputs": [
+    "00_READ_ME_FIRST.txt",
+    "01_search_summary.json",
+    "02_search_report.txt",
+    "03_all_108_cells.csv",
+    "04_oos_segment_metrics.csv",
+    "05_trade_ledger.csv",
+    "06_weekly_block_matrix.csv",
+    "07_bootstrap_familywise.csv",
+    "08_input_manifest.csv",
+    "09_selected_candidate.json",
+    "10_preregistration_copy.json",
+    "11_self_tests.csv",
+    "99_UPLOAD_PACKAGE.zip"
+  ],
+  "forbidden": [
+    "add filters from FF02 six losses",
+    "omit rejected cells",
+    "use close values at bar open time",
+    "use unavailable H1 rows",
+    "nearest or future M5 entry fallback",
+    "manual survivor override",
+    "lot design",
+    "live use",
+    "Discord",
+    "MT5 orders",
+    "GOLD or MOCHIPOYO changes"
+  ],
+  "next_stage_authorized": false
+}
