@@ -1,0 +1,108 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "D1B_COLLECTOR_LOG_AND_CODE_AUDIT",
+  "recorded_at": "2026-07-30T07:01:00+09:00",
+  "status": "D1B_COLLECTOR_PROVENANCE_CONTRACT_AUDITED_BCR01_SNAPSHOT_NEXT",
+  "performance_interpretation_performed": false,
+  "user_package": {
+    "filename": "新しい圧縮された (ZIP) フォルダー(1).zip",
+    "sha256": "b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
+    "files": {
+      "collector_forever.log": {
+        "bytes": 8315891,
+        "sha256": "77b8aa35492fcf88c5687e3a9569987546295ef280057d99b0235289ac5dcc05"
+      },
+      "latest_collection_error.json": {
+        "bytes": 1397,
+        "sha256": "ac897147c805a3fff261bb5c0d0b98c9772978a4d4dc9faca4e6a1297595ca41"
+      },
+      "latest_collection_result.json": {
+        "bytes": 591,
+        "sha256": "09340d3a95d2b48959032b39ffc1c98a0a591a9faa780e6f9f8076cdd21918a3"
+      },
+      "latest_loop_status.json": {
+        "bytes": 905,
+        "sha256": "da65cf404422e2ea94171f00f7b24d4e4b61706bc925b9efea6ba56516e5c228"
+      }
+    }
+  },
+  "loop_audit": {
+    "run_count": 2,
+    "combined_cycle_headers": 12612,
+    "successful_cycles": 12606,
+    "failed_cycles": 6,
+    "pass_cycles": 118,
+    "pass_empty_cycles": 12488,
+    "response_rows": 127,
+    "inserted_rows": 127,
+    "duplicate_rows": 0,
+    "first_run": {
+      "started_at_utc": "2026-07-20T14:51:00Z",
+      "ended_at_utc": "2026-07-22T18:59:04Z",
+      "cycles": 3111,
+      "ending_cursor": 94
+    },
+    "second_run": {
+      "started_at_utc": "2026-07-23T06:32:27Z",
+      "latest_at_utc": "2026-07-29T22:01:00Z",
+      "cycles": 9501,
+      "successful_cycles": 9495,
+      "failed_cycles": 6,
+      "starting_cursor": 94,
+      "latest_cursor": 189
+    },
+    "all_failures": "CLOUDFLARE_HTTP_500_ERROR_1101_WORKER_THREW_EXCEPTION",
+    "cursor_preserved_on_every_failure": true,
+    "next_cycle_recovered_from_same_cursor": true,
+    "cursor_regressions": 0,
+    "duplicate_insertions": 0
+  },
+  "diagnostic_freshness_defect": {
+    "present": true,
+    "file": "latest_collection_error.json",
+    "description": "An older organized target error file remains after later successes because the wrapper moves existing diagnostics but does not delete a stale target when the source error file has been removed.",
+    "data_loss_indicated": false,
+    "collector_modified_during_D1B": false
+  },
+  "source_contract": {
+    "required_event_fields": [
+      "id",
+      "received_at_utc",
+      "source",
+      "strategy",
+      "event",
+      "ticker",
+      "bar_time_utc",
+      "fired_at_utc"
+    ],
+    "stored_provenance_fields": [
+      "downloaded_at_utc",
+      "worker_raw_json",
+      "worker_raw_json_origin",
+      "collector_source_row_json",
+      "payload_sha256",
+      "event_key",
+      "event_key_origin"
+    ],
+    "immutable_collision_fail_closed": true,
+    "cursor_and_insert_transaction_atomic": true
+  },
+  "next_snapshot_allowlist": [
+    "collector_state",
+    "raw_alerts",
+    "raw_alert_annotations",
+    "collection_runs"
+  ],
+  "next_snapshot_denylist": [
+    "episodes",
+    "episode_events",
+    "episode_build_anomalies",
+    "episode_build_runs",
+    "mt5_alignment",
+    "feature_snapshots",
+    "virtual_entries",
+    "outcomes"
+  ],
+  "raw_database_upload_forbidden": true,
+  "next_stage": "BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT"
+}
