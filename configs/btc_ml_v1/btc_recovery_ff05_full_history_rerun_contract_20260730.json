@@ -1,0 +1,62 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "authorization": "USER_AUTHORIZED_CONTINUE_AFTER_MERGE_REVIEW",
+  "required_prior_result": {
+    "stage": "RECOVERY_FF05_FULL_HISTORY_MERGE",
+    "overall_status": "READY_FULL_HISTORY_MERGED",
+    "merge_complete": true,
+    "time_domain": "SAME_RAW_MT5_BROKER_SERVER_WALL_CLOCK",
+    "coverage_from_oos_start_all_timeframes": true,
+    "raw_broker_server_cutoff_inclusive": "2026-07-02 05:15:00"
+  },
+  "frozen_merged_input_sha256": {
+    "M5": "c7745c26d03518eff35ee1bd3117c19af94f6abf8d371061a8abb1206b135db6",
+    "M15": "bba84c92e9931d265aed90b1f7264edb49f267c73cf1dbd1c5d1cb26dfd975dc",
+    "H1": "2132f78ac8a79688e22462922fa7524e763094063d43755a8fac06893554ec57"
+  },
+  "input_isolation": {
+    "method": "COPY_VERIFIED_MERGED_CSVS_TO_ISOLATED_APPDATA_TERMINAL_TREE",
+    "ordinary_short_terminal_csv_allowed": false,
+    "postrun_input_manifest_path_check_required": true,
+    "postrun_input_sha_check_required": true,
+    "mismatch_action": "INVALIDATE_AND_STOP"
+  },
+  "rerun_scope": {
+    "runner": "ORIGINAL_FROZEN_FF05_RUNNER",
+    "cells": 108,
+    "cell_changes": false,
+    "oos_segment_changes": false,
+    "survivor_gate_changes": false,
+    "bootstrap_resamples": 5000,
+    "bootstrap_seed": 7042901,
+    "fresh_six_losses_used_for_tuning": false
+  },
+  "time_contract": {
+    "csv_time": "BAR_OPEN_TIME",
+    "raw_domain": "NAIVE_MT5_BROKER_SERVER_WALL_CLOCK",
+    "m15_decision": "M15_OPEN_PLUS_15_MINUTES",
+    "entry": "EXACT_M5_OPEN_ONLY",
+    "missing_exact_m5": "NO_TRADE",
+    "same_bar_priority": "SL_FIRST",
+    "last_usable_m5_open_at_cutoff": "2026-07-02 05:10:00",
+    "last_usable_m15_open_at_cutoff": "2026-07-02 05:00:00",
+    "last_usable_h1_open_at_cutoff": "2026-07-02 04:00:00"
+  },
+  "outputs": {
+    "original_ff05_outputs_preserved": true,
+    "additional_file": "12_recovery_input_provenance.json",
+    "result_requires_review": true,
+    "automatic_promotion": false
+  },
+  "forbidden": {
+    "live_ready": false,
+    "lot_design": false,
+    "discord": false,
+    "mt5_orders": false,
+    "gold_or_mochipoyo_change": false
+  },
+  "next_stage_authorized": false
+}
