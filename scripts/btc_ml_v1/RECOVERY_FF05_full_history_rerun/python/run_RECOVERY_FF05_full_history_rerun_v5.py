@@ -55,6 +55,7 @@ TARGET_FILENAMES = {
     "M15": "btcusdsharp_m15.csv",
     "H1": "btcusdsharp_h1.csv",
 }
+TARGET_NAME_SET = {name.lower() for name in TARGET_FILENAMES.values()}
 
 
 def sha256_path(path: Path) -> str:
@@ -146,24 +147,45 @@ def _pattern_targets(pattern: str, direct_paths: dict[str, Path]) -> list[Path]:
     return sorted(set(matched), key=lambda item: str(item).lower())
 
 
+def _is_hidden_real_terminal_target(value: str | os.PathLike[str]) -> bool:
+    path = Path(value)
+    if path.name.lower() not in TARGET_NAME_SET:
+        return False
+    normalized = str(path).replace("\\", "/").lower()
+    merged_normalized = str(MERGED_DIR.resolve()).replace("\\", "/").lower()
+    return "/metaquotes/terminal/" in normalized and not normalized.startswith(
+        merged_normalized.rstrip("/") + "/"
+    )
+
+
 class DirectPathPatch:
-    """Force all BTC M5/M15/H1 discovery APIs to expose only verified merged files."""
+    """Expose only verified merged BTC M5/M15/H1 files to FF05 discovery."""
 
     def __init__(self, direct_paths: dict[str, Path]) -> None:
         self.direct_paths = direct_paths
         self._path_rglob = Path.rglob
         self._path_glob = Path.glob
+        self._path_iterdir = Path.iterdir
+        self._path_exists = Path.exists
+        self._path_is_file = Path.is_file
         self._glob = glob_module.glob
         self._iglob = glob_module.iglob
         self._os_walk = os.walk
+        self._os_path_exists = os.path.exists
+        self._os_path_isfile = os.path.isfile
 
     def __enter__(self) -> "DirectPathPatch":
         direct_paths = self.direct_paths
         original_rglob = self._path_rglob
         original_glob_method = self._path_glob
+        original_iterdir = self._path_iterdir
+        original_exists = self._path_exists
+        original_is_file = self._path_is_file
         original_glob = self._glob
         original_iglob = self._iglob
         original_walk = self._os_walk
+        original_os_exists = self._os_path_exists
+        original_os_isfile = self._os_path_isfile
 
         def patched_rglob(path_self: Path, pattern: str):
             matched = _pattern_targets(str(pattern), direct_paths)
@@ -176,6 +198,23 @@ class DirectPathPatch:
             if matched:
                 return iter(matched)
             return original_glob_method(path_self, pattern)
+
+        def patched_iterdir(path_self: Path):
+            return iter(
+                item
+                for item in original_iterdir(path_self)
+                if not _is_hidden_real_terminal_target(item)
+            )
+
+        def patched_exists(path_self: Path) -> bool:
+            if _is_hidden_real_terminal_target(path_self):
+                return False
+            return original_exists(path_self)
+
+        def patched_is_file(path_self: Path) -> bool:
+            if _is_hidden_real_terminal_target(path_self):
+                return False
+            return original_is_file(path_self)
 
         def patched_glob(pathname: str, *args, **kwargs):
             matched = _pattern_targets(str(pathname), direct_paths)
@@ -190,50 +229,62 @@ class DirectPathPatch:
             return original_iglob(pathname, *args, **kwargs)
 
         def patched_walk(top, *args, **kwargs) -> Iterator[tuple[str, list[str], list[str]]]:
-            yielded_direct = False
             for dirpath, dirnames, filenames in original_walk(top, *args, **kwargs):
                 filtered = [
                     filename
                     for filename in filenames
-                    if filename.lower() not in {name.lower() for name in TARGET_FILENAMES.values()}
+                    if not _is_hidden_real_terminal_target(Path(dirpath) / filename)
                 ]
                 yield dirpath, dirnames, filtered
-            if not yielded_direct:
-                yielded_direct = True
-                yield (
-                    str(MERGED_DIR),
-                    [],
-                    [path.name for path in direct_paths.values()],
-                )
+            yield (
+                str(MERGED_DIR),
+                [],
+                [path.name for path in direct_paths.values()],
+            )
+
+        def patched_os_exists(value) -> bool:
+            if _is_hidden_real_terminal_target(value):
+                return False
+            return original_os_exists(value)
+
+        def patched_os_isfile(value) -> bool:
+            if _is_hidden_real_terminal_target(value):
+                return False
+            return original_os_isfile(value)
 
         Path.rglob = patched_rglob  # type: ignore[method-assign]
         Path.glob = patched_path_glob  # type: ignore[method-assign]
+        Path.iterdir = patched_iterdir  # type: ignore[method-assign]
+        Path.exists = patched_exists  # type: ignore[method-assign]
+        Path.is_file = patched_is_file  # type: ignore[method-assign]
         glob_module.glob = patched_glob  # type: ignore[assignment]
         glob_module.iglob = patched_iglob  # type: ignore[assignment]
         os.walk = patched_walk  # type: ignore[assignment]
+        os.path.exists = patched_os_exists  # type: ignore[assignment]
+        os.path.isfile = patched_os_isfile  # type: ignore[assignment]
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         Path.rglob = self._path_rglob  # type: ignore[method-assign]
         Path.glob = self._path_glob  # type: ignore[method-assign]
+        Path.iterdir = self._path_iterdir  # type: ignore[method-assign]
+        Path.exists = self._path_exists  # type: ignore[method-assign]
+        Path.is_file = self._path_is_file  # type: ignore[method-assign]
         glob_module.glob = self._glob  # type: ignore[assignment]
         glob_module.iglob = self._iglob  # type: ignore[assignment]
         os.walk = self._os_walk  # type: ignore[assignment]
+        os.path.exists = self._os_path_exists  # type: ignore[assignment]
+        os.path.isfile = self._os_path_isfile  # type: ignore[assignment]
 
 
-def run_original(module, output_root: Path, direct_paths: dict[str, Path]) -> int:
+def run_original(module, output_root: Path) -> int:
     old_argv = sys.argv[:]
     sys.argv = [str(ORIGINAL_LOADER), "--output-root", str(output_root)]
-    os.environ["BTC_FF05_RECOVERY_MODE"] = "DIRECT_VERIFIED_MERGED_PATHS_V5"
-    os.environ["BTC_FF05_DIRECT_M5"] = str(direct_paths["M5"])
-    os.environ["BTC_FF05_DIRECT_M15"] = str(direct_paths["M15"])
-    os.environ["BTC_FF05_DIRECT_H1"] = str(direct_paths["H1"])
     try:
-        with DirectPathPatch(direct_paths):
-            try:
-                result = module.main()
-            except SystemExit as exc:
-                result = exc.code
+        try:
+            result = module.main()
+        except SystemExit as exc:
+            result = exc.code
         return int(result or 0)
     finally:
         sys.argv = old_argv
@@ -322,8 +373,13 @@ def main() -> int:
     output_root.mkdir(parents=True, exist_ok=True)
     try:
         merge_summary, merge_manifest, cutoff, direct_paths = load_merge_contract()
-        module = load_original_module()
-        original_exit = run_original(module, output_root, direct_paths)
+        os.environ["BTC_FF05_RECOVERY_MODE"] = "DIRECT_VERIFIED_MERGED_PATHS_V5"
+        os.environ["BTC_FF05_DIRECT_M5"] = str(direct_paths["M5"])
+        os.environ["BTC_FF05_DIRECT_M15"] = str(direct_paths["M15"])
+        os.environ["BTC_FF05_DIRECT_H1"] = str(direct_paths["H1"])
+        with DirectPathPatch(direct_paths):
+            module = load_original_module()
+            original_exit = run_original(module, output_root)
         latest = output_root / "LATEST"
         search_summary, used_manifest = validate_outputs(
             latest,
