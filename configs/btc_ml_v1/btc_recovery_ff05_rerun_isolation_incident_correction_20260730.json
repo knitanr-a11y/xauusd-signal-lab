@@ -1,0 +1,37 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "submitted_package": "99_UPLOAD_PACKAGE(92).zip",
+  "submitted_run_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "performance_result_accepted": false,
+  "fatal_error": "FF05 used a non-isolated source for M5 from the real MT5 terminal path",
+  "root_cause": {
+    "classification": "RECOVERY_WRAPPER_ENVIRONMENT_ISOLATION_INCOMPLETE",
+    "detail": "The first wrapper overrode APPDATA only. FF05 source discovery also resolved the real user profile through USERPROFILE or Path.home(), so it selected the normal MT5 CSV instead of the merged full-history copy.",
+    "candidate_logic_changed": false,
+    "entry_exit_logic_changed": false,
+    "performance_threshold_changed": false,
+    "bootstrap_changed": false,
+    "source_csv_modified": false
+  },
+  "correction": {
+    "wrapper_version": "btc_recovery_ff05_full_history_rerun_v2",
+    "override_USERPROFILE": true,
+    "override_HOME": true,
+    "override_APPDATA": true,
+    "preserve_LOCALAPPDATA_for_prior_gates": true,
+    "create_APPDATA_terminal_layout": true,
+    "create_Path_home_terminal_layout": true,
+    "postrun_require_source_path_inside_isolated_profile": true,
+    "postrun_require_merged_sha256": true
+  },
+  "rerun_instruction": "RUN_THE_SAME_RECOVERY_FF05_FULL_HISTORY_RERUN_BAT_AFTER_PULL",
+  "next_stage_authorized": false,
+  "live_ready": false,
+  "lot_design": false,
+  "discord": false,
+  "mt5_orders": false,
+  "gold_or_mochipoyo_change": false
+}
