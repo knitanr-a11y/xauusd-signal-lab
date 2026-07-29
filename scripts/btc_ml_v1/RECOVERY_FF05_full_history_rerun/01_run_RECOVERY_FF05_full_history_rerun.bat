@@ -32,8 +32,8 @@ if errorlevel 1 (
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference='Stop';" ^
-  "$old=@(Get-CimInstance Win32_Process | Where-Object { $_.ProcessId-ne$PID -and $_.CommandLine -and $_.CommandLine -match 'run_RECOVERY_FF05_full_history_rerun_v(8|9|10)\.py' });" ^
-  "if($old.Count-gt0){Write-Host '[RECOVERY_FF05_RERUN] OLD V8-V10 PROCESS IS STILL RUNNING:' -ForegroundColor Red;$old|ForEach-Object{Write-Host ('  PID='+$_.ProcessId+' '+$_.CommandLine)};exit 7}"
+  "$old=@(Get-CimInstance Win32_Process | Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -and $_.CommandLine -match 'run_RECOVERY_FF05_full_history_rerun_v(8|9|10)\.py' });" ^
+  "if($old.Count -gt 0){Write-Host '[RECOVERY_FF05_RERUN] OLD V8-V10 PROCESS IS STILL RUNNING:' -ForegroundColor Red;$old|ForEach-Object{Write-Host ('  PID='+$_.ProcessId+' '+$_.CommandLine)};exit 7}"
 if errorlevel 1 (
   echo [RECOVERY_FF05_RERUN] Stop only the old BTC recovery window with Ctrl+C, then run this BAT again.
   echo [RECOVERY_FF05_RERUN] GOLD and collector Python processes must not be stopped.
