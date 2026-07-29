@@ -1,19 +1,23 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T06:49:00+09:00",
+  "recorded_at": "2026-07-30T07:01:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md",
   "required_read_order": [
     "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
     "configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json",
+    "docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md",
+    "configs/btc_ml_v1/btc_d1b_collector_evidence_manifest_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_CONTRACT_20260730.md",
+    "configs/btc_ml_v1/btc_bcr01_outcome_blind_source_snapshot_contract_20260730.json",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md"
@@ -29,7 +33,7 @@
   "startup_search_policy": {
     "repo_wide_search_before_required_read_order": "FORBIDDEN",
     "old_handoff_search": "FORBIDDEN",
-    "code_search_before_D1_completion": "FORBIDDEN"
+    "gold_or_mochipoyo_broad_search": "FORBIDDEN"
   },
   "forbidden_startup_paths": [
     "AGENTS.md",
@@ -51,9 +55,16 @@
     "general_branch_search": "FORBIDDEN",
     "allowed_role": "READ_ONLY_M7C_AND_COLLECTOR_SOURCE_EVIDENCE_FOR_BTCUSD",
     "allowed_inputs": [
-      "USER_UPLOADED_M7C_PRIMARY_D1_PACKAGE_SHA256_870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
-      "USER_UPLOADED_COLLECTOR_D1B_PACKAGE_WHEN_RECEIVED",
-      "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json"
+      "USER_UPLOADED_M7C_PACKAGE_SHA256_870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+      "USER_UPLOADED_COLLECTOR_PACKAGE_SHA256_b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
+      "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
+      "scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat",
+      "scripts/mochipoyo_alert_research/run_collect_events_forever.py",
+      "scripts/mochipoyo_alert_research/collect_events_once_organized.py",
+      "scripts/mochipoyo_alert_research/collect_events_once.py",
+      "scripts/mochipoyo_alert_research/db.py",
+      "scripts/mochipoyo_alert_research/schema.sql",
+      "BCR01_LOGICAL_EXPORT_FROM_ALLOWLISTED_TABLES_ONLY"
     ],
     "gold_m10_candidate_results_for_btc_design": "FORBIDDEN",
     "runtime_change": "FORBIDDEN",
@@ -69,22 +80,27 @@
       "RESEARCH_VS_FREEZE_VS_SHADOW_VS_LIVE"
     ]
   },
-  "current_status": "BTC_REDESIGN_D1_M7C_PRIMARY_EVIDENCE_AUDITED_COLLECTOR_PROVENANCE_PENDING_READ_ONLY",
-  "current_decision": "ACCEPT_M7C_PRIMARY_STRUCTURE_EVIDENCE_CONTINUE_D1_WITH_COLLECTOR_PROVENANCE",
-  "current_next_action": "RECEIVE_AND_INVENTORY_ONE_ZIP_CONTAINING_COLLECTOR_FOREVER_LOG_LATEST_LOOP_STATUS_LATEST_COLLECTION_RESULT",
+  "current_status": "BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_READY",
+  "current_decision": "ACCEPT_D1_M7C_AND_COLLECTOR_PROVENANCE_IMPLEMENT_BCR01_ALLOWLISTED_LOGICAL_SNAPSHOT",
+  "current_next_action": "RUN_BCR01_ONCE_AND_UPLOAD_99_UPLOAD_PACKAGE_ZIP",
   "current_evidence": {
     "M7C_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
-    "M7C_audit": "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
-    "M7C_manifest": "configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json",
+    "Collector_package_sha256": "b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
+    "D1_M7C_audit": "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
+    "D1B_Collector_audit": "docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md",
     "performance_interpretation_performed": false
   },
+  "currently_authorized": [
+    "ONE_BCR01_READ_ONLY_LOGICAL_SNAPSHOT_RUN",
+    "UPLOAD_BCR01_99_UPLOAD_PACKAGE_ZIP"
+  ],
   "currently_not_authorized": [
-    "D2_STABLE_SOURCE_SNAPSHOT_IMPLEMENTATION",
-    "EVENT_LEDGER_CODE",
+    "SECOND_BCR01_RUN_WITHOUT_PROVEN_INVALID_FIRST_PACKAGE",
+    "RAW_SQLITE_WAL_SHM_UPLOAD",
+    "EVENT_LEDGER_IMPLEMENTATION_BEFORE_BCR01_AUDIT",
     "CANDIDATE_FORMULA_DESIGN",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
     "WR_PF_DD_MFE_MAE_ANALYSIS",
-    "NEW_BAT",
     "FF06",
     "SHADOW_RUNTIME",
     "DISCORD",
