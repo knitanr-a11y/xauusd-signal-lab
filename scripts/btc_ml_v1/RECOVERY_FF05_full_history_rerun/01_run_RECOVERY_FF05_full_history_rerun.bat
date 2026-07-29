@@ -33,6 +33,7 @@ if errorlevel 1 (
 if not exist "%OUTPUT_ROOT%" mkdir "%OUTPUT_ROOT%"
 
 echo [RECOVERY_FF05_RERUN] Run the frozen 108-cell FF05 search on merged full history
+echo [RECOVERY_FF05_RERUN] Isolation mode V3 hides the real USERPROFILE, APPDATA, and LOCALAPPDATA.
 echo [RECOVERY_FF05_RERUN] Only isolated copies of the verified merged M5/M15/H1 files may be used.
 echo [RECOVERY_FF05_RERUN] CSV time remains BAR OPEN in raw MT5 broker-server time.
 echo [RECOVERY_FF05_RERUN] Search cells and survivor thresholds are unchanged.
@@ -40,7 +41,7 @@ echo [RECOVERY_FF05_RERUN] This can take several minutes. Do not start another c
 echo [RECOVERY_FF05_RERUN] No live, Discord, lot, or MT5 order action is enabled.
 echo.
 
-%PYTHON_CMD% "scripts\btc_ml_v1\RECOVERY_FF05_full_history_rerun\python\run_RECOVERY_FF05_full_history_rerun.py" --output-root "%OUTPUT_ROOT%" %*
+%PYTHON_CMD% "scripts\btc_ml_v1\RECOVERY_FF05_full_history_rerun\python\run_RECOVERY_FF05_full_history_rerun_v3.py" --output-root "%OUTPUT_ROOT%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 set "LATEST_DIR=%OUTPUT_ROOT%\LATEST"
 set "UPLOAD_ZIP=%LATEST_DIR%\99_UPLOAD_PACKAGE.zip"
