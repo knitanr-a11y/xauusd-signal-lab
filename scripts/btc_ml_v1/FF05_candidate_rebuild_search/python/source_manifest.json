@@ -1,0 +1,23 @@
+{
+  "stage": "BTC_FF05_CAUSAL_CANDIDATE_REBUILD_SEARCH",
+  "source_sha256_after_decompression": "3f03979249e22d17a54ff2814147eb5edb1a6d8d0bb8734aa4eb6e9537968715",
+  "source_lines": 1281,
+  "source_bytes": 50832,
+  "compressed_base64_characters": 17436,
+  "chunks": [
+    {"file": "source_01.b64", "characters": 3000, "git_blob_sha": "af1fc066adf8a7d90aa03dc745df228fb351e1ab"},
+    {"file": "source_02.b64", "characters": 3000, "git_blob_sha": "8fb4c942beb8f10cec8cd127139de936a3867869"},
+    {"file": "source_03.b64", "characters": 3000, "git_blob_sha": "68382b3eb96614241d94227351a911051e785417"},
+    {"file": "source_04.b64", "characters": 3000, "git_blob_sha": "7944ef18d72ef4b57fb4baccd043d4014c02d74a"},
+    {"file": "source_05.b64", "characters": 3000, "git_blob_sha": "8f8673aa2aa9ce3a738355209d39e03e88c41343"},
+    {"file": "source_06.b64", "characters": 2436, "git_blob_sha": "14f8e26f3aaec38ed4c40fe45be5f79987ef2508"}
+  ],
+  "local_validation": {
+    "python_compile": "PASS",
+    "internal_self_tests": "6_OF_6_PASS",
+    "synthetic_full_run": "PASS_COMPLETE_108_CELLS_AND_ZIP",
+    "synthetic_selection_result": "COMPLETE_NO_CANDIDATE",
+    "zip_layout_validation": "PASS"
+  },
+  "real_user_csv_run": false
+}
