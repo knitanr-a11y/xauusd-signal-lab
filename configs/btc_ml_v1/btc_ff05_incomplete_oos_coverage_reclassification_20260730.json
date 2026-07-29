@@ -1,0 +1,41 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_HISTORICAL_COVERAGE",
+  "submitted_ff05_repository_commit": "88a8b011916d71e5c114abd457c0307011b92c9c",
+  "submitted_ff05_reported_status": "COMPLETE_NO_CANDIDATE",
+  "corrected_formal_status": "BLOCKED_INCOMPLETE_OOS_COVERAGE_NOT_FORMAL_NO_CANDIDATE",
+  "evidence": {
+    "m5_first_open_raw": "2025-09-12 20:40:00",
+    "m15_first_open_raw": "2025-09-13 08:00:00",
+    "h1_first_open_raw": "2024-04-11 01:00:00",
+    "planned_oos_start_raw": "2025-02-01 00:00:00",
+    "oos01_trade_rows_across_all_108_cells": 0,
+    "oos02_trade_rows_across_all_108_cells": 0,
+    "oos03_trade_rows_across_all_108_cells": 194,
+    "first_resolved_signal_in_submitted_ledger": "2025-09-16 07:15:00",
+    "reason": "The frozen six-segment evaluation was not supplied with M5/M15 bars for OOS01, OOS02, and most of OOS03. Zero survivors cannot be interpreted as proof that no candidate exists over the preregistered history."
+  },
+  "recovery_reference": {
+    "package": "BTCUSD_HISTORY_CHAT_PACKAGE.zip",
+    "package_sha256": "9b0b74e9937eca05e895047f5737c6794332af7ec25f2a30b64d9440c9e0dd22",
+    "required_m5_first_time": "2024-07-02 02:25:00",
+    "required_m15_first_time": "2024-07-02 02:30:00",
+    "required_h1_first_time": "2024-07-02 03:00:00"
+  },
+  "rules": {
+    "ff05_rerun_before_recovery_review": false,
+    "performance_threshold_change": false,
+    "search_cell_change": false,
+    "use_ff02_six_losses_for_tuning": false,
+    "source_files_read_only": true,
+    "live_ready": false,
+    "lot_design": false,
+    "discord": false,
+    "mt5_orders": false,
+    "gold_or_mochipoyo_change": false
+  },
+  "next_action": "RUN_RECOVERY_FF05_HISTORICAL_COVERAGE_AND_UPLOAD_PACKAGE",
+  "next_stage_authorized": false
+}
