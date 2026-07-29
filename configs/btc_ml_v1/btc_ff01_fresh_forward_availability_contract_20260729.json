@@ -5,8 +5,14 @@
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_base_branch": "main",
   "working_branch": "feature/btc-fresh-forward-research",
-  "formal_status_before_stage": "BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED",
   "fresh_forward_cutoff_utc_exclusive": "2026-07-02 02:15:00",
+  "correction": {
+    "historical_package": "BTCUSD_H4_WARMUP_PACKAGE.zip",
+    "historical_csv_start": "2017-01-02 04:00:00",
+    "purpose": "historical full reproduction only",
+    "required_for_fresh_forward_readiness": false,
+    "user_must_locate_or_restore": false
+  },
   "implementation": {
     "python": "scripts/btc_ml_v1/fresh_forward_availability/python/audit_btc_fresh_forward_availability.py",
     "bat_readme": "scripts/btc_ml_v1/fresh_forward_availability/bat/00_READ_ME_FIRST.txt",
@@ -20,7 +26,6 @@
     "repository_files": "<repo>/Files",
     "known_mt5_terminal_files": "C:/Users/regen/AppData/Roaming/MetaQuotes/Terminal/2FA8A7E69CED7DC259B1AD86A247F675/MQL5/Files",
     "reproduction_history": "C:/BTC_REPRO/history",
-    "btc4_long_h4_warmup": "C:/BTC_REPRO/h4_warmup/btcusdsharp_h4.csv",
     "explicit_paths_via_numbered_bat": true,
     "whole_pc_recursive_search": false,
     "similar_symbol_substitution": false
@@ -40,27 +45,11 @@
     "post_cutoff_operator": ">"
   },
   "required_timeframes": [
-    "M5",
-    "M15",
-    "H1",
-    "D1",
-    "H4_FRESH_TAIL",
-    "H4_LONG_WARMUP_2017"
-  ],
-  "required_fields_per_inspected_file": [
-    "path",
-    "file_size_bytes",
-    "rows",
-    "first_raw_mt5_broker_server_timestamp",
-    "latest_raw_closed_bar_timestamp",
-    "timestamp_timezone_state",
-    "selected_broker_utc_offset_hours",
-    "broker_offset_inference_evidence",
-    "latest_utc_converted_closed_bar_timestamp",
-    "rows_strictly_after_cutoff_utc",
-    "non_ascending_timestamp_count",
-    "duplicate_timestamp_count",
-    "read_error_or_ambiguity"
+    "M5_FRESH_TAIL",
+    "M15_FRESH_TAIL",
+    "H1_FRESH_TAIL",
+    "D1_FRESH_TAIL",
+    "H4_FRESH_TAIL"
   ],
   "readiness_integrity": {
     "read_error_blocks_input": true,
@@ -72,7 +61,6 @@
   },
   "candidate_requirements": {
     "BTC4_RISK_CAP_400": [
-      "H4_LONG_WARMUP_2017",
       "H4_AFTER_CUTOFF",
       "M5_AFTER_CUTOFF"
     ],
@@ -127,7 +115,6 @@
     "fresh_trade_generation": true,
     "fresh_performance_evaluation": true,
     "extended_csv_reproduction_execution": true,
-    "skip_input_hash_check_as_fresh_evaluator": true,
     "candidate_rule_or_payoff_change": true,
     "spread_pip_or_overlap_change": true,
     "lot_or_monetary_dd_design": true,
@@ -143,7 +130,7 @@
   },
   "validation_completed_before_commit": {
     "python_compile": true,
-    "synthetic_all_five_ready": true,
+    "synthetic_all_five_ready_without_historical_h4": true,
     "synthetic_d1_missing_blocks_only_btc9r": true,
     "synthetic_all_inputs_missing_creates_blocked_package": true,
     "zip_contains_reports_only": true
