@@ -1,0 +1,30 @@
+{
+  "candidate": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+  "recorded_at": "2026-07-29",
+  "formal_status": "BTC7R_HISTORICAL_SCORE_TRUST_SUSPENDED_FF03_PENDING",
+  "reasons": [
+    "FF02 produced six prospective entries and all six lost",
+    "the first immutable repository candidate contract is after the claimed validation period",
+    "a complete ledger of all tested features thresholds and target settings is not present",
+    "the claimed validation blindness is therefore not independently provable"
+  ],
+  "not_claimed": [
+    "deliberate leakage",
+    "confirmed direct future-bar access",
+    "final candidate invalidation before the prefix audit"
+  ],
+  "score_classification": {
+    "pre2026_73_77pct": "RETROSPECTIVE_RESEARCH_NOT_TRUSTED_AS_UNSEEN_VALIDATION",
+    "post2026_22_trade_result": "RETROSPECTIVE_REPLAY",
+    "ff02_six_trade_result": "FIRST_INDEPENDENTLY_VERIFIABLE_PROSPECTIVE_EVIDENCE"
+  },
+  "current_candidate_use": {
+    "promotion": false,
+    "lot_design": false,
+    "live_use": false,
+    "fresh_loss_driven_filter_change": false,
+    "replacement_research": false
+  },
+  "next_required_stage": "BTC_FF03_BTC7R_CAUSALITY_AND_SELECTION_LEAK_AUDIT_READ_ONLY",
+  "other_four_candidates_changed": false
+}
