@@ -65,7 +65,7 @@ if "%PACKAGE_OK%"=="1" (
     "$s=Get-Content -Raw -LiteralPath '%LATEST_DIR%\01_merge_summary.json'|ConvertFrom-Json;" ^
     "if(-not $s.merge_complete){throw 'merge_complete is false'};" ^
     "Add-Type -AssemblyName System.IO.Compression.FileSystem;" ^
-    "$z=[System.IO.CompressionFileSystem.ZipFile]::OpenRead('%UPLOAD_ZIP%');" ^
+    "$z=[System.IO.Compression.ZipFile]::OpenRead('%UPLOAD_ZIP%');" ^
     "$expected=@('00_READ_ME_FIRST.txt','01_merge_summary.json','02_merge_report.txt','03_merge_manifest.csv','04_overlap_verification.csv','05_cutoff_coverage.csv','06_self_tests.csv');" ^
     "$actual=@($z.Entries|ForEach-Object FullName);$z.Dispose();" ^
     "if(($actual.Count-ne$expected.Count)-or(Compare-Object $expected $actual)){throw 'ZIP validation failed'}"
