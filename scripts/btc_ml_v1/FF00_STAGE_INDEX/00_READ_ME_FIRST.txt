@@ -23,7 +23,12 @@ RECOVERY_FF05_historical_coverage
   Exact frozen historical package and required CSV hashes were recovered successfully.
 
 RECOVERY_FF05_time_domain
-  Prove whether recovered history is UTC and current terminal history is broker-server UTC+2/+3 DST before any FF05 rerun.
+  Shift-zero OHLC identity proved recovered and current CSVs share the same raw MT5 timestamp domain.
+  The previous UTC-to-broker +2/+3 hypothesis was rejected.
+
+RECOVERY_FF05_full_history_merge
+  Create a read-only union of recovered early history and current cutoff-tail history.
+  Duplicate timestamps must have exact OHLC identity before merging.
 
 Use only the numbered FF folders for normal manual execution.
 The older unnumbered folders are retained as internal compatibility paths.
@@ -31,5 +36,5 @@ The older unnumbered folders are retained as internal compatibility paths.
 Recovery and incident material begins with RECOVERY_, INCIDENT_, or FORENSIC_
 so that it cannot be buried among normal stage numbers.
 
-Do not rerun FF05 until RECOVERY_FF05_time_domain has been reviewed.
+Do not rerun FF05 until RECOVERY_FF05_full_history_merge has been reviewed.
 Do not run a later FF stage unless ChatGPT explicitly instructs you to do so after reviewing the previous ZIP.
