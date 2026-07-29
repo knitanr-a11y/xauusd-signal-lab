@@ -1,0 +1,35 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "incident": "V3_PREREQUISITE_ARCHIVE_COPY_FAILED",
+  "submitted_package": "99_UPLOAD_PACKAGE(94).zip",
+  "formal_status": "BLOCKED_RECOVERY_RERUN_ERROR",
+  "performance_result_accepted": false,
+  "cause": "V3 mirrored entire prerequisite output roots including historical archive trees. Copying stale archive content failed with WinError 3 before the FF05 search started.",
+  "correction": {
+    "runtime": "ISOLATED_PROFILE_V4",
+    "prerequisite_mirroring": "COPY_ONLY_EACH_ALLOWED_STAGE_LATEST_DIRECTORY",
+    "historical_archives_copied": false,
+    "real_user_profile_hidden": true,
+    "real_appdata_hidden": true,
+    "real_localappdata_hidden": true,
+    "merged_btc_history_only": true
+  },
+  "user_supplied_path_note": {
+    "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\goldsharp_m15.csv",
+    "classification": "GOLD_M15_NOT_AN_INPUT_TO_BTC_FF05",
+    "used": false,
+    "modified": false
+  },
+  "unchanged": {
+    "search_cells": 108,
+    "bootstrap_resamples": 5000,
+    "survivor_thresholds": true,
+    "ff02_six_losses_used_for_tuning": false,
+    "source_csv_modified": false,
+    "gold_or_mochipoyo_modified": false
+  },
+  "next_action": "PULL_V4_AND_RUN_THE_SAME_RECOVERY_BAT_ONCE",
+  "next_stage_authorized": false
+}
