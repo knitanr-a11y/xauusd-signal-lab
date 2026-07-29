@@ -1,0 +1,26 @@
+{
+  "schema_version": "btc_recovery_ff05_v9_recursive_rebuild_incident_correction_v1",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
+  "incident_date": "2026-07-30",
+  "invalid_runtime": "V9",
+  "symptom": "Repeated 'merged payload missing; rebuilding first' and READY_FULL_HISTORY_MERGED output without entering the 108-cell evaluation.",
+  "root_cause": "V9 replaced v5_module.load_merge_contract with load_snapshot_contract, then build_verified_snapshot called v8_module.merged_files_ready. That helper called the replaced load_merge_contract again, creating recursive snapshot construction and repeated merge rebuilds.",
+  "impact": {
+    "performance_evaluation_executed": false,
+    "performance_result_accepted": false,
+    "candidate_selection_changed": false,
+    "source_csv_modified": false,
+    "gold_or_mochipoyo_touched": false
+  },
+  "required_user_action_for_running_v9": "Stop immediately with Ctrl+C or close the console window.",
+  "correction": {
+    "runtime": "V10",
+    "captured_original_merge_loader_only": true,
+    "recursive_helper_call_removed": true,
+    "maximum_automatic_merge_rebuilds": 1,
+    "fail_closed_after_single_rebuild": true,
+    "verified_snapshot_sha256_checks_preserved": true,
+    "frozen_108_cells_and_thresholds_unchanged": true
+  },
+  "next_stage_authorized": false
+}
