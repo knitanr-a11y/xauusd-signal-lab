@@ -15,6 +15,9 @@ FF03_btc7r_causality_audit
 FF04_bar_time_audit
   Confirm that CSV time is BAR OPEN time and verify causal M5/M15/H1 timing.
 
+FF05_candidate_rebuild_search
+  Evaluate all 108 preregistered causal rebuild cells with familywise correction.
+
 Use only the numbered FF folders for normal manual execution.
 The older unnumbered folders are retained as internal compatibility paths.
 
