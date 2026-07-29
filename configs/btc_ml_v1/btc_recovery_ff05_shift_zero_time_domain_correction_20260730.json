@@ -1,0 +1,54 @@
+{
+  "project": "BTC_ML_V1",
+  "recorded_at": "2026-07-30",
+  "branch": "feature/btc-fresh-forward-research",
+  "stage": "RECOVERY_FF05_FULL_HISTORY_MERGE",
+  "submitted_time_domain_status": "BLOCKED_TIME_DOMAIN_NOT_PROVEN",
+  "corrected_interpretation": "REFERENCE_AND_CURRENT_SHARE_SAME_RAW_MT5_BROKER_SERVER_TIMESTAMP_DOMAIN",
+  "evidence": {
+    "M5": {
+      "shift_zero_overlap_rows": 83899,
+      "shift_zero_exact_ohlc_rows": 83899,
+      "shift_zero_exact_ratio": 1.0,
+      "shift_plus_2_exact_rows": 0,
+      "shift_plus_3_exact_rows": 0
+    },
+    "M15": {
+      "shift_zero_overlap_rows": 27964,
+      "shift_zero_exact_ohlc_rows": 27964,
+      "shift_zero_exact_ratio": 1.0,
+      "shift_plus_2_exact_rows": 0,
+      "shift_plus_3_exact_rows": 0
+    },
+    "H1": {
+      "shift_zero_overlap_rows": 17519,
+      "shift_zero_exact_ohlc_rows": 17519,
+      "shift_zero_exact_ratio": 1.0,
+      "shift_plus_2_exact_rows": 0,
+      "shift_plus_3_exact_rows": 0
+    }
+  },
+  "conclusions": {
+    "apply_plus_2_or_plus_3_to_reference_rows": false,
+    "reference_data_cutoff_utc_label": "MISLEADING_LEGACY_LABEL",
+    "ff05_raw_broker_server_cutoff_inclusive": "2026-07-02 05:15:00",
+    "bar_time_semantics": "BAR_OPEN",
+    "m5_last_usable_open_at_cutoff": "2026-07-02 05:10:00",
+    "merge_required": true,
+    "reason_merge_required": "Recovered history provides early OOS coverage but ends before the raw broker-server cutoff; current terminal history provides the cutoff tail and later rows."
+  },
+  "safety": {
+    "source_csv_read_only": true,
+    "overlap_mismatch_blocks": true,
+    "performance_rerun_executed": false,
+    "candidate_rules_changed": false,
+    "ff02_six_losses_used_for_tuning": false,
+    "live_ready": false,
+    "lot_design": false,
+    "discord": false,
+    "mt5_orders": false,
+    "gold_or_mochipoyo_change": false
+  },
+  "next_action": "RUN_RECOVERY_FF05_FULL_HISTORY_MERGE_AND_UPLOAD_PACKAGE",
+  "next_stage_authorized": false
+}
