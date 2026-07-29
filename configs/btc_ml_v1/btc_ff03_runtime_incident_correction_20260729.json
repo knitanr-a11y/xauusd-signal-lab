@@ -1,0 +1,37 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF03_BTC7R_CAUSALITY_AND_SELECTION_LEAK_AUDIT_READ_ONLY",
+  "recorded_at": "2026-07-29",
+  "failed_user_run": {
+    "repository_commit": "f6e7e1cb0e69390c623238ac765c3a2f254ff6db",
+    "overall_status": "BLOCKED_FATAL_AUDIT_ERROR",
+    "fatal_error": "KeyError: 'candidate'",
+    "audit_complete": false,
+    "result_interpretable": false
+  },
+  "root_cause": {
+    "component": "legacy parity metric adapter",
+    "detail": "The frozen reproduction metrics helper sorts a multi-candidate ledger by entry_time and candidate. FF03 passed a BTC7R-only resolved ledger without adding the immutable candidate metadata column.",
+    "strategy_or_entry_logic_fault": false,
+    "source_data_fault": false,
+    "future_information_finding": false
+  },
+  "correction": {
+    "adapter": "scripts/btc_ml_v1/btc7r_causality_audit/python/audit_btc7r_causality_and_selection_v2.py",
+    "launcher": "scripts/btc_ml_v1/btc7r_causality_audit/bat/01_run_btc7r_causality_audit.bat",
+    "behavior": "Add the fixed BTC7R candidate ID as metric-ledger metadata before calling the unchanged frozen reproduction metrics helper.",
+    "entry_exit_or_pnl_changed": false,
+    "candidate_rule_changed": false,
+    "historical_reference_changed": false
+  },
+  "validation": {
+    "python_compile": true,
+    "candidate_required_metrics_helper_test": true,
+    "synthetic_end_to_end_audit_complete": true,
+    "synthetic_prefix_plans_audited": 46,
+    "synthetic_prefix_failures": 0,
+    "zip_output_created": true
+  },
+  "user_action": "Fetch/Pull the working branch and rerun the same numbered FF03 BAT once. Upload the newly created 99_UPLOAD_PACKAGE.zip.",
+  "next_stage_authorized": false
+}
