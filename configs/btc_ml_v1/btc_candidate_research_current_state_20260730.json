@@ -1,0 +1,49 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30",
+  "status": "BTC_REDESIGN_D0_COMPLETE_D1_SOURCE_INVENTORY_NEXT_READ_ONLY",
+  "authoritative_design": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
+  "authoritative_contract": "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
+  "completed": {
+    "research_goal_reframed": true,
+    "mochipoyo_source_anchored_track_defined": true,
+    "independent_vector_track_defined": true,
+    "fidelity_and_value_layers_separated": true,
+    "research_shadow_live_layers_separated": true,
+    "ff05_recovery_chain_discontinued_as_active_work": true,
+    "future_data_and_selection_governance_defined": true
+  },
+  "preserved_evidence": {
+    "FF01_FF04": "PRESERVE_CAUSAL_AND_TIME_SEMANTICS_EVIDENCE",
+    "FF05_and_recovery": "PRESERVE_AS_AUDIT_HISTORY_NOT_CANDIDATE_RESULT",
+    "BTC7R": "QUARANTINED_SELECTION_PROVENANCE_UNTRUSTED"
+  },
+  "mochipoyo_sources": {
+    "M7C_role": "READ_ONLY_PRIMARY_SOURCE_FIDELITY_EVIDENCE",
+    "collector_role": "READ_ONLY_GENUINE_SOURCE_EVENT_EVIDENCE",
+    "M7C_scope": "BTCUSD_AND_XAUUSD_DUAL_SOURCE",
+    "BTC_research_primary_symbol": "BTCUSD",
+    "XAUUSD_use": "SECONDARY_STRUCTURAL_COMPARISON_ONLY",
+    "existing_runtime": "KEEP_UNCHANGED",
+    "writes_to_mochipoyo_outputs": false
+  },
+  "currently_forbidden": {
+    "run_old_recovery_bat": true,
+    "create_FF06": true,
+    "design_candidate_formula": true,
+    "open_outcomes_for_new_design": true,
+    "evaluate_WR_PF_MFE_MAE": true,
+    "create_shadow_runtime": true,
+    "stop_or_modify_collector_M7C_M8C_M9_M10": true,
+    "discord_send": true,
+    "mt5_order": true,
+    "live_ready": true,
+    "automatic_promotion": true
+  },
+  "next_phase": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
+  "next_phase_requires_user_bat": false,
+  "next_phase_requires_runtime_change": false,
+  "later_phases_require_explicit_authorization": true
+}
