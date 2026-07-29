@@ -1,0 +1,106 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
+  "recorded_at": "2026-07-30T06:49:00+09:00",
+  "result": "M7C_PRIMARY_EVIDENCE_ACCEPTED_COLLECTOR_PROVENANCE_PENDING",
+  "performance_interpretation_performed": false,
+  "package": {
+    "uploaded_name": "新しい圧縮された (ZIP) フォルダー.zip",
+    "sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "bytes": 299121,
+    "required_seven_present": true,
+    "additional_file": "m7c_runtime_start_receipt.json",
+    "accepted_as": "MANUAL_D1_INSPECTION_PACKAGE_NOT_IMMUTABLE_D2_SNAPSHOT"
+  },
+  "files": [
+    {"name":"latest_m7c_extra_proxy_signals.csv","bytes":13636,"sha256":"557966083e0b702babedfe8ceaa430f19db08b4e73fd58bae67ab8dd6059e69f","rows":104},
+    {"name":"latest_m7c_prospective_shadow.json","bytes":10689,"sha256":"a45f74f450aac8d4032e7f5629866da04206bc3c57490352c42bf4d946f41cac"},
+    {"name":"latest_m7c_proxy_decisions.csv","bytes":312741,"sha256":"865875cb21f545ef054cc97835f758c3b04145f8cd4e752005fbd46d66eb84f4","rows":1557},
+    {"name":"latest_m7c_proxy_signals.csv","bytes":21001,"sha256":"e27a7b5459718a849766f2db2aebe0d38211a11ebd9cd02385238f111a386fed","rows":168},
+    {"name":"latest_m7c_shadow_loop_status.json","bytes":1147,"sha256":"dcfd72fe109a73eee25c1bc0299f926c453de0337d0eb7ef47a1293c7587aaf0"},
+    {"name":"latest_m7c_source_event_comparisons.csv","bytes":15259,"sha256":"5e4a2e348e83558d6889bfbfecdf35e874dac6a705402be8f572bcd36ff5a93d","rows":125},
+    {"name":"m7c_runtime_start_receipt.json","bytes":2461,"sha256":"55e525b02c7729c92c2b6c73f2cf42c75ea14b430664f1bf99e890f4d0cd029d"},
+    {"name":"m7c_shadow_forever.log","bytes":6445524,"sha256":"d994a389c1198f133f0198cdd9abe14669ca40fab14f8fe2f32cae6d9515ece8"}
+  ],
+  "runtime": {
+    "status": "RUNNING",
+    "stage": "M7C_PROSPECTIVE_SHADOW_REPRODUCTION_AUDIT_ONLY",
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "report_built_at_utc": "2026-07-29T21:46:15Z",
+    "current_process_started_at_utc": "2026-07-23T06:36:43Z",
+    "cycles": 1884,
+    "successful_cycles": 1884,
+    "failed_cycles": 0,
+    "last_exit_code": 0,
+    "audit_only": true,
+    "discord_send": false,
+    "mt5_order": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "counts": {
+    "proxy_decisions": 1557,
+    "proxy_signals": 168,
+    "source_comparison_rows": 125,
+    "supported_source_events": 90,
+    "supported_BTCUSD": 51,
+    "supported_XAUUSD": 39,
+    "exact_matches": 55,
+    "late_one_bar_matches": 9,
+    "missed_supported_source": 26,
+    "unsupported_reentry": 23,
+    "unsupported_opposite": 12,
+    "finalized_extra_proxy_signals": 104
+  },
+  "integrity": {
+    "json_csv_summary_counts_match": true,
+    "raw_alert_id_range": [64,188],
+    "raw_alert_ids_contiguous": true,
+    "raw_alert_id_duplicates": 0,
+    "source_time_regressions_by_raw_id": 0,
+    "full_row_duplicates_all_csv": 0,
+    "proxy_signals_all_join_exactly_to_non_no_signal_decisions": true,
+    "matched_proxy_keys_one_to_one": true
+  },
+  "clock": {
+    "observed_mt5_server_offset_hours": 3,
+    "all_proxy_decisions_match_current_server_open_minus_offset": true,
+    "normal_selected_to_current_gap_minutes": 15,
+    "normal_gap_rows": 1549,
+    "explicit_gap_rows": 8,
+    "gap_rows_all_no_signal": true,
+    "collector_receipt_timestamp_available": false,
+    "genuine_source_timestamp_semantics_proven": false
+  },
+  "outcome_exposure": {
+    "outcome_columns_in_csv": false,
+    "future_fields_used_flag": false,
+    "trade_outcome_fields_used_flag": false,
+    "WR_PF_DD_MFE_MAE_interpreted": false,
+    "source_fidelity_counts_exposed": true
+  },
+  "log_continuity": {
+    "cycle_headers": 2503,
+    "nonzero_exit_headers": 0,
+    "cycle_number_resets": 1,
+    "first_run_cycles": "1-619",
+    "current_run_cycles": "1-1884",
+    "prospective_start_reset": false,
+    "assessment": "COMPATIBLE_WITH_FORCED_REBOOT_RECOVERY_NOT_YET_PROVEN"
+  },
+  "next_required_evidence": [
+    "collector_forever.log",
+    "latest_loop_status.json",
+    "latest_collection_result.json"
+  ],
+  "not_authorized": [
+    "CANDIDATE_FORMULA_DESIGN",
+    "OUTCOME_PERFORMANCE_INTERPRETATION",
+    "NEW_BAT",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_OR_STOP_M7C_OR_COLLECTOR"
+  ]
+}
