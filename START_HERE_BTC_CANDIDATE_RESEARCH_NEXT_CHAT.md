@@ -2,45 +2,45 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_D1_M7C_PRIMARY_EVIDENCE_AUDITED_COLLECTOR_PROVENANCE_PENDING_READ_ONLY`
-- updated: `2026-07-30T06:49:00+09:00`
+- current status: `BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_READY`
+- updated: `2026-07-30T07:01:00+09:00`
 
-## 1. branchを先に固定する
+## 1. branch hard gate
 
 すべての読取りは必ず次のbranchを明示指定する。
 
 `feature/btc-fresh-forward-research`
 
-`main`、default branch、別branchの同名ファイルは使用しない。branchが取得できなければ停止し、推測やfallbackをしない。
+`main`、default branch、別branch、類似ファイルfallbackは禁止。branch取得不能または文書矛盾時は停止する。
 
-## 2. 最新版handoff
+## 2. 唯一の最新版handoff
 
-現在の唯一の最新版handoff:
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md`
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md`
+上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
-上記以外の過去handoffは、固定入口から明示されない限り`AUDIT_HISTORY_ONLY`であり、再開根拠にしない。
-
-## 3. 読む順番
-
-次の順番で、最初から最後まで読む。
+## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
 6. `docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md`
 7. `configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json`
-8. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
-9. `configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json`
-10. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
+8. `docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md`
+9. `configs/btc_ml_v1/btc_d1b_collector_evidence_manifest_20260730.json`
+10. `docs/btc_ml_v1/BTC_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_CONTRACT_20260730.md`
+11. `configs/btc_ml_v1/btc_bcr01_outcome_blind_source_snapshot_contract_20260730.json`
+12. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
+13. `configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json`
+14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
-この順番を終える前にrepo全体検索、code search、古いhandoff探索をしない。
+この順番より前にrepo全体検索、code search、古いhandoff探索をしない。
 
-## 4. 読んではいけないもの
+## 4. startup denylist
 
-このBTC研究の入口として、次を読まない・使わない。
+このBTC研究の入口として次を読まない・使わない。
 
 - `AGENTS.md` — 現在GOLD_ML_V1用
 - `START_HERE_GOLD_ML_V1_NEXT_CHAT.md`
@@ -50,59 +50,50 @@
 - `config/gold_ml_v1/**`
 - `scripts/gold_v3/**`
 - `scripts/gold_ml_v1/**`
-- GOLD V2、旧GOLD、GOLD V3、GOLD_ML_V1、DISC8、Stage41関連
-- 旧BTC stacking handoff
-- 旧BTC YouTube候補handoff
-- FF05 recovery V3〜V11の再開資料
-- この固定入口から参照されていない旧current state、旧next action、旧handoff
+- GOLD V2、旧GOLD、DISC8、Stage41
+- 旧BTC stacking / YouTube候補handoff
+- FF05 recovery V3〜V11
+- 本入口から参照されない旧state、next action、handoff
 
-MOCHIPOYO branchを一般探索しない。M7C/CollectorはBTCUSDを含む一次証拠だが、最新版handoffが正確に許可した契約文書またはユーザー提出物だけを読み取り専用で扱う。
+MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可・監査されたM7C/Collector契約ファイルとユーザー提出物だけを読み取り専用で扱う。
 
-現在の追加許可は次のexact fileだけ:
+## 5. 研究目的
 
-`config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json`
+- Track A: M7C/Collectorの実source alertを一次証拠にする、もちぽよ由来BTC候補
+- Track B: もちぽよと異なる相場原理の独立ベクトルBTC候補
 
-## 5. 現在の目的
-
-- Track A: M7C/Collectorの実source alertを一次証拠にする、もちぽよ由来BTC候補研究
-- Track B: もちぽよと異なる相場原理から作る独立ベクトルBTC候補研究
-
-完全複製や単発バックテストの見栄えではなく、将来の収益性、安定性、損失制御、候補間補完性、shadow parity、監視・停止まで含むシステムを作る。
+完全複製や単発バックテストではなく、将来の収益性、安定性、損失制御、候補間補完性、shadow parity、drift監視、fail-closed停止まで含むシステムを作る。
 
 ## 6. 現在の到達点
 
-M7C一次証拠ZIPを監査済み。
+D1のM7C・Collector監査は完了。
 
-- source comparison rows: 125
-- supported source events: 90
+- M7C supported source events: 90
 - supported BTCUSD: 51
-- proxy decisions: 1557
-- proxy signals: 168
-- finalized extras: 104
-- no trading outcome analysis performed
-
-詳細はD1監査文書とmanifestを読む。
+- Collector combined cycles: 12,612
+- Collector inserted rows: 127
+- duplicate rows: 0
+- latest observed cursor: 189
+- performance interpretation: not performed
 
 ## 7. 現在の次作業
 
-次はD1Bだけ:
+`BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT`
 
-`D1B_COLLECTOR_PROVENANCE_INVENTORY_READ_ONLY`
+ユーザーは次を1回だけ実行する。
 
-ユーザーから次の既存3ファイルを1つのZIPで受け取る。
+`scripts/btc_ml_v1/BCR01_outcome_blind_source_snapshot/01_run_BCR01.bat`
 
-- `collector_forever.log`
-- `latest_loop_status.json`
-- `latest_collection_result.json`
+提出ZIP:
 
-Collector/M7Cを停止、再起動、初期化、編集しない。
+`%LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\BCR01_outcome_blind_source_snapshot\LATEST\99_UPLOAD_PACKAGE.zip`
 
-候補式、WR/PF/DD/MFE/MAE、新BAT、FF06、shadowには進まない。
+raw SQLite DB、WAL、SHMは送らない。BCR01はallowlisted source tablesだけをread-only transactionで論理exportする。
 
-## 8. 実行中システムの保護
+## 8. runtime protection
 
-M7C、Collector、M8C、M9、M10系列を停止・再起動・初期化・変更しない。GOLD/MOCHIPOYO側へBTC研究結果を書き込まない。
+Collector、M7C、M8C、M9、M10を停止・再起動・初期化・変更しない。GOLD/MOCHIPOYO側へBTC研究結果を書き込まない。
 
 ## 9. fail-closed
 
-branch、最新版handoff、current state、next actionのいずれかが矛盾する場合は作業を停止する。似たファイル、古いhandoff、記憶、default branchで補わない。
+branch、最新版handoff、current state、next actionが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
