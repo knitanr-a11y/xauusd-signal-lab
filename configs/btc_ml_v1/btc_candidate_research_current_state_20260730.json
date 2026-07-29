@@ -2,11 +2,12 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T06:31:00+09:00",
-  "status": "BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_READ_ONLY",
+  "recorded_at": "2026-07-30T06:49:00+09:00",
+  "status": "BTC_REDESIGN_D1_M7C_PRIMARY_EVIDENCE_AUDITED_COLLECTOR_PROVENANCE_PENDING_READ_ONLY",
+  "decision": "ACCEPT_M7C_PRIMARY_STRUCTURE_EVIDENCE_CONTINUE_D1_WITH_COLLECTOR_PROVENANCE",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "maintenance_contract": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
@@ -14,6 +15,14 @@
   },
   "authoritative_design": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
   "authoritative_contract": "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
+  "d1_m7c_audit": {
+    "document": "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
+    "manifest": "configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json",
+    "package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "package_accepted": true,
+    "immutable_D2_snapshot": false,
+    "performance_interpretation_performed": false
+  },
   "completed": {
     "research_goal_reframed": true,
     "mochipoyo_source_anchored_track_defined": true,
@@ -23,9 +32,28 @@
     "ff05_recovery_chain_discontinued_as_active_work": true,
     "future_data_and_selection_governance_defined": true,
     "D1_preliminary_contract_inventory_complete": true,
+    "D1_M7C_primary_package_received": true,
+    "D1_M7C_schema_inventory_complete": true,
+    "D1_M7C_event_class_inventory_complete": true,
+    "D1_M7C_clock_mapping_observed": true,
+    "D1_M7C_outcome_exposure_inventory_complete": true,
     "stable_next_chat_entry_created": true,
-    "dated_complete_handoff_created": true,
+    "dated_complete_handoff_updated": true,
     "handoff_allowlist_and_denylist_frozen": true
+  },
+  "m7c_evidence": {
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "status": "RUNNING_COLLECTING_AUDIT_ONLY",
+    "supported_source_events": 90,
+    "supported_BTCUSD": 51,
+    "supported_XAUUSD": 39,
+    "source_comparison_rows": 125,
+    "proxy_decisions": 1557,
+    "proxy_signals": 168,
+    "finalized_extra_proxy_signals": 104,
+    "observed_mt5_server_offset_hours": 3,
+    "trade_outcome_fields_present": false,
+    "cycle_reset_assessment": "COMPATIBLE_WITH_FORCED_REBOOT_RECOVERY_NOT_YET_PROVEN"
   },
   "preserved_evidence": {
     "FF01_FF04": "PRESERVE_CAUSAL_AND_TIME_SEMANTICS_EVIDENCE",
@@ -40,7 +68,8 @@
     "XAUUSD_use": "SECONDARY_STRUCTURAL_COMPARISON_ONLY",
     "existing_runtime": "KEEP_UNCHANGED",
     "writes_to_mochipoyo_outputs": false,
-    "general_mochipoyo_branch_search": false
+    "general_mochipoyo_branch_search": false,
+    "exact_additional_allowed_reference": "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json"
   },
   "startup_guards": {
     "explicit_branch_ref_required": true,
@@ -57,6 +86,8 @@
     "design_candidate_formula": true,
     "open_outcomes_for_new_design": true,
     "evaluate_WR_PF_DD_MFE_MAE": true,
+    "create_D2_snapshot_implementation": true,
+    "create_event_ledger": true,
     "create_shadow_runtime": true,
     "stop_or_modify_collector_M7C_M8C_M9_M10": true,
     "discord_send": true,
@@ -64,8 +95,8 @@
     "live_ready": true,
     "automatic_promotion": true
   },
-  "next_phase": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
-  "pending_user_evidence": "ONE_ZIP_CONTAINING_EXISTING_M7C_SEVEN_FILES",
+  "next_phase": "D1B_COLLECTOR_PROVENANCE_INVENTORY_READ_ONLY",
+  "pending_user_evidence": "ONE_ZIP_CONTAINING_COLLECTOR_FOREVER_LOG_LATEST_LOOP_STATUS_LATEST_COLLECTION_RESULT",
   "next_phase_requires_user_bat": false,
   "next_phase_requires_runtime_change": false,
   "later_phases_require_explicit_authorization": true
