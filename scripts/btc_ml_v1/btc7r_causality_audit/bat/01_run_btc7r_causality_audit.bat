@@ -38,7 +38,7 @@ echo [BTC_FF03] Every available BTC7R plan is recomputed at its exact entry boun
 echo [BTC_FF03] This may take several minutes. Do not start another copy.
 echo.
 
-%PYTHON_CMD% "scripts\btc_ml_v1\btc7r_causality_audit\python\audit_btc7r_causality_and_selection.py" --output-root "%OUTPUT_ROOT%" %*
+%PYTHON_CMD% "scripts\btc_ml_v1\btc7r_causality_audit\python\audit_btc7r_causality_and_selection_v2.py" --output-root "%OUTPUT_ROOT%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 set "LATEST_DIR=%OUTPUT_ROOT%\LATEST"
 set "UPLOAD_ZIP=%LATEST_DIR%\99_UPLOAD_PACKAGE.zip"
