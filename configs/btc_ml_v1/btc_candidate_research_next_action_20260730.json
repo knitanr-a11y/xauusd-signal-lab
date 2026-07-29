@@ -1,19 +1,32 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T06:31:00+09:00",
   "next_stage": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
   "authorization": "AUTHORIZED_READ_ONLY_NO_RUNTIME_OR_CANDIDATE_CODE_CHANGES",
+  "handoff_authority": {
+    "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+    "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
+    "required_branch": "feature/btc-fresh-forward-research",
+    "main_and_default_branch": "FORBIDDEN_AS_CURRENT_STATE",
+    "old_handoffs": "AUDIT_HISTORY_ONLY"
+  },
   "purpose": "Establish exact source provenance, schemas, timestamps, event classes, symbol coverage, state semantics and outcome exposure before any BTC candidate formula is proposed.",
   "preliminary_contract_inventory": {
     "complete": true,
     "document": "docs/btc_ml_v1/BTC_D1_M7C_COLLECTOR_SOURCE_INVENTORY_PRELIMINARY_20260730.md",
     "local_artifacts_inspected": false
   },
-  "read_only_contract_sources": [
-    "docs/mochipoyo_alert_research/SCOPE_CLARIFICATION_M10_GOLD_ONLY_M7C_DUAL_SOURCE_BACKGROUND_20260727.md",
-    "docs/mochipoyo_alert_research/NEXT_CHAT_HANDOFF_M7C_24_SUPPORTED_CONTINUE_TO_FORMAL_GATE_V2_20260722.md",
-    "config/mochipoyo_alert_research/objective_coverage_plus_value_add_20260722.json",
-    "config/mochipoyo_alert_research/current_state_20260727.json"
+  "startup_guards": [
+    "READ_STABLE_ENTRY_FIRST",
+    "USE_EXPLICIT_FEATURE_BTC_FRESH_FORWARD_RESEARCH_REF",
+    "DO_NOT_READ_AGENTS_MD_AS_BTC_AUTHORITY",
+    "DO_NOT_READ_GOLD_PATHS",
+    "DO_NOT_SEARCH_MOCHIPOYO_BRANCH_BROADLY",
+    "DO_NOT_RESUME_OLD_FF05_RECOVERY",
+    "DO_NOT_USE_SIMILAR_FILE_FALLBACK"
   ],
   "prospective_local_evidence_candidates": [
     "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_prospective_shadow.json",
@@ -35,7 +48,7 @@
     "collector_extra_files": "NOT_REQUIRED_UNLESS_PRIMARY_SEVEN_SHOW_GAPS_OR_ABNORMAL_STATUS"
   },
   "inventory_tasks": [
-    "Identify exact file existence, path metadata and content SHA256 without modifying source files.",
+    "Identify exact filenames, file sizes and content SHA256 without modifying source files.",
     "Record schemas, row counts, symbol counts and transition counts without interpreting future trade outcomes.",
     "Identify genuine source event timestamp, collection timestamp, M7C decision timestamp and their clock domains.",
     "Verify M7C prospective start and runtime manifest consistency from existing status artifacts.",
@@ -51,27 +64,31 @@
     "D1_clock_domain_inventory",
     "D1_event_class_inventory",
     "D1_outcome_exposure_inventory",
-    "D1_unresolved_questions_and_risk_register"
+    "D1_unresolved_questions_and_risk_register",
+    "UPDATED_STABLE_HANDOFF_AFTER_D1_AUDIT"
   ],
   "stop_conditions": [
     "M7C or collector abnormal status is detected.",
     "M7C prospective start differs from the frozen contract.",
     "Exact source provenance or clock domain cannot be established.",
-    "A required source artifact is missing or internally inconsistent."
+    "A required source artifact is missing or internally inconsistent.",
+    "Stable entry, latest handoff, current state or next action conflict."
   ],
   "explicitly_not_authorized": [
     "D2_STABLE_SOURCE_SNAPSHOT_IMPLEMENTATION",
     "EVENT_LEDGER_CODE",
     "CANDIDATE_FORMULA_DESIGN",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
-    "WR_PF_MFE_MAE_ANALYSIS",
+    "WR_PF_DD_MFE_MAE_ANALYSIS",
     "NEW_BAT",
     "FF06_CREATION",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
+    "LOT_DESIGN",
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
   "user_action_required_now": true,
-  "user_action": "Upload one ZIP containing the seven existing M7C files. Do not stop, restart or edit M7C/collector."
+  "user_action": "Upload one ZIP containing the seven existing M7C files. Do not stop, restart or edit M7C/collector.",
+  "handoff_update_required_after_completion": true
 }
