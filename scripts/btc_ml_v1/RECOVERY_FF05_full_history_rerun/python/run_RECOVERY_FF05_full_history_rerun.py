@@ -159,7 +159,8 @@ def create_isolated_terminal(
         "USERPROFILE": str(profile_root),
         "HOME": str(profile_root),
         "APPDATA": str(appdata_roaming),
-        "LOCALAPPDATA": str(local_appdata),
+        # Keep LOCALAPPDATA unchanged so the frozen FF04/FF05 prerequisite
+        # outputs remain visible to the original runner.
         "TEMP": str(temp_root),
         "TMP": str(temp_root),
     }
