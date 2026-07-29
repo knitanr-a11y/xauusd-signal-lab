@@ -103,23 +103,67 @@ def ensure_preflight() -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame]:
     return summary, manifest, cutoff
 
 
-def create_isolated_terminal(output_root: Path, manifest: pd.DataFrame) -> tuple[Path, dict[str, str]]:
-    isolated_root = output_root / "_isolated_appdata"
-    if isolated_root.exists():
-        shutil.rmtree(isolated_root)
-    files_dir = isolated_root / "MetaQuotes" / "Terminal" / "FF05_MERGED_FULL_HISTORY" / "MQL5" / "Files"
-    files_dir.mkdir(parents=True)
+def create_isolated_terminal(
+    output_root: Path,
+    manifest: pd.DataFrame,
+) -> tuple[Path, dict[str, str], dict[str, str]]:
+    """
+    Build a complete isolated Windows profile.
+
+    FF05 discovery may derive the MT5 root from APPDATA or from
+    USERPROFILE/Path.home()/AppData/Roaming. The first recovery attempt
+    overrode APPDATA only, so Path.home() still resolved to the real user and
+    the normal terminal CSV was selected. This layout and environment cover
+    both discovery routes without touching the real terminal files.
+    """
+    profile_root = output_root / "_isolated_profile"
+    if profile_root.exists():
+        shutil.rmtree(profile_root)
+
+    appdata_roaming = profile_root / "AppData" / "Roaming"
+    local_appdata = profile_root / "AppData" / "Local"
+    temp_root = local_appdata / "Temp"
+
+    terminal_roots = (
+        appdata_roaming
+        / "MetaQuotes"
+        / "Terminal"
+        / "FF05_MERGED_FULL_HISTORY"
+        / "MQL5"
+        / "Files",
+        profile_root
+        / "MetaQuotes"
+        / "Terminal"
+        / "FF05_MERGED_FULL_HISTORY"
+        / "MQL5"
+        / "Files",
+    )
+    for files_dir in terminal_roots:
+        files_dir.mkdir(parents=True, exist_ok=True)
+    temp_root.mkdir(parents=True, exist_ok=True)
+
     copied: dict[str, str] = {}
     for row in manifest.to_dict(orient="records"):
         source = Path(str(row["merged_path"]))
-        target = files_dir / source.name
-        shutil.copyfile(source, target)
-        os.utime(target, None)
-        actual_sha = sha256_path(target)
-        if actual_sha != str(row["merged_sha256"]):
-            raise RuntimeError(f"isolated copy SHA mismatch: {target}")
-        copied[str(row["timeframe"])] = str(target)
-    return isolated_root, copied
+        primary_target = terminal_roots[0] / source.name
+        for files_dir in terminal_roots:
+            target = files_dir / source.name
+            shutil.copyfile(source, target)
+            os.utime(target, None)
+            actual_sha = sha256_path(target)
+            if actual_sha != str(row["merged_sha256"]):
+                raise RuntimeError(f"isolated copy SHA mismatch: {target}")
+        copied[str(row["timeframe"])] = str(primary_target)
+
+    environment_paths = {
+        "USERPROFILE": str(profile_root),
+        "HOME": str(profile_root),
+        "APPDATA": str(appdata_roaming),
+        "LOCALAPPDATA": str(local_appdata),
+        "TEMP": str(temp_root),
+        "TMP": str(temp_root),
+    }
+    return profile_root, copied, environment_paths
 
 
 def validate_original_outputs(
@@ -212,10 +256,13 @@ def main() -> int:
     isolated_root: Path | None = None
     try:
         merge_summary, merge_manifest, cutoff = ensure_preflight()
-        isolated_root, copied = create_isolated_terminal(output_root, merge_manifest)
+        isolated_root, copied, isolated_environment = create_isolated_terminal(
+            output_root,
+            merge_manifest,
+        )
         environment = os.environ.copy()
-        environment["APPDATA"] = str(isolated_root)
-        environment["BTC_FF05_RECOVERY_MODE"] = "MERGED_FULL_HISTORY_ISOLATED_INPUT"
+        environment.update(isolated_environment)
+        environment["BTC_FF05_RECOVERY_MODE"] = "MERGED_FULL_HISTORY_ISOLATED_PROFILE_V2"
         command = [
             sys.executable,
             str(ORIGINAL_RUNNER),
@@ -235,7 +282,7 @@ def main() -> int:
             merge_manifest,
         )
         provenance = {
-            "schema_version": "btc_recovery_ff05_full_history_rerun_v1",
+            "schema_version": "btc_recovery_ff05_full_history_rerun_v2",
             "stage": "RECOVERY_FF05_FULL_HISTORY_RERUN",
             "generated_at_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
             "original_ff05_exit_code": int(completed.returncode),
@@ -250,6 +297,7 @@ def main() -> int:
                 for row in merge_manifest.to_dict(orient="records")
             },
             "isolated_source_paths": copied,
+            "isolated_environment": isolated_environment,
             "ff05_used_only_isolated_merged_history": True,
             "oos_coverage_proven": {
                 str(row["timeframe"]): bool(row["coverage_from_oos_start"])
