@@ -1,0 +1,102 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "recorded_at": "2026-07-30T06:31:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "authoritative_branch": "feature/btc-fresh-forward-research",
+  "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
+  "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+  "required_read_order": [
+    "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+    "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
+    "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
+    "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
+    "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
+    "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
+    "docs/btc_ml_v1/BTC_D1_M7C_COLLECTOR_SOURCE_INVENTORY_PRELIMINARY_20260730.md",
+    "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md"
+  ],
+  "branch_gate": {
+    "explicit_ref_required": true,
+    "default_branch_forbidden": true,
+    "main_as_current_state_forbidden": true,
+    "fallback_to_similar_file_forbidden": true,
+    "stop_on_missing_branch": true,
+    "stop_on_document_conflict": true
+  },
+  "startup_search_policy": {
+    "repo_wide_search_before_required_read_order": "FORBIDDEN",
+    "old_handoff_search": "FORBIDDEN",
+    "code_search_before_D1_inventory": "FORBIDDEN"
+  },
+  "forbidden_startup_paths": [
+    "AGENTS.md",
+    "START_HERE_GOLD_ML_V1_NEXT_CHAT.md",
+    "docs/gold_v3/**",
+    "docs/gold_ml_v1/**",
+    "config/gold_v3/**",
+    "config/gold_ml_v1/**",
+    "scripts/gold_v3/**",
+    "scripts/gold_ml_v1/**",
+    "old GOLD/**",
+    "GOLD V2/**",
+    "DISC8/**",
+    "Stage41/**",
+    "old BTC handoffs not referenced by stable_entry",
+    "FF05 recovery V3-V11 execution instructions"
+  ],
+  "mochipoyo_exception": {
+    "general_branch_search": "FORBIDDEN",
+    "allowed_role": "READ_ONLY_M7C_AND_COLLECTOR_SOURCE_EVIDENCE_FOR_BTCUSD",
+    "allowed_inputs": "ONLY_EXACT_PATHS_LISTED_BY_LATEST_HANDOFF_OR_USER_UPLOADED_D1_PACKAGE",
+    "gold_m10_candidate_results_for_btc_design": "FORBIDDEN",
+    "runtime_change": "FORBIDDEN",
+    "write_back": "FORBIDDEN"
+  },
+  "current_research_tracks": {
+    "track_A": "MOCHIPOYO_SOURCE_ANCHORED_BTC_RESEARCH",
+    "track_B": "INDEPENDENT_VECTOR_BTC_RESEARCH",
+    "required_separation": [
+      "SOURCE_FIDELITY_VS_BTC_VALUE",
+      "SOURCE_MATCHED_VS_MISSED_SOURCE_VS_EXTRA",
+      "TRACK_A_VS_TRACK_B",
+      "RESEARCH_VS_FREEZE_VS_SHADOW_VS_LIVE"
+    ]
+  },
+  "current_status": "BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_READ_ONLY",
+  "current_next_action": "RECEIVE_AND_INVENTORY_ONE_ZIP_CONTAINING_EXISTING_M7C_SEVEN_FILES",
+  "currently_not_authorized": [
+    "CANDIDATE_FORMULA_DESIGN",
+    "OUTCOME_PERFORMANCE_INTERPRETATION",
+    "WR_PF_DD_MFE_MAE_ANALYSIS",
+    "NEW_BAT",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "LOT_DESIGN",
+    "LIVE_READY",
+    "AUTOMATIC_PROMOTION",
+    "MODIFY_OR_STOP_M7C_COLLECTOR_M8C_M9_M10"
+  ],
+  "continuous_update_triggers": [
+    "USER_RESULT_OR_ZIP_AUDITED",
+    "STATUS_DECISION_OR_NEXT_ACTION_CHANGED",
+    "BLOCKER_INCIDENT_OR_CORRECTION_RECORDED",
+    "DESIGN_CONTRACT_FORMULA_OR_GATE_FROZEN",
+    "IMPLEMENTATION_CREATED_CHANGED_OR_RETIRED",
+    "USER_BAT_RUN_REQUESTED",
+    "SHADOW_MONITORING_OR_STOP_DECISION_CHANGED",
+    "CHAT_MAY_REACH_LENGTH_LIMIT"
+  ],
+  "required_handoff_layers_on_update": [
+    "STABLE_ENTRY",
+    "LATEST_DATED_HANDOFF",
+    "CURRENT_STATE",
+    "NEXT_ACTION",
+    "HANDOFF_POLICY_IF_ALLOWLIST_OR_DENYLIST_CHANGED"
+  ],
+  "old_handoff_policy": "PRESERVE_AS_AUDIT_HISTORY_ONLY_NEVER_DELETE_OR_USE_AS_RESTART_AUTHORITY",
+  "fail_closed": true
+}
