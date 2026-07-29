@@ -25,6 +25,13 @@ Pythonを直接起動する必要はありません。
 FAILEDや致命的BLOCKEDの場合も、作成できたLATESTフォルダを開きます。
 コマンド画面は自動で閉じず、キー入力待ちになります。
 
+重要な訂正
+----------
+2017年開始の古いH4は、過去成績を完全再現するために使った
+BTCUSD_H4_WARMUP_PACKAGE.zip の履歴データです。
+現在のfresh-forward availabilityのREADY条件には使用しません。
+ユーザーが古いH4データを探したり復元したりする必要はありません。
+
 出力先
 ------
 %LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\01_fresh_forward_availability\
@@ -39,18 +46,25 @@ FAILEDや致命的BLOCKEDの場合も、作成できたLATESTフォルダを開�
 
 FF01で確認するもの
 ------------------
-- M5
-- M15
-- H1
-- D1
+- M5 fresh tail
+- M15 fresh tail
+- H1 fresh tail
+- D1 fresh tail
 - H4 fresh tail
-- BTC4用2017年開始long H4 warmup
 - MT5 broker-server timestamp
 - main正本のbroker UTC offset変換
 - cutoff後の行数
 - 時刻昇順違反
 - 重複時刻
 - 候補別READY／BLOCKED
+
+候補別の必要データ
+------------------
+- BTC4: H4 after cutoff + M5 after cutoff
+- BTC5: M5 after cutoff
+- BTC6: M15 after cutoff
+- BTC7R: M5 + M15 + H1 after cutoff
+- BTC9R: M5 + M15 + H1 + D1 after cutoff
 
 安全契約
 --------
