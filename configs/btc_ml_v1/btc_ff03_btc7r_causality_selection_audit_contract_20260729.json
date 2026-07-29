@@ -1,0 +1,77 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF03_BTC7R_CAUSALITY_AND_SELECTION_LEAK_AUDIT_READ_ONLY",
+  "recorded_at": "2026-07-29",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "candidate": "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+  "required_inputs": {
+    "ff01": "READY_ALL_FIVE_CANDIDATES",
+    "ff02_btc7r": {
+      "planned_entries": 6,
+      "resolved_trades": 6,
+      "wins": 0,
+      "losses": 6
+    }
+  },
+  "prefix_audit": {
+    "scope": "all locally reproducible BTC7R plans",
+    "m15_cut": "time <= signal_time",
+    "h1_cut": "time + 1 hour <= signal_time",
+    "m5_cut": "time <= entry_time",
+    "compare": [
+      "plan keys",
+      "direction",
+      "entry and exit levels",
+      "risk reward RR",
+      "trend and impulse values"
+    ]
+  },
+  "legacy_2026_reference": {
+    "raw_time_start_inclusive": "2026-01-01 00:00:00",
+    "raw_time_end_inclusive": "2026-07-02 02:15:00",
+    "trades": 22,
+    "wins": 11,
+    "losses": 11,
+    "win_rate_pct": 50.0,
+    "profit_factor": 1.044792,
+    "total_pips": 35.508909,
+    "max_drawdown_pips": 347.374394
+  },
+  "selection_provenance": {
+    "documented_validation_end": "2026-01-01 00:00:00",
+    "earliest_immutable_contract_commit": "780eccd93f85a087633f90a8e4d016f215b126d0",
+    "earliest_immutable_contract_time_utc": "2026-07-02 08:29:16",
+    "candidate_script_commit": "6177de49be57c33b76b455a8ccfbb066bceac8aa",
+    "pre_validation_immutable_freeze_proven": false,
+    "complete_trial_ledger_found": false,
+    "independent_blinding_proven": false,
+    "classification": "HISTORICAL_VALIDATION_NOT_PROVEN_BLIND_RECLASSIFY_RETROSPECTIVE",
+    "first_independently_verifiable_prospective_boundary_utc_exclusive": "2026-07-02 08:29:16"
+  },
+  "trust_status": {
+    "old_73_77pct": "SUSPENDED",
+    "old_22_trade_result": "RETROSPECTIVE_REPLAY",
+    "ff02_six_trades": "PROSPECTIVE_EVIDENCE",
+    "candidate": "QUARANTINED_PENDING_FF03"
+  },
+  "implementation": {
+    "python": "scripts/btc_ml_v1/btc7r_causality_audit/python/audit_btc7r_causality_and_selection.py",
+    "run_bat": "scripts/btc_ml_v1/btc7r_causality_audit/bat/01_run_btc7r_causality_audit.bat",
+    "output_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/03_btc7r_causality_selection_audit"
+  },
+  "validation": {
+    "python_compile": true,
+    "synthetic_prefix_invariance": true,
+    "synthetic_package": true
+  },
+  "controls": {
+    "source_read_only": true,
+    "candidate_rule_change": false,
+    "fresh_loss_driven_tuning": false,
+    "replacement_created": false,
+    "external_runtime_change": false,
+    "execution_enabled": false
+  },
+  "stop_after_upload": true,
+  "clean_rebuild_authorized": false
+}
