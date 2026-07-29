@@ -2,80 +2,74 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T06:31:00+09:00",
-  "next_stage": "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
+  "recorded_at": "2026-07-30T06:49:00+09:00",
+  "next_stage": "D1B_COLLECTOR_PROVENANCE_INVENTORY_READ_ONLY",
   "authorization": "AUTHORIZED_READ_ONLY_NO_RUNTIME_OR_CANDIDATE_CODE_CHANGES",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D0_COMPLETE_D1_M7C_EVIDENCE_PACKAGE_PENDING_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_M7C_PRIMARY_AUDITED_COLLECTOR_PROVENANCE_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "main_and_default_branch": "FORBIDDEN_AS_CURRENT_STATE",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "purpose": "Establish exact source provenance, schemas, timestamps, event classes, symbol coverage, state semantics and outcome exposure before any BTC candidate formula is proposed.",
-  "preliminary_contract_inventory": {
-    "complete": true,
-    "document": "docs/btc_ml_v1/BTC_D1_M7C_COLLECTOR_SOURCE_INVENTORY_PRELIMINARY_20260730.md",
-    "local_artifacts_inspected": false
+  "completed_input": {
+    "M7C_primary_package_audited": true,
+    "audit_document": "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
+    "manifest": "configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json",
+    "package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "outcome_performance_interpreted": false
   },
-  "startup_guards": [
-    "READ_STABLE_ENTRY_FIRST",
-    "USE_EXPLICIT_FEATURE_BTC_FRESH_FORWARD_RESEARCH_REF",
-    "DO_NOT_READ_AGENTS_MD_AS_BTC_AUTHORITY",
-    "DO_NOT_READ_GOLD_PATHS",
-    "DO_NOT_SEARCH_MOCHIPOYO_BRANCH_BROADLY",
-    "DO_NOT_RESUME_OLD_FF05_RECOVERY",
-    "DO_NOT_USE_SIMILAR_FILE_FALLBACK"
-  ],
-  "prospective_local_evidence_candidates": [
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_prospective_shadow.json",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_shadow_loop_status.json",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_source_event_comparisons.csv",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_extra_proxy_signals.csv",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_proxy_signals.csv",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/latest_m7c_proxy_decisions.csv",
-    "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/logs/m7c/m7c_shadow_forever.log"
-  ],
+  "purpose": "Establish Collector provenance, raw event timestamp semantics, cursor/revision/late-arrival behavior, source payload location and outcome exposure before any immutable event snapshot or BTC candidate formula is designed.",
   "requested_user_evidence_package": {
-    "format": "ONE_ZIP_CONTAINING_THE_EXISTING_SEVEN_FILES",
+    "format": "ONE_ZIP_CONTAINING_THREE_EXISTING_COLLECTOR_FILES",
+    "files": [
+      "collector_forever.log",
+      "latest_loop_status.json",
+      "latest_collection_result.json"
+    ],
+    "search_root_if_location_unknown": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research",
     "new_bat_required": false,
     "stop_or_restart_runtime": false,
     "source_files_must_not_be_edited": true,
-    "purpose": "SCHEMA_TIMESTAMP_AND_EVENT_PROVENANCE_INVENTORY_ONLY",
-    "counts_from_manual_zip": "PROVISIONAL_UNTIL_D2_STABLE_SNAPSHOT",
-    "outcomes_must_not_be_interpreted_in_D1": true,
-    "collector_extra_files": "NOT_REQUIRED_UNLESS_PRIMARY_SEVEN_SHOW_GAPS_OR_ABNORMAL_STATUS"
+    "database_not_requested_yet": true,
+    "purpose": "COLLECTOR_STATUS_CURSOR_CLOCK_RAW_SOURCE_PROVENANCE_AND_OUTCOME_EXPOSURE_INVENTORY_ONLY"
   },
   "inventory_tasks": [
-    "Identify exact filenames, file sizes and content SHA256 without modifying source files.",
-    "Record schemas, row counts, symbol counts and transition counts without interpreting future trade outcomes.",
-    "Identify genuine source event timestamp, collection timestamp, M7C decision timestamp and their clock domains.",
-    "Verify M7C prospective start and runtime manifest consistency from existing status artifacts.",
-    "Classify SOURCE_MATCHED, MISSED_SOURCE, EXTRA_CANDIDATE and UNSUPPORTED event representations.",
-    "Determine duplicate, revision, late-event and cursor behavior.",
-    "Determine whether BTCUSD source and the existing BTC candle source are compatible or require an explicit mapping audit.",
-    "Create an outcome-exposure inventory; unknown exposure is treated as exposed.",
-    "Return unresolved questions before any event snapshot, formula grammar or performance evaluation is implemented."
+    "Fix ZIP and internal file SHA256 values.",
+    "Record Collector status, cycles, failures, interval and cursor progression.",
+    "Identify raw alert identifier, raw payload location and storage path.",
+    "Identify collection/receipt timestamp and its clock domain.",
+    "Determine duplicate, revision, replacement and late-arrival behavior.",
+    "Determine the meaning of genuine source event time before M7C normalization.",
+    "Identify whether Collector storage exposes outcome-like or post-event fields.",
+    "Check whether the logs explain or corroborate the 2026-07-23 M7C process restart without resetting prospective start.",
+    "Determine whether an exact minimal read-only SQLite/database snapshot is required for D1 completion.",
+    "Return unresolved questions before D2 snapshot, event ledger or candidate grammar is implemented."
   ],
   "deliverables": [
-    "D1_source_allowlist",
-    "D1_file_and_schema_manifest",
-    "D1_clock_domain_inventory",
-    "D1_event_class_inventory",
-    "D1_outcome_exposure_inventory",
-    "D1_unresolved_questions_and_risk_register",
-    "UPDATED_STABLE_HANDOFF_AFTER_D1_AUDIT"
+    "D1B_collector_file_and_schema_manifest",
+    "D1B_collector_status_and_cursor_inventory",
+    "D1B_source_timestamp_semantics_inventory",
+    "D1B_duplicate_revision_late_arrival_inventory",
+    "D1B_raw_payload_and_storage_inventory",
+    "D1B_outcome_exposure_inventory",
+    "D1_consolidated_unresolved_questions_and_risk_register",
+    "UPDATED_STABLE_HANDOFF_AFTER_D1B_AUDIT"
   ],
   "stop_conditions": [
-    "M7C or collector abnormal status is detected.",
-    "M7C prospective start differs from the frozen contract.",
-    "Exact source provenance or clock domain cannot be established.",
+    "Collector or M7C abnormal status is detected.",
+    "M7C prospective start differs from 2026-07-20T14:54:15Z.",
+    "Exact source provenance or clock domain cannot be established from allowed evidence.",
     "A required source artifact is missing or internally inconsistent.",
     "Stable entry, latest handoff, current state or next action conflict."
   ],
+  "exact_mochipoyo_reference_allowlist": [
+    "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json"
+  ],
   "explicitly_not_authorized": [
     "D2_STABLE_SOURCE_SNAPSHOT_IMPLEMENTATION",
+    "SQLITE_OR_DATABASE_COPY_REQUEST_BEFORE_D1B_INVENTORY",
     "EVENT_LEDGER_CODE",
     "CANDIDATE_FORMULA_DESIGN",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
@@ -89,6 +83,6 @@
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
   "user_action_required_now": true,
-  "user_action": "Upload one ZIP containing the seven existing M7C files. Do not stop, restart or edit M7C/collector.",
+  "user_action": "Upload one ZIP containing collector_forever.log, latest_loop_status.json and latest_collection_result.json. Do not stop, restart or edit Collector/M7C.",
   "handoff_update_required_after_completion": true
 }
