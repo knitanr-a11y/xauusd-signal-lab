@@ -16,8 +16,9 @@ Current canonical user-facing folders:
 2. `FF02_performance_evaluation`
 3. `FF03_btc7r_causality_audit`
 4. `FF04_bar_time_audit`
+5. `FF05_candidate_rebuild_search`
 
-The next ordinary stage, only after explicit authorization, will use `FF05_...`.
+The next ordinary stage, only after explicit authorization, will use `FF06_...`.
 
 A user-facing folder must contain:
 
@@ -48,7 +49,7 @@ Canonical user execution starts from the `FFNN_...` folders. A later cleanup may
 
 ## 4. Outputs and documents
 
-New output roots should also begin with the stage code, for example:
+New output roots begin with the stage code, for example:
 
 `FF05_candidate_rebuild_search`
 
@@ -56,8 +57,8 @@ Existing FF01-FF04 output roots are not renamed retroactively because FF02-FF04 
 
 Documents and configs keep the stage prefix in the filename, for example:
 
-- `BTC_FF04_...`
-- `btc_ff04_...`
+- `BTC_FF05_...`
+- `btc_ff05_...`
 
 ## 5. Prohibitions
 
