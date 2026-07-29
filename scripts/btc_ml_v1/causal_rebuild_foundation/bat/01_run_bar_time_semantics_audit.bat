@@ -32,13 +32,14 @@ if errorlevel 1 (
 
 if not exist "%OUTPUT_ROOT%" mkdir "%OUTPUT_ROOT%"
 
-echo [BTC_FF04] Bar-time semantics and causal rebuild foundation audit
+echo [BTC_FF04] Bar-time semantics and causal rebuild foundation audit v2
 echo [BTC_FF04] CSV time must be BAR OPEN time.
+echo [BTC_FF04] Longer market or session gaps are warnings, not shortened-bar failures.
 echo [BTC_FF04] No candidate performance search is executed.
 echo [BTC_FF04] Source CSV is read-only.
 echo.
 
-%PYTHON_CMD% "scripts\btc_ml_v1\causal_rebuild_foundation\python\audit_btc_bar_time_semantics.py" --output-root "%OUTPUT_ROOT%" %*
+%PYTHON_CMD% "scripts\btc_ml_v1\causal_rebuild_foundation\python\audit_btc_bar_time_semantics_v2.py" --output-root "%OUTPUT_ROOT%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 set "LATEST_DIR=%OUTPUT_ROOT%\LATEST"
 set "UPLOAD_ZIP=%LATEST_DIR%\99_UPLOAD_PACKAGE.zip"
