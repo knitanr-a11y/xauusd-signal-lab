@@ -4,12 +4,11 @@
 - authoritative base branch: `main`
 - working branch: `feature/btc-fresh-forward-research`
 - stage: `BTC_FF01_FRESH_FORWARD_DATA_AVAILABILITY_AUDIT_READ_ONLY`
-- formal status before FF01: `BTC_DUAL_TRACK_SEPARATED_FIVE_CANDIDATES_FF01_NEXT_M7C_BACKGROUND_PRESERVED`
 - cutoff: `entry_dt > 2026-07-02 02:15:00 UTC`
 
 ## 1. Purpose
 
-FF01 checks only whether the frozen five BTC ML V1 candidates have sufficient local closed-bar inputs for a later fresh-forward evaluation.
+FF01 checks only whether the frozen five BTC ML V1 candidates have sufficient current closed-bar inputs for a later fresh-forward evaluation.
 
 FF01 does not generate candidate trades and does not calculate fresh performance.
 
@@ -21,7 +20,15 @@ Frozen candidates:
 - `BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110`
 - `BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080`
 
-## 2. Dual-track separation
+## 2. Historical H4 correction
+
+`BTCUSD_H4_WARMUP_PACKAGE.zip` and its 2017-start `btcusdsharp_h4.csv` were used only to completely reproduce historical BTC4 results.
+
+That historical package is not a current MT5 fresh-tail input and is not required for fresh-forward readiness.
+
+The user does not need to locate, restore or recreate that package for FF01.
+
+## 3. Dual-track separation
 
 Track A is BTC ML V1 frozen-five research on `feature/btc-fresh-forward-research`.
 
@@ -36,7 +43,7 @@ FF01 must not:
 - touch M10W24B or any other M10W stage
 - broaden the GOLD-only M10 line to BTC
 
-## 3. User-facing layout
+## 4. User-facing layout
 
 ```text
 scripts/btc_ml_v1/fresh_forward_availability/
@@ -55,39 +62,37 @@ The user runs BAT files only.
 
 `02_open_latest_results.bat` only reopens the existing `LATEST` folder. It does not rerun the audit.
 
-## 4. Allowed input discovery
+## 5. Allowed input discovery
 
 The auditor may inspect only:
 
 - repository `Files`
 - the exact known BTC MT5 terminal Files path already used by the main BTC support code
 - `C:\BTC_REPRO\history`
-- `C:\BTC_REPRO\h4_warmup\btcusdsharp_h4.csv`
 - explicit paths supplied through the numbered BAT
 
 No whole-PC recursive search is allowed.
 
 Only `btcusdsharp` BTC files are eligible. A similar filename, another symbol or an unrelated CSV must not be substituted.
 
-## 5. Time contract
+## 6. Time contract
 
 - CSV `time` is the bar-open timestamp.
 - The latest CSV row is closed by contract.
 - A naive MT5 timestamp is broker-server wall-clock time, not UTC.
-- FF01 reuses the broker UTC offset inference and conversion functions from `scripts/run_btc_youtube_candidates_dry_run_cycle.py`.
+- FF01 reuses broker UTC offset inference and conversion functions from `scripts/run_btc_youtube_candidates_dry_run_cycle.py`.
 - FF01 does not independently subtract a fixed two or three hours.
 - Post-cutoff rows are counted strictly with UTC-converted bar-open timestamp greater than `2026-07-02 02:15:00`.
 
-## 6. Required timeframe audit
+## 7. Required timeframe audit
 
-FF01 checks:
+FF01 checks current fresh tails for:
 
 - M5
 - M15
 - H1
 - D1
-- H4 fresh tail
-- BTC4 long H4 warmup beginning in 2017 or earlier
+- H4
 
 For each inspected file, the report records:
 
@@ -107,11 +112,11 @@ For each inspected file, the report records:
 
 A source containing non-ascending or duplicate timestamps is not READY.
 
-## 7. Candidate-specific readiness
+## 8. Candidate-specific readiness
 
 Each candidate is classified independently.
 
-- BTC4: long H4 warmup + H4 after cutoff + M5 after cutoff
+- BTC4: H4 after cutoff + M5 after cutoff
 - BTC5: M5 after cutoff
 - BTC6: M15 after cutoff
 - BTC7R: M5 + M15 + H1 after cutoff
@@ -119,7 +124,7 @@ Each candidate is classified independently.
 
 A missing D1 file may block BTC9R, but it must not block BTC4, BTC5, BTC6 or BTC7R when their own requirements are satisfied.
 
-## 8. Output contract
+## 9. Output contract
 
 ```text
 %LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\01_fresh_forward_availability\
@@ -131,17 +136,11 @@ A missing D1 file may block BTC9R, but it must not block BTC4, BTC5, BTC6 or BTC
 
   archive\
     <UTC execution timestamp>\
-      00_READ_ME_FIRST.txt
-      01_availability_summary.json
-      02_availability_report.txt
-      99_UPLOAD_PACKAGE.zip
 ```
-
-`LATEST` contains the newest completed result. Previous completed results remain in `archive`.
 
 The ZIP contains only the readme, JSON summary and text report. Raw candle CSV files are never included.
 
-## 9. Hard safety gates
+## 10. Hard safety gates
 
 FF01 must not:
 
@@ -159,7 +158,7 @@ FF01 must not:
 - send MT5 orders
 - enable `live_ready` or `final_signal`
 
-## 10. Stop condition
+## 11. Stop condition
 
 Stop after `99_UPLOAD_PACKAGE.zip` or a clear BLOCKED package has been produced.
 
