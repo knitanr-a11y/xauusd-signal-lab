@@ -33,17 +33,18 @@ if errorlevel 1 (
 if not exist "%OUTPUT_ROOT%" mkdir "%OUTPUT_ROOT%"
 
 echo [RECOVERY_FF05_RERUN] Run the frozen 108-cell FF05 search on merged full history
-echo [RECOVERY_FF05_RERUN] V10 prevents recursive rebuilds and permits at most one merge rebuild.
-echo [RECOVERY_FF05_RERUN] FF05 reads only verified snapshot M5/M15/H1 absolute paths.
+echo [RECOVERY_FF05_RERUN] V11 uses a dedicated merge workspace not shared with V8-V10.
+echo [RECOVERY_FF05_RERUN] Exactly one dedicated merge is allowed per execution.
+echo [RECOVERY_FF05_RERUN] V11 publishes SHA-verified M5/M15/H1 snapshots before evaluation.
 echo [RECOVERY_FF05_RERUN] MT5 CSV discovery is bypassed completely.
-echo [RECOVERY_FF05_RERUN] Every snapshot SHA256 is checked before and during evaluation.
+echo [RECOVERY_FF05_RERUN] Concurrent V11 execution is rejected by a run lock.
 echo [RECOVERY_FF05_RERUN] CSV time remains BAR OPEN in raw MT5 broker-server time.
 echo [RECOVERY_FF05_RERUN] Search cells and survivor thresholds are unchanged.
 echo [RECOVERY_FF05_RERUN] This can take several minutes. Do not start another copy.
 echo [RECOVERY_FF05_RERUN] No live, Discord, lot, or MT5 order action is enabled.
 echo.
 
-%PYTHON_CMD% "scripts\btc_ml_v1\RECOVERY_FF05_full_history_rerun\python\run_RECOVERY_FF05_full_history_rerun_v10.py" --output-root "%OUTPUT_ROOT%" %*
+%PYTHON_CMD% "scripts\btc_ml_v1\RECOVERY_FF05_full_history_rerun\python\run_RECOVERY_FF05_full_history_rerun_v11.py" --output-root "%OUTPUT_ROOT%" %*
 set "EXIT_CODE=%ERRORLEVEL%"
 set "LATEST_DIR=%OUTPUT_ROOT%\LATEST"
 set "UPLOAD_ZIP=%LATEST_DIR%\99_UPLOAD_PACKAGE.zip"
