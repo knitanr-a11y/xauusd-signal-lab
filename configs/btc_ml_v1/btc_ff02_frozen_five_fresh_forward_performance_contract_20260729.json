@@ -1,0 +1,81 @@
+{
+  "project": "BTC_ML_V1",
+  "stage": "BTC_FF02_FROZEN_FIVE_CANDIDATE_FRESH_FORWARD_PERFORMANCE_EVALUATION",
+  "recorded_at": "2026-07-29",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "authoritative_base_branch": "main",
+  "working_branch": "feature/btc-fresh-forward-research",
+  "ff01_required_status": "READY_ALL_FIVE_CANDIDATES",
+  "fresh_entry_boundary": {
+    "field": "entry_time_utc",
+    "operator": ">",
+    "value": "2026-07-02 02:15:00"
+  },
+  "candidate_engine_time_domain": "RAW_MT5_BROKER_SERVER_WALL_CLOCK",
+  "engine_input_timestamps_shifted_to_utc": false,
+  "canonical_clock_module": "scripts/run_btc_youtube_candidates_dry_run_cycle.py",
+  "frozen_candidates": [
+    "BTC4_RISK_CAP_400",
+    "BTC5_TWO_PIVOT_P2_CLEAN_N_382_786",
+    "BTC6_M15_TWO_PIVOT_P3_BROAD_N_236_886",
+    "BTC7R_M15_IMPULSE_HIGH_WIN_24_96_M22_R110",
+    "BTC9R_M15_PREVDAY_BREAKOUT_HIGH_WIN_R080"
+  ],
+  "outcome_functions_reused_from": "scripts/btc_ml_v1/research/reproduce_btc_stacking_portfolio.py",
+  "reproduction_script_executed_as_fresh_evaluator": false,
+  "skip_input_hash_check_used": false,
+  "snapshot_contract": {
+    "source_read_only": true,
+    "hash_before_snapshot_after": true,
+    "require_exact_size_hash_equality": true,
+    "internal_only": true,
+    "deleted_after_evaluation": true,
+    "included_in_zip": false
+  },
+  "portfolio_contract": {
+    "pip_usd": 10,
+    "spread_usd": 30,
+    "simple_same_bar_order": "SL_FIRST",
+    "btc4_after_tp1_same_bar_order": "BREAK_EVEN_FIRST",
+    "btc4_risk_cap_pips": 400,
+    "global_one_position_cap": false,
+    "exact_time_overlap_deduplication": false,
+    "open_in_realized_metrics": false,
+    "lot_design": false,
+    "monetary_drawdown": false
+  },
+  "implementation": {
+    "python": "scripts/btc_ml_v1/fresh_forward_performance/python/evaluate_btc_fresh_forward_performance.py",
+    "bat_readme": "scripts/btc_ml_v1/fresh_forward_performance/bat/00_READ_ME_FIRST.txt",
+    "bat_run": "scripts/btc_ml_v1/fresh_forward_performance/bat/01_run_fresh_forward_evaluation.bat",
+    "bat_open_latest": "scripts/btc_ml_v1/fresh_forward_performance/bat/02_open_latest_results.bat",
+    "user_runs_python_directly": false,
+    "bat_selects_upload_zip": true,
+    "console_stays_open": true
+  },
+  "output_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/02_fresh_forward_performance",
+  "validation_before_commit": {
+    "python_compile": true,
+    "strict_cutoff_equal_excluded": true,
+    "strict_cutoff_later_included": true,
+    "all_five_synthetic_standardization": true,
+    "open_trade_metrics": true,
+    "blocked_zip_layout": true
+  },
+  "forbidden": [
+    "candidate rule or threshold change",
+    "TP SL exit spread pip overlap change",
+    "fresh optimization",
+    "candidate replacement or BTC10R",
+    "lot or monetary DD",
+    "source mutation",
+    "M7C mixing",
+    "collector M7C M8C GOLD M10W change",
+    "Discord",
+    "MT5 order",
+    "live-ready",
+    "final signal"
+  ],
+  "mandatory_stop": "Upload and review LATEST/99_UPLOAD_PACKAGE.zip before any later stage.",
+  "next_stage_authorized": false
+}
