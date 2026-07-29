@@ -1,0 +1,60 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT",
+  "recorded_at": "2026-07-30",
+  "status": "IMPLEMENTED_READY_FOR_ONE_LOCAL_RUN",
+  "branch": "feature/btc-fresh-forward-research",
+  "source_db": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/mochipoyo_alerts.sqlite3",
+  "source_access": {
+    "sqlite_uri_mode": "ro",
+    "query_only": true,
+    "consistent_read_transaction": true,
+    "source_discovery": false,
+    "fallback": false,
+    "copy_raw_db": false,
+    "copy_wal": false,
+    "copy_shm": false,
+    "stop_collector": false,
+    "restart_collector": false,
+    "modify_collector_or_m7c": false
+  },
+  "allowlisted_tables": [
+    "collector_state",
+    "raw_alerts",
+    "raw_alert_annotations",
+    "collection_runs"
+  ],
+  "forbidden_tables": [
+    "episodes",
+    "episode_events",
+    "episode_build_anomalies",
+    "episode_build_runs",
+    "mt5_alignment",
+    "feature_snapshots",
+    "virtual_entries",
+    "outcomes"
+  ],
+  "integrity_gates": [
+    "CURSOR_EQUALS_MAX_RAW_ID",
+    "UNIQUE_RAW_IDS",
+    "UNIQUE_EVENT_KEYS",
+    "PAYLOAD_SHA256_MATCH",
+    "SOURCE_ROW_IDENTITY_MATCH",
+    "NO_ANNOTATION_ORPHANS",
+    "UNIQUE_COLLECTION_RUN_IDS",
+    "NO_CLOUDFLARE_CURSOR_REGRESSION",
+    "VALID_COLLECTION_STATUSES",
+    "ZERO_FORBIDDEN_TABLE_EXPORTS"
+  ],
+  "output_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR01_outcome_blind_source_snapshot",
+  "user_entry": "scripts/btc_ml_v1/BCR01_outcome_blind_source_snapshot/01_run_BCR01.bat",
+  "upload": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR01_outcome_blind_source_snapshot/LATEST/99_UPLOAD_PACKAGE.zip",
+  "failure_policy": "FAIL_ONCE_NO_RETRY_LOOP_CREATE_ERROR_ZIP",
+  "performance_interpretation": false,
+  "candidate_formula_design": false,
+  "discord": false,
+  "mt5_order": false,
+  "live_ready": false,
+  "automatic_promotion": false,
+  "next_stage_authorized": false
+}
