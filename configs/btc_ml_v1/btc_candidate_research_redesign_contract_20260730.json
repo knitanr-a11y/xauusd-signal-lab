@@ -1,0 +1,130 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30",
+  "status": "DESIGN_FROZEN_IMPLEMENTATION_NOT_YET_AUTHORIZED",
+  "design_document": "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
+  "formal_decisions": {
+    "ff05_recovery_v3_v11_active_execution_discontinued": true,
+    "ff05_recovery_history_retained_for_audit": true,
+    "ff01_ff04_causal_time_contracts_reused": true,
+    "btc7r_quarantine_continues": true,
+    "incomplete_or_failed_ff05_runs_not_candidate_evidence": true,
+    "ff06_number_not_assigned": true,
+    "new_candidate_code_authorized": false,
+    "new_user_bat_authorized": false
+  },
+  "research_tracks": {
+    "A_MOCHIPOYO_SOURCE_ANCHORED": {
+      "primary_source": "M7C_AND_COLLECTOR_READ_ONLY_EVIDENCE",
+      "primary_symbol_teacher": "BTCUSD",
+      "secondary_cross_symbol_evidence": "XAUUSD_STRUCTURE_ONLY_NO_BLIND_POOLING",
+      "exact_clone_final_goal": false,
+      "required_layers": [
+        "FIDELITY_LAYER_OUTCOME_BLIND",
+        "VALUE_LAYER_AFTER_FORMULA_FREEZE"
+      ],
+      "required_classes": [
+        "GENUINE_SOURCE_EVENT",
+        "M7C_SOURCE_MATCHED",
+        "M7C_MISSED_SOURCE",
+        "M7C_EXTRA_CANDIDATE",
+        "UNSUPPORTED_SOURCE_EVENT",
+        "BTC_RESEARCH_DERIVED_SIGNAL"
+      ]
+    },
+    "B_INDEPENDENT_VECTOR": {
+      "must_not_depend_on_mochipoyo_formula": true,
+      "mechanism_first": true,
+      "initial_mechanism_inventory": [
+        "TREND_CONTINUATION_PULLBACK",
+        "VOLATILITY_COMPRESSION_EXPANSION",
+        "BREAKOUT_RETEST_REACCELERATION",
+        "OVEREXTENSION_EXHAUSTION_MEAN_REVERSION"
+      ],
+      "finite_grammar_required": true,
+      "label_free_density_before_performance": true
+    }
+  },
+  "mochipoyo_runtime_protection": {
+    "collector": "KEEP_UNCHANGED",
+    "M7C": "KEEP_UNCHANGED",
+    "M8C": "KEEP_UNCHANGED",
+    "M9V": "KEEP_UNCHANGED",
+    "M9Y": "KEEP_UNCHANGED",
+    "M10B": "KEEP_UNCHANGED",
+    "M10E": "KEEP_UNCHANGED",
+    "M10P": "KEEP_UNCHANGED",
+    "M10P2": "KEEP_UNCHANGED",
+    "M10W": "KEEP_UNCHANGED",
+    "write_to_mochipoyo_branch_or_outputs": false,
+    "stop_or_restart_existing_runtime": false,
+    "prospective_start_reset": false,
+    "formula_or_threshold_refit": false
+  },
+  "time_and_causality": {
+    "csv_time": "MT5_BROKER_SERVER_NAIVE_BAR_OPEN",
+    "M5_available": "time_plus_5_minutes",
+    "M15_available": "time_plus_15_minutes",
+    "H1_available": "time_plus_60_minutes",
+    "exact_entry_required": true,
+    "nearest_or_future_fallback": false,
+    "signal_decision_entry_exit_times_separate": true,
+    "source_and_broker_clock_mapping_must_be_proven": true
+  },
+  "data_governance": {
+    "explicit_input_manifest_only": true,
+    "content_addressed_read_only_snapshot": true,
+    "source_sha_before_and_after": true,
+    "automatic_file_discovery": false,
+    "fallback_to_similar_filename": false,
+    "unknown_outcome_exposure_treated_as_exposed": true,
+    "random_split": false,
+    "nested_forward_chaining": true,
+    "retrospective_not_called_independent_oos": true,
+    "new_prospective_boundary_after_rule_freeze": true
+  },
+  "candidate_governance": {
+    "trial_registry_required": true,
+    "rejected_candidates_retained": true,
+    "multiple_testing_control_required": true,
+    "parameter_neighborhood_stability_required": true,
+    "cost_sensitivity_required": true,
+    "side_regime_period_breakdowns_required": true,
+    "portfolio_overlap_and_joint_dd_required": true,
+    "retrospective_survivor_not_live_ready": true,
+    "explicit_user_approval_for_shadow": true,
+    "explicit_user_approval_for_live": true
+  },
+  "prohibited_implementation_patterns": [
+    "VERSION_CHAIN_IMPORT_WRAPPERS",
+    "MONKEY_PATCH_INPUT_DISCOVERY",
+    "PROFILE_HIDING_TO_FORCE_PATH_SELECTION",
+    "SHARED_MUTABLE_STAGE_INPUT_DIRECTORY",
+    "AUTO_DISCOVERY_OR_FALLBACK",
+    "SUCCESS_MANIFEST_WITH_MISSING_PAYLOAD",
+    "RECURSIVE_REBUILD",
+    "SILENT_THRESHOLD_RESCUE"
+  ],
+  "phases": [
+    "D0_REDESIGN_FREEZE",
+    "D1_M7C_COLLECTOR_SOURCE_INVENTORY_READ_ONLY",
+    "D2_IMMUTABLE_EVIDENCE_SNAPSHOT_AND_EVENT_LEDGER",
+    "D3_TRIGGER_SIGNATURE_AND_CONTROL_DESIGN",
+    "D4_OUTCOME_BLIND_DENSITY_AUDIT",
+    "D5_RETROSPECTIVE_WALK_FORWARD_EVALUATION",
+    "D6_COMPLEMENTARITY_AND_PORTFOLIO_REVIEW",
+    "D7_RULE_RUNTIME_FREEZE_AND_PROSPECTIVE_SHADOW"
+  ],
+  "current_authorization": {
+    "D0_complete": true,
+    "D1_authorized": true,
+    "D2_authorized": false,
+    "candidate_formula_design_authorized": false,
+    "performance_evaluation_authorized": false,
+    "prospective_shadow_authorized": false,
+    "discord_authorized": false,
+    "mt5_order_authorized": false
+  }
+}
