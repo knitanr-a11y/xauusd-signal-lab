@@ -1,0 +1,87 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR06_OUTCOME_BLIND_TRACK_B_INDEPENDENT_MECHANISM_GRAMMAR",
+  "recorded_at": "2026-07-30T19:00:00+09:00",
+  "status": "READY_OUTCOME_BLIND_TRACK_B_DATA_CAPABILITY_RESULT",
+  "input": {
+    "M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "contract_commit": "7b5cca370556bd41c4ef94ee4d711f11b45ac4e9",
+    "gap_addendum_commit": "329c6b27ff274fbd5379beb4b80cfe6cddc6b40f"
+  },
+  "grammar_rows": 32,
+  "eligible_rows": {
+    "B1_B4_contiguous50": 27861,
+    "B2_contiguous500": 7611
+  },
+  "gate_counts": {
+    "advance_eligible_total": 24,
+    "B1_LONG": 8,
+    "B1_SHORT": 8,
+    "B2_LONG": 0,
+    "B2_SHORT": 0,
+    "B4_LONG": 4,
+    "B4_SHORT": 4
+  },
+  "advanced_data_capable_grammars": [
+    {
+      "family": "B1_TREND_PULLBACK_CONTINUATION",
+      "direction": "LONG",
+      "grammar_id": "B1_LONG_S0_H8_C0",
+      "fire_count": 1943,
+      "distinct_months": 11,
+      "maximum_single_month_share": 0.1080802882,
+      "maximum_single_week_share": 0.0339680906,
+      "maximum_jaccard_with_track_a": 0.164363,
+      "maximum_track_b_fire_overlap_share_with_track_a": 0.1713844570
+    },
+    {
+      "family": "B1_TREND_PULLBACK_CONTINUATION",
+      "direction": "SHORT",
+      "grammar_id": "B1_SHORT_S0_H4_C0",
+      "fire_count": 2030,
+      "distinct_months": 11,
+      "maximum_single_month_share": 0.1068965517,
+      "maximum_single_week_share": 0.0320197044,
+      "maximum_jaccard_with_track_a": 0.084337,
+      "maximum_track_b_fire_overlap_share_with_track_a": 0.0931034483
+    },
+    {
+      "family": "B4_OVEREXTENSION_MEAN_REVERSION",
+      "direction": "LONG",
+      "grammar_id": "B4_LONG_T1p5_C0",
+      "fire_count": 828,
+      "distinct_months": 11,
+      "maximum_single_month_share": 0.1086956522,
+      "maximum_single_week_share": 0.0374396135,
+      "maximum_jaccard_with_track_a": 0.042226,
+      "maximum_track_b_fire_overlap_share_with_track_a": 0.0797101449
+    },
+    {
+      "family": "B4_OVEREXTENSION_MEAN_REVERSION",
+      "direction": "SHORT",
+      "grammar_id": "B4_SHORT_T1p0_C0",
+      "fire_count": 1727,
+      "distinct_months": 11,
+      "maximum_single_month_share": 0.1146496815,
+      "maximum_single_week_share": 0.0480602200,
+      "maximum_jaccard_with_track_a": 0.082210,
+      "maximum_track_b_fire_overlap_share_with_track_a": 0.1094383324
+    }
+  ],
+  "B2_compression_expansion": {
+    "status": "BLOCKED_INSUFFICIENT_CAUSAL_SIGNAL_DENSITY",
+    "LONG_fire_counts": [0, 0, 4, 0],
+    "SHORT_fire_counts": [2, 0, 3, 0],
+    "threshold_rescue_authorized": false
+  },
+  "accepted_package": {
+    "filename": "BCR06_OUTCOME_BLIND_TRACK_B_MECHANISM_DENSITY_20260730.zip",
+    "sha256": "04215689d2b861b72e737e000dfe6a6b3d2434ec2caae37b9574edd4b770027b",
+    "deterministic_two_run_sha_match": true
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "trading_candidate_promoted": false,
+  "next_stage": "BCR07_OUTCOME_BLIND_TRACK_B_FINITE_EXIT_AND_STATE_MACHINE_DESIGN"
+}
