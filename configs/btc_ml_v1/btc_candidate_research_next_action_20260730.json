@@ -2,45 +2,54 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T07:01:00+09:00",
-  "next_stage": "BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_ONE_LOCAL_RUN",
-  "authorization": "AUTHORIZED_ONE_READ_ONLY_LOGICAL_SNAPSHOT_RUN_NO_RUNTIME_CHANGE",
+  "recorded_at": "2026-07-30T11:35:00+09:00",
+  "next_stage": "BCR01_V101_ONE_REPLACEMENT_LOCAL_RUN",
+  "authorization": "AUTHORIZED_ONE_REPLACEMENT_RUN_AFTER_PROVEN_V100_IMPLEMENTATION_INVALID",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR01_SCHEMA_ORDER_CORRECTED_RERUN_READY_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "main_and_default_branch": "FORBIDDEN_AS_CURRENT_STATE",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "completed_inputs": {
-    "M7C_primary_package_audited": true,
-    "M7C_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
-    "Collector_package_audited": true,
-    "Collector_package_sha256": "b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
-    "Collector_code_and_schema_audited": true,
-    "outcome_performance_interpreted": false
+  "invalid_first_run": {
+    "package": "99_UPLOAD_PACKAGE(101).zip",
+    "sha256": "47c38b81a465f1fa9adfbcd7901644cca8d3ab4f03f71cb9dd7353b368b602f1",
+    "snapshot_created": false,
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "source_runtime_modified": false,
+    "root_cause": "PHYSICAL_COLUMN_ORDER_CHECK_REJECTED_VALID_MIGRATED_SCHEMA",
+    "replacement_run_allowed": true
   },
-  "purpose": "Create one immutable logical snapshot of genuine source/provenance rows needed for BTC event-ledger research, while excluding every outcome-bearing table and leaving Collector/M7C running unchanged.",
+  "purpose": "Create one outcome-blind logical source snapshot using BCR01 v1.0.1, which requires the exact allowlisted column set but permits SQLite physical order differences caused by known migrations.",
   "user_action": {
     "repository_path": "C:/btc-ff",
     "required_branch": "feature/btc-fresh-forward-research",
-    "pull_first": true,
+    "fetch_and_pull_first": true,
+    "verify_script_commit_in_history": "81ce359f919fba7b174ce2f8c5c25429b934ef2e",
     "run_once": "C:/btc-ff/scripts/btc_ml_v1/BCR01_outcome_blind_source_snapshot/01_run_BCR01.bat",
     "upload": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR01_outcome_blind_source_snapshot/LATEST/99_UPLOAD_PACKAGE.zip",
     "do_not_stop_or_restart_collector_m7c": true,
     "do_not_upload_raw_database": true,
-    "do_not_run_twice": true
+    "do_not_run_more_than_once_after_v101_pull": true
   },
-  "source_contract": {
-    "source_db": "%LOCALAPPDATA%/xauusd_signal_lab/mochipoyo_alert_research/mochipoyo_alerts.sqlite3",
-    "open_mode": "SQLITE_URI_MODE_RO_QUERY_ONLY",
+  "v101_contract": {
+    "version": "1.0.1",
+    "source_db_open_mode": "SQLITE_URI_MODE_RO_QUERY_ONLY",
     "consistent_read_transaction": true,
+    "schema_validation": "EXACT_COLUMN_SET_PHYSICAL_ORDER_MAY_DIFFER",
+    "export_order": "FROZEN_LOGICAL_COLUMN_ORDER",
+    "missing_columns_fail": true,
+    "unexpected_columns_fail": true,
+    "duplicate_columns_fail": true,
     "source_discovery": false,
     "fallback": false,
     "raw_db_copy": false,
     "wal_copy": false,
-    "shm_copy": false
+    "shm_copy": false,
+    "outcome_tables_read": false
   },
   "allowlisted_tables": [
     "collector_state",
@@ -61,7 +70,10 @@
   "acceptance_checks_after_upload": [
     "EXACT_ZIP_LAYOUT",
     "SNAPSHOT_STATUS_READY",
-    "EXACT_ALLOWLISTED_SCHEMA",
+    "VERSION_1_0_1",
+    "EXACT_COLUMN_SETS",
+    "PHYSICAL_ORDER_RECORDED",
+    "FROZEN_LOGICAL_EXPORT_ORDER",
     "CURSOR_EQUALS_MAX_RAW_ID",
     "UNIQUE_RAW_IDS",
     "UNIQUE_EVENT_KEYS",
@@ -74,8 +86,8 @@
     "PERFORMANCE_INTERPRETATION_FALSE"
   ],
   "stop_conditions": [
-    "BCR01 creates an error package.",
-    "Source schema differs from frozen allowlist.",
+    "BCR01 v1.0.1 creates an error package.",
+    "Any required column is missing, unexpected or duplicated.",
     "Cursor and max raw ID disagree.",
     "Any source payload hash or identity mismatch is detected.",
     "Any forbidden table is exported or outcome table is read.",
@@ -83,9 +95,9 @@
     "Stable entry, handoff, current state or next action conflict."
   ],
   "explicitly_not_authorized": [
-    "SECOND_BCR01_RUN_WITHOUT_PROVEN_INVALID_FIRST_PACKAGE",
+    "MORE_THAN_ONE_V101_RUN",
     "RAW_SQLITE_WAL_SHM_UPLOAD",
-    "EVENT_LEDGER_IMPLEMENTATION_BEFORE_BCR01_AUDIT",
+    "EVENT_LEDGER_IMPLEMENTATION_BEFORE_VALID_BCR01_AUDIT",
     "CANDIDATE_FORMULA_DESIGN",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
     "WR_PF_DD_MFE_MAE_ANALYSIS",
