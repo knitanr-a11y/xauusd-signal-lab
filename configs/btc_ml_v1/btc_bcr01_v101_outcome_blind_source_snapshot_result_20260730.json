@@ -1,0 +1,46 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT",
+  "version": "1.0.1",
+  "recorded_at": "2026-07-30T12:14:00+09:00",
+  "status": "ACCEPTED_READY_OUTCOME_BLIND_SOURCE_SNAPSHOT",
+  "input_package": {
+    "name": "99_UPLOAD_PACKAGE(102).zip",
+    "sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
+    "bytes": 445348
+  },
+  "snapshot_id": "BCR01_20260730T030649Z_RAWMAX194",
+  "raw_alert_rows": 194,
+  "raw_alert_id_min": 1,
+  "raw_alert_id_max": 194,
+  "last_successful_id": 194,
+  "integrity": {
+    "ids_contiguous": true,
+    "cursor_equals_max_raw_id": true,
+    "duplicate_raw_ids": 0,
+    "duplicate_event_keys": 0,
+    "payload_sha256_mismatches": 0,
+    "source_json_parse_errors": 0,
+    "source_identity_mismatches": 0,
+    "annotation_orphans": 0,
+    "collection_run_duplicate_ids": 0,
+    "invalid_collection_statuses": 0,
+    "cloudflare_cursor_regressions": 0
+  },
+  "source_contract": {
+    "source": "tradingview",
+    "strategy": "mochipoyo",
+    "exchange_name": "VANTAGE",
+    "timeframe": "15",
+    "event_key_origin": "DERIVED_CLOUDFLARE_ID",
+    "worker_raw_json_origin": "COLLECTOR_SOURCE_ROW_FALLBACK"
+  },
+  "connection_test_ids": [1],
+  "outcome_boundary": {
+    "outcomes_opened": false,
+    "outcome_tables_read": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false
+  },
+  "runtime_observation": "NO_LOGICAL_SOURCE_DATABASE_MUTATION_EVIDENCE_LIVE_SQLITE_SIDECAR_ACTIVITY_OBSERVED"
+}
