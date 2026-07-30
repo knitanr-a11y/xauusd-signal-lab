@@ -32,10 +32,10 @@ Total trials: `6 × 6 = 36`.
 
 The baseline replay reproduced every BCR09 episode for all six machines exactly, including direction, entry time, exit time and endpoint-open state. There were no missing execution rows, nearest/next fallback, interpolation, base-formula changes, TP/SL additions or per-machine custom overlays.
 
-The result was generated twice in separate directories with identical ZIP SHA256.
+The GitHub reproducer output was generated twice in separate directories with identical ZIP SHA256.
 
 - package: `BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_20260730.zip`
-- accepted SHA256: `94483c7e50a50c6775c5e4140f37471e4e71c0417e5eb0ba2b6438e74bcc4339`
+- accepted SHA256: `6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8`
 - deterministic repeat SHA match: true
 - local tests: `4 passed`
 
