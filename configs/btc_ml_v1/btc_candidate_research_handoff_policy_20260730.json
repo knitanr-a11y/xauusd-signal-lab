@@ -1,18 +1,20 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T22:11:00+09:00",
+  "recorded_at": "2026-07-30T23:05:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
   "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR13_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260730.md",
   "final_handoff_verification": {
-    "verified_at": "2026-07-30T22:11:00+09:00",
-    "result": "BCR13_IMPLEMENTATION_READY_ACTUAL_FROZEN_INPUT_RUN_PENDING",
+    "verified_at": "2026-07-30T23:05:00+09:00",
+    "result": "BCR13_STANDARD_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_RESTORED_ACTUAL_FROZEN_INPUT_RUN_PENDING",
     "BCR11_factual_correction_required": false,
     "BCR12_contract_changed": false,
     "BCR13_user_authorized": true,
     "BCR13_actual_run_completed": false,
+    "BCR13_output_workflow_incident_corrected": true,
+    "BCR13_research_logic_changed_by_correction": false,
     "BCR14_user_authorized": false,
     "new_chat_open_is_BCR14_authorization": false
   },
@@ -22,6 +24,8 @@
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR13_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_WORKFLOW_CORRECTION_20260730.md",
+    "configs/btc_ml_v1/btc_bcr13_localappdata_single_upload_zip_workflow_correction_20260730.json",
     "docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md",
     "configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json",
     "docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md",
@@ -81,8 +85,13 @@
     "BCR12_contract_json_commit": "0232261adfddfaa4bc7e79c748838387374aabf2",
     "BCR13_python_commit": "be03d9a8e38d9424642653fcf488b177193579c3",
     "BCR13_test_commit": "8195dc0b77675e27aff9d95ad8c398eed0259354",
-    "BCR13_readiness_document_commit": "e83fde1c25277a2fe84897738c7f3bae7470d1d1",
-    "BCR13_readiness_json_commit": "e62c318dcf0eb946d4855e0807cc26f469da5178",
+    "BCR13_runner_bat_correction_commit": "5ae358ab06c3183da2486d31ffa8d4f1721c57f4",
+    "BCR13_open_results_bat_correction_commit": "5809d2a09ed8d31aab646901a0716c028ce0480e",
+    "BCR13_readme_correction_commit": "e281ff1ef9f1c3fc3dcbae91520fd9584d1f0e48",
+    "BCR13_workflow_correction_document_commit": "92f2341c8d9f345b47aaa1304834772308292f9b",
+    "BCR13_workflow_correction_json_commit": "1ace747a12b4fec13ba107a1271724a00aa50aff",
+    "BCR13_readiness_document_commit": "dcf26a158717b397d497445b688a9caef4728727",
+    "BCR13_readiness_json_commit": "cfbae29d5e0f5338b79c942354a8a964ad972cd6",
     "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
     "runtime_change": "FORBIDDEN",
     "gold_mochipoyo_writeback": "FORBIDDEN"
@@ -104,8 +113,8 @@
     "shadow_started": false
   },
   "current_status": "BTC_REDESIGN_BCR13_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED",
-  "current_decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_FROZEN_INPUT_PACKAGE_NO_PROMOTION",
-  "current_next_action": "RUN_BCR13_BAT_AND_UPLOAD_DETERMINISTIC_LABEL_FREE_PACKAGE",
+  "current_decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_STANDARD_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_RESTORED_AWAIT_USER_LOCAL_RUN_NO_PROMOTION",
+  "current_next_action": "RUN_BCR13_BAT_AND_UPLOAD_SELECTED_99_UPLOAD_PACKAGE_ZIP",
   "current_evidence": {
     "BCR12_family": "B3_BREAKOUT_RETEST_REACCELERATION",
     "BCR12_machines": 8,
@@ -113,15 +122,25 @@
     "BCR13_local_tests": "6_PASSED",
     "BCR13_actual_frozen_input_run_completed": false,
     "BCR13_deterministic_package_received": false,
+    "BCR13_output_workflow_corrected": true,
     "B3_outcome_opened": false,
     "candidate_promoted": false,
     "exposure_label": "B3_OUTCOME_UNOPENED_LABEL_FREE_RUN_PENDING"
   },
+  "output_handoff_contract": {
+    "output_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit",
+    "resolved_user_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
+    "sole_upload_file": "99_UPLOAD_PACKAGE.zip",
+    "explorer_select_after_success": true,
+    "pause_after_run": true,
+    "separate_three_file_upload_instruction": "FORBIDDEN_SUPERSEDED",
+    "repository_relative_output_instruction": "FORBIDDEN_SUPERSEDED"
+  },
   "currently_authorized": [
     "RUN_BCR13_ON_EXACT_FROZEN_INPUT",
-    "UPLOAD_AND_AUDIT_BCR13_LABEL_FREE_PACKAGE",
+    "UPLOAD_AND_AUDIT_BCR13_LABEL_FREE_99_UPLOAD_PACKAGE",
     "REPORT_ALL_EIGHT_MACHINES_WITHOUT_RESCUE",
-    "PRESERVE_BCR13_IMPLEMENTATION_AND_HANDOFF"
+    "PRESERVE_BCR13_IMPLEMENTATION_CORRECTION_AND_HANDOFF"
   ],
   "currently_not_authorized": [
     "BCR14_VALUE_EVALUATION",
@@ -143,10 +162,9 @@
   "required_user_local_action": {
     "bat": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
     "upload_files": [
-      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
-      "deterministic_repeat.json",
-      "package_sha256.txt"
+      "99_UPLOAD_PACKAGE.zip"
     ],
+    "output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
     "no_fallback_on_failure": true
   },
   "continuous_update_triggers": [
