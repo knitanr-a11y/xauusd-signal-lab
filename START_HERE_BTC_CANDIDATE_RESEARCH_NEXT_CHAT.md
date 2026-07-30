@@ -3,7 +3,7 @@
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
 - current status: `BTC_REDESIGN_BCR13_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED`
-- updated: `2026-07-30T22:11:00+09:00`
+- updated: `2026-07-30T23:05:00+09:00`
 - handoff verification: `FINAL_VERIFIED_FOR_NEXT_CHAT`
 
 ## 1. branch hard gate
@@ -27,22 +27,24 @@
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md`
-7. `configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json`
-8. `docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md`
-9. `configs/btc_ml_v1/btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json`
-10. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_RESULT_20260730.md`
-11. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_result_20260730.json`
-12. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_CONTRACT_20260730.md`
-13. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_development_contract_20260730.json`
-14. `docs/btc_ml_v1/BTC_BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_RESULT_20260730.md`
-15. `configs/btc_ml_v1/btc_bcr10_holding_rollover_path_diagnostic_result_20260730.json`
-16. `docs/btc_ml_v1/BTC_BCR09_CORRECTED_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260730.md`
-17. `docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_RESULT_20260730.md`
-18. `docs/btc_ml_v1/BTC_BCR05F_TRACK_A_SOURCE_FIDELITY_FAMILY_FREEZE_20260730.md`
-19. `docs/btc_ml_v1/BTC_BCR07_OUTCOME_BLIND_TRACK_B_STATE_MACHINE_RESULT_20260730.md`
-20. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
-21. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
+6. `docs/btc_ml_v1/BTC_BCR13_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_WORKFLOW_CORRECTION_20260730.md`
+7. `configs/btc_ml_v1/btc_bcr13_localappdata_single_upload_zip_workflow_correction_20260730.json`
+8. `docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md`
+9. `configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json`
+10. `docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md`
+11. `configs/btc_ml_v1/btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json`
+12. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_RESULT_20260730.md`
+13. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_result_20260730.json`
+14. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_CONTRACT_20260730.md`
+15. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_development_contract_20260730.json`
+16. `docs/btc_ml_v1/BTC_BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_RESULT_20260730.md`
+17. `configs/btc_ml_v1/btc_bcr10_holding_rollover_path_diagnostic_result_20260730.json`
+18. `docs/btc_ml_v1/BTC_BCR09_CORRECTED_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260730.md`
+19. `docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_RESULT_20260730.md`
+20. `docs/btc_ml_v1/BTC_BCR05F_TRACK_A_SOURCE_FIDELITY_FAMILY_FREEZE_20260730.md`
+21. `docs/btc_ml_v1/BTC_BCR07_OUTCOME_BLIND_TRACK_B_STATE_MACHINE_RESULT_20260730.md`
+22. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
+23. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
 この順番より前にrepo全体検索、code search、古いhandoff探索をしない。
 
@@ -77,30 +79,42 @@ MOCHIPOYOの一般探索は禁止。current policyでexact allowlistされたM7C
 
 実装は完全確定済みM15バーだけを使い、current bar high/low/close、未来結果、fallback、補間、H1/H4/D1、source stateを使用しない。
 
-## 6. 現在の次作業
+## 6. BCR13出力契約の訂正
+
+初版BATがrepo相対の出力先と3ファイル別々のアップロードを指示したのは実装ミスであり、仕様変更ではない。
+
+正式出力先は次。
+
+`C:\Users\regen\AppData\Local\xauusd_signal_lab\btc_ml_v1\outputs\BCR13_b3_outcome_blind_density_audit\LATEST`
+
+正式な唯一のアップロードファイルは次。
+
+`C:\Users\regen\AppData\Local\xauusd_signal_lab\btc_ml_v1\outputs\BCR13_b3_outcome_blind_density_audit\LATEST\99_UPLOAD_PACKAGE.zip`
+
+BAT成功後はExplorerでこのZIPを選択表示し、停止する。アップロードはこの選択されたZIPだけ。
+
+## 7. 現在の次作業
 
 ユーザーのWindows環境で次を実行する。
 
-`scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat`
+`scripts\btc_ml_v1\BCR13_b3_outcome_blind_density_audit\01_run_BCR13.bat`
 
-成功後、次をアップロードする。
+成功後、Explorerで選択された次の1ファイルだけをアップロードする。
 
-1. `BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip`
-2. `deterministic_repeat.json`
-3. `package_sha256.txt`
+`99_UPLOAD_PACKAGE.zip`
 
 BAT失敗時は完全なconsole errorを提示する。別CSV、SHA変更、row count変更、類似ファイルfallbackは禁止。
 
-## 7. BCR14境界
+## 8. BCR14境界
 
 BCR14 value evaluationは未承認。BCR13 packageの受領・監査前に、return、win/loss、PF、PnL、MFE、MAE、portfolio、prospective start、shadowへ進まない。
 
-## 8. runtime protection
+## 9. runtime protection
 
 Collector、M7C、M8C、M9、M10を停止・再起動・初期化・変更しない。GOLD/MOCHIPOYO側へBTC研究結果を書き込まない。
 
 Discord、MT5発注、prospective start、shadow、live-ready、final signalは未承認。
 
-## 9. fail-closed
+## 10. fail-closed
 
-branch、最新版handoff、current state、next action、BCR12契約、BCR13 implementation readinessが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
+branch、最新版handoff、current state、next action、BCR12契約、BCR13 implementation readiness、BCR13 output workflow correctionが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
