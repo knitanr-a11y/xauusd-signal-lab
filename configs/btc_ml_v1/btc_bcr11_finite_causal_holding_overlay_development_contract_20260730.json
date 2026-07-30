@@ -1,0 +1,89 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_REPLAY",
+  "recorded_at": "2026-07-30T20:20:00+09:00",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "branch": "feature/btc-fresh-forward-research",
+  "exposure": "RETROSPECTIVE_FULL_HISTORY_EXPOSED_DEVELOPMENT",
+  "inputs": {
+    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "BCR10_package_sha256": "99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0",
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "cost_scenarios": ["C0_OBSERVED_SPREAD", "C2_25PCT_SPREAD_PER_FILL"],
+    "commission_round_trip": 0.0,
+    "swap_included": false
+  },
+  "machines": [
+    "TRACK_A_F1_COVERAGE_FIRST",
+    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+    "TRACK_A_F3_STATE_FIDELITY",
+    "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
+    "TRACK_B_B4_E0_EMA20_TOUCH",
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT"
+  ],
+  "overlays": [
+    {"id": "O0_BASELINE", "type": "NONE"},
+    {"id": "O1_MAX_HOLD_16", "type": "MAX_HOLD", "bars": 16},
+    {"id": "O2_MAX_HOLD_32", "type": "MAX_HOLD", "bars": 32},
+    {"id": "O3_MAX_HOLD_64", "type": "MAX_HOLD", "bars": 64},
+    {"id": "O4_SERVER_DAY_FLAT_2345", "type": "SERVER_DAY_FLAT", "server_time": "23:45", "suppress_entry_at_boundary": true},
+    {"id": "O5_MAX_HOLD_16_AND_SERVER_DAY_FLAT_2345", "type": "COMBINED", "bars": 16, "server_time": "23:45", "suppress_entry_at_boundary": true}
+  ],
+  "trial_count": 36,
+  "max_hold_semantics": {
+    "entry_age": 0,
+    "exit_condition": "FIRST_AVAILABLE_BOUNDARY_WITH_ELAPSED_THEORETICAL_M15_BARS_GTE_N",
+    "exact_threshold_missing": "EXIT_FIRST_LATER_AVAILABLE_BOUNDARY_LABEL_OVERDUE_AFTER_GAP",
+    "interpolation": false
+  },
+  "day_flat_semantics": {
+    "exact_boundary": "23:45_MT5_SERVER_OPEN",
+    "active_exit_before_entry": true,
+    "new_entry_suppressed": true,
+    "same_boundary_reentry": false,
+    "missing_boundary": "NO_SUBSTITUTE_LABEL_DAY_FLAT_BOUNDARY_UNAVAILABLE"
+  },
+  "state_order": [
+    "OVERLAY_EXIT",
+    "UNCHANGED_BASE_EXIT",
+    "AT_MOST_ONE_EXIT",
+    "NO_SAME_BOUNDARY_REENTRY",
+    "UNCHANGED_BASE_ENTRY_IF_IDLE_AND_NOT_SUPPRESSED"
+  ],
+  "required_outputs": [
+    "EPISODE_AND_TRANSITION_LEDGER",
+    "EXIT_REASON_COUNTS",
+    "C0_C2_MACHINE_DIRECTION_METRICS",
+    "SEQUENTIAL_TRADE_DRAWDOWN",
+    "MAX_LOSING_STREAK",
+    "MONTHLY_METRICS",
+    "ROLLOVER_EXPOSURE",
+    "BASE_EXIT_CHANGE_RATE",
+    "GAP_OVERDUE_AND_DAY_FLAT_UNAVAILABLE_COUNTS",
+    "PARETO_TABLE_NO_PROMOTION",
+    "DETERMINISTIC_REPEAT_SHA"
+  ],
+  "pareto_axes": [
+    "HIGHER_C0_PF",
+    "HIGHER_C2_PF",
+    "LOWER_ABSOLUTE_DRAWDOWN",
+    "LOWER_ROLLOVER_EXPOSURE",
+    "FEWER_CHANGED_EXITS_TIEBREAK"
+  ],
+  "explicitly_forbidden": [
+    "BASE_FORMULA_OR_THRESHOLD_CHANGE",
+    "TP_SL_TRAILING_STOP",
+    "ATR_DIRECTION_ENTRY_HOUR_WEEKDAY_REGIME_FILTER",
+    "OTHER_MAX_HOLD_OR_FLAT_TIME",
+    "PER_MACHINE_CUSTOM_OVERLAY_SET",
+    "LOT_OPTIMIZATION",
+    "PORTFOLIO",
+    "PROMOTION",
+    "PROSPECTIVE_START_OR_SHADOW",
+    "DISCORD_OR_MT5_ORDER",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+  ],
+  "candidate_promotion_authorized": false,
+  "implementation_authorized": false,
+  "user_action_required_now": false
+}
