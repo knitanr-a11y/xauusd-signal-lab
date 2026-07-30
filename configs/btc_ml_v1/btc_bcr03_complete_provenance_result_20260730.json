@@ -1,0 +1,51 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T13:12:00+09:00",
+  "stage": "BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT",
+  "status": "BCR03_COMPLETE_SOURCE_CANDLE_PROVENANCE_FROZEN",
+  "authoritative_source": {
+    "original_absolute_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "path_authority": "USER_ATTESTED_ORIGINAL_ABSOLUTE_PATH",
+    "original_filename": "btcusdsharp_m15.csv",
+    "content_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "bytes": 2110267,
+    "rows": 30661,
+    "earliest_server_open": "2025-09-13 08:00:00",
+    "latest_server_open": "2026-07-30 06:15:00"
+  },
+  "quality": {
+    "timestamp_parse_failures": 0,
+    "duplicate_server_opens": 0,
+    "monotonic_increasing": true,
+    "gap_transitions": 47,
+    "implied_missing_m15_bars": 53,
+    "gap_interpolation_authorized": false
+  },
+  "mapping": {
+    "accepted_offset_hours_for_inspected_interval": 3,
+    "btc_source_events": 76,
+    "current_server_open_found": 76,
+    "previous_closed_bar_found": 76,
+    "event_gap_boundary_count": 0
+  },
+  "m7c_feature_parity": {
+    "btc_proxy_rows_tested": 890,
+    "rci9_matches": 890,
+    "ema20_minus_ema30_bps_matches": 890,
+    "ema30_minus_ema40_bps_matches": 890
+  },
+  "causal_boundary": {
+    "fully_closed_m15_history_allowed": true,
+    "current_m15_open_allowed": true,
+    "current_m15_high_low_close_allowed": false,
+    "later_m15_allowed": false,
+    "gap_interpolation_allowed": false,
+    "higher_timeframe_without_asof_contract_allowed": false
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false,
+  "document": "docs/btc_ml_v1/BTC_BCR03_COMPLETE_ORIGINAL_PATH_PROVENANCE_20260730.md"
+}
