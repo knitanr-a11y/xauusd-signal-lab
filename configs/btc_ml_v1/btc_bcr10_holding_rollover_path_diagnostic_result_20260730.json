@@ -1,0 +1,83 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC",
+  "recorded_at": "2026-07-30T20:15:00+09:00",
+  "status": "READY_OUTCOME_EXPOSED_DIAGNOSTIC_NO_OVERLAY_SELECTION",
+  "branch": "feature/btc-fresh-forward-research",
+  "inputs": {
+    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148"
+  },
+  "artifact": {
+    "filename": "BCR10_HOLDING_ROLLOVER_PATH_DIAGNOSTIC_20260730.zip",
+    "sha256": "99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0",
+    "deterministic_repeat_match": true,
+    "tests": "4_PASSED"
+  },
+  "population": {
+    "machines": 6,
+    "episodes": 5975,
+    "path_complete": 5829,
+    "path_incomplete_explicit_no_interpolation": 146,
+    "date_crossing_counts": {"D0": 5018, "D1": 950, "D2": 7},
+    "holding_bin_counts": {
+      "H01_04": 1227,
+      "H05_08": 1284,
+      "H09_16": 1530,
+      "H17_32": 1232,
+      "H33_64": 572,
+      "H65_128": 129,
+      "H129_PLUS": 1
+    }
+  },
+  "observed_holding_phenotype_not_overlay": {
+    "all_six_machine_aggregates_LE16_positive": true,
+    "LE16_pf_range": [8.582979, 18.062695],
+    "all_six_machine_aggregates_GE17_negative": true,
+    "GE17_pf_range": [0.080063, 0.146668],
+    "rollover_LE16_episode_count": 310,
+    "rollover_LE16_all_six_machine_aggregates_positive": true,
+    "same_day_GE17_all_six_machine_aggregates_negative": true,
+    "interpretation": "HOLDING_DURATION_IS_MORE_DIRECT_THAN_CALENDAR_CROSSING_BUT_REMAINS_FUTURE_EXIT_BASED_DESCRIPTION"
+  },
+  "long_held_loser_path": {
+    "definition": "holding_bars_ge_17_and_final_C0_loss_and_path_complete",
+    "count": 1361,
+    "positive_MFE_fraction": 0.8978692138,
+    "first_MFE_bar_median": 1.0,
+    "first_MFE_bar_q90": 8.0,
+    "MFE_median_usd_1lot": 117.6,
+    "MAE_median_usd_1lot": 1283.8,
+    "giveback_median_usd_1lot": 758.2
+  },
+  "rollover_loser_path": {
+    "rollover_episodes": 957,
+    "rollover_losers": 582,
+    "path_complete_losers": 530,
+    "positive_at_23_45_count": 43,
+    "positive_at_23_45_fraction": 0.0811320755,
+    "positive_MFE_count": 488,
+    "positive_MFE_fraction": 0.9207547170,
+    "positive_MFE_loser_loss_dollar_share": 0.9488429517,
+    "median_23_45_pnl_C0_usd_1lot": -529.8,
+    "median_final_loser_pnl_C0_usd_1lot": -618.3,
+    "median_giveback_positive_MFE_losers_usd_1lot": 948.9
+  },
+  "decision": {
+    "BCR10_passed": true,
+    "overlay_pnl_evaluated": false,
+    "candidate_selected": false,
+    "server_day_flat_validated": false,
+    "max_hold_16_validated": false,
+    "development_priority": "FINITE_MAX_HOLD_FAMILY_WITH_16_AS_PRIMARY_DIAGNOSTIC_ANCHOR",
+    "next_stage": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_REPLAY"
+  },
+  "forbidden": [
+    "CALL_BCR10_OOS_OR_PROSPECTIVE",
+    "PROMOTE_MAX_HOLD_16_FROM_BUCKET_RESULTS",
+    "PROMOTE_SERVER_DAY_FLAT_FROM_SAME_DATE_RESULTS",
+    "TP_SL_OR_TRAILING_SEARCH",
+    "ENTRY_HOUR_WEEKDAY_ATR_DIRECTION_FILTER",
+    "PORTFOLIO_OR_SHADOW"
+  ]
+}
