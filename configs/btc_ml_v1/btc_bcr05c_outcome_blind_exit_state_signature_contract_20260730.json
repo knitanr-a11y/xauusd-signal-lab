@@ -1,0 +1,106 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "input": {
+    "bcr04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "valid_long_exit_events": 17,
+    "active_long_eligible_controls": 223,
+    "valid_short_exit_events": 10,
+    "active_short_eligible_controls": 168
+  },
+  "populations": {
+    "long_exit_positive": "VALID_LONG_EXIT_EVENT",
+    "long_exit_control": "ACTIVE_LONG_NON_EVENT_CONTROL_AND_CORE_FEATURE_ELIGIBLE",
+    "short_exit_positive": "VALID_SHORT_EXIT_EVENT",
+    "short_exit_control": "ACTIVE_SHORT_NON_EVENT_CONTROL_AND_CORE_FEATURE_ELIGIBLE",
+    "mix_idle_or_opposite_state_controls": false
+  },
+  "feature_families": {
+    "X1_RCI_EXIT_SHAPE": [
+      "RCI9_14_18_LEVEL",
+      "DELTA1",
+      "TURN_UP_DOWN",
+      "FIXED_RCI_ZONES",
+      "DIRECTION_OPPOSITE_RCI9_TURN"
+    ],
+    "X2_EMA_TREND_STRUCTURE": [
+      "EMA_ALIGNMENT",
+      "EMA_SPREADS_BPS",
+      "EMA_SLOPES_1_4_8"
+    ],
+    "X3_CLOSED_BAR_REVERSAL_DISPLACEMENT": [
+      "RETURNS_1_4_16",
+      "BODY_RANGE_WICKS",
+      "CURRENT_OPEN_GAP",
+      "ROLLING_LOCATION"
+    ],
+    "X4_VOLATILITY_CONTEXT": [
+      "ATR14",
+      "ATR14_ATR50_RATIO",
+      "REALIZED_VOL32_BAND",
+      "BB_WIDTH_BAND"
+    ]
+  },
+  "fidelity_context_only": [
+    "SOURCE_STATE_AGE",
+    "BARS_SINCE_PREVIOUS_GENUINE_SOURCE_EVENT",
+    "M7C_EXACT_LATE_MISSED_CLASSIFICATION"
+  ],
+  "statistics": {
+    "binary_categorical": "FISHER_EXACT_TWO_SIDED_WITH_HALDANE_CORRECTED_OR",
+    "continuous": "MANN_WHITNEY_U_TWO_SIDED_AND_CLIFFS_DELTA",
+    "fdr": "BENJAMINI_HOCHBERG_Q_0_10_WITHIN_DIRECTION_FAMILY_STATISTIC_TYPE",
+    "stability": [
+      "LEAVE_ONE_EXIT_CALENDAR_DAY_OUT_SIGN_RETENTION",
+      "LEAVE_ONE_EXIT_OUT_SIGN_RETENTION"
+    ],
+    "maximum_shortlisted_families_per_position_direction": 3,
+    "minimum_required": 0
+  },
+  "one_bar_late_audit": {
+    "allowed": true,
+    "label": "POST_SOURCE_EXIT_ONE_BAR_TIMING_DESCRIPTIVE_ONLY",
+    "requires_exact_next_decision_row": true,
+    "may_not_be_exact_time_candidate_feature": true,
+    "outcome_use": false
+  },
+  "m7c_decomposition": [
+    "EXACT_EXIT_MATCH",
+    "ONE_M15_BAR_LATE_MATCH",
+    "MISSED_EXIT",
+    "PREEXISTING_PROXY_SOURCE_STATE_DIVERGENCE",
+    "DATA_GAP_OR_FEATURE_UNAVAILABLE"
+  ],
+  "state_divergence_ledger_fields": [
+    "SOURCE_STATE_BEFORE_AFTER",
+    "PROXY_STATE_AT_EXACT_BOUNDARY",
+    "PROXY_STATE_ONE_BAR_LATER",
+    "FIRST_RESYNCHRONIZATION_BOUNDARY",
+    "DIVERGENT_DECISION_BAR_COUNT",
+    "GENUINE_PRIMARY_ENTRIES_WHILE_DIVERGENT",
+    "PRIMARY_REJECTED_ONLY_DUE_ACTIVE_PROXY_STATE",
+    "EVENT_IDS_AND_TIMESTAMPS"
+  ],
+  "forbidden": [
+    "FINAL_EXIT_FORMULA",
+    "TIME_STOP",
+    "TP_SL",
+    "HOLDING_PERIOD_OPTIMIZATION",
+    "PROFITABILITY_CLAIM_FROM_EARLIER_EXIT",
+    "RESYNCHRONIZATION_POLICY_SELECTION",
+    "INTEGRATED_CANDIDATE",
+    "OUTCOME_OPENING",
+    "WR_PF_DD_MFE_MAE",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_GOLD_MOCHIPOYO_RUNTIME"
+  ],
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false
+}
