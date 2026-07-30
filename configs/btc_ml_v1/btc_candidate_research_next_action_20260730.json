@@ -2,90 +2,50 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-31T00:03:00+09:00",
-  "current_status": "BTC_REDESIGN_BCR16_B5_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED",
-  "completed_stages": [
-    "BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT_ZERO_SURVIVORS",
-    "BCR15_B5_MATERIALLY_NEW_OUTCOME_BLIND_MECHANISM_DESIGN",
-    "BCR16_IMPLEMENTATION_AND_SYNTHETIC_EXACT_PATH_VALIDATION"
-  ],
-  "completed_decision": "ACCEPT_BCR16_IMPLEMENTATION_READY_AWAIT_EXACT_FROZEN_INPUT_99_UPLOAD_PACKAGE_NO_OUTCOME_OPENED_NO_PROMOTION",
-  "next_stage": "BCR16_FROZEN_INPUT_LABEL_FREE_CAPABILITY_PACKAGE_RUN_AND_AUDIT",
-  "authorization": "USER_AUTHORIZED_CONTINUED_OUTCOME_BLIND_WORK_VALUE_ACCESS_NOT_AUTHORIZED",
+  "recorded_at": "2026-07-31T00:33:00+09:00",
+  "current_status": "BTC_REDESIGN_BCR16_COMPLETE_EIGHT_OF_EIGHT_B5_MACHINES_PASS_CAPABILITY_BCR17_AUTHORIZATION_PENDING",
+  "completed_stage": "BCR16_B5_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "completed_decision": "ACCEPT_BCR16_DETERMINISTIC_LABEL_FREE_RESULT_FREEZE_EIGHT_B5_CAPABILITY_SURVIVORS_AWAIT_EXPLICIT_BCR17_VALUE_GATE_AUTHORIZATION",
+  "next_stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+  "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_BCR17_IMPLEMENTATION_OR_VALUE_ACCESS",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260731.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_COMPLETE_EIGHT_OF_EIGHT_PASS_BCR17_AUTHORIZATION_PENDING_20260731.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "BCR13_boundary": {
-    "B3_status": "CLOSED_NO_CAPABILITY_SURVIVOR_NO_RESCUE",
-    "machines_passed": 0,
-    "machines_failed": 8,
-    "BCR14_status": "NOT_APPLICABLE_ZERO_SURVIVORS",
-    "B3_value_fields_opened": false
-  },
-  "BCR15_contract": {
-    "family": "B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM",
-    "document": "docs/btc_ml_v1/BTC_BCR15_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_DESIGN_CONTRACT_20260731.md",
-    "json": "configs/btc_ml_v1/btc_bcr15_causal_h1_impulse_m15_pullback_reclaim_design_contract_20260731.json",
-    "machines": 8,
-    "outcome_opened": false
-  },
-  "BCR16_implementation": {
-    "python": "scripts/btc_ml_v1/BCR16_b5_h1_impulse_m15_reclaim_capability_audit/python/run_bcr16_b5_capability_audit.py",
-    "tests": "tests/btc_ml_v1/test_bcr16_b5_capability_audit.py",
-    "runner_bat": "scripts/btc_ml_v1/BCR16_b5_h1_impulse_m15_reclaim_capability_audit/01_run_BCR16.bat",
-    "readiness_document": "docs/btc_ml_v1/BTC_BCR16_B5_OUTCOME_BLIND_CAPABILITY_IMPLEMENTATION_READY_20260731.md",
-    "readiness_json": "configs/btc_ml_v1/btc_bcr16_b5_outcome_blind_capability_implementation_ready_20260731.json",
-    "local_tests": "6_PASSED",
-    "actual_frozen_input_result_available": false
+  "BCR16_result": {
+    "document": "docs/btc_ml_v1/BTC_BCR16_B5_OUTCOME_BLIND_CAPABILITY_RESULT_20260731.md",
+    "json": "configs/btc_ml_v1/btc_bcr16_b5_outcome_blind_capability_result_20260731.json",
+    "document_commit": "04ce341ee21b59e7a08becc0225085bfe51e93ad",
+    "json_commit": "ad2d4f50313f43d4d70d7deefbd78122c958c6eb",
+    "accepted_inner_package_sha256": "c469be9455bd5639de336684e0fdcaebf6a72dc6f0bae623acefa5e0cb506653",
+    "deterministic_repeat_match": true,
+    "machines_passed": 8,
+    "machines_failed": 0,
+    "B5_outcome_opened": false,
+    "candidate_promoted": false
   },
   "required_user_action": {
-    "step_1": "FETCH_OR_PULL_feature/btc-fresh-forward-research",
-    "step_2": "RUN_scripts/btc_ml_v1/BCR16_b5_h1_impulse_m15_reclaim_capability_audit/01_run_BCR16.bat",
-    "step_3": "UPLOAD_ONLY_THE_EXPLORER_SELECTED_99_UPLOAD_PACKAGE_ZIP",
-    "upload_files": ["99_UPLOAD_PACKAGE.zip"],
-    "expected_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR16_b5_h1_impulse_m15_reclaim_capability_audit\\LATEST",
-    "expected_upload_file": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR16_b5_h1_impulse_m15_reclaim_capability_audit\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "bat_opens_explorer_with_zip_selected": true,
-    "failure_action": "PROVIDE_COMPLETE_CONSOLE_ERROR_AND_STOP",
-    "forbidden_failure_response": [
-      "USE_DIFFERENT_CSV",
-      "CHANGE_EXPECTED_SHA",
-      "CHANGE_EXPECTED_ROW_COUNT",
-      "SORT_OR_REPAIR_ROWS",
-      "NEAREST_NEXT_OR_SIMILAR_FILE_FALLBACK"
-    ]
+    "action": "EXPLICITLY_AUTHORIZE_OR_DECLINE_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+    "bat_required_now": false,
+    "upload_required_now": false,
+    "runtime_change_required": false
   },
-  "audit_after_upload": {
-    "verify_outer_upload_zip_members": true,
-    "verify_inner_package_sha": true,
-    "verify_deterministic_repeat": true,
-    "verify_manifest_members_and_hashes": true,
-    "verify_exact_frozen_input_sha_and_rows": true,
-    "verify_complete_H1_count_and_construction": true,
-    "verify_all_eight_machines_reported": true,
-    "verify_no_forbidden_value_fields": true,
-    "report_capability_gate_per_machine": true,
-    "allow_threshold_or_side_rescue": false
-  },
-  "value_boundary": {
-    "authorized": false,
-    "applicable_only_to_BCR16_capability_survivors": true,
-    "return_or_value_fields_allowed": false,
-    "candidate_promotion_allowed": false,
-    "portfolio_allowed": false,
-    "prospective_or_shadow_allowed": false
-  },
+  "allowed_after_explicit_BCR17_authorization_only": [
+    "IMPLEMENT_ONE_SHARED_B5_RETROSPECTIVE_VALUE_GATE",
+    "EVALUATE_ALL_EIGHT_CAPABILITY_SURVIVORS",
+    "USE_FROZEN_BCR08_EXECUTION_AND_COST_PROVENANCE",
+    "REPORT_C0_AND_C2",
+    "APPLY_MULTIPLE_TESTING_CONTROL",
+    "REPORT_ALL_FAILURES_WITHOUT_MACHINE_OR_SIDE_DELETION"
+  ],
   "explicitly_not_authorized": [
+    "BCR17_IMPLEMENTATION_OR_VALUE_ACCESS_WITHOUT_EXPLICIT_USER_AUTHORIZATION",
     "B5_RETURN_WIN_LOSS_PF_PNL_MFE_MAE_ACCESS",
-    "B5_VALUE_EVALUATION",
-    "ADDITIONAL_B5_GRID_OR_THRESHOLD",
-    "LONG_ONLY_OR_SHORT_ONLY_RESCUE",
-    "OUTCOME_BASED_MACHINE_DELETION",
-    "TRACK_A_B1_B2_B3_B4_RETUNE_OR_RESCUE",
+    "POST_RESULT_MACHINE_OR_DIRECTION_DELETION",
+    "B5_THRESHOLD_OR_EXIT_RESCUE",
     "PORTFOLIO_SELECTION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
@@ -97,8 +57,8 @@
     "GOLD_MOCHIPOYO_WRITEBACK"
   ],
   "user_action_required_now": true,
-  "bat_required_now": true,
-  "upload_required_now": true,
+  "bat_required_now": false,
+  "upload_required_now": false,
   "runtime_change_required": false,
   "handoff_update_required_after_next_decision": true
 }
