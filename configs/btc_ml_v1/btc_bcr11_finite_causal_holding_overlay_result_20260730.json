@@ -12,7 +12,7 @@
   },
   "artifact": {
     "package": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_20260730.zip",
-    "sha256": "94483c7e50a50c6775c5e4140f37471e4e71c0417e5eb0ba2b6438e74bcc4339",
+    "sha256": "6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8",
     "deterministic_repeat_sha_match": true,
     "tests": "4_PASSED"
   },
