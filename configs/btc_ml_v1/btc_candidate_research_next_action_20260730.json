@@ -2,77 +2,62 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-31T00:45:00+09:00",
-  "current_status": "BTC_REDESIGN_BCR17_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_VALUE_ACCESS_AUTHORIZED_NO_RESULT_YET",
-  "completed_stage": "BCR17_CONTRACT_IMPLEMENTATION_LOCAL_TESTS_AND_STANDARD_BAT",
-  "completed_decision": "ACCEPT_BCR17_CONTRACT_AND_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_99_UPLOAD_PACKAGE_NO_AUTOMATIC_PROMOTION",
-  "next_stage": "BCR17_FROZEN_INPUT_SHARED_RETROSPECTIVE_VALUE_RUN_AND_AUDIT",
-  "authorization": "USER_AUTHORIZED_BCR17_VALUE_ACCESS_WITH_FROZEN_CONTRACT",
+  "recorded_at": "2026-07-31T01:30:00+09:00",
+  "current_status": "BTC_REDESIGN_BCR17_COMPLETE_ONE_PROMISING_ONE_HOLD_SIX_REJECT_NO_SUPPORTED_BCR18_AUTHORIZATION_PENDING",
+  "completed_stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+  "completed_decision": "ACCEPT_BCR17_DETERMINISTIC_VALUE_RESULT_FREEZE_R12_B075_W16_AS_PROMISING_RESEARCH_SURVIVOR_R12_B100_W16_AS_COST_SENSITIVE_HOLD_NO_PROMOTION",
+  "next_stage": "BCR18_B5_PROMISING_SURVIVOR_PROSPECTIVE_PREREGISTRATION",
+  "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_BCR18_CONTRACT_PROSPECTIVE_BOUNDARY_OR_SHADOW",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR17_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260731.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR17_COMPLETE_ONE_PROMISING_ONE_HOLD_BCR18_AUTHORIZATION_PENDING_20260731.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "BCR17_implementation": {
-    "contract_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_CONTRACT_20260731.md",
-    "contract_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_contract_20260731.json",
-    "implementation_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_IMPLEMENTATION_READY_20260731.md",
-    "implementation_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_implementation_ready_20260731.json",
-    "python": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/python/run_bcr17_b5_shared_value_gate.py",
-    "tests": "tests/btc_ml_v1/test_bcr17_b5_shared_value_gate.py",
-    "runner_bat": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
-    "local_test_result": "6_PASSED",
-    "actual_frozen_input_result_available": false
+  "BCR17_result": {
+    "document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260731.md",
+    "json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_result_20260731.json",
+    "document_commit": "b945a6ba4f5a0b38c5e61d1dce3ea037a714fa76",
+    "json_commit": "c079a0bcaf861af68e9d98a08b910067758135cf",
+    "accepted_inner_sha256": "dc8420a6edb104799919a51195cc03b7023377bca2c1d1eb75b0792164337ec7",
+    "supported": 0,
+    "promising": 1,
+    "hold_cost_sensitive": 1,
+    "reject": 6,
+    "candidate_promoted": false
+  },
+  "promising_research_survivor": {
+    "machine_id": "TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM",
+    "both_directions_frozen": true,
+    "threshold_and_exit_frozen": true,
+    "C2_pf": 1.007930096021,
+    "C2_net_usd_1lot": 245.49,
+    "C2_max_drawdown_usd_1lot": 9803.0,
+    "C2_Holm_p": 1.0,
+    "deployable": false
   },
   "required_user_action": {
-    "step_1": "FETCH_OR_PULL_feature/btc-fresh-forward-research",
-    "step_2": "RUN_scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
-    "step_3": "UPLOAD_ONLY_THE_EXPLORER_SELECTED_99_UPLOAD_PACKAGE_ZIP",
-    "upload_files": [
-      "99_UPLOAD_PACKAGE.zip"
-    ],
-    "expected_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate\\LATEST",
-    "expected_upload_file": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate\\LATEST\\99_UPLOAD_PACKAGE.zip",
-    "bat_opens_explorer_with_zip_selected": true,
-    "failure_action": "PROVIDE_COMPLETE_CONSOLE_ERROR_AND_STOP",
-    "forbidden_failure_response": [
-      "USE_DIFFERENT_CSV",
-      "USE_DIFFERENT_BCR16_LEDGER",
-      "CHANGE_EXPECTED_SHA",
-      "CHANGE_EXPECTED_ROW_COUNT",
-      "DELETE_MACHINE_OR_DIRECTION",
-      "CHANGE_COST_OR_CLASSIFICATION_CONTRACT",
-      "NEAREST_NEXT_OR_INTERPOLATION_FALLBACK"
-    ]
+    "action": "EXPLICITLY_AUTHORIZE_OR_DECLINE_BCR18_B5_PROMISING_SURVIVOR_PROSPECTIVE_PREREGISTRATION",
+    "bat_required_now": false,
+    "upload_required_now": false,
+    "runtime_change_required": false
   },
-  "audit_after_upload": {
-    "verify_outer_upload_zip_members": true,
-    "verify_inner_package_sha": true,
-    "verify_deterministic_repeat": true,
-    "verify_manifest_members_and_hashes": true,
-    "verify_exact_frozen_input_sha_and_rows": true,
-    "verify_accepted_BCR16_package_sha": true,
-    "verify_all_eight_machines_and_both_directions": true,
-    "verify_C0_C2_arithmetic": true,
-    "verify_monthly_wilcoxon_and_holm": true,
-    "report_all_classifications_without_rescue": true
-  },
-  "post_result_boundary": {
-    "automatic_promotion": false,
-    "post_result_machine_or_direction_deletion": false,
-    "threshold_or_exit_rescue": false,
-    "portfolio": false,
-    "prospective_or_shadow": false,
-    "next_stage_requires_explicit_user_authorization": true
-  },
+  "allowed_after_explicit_BCR18_authorization_only": [
+    "FREEZE_EXACT_R12_B075_W16_BOTH_DIRECTIONS_FOR_FUTURE_ONLY_EVALUATION",
+    "FREEZE_PROSPECTIVE_START_AFTER_CONTRACT_COMMIT",
+    "PRESERVE_BCR17_C0_C2_COST_CONTRACT",
+    "DEFINE_MINIMUM_FUTURE_EVIDENCE_BEFORE_ANY_PROMOTION_DECISION",
+    "CREATE_BCR18_CONTRACT_AND_MACHINE_READABLE_COMPANION"
+  ],
   "explicitly_not_authorized": [
+    "BCR18_CONTRACT_OR_PROSPECTIVE_START_WITHOUT_EXPLICIT_USER_AUTHORIZATION",
+    "LONG_DELETION_OR_SHORT_ONLY_CANDIDATE",
+    "RETROSPECTIVE_SAME_SERVER_DATE_FILTER",
+    "ROLLOVER_FLAT_OR_MAX_HOLDING_RESCUE",
+    "THRESHOLD_OR_EXIT_RETUNE",
     "AUTOMATIC_CANDIDATE_PROMOTION",
-    "POST_RESULT_MACHINE_OR_DIRECTION_DELETION",
-    "B5_THRESHOLD_OR_EXIT_RESCUE",
     "PORTFOLIO_SELECTION",
-    "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
@@ -82,8 +67,8 @@
     "GOLD_MOCHIPOYO_WRITEBACK"
   ],
   "user_action_required_now": true,
-  "bat_required_now": true,
-  "upload_required_now": true,
+  "bat_required_now": false,
+  "upload_required_now": false,
   "runtime_change_required": false,
   "handoff_update_required_after_next_decision": true
 }
