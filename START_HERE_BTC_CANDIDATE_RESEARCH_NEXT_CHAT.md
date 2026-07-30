@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_READY`
-- updated: `2026-07-30T07:01:00+09:00`
+- current status: `BTC_REDESIGN_BCR01_V100_INVALID_SCHEMA_ORDER_CORRECTED_V101_RERUN_READY`
+- updated: `2026-07-30T11:35:00+09:00`
 
 ## 1. branch hard gate
 
@@ -15,26 +15,24 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR01_SCHEMA_ORDER_CORRECTED_RERUN_READY_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR01_SCHEMA_ORDER_CORRECTED_RERUN_READY_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md`
-7. `configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json`
-8. `docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md`
-9. `configs/btc_ml_v1/btc_d1b_collector_evidence_manifest_20260730.json`
-10. `docs/btc_ml_v1/BTC_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_CONTRACT_20260730.md`
-11. `configs/btc_ml_v1/btc_bcr01_outcome_blind_source_snapshot_contract_20260730.json`
-12. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
-13. `configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json`
-14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
+6. `docs/btc_ml_v1/BTC_BCR01_SCHEMA_PHYSICAL_ORDER_CORRECTION_20260730.md`
+7. `configs/btc_ml_v1/bcr01_schema_physical_order_incident_20260730.json`
+8. `docs/btc_ml_v1/BTC_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_CONTRACT_20260730.md`
+9. `docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md`
+10. `docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md`
+11. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
+12. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
 この順番より前にrepo全体検索、code search、古いhandoff探索をしない。
 
@@ -66,29 +64,31 @@ MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可・監�
 
 ## 6. 現在の到達点
 
-D1のM7C・Collector監査は完了。
+D1のM7C・Collector監査は完了。BCR01初回runはsource snapshot作成前に停止した。
 
-- M7C supported source events: 90
-- supported BTCUSD: 51
-- Collector combined cycles: 12,612
-- Collector inserted rows: 127
-- duplicate rows: 0
-- latest observed cursor: 189
-- performance interpretation: not performed
+初回ZIP:
+
+`99_UPLOAD_PACKAGE(101).zip`
+
+SHA256:
+
+`47c38b81a465f1fa9adfbcd7901644cca8d3ab4f03f71cb9dd7353b368b602f1`
+
+原因はsource dataではなく、BCR01 v1.0.0がSQLite物理列順までfresh schema順と一致要求した実装事故。outcomeは開かれていない。
+
+BCR01 v1.0.1へ修正済み。exact列集合を要求し、物理順差を許可、固定論理順でexportする。欠落・未知・重複列は拒否する。4 regression tests passed。
 
 ## 7. 現在の次作業
 
-`BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT`
+GitHub Desktopでpull後、同じBATを1回だけ実行する。
 
-ユーザーは次を1回だけ実行する。
-
-`scripts/btc_ml_v1/BCR01_outcome_blind_source_snapshot/01_run_BCR01.bat`
+`C:\btc-ff\scripts\btc_ml_v1\BCR01_outcome_blind_source_snapshot\01_run_BCR01.bat`
 
 提出ZIP:
 
 `%LOCALAPPDATA%\xauusd_signal_lab\btc_ml_v1\outputs\BCR01_outcome_blind_source_snapshot\LATEST\99_UPLOAD_PACKAGE.zip`
 
-raw SQLite DB、WAL、SHMは送らない。BCR01はallowlisted source tablesだけをread-only transactionで論理exportする。
+初回runはsnapshot未作成の無効runなので、このv1.0.1置換runだけ追加承認。成功・失敗を問わず最初のZIPを提出し、それ以上繰り返さない。
 
 ## 8. runtime protection
 
