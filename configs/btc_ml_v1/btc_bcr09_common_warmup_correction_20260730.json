@@ -1,0 +1,32 @@
+{
+  "stage": "BCR09_SHARED_EXECUTION_COST_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-30T19:45:00+09:00",
+  "status": "INITIAL_LOCAL_OUTPUT_INVALID_CORRECTED_REPLAY_AUTHORIZED",
+  "invalid_run": {
+    "accepted": false,
+    "reason": "TRACK_A_FULL_HISTORY_WARMUP_DID_NOT_REPRODUCE_FROZEN_BCR06_REFERENCE_COUNTS",
+    "result_may_be_used": false
+  },
+  "correction_authority": "OUTCOME_BLIND_BCR06_COMMON_UNIVERSE_AND_TRACK_A_OVERLAP_REFERENCE_COUNTS",
+  "corrected_rule": {
+    "physical_rows_reserved_before_analysis": 500,
+    "first_allowed_physical_row_index_zero_based": 500,
+    "contiguous_previous_m15_bars_required": 50,
+    "exact_previous_boundary_required": true,
+    "gap_interpolation": false,
+    "state_persists_through_unavailable_rows": true
+  },
+  "parity_targets": {
+    "track_b_common_eligible_rows": 27861,
+    "track_a_entries": {
+      "TRACK_A_F1_COVERAGE_FIRST": {"LONG": 801, "SHORT": 761},
+      "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE": {"LONG": 892, "SHORT": 337},
+      "TRACK_A_F3_STATE_FIDELITY": {"LONG": 412, "SHORT": 400},
+      "TRACK_A_F4_MINIMUM_EXTRA_PARETO": {"LONG": 416, "SHORT": 352}
+    }
+  },
+  "pnl_used_to_choose_correction": false,
+  "other_bcr09_contract_fields_changed": false,
+  "corrected_result_required": true,
+  "incident_document": "docs/btc_ml_v1/BTC_BCR09_PREACCEPTANCE_COMMON_WARMUP_INCIDENT_AND_CORRECTION_20260730.md"
+}
