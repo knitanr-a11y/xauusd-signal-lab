@@ -1,0 +1,88 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T12:42:00+09:00",
+  "stage": "BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT",
+  "status": "CONTENT_CLOCK_FEATURE_PARITY_ACCEPTED_ORIGINAL_ABSOLUTE_PATH_PENDING",
+  "input": {
+    "uploaded_name": "btcusdsharp_m15(3).csv",
+    "authoritative_original_filename": null,
+    "authoritative_original_absolute_path": null,
+    "sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "bytes": 2110267,
+    "rows": 30661,
+    "columns": [
+      "time",
+      "open",
+      "high",
+      "low",
+      "close",
+      "tick_volume",
+      "spread",
+      "real_volume"
+    ],
+    "earliest_server_open": "2025-09-13 08:00:00",
+    "latest_server_open": "2026-07-30 06:15:00",
+    "timestamp_parse_failures": 0,
+    "duplicate_server_opens": 0,
+    "monotonic_increasing": true,
+    "gap_transitions": 47,
+    "implied_missing_m15_bars": 53
+  },
+  "bcr02_event_mapping": {
+    "bcr02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "btc_event_rows": 76,
+    "mapping": "MT5_SERVER_OPEN_EQUALS_BAR_TIME_UTC_PLUS_3_HOURS",
+    "current_server_open_found": 76,
+    "previous_closed_m15_found": 76,
+    "events_on_gap_boundary": 0,
+    "event_previous_closed_bar_on_gap_boundary": 0,
+    "earliest_event_server_open": "2026-07-20 19:00:00",
+    "latest_event_server_open": "2026-07-30 04:30:00"
+  },
+  "clock_evidence": {
+    "accepted_offset_hours_for_inspected_interval": 3,
+    "plus_3_median_abs_source_to_current_open": 3.88,
+    "plus_3_mean_abs_source_to_current_open": 5.615921052632314,
+    "next_best_tested_integer_offset_hours": 2,
+    "plus_2_median_abs_source_to_current_open": 105.52,
+    "plus_2_mean_abs_source_to_current_open": 147.46921052631563,
+    "generalize_across_uninspected_dst_periods": false
+  },
+  "m7c_feature_parity": {
+    "btc_proxy_decision_rows": 890,
+    "rci9_exact_rows": 890,
+    "ema20_minus_ema30_bps_exact_rows": 890,
+    "ema30_minus_ema40_bps_exact_rows": 890,
+    "max_abs_rci9_difference": 1.4210854715202004e-14,
+    "max_abs_ema20_minus_ema30_bps_difference": 3.552713678800501e-15,
+    "max_abs_ema30_minus_ema40_bps_difference": 3.552713678800501e-15,
+    "content_provenance_assessment": "EXACT_M7C_BTC_M15_CLOSE_SEQUENCE_FOR_ALL_INSPECTED_DECISIONS"
+  },
+  "source_price_mapping": {
+    "events": 76,
+    "median_abs_source_to_current_open": 3.88,
+    "mean_abs_source_to_current_open": 5.615921052632314,
+    "max_abs_source_to_current_open": 108.98,
+    "median_abs_source_to_previous_close": 3.405,
+    "mean_abs_source_to_previous_close": 4.978289473684383,
+    "max_abs_source_to_previous_close": 108.98,
+    "raw_alert_114_retained": true,
+    "cross_feed_equality_required": false
+  },
+  "feature_boundary": {
+    "fully_closed_m15_history": "ALLOWED",
+    "current_m15_open": "ALLOWED",
+    "current_m15_high_low_close": "FORBIDDEN",
+    "future_m15": "FORBIDDEN",
+    "gap_interpolation": "FORBIDDEN",
+    "higher_timeframe": "PENDING_SEPARATE_ASOF_CLOSE_AVAILABILITY_CONTRACT",
+    "trade_outcomes": "FORBIDDEN"
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false,
+  "remaining_blocker": "USER_MUST_STATE_EXACT_ORIGINAL_ABSOLUTE_PATH_FROM_WHICH_THE_SUBMITTED_CSV_WAS_COPIED",
+  "audit_document": "docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md"
+}
