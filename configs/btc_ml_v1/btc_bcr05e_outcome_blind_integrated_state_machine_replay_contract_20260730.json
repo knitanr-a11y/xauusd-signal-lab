@@ -1,0 +1,107 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05E_OUTCOME_BLIND_COMPLETE_ENTRY_EXIT_STATE_MACHINE_REPLAY",
+  "recorded_at": "2026-07-30T18:35:00+09:00",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "branch": "feature/btc-fresh-forward-research",
+  "inputs": {
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "BCR05B_package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "BCR05C_package_sha256": "221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
+    "BCR05D_package_sha256": "b1c4c66454f3076ffc90b22cac27280c6daa38f97db63ae07bed5294eed872d7"
+  },
+  "component_variants": {
+    "LONG_ENTRY": ["A_LONG_E0_Z1_P0", "A_LONG_E1_Z2_P0"],
+    "SHORT_ENTRY": ["A_SHORT_E0_Z1_P1", "A_SHORT_E1_Z1_P1", "A_SHORT_E1_Z2_P0"],
+    "LONG_EXIT": ["X_LONG_EXIT_T70_M0_P1", "X_LONG_EXIT_T70_M1_P0"],
+    "SHORT_EXIT": ["X_SHORT_EXIT_T70_M0_P0", "X_SHORT_EXIT_T70_M0_P1", "X_SHORT_EXIT_T70_M1_P1"],
+    "integrated_combination_count": 36
+  },
+  "state_machine": {
+    "states": ["IDLE", "ACTIVE_LONG", "ACTIVE_SHORT"],
+    "IDLE": {
+      "long_only": "emit PRIMARY_LONG and enter ACTIVE_LONG",
+      "short_only": "emit PRIMARY_SHORT and enter ACTIVE_SHORT",
+      "both": "emit NO_SIGNAL_AMBIGUOUS_ENTRY_CONFLICT and remain IDLE",
+      "neither": "NO_SIGNAL"
+    },
+    "ACTIVE_LONG": {
+      "long_exit": "emit LONG_EXIT and enter IDLE",
+      "otherwise": "NO_SIGNAL; primary/reentry/opposite predicates do not change state"
+    },
+    "ACTIVE_SHORT": {
+      "short_exit": "emit SHORT_EXIT and enter IDLE",
+      "otherwise": "NO_SIGNAL; primary/reentry/opposite predicates do not change state"
+    },
+    "one_position_only": true,
+    "reentries_emitted": false,
+    "opposite_alerts_emitted": false
+  },
+  "seed_modes": {
+    "SOURCE_SEEDED_FIDELITY_PRIMARY": {
+      "initial_state": "BCR04 source_state_before at first decision boundary",
+      "selection_eligible": true,
+      "deployable_initialization_claim": false
+    },
+    "IDLE_SEEDED_STANDALONE_DIAGNOSTIC": {
+      "initial_state": "IDLE",
+      "selection_eligible": false,
+      "role": "report convergence and hidden source-seed dependence only"
+    }
+  },
+  "evaluation": {
+    "supported_source_transitions": ["PRIMARY_LONG", "PRIMARY_SHORT", "LONG_EXIT", "SHORT_EXIT"],
+    "unsupported_source_events_retained_separately": ["REENTRY_LONG", "REENTRY_SHORT", "OPPOSITE_ALERT_IGNORED", "OPPOSITE_EXIT_IGNORED"],
+    "metrics": [
+      "exact_supported_transition_recall_overall",
+      "exact_recall_by_transition",
+      "within_one_bar_supported_transition_recall_descriptive",
+      "extra_supported_transition_count",
+      "extra_transition_rate_per_decision_boundary",
+      "wrong_transition_at_supported_source_event_count",
+      "source_state_before_agreement_rate",
+      "divergent_boundary_count",
+      "divergence_episode_count",
+      "maximum_divergence_episode_length",
+      "source_primary_while_candidate_non_idle_count",
+      "state_blocked_primary_count",
+      "ambiguous_entry_conflict_count"
+    ],
+    "within_one_bar_role": "DESCRIPTIVE_ONLY_NOT_EXACT_RECALL",
+    "all_907_decision_boundaries_retained": true
+  },
+  "pareto": {
+    "objectives": [
+      "maximize exact supported transition recall",
+      "minimize extra transition rate",
+      "minimize divergent boundary count",
+      "minimize state_blocked_primary_count"
+    ],
+    "minimum_exact_supported_recall_for_profile_selection": 0.70,
+    "maximum_advanced_integrated_variants": 4,
+    "profiles": {
+      "COVERAGE_FIRST": ["higher exact recall", "lower divergent boundaries", "lower extras", "lexical ID"],
+      "STATE_FIDELITY": ["lower divergent boundaries", "higher exact recall", "lower extras", "lexical ID"],
+      "LOW_EXTRA": ["lower extra transition rate", "higher exact recall", "lower divergent boundaries", "lexical ID"],
+      "BALANCED_RANK": ["lower summed ordinal ranks of recall descending, extras ascending, divergence ascending, state-blocked ascending", "lexical ID"]
+    },
+    "duplicates_between_profiles_removed": true
+  },
+  "explicitly_not_authorized": [
+    "PROFITABILITY_OUTCOME_ACCESS",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL_TIME_STOP_OR_HOLDING_OPTIMIZATION",
+    "COMPONENT_RESCUE_OR_THRESHOLD_CHANGE_AFTER_REPLAY",
+    "SOURCE_STATE_SEED_AS_DEPLOYABLE_LIVE_REQUIREMENT",
+    "FINAL_TRADING_CANDIDATE_PROMOTION",
+    "FF06",
+    "PROSPECTIVE_START",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+  ],
+  "required_after_completion": "FREEZE_SMALL_TRACK_A_SOURCE_FIDELITY_FAMILY_THEN_DEFINE_SEPARATE_VALUE_GATE_AND_STANDALONE_INITIALIZATION_CONTRACT",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
