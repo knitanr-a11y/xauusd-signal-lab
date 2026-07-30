@@ -158,4 +158,4 @@ BCR05E passes.
 All four non-dominated variants are retained as a small Track A source-fidelity family. None is promoted as a trading candidate. The next work must keep two separate paths:
 
 1. define a standalone, IDLE-seeded Track A trading-value gate with exact execution and cost contracts;
-2. resume Track B independent-mechanism research so the final system is not only a family of moch ipoyo approximations.
+2. resume Track B independent-mechanism research so the final system is not only a family of Mochipoyo approximations.
