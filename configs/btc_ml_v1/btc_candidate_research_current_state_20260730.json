@@ -2,141 +2,142 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T13:46:00+09:00",
-  "status": "BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT",
-  "decision": "ACCEPT_BCR05B_FINITE_ENTRY_FIDELITY_VARIANTS_PROCEED_TO_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "recorded_at": "2026-07-30T19:25:00+09:00",
+  "status": "BTC_REDESIGN_TRACK_A_AND_TRACK_B_COMPLETE_OUTCOME_BLIND_BCR08_COST_PROVENANCE_READY",
+  "decision": "FREEZE_FOUR_TRACK_A_AND_FOUR_TRACK_B_COMPLETE_STATE_MACHINES_NO_PROFITABILITY_RUN_BCR08_READ_ONLY_ONCE",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_TRACK_A_TRACK_B_COMPLETE_BCR08_COST_PROVENANCE_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
     "continuous_updates_required": true
   },
-  "research_tracks": {
-    "track_A": "MOCHIPOYO_SOURCE_ANCHORED_BTC_RESEARCH",
-    "track_B": "INDEPENDENT_VECTOR_BTC_RESEARCH"
+  "frozen_market_data": {
+    "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "current_high_low_close_allowed": false,
+    "gap_interpolation_allowed": false,
+    "uncontracted_higher_timeframe_allowed": false
   },
-  "frozen_upstream": {
-    "BCR01_package_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
-    "BCR02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
-    "BCR03_m15_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
-    "BCR03_m15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
-    "BCR03_m7c_selected_bar_parity": "890_OF_890",
-    "BCR03_exact_previous_boundary_parity": "889_OF_889_ELIGIBLE",
-    "BCR03_m7c_gap_bridge_rows": 1,
-    "BCR03_btc_research_gap_fallback_used": false
-  },
-  "bcr04": {
-    "status": "READY_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
-    "package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
-    "decision_rows": 907,
-    "source_event_rows": 76,
-    "non_event_control_rows": 831,
-    "core_feature_eligible_rows": 905,
-    "primary_long_rows": 16,
-    "primary_short_rows": 10,
-    "eligible_idle_controls": 438,
-    "valid_long_exit_rows": 17,
-    "valid_short_exit_rows": 10,
-    "eligible_active_long_controls": 223,
-    "eligible_active_short_controls": 168,
-    "gap_adjacent_rows": 2,
-    "event_rows_gap_adjacent": 0,
-    "outcomes_opened": false,
-    "result_document": "docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_RESULT_20260730.md",
-    "result_json": "configs/btc_ml_v1/btc_bcr04_outcome_blind_decision_universe_result_20260730.json"
-  },
-  "bcr05a": {
-    "status": "READY_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON_CORRECTED",
-    "package_sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
-    "invalid_preacceptance_package_sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
-    "invalid_preacceptance_reason": "LABEL_DERIVED_EVENT_DISTANCE_SELF_IDENTIFICATION",
-    "long_rci9_turn_event_prevalence": 1.0,
-    "long_rci9_turn_control_prevalence": 0.11643835616438356,
-    "short_rci9_turn_event_prevalence": 1.0,
-    "short_rci9_turn_control_prevalence": 0.1461187214611872,
-    "retained_feature_families": [
-      "A_RCI_SHAPE",
-      "B_EMA_STRUCTURE",
-      "D_CLOSED_BAR_LOCATION"
+  "track_A": {
+    "status": "FOUR_MEMBER_COMPLETE_SOURCE_FIDELITY_FAMILY_FROZEN",
+    "profitability_evaluated": false,
+    "deployable_candidates": 0,
+    "BCR05C_package_sha256": "221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
+    "BCR05D_package_sha256": "b1c4c66454f3076ffc90b22cac27280c6daa38f97db63ae07bed5294eed872d7",
+    "BCR05E_package_sha256": "d8fd13557f3b0a9c6d7fc9d499e7654ec4cb814f5538e41928b2e9d2c4d0ca84",
+    "family_freeze": "configs/btc_ml_v1/btc_bcr05f_track_a_source_fidelity_family_freeze_20260730.json",
+    "members": [
+      {
+        "id": "TRACK_A_F1_COVERAGE_FIRST",
+        "exact_supported_recall": 0.9622641509,
+        "extra_transitions": 66,
+        "divergent_boundaries": 425
+      },
+      {
+        "id": "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+        "exact_supported_recall": 0.9433962264,
+        "extra_transitions": 37,
+        "divergent_boundaries": 266
+      },
+      {
+        "id": "TRACK_A_F3_STATE_FIDELITY",
+        "exact_supported_recall": 0.8490566038,
+        "extra_transitions": 16,
+        "divergent_boundaries": 220
+      },
+      {
+        "id": "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
+        "exact_supported_recall": 0.7547169811,
+        "extra_transitions": 15,
+        "divergent_boundaries": 298
+      }
     ],
-    "not_retained_feature_families": [
-      "C_VOLATILITY_COMPRESSION",
-      "E_CLOCK_SEQUENCE"
-    ],
-    "label_derived_event_distance_tested_in_accepted_run": false,
-    "outcomes_opened": false,
-    "result_document": "docs/btc_ml_v1/BTC_BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_RESULT_20260730.md",
-    "result_json": "configs/btc_ml_v1/btc_bcr05a_outcome_blind_track_a_signature_result_20260730.json"
+    "standalone_initial_state": "IDLE",
+    "source_state_as_deployable_input": false
   },
-  "bcr05b": {
-    "status": "READY_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_FIDELITY_RESULT",
-    "package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
-    "long_grammar_rows": 12,
-    "short_grammar_rows": 12,
-    "total_grammar_rows": 24,
-    "advanced_long": [
-      "A_LONG_E0_Z1_P0",
-      "A_LONG_E1_Z2_P0"
-    ],
-    "long_high_coverage_tier": "EMPTY",
-    "advanced_short": [
-      "A_SHORT_E0_Z1_P1",
-      "A_SHORT_E1_Z1_P1",
-      "A_SHORT_E1_Z2_P0"
-    ],
-    "advanced_variants_are_profitability_candidates": false,
-    "integrated_candidate_frozen": false,
-    "outcomes_opened": false,
-    "result_document": "docs/btc_ml_v1/BTC_BCR05B_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_RESULT_20260730.md",
-    "result_json": "configs/btc_ml_v1/btc_bcr05b_outcome_blind_finite_entry_grammar_result_20260730.json"
+  "track_B": {
+    "status": "FOUR_COMPLETE_INDEPENDENT_STATE_MACHINES_DATA_CAPABLE",
+    "profitability_evaluated": false,
+    "deployable_candidates": 0,
+    "BCR06_package_sha256": "04215689d2b861b72e737e000dfe6a6b3d2434ec2caae37b9574edd4b770027b",
+    "BCR07_package_sha256": "7b2643a00179aaa3b09c2854fa52e10e4bbad6ed9ff69d0a58e3d279ea7cb0f4",
+    "B2_compression_expansion": "BLOCKED_INSUFFICIENT_CAUSAL_SIGNAL_DENSITY_NO_RESCUE",
+    "members": [
+      {
+        "id": "TRACK_B_B1_E0_EMA30_CROSS",
+        "closed_episodes": 1980,
+        "median_holding_bars": 2.0,
+        "p90_holding_bars": 23.0
+      },
+      {
+        "id": "TRACK_B_B1_E1_STACK_BREAK",
+        "closed_episodes": 519,
+        "median_holding_bars": 27.0,
+        "p90_holding_bars": 103.2
+      },
+      {
+        "id": "TRACK_B_B4_E0_EMA20_TOUCH",
+        "closed_episodes": 773,
+        "open_episode_at_end": 1,
+        "median_holding_bars": 11.0,
+        "p90_holding_bars": 31.8
+      },
+      {
+        "id": "TRACK_B_B4_E1_EXTENSION_CONTRACT",
+        "closed_episodes": 832,
+        "open_episode_at_end": 1,
+        "median_holding_bars": 9.0,
+        "p90_holding_bars": 26.0
+      }
+    ]
   },
-  "bcr05c": {
-    "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
-    "purpose": "COMPARE_GENUINE_EXIT_EVENTS_WITH_STATE_COMPATIBLE_ACTIVE_CONTROLS_AND_QUANTIFY_EXIT_TIMING_STATE_DIVERGENCE_WITHOUT_OUTCOMES",
-    "long_exit_events": 17,
-    "active_long_controls": 223,
-    "short_exit_events": 10,
-    "active_short_controls": 168,
-    "one_bar_late_analysis_role": "POST_SOURCE_EXIT_TIMING_DESCRIPTIVE_ONLY",
-    "state_divergence_consequence_ledger_required": true,
-    "final_exit_formula_authorized": false,
-    "contract_document": "docs/btc_ml_v1/BTC_BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_CONTRACT_20260730.md",
-    "contract_json": "configs/btc_ml_v1/btc_bcr05c_outcome_blind_exit_state_signature_contract_20260730.json"
+  "bcr08": {
+    "status": "READ_ONLY_EVIDENCE_EXPORTER_READY_FOR_ONE_LOCAL_RUN",
+    "purpose": "PROVE_EXACT_MT5_SYMBOL_PRICE_UNIT_SPREAD_AND_TICK_COST_FIELDS_BEFORE_ANY_PNL",
+    "expected_terminal_data_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675",
+    "expected_symbol_hypothesis": "BTCUSD#",
+    "symbol_hypothesis_authoritative_before_run": false,
+    "script": "scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/python/run_bcr08_mt5_symbol_cost_provenance.py",
+    "bat": "scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/01_run_BCR08.bat",
+    "contract": "docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_CONTRACT_20260730.md",
+    "contract_json": "configs/btc_ml_v1/btc_bcr08_mt5_symbol_cost_provenance_contract_20260730.json",
+    "static_tests": "3_PASSED",
+    "run_count_authorized": 1,
+    "commission_resolved": false,
+    "safe_to_compute_pnl": false,
+    "pending_user_evidence": "FIRST_BCR08_99_UPLOAD_PACKAGE_ZIP_SUCCESS_OR_FAILURE"
   },
   "preserved_evidence": {
+    "BCR01_package_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
+    "BCR02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "BCR05A_corrected_package_sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
+    "BCR05B_package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "BCR05A_invalid_package": "AUDIT_HISTORY_ONLY_838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
     "FF01_FF04": "PRESERVE_CAUSAL_AND_TIME_SEMANTICS_EVIDENCE",
-    "FF05_and_recovery": "PRESERVE_AS_AUDIT_HISTORY_NOT_CANDIDATE_RESULT",
+    "FF05_and_recovery": "AUDIT_HISTORY_NOT_CANDIDATE_RESULT",
     "BTC7R": "QUARANTINED_SELECTION_PROVENANCE_UNTRUSTED"
   },
   "currently_forbidden": {
-    "run_old_recovery_bat": true,
+    "profitability_outcome_access_before_BCR08_and_shared_cost_contract": true,
+    "WR_PF_DD_MFE_MAE": true,
+    "spread_conversion_by_assumption": true,
+    "zero_commission_assumption": true,
+    "TP_SL_time_stop_or_holding_optimization": true,
+    "candidate_promotion_or_rejection": true,
+    "formula_rescue_after_outcomes": true,
     "create_FF06": true,
-    "open_outcomes_for_new_design": true,
-    "evaluate_WR_PF_DD_MFE_MAE": true,
-    "TP_SL_or_holding_optimization": true,
-    "continuous_threshold_search": true,
-    "use_event_distance_as_predictor": true,
-    "use_source_state_age_as_standalone_candidate_input": true,
-    "freeze_final_exit_formula_in_BCR05C": true,
-    "freeze_integrated_candidate_before_finite_exit_and_state_replay": true,
-    "select_resynchronization_policy_from_profitability": true,
-    "create_shadow_runtime": true,
-    "stop_or_modify_collector_M7C_M8C_M9_M10": true,
+    "prospective_start": true,
+    "shadow_runtime": true,
     "discord_send": true,
     "mt5_order": true,
-    "live_ready": true,
-    "automatic_promotion": true
+    "stop_or_modify_collector_M7C_M8C_M9_M10": true,
+    "GOLD_MOCHIPOYO_writeback": true
   },
-  "next_phase": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
-  "required_after_bcr05c": [
-    "PREREGISTER_FINITE_EXIT_GRAMMAR",
-    "REPLAY_COMPLETE_ENTRY_EXIT_STATE_MACHINES",
-    "FREEZE_SMALL_INTEGRATED_SOURCE_FIDELITY_FAMILY",
-    "DEFINE_SEPARATE_TRADING_VALUE_OUTCOME_GATE"
-  ],
-  "pending_user_evidence": null,
-  "next_phase_requires_user_bat": false,
-  "next_phase_requires_runtime_change": false,
-  "later_phases_require_explicit_authorization": true
+  "next_phase": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_ONE_READ_ONLY_LOCAL_RUN",
+  "next_phase_requires_user_bat": true,
+  "next_phase_requires_runtime_stop_or_restart": false,
+  "later_phases_require_explicit_contract": true
 }
