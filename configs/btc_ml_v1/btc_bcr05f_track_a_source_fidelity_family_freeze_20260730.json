@@ -1,0 +1,60 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05F_TRACK_A_SOURCE_FIDELITY_FAMILY_FREEZE",
+  "recorded_at": "2026-07-30T18:45:00+09:00",
+  "status": "TRACK_A_FOUR_MEMBER_SOURCE_FIDELITY_FAMILY_FROZEN",
+  "branch": "feature/btc-fresh-forward-research",
+  "source_result": {
+    "BCR05E_package_sha256": "d8fd13557f3b0a9c6d7fc9d499e7654ec4cb814f5538e41928b2e9d2c4d0ca84",
+    "pareto_member_count": 4
+  },
+  "family": [
+    {
+      "family_id": "TRACK_A_F1_COVERAGE_FIRST",
+      "integrated_id": "I__A_LONG_E0_Z1_P0__A_SHORT_E0_Z1_P1__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0"
+    },
+    {
+      "family_id": "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+      "integrated_id": "I__A_LONG_E0_Z1_P0__A_SHORT_E1_Z1_P1__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0"
+    },
+    {
+      "family_id": "TRACK_A_F3_STATE_FIDELITY",
+      "integrated_id": "I__A_LONG_E1_Z2_P0__A_SHORT_E1_Z2_P0__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0"
+    },
+    {
+      "family_id": "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
+      "integrated_id": "I__A_LONG_E1_Z2_P0__A_SHORT_E1_Z2_P0__X_LONG_EXIT_T70_M1_P0__X_SHORT_EXIT_T70_M0_P0"
+    }
+  ],
+  "immutable": {
+    "entry_predicates": true,
+    "exit_predicates": true,
+    "one_position_state_machine": true,
+    "ambiguous_entry_conflict_no_signal": true,
+    "reentries_not_emitted": true,
+    "opposite_alerts_not_emitted": true,
+    "post_outcome_formula_rescue_forbidden": true
+  },
+  "standalone_contract": {
+    "initial_state": "IDLE",
+    "source_state_input_forbidden": true,
+    "source_event_reset_forbidden": true,
+    "candidate_state_changes_only_from_own_transitions": true
+  },
+  "design_exposure": {
+    "source_interval_start_utc": "2026-07-20T15:00:00Z",
+    "source_interval_end_utc": "2026-07-30T01:30:00Z",
+    "classification": "DESIGN_EXPOSED_NOT_INDEPENDENT_OOS"
+  },
+  "value_gate_requirement": {
+    "all_four_members_enter_same_gate": true,
+    "same_execution_and_cost_assumptions": true,
+    "historical_result_label": "RETROSPECTIVE_WALK_FORWARD_ONLY",
+    "new_prospective_start_required_after_freeze": true,
+    "backfill_or_start_reset_forbidden": true
+  },
+  "track_B_required_before_final_portfolio_promotion": true,
+  "deployable_candidates": 0,
+  "outcomes_opened": false,
+  "next_stage": "BCR06_OUTCOME_BLIND_TRACK_B_INDEPENDENT_MECHANISM_GRAMMAR"
+}
