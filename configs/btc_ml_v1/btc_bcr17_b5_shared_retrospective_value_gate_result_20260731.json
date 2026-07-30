@@ -1,0 +1,105 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-31T01:30:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "BCR17_COMPLETE_ONE_PROMISING_ONE_HOLD_SIX_REJECT_NO_SUPPORTED",
+  "decision": "ACCEPT_BCR17_DETERMINISTIC_VALUE_RESULT_FREEZE_R12_B075_W16_AS_PROMISING_RESEARCH_SURVIVOR_R12_B100_W16_AS_COST_SENSITIVE_HOLD_NO_PROMOTION",
+  "accepted_package": {
+    "outer_sha256": "7e157046a11f65c18a030cc1a18665d0de737f652b0e02ca32b260b7edb3b1b8",
+    "inner_name": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_20260731.zip",
+    "inner_sha256": "dc8420a6edb104799919a51195cc03b7023377bca2c1d1eb75b0792164337ec7",
+    "deterministic_repeat_match": true,
+    "outer_crc_pass": true,
+    "inner_crc_pass": true,
+    "manifest_hashes_and_bytes_exact": true
+  },
+  "frozen_sources": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BTC_M15_rows": 30661,
+    "first_time": "2025-09-13 08:00:00",
+    "last_time": "2026-07-30 06:15:00",
+    "accepted_BCR16_package_sha256": "c469be9455bd5639de336684e0fdcaebf6a72dc6f0bae623acefa5e0cb506653",
+    "BCR16_episode_rows": 844,
+    "exact_entry_exit_rows": true,
+    "fallback_or_interpolation_used": false
+  },
+  "execution_cost_contract": {
+    "C0": "OBSERVED_SPREAD_ONLY",
+    "C2": "C0_PLUS_25_PERCENT_CONTEMPORANEOUS_SPREAD_ADVERSE_EACH_FILL",
+    "commission_usd_1lot": 0.0,
+    "swap_included": false,
+    "rollover_exposed": "PRE_SWAP_ONLY",
+    "profit_currency": "USD",
+    "lot": 1.0
+  },
+  "audit": {
+    "all_844_fill_prices_recomputed": true,
+    "all_machine_net_pf_drawdown_recomputed": true,
+    "monthly_wilcoxon_recomputed": true,
+    "holm_adjustment_recomputed": true,
+    "audit_match": true
+  },
+  "classification_counts": {
+    "VALUE_SUPPORTED_RETROSPECTIVE": 0,
+    "VALUE_PROMISING_RETROSPECTIVE": 1,
+    "HOLD_COST_SENSITIVE": 1,
+    "REJECT_RETROSPECTIVE_VALUE": 6
+  },
+  "machine_results": [
+    {"id":"TRACK_B_B5_R06_B075_W08_H1_IMPULSE_M15_RECLAIM","trades":131,"c0_pf":0.934692515985,"c0_net":-2519.63,"c2_pf":0.896009119852,"c2_net":-4072.13,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R06_B075_W16_H1_IMPULSE_M15_RECLAIM","trades":130,"c0_pf":0.997830262139,"c0_net":-80.64,"c2_pf":0.957102159605,"c2_net":-1618.14,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R06_B100_W08_H1_IMPULSE_M15_RECLAIM","trades":100,"c0_pf":0.946468993862,"c0_net":-1636.68,"c2_pf":0.908983731013,"c2_net":-2821.68,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R06_B100_W16_H1_IMPULSE_M15_RECLAIM","trades":103,"c0_pf":0.928602570603,"c0_net":-2312.29,"c2_pf":0.892428102665,"c2_net":-3531.04,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R12_B075_W08_H1_IMPULSE_M15_RECLAIM","trades":105,"c0_pf":0.952761298353,"c0_net":-1510.50,"c2_pf":0.915051106524,"c2_net":-2755.50,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM","trades":107,"c0_win_rate":0.644859813084,"c0_pf":1.049454092667,"c0_net":1509.24,"c0_expectancy":14.105046728971,"c0_max_drawdown":9128.0,"c2_pf":1.007930096021,"c2_net":245.49,"c2_expectancy":2.29429906542,"c2_max_drawdown":9803.0,"c2_raw_p":0.55078125,"c2_holm_p":1.0,"positive_c2_months":5,"negative_c2_months":6,"classification":"VALUE_PROMISING_RETROSPECTIVE"},
+    {"id":"TRACK_B_B5_R12_B100_W08_H1_IMPULSE_M15_RECLAIM","trades":82,"c0_pf":0.980747837583,"c0_net":-477.65,"c2_pf":0.942435896417,"c2_net":-1448.90,"c2_holm_p":1.0,"classification":"REJECT_RETROSPECTIVE_VALUE"},
+    {"id":"TRACK_B_B5_R12_B100_W16_H1_IMPULSE_M15_RECLAIM","trades":86,"c0_pf":1.038446382326,"c0_net":961.99,"c2_pf":0.997862230907,"c2_net":-54.26,"c2_holm_p":1.0,"classification":"HOLD_COST_SENSITIVE"}
+  ],
+  "promising_research_survivor": {
+    "machine_id": "TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM",
+    "candidate_promoted": false,
+    "deployable": false,
+    "direction_diagnostic": {
+      "LONG_C2_pf": 0.891458,
+      "LONG_C2_net": -1654.90,
+      "SHORT_C2_pf": 1.120966,
+      "SHORT_C2_net": 1900.39,
+      "direction_deletion_authorized": false
+    },
+    "rollover_diagnostic": {
+      "same_server_date_C2_pf": 1.406207,
+      "same_server_date_C2_net": 7965.94,
+      "rollover_exposed_C2_pf": 0.319556,
+      "rollover_exposed_C2_net": -7720.45,
+      "swap_included": false,
+      "same_date_filter_authorized": false,
+      "rollover_flat_rescue_authorized": false
+    }
+  },
+  "research_assessment": {
+    "candidate_level_traction": "MODEST_FIRST_POSITIVE_SIGNAL_NOT_ROBUST",
+    "supported_machine_count": 0,
+    "deployable_candidates": 0,
+    "automatic_promotion": false
+  },
+  "recommended_next_stage": "BCR18_B5_PROMISING_SURVIVOR_PROSPECTIVE_PREREGISTRATION",
+  "BCR18_authorization": "PENDING_EXPLICIT_USER_AUTHORIZATION",
+  "currently_not_authorized": [
+    "BCR18_CONTRACT_OR_PROSPECTIVE_START_WITHOUT_EXPLICIT_AUTHORIZATION",
+    "LONG_OR_SHORT_DELETION",
+    "RETROSPECTIVE_SAME_DATE_FILTER",
+    "ROLLOVER_FLAT_OR_MAX_HOLDING_RESCUE",
+    "THRESHOLD_OR_EXIT_RETUNE",
+    "AUTOMATIC_PROMOTION",
+    "PORTFOLIO_SELECTION",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "LIVE_READY",
+    "FINAL_SIGNAL",
+    "MODIFY_OR_STOP_M7C_COLLECTOR_M8C_M9_M10",
+    "GOLD_MOCHIPOYO_WRITEBACK"
+  ]
+}
