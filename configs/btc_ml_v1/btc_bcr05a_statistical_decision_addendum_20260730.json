@@ -1,0 +1,70 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "status": "STATISTICAL_DECISION_RULES_FROZEN_BEFORE_ACTUAL_COMPARISON",
+  "continuous_p_value": {
+    "test": "MANN_WHITNEY_U_TWO_SIDED",
+    "method": "ASYMPTOTIC_WITH_TIE_CORRECTION",
+    "nan_policy": "DROP_PER_FEATURE",
+    "minimum_event_non_missing": 5
+  },
+  "binary_categorical_p_value": {
+    "test": "FISHER_EXACT_TWO_SIDED",
+    "one_vs_rest_for_multilevel_features": true,
+    "haldane_anscombe_correction_for_reported_odds_ratio": 0.5
+  },
+  "fdr": {
+    "method": "BENJAMINI_HOCHBERG",
+    "q": 0.10,
+    "group_keys": ["direction", "feature_family", "statistic_type"]
+  },
+  "nontrivial_effect": {
+    "continuous": {"absolute_cliffs_delta_min": 0.33},
+    "binary_categorical": {
+      "absolute_prevalence_difference_min": 0.20,
+      "corrected_odds_ratio_min_or_max": [0.5, 2.0]
+    }
+  },
+  "large_descriptive_effect": {
+    "continuous": {"absolute_cliffs_delta_min": 0.474},
+    "binary_categorical": {
+      "absolute_prevalence_difference_min": 0.30,
+      "corrected_odds_ratio_min_or_max": [0.3333333333, 3.0]
+    }
+  },
+  "stability": {
+    "leave_one_event_calendar_day_out_sign_retention_min": 0.80,
+    "leave_one_event_out_sign_retention_min": 0.80,
+    "zero_effect_counts_as_retained": false,
+    "minimum_distinct_event_days": 3
+  },
+  "feature_qualification": {
+    "FDR_SUPPORTED": [
+      "q_value_le_0_10",
+      "nontrivial_effect",
+      "day_sign_retention_ge_0_80",
+      "event_sign_retention_ge_0_80"
+    ],
+    "DESCRIPTIVE_ONLY": [
+      "q_value_gt_0_10",
+      "large_descriptive_effect",
+      "day_sign_retention_ge_0_80",
+      "event_sign_retention_ge_0_80"
+    ],
+    "NOT_SHORTLISTED": "otherwise"
+  },
+  "family_shortlist_ranking": [
+    "FDR_SUPPORTED_BEFORE_DESCRIPTIVE_ONLY",
+    "LOWER_Q_VALUE",
+    "LARGER_ABSOLUTE_EFFECT",
+    "HIGHER_MINIMUM_STABILITY",
+    "LEXICAL_FEATURE_NAME_TIEBREAK"
+  ],
+  "maximum_additional_families_per_direction": 3,
+  "minimum_additional_families": 0,
+  "rci9_anchor_excluded_from_additional_family_quota": true,
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false
+}
