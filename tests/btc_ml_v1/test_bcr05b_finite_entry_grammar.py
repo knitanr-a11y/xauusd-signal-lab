@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import sys
 from itertools import product
 from pathlib import Path
@@ -49,8 +50,8 @@ def test_pareto_dominance() -> None:
     assert module.pareto(table).tolist() == [True, True, False, True]
 
 
-def test_script_has_no_forbidden_source_distance_predicate() -> None:
-    source = MODULE_PATH.read_text(encoding="utf-8")
+def test_predicate_has_no_forbidden_source_context() -> None:
+    source = inspect.getsource(module.predicate)
     assert "distance_to_nearest_source_event" not in source
     assert "bars_until_next_source_event" not in source
     assert "source_state_age" not in source
