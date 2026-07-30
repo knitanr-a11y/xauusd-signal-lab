@@ -1,0 +1,191 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR15_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
+  "recorded_at": "2026-07-31T00:03:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "BCR15_B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_CONTRACT_FROZEN",
+  "decision": "FREEZE_BCR15_B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_EIGHT_MACHINE_FAMILY_OUTCOME_UNOPENED",
+  "authorization": {
+    "BCR15_design": true,
+    "immediately_following_label_free_implementation_preparation": true,
+    "B5_outcome_access": false,
+    "value_evaluation": false,
+    "candidate_promotion": false,
+    "prospective_start": false,
+    "shadow": false,
+    "discord": false,
+    "mt5_order": false
+  },
+  "exposure": {
+    "B5_formula_outcome_status": "B5_OUTCOME_UNOPENED",
+    "historical_claim_boundary": "RETROSPECTIVE_ONLY_NOT_INDEPENDENT_OOS",
+    "B3_closed_without_rescue": true
+  },
+  "frozen_input": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "symbol": "BTCUSD#",
+    "bar_side": "BID",
+    "clock": "NAIVE_MT5_BROKER_SERVER_M15_OPEN",
+    "latest_row_contract": "CLOSED"
+  },
+  "family": {
+    "id": "B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM",
+    "economic_statement": "A fully closed H1 directional range expansion is traded only after a later M15 retracement into the frozen impulse value zone and a subsequent closed M15 reclaim.",
+    "materially_different_from": [
+      "TRACK_A_RCI_EMA_SOURCE_FIDELITY",
+      "TRACK_B_B1_GENERIC_TREND_PULLBACK",
+      "TRACK_B_B2_COMPRESSION_EXPANSION",
+      "TRACK_B_B3_M15_BREAKOUT_RETEST_REACCELERATION",
+      "TRACK_B_B4_OVEREXTENSION_MEAN_REVERSION",
+      "BCR11_HOLDING_ROLLOVER_OVERLAYS"
+    ]
+  },
+  "h1_construction": {
+    "source": "EXACT_M15_ONLY",
+    "alignment": "MT5_SERVER_HOUR_OPEN_MINUTE_00",
+    "constituent_minutes": [0, 15, 30, 45],
+    "complete_four_bar_h1_required": true,
+    "partial_h1_forbidden": true,
+    "nearest_next_interpolation_forbidden": true,
+    "newest_usable_h1_must_end_at_or_before_decision_t": true
+  },
+  "feature_definitions": {
+    "H1_ATR14_PRE": "WILDER_ATR14_THROUGH_H1_h_MINUS_1_ONLY",
+    "PRIOR_HIGH_R": "MAX_HIGH_OF_EXACT_R_COMPLETE_H1_BARS_BEFORE_h",
+    "PRIOR_LOW_R": "MIN_LOW_OF_EXACT_R_COMPLETE_H1_BARS_BEFORE_h",
+    "M15_ATR14_PRE": "WILDER_ATR14_THROUGH_M15_m_MINUS_1_ONLY",
+    "impulse_break_distance_H1_ATR": 0.25,
+    "impulse_close_location_fraction": 0.75,
+    "pullback_near_retracement": 0.382,
+    "pullback_deep_retracement": 0.618,
+    "preentry_invalidation_H1_ATR": 0.25,
+    "reclaim_body_floor_M15_ATR": 0.25,
+    "reclaim_deadline_after_pullback_M15_bars": 4,
+    "active_success_extension_H1_ATR": 0.5,
+    "active_failure_beyond_origin_H1_ATR": 0.25,
+    "active_thesis_expiry_M15_bars": 32,
+    "all_H1_levels_frozen_per_setup": true
+  },
+  "grammar": {
+    "prior_H1_range_R": [6, 12],
+    "minimum_H1_impulse_body_B_ATR": [0.75, 1.0],
+    "first_pullback_deadline_W_M15_bars": [8, 16],
+    "trial_count": 8,
+    "direction_policy": "SYMMETRIC_LONG_SHORT_SAME_MACHINE",
+    "machines": [
+      {"id": "TRACK_B_B5_R06_B075_W08_H1_IMPULSE_M15_RECLAIM", "R": 6, "B": 0.75, "W": 8},
+      {"id": "TRACK_B_B5_R06_B075_W16_H1_IMPULSE_M15_RECLAIM", "R": 6, "B": 0.75, "W": 16},
+      {"id": "TRACK_B_B5_R06_B100_W08_H1_IMPULSE_M15_RECLAIM", "R": 6, "B": 1.0, "W": 8},
+      {"id": "TRACK_B_B5_R06_B100_W16_H1_IMPULSE_M15_RECLAIM", "R": 6, "B": 1.0, "W": 16},
+      {"id": "TRACK_B_B5_R12_B075_W08_H1_IMPULSE_M15_RECLAIM", "R": 12, "B": 0.75, "W": 8},
+      {"id": "TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM", "R": 12, "B": 0.75, "W": 16},
+      {"id": "TRACK_B_B5_R12_B100_W08_H1_IMPULSE_M15_RECLAIM", "R": 12, "B": 1.0, "W": 8},
+      {"id": "TRACK_B_B5_R12_B100_W16_H1_IMPULSE_M15_RECLAIM", "R": 12, "B": 1.0, "W": 16}
+    ],
+    "additional_machine_or_parameter_after_result": false
+  },
+  "impulse_predicates": {
+    "LONG": [
+      "close_h >= prior_high_R + 0.25 * H1_ATR14_PRE_h",
+      "close_h > open_h",
+      "close_h - open_h >= B * H1_ATR14_PRE_h",
+      "close_h >= low_h + 0.75 * impulse_range"
+    ],
+    "SHORT": [
+      "close_h <= prior_low_R - 0.25 * H1_ATR14_PRE_h",
+      "close_h < open_h",
+      "open_h - close_h >= B * H1_ATR14_PRE_h",
+      "close_h <= high_h - 0.75 * impulse_range"
+    ]
+  },
+  "pullback": {
+    "first_valid_only": true,
+    "deadline": "THEORETICAL_M15_AGES_1_THROUGH_W_AFTER_H1_IMPULSE_CLOSE",
+    "LONG_zone": "[impulse_high - 0.618*range, impulse_high - 0.382*range]",
+    "SHORT_zone": "[impulse_low + 0.382*range, impulse_low + 0.618*range]",
+    "LONG_invalidation": "M15_close < impulse_open - 0.25*H1_ATR",
+    "SHORT_invalidation": "M15_close > impulse_open + 0.25*H1_ATR",
+    "cancel_on_gap": true
+  },
+  "reclaim": {
+    "same_bar_as_pullback_allowed": false,
+    "deadline_M15_bars_after_pullback": 4,
+    "LONG": [
+      "close_m > long_near_boundary",
+      "close_m > open_m",
+      "close_m - open_m >= 0.25*M15_ATR14_PRE_m",
+      "close_m > previous_exact_M15_high"
+    ],
+    "SHORT": [
+      "close_m < short_near_boundary",
+      "close_m < open_m",
+      "open_m - close_m >= 0.25*M15_ATR14_PRE_m",
+      "close_m < previous_exact_M15_low"
+    ],
+    "entry": "NEXT_EXACT_M15_OPEN",
+    "missing_exact_entry": "NO_TRADE_EXACT_ENTRY_MISSING"
+  },
+  "active_exit": {
+    "LONG_success": "previous_closed_M15_close >= impulse_high + 0.50*H1_ATR",
+    "LONG_failure": "previous_closed_M15_close <= impulse_open - 0.25*H1_ATR",
+    "SHORT_success": "previous_closed_M15_close <= impulse_low - 0.50*H1_ATR",
+    "SHORT_failure": "previous_closed_M15_close >= impulse_open + 0.25*H1_ATR",
+    "thesis_expiry": "FIRST_EXACT_BOUNDARY_AT_OR_AFTER_32_THEORETICAL_M15_BARS_FROM_ENTRY",
+    "exit_execution": "CURRENT_EXACT_M15_OPEN",
+    "expiry_is_grid_dimension": false,
+    "endpoint_force_close": false
+  },
+  "states": [
+    "IDLE",
+    "LONG_H1_IMPULSE_ARMED",
+    "SHORT_H1_IMPULSE_ARMED",
+    "LONG_PULLBACK_SEEN",
+    "SHORT_PULLBACK_SEEN",
+    "ACTIVE_LONG",
+    "ACTIVE_SHORT"
+  ],
+  "one_position": true,
+  "simultaneous_impulse_conflict": "NO_TRANSITION_REMAIN_IDLE",
+  "gap_behavior": {
+    "interpolation_or_fallback": false,
+    "pending_gap": "CANCEL_GAP_IN_SEQUENCE",
+    "missing_exact_entry": "NO_TRADE_EXACT_ENTRY_MISSING",
+    "active_missing_previous_exact_bar": "ACTIVE_DECISION_UNAVAILABLE_GAP_POSITION_PERSISTS",
+    "theoretical_age_continues": true,
+    "synthetic_exit": false
+  },
+  "BCR16_capability_gate": {
+    "outcome_fields_allowed": false,
+    "report_all_eight_machines": true,
+    "minimum_closed_episodes_total": 50,
+    "minimum_closed_episodes_each_direction": 20,
+    "minimum_entry_months": 6,
+    "maximum_single_month_entry_share": 0.35,
+    "maximum_p90_holding_bars": 384,
+    "maximum_holding_bars": 1500,
+    "maximum_endpoint_open_episodes": 1,
+    "state_integrity_required": true,
+    "fallback_used_allowed": false,
+    "threshold_source": "UNCHANGED_BCR07_BCR13_CAPABILITY_GATE",
+    "threshold_rescue_after_result": false,
+    "side_deletion_after_result": false
+  },
+  "explicitly_forbidden": [
+    "B3_RESCUE",
+    "BCR14_VALUE_EVALUATION",
+    "B5_OUTCOME_ACCESS_IN_BCR15_OR_BCR16",
+    "ADDITIONAL_B5_PARAMETER_OR_MACHINE",
+    "OUTCOME_BASED_SIDE_OR_MACHINE_DELETION",
+    "TRACK_A_B1_B2_B4_RETUNE_OR_RESCUE",
+    "PORTFOLIO",
+    "PROSPECTIVE_START_OR_SHADOW",
+    "DISCORD_MT5_LIVE_READY_FINAL_SIGNAL",
+    "MODIFY_OR_STOP_COLLECTOR_M7C_M8C_M9_M10",
+    "GOLD_MOCHIPOYO_WRITEBACK"
+  ],
+  "contract_document": "docs/btc_ml_v1/BTC_BCR15_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_DESIGN_CONTRACT_20260731.md",
+  "candidate_promoted": false,
+  "deployable_candidates": 0
+}
