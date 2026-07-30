@@ -1,0 +1,97 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR09_SHARED_EXECUTION_COST_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-30T19:40:00+09:00",
+  "status": "CONTRACT_FROZEN_BEFORE_VALUE_OUTPUT",
+  "machines": [
+    "TRACK_A_F1_COVERAGE_FIRST",
+    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+    "TRACK_A_F3_STATE_FIDELITY",
+    "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
+    "TRACK_B_B1_E0_EMA30_CROSS",
+    "TRACK_B_B1_E1_STACK_BREAK",
+    "TRACK_B_B4_E0_EMA20_TOUCH",
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT"
+  ],
+  "market_input": {
+    "sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "bar_side": "BID",
+    "point": 0.01,
+    "contract_size": 1.0,
+    "profit_currency": "USD",
+    "account_currency": "JPY"
+  },
+  "execution": {
+    "long_entry": "bid_open + spread*point + slippage",
+    "long_exit": "bid_open - slippage",
+    "short_entry": "bid_open - slippage",
+    "short_exit": "bid_open + spread*point + slippage",
+    "exact_boundary_required": true,
+    "nearest_next_interpolation_forbidden": true,
+    "current_high_low_close_forbidden": true,
+    "start_state": "IDLE",
+    "exit_before_entry": true,
+    "same_boundary_reentry": false,
+    "one_position": true
+  },
+  "costs": {
+    "commission_round_trip": 0.0,
+    "commission_authority": "BCR08A_EXACT_KIWAMI_ACCOUNT_CONTRACT",
+    "slippage_scenarios_fraction_of_contemporaneous_spread_per_fill": {
+      "C0_OBSERVED_SPREAD": 0.0,
+      "C1_10PCT_SPREAD_PER_FILL": 0.1,
+      "C2_25PCT_SPREAD_PER_FILL": 0.25,
+      "C3_50PCT_SPREAD_PER_FILL": 0.5
+    },
+    "swap": {
+      "status": "UNRESOLVED_FOR_HISTORICAL_FULL_COST",
+      "all_episode_metric": "NET_EX_SWAP",
+      "full_known_cost_subset": "ENTRY_AND_EXIT_SAME_SERVER_CALENDAR_DATE",
+      "rollover_exposed_label": "PRE_SWAP_ONLY"
+    }
+  },
+  "statistics": {
+    "monthly_test": "ONE_SIDED_WILCOXON_SIGNED_RANK_GREATER_THAN_ZERO",
+    "multiple_testing": "HOLM_ACROSS_EIGHT_MACHINES_SEPARATELY_FOR_C0_AND_C2",
+    "random_split": false,
+    "parameter_refit": false
+  },
+  "supported_gate": {
+    "closed_trades_min": 50,
+    "closed_long_min": 20,
+    "closed_short_min": 20,
+    "active_months_min": 6,
+    "pf_c0_min": 1.2,
+    "positive_month_share_min": 0.6,
+    "top5_profit_share_max": 0.5,
+    "no_rollover_trades_min": 30,
+    "no_rollover_pf_min": 1.05,
+    "pf_c2_min": 1.0,
+    "net_c2_min": 0.0
+  },
+  "promising_gate": {
+    "closed_trades_min": 50,
+    "pf_c0_min": 1.1,
+    "positive_month_share_min": 0.5,
+    "pf_c2_min": 0.95,
+    "single_trade_positive_net_share_max": 0.35
+  },
+  "reject_gate": {
+    "pf_c0_max": 1.0,
+    "net_c0_max": 0.0,
+    "integrity_failure_rejects": true
+  },
+  "classification_labels": [
+    "VALUE_SUPPORTED_RETROSPECTIVE",
+    "VALUE_PROMISING_RETROSPECTIVE",
+    "HOLD_INSUFFICIENT_OR_COST_SENSITIVE",
+    "REJECT_RETROSPECTIVE_VALUE"
+  ],
+  "portfolio_selection_authorized": false,
+  "loss_filter_design_authorized": false,
+  "tp_sl_search_authorized": false,
+  "shadow_authorized": false,
+  "outcomes_opened_before_contract_commit": false,
+  "contract_document": "docs/btc_ml_v1/BTC_BCR09_SHARED_EXECUTION_COST_AND_RETROSPECTIVE_VALUE_GATE_CONTRACT_20260730.md"
+}
