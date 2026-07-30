@@ -1,0 +1,93 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR07_OUTCOME_BLIND_TRACK_B_FINITE_EXIT_AND_STATE_MACHINE_DESIGN",
+  "recorded_at": "2026-07-30T19:05:00+09:00",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "branch": "feature/btc-fresh-forward-research",
+  "inputs": {
+    "M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BCR06_package_sha256": "04215689d2b861b72e737e000dfe6a6b3d2434ec2caae37b9574edd4b770027b"
+  },
+  "entry_grammars": {
+    "B1_LONG": "B1_LONG_S0_H8_C0",
+    "B1_SHORT": "B1_SHORT_S0_H4_C0",
+    "B4_LONG": "B4_LONG_T1p5_C0",
+    "B4_SHORT": "B4_SHORT_T1p0_C0"
+  },
+  "complete_state_machines": {
+    "TRACK_B_B1_E0_EMA30_CROSS": {
+      "entry_family": "B1_TREND_PULLBACK_CONTINUATION",
+      "LONG_EXIT": "previous fully closed close <= previous closed EMA30",
+      "SHORT_EXIT": "previous fully closed close >= previous closed EMA30"
+    },
+    "TRACK_B_B1_E1_STACK_BREAK": {
+      "entry_family": "B1_TREND_PULLBACK_CONTINUATION",
+      "LONG_EXIT": "previous closed EMA alignment is not BULLISH_STACK",
+      "SHORT_EXIT": "previous closed EMA alignment is not BEARISH_STACK"
+    },
+    "TRACK_B_B4_E0_EMA20_TOUCH": {
+      "entry_family": "B4_OVEREXTENSION_MEAN_REVERSION",
+      "LONG_EXIT": "previous fully closed close >= previous closed EMA20",
+      "SHORT_EXIT": "previous fully closed close <= previous closed EMA20"
+    },
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT": {
+      "entry_family": "B4_OVEREXTENSION_MEAN_REVERSION",
+      "LONG_EXIT": "previous close minus EMA20 in ATR14 units >= -0.25",
+      "SHORT_EXIT": "previous close minus EMA20 in ATR14 units <= 0.25"
+    }
+  },
+  "state_machine": {
+    "initial_state": "IDLE",
+    "states": ["IDLE", "ACTIVE_LONG", "ACTIVE_SHORT"],
+    "one_position_only": true,
+    "same_bar_long_short_entry_conflict": "NO_SIGNAL_REMAIN_IDLE",
+    "opposite_entry_while_active": "IGNORE",
+    "same_boundary_exit_before_new_entry": true,
+    "reentry_on_same_boundary_after_exit": false,
+    "feature_unavailable": "NO_TRANSITION_STATE_PERSISTS"
+  },
+  "outcome_blind_metrics": [
+    "entry_count_total_and_by_direction",
+    "closed_episode_count_total_and_by_direction",
+    "open_episode_at_end",
+    "median_holding_bars",
+    "p90_holding_bars",
+    "maximum_holding_bars",
+    "position_occupancy_rate",
+    "same_bar_entry_conflict_count",
+    "distinct_entry_months",
+    "maximum_single_month_entry_share",
+    "episode_start_overlap_with_Track_A_members"
+  ],
+  "data_capability_gate": {
+    "minimum_closed_episodes_total": 50,
+    "minimum_closed_episodes_per_direction": 20,
+    "minimum_distinct_entry_months": 6,
+    "maximum_single_month_entry_share": 0.35,
+    "maximum_p90_holding_bars": 384,
+    "maximum_holding_bars": 1500,
+    "maximum_open_episode_at_end": 1
+  },
+  "advance_policy": {
+    "maximum_per_family": 2,
+    "all_passing_semantically_distinct_exit_variants_may_advance": true,
+    "no_profitability_tiebreak": true
+  },
+  "explicitly_not_authorized": [
+    "FUTURE_PRICE_OR_WIN_LOSS",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL",
+    "TIME_STOP_OPTIMIZATION",
+    "EXIT_THRESHOLD_SEARCH",
+    "OUTCOME_BASED_EXIT_RESCUE",
+    "TRACK_B_TRADING_PROMOTION",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+  ],
+  "required_after_completion": "FREEZE_PASSING_TRACK_B_COMPLETE_STATE_MACHINES_AND_DEFINE_SHARED_RETROSPECTIVE_TRADING_VALUE_CONTRACT",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
