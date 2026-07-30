@@ -1,0 +1,140 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "stage": "BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON",
+  "status": "READY_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON_CORRECTED",
+  "input": {
+    "bcr04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "decision_rows": 907,
+    "long_primary_events": 16,
+    "short_primary_events": 10,
+    "eligible_idle_controls": 438
+  },
+  "accepted_package": {
+    "filename": "BCR05A_OUTCOME_BLIND_TRACK_A_SIGNATURE_COMPARISON_20260730.zip",
+    "sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
+    "members": 14,
+    "deterministic_reproduction_sha_match": true,
+    "extended_generator_sha256": "ee615ab860945713a272995fe448f3dce997ba81e5ec64baa98994a0945fb6c6"
+  },
+  "invalid_preacceptance_output": {
+    "sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
+    "accepted": false,
+    "root_cause": "LABEL_DERIVED_EVENT_DISTANCE_SELF_IDENTIFICATION",
+    "outcomes_opened": false,
+    "incident_document": "docs/btc_ml_v1/BTC_BCR05A_LABEL_DERIVED_EVENT_DISTANCE_INCIDENT_AND_CORRECTION_20260730.md",
+    "correction_json": "configs/btc_ml_v1/btc_bcr05a_label_derived_feature_correction_20260730.json"
+  },
+  "test_counts": {
+    "binary_categorical": 162,
+    "continuous": 66,
+    "fdr_method": "BENJAMINI_HOCHBERG_WITHIN_DIRECTION_FAMILY_STATISTIC_TYPE",
+    "fdr_q": 0.10,
+    "leave_one_event_day_stability": true,
+    "leave_one_event_stability": true
+  },
+  "prior_anchor": {
+    "long": {
+      "feature": "RCI9_TURN_UP",
+      "event_prevalence": 1.0,
+      "control_prevalence": 0.11643835616438356,
+      "prevalence_difference": 0.8835616438356164,
+      "corrected_odds_ratio": 248.3009708737864,
+      "q_value": 1.9803875770444304e-13
+    },
+    "short": {
+      "feature": "RCI9_TURN_DOWN",
+      "event_prevalence": 1.0,
+      "control_prevalence": 0.1461187214611872,
+      "prevalence_difference": 0.8538812785388128,
+      "corrected_odds_ratio": 121.93023255813954,
+      "q_value": 1.8599775374700603e-7
+    },
+    "new_discovery_claimed": false
+  },
+  "direction_correct_ema_stack": {
+    "long": {
+      "event_prevalence": 0.875,
+      "control_prevalence": 0.5730593607305936,
+      "prevalence_difference": 0.3019406392694064,
+      "corrected_odds_ratio": 4.324055666003976,
+      "q_value": 0.024616585396671897
+    },
+    "short": {
+      "event_prevalence": 0.9,
+      "control_prevalence": 0.3881278538812785,
+      "prevalence_difference": 0.5118721461187214,
+      "corrected_odds_ratio": 9.973607038123166,
+      "q_value": 0.001992400012997102
+    }
+  },
+  "continuous_signature": {
+    "long": {
+      "rci9_median": -70.83333333333333,
+      "control_rci9_median": 20.0,
+      "rci9_delta1_median": 10.833333333333332,
+      "control_rci9_delta1_median": 0.0,
+      "rci9_delta1_cliffs_delta": 0.6091609589041096,
+      "rci9_delta1_q_value": 0.00020317356080971178,
+      "closed_return_1_bps_median": 8.089130842010572,
+      "control_closed_return_1_bps_median": 0.2180316944888627,
+      "closed_return_1_cliffs_delta": 0.40496575342465757,
+      "closed_return_1_q_value": 0.071121962370246
+    },
+    "short": {
+      "rci9_median": 74.16666666666666,
+      "control_rci9_median": 20.0,
+      "rci9_delta1_median": -11.666666666666664,
+      "control_rci9_delta1_median": 0.0,
+      "rci9_cliffs_delta": 0.49520547945205484,
+      "rci9_q_value": 0.03981672032741447,
+      "closed_return_1_bps_median": -14.883872648742134,
+      "control_closed_return_1_bps_median": 0.2180316944888627,
+      "closed_return_1_cliffs_delta": -0.6762557077625571,
+      "closed_return_1_q_value": 0.0030608202657135576
+    }
+  },
+  "family_shortlist": {
+    "long": [
+      "A_RCI_SHAPE",
+      "B_EMA_STRUCTURE",
+      "D_CLOSED_BAR_LOCATION"
+    ],
+    "short": [
+      "B_EMA_STRUCTURE",
+      "D_CLOSED_BAR_LOCATION",
+      "A_RCI_SHAPE"
+    ],
+    "not_shortlisted_both_directions": [
+      "C_VOLATILITY_COMPRESSION",
+      "E_CLOCK_SEQUENCE"
+    ],
+    "maximum_additional_families_respected": true,
+    "final_formula_selected": false
+  },
+  "availability_correction": {
+    "label_derived_event_distance_tested": false,
+    "future_source_event_distance_tested": false,
+    "source_state_age_role": "FIDELITY_CONTEXT_ONLY_NOT_SHORTLIST_ELIGIBLE"
+  },
+  "reproduction": {
+    "core_script": "scripts/btc_ml_v1/BCR05A_outcome_blind_track_a_signature/python/run_bcr05a_core_reproduction.py",
+    "core_script_commit": "63fa6d46c0fe435d476b8a7cd8e7e395873733a9",
+    "local_core_script_sha256": "779a4af222cb3040cb4938fdcd26c691b57a62bbb96f27fd62302b7f388384f3",
+    "test_path": "tests/btc_ml_v1/test_bcr05a_corrected_core_reproduction.py",
+    "test_commit": "8ea64c8c0059d207f17fe7437f498a5e402413df",
+    "tests": "3_PASSED_PLUS_ACTUAL_FROZEN_INPUT_CORE_RUN"
+  },
+  "integrity": {
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false,
+    "high_capacity_model_used": false,
+    "random_split_used": false,
+    "threshold_search_used": false,
+    "ff06_created": false,
+    "runtime_modified": false
+  }
+}
