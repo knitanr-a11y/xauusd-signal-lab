@@ -1,0 +1,92 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "stage": "BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
+  "status": "READY_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
+  "preregistration_commit": "3c08b558c3a3067d89e72a96c320120cb013cbb9",
+  "extended_package": {
+    "filename": "BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_20260730.zip",
+    "sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "generator_script_sha256": "f22c5fb0e5c1a7421d2f54342d2961f7ba9b4bd16f29d0f30b52c9f6c466a51d",
+    "members": 17
+  },
+  "core_reproducer": {
+    "path": "scripts/btc_ml_v1/BCR04_outcome_blind_decision_universe/python/run_bcr04_core_reproduction.py",
+    "commit": "4f6140752f44815cf30132a99a56b79c5bae7e80",
+    "local_verified_sha256": "ceb6f974e42516e7328688cd4e7a2e0c4fc2b7e7955b295690320aaf2170e65b",
+    "test_path": "tests/btc_ml_v1/test_bcr04_outcome_blind_decision_universe_core.py",
+    "test_commit": "2821c94bec0e83af26b15dbc09214c3cdc9e04fa",
+    "tests": "2_PASSED_PLUS_ACTUAL_FROZEN_INPUT_CORE_RUN"
+  },
+  "frozen_inputs": {
+    "bcr02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "m7c_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "m15_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "m15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148"
+  },
+  "universe": {
+    "start_utc": "2026-07-20T15:00:00Z",
+    "end_utc": "2026-07-30T01:30:00Z",
+    "frequency_minutes": 15,
+    "theoretical_rows": 907,
+    "unique_decision_times": 907,
+    "btc_source_event_rows": 76,
+    "non_event_control_rows": 831,
+    "feature_eligible_core_rows": 905,
+    "current_bar_missing_rows": 1,
+    "exact_previous_bar_missing_rows": 1,
+    "gap_adjacent_rows": 2,
+    "event_rows_gap_adjacent": 0
+  },
+  "event_control_class_counts": {
+    "PRIMARY_LONG_EVENT": 16,
+    "PRIMARY_SHORT_EVENT": 10,
+    "VALID_LONG_EXIT_EVENT": 17,
+    "VALID_SHORT_EXIT_EVENT": 10,
+    "REENTRY_EVENT": 11,
+    "OPPOSITE_EVENT_IGNORED": 12,
+    "IDLE_NON_EVENT_CONTROL": 440,
+    "ACTIVE_LONG_NON_EVENT_CONTROL": 223,
+    "ACTIVE_SHORT_NON_EVENT_CONTROL": 168
+  },
+  "quantile_boundaries": {
+    "atr14": [85.1057142857142, 119.29928571428577, 138.01571428571407, 179.80571428571432],
+    "bb_width20_bps": [45.19366026664046, 70.2417849976455, 88.25279598722646, 131.35765669735275],
+    "realized_vol_32_bps": [9.385502139897904, 12.576403193622218, 15.047986159792703, 18.75867952339954],
+    "population_rows": 905,
+    "outcome_selected": false
+  },
+  "m7c_parity": {
+    "selected_bar_content_rows": 890,
+    "selected_bar_all_match": true,
+    "exact_previous_eligible_rows": 889,
+    "exact_previous_all_match": true,
+    "gap_bridge_rows": 1,
+    "bcr04_gap_bridge_fallback_used": false
+  },
+  "track_b_label_free_probe_counts_source_interval": {
+    "trend_pullback_long": 56,
+    "trend_pullback_short": 64,
+    "compression_low": 181,
+    "breakout_up": 2,
+    "breakout_down": 1,
+    "overextension": 220,
+    "candidate_selected": false
+  },
+  "integrity": {
+    "status": "PASS",
+    "source_state_before_parity": true,
+    "all_76_events_mapped_once": true,
+    "nearest_next_interpolated_fallback_used": false,
+    "gap_interpolation_used": false,
+    "current_high_low_close_used": false,
+    "outcome_fields_read": [],
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false,
+    "ff06_created": false,
+    "runtime_modified": false
+  }
+}
