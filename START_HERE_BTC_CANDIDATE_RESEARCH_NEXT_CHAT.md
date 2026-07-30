@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_BCR03_CONTENT_CLOCK_FEATURE_PARITY_COMPLETE_ORIGINAL_PATH_PENDING`
-- updated: `2026-07-30T12:42:00+09:00`
+- current status: `BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_CONTRACT_FROZEN_IMPLEMENTATION_NEXT`
+- updated: `2026-07-30T13:12:00+09:00`
 
 ## 1. branch hard gate
 
@@ -15,25 +15,27 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_CONTENT_PARITY_ACCEPTED_ORIGINAL_PATH_PENDING_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_NEXT_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_CONTENT_PARITY_ACCEPTED_ORIGINAL_PATH_PENDING_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_NEXT_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md`
-7. `configs/btc_ml_v1/btc_bcr03_m15_content_clock_feature_parity_result_20260730.json`
-8. `docs/btc_ml_v1/BTC_BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_CONTRACT_20260730.md`
-9. `docs/btc_ml_v1/BTC_BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.md`
-10. `docs/btc_ml_v1/BTC_BCR02A_M7C_FIDELITY_DECOMPOSITION_OUTCOME_BLIND_20260730.md`
-11. `docs/btc_ml_v1/BTC_BCR01_V101_OUTCOME_BLIND_SOURCE_SNAPSHOT_AUDIT_20260730.md`
-12. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
-13. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
+6. `docs/btc_ml_v1/BTC_BCR03_COMPLETE_ORIGINAL_PATH_PROVENANCE_20260730.md`
+7. `configs/btc_ml_v1/btc_bcr03_complete_provenance_result_20260730.json`
+8. `docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS_CONTRACT_20260730.md`
+9. `configs/btc_ml_v1/btc_bcr04_outcome_blind_decision_universe_contract_20260730.json`
+10. `docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md`
+11. `docs/btc_ml_v1/BTC_BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.md`
+12. `docs/btc_ml_v1/BTC_BCR02A_M7C_FIDELITY_DECOMPOSITION_OUTCOME_BLIND_20260730.md`
+13. `docs/btc_ml_v1/BTC_BCR01_V101_OUTCOME_BLIND_SOURCE_SNAPSHOT_AUDIT_20260730.md`
+14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
+15. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
 この順番より前にrepo全体検索、code search、古いhandoff探索をしない。
 
@@ -65,27 +67,27 @@ MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可され�
 
 ## 6. 現在の到達点
 
-BCR01、BCR02、BCR02A、BCR03の内容・時刻・feature parity監査まで完了。
+BCR01、BCR02、BCR02A、BCR03は完了。
 
 - BCR01 raw rows: 194、cursor 194、outcome table未参照
 - BCR02 BTCUSD source rows: 76
 - BCR02 BTC supported primary/valid-exit: 53
 - M7C state parity: 125/125
-- 提出M15 SHA256: `b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148`
-- M15 rows: 30,661
+- authoritative M15 path: `C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\btcusdsharp_m15.csv`
+- authoritative M15 SHA256: `b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148`
 - BTC event current/previous bar mapping: 76/76
 - M7C BTC RCI9/EMA parity: 890/890
 - performance interpretation: not performed
 
 ## 7. 現在の次作業
 
-追加CSVやBATではない。
+`BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS`
 
-ユーザーに、提出したCSVをコピーした**元のWindowsフルパス**をそのまま貼ってもらう。
+source eventだけで条件を決めず、同じ時刻・state・volatility・RCI turn・EMA contextを持つ非発火controlをoutcome-blindで構築する。
 
-例は推測に使わない。ファイル名、更新日時、MetaQuotesの慣例からpathを補わない。
+候補式、勝率、PF、DD、MFE、MAE、TP/SL最適化にはまだ進まない。
 
-pathが一意で今回の提出物の役割と整合すればBCR03 provenanceを閉じ、その後に次のoutcome-blind候補grammar設計契約を作る。
+現在ユーザーの追加ファイルやBAT実行は不要。
 
 ## 8. runtime protection
 
