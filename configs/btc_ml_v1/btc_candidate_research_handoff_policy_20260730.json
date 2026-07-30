@@ -1,14 +1,20 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T20:39:00+09:00",
+  "recorded_at": "2026-07-30T21:14:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md",
+  "final_handoff_verification": {
+    "verified_at": "2026-07-30T21:14:00+09:00",
+    "result": "CONSISTENT",
+    "bcr11_factual_correction_required": false,
+    "new_chat_open_is_BCR12_authorization": false
+  },
   "required_read_order": [
     "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
@@ -100,10 +106,12 @@
   "currently_authorized": [
     "READ_AND_EXPLAIN_BCR11_RESULT",
     "PRESERVE_BCR11_ARTIFACT_AND_REPRODUCER",
+    "VERIFY_AND_TRANSFER_HANDOFF",
     "AWAIT_EXPLICIT_BCR12_AUTHORIZATION"
   ],
   "currently_not_authorized": [
     "BCR12_CONTRACT_OR_IMPLEMENTATION",
+    "NEW_CHAT_OPEN_AS_IMPLICIT_BCR12_AUTHORIZATION",
     "PROMOTE_ANY_BCR11_OVERLAY",
     "ALTERNATIVE_MAX_HOLD_OR_SERVER_FLAT_TIME",
     "BASE_MACHINE_THRESHOLD_RESCUE",
