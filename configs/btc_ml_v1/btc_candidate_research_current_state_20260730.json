@@ -2,17 +2,17 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T22:11:00+09:00",
+  "recorded_at": "2026-07-30T23:05:00+09:00",
   "status": "BTC_REDESIGN_BCR13_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED",
-  "decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_FROZEN_INPUT_PACKAGE_NO_PROMOTION",
+  "decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_STANDARD_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_RESTORED_AWAIT_USER_LOCAL_RUN_NO_PROMOTION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
     "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR13_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
     "continuous_updates_required": true,
-    "final_verification_at": "2026-07-30T22:11:00+09:00",
-    "final_verification_result": "BCR13_IMPLEMENTATION_READY_ACTUAL_FROZEN_INPUT_RUN_PENDING"
+    "final_verification_at": "2026-07-30T23:05:00+09:00",
+    "final_verification_result": "BCR13_STANDARD_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_RESTORED_ACTUAL_FROZEN_INPUT_RUN_PENDING"
   },
   "frozen_market_data": {
     "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
@@ -47,11 +47,16 @@
     "status": "IMPLEMENTATION_AND_SYNTHETIC_TESTS_READY_FROZEN_INPUT_LOCAL_RUN_PENDING",
     "implementation_document": "docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md",
     "implementation_json": "configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json",
+    "workflow_correction_document": "docs/btc_ml_v1/BTC_BCR13_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_WORKFLOW_CORRECTION_20260730.md",
+    "workflow_correction_json": "configs/btc_ml_v1/btc_bcr13_localappdata_single_upload_zip_workflow_correction_20260730.json",
     "python_path": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/python/run_bcr13_b3_density_audit.py",
     "python_commit": "be03d9a8e38d9424642653fcf488b177193579c3",
     "test_path": "tests/btc_ml_v1/test_bcr13_b3_density_audit.py",
     "test_commit": "8195dc0b77675e27aff9d95ad8c398eed0259354",
     "runner_bat": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
+    "runner_bat_commit": "5ae358ab06c3183da2486d31ffa8d4f1721c57f4",
+    "open_results_bat_commit": "5809d2a09ed8d31aab646901a0716c028ce0480e",
+    "readme_commit": "e281ff1ef9f1c3fc3dcbae91520fd9584d1f0e48",
     "local_tests": "6_PASSED",
     "actual_frozen_input_run_completed": false,
     "deterministic_package_received": false,
@@ -59,6 +64,22 @@
     "value_evaluation_performed": false,
     "candidate_promoted": false,
     "deployable_candidates": 0
+  },
+  "output_handoff_contract": {
+    "incident": "INITIAL_REPOSITORY_RELATIVE_OUTPUT_AND_THREE_FILE_UPLOAD_INSTRUCTION_CORRECTED",
+    "intentional_specification_change": false,
+    "output_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit",
+    "resolved_user_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
+    "sole_upload_file": "99_UPLOAD_PACKAGE.zip",
+    "resolved_user_upload_file": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "explorer_select_after_success": true,
+    "pause_after_run": true,
+    "upload_only_selected_zip": true,
+    "upload_zip_members": [
+      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+      "deterministic_repeat.json",
+      "package_sha256.txt"
+    ]
   },
   "research_track_decisions": {
     "Track_A_current_family": "PRESERVE_AS_AUDIT_EVIDENCE_ACTIVE_RESCUE_CLOSED",
@@ -70,9 +91,9 @@
   },
   "currently_authorized": [
     "RUN_BCR13_ON_EXACT_FROZEN_INPUT",
-    "UPLOAD_AND_AUDIT_BCR13_LABEL_FREE_PACKAGE",
+    "UPLOAD_AND_AUDIT_BCR13_LABEL_FREE_99_UPLOAD_PACKAGE",
     "REPORT_ALL_EIGHT_MACHINES_WITHOUT_RESCUE",
-    "PRESERVE_BCR13_IMPLEMENTATION_AND_HANDOFF"
+    "PRESERVE_BCR13_IMPLEMENTATION_CORRECTION_AND_HANDOFF"
   ],
   "currently_not_authorized": [
     "BCR14_VALUE_EVALUATION",
@@ -92,12 +113,12 @@
     "GOLD_MOCHIPOYO_WRITEBACK"
   ],
   "required_user_action": {
+    "pull_branch": "feature/btc-fresh-forward-research",
     "run": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
     "upload": [
-      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
-      "deterministic_repeat.json",
-      "package_sha256.txt"
+      "99_UPLOAD_PACKAGE.zip"
     ],
+    "output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
     "on_failure": "PROVIDE_COMPLETE_CONSOLE_ERROR_NO_FALLBACK"
   },
   "preserved_invalid_history": {
@@ -106,7 +127,7 @@
     "FF05_recovery_V3_V11": "AUDIT_HISTORY_ONLY",
     "BTC7R": "QUARANTINED"
   },
-  "next_phase": "AWAIT_USER_LOCAL_BCR13_FROZEN_INPUT_PACKAGE",
+  "next_phase": "AWAIT_USER_LOCAL_BCR13_99_UPLOAD_PACKAGE",
   "next_phase_requires_user_bat": true,
   "next_phase_requires_runtime_change": false,
   "candidate_count_deployable": 0
