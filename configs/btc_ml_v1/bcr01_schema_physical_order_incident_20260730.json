@@ -1,0 +1,86 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT",
+  "recorded_at": "2026-07-30T11:35:00+09:00",
+  "status": "BCR01_V100_INVALID_SCHEMA_ORDER_CHECK_CORRECTED_V101_RERUN_AUTHORIZED",
+  "invalid_user_package": {
+    "name": "99_UPLOAD_PACKAGE(101).zip",
+    "sha256": "47c38b81a465f1fa9adfbcd7901644cca8d3ab4f03f71cb9dd7353b368b602f1",
+    "bytes": 814,
+    "members": [
+      "00_READ_ME_FIRST.txt",
+      "01_snapshot_error.json"
+    ],
+    "generated_at_utc": "2026-07-30T02:34:55Z",
+    "result": "BLOCKED_BCR01_SOURCE_SNAPSHOT_ERROR",
+    "source_snapshot_created": false,
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "source_runtime_modified": false
+  },
+  "root_cause": {
+    "category": "IMPLEMENTATION_SCHEMA_VALIDATION_DEFECT",
+    "detail": "BCR01 v1.0.0 compared PRAGMA table_info physical column order to the fresh-schema logical export order. The active database was created before two provenance columns existed; SQLite ALTER TABLE appended event_key_origin and worker_raw_json_origin at the physical end. All required columns were present exactly once, but the order differed.",
+    "data_corruption": false,
+    "source_schema_missing_columns": false,
+    "source_schema_unexpected_columns": false,
+    "collector_failure": false,
+    "m7c_failure": false,
+    "candidate_failure": false
+  },
+  "actual_raw_alerts_physical_order": [
+    "cloudflare_id",
+    "event_key",
+    "received_at_utc",
+    "source",
+    "strategy",
+    "event",
+    "exchange_name",
+    "ticker",
+    "timeframe",
+    "bar_time_utc",
+    "fired_at_utc",
+    "open_price",
+    "high_price",
+    "low_price",
+    "close_price",
+    "message",
+    "worker_raw_json",
+    "collector_source_row_json",
+    "payload_sha256",
+    "downloaded_at_utc",
+    "event_key_origin",
+    "worker_raw_json_origin"
+  ],
+  "correction": {
+    "version": "1.0.1",
+    "script": "scripts/btc_ml_v1/BCR01_outcome_blind_source_snapshot/python/run_bcr01_outcome_blind_source_snapshot.py",
+    "script_commit": "81ce359f919fba7b174ce2f8c5c25429b934ef2e",
+    "script_blob_sha": "34d2febf74e2d11dbdeb27f8fd68d2033311b9a8",
+    "test_commit": "0da97025d2f2cef5b98f51523da9ffc98e3223a8",
+    "test_blob_sha": "0eda26243c8771314012658d02697d774adbca5e",
+    "schema_rule": "REQUIRE_EXACT_COLUMN_SET_ALLOW_PHYSICAL_ORDER_DIFFERENCE_EXPORT_USING_FROZEN_LOGICAL_ORDER",
+    "missing_columns_fail": true,
+    "unexpected_columns_fail": true,
+    "duplicate_columns_fail": true,
+    "explicit_column_select": true,
+    "outcome_tables_read": false
+  },
+  "tests": {
+    "result": "4_PASSED",
+    "fresh_schema_order": "PASS",
+    "migrated_existing_db_order": "PASS",
+    "payload_sha_mismatch_fail_closed": "PASS",
+    "unexpected_column_fail_closed": "PASS"
+  },
+  "authorization": {
+    "second_run_authorized": true,
+    "reason": "The first package is proven invalid before snapshot creation due only to the BCR01 implementation defect.",
+    "run_same_bat_after_pull": true,
+    "do_not_run_more_than_once_after_v101_pull": true,
+    "collector_or_m7c_restart_required": false,
+    "raw_database_upload": false,
+    "candidate_formula_design": false,
+    "performance_evaluation": false
+  }
+}
