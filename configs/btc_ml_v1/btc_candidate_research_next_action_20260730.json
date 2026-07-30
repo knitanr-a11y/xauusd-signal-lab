@@ -2,49 +2,45 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T12:14:16+09:00",
-  "next_stage": "BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT",
-  "authorization": "AUTHORIZED_READ_ONLY_CANDLE_SOURCE_MAPPING_NO_OUTCOME_OR_RUNTIME_CHANGE",
+  "recorded_at": "2026-07-30T12:42:00+09:00",
+  "next_stage": "BCR03_RECORD_EXACT_ORIGINAL_ABSOLUTE_CSV_PATH",
+  "authorization": "AUTHORIZED_PROVENANCE_CAPTURE_ONLY_NO_OUTCOME_OR_RUNTIME_CHANGE",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR02_LEDGER_COMPLETE_BCR03_CANDLE_MAPPING_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_CONTENT_PARITY_ACCEPTED_ORIGINAL_PATH_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
   "completed_inputs": {
     "BCR01_v101_package_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
-    "BCR01_snapshot_id": "BCR01_20260730T030649Z_RAWMAX194",
     "BCR02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
-    "BCR02_research_rows": 131,
-    "BCR02_BTCUSD_rows": 76,
-    "BCR02_supported_BTCUSD": 53,
-    "M7C_parity_rows": 125,
-    "M7C_parity_all_match": true,
+    "BCR03_submitted_csv_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BCR03_csv_rows": 30661,
+    "BCR03_BTC_event_mapping": "76_OF_76",
+    "BCR03_previous_closed_bar_mapping": "76_OF_76",
+    "BCR03_M7C_RCI9_parity": "890_OF_890",
+    "BCR03_M7C_EMA_spread_parity": "890_OF_890_BOTH_SPREADS",
     "outcome_performance_interpreted": false
   },
-  "purpose": "Map source BTC event times and prices to the exact research MT5 M15 candle source and freeze causal feature availability before any trigger grammar or outcome analysis.",
-  "requested_user_evidence": {
-    "format": "ONE_ZIP_CONTAINING_ONE_EXACT_CURRENT_CSV",
-    "filename": "btcusdsharp_m15.csv",
-    "preserve_original_filename": true,
-    "do_not_edit_source_file": true,
-    "do_not_stop_or_restart_collector_m7c": true,
-    "do_not_include_gold_csv": true,
-    "if_multiple_same_name_files_exist": "REPORT_ALL_FULL_PATHS_FIRST_DO_NOT_SELECT_BY_MTIME_ALONE"
+  "purpose": "Record the exact original absolute Windows path of the already audited BTC M15 file so BCR03 can close with reproducible source provenance. Do not request another CSV unless the path reveals a different or ambiguous source.",
+  "user_action": {
+    "required": true,
+    "instruction": "Paste the exact full Windows path from which btcusdsharp_m15(3).csv was copied.",
+    "example_only_not_assumed": "C:/.../btcusdsharp_m15.csv",
+    "new_upload_required": false,
+    "bat_required": false,
+    "do_not_guess_path": true,
+    "do_not_stop_or_restart_collector_m7c": true
   },
-  "audit_tasks": [
-    "Fix the submitted ZIP and CSV SHA256, bytes, path provenance, schema and row count.",
-    "Verify earliest/latest server-open time, monotonicity, duplicates and gaps.",
-    "Verify coverage for all BCR02 BTC event times.",
-    "Test the observed UTC+3 event-to-server-time mapping for the exact interval.",
-    "Map each event to current_server_open and immediately previous fully closed M15 bar.",
-    "Compare TradingView/VANTAGE source prices and MT5 prices descriptively without forcing feed equality.",
-    "Freeze current-bar open-only and closed-bar feature availability.",
-    "Return unresolved clock/feed issues before any candidate grammar is frozen."
+  "after_path_received": [
+    "Record the exact path without normalization that changes its identity.",
+    "Check whether the path identifies one file or an ambiguous candidate set.",
+    "Close BCR03 provenance if consistent with the submitted content role.",
+    "Create the next outcome-blind candidate-grammar design contract before any outcome is opened."
   ],
   "explicitly_not_authorized": [
-    "CANDIDATE_FORMULA_FREEZE",
+    "CANDIDATE_FORMULA_FREEZE_BEFORE_PATH_PROVENANCE_CLOSE",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
     "WR_PF_DD_MFE_MAE_ANALYSIS",
     "TP_SL_OPTIMIZATION",
@@ -55,7 +51,5 @@
     "LOT_DESIGN",
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
-  "user_action_required_now": true,
-  "user_action": "Upload one ZIP containing the exact current btcusdsharp_m15.csv used by the BTC/M7C environment. If multiple candidate files exist, provide their full paths before uploading.",
   "handoff_update_required_after_completion": true
 }
