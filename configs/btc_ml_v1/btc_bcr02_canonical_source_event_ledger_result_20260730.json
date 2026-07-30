@@ -1,0 +1,56 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR02_CANONICAL_SOURCE_EVENT_LEDGER",
+  "version": "1.0.0",
+  "recorded_at": "2026-07-30T12:14:16+09:00",
+  "status": "READY_CANONICAL_SOURCE_EVENT_LEDGER_OUTCOME_BLIND",
+  "output_package": {
+    "name": "BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.zip",
+    "sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "bytes": 19031
+  },
+  "inputs": {
+    "bcr01_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
+    "m7c_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "prospective_start_utc": "2026-07-20T14:54:15Z"
+  },
+  "raw_scope": {
+    "all_rows": 194,
+    "all_id_min": 1,
+    "all_id_max": 194,
+    "connection_test_ids": [1],
+    "state_seed_rows": 63,
+    "research_rows": 131,
+    "research_id_min": 64,
+    "research_id_max": 194
+  },
+  "research_counts": {
+    "BTCUSD": 76,
+    "XAUUSD": 55,
+    "supported_BTCUSD": 53,
+    "supported_XAUUSD": 39
+  },
+  "transition_counts": {
+    "PRIMARY_LONG": 25,
+    "PRIMARY_SHORT": 21,
+    "LONG_EXIT": 26,
+    "SHORT_EXIT": 20,
+    "REENTRY_LONG": 13,
+    "REENTRY_SHORT": 10,
+    "OPPOSITE_ALERT_IGNORED": 9,
+    "OPPOSITE_EXIT_IGNORED": 7
+  },
+  "m7c_parity": {
+    "rows": 125,
+    "raw_id_min": 64,
+    "raw_id_max": 188,
+    "all_match": true,
+    "mismatches": 0
+  },
+  "outcome_boundary": {
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false
+  },
+  "next_stage": "BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT"
+}
