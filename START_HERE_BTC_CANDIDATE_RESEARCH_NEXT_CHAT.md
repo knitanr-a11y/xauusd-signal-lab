@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_BCR02_CANONICAL_LEDGER_COMPLETE_BCR03_CANDLE_MAPPING_NEXT`
-- updated: `2026-07-30T12:14:16+09:00`
+- current status: `BTC_REDESIGN_BCR03_CONTENT_CLOCK_FEATURE_PARITY_COMPLETE_ORIGINAL_PATH_PENDING`
+- updated: `2026-07-30T12:42:00+09:00`
 
 ## 1. branch hard gate
 
@@ -15,23 +15,23 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR02_LEDGER_COMPLETE_BCR03_CANDLE_MAPPING_NEXT_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_CONTENT_PARITY_ACCEPTED_ORIGINAL_PATH_PENDING_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR02_LEDGER_COMPLETE_BCR03_CANDLE_MAPPING_NEXT_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_CONTENT_PARITY_ACCEPTED_ORIGINAL_PATH_PENDING_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR01_V101_OUTCOME_BLIND_SOURCE_SNAPSHOT_AUDIT_20260730.md`
-7. `configs/btc_ml_v1/btc_bcr01_v101_outcome_blind_source_snapshot_result_20260730.json`
-8. `docs/btc_ml_v1/BTC_BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.md`
-9. `configs/btc_ml_v1/btc_bcr02_canonical_source_event_ledger_result_20260730.json`
+6. `docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md`
+7. `configs/btc_ml_v1/btc_bcr03_m15_content_clock_feature_parity_result_20260730.json`
+8. `docs/btc_ml_v1/BTC_BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_CONTRACT_20260730.md`
+9. `docs/btc_ml_v1/BTC_BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.md`
 10. `docs/btc_ml_v1/BTC_BCR02A_M7C_FIDELITY_DECOMPOSITION_OUTCOME_BLIND_20260730.md`
-11. `docs/btc_ml_v1/BTC_BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_CONTRACT_20260730.md`
+11. `docs/btc_ml_v1/BTC_BCR01_V101_OUTCOME_BLIND_SOURCE_SNAPSHOT_AUDIT_20260730.md`
 12. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
 13. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
@@ -54,7 +54,7 @@
 - FF05 recovery V3〜V11
 - 本入口から参照されない旧state、next action、handoff
 
-MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可されたM7C/Collector契約ファイルとユーザー提出物だけを読み取り専用で扱う。
+MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可されたM7C/Collector契約ファイルと、固定SHAのユーザー提出物だけを読み取り専用で扱う。
 
 ## 5. 研究目的
 
@@ -65,27 +65,27 @@ MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可され�
 
 ## 6. 現在の到達点
 
-BCR01 v1.0.1 source snapshotとBCR02 canonical source event ledgerは完了。
+BCR01、BCR02、BCR02A、BCR03の内容・時刻・feature parity監査まで完了。
 
-- BCR01 raw rows: 194、IDs 1–194、cursor 194
-- BCR01 outcome tables read: false
-- BCR02 research rows: 131、IDs 64–194
-- BCR02 BTCUSD rows: 76
-- BCR02 BTC supported primary/valid-exit events: 53
-- M7C parity IDs 64–188: 125/125 exact
+- BCR01 raw rows: 194、cursor 194、outcome table未参照
+- BCR02 BTCUSD source rows: 76
+- BCR02 BTC supported primary/valid-exit: 53
+- M7C state parity: 125/125
+- 提出M15 SHA256: `b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148`
+- M15 rows: 30,661
+- BTC event current/previous bar mapping: 76/76
+- M7C BTC RCI9/EMA parity: 890/890
 - performance interpretation: not performed
 
 ## 7. 現在の次作業
 
-`BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT`
+追加CSVやBATではない。
 
-次に必要な証拠:
+ユーザーに、提出したCSVをコピーした**元のWindowsフルパス**をそのまま貼ってもらう。
 
-`btcusdsharp_m15.csv`
+例は推測に使わない。ファイル名、更新日時、MetaQuotesの慣例からpathを補わない。
 
-M7C/BTC環境で現在使用している正確なファイルを、元ファイル名のまま1つのZIPへ入れて提出する。M7C/Collectorを停止・再起動・編集しない。GOLD CSVは送らない。
-
-同名ファイルが複数存在する場合は、更新日時だけで選ばず、候補のフルパスを先に提示する。
+pathが一意で今回の提出物の役割と整合すればBCR03 provenanceを閉じ、その後に次のoutcome-blind候補grammar設計契約を作る。
 
 ## 8. runtime protection
 
