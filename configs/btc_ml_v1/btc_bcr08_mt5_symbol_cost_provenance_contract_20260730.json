@@ -1,0 +1,106 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE",
+  "recorded_at": "2026-07-30T19:20:00+09:00",
+  "status": "READ_ONLY_EVIDENCE_EXPORTER_READY",
+  "branch": "feature/btc-fresh-forward-research",
+  "terminal": {
+    "expected_data_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675",
+    "must_already_be_running": true,
+    "launch_if_closed": false,
+    "data_path_exact_match_required": true
+  },
+  "csv": {
+    "origin_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "frozen_research_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "live_file_may_have_grown": true,
+    "live_file_silently_replaces_frozen_snapshot": false
+  },
+  "symbol": {
+    "exact_hypothesis": "BTCUSD#",
+    "hypothesis_is_authoritative_before_run": false,
+    "candidate_group": "*BTC*",
+    "fuzzy_or_first_match_fallback": false,
+    "blocked_package_if_exact_not_found": true
+  },
+  "allowed_mt5_calls": [
+    "initialize",
+    "shutdown",
+    "terminal_info",
+    "account_info_REDACTED_ALLOWLIST",
+    "symbols_get",
+    "symbol_info",
+    "symbol_info_tick"
+  ],
+  "forbidden_mt5_calls": [
+    "order_send",
+    "order_check",
+    "positions_get",
+    "orders_get",
+    "history_orders_get",
+    "history_deals_get",
+    "symbol_select"
+  ],
+  "account_export_forbidden_fields": [
+    "login",
+    "name",
+    "balance",
+    "credit",
+    "profit",
+    "equity",
+    "margin",
+    "margin_free",
+    "margin_level",
+    "assets",
+    "liabilities",
+    "commission_blocked"
+  ],
+  "required_symbol_fields": [
+    "digits",
+    "point",
+    "trade_tick_size",
+    "trade_tick_value",
+    "trade_tick_value_profit",
+    "trade_tick_value_loss",
+    "trade_contract_size",
+    "trade_calc_mode",
+    "trade_mode",
+    "spread",
+    "spread_float",
+    "currency_base",
+    "currency_profit",
+    "currency_margin",
+    "volume_min",
+    "volume_max",
+    "volume_step"
+  ],
+  "commission": {
+    "resolved_by_symbol_info": false,
+    "historical_deals_queried": false,
+    "zero_commission_assumption_allowed": false,
+    "successful_stage_status": "READY_MT5_SYMBOL_COST_PROVENANCE_COMMISSION_UNRESOLVED",
+    "separate_resolution_required": true
+  },
+  "success_still_safe_to_compute_pnl": false,
+  "operator": {
+    "script": "scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/python/run_bcr08_mt5_symbol_cost_provenance.py",
+    "bat": "scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/01_run_BCR08.bat",
+    "output_zip": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR08_mt5_symbol_cost_provenance/LATEST/99_UPLOAD_PACKAGE.zip",
+    "run_count_authorized": 1,
+    "upload_first_zip_success_or_failure": true
+  },
+  "runtime_protection": {
+    "Collector_M7C_M8C_M9_M10_change": false,
+    "GOLD_MOCHIPOYO_writeback": false,
+    "Discord": false,
+    "MT5_order": false
+  },
+  "static_tests": {
+    "count": 3,
+    "result": "PASSED",
+    "test_file": "tests/btc_ml_v1/test_bcr08_mt5_symbol_cost_provenance.py"
+  },
+  "next_stage_after_package_audit": "FREEZE_SHARED_EXECUTION_SPREAD_COMMISSION_AND_COST_SENSITIVITY_CONTRACT",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
