@@ -2,26 +2,18 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T12:42:00+09:00",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
   "stage": "BCR03_BTC_SOURCE_TO_MT5_CANDLE_MAPPING_AND_FEATURE_AVAILABILITY_AUDIT",
-  "status": "CONTENT_CLOCK_FEATURE_PARITY_ACCEPTED_ORIGINAL_ABSOLUTE_PATH_PENDING",
+  "status": "BCR03_COMPLETE_SOURCE_CANDLE_PROVENANCE_FROZEN_WITH_GAP_SELECTION_NUANCE",
   "input": {
     "uploaded_name": "btcusdsharp_m15(3).csv",
-    "authoritative_original_filename": null,
-    "authoritative_original_absolute_path": null,
+    "authoritative_original_filename": "btcusdsharp_m15.csv",
+    "authoritative_original_absolute_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "path_authority": "USER_ATTESTED_ORIGINAL_ABSOLUTE_PATH",
     "sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
     "bytes": 2110267,
     "rows": 30661,
-    "columns": [
-      "time",
-      "open",
-      "high",
-      "low",
-      "close",
-      "tick_volume",
-      "spread",
-      "real_volume"
-    ],
+    "columns": ["time", "open", "high", "low", "close", "tick_volume", "spread", "real_volume"],
     "earliest_server_open": "2025-09-13 08:00:00",
     "latest_server_open": "2026-07-30 06:15:00",
     "timestamp_parse_failures": 0,
@@ -52,24 +44,34 @@
   },
   "m7c_feature_parity": {
     "btc_proxy_decision_rows": 890,
-    "rci9_exact_rows": 890,
-    "ema20_minus_ema30_bps_exact_rows": 890,
-    "ema30_minus_ema40_bps_exact_rows": 890,
+    "selected_server_open_content_parity": {
+      "rci9_rows": 890,
+      "ema20_minus_ema30_bps_rows": 890,
+      "ema30_minus_ema40_bps_rows": 890,
+      "all_match": true
+    },
+    "exact_immediately_previous_boundary_parity": {
+      "eligible_rows": 889,
+      "excluded_due_missing_exact_previous_bar": 1,
+      "rci9_rows": 889,
+      "ema20_minus_ema30_bps_rows": 889,
+      "ema30_minus_ema40_bps_rows": 889,
+      "all_match": true
+    },
+    "gap_bridge": {
+      "count": 1,
+      "decision_time_utc": "2026-07-25T07:30:00Z",
+      "current_server_open": "2026-07-25 10:30:00",
+      "expected_previous_server_open": "2026-07-25 10:15:00",
+      "m7c_selected_server_open": "2026-07-25 10:00:00",
+      "selected_lag_minutes": 30,
+      "source_event_present": false,
+      "bcr04_fallback_used": false
+    },
     "max_abs_rci9_difference": 1.4210854715202004e-14,
     "max_abs_ema20_minus_ema30_bps_difference": 3.552713678800501e-15,
     "max_abs_ema30_minus_ema40_bps_difference": 3.552713678800501e-15,
-    "content_provenance_assessment": "EXACT_M7C_BTC_M15_CLOSE_SEQUENCE_FOR_ALL_INSPECTED_DECISIONS"
-  },
-  "source_price_mapping": {
-    "events": 76,
-    "median_abs_source_to_current_open": 3.88,
-    "mean_abs_source_to_current_open": 5.615921052632314,
-    "max_abs_source_to_current_open": 108.98,
-    "median_abs_source_to_previous_close": 3.405,
-    "mean_abs_source_to_previous_close": 4.978289473684383,
-    "max_abs_source_to_previous_close": 108.98,
-    "raw_alert_114_retained": true,
-    "cross_feed_equality_required": false
+    "content_provenance_assessment": "EXACT_M7C_SELECTED_BAR_CONTENT_SEQUENCE_FOR_ALL_890_INSPECTED_DECISIONS"
   },
   "feature_boundary": {
     "fully_closed_m15_history": "ALLOWED",
@@ -77,12 +79,15 @@
     "current_m15_high_low_close": "FORBIDDEN",
     "future_m15": "FORBIDDEN",
     "gap_interpolation": "FORBIDDEN",
+    "last_observed_gap_bridge_for_btc_research": "FORBIDDEN_UNLESS_SEPARATELY_PREREGISTERED",
     "higher_timeframe": "PENDING_SEPARATE_ASOF_CLOSE_AVAILABILITY_CONTRACT",
     "trade_outcomes": "FORBIDDEN"
   },
   "outcomes_opened": false,
   "performance_interpretation_performed": false,
   "candidate_formula_designed": false,
-  "remaining_blocker": "USER_MUST_STATE_EXACT_ORIGINAL_ABSOLUTE_PATH_FROM_WHICH_THE_SUBMITTED_CSV_WAS_COPIED",
-  "audit_document": "docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md"
+  "remaining_blocker": null,
+  "audit_document": "docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md",
+  "provenance_completion_document": "docs/btc_ml_v1/BTC_BCR03_COMPLETE_ORIGINAL_PATH_PROVENANCE_20260730.md",
+  "gap_addendum": "docs/btc_ml_v1/BTC_BCR03_M7C_SELECTED_BAR_GAP_BRIDGE_ADDENDUM_20260730.md"
 }
