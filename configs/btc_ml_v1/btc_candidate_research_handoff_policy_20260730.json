@@ -1,25 +1,29 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T21:57:00+09:00",
+  "recorded_at": "2026-07-30T22:11:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR12_B3_CONTRACT_FROZEN_BCR13_AUTHORIZATION_PENDING_20260730.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR13_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260730.md",
   "final_handoff_verification": {
-    "verified_at": "2026-07-30T21:57:00+09:00",
-    "result": "BCR12_CONTRACT_FROZEN_B3_OUTCOME_UNOPENED",
+    "verified_at": "2026-07-30T22:11:00+09:00",
+    "result": "BCR13_IMPLEMENTATION_READY_ACTUAL_FROZEN_INPUT_RUN_PENDING",
     "BCR11_factual_correction_required": false,
-    "BCR12_user_authorized": true,
-    "BCR13_user_authorized": false,
-    "new_chat_open_is_BCR13_authorization": false
+    "BCR12_contract_changed": false,
+    "BCR13_user_authorized": true,
+    "BCR13_actual_run_completed": false,
+    "BCR14_user_authorized": false,
+    "new_chat_open_is_BCR14_authorization": false
   },
   "required_read_order": [
     "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR12_B3_CONTRACT_FROZEN_BCR13_AUTHORIZATION_PENDING_20260730.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR13_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md",
+    "configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json",
     "docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md",
     "configs/btc_ml_v1/btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json",
     "docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_RESULT_20260730.md",
@@ -75,6 +79,10 @@
     "BCR11_package_sha256": "6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8",
     "BCR12_contract_markdown_commit": "b9ab8decdbb9be3e09822d92ce1c270a86a39918",
     "BCR12_contract_json_commit": "0232261adfddfaa4bc7e79c748838387374aabf2",
+    "BCR13_python_commit": "be03d9a8e38d9424642653fcf488b177193579c3",
+    "BCR13_test_commit": "8195dc0b77675e27aff9d95ad8c398eed0259354",
+    "BCR13_readiness_document_commit": "e83fde1c25277a2fe84897738c7f3bae7470d1d1",
+    "BCR13_readiness_json_commit": "e62c318dcf0eb946d4855e0807cc26f469da5178",
     "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
     "runtime_change": "FORBIDDEN",
     "gold_mochipoyo_writeback": "FORBIDDEN"
@@ -89,35 +97,35 @@
     "track_A": "FROZEN_AUDIT_EVIDENCE_CURRENT_ACTIVE_RESCUE_CLOSED",
     "track_B_B1": "REJECTED_NO_RESCUE",
     "track_B_B2": "BLOCKED_NO_THRESHOLD_RESCUE",
-    "track_B_B3": "CONTRACT_FROZEN_OUTCOME_UNOPENED_IMPLEMENTATION_NOT_STARTED",
+    "track_B_B3": "IMPLEMENTATION_READY_ACTUAL_LABEL_FREE_RUN_PENDING",
     "track_B_B4": "FROZEN_AUDIT_EVIDENCE_CURRENT_ACTIVE_RESCUE_CLOSED",
     "deployable_candidates": 0,
     "portfolio_selected": false,
     "shadow_started": false
   },
-  "current_status": "BTC_REDESIGN_BCR12_B3_BREAKOUT_RETEST_REACCELERATION_CONTRACT_FROZEN_BCR13_AUTHORIZATION_PENDING",
-  "current_decision": "FREEZE_BCR12_B3_BREAKOUT_RETEST_REACCELERATION_FAMILY_NO_OUTCOME_OPENED_NO_IMPLEMENTATION",
-  "current_next_action": "AWAIT_USER_AUTHORIZATION_FOR_BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "current_status": "BTC_REDESIGN_BCR13_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED",
+  "current_decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_FROZEN_INPUT_PACKAGE_NO_PROMOTION",
+  "current_next_action": "RUN_BCR13_BAT_AND_UPLOAD_DETERMINISTIC_LABEL_FREE_PACKAGE",
   "current_evidence": {
     "BCR12_family": "B3_BREAKOUT_RETEST_REACCELERATION",
     "BCR12_machines": 8,
-    "BCR12_outcome_opened": false,
-    "BCR12_implementation_created": false,
-    "BCR12_candidate_promoted": false,
-    "BCR11_overlay_proposals_advanced": 0,
+    "BCR13_implementation_created": true,
+    "BCR13_local_tests": "6_PASSED",
+    "BCR13_actual_frozen_input_run_completed": false,
+    "BCR13_deterministic_package_received": false,
+    "B3_outcome_opened": false,
     "candidate_promoted": false,
-    "exposure_label": "B3_OUTCOME_UNOPENED_HISTORICAL_RESULTS_LATER_RETROSPECTIVE_ONLY"
+    "exposure_label": "B3_OUTCOME_UNOPENED_LABEL_FREE_RUN_PENDING"
   },
   "currently_authorized": [
-    "READ_AND_EXPLAIN_BCR12_CONTRACT",
-    "PRESERVE_BCR12_CONTRACT",
-    "VERIFY_AND_TRANSFER_HANDOFF",
-    "AWAIT_EXPLICIT_BCR13_AUTHORIZATION"
+    "RUN_BCR13_ON_EXACT_FROZEN_INPUT",
+    "UPLOAD_AND_AUDIT_BCR13_LABEL_FREE_PACKAGE",
+    "REPORT_ALL_EIGHT_MACHINES_WITHOUT_RESCUE",
+    "PRESERVE_BCR13_IMPLEMENTATION_AND_HANDOFF"
   ],
   "currently_not_authorized": [
-    "BCR13_IMPLEMENTATION_OR_DENSITY_RUN",
-    "B3_OUTCOME_ACCESS",
     "BCR14_VALUE_EVALUATION",
+    "B3_RETURN_WIN_LOSS_PF_PNL_MFE_MAE_ACCESS",
     "ADDITIONAL_B3_PARAMETER_OR_MACHINE",
     "OUTCOME_BASED_MACHINE_OR_DIRECTION_DELETION",
     "TRACK_A_B1_B2_B4_RETUNE_OR_RESCUE",
@@ -127,10 +135,20 @@
     "DISCORD",
     "MT5_ORDER",
     "LIVE_READY",
+    "FINAL_SIGNAL",
     "AUTOMATIC_PROMOTION",
     "MODIFY_OR_STOP_M7C_COLLECTOR_M8C_M9_M10",
     "GOLD_MOCHIPOYO_WRITEBACK"
   ],
+  "required_user_local_action": {
+    "bat": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
+    "upload_files": [
+      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+      "deterministic_repeat.json",
+      "package_sha256.txt"
+    ],
+    "no_fallback_on_failure": true
+  },
   "continuous_update_triggers": [
     "USER_RESULT_OR_ZIP_AUDITED",
     "STATUS_DECISION_OR_NEXT_ACTION_CHANGED",
