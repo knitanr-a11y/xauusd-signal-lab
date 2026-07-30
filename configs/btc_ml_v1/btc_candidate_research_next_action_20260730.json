@@ -2,15 +2,16 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T20:39:00+09:00",
+  "recorded_at": "2026-07-30T21:14:00+09:00",
   "next_stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
   "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_CONTRACT_OR_IMPLEMENTATION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
-    "old_handoffs": "AUDIT_HISTORY_ONLY"
+    "old_handoffs": "AUDIT_HISTORY_ONLY",
+    "final_verification_at": "2026-07-30T21:14:00+09:00"
   },
   "completed_inputs": {
     "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
@@ -33,6 +34,12 @@
     "preserve_all_as_audit_evidence": true,
     "prospective_or_shadow_proposal": false
   },
+  "next_chat_startup_action": [
+    "Read the exact files listed by START_HERE in order on the required branch.",
+    "Report the formal BCR11 status and BCR12 authorization boundary.",
+    "Do not infer BCR12 authorization from the opening of a new chat.",
+    "Stop and ask the user if any branch, state, handoff or evidence conflict is found."
+  ],
   "recommended_new_family_requirements": [
     "The economic mechanism must be materially different from Track A, B1, B2 and B4.",
     "Freeze the mechanism grammar and causal data boundary before opening its outcome results.",
@@ -57,6 +64,7 @@
   ],
   "explicitly_not_authorized": [
     "BCR12_CONTRACT_OR_IMPLEMENTATION_BEFORE_USER_AUTHORIZATION",
+    "NEW_CHAT_OPEN_AS_IMPLICIT_BCR12_AUTHORIZATION",
     "PROMOTE_ANY_BCR11_OVERLAY",
     "ANOTHER_MAX_HOLD_OR_SERVER_FLAT_TIME",
     "TP_SL_OR_TRAILING_STOP_RESCUE",
