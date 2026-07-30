@@ -1,0 +1,128 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "recorded_at": "2026-07-30T22:11:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "BCR13_IMPLEMENTATION_AND_SYNTHETIC_TESTS_READY_FROZEN_INPUT_LOCAL_RUN_PENDING",
+  "decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_AWAIT_FROZEN_INPUT_LOCAL_RUN_NO_OUTCOME_OPENED",
+  "authorization": {
+    "BCR13_user_authorized": true,
+    "BCR13_implementation": true,
+    "BCR13_frozen_input_run": true,
+    "B3_outcome_access": false,
+    "BCR14_value_evaluation": false,
+    "candidate_promotion": false,
+    "prospective_start": false,
+    "shadow": false,
+    "discord": false,
+    "mt5_order": false,
+    "live_ready": false
+  },
+  "frozen_input": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "symbol": "BTCUSD#",
+    "latest_row_contract": "CLOSED",
+    "actual_run_completed": false
+  },
+  "implementation": {
+    "python_path": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/python/run_bcr13_b3_density_audit.py",
+    "python_commit": "be03d9a8e38d9424642653fcf488b177193579c3",
+    "test_path": "tests/btc_ml_v1/test_bcr13_b3_density_audit.py",
+    "test_commit": "8195dc0b77675e27aff9d95ad8c398eed0259354",
+    "readme_path": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/00_READ_ME_FIRST.txt",
+    "readme_commit": "16e75b8c517299ef40e4c7f725623d79ff0bb67c",
+    "runner_bat_path": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
+    "runner_bat_commit": "8dbd2bb74e1c38eaec9b0ee418e3b48658c61a8d",
+    "open_results_bat_path": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/02_open_latest_results.bat",
+    "open_results_bat_commit": "b1449b263478db1f8fc5ba9b4a945bdbbb571926",
+    "standalone_stage_specific": true,
+    "machine_count": 8,
+    "contract_inventory_validation": true,
+    "current_bar_high_low_close_used": false,
+    "future_bar_or_future_exit_used": false,
+    "fallback_or_interpolation_used": false,
+    "higher_timeframe_used": false,
+    "source_state_used": false
+  },
+  "conflict_policy": {
+    "simultaneous_long_short_breakout": "SIMULTANEOUS_BREAKOUT_NO_TRANSITION",
+    "state_after": "IDLE",
+    "side_selected": false,
+    "reported": true,
+    "classification": "FAIL_CLOSED_IMPLEMENTATION_CLARIFICATION"
+  },
+  "input_rehydration": {
+    "live_append_only_source_may_have_grown": true,
+    "prefix_allowed_only_if_exact_frozen_sha_matches": true,
+    "approximate_prefix_or_row_matching": false,
+    "similar_file_fallback": false,
+    "implicit_sorting": false
+  },
+  "outputs": {
+    "package": "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+    "deterministic_repeat_required": true,
+    "files": [
+      "bcr13_machine_metrics.csv",
+      "bcr13_event_counts.csv",
+      "bcr13_monthly_entries.csv",
+      "bcr13_gate_checks.csv",
+      "bcr13_transition_ledger.csv",
+      "bcr13_episode_ledger.csv",
+      "bcr13_summary.json",
+      "manifest.json"
+    ],
+    "forbidden_value_fields": [
+      "RETURN",
+      "WIN_LOSS",
+      "PF",
+      "PNL",
+      "MFE",
+      "MAE",
+      "FUTURE_EXIT_RESULT",
+      "ENTRY_PRICE",
+      "EXIT_PRICE"
+    ]
+  },
+  "validation": {
+    "local_synthetic_exact_path_tests": "6_PASSED",
+    "github_ci_run": false,
+    "formal_frozen_input_result_available": false,
+    "covered": [
+      "LONG_COMPLETE_STATE_PATH_AND_STRUCTURAL_EXIT",
+      "CURRENT_BAR_HLC_NOT_USED",
+      "PENDING_GAP_CANCEL_NO_FALLBACK",
+      "SIMULTANEOUS_CONFLICT_FAIL_CLOSED",
+      "DETERMINISTIC_REPEAT_AND_NO_VALUE_COLUMNS",
+      "EXACT_SHA_PREFIX_REHYDRATION_ONLY"
+    ]
+  },
+  "user_local_action": {
+    "bat": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
+    "upload_required": true,
+    "upload_files": [
+      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+      "deterministic_repeat.json",
+      "package_sha256.txt"
+    ]
+  },
+  "currently_not_authorized": [
+    "BCR14_VALUE_EVALUATION",
+    "B3_RETURN_WIN_LOSS_PF_PNL_MFE_MAE_ACCESS",
+    "OUTCOME_BASED_MACHINE_OR_DIRECTION_DELETION",
+    "ADDITIONAL_B3_PARAMETER_OR_MACHINE",
+    "TRACK_A_B1_B2_B4_RETUNE_OR_RESCUE",
+    "PORTFOLIO_SELECTION",
+    "PROSPECTIVE_START",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "LIVE_READY",
+    "FINAL_SIGNAL",
+    "MODIFY_OR_STOP_M7C_COLLECTOR_M8C_M9_M10",
+    "GOLD_MOCHIPOYO_WRITEBACK"
+  ],
+  "next_phase": "AWAIT_USER_LOCAL_BCR13_FROZEN_INPUT_PACKAGE",
+  "candidate_count_deployable": 0
+}
