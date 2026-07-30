@@ -23,13 +23,20 @@ Run:
 Optional input override before running:
   set BTC_BCR13_INPUT=C:\exact\path\to\btcusdsharp_m15.csv
 
-Output:
-  outputs\btc_ml_v1\BCR13_b3_outcome_blind_density_audit\latest\
+Standard output root:
+  C:\Users\regen\AppData\Local\xauusd_signal_lab\btc_ml_v1\outputs\BCR13_b3_outcome_blind_density_audit\LATEST\
 
-The runner builds the package twice and requires identical ZIP SHA256 values. Upload these after a successful run:
+Upload file:
+  99_UPLOAD_PACKAGE.zip
+
+The BAT creates the deterministic BCR13 evidence files, bundles the required upload set into 99_UPLOAD_PACKAGE.zip, and then opens Explorer with that ZIP selected. Upload only that selected ZIP.
+
+99_UPLOAD_PACKAGE.zip contains:
   1. BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip
   2. deterministic_repeat.json
   3. package_sha256.txt
+
+The separate 02_open_latest_results.bat opens the same LocalAppData output location and selects 99_UPLOAD_PACKAGE.zip when it exists.
 
 State conflict policy:
   If LONG and SHORT breakout predicates are simultaneously true, the implementation records SIMULTANEOUS_BREAKOUT_NO_TRANSITION and remains IDLE. It never chooses a side. All conflict counts are reported.
