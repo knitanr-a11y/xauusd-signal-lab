@@ -1,0 +1,73 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE",
+  "recorded_at": "2026-07-30T19:30:00+09:00",
+  "status": "BCR08_ACCEPTED_SYMBOL_SPREAD_PROVENANCE_COMMISSION_CONTRACT_SEPARATE",
+  "package": {
+    "uploaded_name": "99_UPLOAD_PACKAGE(103).zip",
+    "sha256": "2b5df4bcdf0f2c07c0d246a3cfe057f05ef4751f7ab3e3c71e8f993cd24cbbf7",
+    "members": 12,
+    "manifest_mismatches": 0,
+    "error": null
+  },
+  "runtime": {
+    "terminal_name": "XMTrading MT5",
+    "company": "Tradexfin Limited",
+    "server": "XMTrading-MT5 3",
+    "account_currency": "JPY",
+    "data_path_exact_match": true,
+    "orders_sent": false,
+    "orders_checked": false,
+    "positions_queried": false,
+    "orders_queried": false,
+    "history_orders_queried": false,
+    "history_deals_queried": false,
+    "symbol_select_called": false,
+    "account_identity_or_balance_exported": false,
+    "collector_or_m7c_modified": false,
+    "gold_or_mochipoyo_modified": false
+  },
+  "symbol": {
+    "name": "BTCUSD#",
+    "path": "Cryptocurrencies\\KIWAMI\\BTCUSD#",
+    "description": "Bitcoin vs US Dollar",
+    "chart_mode": 0,
+    "digits": 2,
+    "point": 0.01,
+    "spread_points_at_capture": 2250,
+    "trade_tick_size": 0.01,
+    "trade_tick_value": 0.01,
+    "trade_contract_size": 1.0,
+    "trade_calc_mode": 4,
+    "currency_base": "USD",
+    "currency_profit": "USD",
+    "currency_margin": "USD",
+    "volume_min": 0.01,
+    "volume_step": 0.01
+  },
+  "spread_provenance": {
+    "bid": 64561.6,
+    "ask": 64584.1,
+    "tick_spread_price": 22.5,
+    "tick_spread_points": 2250.0,
+    "csv_spread_unit": "POINTS",
+    "formula": "spread_price = spread_field * point",
+    "frozen_csv_spread_values": [2250, 3000],
+    "frozen_csv_spread_prices": [22.5, 30.0]
+  },
+  "frozen_snapshot": {
+    "sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661
+  },
+  "live_file_at_capture": {
+    "sha256": "7d245b0d38723c7546f6c50fbad28f169ff161f88e35a45562bfed4c39d24e19",
+    "rows": 30687,
+    "latest_server_open": "2026-07-30 12:45:00",
+    "replaces_frozen_snapshot": false
+  },
+  "commission_model": "RESOLVE_IN_SEPARATE_BCR08A_ACCOUNT_TYPE_CONTRACT",
+  "swap_model": "UNRESOLVED_NONZERO_METADATA_REQUIRES_SEPARATE_TREATMENT",
+  "safe_to_open_value_results": false,
+  "pnl_evaluation_performed": false,
+  "result_document": "docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_RESULT_20260730.md"
+}
