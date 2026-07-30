@@ -1,12 +1,25 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions DisableDelayedExpansion
 
-set "STAGE_DIR=%~dp0"
-for %%I in ("%STAGE_DIR%\..\..\..") do set "REPO_ROOT=%%~fI"
-set "PY_SCRIPT=%STAGE_DIR%python\run_bcr13_b3_density_audit.py"
-set "CONTRACT=%REPO_ROOT%\configs\btc_ml_v1\btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json"
+set "BAT_DIR=%~dp0"
+for %%I in ("%BAT_DIR%..\..\..") do set "REPO_ROOT=%%~fI"
+cd /d "%REPO_ROOT%"
+
+if defined LOCALAPPDATA (
+  set "LOCAL_ROOT=%LOCALAPPDATA%\xauusd_signal_lab"
+) else (
+  set "LOCAL_ROOT=%TEMP%\xauusd_signal_lab"
+)
+
+set "PY_SCRIPT=scripts\btc_ml_v1\BCR13_b3_outcome_blind_density_audit\python\run_bcr13_b3_density_audit.py"
+set "CONTRACT=configs\btc_ml_v1\btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json"
 set "DEFAULT_INPUT=C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\btcusdsharp_m15.csv"
-set "OUTPUT_DIR=%REPO_ROOT%\outputs\btc_ml_v1\BCR13_b3_outcome_blind_density_audit\latest"
+set "OUTPUT_ROOT=%LOCAL_ROOT%\btc_ml_v1\outputs\BCR13_b3_outcome_blind_density_audit"
+set "OUTPUT_DIR=%OUTPUT_ROOT%\LATEST"
+set "CORE_ZIP=%OUTPUT_DIR%\BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip"
+set "REPEAT_JSON=%OUTPUT_DIR%\deterministic_repeat.json"
+set "PACKAGE_SHA=%OUTPUT_DIR%\package_sha256.txt"
+set "UPLOAD_ZIP=%OUTPUT_DIR%\99_UPLOAD_PACKAGE.zip"
 
 if defined BTC_BCR13_INPUT (
   set "INPUT=%BTC_BCR13_INPUT%"
@@ -14,57 +27,121 @@ if defined BTC_BCR13_INPUT (
   set "INPUT=%DEFAULT_INPUT%"
 )
 
+set "PYTHON_CMD="
+where python >nul 2>&1
+if not errorlevel 1 set "PYTHON_CMD=python"
+if not defined PYTHON_CMD (
+  where py >nul 2>&1
+  if not errorlevel 1 set "PYTHON_CMD=py -3"
+)
+if not defined PYTHON_CMD (
+  echo [BCR13] FAILED: Python was not found.
+  pause
+  exit /b 9009
+)
+
 if not exist "%PY_SCRIPT%" (
-  echo ERROR: Python script not found:
-  echo   %PY_SCRIPT%
-  exit /b 1
+  echo [BCR13] FAILED: Python script was not found.
+  echo %PY_SCRIPT%
+  pause
+  exit /b 2
 )
 if not exist "%CONTRACT%" (
-  echo ERROR: BCR12 contract not found:
-  echo   %CONTRACT%
-  exit /b 1
+  echo [BCR13] FAILED: BCR12 contract was not found.
+  echo %CONTRACT%
+  pause
+  exit /b 2
 )
 if not exist "%INPUT%" (
-  echo ERROR: BTC M15 input not found:
-  echo   %INPUT%
-  echo Set BTC_BCR13_INPUT to the exact source path and rerun.
-  exit /b 1
+  echo [BCR13] FAILED: BTC M15 input was not found.
+  echo %INPUT%
+  echo No fallback or alternative CSV was used.
+  pause
+  exit /b 2
 )
 
-where py >nul 2>nul
-if not errorlevel 1 (
-  set "PYTHON=py -3"
-) else (
-  where python >nul 2>nul
-  if errorlevel 1 (
-    echo ERROR: Python was not found in PATH.
-    exit /b 1
-  )
-  set "PYTHON=python"
+where powershell >nul 2>&1
+if errorlevel 1 (
+  echo [BCR13] FAILED: Windows PowerShell was not found.
+  echo The upload ZIP could not be created.
+  pause
+  exit /b 9009
 )
 
-echo.
-echo BCR13 label-free audit starting.
-echo Input:  %INPUT%
-echo Output: %OUTPUT_DIR%
+echo ============================================================
+echo BCR13 - B3 OUTCOME-BLIND DENSITY AND STATE-MACHINE AUDIT
+echo ============================================================
+echo Python          : %PYTHON_CMD%
+echo BTC M15 input   : %INPUT%
+echo Output root     : %OUTPUT_ROOT%
+echo Upload package  : %UPLOAD_ZIP%
+echo Outcome fields  : NOT READ OR EXPORTED
+echo Fallback        : FORBIDDEN
+echo Collector/M7C   : KEEP RUNNING, NO CHANGE
+echo GOLD/MOCHIPOYO  : NO CHANGE
+echo Discord/MT5     : OFF
+echo ============================================================
 echo.
 
-%PYTHON% "%PY_SCRIPT%" ^
+%PYTHON_CMD% "%PY_SCRIPT%" ^
   --input "%INPUT%" ^
   --contract "%CONTRACT%" ^
   --output-dir "%OUTPUT_DIR%" ^
   --allow-prefix-rehydrate ^
   --repeat-check
+set "EXIT_CODE=%ERRORLEVEL%"
 
-if errorlevel 1 (
+if not "%EXIT_CODE%"=="0" (
   echo.
-  echo BCR13 FAILED. No fallback or alternative input was used.
-  exit /b 1
+  echo [BCR13] FAILED: audit execution returned exit_code=%EXIT_CODE%.
+  echo [BCR13] No fallback or alternative input was used.
+  if exist "%OUTPUT_DIR%" start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b %EXIT_CODE%
+)
+
+if not exist "%CORE_ZIP%" (
+  echo [BCR13] FAILED: core deterministic ZIP was not created.
+  if exist "%OUTPUT_DIR%" start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b 3
+)
+if not exist "%REPEAT_JSON%" (
+  echo [BCR13] FAILED: deterministic_repeat.json was not created.
+  start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b 3
+)
+if not exist "%PACKAGE_SHA%" (
+  echo [BCR13] FAILED: package_sha256.txt was not created.
+  start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b 3
+)
+
+if exist "%UPLOAD_ZIP%" del /q "%UPLOAD_ZIP%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath @('%CORE_ZIP%','%REPEAT_JSON%','%PACKAGE_SHA%') -DestinationPath '%UPLOAD_ZIP%' -CompressionLevel Optimal -Force"
+set "ZIP_EXIT=%ERRORLEVEL%"
+if not "%ZIP_EXIT%"=="0" (
+  echo [BCR13] FAILED: 99_UPLOAD_PACKAGE.zip could not be created.
+  start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b %ZIP_EXIT%
+)
+
+if exist "%UPLOAD_ZIP%" (
+  start "" explorer.exe /select,"%UPLOAD_ZIP%"
+) else (
+  echo [BCR13] FAILED: upload ZIP is missing after packaging.
+  start "" explorer.exe "%OUTPUT_DIR%"
+  pause
+  exit /b 3
 )
 
 echo.
-echo BCR13 completed with deterministic repeat match.
-echo Upload the ZIP, deterministic_repeat.json, and package_sha256.txt from:
-echo   %OUTPUT_DIR%
+echo [BCR13] COMPLETED.
+echo [BCR13] Upload only the selected file:
+echo %UPLOAD_ZIP%
 echo.
+pause
 exit /b 0
