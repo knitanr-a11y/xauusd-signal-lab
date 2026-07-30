@@ -1,0 +1,51 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-31T00:45:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "IMPLEMENTATION_AND_LOCAL_TESTS_READY_FROZEN_INPUT_LOCAL_RUN_PENDING",
+  "contract_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_CONTRACT_20260731.md",
+  "contract_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_contract_20260731.json",
+  "python_path": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/python/run_bcr17_b5_shared_value_gate.py",
+  "test_path": "tests/btc_ml_v1/test_bcr17_b5_shared_value_gate.py",
+  "runner_bat": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
+  "open_results_bat": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/02_open_latest_results.bat",
+  "local_tests": "6_PASSED",
+  "hard_gates": {
+    "frozen_input_sha": true,
+    "frozen_rows": true,
+    "accepted_BCR16_package_sha": true,
+    "eight_machine_inventory": true,
+    "closed_episode_count_parity": true,
+    "exact_entry_exit_rows": true,
+    "fallback": false
+  },
+  "outputs": {
+    "C0_C2": true,
+    "PF_PnL_win_loss": true,
+    "MFE_MAE": true,
+    "directions": true,
+    "monthly": true,
+    "rollover": true,
+    "exit_reason": true,
+    "wilcoxon_holm": true,
+    "automatic_promotion": false
+  },
+  "actual_frozen_input_run_completed": false,
+  "deterministic_package_received": false,
+  "candidate_promoted": false,
+  "portfolio_selected": false,
+  "prospective_start": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_order": false,
+  "required_user_action": {
+    "pull_branch": "feature/btc-fresh-forward-research",
+    "run": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
+    "output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate\\LATEST",
+    "upload": [
+      "99_UPLOAD_PACKAGE.zip"
+    ]
+  }
+}
