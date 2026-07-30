@@ -1,0 +1,32 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR06_OUTCOME_BLIND_TRACK_B_INDEPENDENT_MECHANISM_GRAMMAR",
+  "recorded_at": "2026-07-30T18:55:00+09:00",
+  "status": "IMPLEMENTATION_ADDENDUM_FROZEN_BEFORE_DENSITY_OUTPUT",
+  "gap_policy": {
+    "B1_TREND_PULLBACK_CONTINUATION": "current boundary and previous 50 closed M15 bars must be exact contiguous 15-minute observations",
+    "B4_OVEREXTENSION_MEAN_REVERSION": "current boundary and previous 50 closed M15 bars must be exact contiguous 15-minute observations",
+    "Track_A_overlap_reference": "current boundary and previous 50 closed M15 bars must be exact contiguous 15-minute observations",
+    "B2_COMPRESSION_EXPANSION": "current boundary and previous 500 closed M15 bars must be exact contiguous 15-minute observations",
+    "missing_bar_fill": false,
+    "nearest_or_last_observed_fallback": false,
+    "ineligible_rows_retained_in_denominator_report": true
+  },
+  "rolling_compression_percentile": {
+    "window": 500,
+    "value": "bb_width20_bps computed at the immediately previous fully closed bar",
+    "rank_window": "last 500 fully closed bb_width observations including the current known closed-bar value",
+    "tie_method": "average percentile rank",
+    "future_values_used": false
+  },
+  "feature_formulas": {
+    "EMA": "pandas ewm span with adjust=false evaluated at previous closed bar",
+    "ATR14": "simple rolling mean of closed-bar true range over 14 observations",
+    "Bollinger_width20_bps": "4 times population standard deviation of 20 closed closes divided by 20-close mean times 10000",
+    "rolling_breakout": "current open strictly above prior closed rolling high or strictly below prior closed rolling low",
+    "current_open_gap_bps": "current open divided by previous closed close minus one times 10000"
+  },
+  "minimum_global_warmup_rows": 500,
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
