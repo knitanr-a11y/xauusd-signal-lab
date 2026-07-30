@@ -2,89 +2,87 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T19:25:00+09:00",
-  "next_stage": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_ONE_READ_ONLY_LOCAL_RUN",
-  "authorization": "AUTHORIZED_ONE_READ_ONLY_METADATA_RUN_NO_ORDER_HISTORY_OR_RUNTIME_STOP",
+  "recorded_at": "2026-07-30T20:00:00+09:00",
+  "next_stage": "BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_IMPLEMENTATION",
+  "authorization": "AUTHORIZED_OUTCOME_EXPOSED_DIAGNOSTIC_ONLY_NO_OVERLAY_PNL_OR_PROMOTION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_TRACK_A_TRACK_B_COMPLETE_BCR08_COST_PROVENANCE_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR09_VALUE_GATE_COMPLETE_BCR10_PATH_DIAGNOSTIC_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "completed_families": {
-    "Track_A_complete_state_machines": 4,
-    "Track_B_complete_state_machines": 4,
-    "profitability_candidates": 0,
-    "profitability_outcomes_opened": false
+  "completed_inputs": {
+    "BCR08_package_sha256": "2b5df4bcdf0f2c07c0d246a3cfe057f05ef4751f7ab3e3c71e8f993cd24cbbf7",
+    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "BCR09_supported": 0,
+    "BCR09_promising": 0,
+    "BCR09_hold_cost_sensitive": 1,
+    "BCR09_rejected": 7,
+    "outcome_exposure": "RETROSPECTIVE_FULL_HISTORY_EXPOSED"
   },
-  "purpose": "Capture exact MT5 terminal and BTC symbol price-unit, tick, contract and spread metadata before any shared Track A/Track B PnL evaluation. Commission remains a separate unresolved contract.",
-  "user_action": {
-    "repository_path": "C:/btc-ff",
-    "required_branch": "feature/btc-fresh-forward-research",
-    "fetch_and_pull_first": true,
-    "keep_existing_mt5_running": true,
-    "keep_collector_and_m7c_running": true,
-    "run_once": "C:/btc-ff/scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/01_run_BCR08.bat",
-    "upload": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR08_mt5_symbol_cost_provenance/LATEST/99_UPLOAD_PACKAGE.zip",
-    "upload_first_zip_success_or_failure": true,
-    "do_not_rerun_automatically": true
-  },
-  "expected_evidence": {
-    "terminal_data_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675",
-    "exact_symbol_hypothesis": "BTCUSD#",
-    "symbol_hypothesis_may_block_and_return_candidate_list": true,
-    "required_fields": [
-      "digits",
-      "point",
-      "trade_tick_size",
-      "trade_tick_value",
-      "trade_contract_size",
-      "trade_calc_mode",
-      "currency_profit",
-      "spread",
-      "bid_ask_tick_when_available"
-    ]
-  },
-  "read_only_guards": {
-    "terminal_must_already_be_running": true,
-    "connected_data_path_exact_match_required": true,
-    "order_send": false,
-    "order_check": false,
-    "positions_or_orders_query": false,
-    "order_or_deal_history_query": false,
-    "symbol_select": false,
-    "account_number_name_balance_pnl_export": false,
-    "Collector_M7C_GOLD_change": false
-  },
-  "acceptance_after_upload": [
-    "EXACT_PACKAGE_LAYOUT_AND_MANIFEST",
-    "EXPECTED_TERMINAL_DATA_PATH_MATCH",
-    "EXACT_SYMBOL_OR_EXPLICIT_AMBIGUITY_DIAGNOSTIC",
-    "VALID_DIGITS_POINT_TICK_SIZE_CONTRACT_SIZE_AND_CURRENCY",
-    "CSV_SPREAD_OBSERVATION_RECORDED_WITHOUT_SILENT_SNAPSHOT_REPLACEMENT",
-    "NO_FORBIDDEN_MT5_CALL_OR_PRIVATE_ACCOUNT_EXPORT",
-    "COMMISSION_REMAINS_EXPLICITLY_RESOLVED_OR_UNRESOLVED",
-    "SAFE_TO_COMPUTE_PNL_REMAINS_FALSE_UNTIL_SHARED_COST_CONTRACT"
+  "diagnostic_population": [
+    "TRACK_A_F1_COVERAGE_FIRST",
+    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+    "TRACK_A_F3_STATE_FIDELITY",
+    "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
+    "TRACK_B_B4_E0_EMA20_TOUCH",
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT"
+  ],
+  "excluded_from_current_rescue": [
+    "TRACK_B_B1_E0_EMA30_CROSS",
+    "TRACK_B_B1_E1_STACK_BREAK",
+    "B2_COMPRESSION_EXPANSION"
+  ],
+  "purpose": "Describe fixed holding-duration, server-date crossing, server-hour and exact MFE/MAE/giveback phenotypes for Track A and B4 without converting future exit-date membership into a candidate filter.",
+  "implementation_tasks": [
+    "Verify the accepted BCR09 package SHA and frozen M15 SHA.",
+    "Represent every closed BCR09 episode for the six diagnostic machines exactly once.",
+    "Apply the frozen holding bins 1-4, 5-8, 9-16, 17-32, 33-64, 65-128, and 129-plus.",
+    "Apply frozen server-date crossing bins D0, D1, D2 and D3-plus.",
+    "Apply fixed four-hour entry and exit server-time bins.",
+    "Compute direction-correct exact-row MFE, MAE, first excursion bars and favorable-excursion giveback.",
+    "Record PnL and excursion state before the first server-date crossing and at exact 23:45 when available.",
+    "Keep gap and unavailable-path cases explicit; never interpolate.",
+    "Produce descriptive machine/direction/bin reports and integrity proof.",
+    "Do not calculate any time-stop or forced-flat overlay PnL in BCR10.",
+    "Update all handoff layers after audit."
+  ],
+  "acceptance_checks": [
+    "SIX_MACHINE_POPULATION_ONLY",
+    "ALL_ELIGIBLE_BCR09_CLOSED_EPISODES_EXACTLY_ONCE",
+    "FIXED_BINS_UNCHANGED",
+    "EXACT_PATH_ROWS_NO_INTERPOLATION",
+    "DIRECTION_CORRECT_MFE_MAE",
+    "OUTCOME_DIAGNOSTIC_LABELED_EXPOSED",
+    "NO_OVERLAY_PNL",
+    "NO_CANDIDATE_SELECTION",
+    "NO_RUNTIME_CHANGE"
+  ],
+  "possible_later_overlay_types_only": [
+    "NO_OVERLAY_BASELINE",
+    "MAX_HOLD_16_BARS",
+    "MAX_HOLD_32_BARS",
+    "MAX_HOLD_64_BARS",
+    "SERVER_DAY_FLAT_AT_23_45",
+    "ONE_PREREGISTERED_SERVER_DAY_FLAT_PLUS_MAX_HOLD_COMBINATION"
   ],
   "explicitly_not_authorized": [
-    "SECOND_BCR08_RUN_WITHOUT_AUDITING_FIRST_PACKAGE",
-    "PNL_OR_FUTURE_OUTCOME_ANALYSIS",
-    "WR_PF_DD_MFE_MAE",
-    "SPREAD_CONVERSION_BY_GUESS",
-    "ZERO_COMMISSION_ASSUMPTION",
-    "TP_SL_TIME_STOP_OR_HOLDING_OPTIMIZATION",
-    "CANDIDATE_PROMOTION_OR_REJECTION",
-    "FF06",
+    "SAME_SERVER_DATE_AS_ENTRY_FILTER",
+    "OVERLAY_PNL_IN_BCR10",
+    "TP_SL_TRAILING_STOP_OR_TIME_STOP_SEARCH",
+    "ATR_HOUR_WEEKDAY_DIRECTION_OR_REGIME_FILTER",
+    "BASE_MACHINE_RESCUE_OR_THRESHOLD_CHANGE",
+    "B2_THRESHOLD_RESCUE",
+    "PORTFOLIO_SELECTION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
-  "after_successful_audit": "FREEZE_SHARED_TRACK_A_TRACK_B_EXECUTION_SPREAD_COMMISSION_AND_COST_SENSITIVITY_CONTRACT_BEFORE_OPENING_RETROSPECTIVE_OUTCOMES",
-  "user_action_required_now": true,
-  "bat_required_now": true,
-  "runtime_stop_or_restart_required": false,
+  "user_action_required_now": false,
+  "bat_required_now": false,
+  "runtime_change_required": false,
   "handoff_update_required_after_completion": true
 }
