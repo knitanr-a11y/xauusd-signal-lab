@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_BCR10_DIAGNOSTIC_COMPLETE_BCR11_CONTRACT_FROZEN_IMPLEMENTATION_AWAITING_AUTHORIZATION`
-- updated: `2026-07-30T20:20:00+09:00`
+- current status: `BTC_REDESIGN_BCR11_COMPLETE_NO_CAUSAL_HOLDING_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT`
+- updated: `2026-07-30T20:39:00+09:00`
 
 ## 1. branch hard gate
 
@@ -15,21 +15,21 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR10_DIAGNOSTIC_COMPLETE_BCR11_FINITE_OVERLAY_NEXT_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR10_DIAGNOSTIC_COMPLETE_BCR11_FINITE_OVERLAY_NEXT_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_RESULT_20260730.md`
-7. `configs/btc_ml_v1/btc_bcr10_holding_rollover_path_diagnostic_result_20260730.json`
+6. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_RESULT_20260730.md`
+7. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_result_20260730.json`
 8. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_CONTRACT_20260730.md`
-9. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_development_contract_20260730.json`
+9. `docs/btc_ml_v1/BTC_BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_RESULT_20260730.md`
 10. `docs/btc_ml_v1/BTC_BCR09_CORRECTED_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260730.md`
 11. `docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_RESULT_20260730.md`
 12. `docs/btc_ml_v1/BTC_BCR05F_TRACK_A_SOURCE_FIDELITY_FAMILY_FREEZE_20260730.md`
@@ -58,44 +58,41 @@
 
 MOCHIPOYOの一般探索は禁止。current policyでexact allowlistされたM7C/Collector証拠と固定SHA提出物だけを読み取り専用で扱う。
 
-## 5. BCR10正式結果
+## 5. BCR11正式結果
 
-- accepted package SHA: `99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0`
-- six-machine episodes: `5,975`
-- path complete / incomplete: `5,829 / 146`
-- overlay PnL evaluated: no
-- candidate selected: no
+- accepted package SHA: `6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8`
+- six machines × six overlays: `36` trials
+- baseline episode parity: all six exact
+- non-baseline C0 positive / PF>=1: `0 / 0`
+- non-baseline C2 positive / PF>=1: `0 / 0`
+- overlay proposal advanced: `0`
+- deployable candidate: `0`
+- prospective start / shadow: none
 
-Actual-exit holding phenotype:
+Best C0 and C2 rows remained unchanged B4 E0 baseline:
 
-- all six machine aggregates with actual holding `<=16` bars: positive, PF `8.58–18.06`
-- all six with actual holding `>=17` bars: negative, PF `0.08–0.15`
-- rollover and holding are not equivalent: rollover `<=16` remained positive while same-day `>=17` was negative in all six machines
+- C0 PF `1.000623`, net `+108.97 USD / 1 lot`
+- C2 PF `0.949662`, net `-8,951.03 USD / 1 lot`
 
-This is outcome-exposed description, not a validated max-hold rule.
+## 6. Interpretation boundary
 
-## 6. Path finding
+BCR10の「実際に16本以内で終わった群」は未来のbase exit時間で分類された記述群だった。
 
-- path-complete final losers held `>=17`: `1,361`
-- positive MFE at some point: `89.79%`
-- first MFE median / q90: bar `1 / 8`
-- rollover path-complete losers positive at 23:45: `8.11%`
-- rollover losers with earlier positive MFE: `92.08%`
+16本強制決済ではstateが早くIDLEへ戻り、後続entryが増えてepisode列全体が変わる。max hold 16ではbase episodeの`24.25%〜38.02%`が変化し、各machineで`108〜553`件の新規entryが発生した。全6系統でC0/C2とも負のままだった。
 
-The primary next development hypothesis is finite maximum-holding control, with 23:45 flat retained as a comparator.
+23:45 flatもrolloverを除去したが、正の価値を作らなかった。
 
-## 7. Current next stage
+したがって現行Track A/B4の負け削減overlay救済は終了する。
 
-`BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_REPLAY`
+## 7. 現在の次作業
 
-The contract is frozen for exactly six overlays per six unchanged machines:
+推奨候補：
 
-- baseline
-- max hold 16 / 32 / 64 bars
-- exact 23:45 server-day flat
-- max hold 16 plus 23:45 flat
+`BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN`
 
-BCR11 implementation is not yet authorized. No BAT or upload is required now.
+ただし未承認。次はparameter救済ではなく、breakout/retest/re-acceleration、causal HTF regime + LTF execution等の、経済原理が異なる新familyをoutcome-blindで契約する。
+
+現在、BAT・追加ファイル・prospective start・shadowは不要。ユーザーの明示承認を待つ。
 
 ## 8. runtime protection
 
