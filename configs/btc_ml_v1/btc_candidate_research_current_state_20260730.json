@@ -3,11 +3,11 @@
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
   "recorded_at": "2026-07-30T13:46:00+09:00",
-  "status": "BTC_REDESIGN_BCR04_BCR05A_COMPLETE_BCR05B_FINITE_ENTRY_GRAMMAR_NEXT",
-  "decision": "ACCEPT_BCR04_CONTROL_UNIVERSE_AND_CORRECTED_BCR05A_SIGNATURE_PROCEED_TO_FINITE_OUTCOME_BLIND_ENTRY_GRAMMAR",
+  "status": "BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT",
+  "decision": "ACCEPT_BCR05B_FINITE_ENTRY_FIDELITY_VARIANTS_PROCEED_TO_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR04_BCR05A_COMPLETE_BCR05B_FINITE_ENTRY_GRAMMAR_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
     "continuous_updates_required": true
@@ -16,31 +16,15 @@
     "track_A": "MOCHIPOYO_SOURCE_ANCHORED_BTC_RESEARCH",
     "track_B": "INDEPENDENT_VECTOR_BTC_RESEARCH"
   },
-  "bcr01_v101": {
-    "status": "ACCEPTED_READY_OUTCOME_BLIND_SOURCE_SNAPSHOT",
-    "package_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
-    "raw_alert_rows": 194,
-    "outcomes_opened": false
-  },
-  "bcr02": {
-    "status": "READY_CANONICAL_SOURCE_EVENT_LEDGER_OUTCOME_BLIND",
-    "package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
-    "BTCUSD_rows": 76,
-    "m7c_parity_rows": 125,
-    "m7c_parity_all_match": true,
-    "outcomes_opened": false
-  },
-  "bcr03": {
-    "status": "BCR03_COMPLETE_SOURCE_CANDLE_PROVENANCE_FROZEN_WITH_GAP_SELECTION_NUANCE",
-    "original_absolute_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
-    "content_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
-    "btc_events_mapped": 76,
-    "m7c_selected_bar_parity": "890_OF_890",
-    "exact_previous_boundary_parity": "889_OF_889_ELIGIBLE",
-    "m7c_gap_bridge_rows": 1,
-    "btc_research_gap_fallback_used": false,
-    "gap_addendum": "docs/btc_ml_v1/BTC_BCR03_M7C_SELECTED_BAR_GAP_BRIDGE_ADDENDUM_20260730.md",
-    "outcomes_opened": false
+  "frozen_upstream": {
+    "BCR01_package_sha256": "bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
+    "BCR02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "BCR03_m15_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "BCR03_m15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BCR03_m7c_selected_bar_parity": "890_OF_890",
+    "BCR03_exact_previous_boundary_parity": "889_OF_889_ELIGIBLE",
+    "BCR03_m7c_gap_bridge_rows": 1,
+    "BCR03_btc_research_gap_fallback_used": false
   },
   "bcr04": {
     "status": "READY_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
@@ -52,64 +36,73 @@
     "primary_long_rows": 16,
     "primary_short_rows": 10,
     "eligible_idle_controls": 438,
+    "valid_long_exit_rows": 17,
+    "valid_short_exit_rows": 10,
+    "eligible_active_long_controls": 223,
+    "eligible_active_short_controls": 168,
     "gap_adjacent_rows": 2,
     "event_rows_gap_adjacent": 0,
-    "current_high_low_close_used": false,
     "outcomes_opened": false,
     "result_document": "docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_RESULT_20260730.md",
     "result_json": "configs/btc_ml_v1/btc_bcr04_outcome_blind_decision_universe_result_20260730.json"
   },
-  "bcr05a_invalid_preacceptance": {
-    "package_sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
-    "accepted": false,
-    "root_cause": "LABEL_DERIVED_EVENT_DISTANCE_SELF_IDENTIFICATION",
-    "outcomes_opened": false,
-    "incident_document": "docs/btc_ml_v1/BTC_BCR05A_LABEL_DERIVED_EVENT_DISTANCE_INCIDENT_AND_CORRECTION_20260730.md"
-  },
   "bcr05a": {
     "status": "READY_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON_CORRECTED",
     "package_sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
-    "long_primary_events": 16,
-    "short_primary_events": 10,
-    "eligible_idle_controls": 438,
+    "invalid_preacceptance_package_sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
+    "invalid_preacceptance_reason": "LABEL_DERIVED_EVENT_DISTANCE_SELF_IDENTIFICATION",
     "long_rci9_turn_event_prevalence": 1.0,
     "long_rci9_turn_control_prevalence": 0.11643835616438356,
     "short_rci9_turn_event_prevalence": 1.0,
     "short_rci9_turn_control_prevalence": 0.1461187214611872,
-    "long_direction_correct_ema_event_prevalence": 0.875,
-    "short_direction_correct_ema_event_prevalence": 0.9,
-    "shortlisted_families_both_directions": [
+    "retained_feature_families": [
       "A_RCI_SHAPE",
       "B_EMA_STRUCTURE",
       "D_CLOSED_BAR_LOCATION"
     ],
-    "not_shortlisted_both_directions": [
+    "not_retained_feature_families": [
       "C_VOLATILITY_COMPRESSION",
       "E_CLOCK_SEQUENCE"
     ],
-    "label_derived_event_distance_tested": false,
-    "source_fidelity_context_shortlist_eligible": false,
+    "label_derived_event_distance_tested_in_accepted_run": false,
     "outcomes_opened": false,
-    "performance_interpretation_performed": false,
-    "candidate_formula_designed": false,
     "result_document": "docs/btc_ml_v1/BTC_BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_RESULT_20260730.md",
     "result_json": "configs/btc_ml_v1/btc_bcr05a_outcome_blind_track_a_signature_result_20260730.json"
   },
   "bcr05b": {
-    "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
-    "purpose": "EVALUATE_EXACTLY_12_FINITE_ENTRY_GRAMMARS_PER_DIRECTION_BY_SOURCE_RECALL_AND_IDLE_CONTROL_FIRE_RATE_ONLY",
-    "long_grammars": 12,
-    "short_grammars": 12,
-    "mandatory_anchor": "DIRECTION_CORRECT_RCI9_TURN",
-    "optional_axes": [
-      "DIRECTION_CORRECT_EMA_STACK",
-      "FIXED_RCI9_LEVEL_NONE_POLARITY_EXTREME40",
-      "PREVIOUS_CLOSED_RETURN_SIGN"
+    "status": "READY_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_FIDELITY_RESULT",
+    "package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "long_grammar_rows": 12,
+    "short_grammar_rows": 12,
+    "total_grammar_rows": 24,
+    "advanced_long": [
+      "A_LONG_E0_Z1_P0",
+      "A_LONG_E1_Z2_P0"
     ],
-    "maximum_advanced_per_direction": 3,
-    "profitability_outcomes_authorized": false,
-    "contract_document": "docs/btc_ml_v1/BTC_BCR05B_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_CONTRACT_20260730.md",
-    "contract_json": "configs/btc_ml_v1/btc_bcr05b_outcome_blind_finite_entry_grammar_contract_20260730.json"
+    "long_high_coverage_tier": "EMPTY",
+    "advanced_short": [
+      "A_SHORT_E0_Z1_P1",
+      "A_SHORT_E1_Z1_P1",
+      "A_SHORT_E1_Z2_P0"
+    ],
+    "advanced_variants_are_profitability_candidates": false,
+    "integrated_candidate_frozen": false,
+    "outcomes_opened": false,
+    "result_document": "docs/btc_ml_v1/BTC_BCR05B_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_RESULT_20260730.md",
+    "result_json": "configs/btc_ml_v1/btc_bcr05b_outcome_blind_finite_entry_grammar_result_20260730.json"
+  },
+  "bcr05c": {
+    "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+    "purpose": "COMPARE_GENUINE_EXIT_EVENTS_WITH_STATE_COMPATIBLE_ACTIVE_CONTROLS_AND_QUANTIFY_EXIT_TIMING_STATE_DIVERGENCE_WITHOUT_OUTCOMES",
+    "long_exit_events": 17,
+    "active_long_controls": 223,
+    "short_exit_events": 10,
+    "active_short_controls": 168,
+    "one_bar_late_analysis_role": "POST_SOURCE_EXIT_TIMING_DESCRIPTIVE_ONLY",
+    "state_divergence_consequence_ledger_required": true,
+    "final_exit_formula_authorized": false,
+    "contract_document": "docs/btc_ml_v1/BTC_BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_CONTRACT_20260730.md",
+    "contract_json": "configs/btc_ml_v1/btc_bcr05c_outcome_blind_exit_state_signature_contract_20260730.json"
   },
   "preserved_evidence": {
     "FF01_FF04": "PRESERVE_CAUSAL_AND_TIME_SEMANTICS_EVIDENCE",
@@ -121,12 +114,13 @@
     "create_FF06": true,
     "open_outcomes_for_new_design": true,
     "evaluate_WR_PF_DD_MFE_MAE": true,
-    "TP_SL_optimization": true,
+    "TP_SL_or_holding_optimization": true,
     "continuous_threshold_search": true,
-    "add_ATR_compression_or_time_gate_to_BCR05B": true,
     "use_event_distance_as_predictor": true,
     "use_source_state_age_as_standalone_candidate_input": true,
-    "freeze_integrated_candidate_before_exit_state_research": true,
+    "freeze_final_exit_formula_in_BCR05C": true,
+    "freeze_integrated_candidate_before_finite_exit_and_state_replay": true,
+    "select_resynchronization_policy_from_profitability": true,
     "create_shadow_runtime": true,
     "stop_or_modify_collector_M7C_M8C_M9_M10": true,
     "discord_send": true,
@@ -134,8 +128,13 @@
     "live_ready": true,
     "automatic_promotion": true
   },
-  "next_phase": "BCR05B_OUTCOME_BLIND_FINITE_TRACK_A_ENTRY_GRAMMAR_IMPLEMENTATION",
-  "required_after_bcr05b": "OUTCOME_BLIND_EXIT_AND_STATE_ANALYSIS_BEFORE_INTEGRATED_TRACK_A_FORMULA",
+  "next_phase": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "required_after_bcr05c": [
+    "PREREGISTER_FINITE_EXIT_GRAMMAR",
+    "REPLAY_COMPLETE_ENTRY_EXIT_STATE_MACHINES",
+    "FREEZE_SMALL_INTEGRATED_SOURCE_FIDELITY_FAMILY",
+    "DEFINE_SEPARATE_TRADING_VALUE_OUTCOME_GATE"
+  ],
   "pending_user_evidence": null,
   "next_phase_requires_user_bat": false,
   "next_phase_requires_runtime_change": false,
