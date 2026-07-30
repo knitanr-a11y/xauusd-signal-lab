@@ -1,0 +1,132 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_REPLAY",
+  "recorded_at": "2026-07-30T20:39:00+09:00",
+  "status": "READY_RETROSPECTIVE_EXPOSED_FINITE_OVERLAY_COMPARISON_NO_PROMOTION",
+  "exposure": "RETROSPECTIVE_FULL_HISTORY_EXPOSED_DEVELOPMENT",
+  "inputs": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "BCR10_package_sha256": "99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0",
+    "BCR11_contract_commit": "b837d02914743bdec87d46cfbdc60683fdf511b0"
+  },
+  "artifact": {
+    "package": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_20260730.zip",
+    "sha256": "94483c7e50a50c6775c5e4140f37471e4e71c0417e5eb0ba2b6438e74bcc4339",
+    "deterministic_repeat_sha_match": true,
+    "tests": "4_PASSED"
+  },
+  "inventory": {
+    "machines": 6,
+    "overlays_per_machine": 6,
+    "trials": 36,
+    "overlays": [
+      "O0_BASELINE",
+      "O1_MAX_HOLD_16",
+      "O2_MAX_HOLD_32",
+      "O3_MAX_HOLD_64",
+      "O4_SERVER_DAY_FLAT_2345",
+      "O5_MAX_HOLD_16_AND_SERVER_DAY_FLAT_2345"
+    ]
+  },
+  "integrity": {
+    "baseline_exact_episode_parity_all_six": true,
+    "exact_execution_rows_missing": 0,
+    "nearest_next_or_interpolation_used": false,
+    "current_bar_high_low_close_used_for_signal": false,
+    "base_formula_changed": false,
+    "tp_sl_or_trailing_added": false,
+    "custom_overlay_per_machine": false,
+    "commission": 0.0,
+    "swap_included": false
+  },
+  "main_result": {
+    "nonbaseline_positive_C0_trials": 0,
+    "nonbaseline_PF_ge_1_C0_trials": 0,
+    "nonbaseline_positive_C2_trials": 0,
+    "nonbaseline_PF_ge_1_C2_trials": 0,
+    "best_C0_row": {
+      "machine_id": "TRACK_B_B4_E0_EMA20_TOUCH",
+      "overlay_id": "O0_BASELINE",
+      "pf": 1.0006233755,
+      "net_usd_per_1lot": 108.97
+    },
+    "best_C2_row": {
+      "machine_id": "TRACK_B_B4_E0_EMA20_TOUCH",
+      "overlay_id": "O0_BASELINE",
+      "pf": 0.9496619613,
+      "net_usd_per_1lot": -8951.03
+    }
+  },
+  "best_nonbaseline_by_machine_C0": {
+    "TRACK_A_F1_COVERAGE_FIRST": {
+      "overlay_id": "O1_MAX_HOLD_16",
+      "pf": 0.9102526725,
+      "net_usd_per_1lot": -39661.41,
+      "C2_pf": 0.8585756025,
+      "C2_net_usd_per_1lot": -63815.16,
+      "base_episode_changed_share": 0.3546734955,
+      "new_entries_after_path_divergence": 553
+    },
+    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE": {
+      "overlay_id": "O3_MAX_HOLD_64",
+      "pf": 0.9015727733,
+      "net_usd_per_1lot": -28324.03,
+      "C2_pf": 0.8535242268,
+      "C2_net_usd_per_1lot": -42900.28,
+      "base_episode_changed_share": 0.0276647681,
+      "new_entries_after_path_divergence": 26
+    },
+    "TRACK_A_F3_STATE_FIDELITY": {
+      "overlay_id": "O3_MAX_HOLD_64",
+      "pf": 0.9250708550,
+      "net_usd_per_1lot": -13720.26,
+      "C2_pf": 0.8751331755,
+      "C2_net_usd_per_1lot": -23271.51,
+      "base_episode_changed_share": 0.0369458128,
+      "new_entries_after_path_divergence": 11
+    },
+    "TRACK_A_F4_MINIMUM_EXTRA_PARETO": {
+      "overlay_id": "O3_MAX_HOLD_64",
+      "pf": 0.8957974131,
+      "net_usd_per_1lot": -18933.51,
+      "C2_pf": 0.8483040003,
+      "C2_net_usd_per_1lot": -28046.01,
+      "base_episode_changed_share": 0.05859375,
+      "new_entries_after_path_divergence": 20
+    },
+    "TRACK_B_B4_E0_EMA20_TOUCH": {
+      "overlay_id": "O4_SERVER_DAY_FLAT_2345",
+      "pf": 0.9914165974,
+      "net_usd_per_1lot": -1600.43,
+      "C2_pf": 0.9414549880,
+      "C2_net_usd_per_1lot": -11110.43,
+      "base_episode_changed_share": 0.1266149871,
+      "new_entries_after_path_divergence": 44
+    },
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT": {
+      "overlay_id": "O3_MAX_HOLD_64",
+      "pf": 0.9977887862,
+      "net_usd_per_1lot": -362.97,
+      "C2_pf": 0.9395277728,
+      "C2_net_usd_per_1lot": -10116.72,
+      "base_episode_changed_share": 0.0024009604,
+      "new_entries_after_path_divergence": 0
+    }
+  },
+  "max_hold_16_path_divergence": {
+    "base_episode_changed_share_range": [0.242497, 0.380208],
+    "new_entries_range": [108, 553],
+    "all_six_C0_negative": true,
+    "all_six_C2_negative": true
+  },
+  "decision": {
+    "overlay_proposals_advanced": 0,
+    "candidate_promoted": false,
+    "portfolio_selected": false,
+    "prospective_start_set": false,
+    "shadow_started": false,
+    "current_track_A_B4_rescue_path": "CLOSED_NO_CAUSAL_OVERLAY_ADVANCES",
+    "recommended_next": "MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_REQUIRES_USER_AUTHORIZATION"
+  }
+}
