@@ -2,10 +2,10 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T22:11:00+09:00",
+  "recorded_at": "2026-07-30T23:05:00+09:00",
   "current_status": "BTC_REDESIGN_BCR13_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED",
-  "completed_stage": "BCR13_IMPLEMENTATION_AND_SYNTHETIC_EXACT_PATH_VALIDATION",
-  "completed_decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_FROZEN_INPUT_PACKAGE_NO_PROMOTION",
+  "completed_stage": "BCR13_IMPLEMENTATION_SYNTHETIC_EXACT_PATH_VALIDATION_AND_OUTPUT_WORKFLOW_CORRECTION",
+  "completed_decision": "ACCEPT_BCR13_IMPLEMENTATION_READY_STANDARD_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_RESTORED_AWAIT_USER_LOCAL_RUN_NO_PROMOTION",
   "next_stage": "BCR13_FROZEN_INPUT_LABEL_FREE_PACKAGE_RUN_AND_AUDIT",
   "authorization": "USER_AUTHORIZED_BCR13_LABEL_FREE_RUN_BCR14_NOT_AUTHORIZED",
   "handoff_authority": {
@@ -18,6 +18,8 @@
   "BCR13_implementation": {
     "document": "docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_IMPLEMENTATION_READY_20260730.md",
     "json": "configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_implementation_ready_20260730.json",
+    "workflow_correction_document": "docs/btc_ml_v1/BTC_BCR13_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_WORKFLOW_CORRECTION_20260730.md",
+    "workflow_correction_json": "configs/btc_ml_v1/btc_bcr13_localappdata_single_upload_zip_workflow_correction_20260730.json",
     "python": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/python/run_bcr13_b3_density_audit.py",
     "runner_bat": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
     "tests": "tests/btc_ml_v1/test_bcr13_b3_density_audit.py",
@@ -27,13 +29,13 @@
   "required_user_action": {
     "step_1": "FETCH_OR_PULL_feature/btc-fresh-forward-research",
     "step_2": "RUN_scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
-    "step_3": "UPLOAD_THE_THREE_REQUIRED_FILES",
+    "step_3": "UPLOAD_ONLY_THE_EXPLORER_SELECTED_99_UPLOAD_PACKAGE_ZIP",
     "upload_files": [
-      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
-      "deterministic_repeat.json",
-      "package_sha256.txt"
+      "99_UPLOAD_PACKAGE.zip"
     ],
-    "expected_output_dir": "outputs/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/latest",
+    "expected_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
+    "expected_upload_file": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "bat_opens_explorer_with_zip_selected": true,
     "failure_action": "PROVIDE_COMPLETE_CONSOLE_ERROR_AND_STOP",
     "forbidden_failure_response": [
       "USE_DIFFERENT_CSV",
@@ -43,8 +45,19 @@
       "NEAREST_NEXT_OR_SIMILAR_FILE_FALLBACK"
     ]
   },
+  "upload_package_contract": {
+    "sole_upload_file": "99_UPLOAD_PACKAGE.zip",
+    "members": [
+      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+      "deterministic_repeat.json",
+      "package_sha256.txt"
+    ],
+    "separate_three_file_upload_instruction": "SUPERSEDED_BY_CORRECTION",
+    "repository_relative_output_instruction": "SUPERSEDED_BY_CORRECTION"
+  },
   "audit_after_upload": {
-    "verify_package_sha": true,
+    "verify_outer_upload_zip_members": true,
+    "verify_inner_package_sha": true,
     "verify_deterministic_repeat": true,
     "verify_manifest_members_and_hashes": true,
     "verify_exact_frozen_input_sha_and_rows": true,
