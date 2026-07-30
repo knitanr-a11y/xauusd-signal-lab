@@ -27,19 +27,40 @@ spec.loader.exec_module(module)
 
 
 def create_source_db(
-    path: Path, *, bad_hash: bool = False, extra_column: bool = False
+    path: Path,
+    *,
+    bad_hash: bool = False,
+    extra_column: bool = False,
+    migrated_order: bool = False,
 ) -> None:
     connection = sqlite3.connect(path)
-    raw_extra = ", unexpected_column TEXT" if extra_column else ""
-    connection.executescript(
-        f"""
-        PRAGMA foreign_keys = ON;
-        CREATE TABLE collector_state (
-            state_key TEXT PRIMARY KEY,
-            state_value TEXT NOT NULL,
-            updated_at_utc TEXT NOT NULL
-        );
-        CREATE TABLE raw_alerts (
+    if migrated_order:
+        raw_columns = """
+            cloudflare_id INTEGER PRIMARY KEY,
+            event_key TEXT NOT NULL UNIQUE,
+            received_at_utc TEXT NOT NULL,
+            source TEXT NOT NULL,
+            strategy TEXT NOT NULL,
+            event TEXT NOT NULL,
+            exchange_name TEXT,
+            ticker TEXT NOT NULL,
+            timeframe TEXT,
+            bar_time_utc TEXT NOT NULL,
+            fired_at_utc TEXT NOT NULL,
+            open_price REAL,
+            high_price REAL,
+            low_price REAL,
+            close_price REAL,
+            message TEXT,
+            worker_raw_json TEXT NOT NULL,
+            collector_source_row_json TEXT NOT NULL,
+            payload_sha256 TEXT NOT NULL,
+            downloaded_at_utc TEXT NOT NULL,
+            event_key_origin TEXT NOT NULL,
+            worker_raw_json_origin TEXT NOT NULL
+        """
+    else:
+        raw_columns = """
             cloudflare_id INTEGER PRIMARY KEY,
             event_key TEXT NOT NULL UNIQUE,
             event_key_origin TEXT NOT NULL,
@@ -62,8 +83,17 @@ def create_source_db(
             collector_source_row_json TEXT NOT NULL,
             payload_sha256 TEXT NOT NULL,
             downloaded_at_utc TEXT NOT NULL
-            {raw_extra}
+        """
+    if extra_column:
+        raw_columns += ", unexpected_column TEXT"
+    connection.executescript(
+        f"""
+        CREATE TABLE collector_state (
+            state_key TEXT PRIMARY KEY,
+            state_value TEXT NOT NULL,
+            updated_at_utc TEXT NOT NULL
         );
+        CREATE TABLE raw_alerts ({raw_columns});
         CREATE TABLE raw_alert_annotations (
             raw_alert_id INTEGER PRIMARY KEY,
             annotation_type TEXT NOT NULL,
@@ -88,10 +118,7 @@ def create_source_db(
             error_type TEXT,
             error_message_redacted TEXT
         );
-        CREATE TABLE outcomes (
-            entry_id TEXT PRIMARY KEY,
-            result_r REAL
-        );
+        CREATE TABLE outcomes (entry_id TEXT PRIMARY KEY, result_r REAL);
         """
     )
     source_row = {
@@ -114,40 +141,42 @@ def create_source_db(
     if bad_hash:
         payload_hash = "0" * 64
 
+    logical = {
+        "cloudflare_id": 1,
+        "event_key": "event-1",
+        "event_key_origin": "WORKER",
+        "received_at_utc": source_row["received_at_utc"],
+        "source": "tradingview",
+        "strategy": "mochipoyo",
+        "event": "LONG",
+        "exchange_name": "BINANCE",
+        "ticker": "BTCUSD",
+        "timeframe": "15",
+        "bar_time_utc": source_row["bar_time_utc"],
+        "fired_at_utc": source_row["fired_at_utc"],
+        "open_price": 100.0,
+        "high_price": 101.0,
+        "low_price": 99.0,
+        "close_price": 100.5,
+        "message": "LONG",
+        "worker_raw_json": canonical,
+        "worker_raw_json_origin": "COLLECTOR_SOURCE_ROW_FALLBACK",
+        "collector_source_row_json": canonical,
+        "payload_sha256": payload_hash,
+        "downloaded_at_utc": "2026-07-20T14:55:02Z",
+    }
+    physical_columns = [
+        row[1] for row in connection.execute("PRAGMA table_info(raw_alerts)")
+    ]
+    values = [logical.get(column, "unexpected") for column in physical_columns]
+    connection.execute(
+        f"INSERT INTO raw_alerts ({', '.join(physical_columns)}) "
+        f"VALUES ({','.join('?' for _ in values)})",
+        values,
+    )
     connection.execute(
         "INSERT INTO collector_state VALUES (?, ?, ?)",
         ("last_successful_id", "1", "2026-07-20T14:55:02Z"),
-    )
-    values = [
-        1,
-        "event-1",
-        "WORKER",
-        source_row["received_at_utc"],
-        "tradingview",
-        "mochipoyo",
-        "LONG",
-        "BINANCE",
-        "BTCUSD",
-        "15",
-        source_row["bar_time_utc"],
-        source_row["fired_at_utc"],
-        100.0,
-        101.0,
-        99.0,
-        100.5,
-        "LONG",
-        canonical,
-        "COLLECTOR_SOURCE_ROW_FALLBACK",
-        canonical,
-        payload_hash,
-        "2026-07-20T14:55:02Z",
-    ]
-    if extra_column:
-        values.append("unexpected")
-    placeholders = ",".join("?" for _ in values)
-    connection.execute(
-        f"INSERT INTO raw_alerts VALUES ({placeholders})",
-        values,
     )
     connection.execute(
         "INSERT INTO collection_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -173,43 +202,58 @@ def create_source_db(
     connection.close()
 
 
-def test_happy_path_exports_only_allowlisted_tables(tmp_path: Path) -> None:
-    source = tmp_path / "source.sqlite3"
-    output = tmp_path / "output"
-    create_source_db(source)
-
-    package = module.build(source, output)
-
-    assert package.is_file()
+def inspect_package(package: Path) -> tuple[dict, dict, dict]:
     with zipfile.ZipFile(package, "r") as archive:
         assert archive.namelist() == module.MEMBERS
-        summary = json.loads(archive.read("01_snapshot_summary.json"))
-        schema = json.loads(archive.read("02_source_schema_manifest.json"))
-        checks = json.loads(archive.read("08_integrity_checks.json"))
+        return (
+            json.loads(archive.read("01_snapshot_summary.json")),
+            json.loads(archive.read("02_source_schema_manifest.json")),
+            json.loads(archive.read("08_integrity_checks.json")),
+        )
 
+
+def test_fresh_schema_order_exports_allowlist_only(tmp_path: Path) -> None:
+    source = tmp_path / "source.sqlite3"
+    create_source_db(source)
+    summary, schema, checks = inspect_package(
+        module.build(source, tmp_path / "output")
+    )
     assert summary["status"] == "READY_OUTCOME_BLIND_SOURCE_SNAPSHOT"
     assert summary["outcomes_opened"] is False
-    assert summary["exported_tables"] == list(module.TABLES)
-    assert "outcomes" in schema["snapshot_context"][
-        "forbidden_tables_present_but_not_read_or_exported"
-    ]
-    assert checks["forbidden_tables_exported"] == []
+    assert (
+        schema["allowlisted_tables"]["raw_alerts"][
+            "physical_order_matches_export_order"
+        ]
+        is True
+    )
+    assert checks["cursor_equals_max_raw_id"] is True
+
+
+def test_migrated_schema_order_is_accepted_and_export_order_is_canonical(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source.sqlite3"
+    create_source_db(source, migrated_order=True)
+    summary, schema, checks = inspect_package(
+        module.build(source, tmp_path / "output")
+    )
+    raw_schema = schema["allowlisted_tables"]["raw_alerts"]
+    assert summary["schema_validation"] == "EXACT_COLUMN_SET_PHYSICAL_ORDER_MAY_DIFFER"
+    assert raw_schema["physical_order_matches_export_order"] is False
+    assert raw_schema["column_set_exact"] is True
+    assert raw_schema["export_columns"] == module.TABLES["raw_alerts"]
     assert checks["cursor_equals_max_raw_id"] is True
 
 
 def test_payload_hash_mismatch_fails_closed(tmp_path: Path) -> None:
     source = tmp_path / "source.sqlite3"
     create_source_db(source, bad_hash=True)
-
     with pytest.raises(RuntimeError, match="source integrity checks failed"):
         module.build(source, tmp_path / "output")
 
 
-def test_unexpected_allowlisted_schema_column_fails_closed(
-    tmp_path: Path,
-) -> None:
+def test_unexpected_column_still_fails_closed(tmp_path: Path) -> None:
     source = tmp_path / "source.sqlite3"
     create_source_db(source, extra_column=True)
-
     with pytest.raises(RuntimeError, match="schema mismatch for raw_alerts"):
         module.build(source, tmp_path / "output")
