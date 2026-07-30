@@ -1,0 +1,94 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05D_OUTCOME_BLIND_FINITE_EXIT_GRAMMAR",
+  "recorded_at": "2026-07-30T18:25:00+09:00",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "branch": "feature/btc-fresh-forward-research",
+  "inputs": {
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "BCR05C_package_sha256": "221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
+    "LONG_exit_events": 17,
+    "ACTIVE_LONG_controls": 223,
+    "SHORT_exit_events": 10,
+    "ACTIVE_SHORT_controls": 168
+  },
+  "grammar": {
+    "threshold_axis": [40, 60, 70, 80],
+    "threshold_interpretation": {
+      "LONG_EXIT": "rci9 >= threshold",
+      "SHORT_EXIT": "rci9 <= -threshold"
+    },
+    "trend_axis": {
+      "OFF": "no trend gate",
+      "LONG_EXIT_ON": "ema30_slope_4_bps > 0",
+      "SHORT_EXIT_ON": "ema20_slope_4_bps < 0"
+    },
+    "extension_axis": {
+      "OFF": "no extension gate",
+      "LONG_EXIT_ON": "current_open_minus_ema20_atr14 > 0",
+      "SHORT_EXIT_ON": "closed_return_4_bps < 0"
+    },
+    "LONG_grammar_count": 16,
+    "SHORT_grammar_count": 16,
+    "total_grammar_count": 32,
+    "grammar_id": "X_{DIRECTION}_T{THRESHOLD}_M{0_OR_1}_P{0_OR_1}"
+  },
+  "threshold_rationale": {
+    "40": "fixed positive/negative extreme boundary used in BCR05C family comparison",
+    "60": "predeclared intermediate strictness",
+    "70": "observed source-support boundary, included transparently as a source-fidelity level rather than a profitability optimum",
+    "80": "predeclared stricter extreme level",
+    "continuous_or_additional_threshold_search": false
+  },
+  "evaluation": {
+    "metrics": [
+      "source_exit_hits",
+      "source_exit_recall",
+      "compatible_active_control_hits",
+      "compatible_active_control_fire_rate",
+      "specificity",
+      "source_event_density_among_fires",
+      "event_days_represented"
+    ],
+    "pareto": "MAXIMIZE_SOURCE_EXIT_RECALL_MINIMIZE_COMPATIBLE_ACTIVE_CONTROL_FIRE_RATE",
+    "recall_tiers": {
+      "FULL_COVERAGE": "recall == 1.0",
+      "HIGH_COVERAGE": "0.90 <= recall < 1.0",
+      "BALANCED_COVERAGE": "0.75 <= recall < 0.90"
+    },
+    "maximum_advanced_per_direction": 3,
+    "maximum_one_per_recall_tier": true,
+    "tier_tiebreak": [
+      "LOWER_CONTROL_FIRE_RATE",
+      "FEWER_OPTIONAL_GATES",
+      "MORE_DISTINCT_EVENT_DAYS",
+      "LEXICAL_GRAMMAR_ID"
+    ],
+    "leave_one_exit_day_and_exit_stability": true
+  },
+  "state_and_timing": {
+    "grammar_evaluated_only_at_compatible_ACTIVE_state_rows": true,
+    "one_bar_post_source_rows_used_for_exact_grammar": false,
+    "source_state_age_used_as_predicate": false,
+    "event_distance_used_as_predicate": false
+  },
+  "explicitly_not_authorized": [
+    "PROFITABILITY_OUTCOME_ACCESS",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL_OR_TIME_STOP",
+    "HOLDING_PERIOD_OPTIMIZATION",
+    "CONTINUOUS_THRESHOLD_SEARCH",
+    "ATR_COMPRESSION_OR_CLOCK_GATE",
+    "FINAL_EXIT_SELECTION_BY_PROFIT",
+    "RESYNCHRONIZATION_POLICY",
+    "INTEGRATED_CANDIDATE_BEFORE_COMPLETE_STATE_REPLAY",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+  ],
+  "required_after_completion": "BCR05E_OUTCOME_BLIND_COMPLETE_ENTRY_EXIT_STATE_MACHINE_REPLAY",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
