@@ -3,7 +3,8 @@
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
 - current status: `BTC_REDESIGN_BCR11_COMPLETE_NO_CAUSAL_HOLDING_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT`
-- updated: `2026-07-30T20:39:00+09:00`
+- updated: `2026-07-30T21:14:00+09:00`
+- handoff verification: `FINAL_VERIFIED_FOR_NEXT_CHAT`
 
 ## 1. branch hard gate
 
@@ -15,14 +16,14 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
@@ -82,7 +83,7 @@ BCR10の「実際に16本以内で終わった群」は未来のbase exit時間�
 
 23:45 flatもrolloverを除去したが、正の価値を作らなかった。
 
-したがって現行Track A/B4の負け削減overlay救済は終了する。
+したがって現行Track A/B4の負け削減overlay救済は終了する。B1はreject、B2はblockedを維持し、threshold救済をしない。
 
 ## 7. 現在の次作業
 
@@ -90,9 +91,11 @@ BCR10の「実際に16本以内で終わった群」は未来のbase exit時間�
 
 `BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN`
 
-ただし未承認。次はparameter救済ではなく、breakout/retest/re-acceleration、causal HTF regime + LTF execution等の、経済原理が異なる新familyをoutcome-blindで契約する。
+ただし、BCR12は未承認。新チャットを開始したこと自体を承認とみなさない。
 
-現在、BAT・追加ファイル・prospective start・shadowは不要。ユーザーの明示承認を待つ。
+次はparameter救済ではなく、breakout/retest/re-acceleration、causal HTF regime + M15 execution、方向非対称mechanism等の、経済原理が異なる新familyをoutcome-blindで契約する。
+
+現在、BAT・追加ファイル・prospective start・shadowは不要。必要read order完了後、正式状態と承認境界を報告してユーザーの明示指示を待つ。
 
 ## 8. runtime protection
 
