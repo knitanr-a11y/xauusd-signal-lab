@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_CONTRACT_FROZEN_IMPLEMENTATION_NEXT`
-- updated: `2026-07-30T13:12:00+09:00`
+- current status: `BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT`
+- updated: `2026-07-30T13:46:00+09:00`
 
 ## 1. branch hard gate
 
@@ -15,25 +15,25 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_NEXT_20260730.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR03_COMPLETE_BCR04_CONTROL_UNIVERSE_NEXT_20260730.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR03_COMPLETE_ORIGINAL_PATH_PROVENANCE_20260730.md`
-7. `configs/btc_ml_v1/btc_bcr03_complete_provenance_result_20260730.json`
-8. `docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS_CONTRACT_20260730.md`
-9. `configs/btc_ml_v1/btc_bcr04_outcome_blind_decision_universe_contract_20260730.json`
-10. `docs/btc_ml_v1/BTC_BCR03_M15_CONTENT_CLOCK_AND_M7C_FEATURE_PARITY_AUDIT_20260730.md`
-11. `docs/btc_ml_v1/BTC_BCR02_CANONICAL_SOURCE_EVENT_LEDGER_20260730.md`
-12. `docs/btc_ml_v1/BTC_BCR02A_M7C_FIDELITY_DECOMPOSITION_OUTCOME_BLIND_20260730.md`
-13. `docs/btc_ml_v1/BTC_BCR01_V101_OUTCOME_BLIND_SOURCE_SNAPSHOT_AUDIT_20260730.md`
+6. `docs/btc_ml_v1/BTC_BCR05B_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_RESULT_20260730.md`
+7. `configs/btc_ml_v1/btc_bcr05b_outcome_blind_finite_entry_grammar_result_20260730.json`
+8. `docs/btc_ml_v1/BTC_BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_CONTRACT_20260730.md`
+9. `configs/btc_ml_v1/btc_bcr05c_outcome_blind_exit_state_signature_contract_20260730.json`
+10. `docs/btc_ml_v1/BTC_BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_RESULT_20260730.md`
+11. `docs/btc_ml_v1/BTC_BCR05A_LABEL_DERIVED_EVENT_DISTANCE_INCIDENT_AND_CORRECTION_20260730.md`
+12. `docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_RESULT_20260730.md`
+13. `docs/btc_ml_v1/BTC_BCR03_M7C_SELECTED_BAR_GAP_BRIDGE_ADDENDUM_20260730.md`
 14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
 15. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
@@ -56,43 +56,34 @@
 - FF05 recovery V3〜V11
 - 本入口から参照されない旧state、next action、handoff
 
-MOCHIPOYO branchの一般探索は禁止。D1でexact pathとして許可されたM7C/Collector契約ファイルと、固定SHAのユーザー提出物だけを読み取り専用で扱う。
+MOCHIPOYOの一般探索は禁止。current policyでexact allowlistされたM7C/Collector証拠と固定SHA提出物だけを読み取り専用で扱う。
 
-## 5. 研究目的
+## 5. 現在の到達点
 
-- Track A: M7C/Collectorの実source alertを一次証拠にする、もちぽよ由来BTC候補
-- Track B: もちぽよと異なる相場原理の独立ベクトルBTC候補
+BCR01〜BCR05B完了。outcomeは未参照。
 
-完全複製や単発バックテストではなく、将来の収益性、安定性、損失制御、候補間補完性、shadow parity、drift監視、fail-closed停止まで含むシステムを作る。
+- BCR04 decision rows: 907
+- primary LONG / SHORT: 16 / 10
+- eligible IDLE controls: 438
+- valid LONG / SHORT exits: 17 / 10
+- eligible ACTIVE_LONG / ACTIVE_SHORT controls: 223 / 168
+- BCR05A corrected package SHA: `b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b`
+- BCR05B package SHA: `525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9`
+- advanced entry-fidelity variants: LONG 2、SHORT 3
+- profitability candidates selected: 0
 
-## 6. 現在の到達点
+## 6. 現在の次作業
 
-BCR01、BCR02、BCR02A、BCR03は完了。
+`BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS`
 
-- BCR01 raw rows: 194、cursor 194、outcome table未参照
-- BCR02 BTCUSD source rows: 76
-- BCR02 BTC supported primary/valid-exit: 53
-- M7C state parity: 125/125
-- authoritative M15 path: `C:\Users\regen\AppData\Roaming\MetaQuotes\Terminal\2FA8A7E69CED7DC259B1AD86A247F675\MQL5\Files\btcusdsharp_m15.csv`
-- authoritative M15 SHA256: `b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148`
-- BTC event current/previous bar mapping: 76/76
-- M7C BTC RCI9/EMA parity: 890/890
-- performance interpretation: not performed
+LONG EXIT 17件対ACTIVE_LONG control 223件、SHORT EXIT 10件対ACTIVE_SHORT control 168件を分離比較する。
 
-## 7. 現在の次作業
+exact、1本遅れ、missed、事前state divergenceを別分類し、state divergence中に遭遇した後続primaryをevent ID・時刻だけで追跡する。将来価格、勝敗、MFE、MAE、TP/SLは使用しない。
 
-`BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS`
-
-source eventだけで条件を決めず、同じ時刻・state・volatility・RCI turn・EMA contextを持つ非発火controlをoutcome-blindで構築する。
-
-候補式、勝率、PF、DD、MFE、MAE、TP/SL最適化にはまだ進まない。
-
-現在ユーザーの追加ファイルやBAT実行は不要。
-
-## 8. runtime protection
+## 7. runtime protection
 
 Collector、M7C、M8C、M9、M10を停止・再起動・初期化・変更しない。GOLD/MOCHIPOYO側へBTC研究結果を書き込まない。
 
-## 9. fail-closed
+## 8. fail-closed
 
 branch、最新版handoff、current state、next actionが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
