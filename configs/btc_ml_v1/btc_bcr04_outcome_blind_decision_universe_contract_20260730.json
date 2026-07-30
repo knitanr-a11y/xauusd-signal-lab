@@ -1,0 +1,94 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T13:12:00+09:00",
+  "stage": "BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "purpose": "Create the complete causal M15 decision-window universe, source-event classes, non-event controls, finite feature registry and label-free data-capability inventory before any candidate grammar or profitability outcome is opened.",
+  "frozen_inputs": {
+    "bcr02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "btc_source_event_rows": 76,
+    "btc_primary_source_alerts": 25,
+    "m15_original_absolute_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "m15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "clock_mapping_for_inspected_interval": "MT5_SERVER_TIME_EQUALS_UTC_PLUS_3_HOURS"
+  },
+  "event_control_classes": [
+    "PRIMARY_LONG_EVENT",
+    "PRIMARY_SHORT_EVENT",
+    "VALID_LONG_EXIT_EVENT",
+    "VALID_SHORT_EXIT_EVENT",
+    "REENTRY_EVENT",
+    "OPPOSITE_EVENT_IGNORED",
+    "IDLE_NON_EVENT_CONTROL",
+    "ACTIVE_LONG_NON_EVENT_CONTROL",
+    "ACTIVE_SHORT_NON_EVENT_CONTROL"
+  ],
+  "control_policy": {
+    "retain_full_non_event_universe": true,
+    "future_price_for_selection": false,
+    "outcome_for_selection": false,
+    "stratify_by_state": true,
+    "stratify_by_time": true,
+    "stratify_by_causal_volatility": true,
+    "stratify_by_event_distance": true,
+    "stratify_by_rci_turn": true,
+    "stratify_by_ema_alignment": true,
+    "fixed_bins_before_comparison": true
+  },
+  "causal_boundary": {
+    "fully_closed_m15_history_allowed": true,
+    "current_m15_open_allowed": true,
+    "current_m15_high_low_close_allowed": false,
+    "future_m15_allowed": false,
+    "gap_interpolation_allowed": false,
+    "higher_timeframe_without_separate_asof_contract_allowed": false
+  },
+  "feature_families": [
+    "M7C_RCI9_ANCHOR",
+    "EMA_ALIGNMENT_SEPARATION_SLOPE",
+    "RCI14_RCI18_CONTEXT",
+    "FIXED_HORIZON_RETURNS",
+    "ATR_AND_REALIZED_VOLATILITY",
+    "VOLATILITY_COMPRESSION",
+    "PREVIOUS_CLOSED_CANDLE_SHAPE",
+    "CURRENT_OPEN_GAP",
+    "ROLLING_HIGH_LOW_LOCATION",
+    "SOURCE_STATE_DURATION_AND_TRANSITION_AGE",
+    "GAP_AND_ELAPSED_TIME",
+    "BROKER_SERVER_TIME_CONTEXT"
+  ],
+  "track_b_label_free_inventory": [
+    "TREND_CONTINUATION_PULLBACK",
+    "VOLATILITY_COMPRESSION_EXPANSION",
+    "BREAKOUT_REACCELERATION",
+    "OVEREXTENSION_EXHAUSTION_MEAN_REVERSION"
+  ],
+  "required_outputs": [
+    "DECISION_WINDOW_LEDGER",
+    "EVENT_CONTROL_CLASS_COUNTS",
+    "SOURCE_STATE_COVERAGE",
+    "CAUSAL_FEATURE_REGISTRY",
+    "MISSINGNESS_AND_WARMUP_REPORT",
+    "GAP_ADJACENCY_REPORT",
+    "LABEL_FREE_FEATURE_DENSITY_REPORT",
+    "TRACK_A_STRATA_MANIFEST",
+    "TRACK_B_DATA_CAPABILITY_INVENTORY",
+    "NO_OUTCOME_INTEGRITY_CHECKS"
+  ],
+  "forbidden": [
+    "OUTCOME_OPENING",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL_DESIGN_OR_OPTIMIZATION",
+    "PROFITABILITY_SELECTED_THRESHOLD",
+    "CANDIDATE_PROMOTION_OR_REJECTION",
+    "FF06",
+    "PROSPECTIVE_START",
+    "SHADOW_RUNTIME",
+    "MODIFY_M7C_COLLECTOR_M8C_M9_M10",
+    "GOLD_OR_MOCHIPOYO_WRITE_BACK"
+  ],
+  "document": "docs/btc_ml_v1/BTC_BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS_CONTRACT_20260730.md"
+}
