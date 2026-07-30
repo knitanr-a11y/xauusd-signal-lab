@@ -1,0 +1,114 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "recorded_at": "2026-07-30T18:15:00+09:00",
+  "status": "READY_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_RESULT",
+  "branch": "feature/btc-fresh-forward-research",
+  "input": {
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "M7C_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "implementation_preregistration_commit": "542ed4bec923734033e12aebfa64965689f7e122"
+  },
+  "population": {
+    "LONG_exit_events": 17,
+    "ACTIVE_LONG_controls": 223,
+    "SHORT_exit_events": 10,
+    "ACTIVE_SHORT_controls": 168
+  },
+  "source_exit_signature": {
+    "LONG_exit_rci9_range": [70.0, 91.6666666667],
+    "LONG_exit_rci9_median": 81.6666666667,
+    "LONG_exit_positive_extreme_prevalence": 1.0,
+    "ACTIVE_LONG_control_positive_extreme_prevalence": 0.2286995516,
+    "LONG_positive_extreme_corrected_odds_ratio": 117.23301,
+    "LONG_positive_extreme_q_value": 4.910592e-10,
+    "SHORT_exit_rci9_range": [-88.3333333333, -70.0],
+    "SHORT_exit_rci9_median": -76.6666666667,
+    "SHORT_exit_negative_extreme_prevalence": 1.0,
+    "ACTIVE_SHORT_control_negative_extreme_prevalence": 0.2380952381,
+    "SHORT_negative_extreme_corrected_odds_ratio": 66.62963,
+    "SHORT_negative_extreme_q_value": 7.550927e-06,
+    "LONG_exit_direction_opposite_rci9_turn_count": 0,
+    "SHORT_exit_direction_opposite_rci9_turn_count": 0
+  },
+  "shortlisted_families": {
+    "LONG_EXIT": [
+      {
+        "family": "X1_RCI_EXIT_SHAPE",
+        "representative": "rci9_fixed_zone=Z_POS_EXTREME",
+        "qualification": "FDR_SUPPORTED"
+      },
+      {
+        "family": "X2_EMA_TREND_STRUCTURE",
+        "representative": "ema30_slope_4_bps",
+        "cliffs_delta": 0.735690,
+        "q_value": 1.565858e-06,
+        "qualification": "FDR_SUPPORTED"
+      },
+      {
+        "family": "X3_CLOSED_BAR_REVERSAL_LOCATION",
+        "representative": "current_open_minus_ema20_atr14",
+        "cliffs_delta": 0.710894,
+        "q_value": 1.156814e-05,
+        "qualification": "FDR_SUPPORTED"
+      }
+    ],
+    "SHORT_EXIT": [
+      {
+        "family": "X1_RCI_EXIT_SHAPE",
+        "representative": "rci9_fixed_zone=Z_NEG_EXTREME",
+        "qualification": "FDR_SUPPORTED"
+      },
+      {
+        "family": "X2_EMA_TREND_STRUCTURE",
+        "representative": "ema20_slope_4_bps",
+        "cliffs_delta": -0.507143,
+        "q_value": 0.05571614,
+        "qualification": "FDR_SUPPORTED"
+      },
+      {
+        "family": "X3_CLOSED_BAR_REVERSAL_LOCATION",
+        "representative": "closed_return_4_bps",
+        "cliffs_delta": -0.533333,
+        "q_value": 0.05170945,
+        "qualification": "FDR_SUPPORTED"
+      }
+    ]
+  },
+  "m7c_decomposition": {
+    "LONG_EXIT": {
+      "EXACT_MATCH": 9,
+      "LATE_1_BAR": 4,
+      "MISSED": 4
+    },
+    "SHORT_EXIT": {
+      "EXACT_MATCH": 4,
+      "LATE_1_BAR": 2,
+      "MISSED": 3,
+      "COMPARISON_NOT_AVAILABLE": 1
+    },
+    "pre_exit_state_divergent_with_comparison": 3,
+    "post_exit_state_divergence_started_with_comparison": 13
+  },
+  "state_divergence_consequences": {
+    "exits_with_later_primary_while_divergent": 3,
+    "later_primary_events_while_divergent_total": 3,
+    "state_blocked_full_coverage_primary_total": 3,
+    "cases": [
+      {"missed_exit_raw_id": 85, "divergent_boundaries": 45, "later_primary_raw_id": 86},
+      {"missed_exit_raw_id": 97, "divergent_boundaries": 9, "later_primary_raw_id": 98},
+      {"missed_exit_raw_id": 169, "divergent_boundaries": 18, "later_primary_raw_id": 172}
+    ]
+  },
+  "accepted_package": {
+    "filename": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_20260730.zip",
+    "sha256": "221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
+    "deterministic_two_run_sha_match": true
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "final_exit_formula_selected": false,
+  "resynchronization_policy_selected": false,
+  "integrated_candidate_frozen": false,
+  "next_stage": "BCR05D_OUTCOME_BLIND_FINITE_EXIT_GRAMMAR"
+}
