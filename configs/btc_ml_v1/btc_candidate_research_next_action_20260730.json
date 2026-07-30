@@ -2,91 +2,89 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T13:46:00+09:00",
-  "next_stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
-  "authorization": "AUTHORIZED_OUTCOME_BLIND_EXIT_STATE_FIDELITY_ANALYSIS_NO_PROFITABILITY_OR_RUNTIME_CHANGE",
+  "recorded_at": "2026-07-30T19:25:00+09:00",
+  "next_stage": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_ONE_READ_ONLY_LOCAL_RUN",
+  "authorization": "AUTHORIZED_ONE_READ_ONLY_METADATA_RUN_NO_ORDER_HISTORY_OR_RUNTIME_STOP",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_TRACK_A_TRACK_B_COMPLETE_BCR08_COST_PROVENANCE_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "completed_inputs": {
-    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
-    "BCR04_decision_rows": 907,
-    "BCR05A_corrected_package_sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
-    "BCR05B_package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
-    "BCR05B_advanced_long_variants": [
-      "A_LONG_E0_Z1_P0",
-      "A_LONG_E1_Z2_P0"
-    ],
-    "BCR05B_advanced_short_variants": [
-      "A_SHORT_E0_Z1_P1",
-      "A_SHORT_E1_Z1_P1",
-      "A_SHORT_E1_Z2_P0"
-    ],
-    "BCR05B_variants_are_source_fidelity_only": true,
-    "outcome_performance_interpreted": false
+  "completed_families": {
+    "Track_A_complete_state_machines": 4,
+    "Track_B_complete_state_machines": 4,
+    "profitability_candidates": 0,
+    "profitability_outcomes_opened": false
   },
-  "populations": {
-    "long_exit_positive": 17,
-    "active_long_eligible_controls": 223,
-    "short_exit_positive": 10,
-    "active_short_eligible_controls": 168,
-    "mix_idle_or_opposite_state_controls": false
+  "purpose": "Capture exact MT5 terminal and BTC symbol price-unit, tick, contract and spread metadata before any shared Track A/Track B PnL evaluation. Commission remains a separate unresolved contract.",
+  "user_action": {
+    "repository_path": "C:/btc-ff",
+    "required_branch": "feature/btc-fresh-forward-research",
+    "fetch_and_pull_first": true,
+    "keep_existing_mt5_running": true,
+    "keep_collector_and_m7c_running": true,
+    "run_once": "C:/btc-ff/scripts/btc_ml_v1/BCR08_mt5_symbol_cost_provenance/01_run_BCR08.bat",
+    "upload": "%LOCALAPPDATA%/xauusd_signal_lab/btc_ml_v1/outputs/BCR08_mt5_symbol_cost_provenance/LATEST/99_UPLOAD_PACKAGE.zip",
+    "upload_first_zip_success_or_failure": true,
+    "do_not_rerun_automatically": true
   },
-  "purpose": "Identify exact-boundary exit signatures, separate exact/one-bar-late/missed M7C exits, and quantify proxy/source state-divergence consequences before any finite exit grammar or integrated Track A state machine is frozen.",
-  "implementation_tasks": [
-    "Read only the frozen BCR04 ledger and exact allowlisted M7C comparison evidence.",
-    "Verify 17 LONG exits, 223 eligible ACTIVE_LONG controls, 10 SHORT exits and 168 eligible ACTIVE_SHORT controls.",
-    "Analyze LONG and SHORT exits separately using the frozen X1 RCI, X2 EMA, X3 closed-bar reversal/location and X4 volatility feature families.",
-    "Use Fisher exact, Mann-Whitney U, Cliff's delta, Benjamini-Hochberg q=0.10 and leave-one-exit-day/leave-one-exit stability under the frozen contract.",
-    "Keep source-state age and genuine-source cadence in fidelity-context outputs only, not candidate shortlist evidence.",
-    "Label exact-next-row inspection as POST_SOURCE_EXIT_ONE_BAR_TIMING_DESCRIPTIVE_ONLY.",
-    "Keep exact, one-M15-late, missed, preexisting-state-divergence and unavailable-feature cases separate.",
-    "Build a state-divergence consequence ledger with event IDs/timestamps and later genuine primary entries encountered while divergent, without attaching future prices or outcomes.",
-    "Shortlist at most three exit feature families per position direction; a minimum is not required.",
-    "Return immutable result artifacts and update all handoff layers."
-  ],
-  "acceptance_checks": [
-    "LONG_AND_SHORT_EXIT_POPULATIONS_SEPARATE",
-    "STATE_COMPATIBLE_CONTROLS_ONLY",
-    "ALL_SOURCE_EXITS_RETAINED_IN_DENOMINATOR",
-    "CURRENT_M15_HIGH_LOW_CLOSE_UNUSED",
-    "ONE_BAR_LATE_ROWS_DESCRIPTIVE_ONLY",
-    "EXACT_LATE_MISSED_COUNTS_SEPARATE",
-    "STATE_DIVERGENCE_LEDGER_HAS_NO_FUTURE_PRICE_OR_OUTCOME",
-    "SOURCE_CONTEXT_EXCLUDED_FROM_STANDALONE_CANDIDATE_SHORTLIST",
-    "NO_OUTCOME_FIELD_READ",
-    "NO_RUNTIME_CHANGE"
-  ],
-  "required_after_completion": [
-    "PREREGISTER_FINITE_EXIT_GRAMMAR",
-    "REPLAY_COMPLETE_ENTRY_EXIT_STATE_MACHINES",
-    "COMPARE_SOURCE_RECALL_EXTRA_TRANSITIONS_DIVERGENCE_DURATION_AND_MISSED_PRIMARY_CASCADES",
-    "FREEZE_SMALL_INTEGRATED_SOURCE_FIDELITY_FAMILY",
-    "DEFINE_SEPARATE_TRADING_VALUE_OUTCOME_GATE"
+  "expected_evidence": {
+    "terminal_data_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675",
+    "exact_symbol_hypothesis": "BTCUSD#",
+    "symbol_hypothesis_may_block_and_return_candidate_list": true,
+    "required_fields": [
+      "digits",
+      "point",
+      "trade_tick_size",
+      "trade_tick_value",
+      "trade_contract_size",
+      "trade_calc_mode",
+      "currency_profit",
+      "spread",
+      "bid_ask_tick_when_available"
+    ]
+  },
+  "read_only_guards": {
+    "terminal_must_already_be_running": true,
+    "connected_data_path_exact_match_required": true,
+    "order_send": false,
+    "order_check": false,
+    "positions_or_orders_query": false,
+    "order_or_deal_history_query": false,
+    "symbol_select": false,
+    "account_number_name_balance_pnl_export": false,
+    "Collector_M7C_GOLD_change": false
+  },
+  "acceptance_after_upload": [
+    "EXACT_PACKAGE_LAYOUT_AND_MANIFEST",
+    "EXPECTED_TERMINAL_DATA_PATH_MATCH",
+    "EXACT_SYMBOL_OR_EXPLICIT_AMBIGUITY_DIAGNOSTIC",
+    "VALID_DIGITS_POINT_TICK_SIZE_CONTRACT_SIZE_AND_CURRENCY",
+    "CSV_SPREAD_OBSERVATION_RECORDED_WITHOUT_SILENT_SNAPSHOT_REPLACEMENT",
+    "NO_FORBIDDEN_MT5_CALL_OR_PRIVATE_ACCOUNT_EXPORT",
+    "COMMISSION_REMAINS_EXPLICITLY_RESOLVED_OR_UNRESOLVED",
+    "SAFE_TO_COMPUTE_PNL_REMAINS_FALSE_UNTIL_SHARED_COST_CONTRACT"
   ],
   "explicitly_not_authorized": [
-    "FINAL_EXIT_FORMULA",
-    "TIME_STOP",
-    "TP_SL_OR_HOLDING_OPTIMIZATION",
-    "PROFITABILITY_CLAIM_FROM_EARLIER_EXIT",
-    "RESYNCHRONIZATION_POLICY_SELECTION",
-    "FINAL_INTEGRATED_CANDIDATE_FORMULA",
-    "OUTCOME_PERFORMANCE_INTERPRETATION",
-    "WR_PF_DD_MFE_MAE_ANALYSIS",
-    "FF06_CREATION",
+    "SECOND_BCR08_RUN_WITHOUT_AUDITING_FIRST_PACKAGE",
+    "PNL_OR_FUTURE_OUTCOME_ANALYSIS",
+    "WR_PF_DD_MFE_MAE",
+    "SPREAD_CONVERSION_BY_GUESS",
+    "ZERO_COMMISSION_ASSUMPTION",
+    "TP_SL_TIME_STOP_OR_HOLDING_OPTIMIZATION",
+    "CANDIDATE_PROMOTION_OR_REJECTION",
+    "FF06",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
-    "LOT_DESIGN",
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
-  "user_action_required_now": false,
-  "bat_required_now": false,
-  "runtime_change_required": false,
+  "after_successful_audit": "FREEZE_SHARED_TRACK_A_TRACK_B_EXECUTION_SPREAD_COMMISSION_AND_COST_SENSITIVITY_CONTRACT_BEFORE_OPENING_RETROSPECTIVE_OUTCOMES",
+  "user_action_required_now": true,
+  "bat_required_now": true,
+  "runtime_stop_or_restart_required": false,
   "handoff_update_required_after_completion": true
 }
