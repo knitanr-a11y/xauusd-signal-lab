@@ -1,0 +1,97 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05E_OUTCOME_BLIND_COMPLETE_ENTRY_EXIT_STATE_MACHINE_REPLAY",
+  "recorded_at": "2026-07-30T18:40:00+09:00",
+  "status": "READY_OUTCOME_BLIND_INTEGRATED_SOURCE_FIDELITY_REPLAY",
+  "inputs": {
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "BCR05B_package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "BCR05C_package_sha256": "221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
+    "BCR05D_package_sha256": "b1c4c66454f3076ffc90b22cac27280c6daa38f97db63ae07bed5294eed872d7",
+    "contract_commit": "180d228983561b4fa3f4e8d00fab6cd08a0538c7"
+  },
+  "integrated_combinations": 36,
+  "source_seeded_pareto_count": 4,
+  "pareto_with_exact_recall_ge_0_70": 4,
+  "pareto_family": [
+    {
+      "family_id": "F1_COVERAGE_FIRST",
+      "integrated_id": "I__A_LONG_E0_Z1_P0__A_SHORT_E0_Z1_P1__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0",
+      "exact_supported_hits": 51,
+      "supported_source_n": 53,
+      "exact_supported_recall": 0.9622641509,
+      "extra_transition_count": 66,
+      "extra_transition_rate": 0.0727673649,
+      "source_state_agreement_rate": 0.5314222712,
+      "divergent_boundary_count": 425,
+      "divergence_episode_count": 29,
+      "maximum_divergence_episode_length": 46,
+      "state_blocked_primary_count": 1
+    },
+    {
+      "family_id": "F2_HIGH_COVERAGE_INTERMEDIATE",
+      "integrated_id": "I__A_LONG_E0_Z1_P0__A_SHORT_E1_Z1_P1__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0",
+      "exact_supported_hits": 50,
+      "supported_source_n": 53,
+      "exact_supported_recall": 0.9433962264,
+      "extra_transition_count": 37,
+      "extra_transition_rate": 0.0407938258,
+      "source_state_agreement_rate": 0.7067254686,
+      "divergent_boundary_count": 266,
+      "divergence_episode_count": 15,
+      "maximum_divergence_episode_length": 65,
+      "state_blocked_primary_count": 1
+    },
+    {
+      "family_id": "F3_STATE_FIDELITY",
+      "integrated_id": "I__A_LONG_E1_Z2_P0__A_SHORT_E1_Z2_P0__X_LONG_EXIT_T70_M0_P1__X_SHORT_EXIT_T70_M0_P0",
+      "exact_supported_hits": 45,
+      "supported_source_n": 53,
+      "exact_supported_recall": 0.8490566038,
+      "extra_transition_count": 16,
+      "extra_transition_rate": 0.0176405733,
+      "source_state_agreement_rate": 0.7574421169,
+      "divergent_boundary_count": 220,
+      "divergence_episode_count": 8,
+      "maximum_divergence_episode_length": 116,
+      "state_blocked_primary_count": 1
+    },
+    {
+      "family_id": "F4_MINIMUM_EXTRA_PARETO",
+      "integrated_id": "I__A_LONG_E1_Z2_P0__A_SHORT_E1_Z2_P0__X_LONG_EXIT_T70_M1_P0__X_SHORT_EXIT_T70_M0_P0",
+      "exact_supported_hits": 40,
+      "supported_source_n": 53,
+      "exact_supported_recall": 0.7547169811,
+      "extra_transition_count": 15,
+      "extra_transition_rate": 0.0165380375,
+      "source_state_agreement_rate": 0.6714443219,
+      "divergent_boundary_count": 298,
+      "divergence_episode_count": 8,
+      "maximum_divergence_episode_length": 116,
+      "state_blocked_primary_count": 2
+    }
+  ],
+  "idle_seed_diagnostic": {
+    "source_seed_is_deployable_requirement": false,
+    "F1_exact_recall": 0.9622641509,
+    "F1_divergent_boundaries": 427,
+    "F3_exact_recall": 0.8301886792,
+    "F3_divergent_boundaries": 225,
+    "F4_exact_recall": 0.7358490566,
+    "F4_divergent_boundaries": 303
+  },
+  "accepted_package": {
+    "filename": "BCR05E_OUTCOME_BLIND_INTEGRATED_STATE_MACHINE_REPLAY_20260730.zip",
+    "sha256": "d8fd13557f3b0a9c6d7fc9d499e7654ec4cb814f5538e41928b2e9d2c4d0ca84",
+    "deterministic_two_run_sha_match": true
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "trading_candidate_promoted": false,
+  "track_A_source_fidelity_family_ready_to_freeze": true,
+  "next_required_paths": [
+    "FREEZE_TRACK_A_SOURCE_FIDELITY_FAMILY_WITH_STANDALONE_INITIALIZATION_BOUNDARY",
+    "RESUME_TRACK_B_INDEPENDENT_MECHANISM_RESEARCH",
+    "DEFINE_SEPARATE_TRADING_VALUE_GATE_AFTER_BOTH_TRACKS_HAVE_FIXED_CANDIDATES"
+  ]
+}
