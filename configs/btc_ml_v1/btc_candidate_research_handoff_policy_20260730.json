@@ -1,28 +1,27 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T19:25:00+09:00",
+  "recorded_at": "2026-07-30T20:00:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_TRACK_A_TRACK_B_COMPLETE_BCR08_COST_PROVENANCE_NEXT_20260730.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR09_VALUE_GATE_COMPLETE_BCR10_PATH_DIAGNOSTIC_NEXT_20260730.md",
   "required_read_order": [
     "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_TRACK_A_TRACK_B_COMPLETE_BCR08_COST_PROVENANCE_NEXT_20260730.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR09_VALUE_GATE_COMPLETE_BCR10_PATH_DIAGNOSTIC_NEXT_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
-    "docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_CONTRACT_20260730.md",
-    "configs/btc_ml_v1/btc_bcr08_mt5_symbol_cost_provenance_contract_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR09_CORRECTED_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260730.md",
+    "configs/btc_ml_v1/btc_bcr09_corrected_shared_retrospective_value_result_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR09_PREACCEPTANCE_COMMON_WARMUP_INCIDENT_AND_CORRECTION_20260730.md",
+    "configs/btc_ml_v1/btc_bcr09_common_warmup_correction_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR09_SHARED_EXECUTION_COST_AND_RETROSPECTIVE_VALUE_GATE_CONTRACT_20260730.md",
+    "docs/btc_ml_v1/BTC_BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_RESULT_20260730.md",
+    "docs/btc_ml_v1/BTC_BCR08A_KIWAMI_COMMISSION_CONTRACT_RESOLUTION_20260730.md",
+    "docs/btc_ml_v1/BTC_BCR10_HOLDING_ROLLOVER_AND_PATH_PHENOTYPE_DIAGNOSTIC_CONTRACT_20260730.md",
     "docs/btc_ml_v1/BTC_BCR05F_TRACK_A_SOURCE_FIDELITY_FAMILY_FREEZE_20260730.md",
-    "configs/btc_ml_v1/btc_bcr05f_track_a_source_fidelity_family_freeze_20260730.json",
-    "docs/btc_ml_v1/BTC_BCR05E_OUTCOME_BLIND_INTEGRATED_STATE_MACHINE_REPLAY_RESULT_20260730.md",
-    "configs/btc_ml_v1/btc_bcr05e_outcome_blind_integrated_state_machine_replay_result_20260730.json",
-    "docs/btc_ml_v1/BTC_BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_RESULT_20260730.md",
-    "docs/btc_ml_v1/BTC_BCR06_OUTCOME_BLIND_TRACK_B_MECHANISM_DENSITY_RESULT_20260730.md",
-    "configs/btc_ml_v1/btc_bcr06_outcome_blind_track_b_mechanism_density_result_20260730.json",
     "docs/btc_ml_v1/BTC_BCR07_OUTCOME_BLIND_TRACK_B_STATE_MACHINE_RESULT_20260730.md",
-    "configs/btc_ml_v1/btc_bcr07_outcome_blind_track_b_state_machine_result_20260730.json",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md"
   ],
@@ -55,65 +54,64 @@
     "old BTC handoffs not referenced by stable_entry",
     "FF05 recovery V3-V11 execution instructions"
   ],
-  "mochipoyo_exception": {
-    "general_branch_search": "FORBIDDEN",
-    "allowed_role": "READ_ONLY_M7C_AND_COLLECTOR_SOURCE_EVIDENCE_FOR_BTCUSD",
-    "allowed_inputs": [
-      "USER_UPLOADED_M7C_PACKAGE_SHA256_870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
-      "USER_UPLOADED_COLLECTOR_PACKAGE_SHA256_b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
-      "BCR01_PACKAGE_SHA256_bc562948ee8baefba32d0e291a54341243da4684bdbf43d652676d5fcdab5611",
-      "BCR02_PACKAGE_SHA256_5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
-      "BCR03_M15_SHA256_b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
-      "BCR04_PACKAGE_SHA256_5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
-      "BCR05A_CORRECTED_PACKAGE_SHA256_b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
-      "BCR05B_PACKAGE_SHA256_525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
-      "BCR05C_PACKAGE_SHA256_221280603569054f3ffc23c6698446e377f9d650d288fa3d08d224a8e3925af3",
-      "BCR05D_PACKAGE_SHA256_b1c4c66454f3076ffc90b22cac27280c6daa38f97db63ae07bed5294eed872d7",
-      "BCR05E_PACKAGE_SHA256_d8fd13557f3b0a9c6d7fc9d499e7654ec4cb814f5538e41928b2e9d2c4d0ca84"
-    ],
-    "invalid_inputs_audit_history_only": [
-      "BCR05A_PREACCEPTANCE_INVALID_PACKAGE_SHA256_838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb"
-    ],
-    "runtime_change": "FORBIDDEN",
-    "write_back": "FORBIDDEN"
-  },
-  "current_research_tracks": {
-    "track_A": "FOUR_FROZEN_MOCHIPOYO_SOURCE_FIDELITY_COMPLETE_STATE_MACHINES",
-    "track_B": "FOUR_FROZEN_INDEPENDENT_COMPLETE_STATE_MACHINES",
-    "deployable_candidates": 0,
-    "profitability_outcomes_opened": false
-  },
-  "current_status": "BTC_REDESIGN_TRACK_A_AND_TRACK_B_COMPLETE_OUTCOME_BLIND_BCR08_COST_PROVENANCE_READY",
-  "current_decision": "RUN_ONE_READ_ONLY_BCR08_METADATA_EVIDENCE_EXPORT_BEFORE_ANY_PNL",
-  "current_next_action": "PULL_AND_RUN_BCR08_ONCE_UPLOAD_FIRST_ZIP",
-  "current_evidence": {
-    "Track_A_member_count": 4,
-    "Track_B_member_count": 4,
+  "allowed_evidence": {
+    "M7C_Collector_role": "READ_ONLY_TEACHER_EVIDENCE_ONLY",
     "BCR05E_package_sha256": "d8fd13557f3b0a9c6d7fc9d499e7654ec4cb814f5538e41928b2e9d2c4d0ca84",
     "BCR06_package_sha256": "04215689d2b861b72e737e000dfe6a6b3d2434ec2caae37b9574edd4b770027b",
     "BCR07_package_sha256": "7b2643a00179aaa3b09c2854fa52e10e4bbad6ed9ff69d0a58e3d279ea7cb0f4",
-    "profitability_candidates_selected": 0,
-    "outcomes_opened": false
+    "BCR08_package_sha256": "2b5df4bcdf0f2c07c0d246a3cfe057f05ef4751f7ab3e3c71e8f993cd24cbbf7",
+    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "runtime_change": "FORBIDDEN",
+    "gold_mochipoyo_writeback": "FORBIDDEN"
+  },
+  "invalid_audit_history_only": [
+    "BCR05A_PREACCEPTANCE_LABEL_DERIVED_OUTPUT",
+    "BCR09_INITIAL_INCORRECT_WARMUP_OUTPUT",
+    "FF05_RECOVERY_V3_V11",
+    "BTC7R"
+  ],
+  "current_research_tracks": {
+    "track_A": "FOUR_FROZEN_MOCHIPOYO_DERIVED_BASE_MACHINES_ALL_REJECTED_IN_BCR09_BASE_GATE",
+    "track_B": "B1_REJECTED_B4_ONE_HOLD_ONE_REJECTED",
+    "deployable_candidates": 0,
+    "portfolio_selected": false,
+    "shadow_started": false
+  },
+  "current_status": "BTC_REDESIGN_BCR09_COMPLETE_NO_SUPPORTED_BASE_MACHINE_BCR10_DIAGNOSTIC_NEXT",
+  "current_decision": "NO_BASE_PROMOTION_DIAGNOSE_TRACK_A_AND_B4_HOLDING_PATH_PHENOTYPE_WITH_FIXED_BINS",
+  "current_next_action": "IMPLEMENT_AND_AUDIT_BCR10_DIAGNOSTIC_NO_OVERLAY_PNL",
+  "current_evidence": {
+    "BCR09_closed_trades": 8474,
+    "BCR09_supported": 0,
+    "BCR09_promising": 0,
+    "BCR09_hold": 1,
+    "BCR09_rejected": 7,
+    "BCR09_monthly_holm_support": false,
+    "same_server_date_is_validated_filter": false,
+    "outcomes_opened": true,
+    "exposure_label": "RETROSPECTIVE_FULL_HISTORY_EXPOSED"
   },
   "currently_authorized": [
-    "ONE_BCR08_READ_ONLY_MT5_METADATA_RUN",
-    "UPLOAD_FIRST_BCR08_PACKAGE_SUCCESS_OR_FAILURE",
-    "AUDIT_SYMBOL_POINT_TICK_CONTRACT_SPREAD_AND_PRIVACY_INTEGRITY"
+    "BCR10_FIXED_BIN_HOLDING_DATE_CROSSING_AND_PATH_DIAGNOSTIC",
+    "BCR10_DIRECTION_CORRECT_MFE_MAE_GIVEBACK_ANALYSIS",
+    "BCR10_EXPLICIT_GAP_AND_23_45_AVAILABILITY_AUDIT",
+    "BCR10_TESTS_AND_IMMUTABLE_DIAGNOSTIC_PACKAGE"
   ],
   "currently_not_authorized": [
-    "SECOND_BCR08_RUN_BEFORE_FIRST_PACKAGE_AUDIT",
-    "PROFITABILITY_OUTCOME_ACCESS",
-    "WR_PF_DD_MFE_MAE",
-    "SPREAD_CONVERSION_BY_ASSUMPTION",
-    "ZERO_COMMISSION_ASSUMPTION",
-    "TP_SL_TIME_STOP_HOLDING_OPTIMIZATION",
-    "CANDIDATE_PROMOTION_OR_REJECTION",
-    "FF06",
+    "BASE_MACHINE_THRESHOLD_RESCUE",
+    "B2_THRESHOLD_RESCUE",
+    "SAME_SERVER_DATE_AS_VALIDATED_ENTRY_FILTER",
+    "TIME_STOP_OR_SERVER_DAY_FLAT_PNL_IN_BCR10",
+    "TP_SL_OR_TRAILING_STOP_SEARCH",
+    "ATR_HOUR_WEEKDAY_DIRECTION_OR_REGIME_FILTER",
+    "PORTFOLIO_SELECTION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
     "LIVE_READY",
+    "AUTOMATIC_PROMOTION",
     "MODIFY_OR_STOP_M7C_COLLECTOR_M8C_M9_M10"
   ],
   "continuous_update_triggers": [
