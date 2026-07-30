@@ -3,11 +3,11 @@
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
   "recorded_at": "2026-07-30T13:46:00+09:00",
-  "next_stage": "BCR05B_OUTCOME_BLIND_FINITE_TRACK_A_ENTRY_GRAMMAR_IMPLEMENTATION",
-  "authorization": "AUTHORIZED_FINITE_SOURCE_FIDELITY_GRAMMAR_ONLY_NO_OUTCOME_OR_RUNTIME_CHANGE",
+  "next_stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "authorization": "AUTHORIZED_OUTCOME_BLIND_EXIT_STATE_FIDELITY_ANALYSIS_NO_PROFITABILITY_OR_RUNTIME_CHANGE",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR04_BCR05A_COMPLETE_BCR05B_FINITE_ENTRY_GRAMMAR_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR05B_ENTRY_FIDELITY_COMPLETE_BCR05C_EXIT_STATE_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
@@ -15,76 +15,68 @@
   "completed_inputs": {
     "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
     "BCR04_decision_rows": 907,
-    "BCR04_primary_long_rows": 16,
-    "BCR04_primary_short_rows": 10,
-    "BCR04_eligible_idle_controls": 438,
     "BCR05A_corrected_package_sha256": "b49b9118d0e15184d8b7aea3452b70899ed0406b82360580fd076ae972d9255b",
-    "BCR05A_invalid_v100_sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
-    "BCR05A_shortlisted_families": [
-      "A_RCI_SHAPE",
-      "B_EMA_STRUCTURE",
-      "D_CLOSED_BAR_LOCATION"
+    "BCR05B_package_sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "BCR05B_advanced_long_variants": [
+      "A_LONG_E0_Z1_P0",
+      "A_LONG_E1_Z2_P0"
     ],
+    "BCR05B_advanced_short_variants": [
+      "A_SHORT_E0_Z1_P1",
+      "A_SHORT_E1_Z1_P1",
+      "A_SHORT_E1_Z2_P0"
+    ],
+    "BCR05B_variants_are_source_fidelity_only": true,
     "outcome_performance_interpreted": false
   },
-  "purpose": "Evaluate exactly 12 preregistered entry grammars per direction against genuine primary source events and the full compatible IDLE-control universe, using source recall and control-fire rate only.",
-  "grammar": {
-    "mandatory_anchor": {
-      "long": "RCI9_TURN_UP",
-      "short": "RCI9_TURN_DOWN"
-    },
-    "EMA_axis": [
-      "NO_EMA_GATE",
-      "DIRECTION_CORRECT_EMA20_30_40_STACK"
-    ],
-    "RCI9_level_axis": [
-      "NO_LEVEL_GATE",
-      "POLARITY_GATE_LONG_LE_0_SHORT_GE_0",
-      "EXTREME_GATE_LONG_LE_NEG40_SHORT_GE_40"
-    ],
-    "previous_closed_return_axis": [
-      "NO_RETURN_GATE",
-      "DIRECTION_MATCHING_RETURN_SIGN"
-    ],
-    "long_grammar_count": 12,
-    "short_grammar_count": 12,
-    "total_grammar_count": 24,
-    "post_output_changes_allowed": false
+  "populations": {
+    "long_exit_positive": 17,
+    "active_long_eligible_controls": 223,
+    "short_exit_positive": 10,
+    "active_short_eligible_controls": 168,
+    "mix_idle_or_opposite_state_controls": false
   },
+  "purpose": "Identify exact-boundary exit signatures, separate exact/one-bar-late/missed M7C exits, and quantify proxy/source state-divergence consequences before any finite exit grammar or integrated Track A state machine is frozen.",
   "implementation_tasks": [
-    "Read only the frozen BCR04 decision-window ledger identified by exact package SHA.",
-    "Verify 16 LONG events, 10 SHORT events and 438 eligible IDLE controls before evaluation.",
-    "Generate exactly the 12 frozen grammars per direction with deterministic grammar IDs.",
-    "Report event hits, recall, control hits, control-fire rate, specificity, corrected odds ratio and descriptive Fisher p-value.",
-    "Construct the recall-versus-control-fire Pareto frontier without profitability information.",
-    "Advance at most one Pareto grammar per full, high and balanced recall tier using the frozen tie-break.",
-    "Produce leave-one-event-day and leave-one-event stability reports for advancing grammars.",
-    "Prove that event distance, future source information, source-state age and outcome fields are absent from grammar predicates.",
-    "Return an immutable result package and update all handoff layers."
+    "Read only the frozen BCR04 ledger and exact allowlisted M7C comparison evidence.",
+    "Verify 17 LONG exits, 223 eligible ACTIVE_LONG controls, 10 SHORT exits and 168 eligible ACTIVE_SHORT controls.",
+    "Analyze LONG and SHORT exits separately using the frozen X1 RCI, X2 EMA, X3 closed-bar reversal/location and X4 volatility feature families.",
+    "Use Fisher exact, Mann-Whitney U, Cliff's delta, Benjamini-Hochberg q=0.10 and leave-one-exit-day/leave-one-exit stability under the frozen contract.",
+    "Keep source-state age and genuine-source cadence in fidelity-context outputs only, not candidate shortlist evidence.",
+    "Label exact-next-row inspection as POST_SOURCE_EXIT_ONE_BAR_TIMING_DESCRIPTIVE_ONLY.",
+    "Keep exact, one-M15-late, missed, preexisting-state-divergence and unavailable-feature cases separate.",
+    "Build a state-divergence consequence ledger with event IDs/timestamps and later genuine primary entries encountered while divergent, without attaching future prices or outcomes.",
+    "Shortlist at most three exit feature families per position direction; a minimum is not required.",
+    "Return immutable result artifacts and update all handoff layers."
   ],
   "acceptance_checks": [
-    "EXACTLY_24_DIRECTIONAL_GRAMMAR_ROWS",
-    "ALL_GRAMMAR_IDS_UNIQUE",
-    "MANDATORY_RCI9_TURN_IN_EVERY_GRAMMAR",
-    "ONLY_THREE_FROZEN_OPTIONAL_AXES",
-    "ALL_PRIMARY_EVENTS_RETAINED_IN_DENOMINATOR",
-    "ALL_438_ELIGIBLE_IDLE_CONTROLS_RETAINED",
-    "PARETO_RULE_DETERMINISTIC",
-    "MAXIMUM_THREE_ADVANCED_PER_DIRECTION",
-    "NO_LABEL_DERIVED_OR_FUTURE_SOURCE_FEATURE",
+    "LONG_AND_SHORT_EXIT_POPULATIONS_SEPARATE",
+    "STATE_COMPATIBLE_CONTROLS_ONLY",
+    "ALL_SOURCE_EXITS_RETAINED_IN_DENOMINATOR",
+    "CURRENT_M15_HIGH_LOW_CLOSE_UNUSED",
+    "ONE_BAR_LATE_ROWS_DESCRIPTIVE_ONLY",
+    "EXACT_LATE_MISSED_COUNTS_SEPARATE",
+    "STATE_DIVERGENCE_LEDGER_HAS_NO_FUTURE_PRICE_OR_OUTCOME",
+    "SOURCE_CONTEXT_EXCLUDED_FROM_STANDALONE_CANDIDATE_SHORTLIST",
     "NO_OUTCOME_FIELD_READ",
     "NO_RUNTIME_CHANGE"
   ],
-  "required_after_completion": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS_BEFORE_INTEGRATED_TRACK_A_FORMULA",
+  "required_after_completion": [
+    "PREREGISTER_FINITE_EXIT_GRAMMAR",
+    "REPLAY_COMPLETE_ENTRY_EXIT_STATE_MACHINES",
+    "COMPARE_SOURCE_RECALL_EXTRA_TRANSITIONS_DIVERGENCE_DURATION_AND_MISSED_PRIMARY_CASCADES",
+    "FREEZE_SMALL_INTEGRATED_SOURCE_FIDELITY_FAMILY",
+    "DEFINE_SEPARATE_TRADING_VALUE_OUTCOME_GATE"
+  ],
   "explicitly_not_authorized": [
+    "FINAL_EXIT_FORMULA",
+    "TIME_STOP",
+    "TP_SL_OR_HOLDING_OPTIMIZATION",
+    "PROFITABILITY_CLAIM_FROM_EARLIER_EXIT",
+    "RESYNCHRONIZATION_POLICY_SELECTION",
+    "FINAL_INTEGRATED_CANDIDATE_FORMULA",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
     "WR_PF_DD_MFE_MAE_ANALYSIS",
-    "TP_SL_OR_HOLDING_OPTIMIZATION",
-    "CONTINUOUS_THRESHOLD_SEARCH",
-    "ADD_ATR_COMPRESSION_OR_TIME_GATES",
-    "SOURCE_EVENT_DISTANCE_PREDICATES",
-    "SOURCE_STATE_AGE_AS_STANDALONE_CANDIDATE_INPUT",
-    "FINAL_INTEGRATED_CANDIDATE_FORMULA",
     "FF06_CREATION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
