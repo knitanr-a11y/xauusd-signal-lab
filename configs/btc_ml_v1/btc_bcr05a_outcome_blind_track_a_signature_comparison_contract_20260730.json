@@ -1,0 +1,70 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "input": {
+    "bcr04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "decision_rows": 907,
+    "core_feature_eligible_rows": 905,
+    "primary_long_rows": 16,
+    "primary_short_rows": 10,
+    "idle_control_rows_total": 440,
+    "idle_control_rows_eligible": 438
+  },
+  "known_anchor": {
+    "long": "RCI9_TURN_UP",
+    "short": "RCI9_TURN_DOWN",
+    "status": "PRIOR_OUTCOME_BLIND_EVIDENCE_NOT_NEW_DISCOVERY"
+  },
+  "populations": {
+    "long_positive": "ALL_PRIMARY_LONG_EVENT",
+    "short_positive": "ALL_PRIMARY_SHORT_EVENT",
+    "control": "ALL_CORE_FEATURE_ELIGIBLE_IDLE_NON_EVENT_CONTROL",
+    "active_state_controls_in_primary_analysis": false,
+    "event_exclusion_allowed": false
+  },
+  "feature_families": {
+    "A_RCI_SHAPE": ["RCI9", "RCI14", "RCI18", "DELTA1", "TURN_FLAGS", "FIXED_LEVEL_ZONES"],
+    "B_EMA_STRUCTURE": ["ALIGNMENT", "EMA_SPREADS_BPS", "EMA_SLOPES_1_4_8"],
+    "C_VOLATILITY_COMPRESSION": ["ATR14", "ATR14_ATR50", "ATR_QUINTILE", "RV32_QUINTILE", "BB_WIDTH_QUINTILE"],
+    "D_CLOSED_BAR_LOCATION": ["RETURNS_1_4_16", "BODY_RANGE_WICKS", "CURRENT_OPEN_GAP", "ROLLING_LOCATION", "FIXED_BREAKOUT_FLAGS"],
+    "E_CLOCK_SEQUENCE": ["BROKER_HOUR", "DAY_OF_WEEK", "STATE_AGE_BIN", "EVENT_DISTANCE_BIN", "GAP_FLAGS"]
+  },
+  "rci_zones": ["LE_NEG80", "NEG80_NEG40", "NEG40_ZERO", "ZERO_40", "40_80", "GE_80"],
+  "statistics": {
+    "binary_categorical": ["EVENT_PREVALENCE", "CONTROL_PREVALENCE", "PREVALENCE_DIFFERENCE", "HALDANE_ANSCOMBE_ODDS_RATIO", "FISHER_EXACT_TWO_SIDED"],
+    "continuous": ["MEDIAN", "IQR", "MEDIAN_DIFFERENCE", "CLIFFS_DELTA"],
+    "continuous_threshold_search": false,
+    "multiple_testing": {
+      "method": "BENJAMINI_HOCHBERG",
+      "q": 0.10,
+      "groups": ["DIRECTION", "FEATURE_FAMILY", "STATISTIC_TYPE"]
+    },
+    "temporal_stability": "LEAVE_ONE_PRIMARY_EVENT_CALENDAR_DAY_OUT_DESCRIPTIVE"
+  },
+  "shortlist": {
+    "maximum_additional_feature_families_per_direction": 3,
+    "minimum_required": 0,
+    "anchor_not_counted_as_new_family": true,
+    "requirements": ["NONTRIVIAL_EFFECT_SIZE", "FDR_OR_DESCRIPTIVE_ONLY_LABEL", "LEAVE_ONE_DAY_STABILITY", "NO_SINGLE_EVENT_DOMINANCE", "BCR04_CAUSAL_AVAILABILITY"]
+  },
+  "forbidden": [
+    "HIGH_CAPACITY_CLASSIFIER",
+    "RANDOM_SPLIT",
+    "EXHAUSTIVE_THRESHOLD_SEARCH",
+    "OUTCOME_OPENING",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL_OR_EXIT_OPTIMIZATION",
+    "FINAL_TRIGGER_FORMULA",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_GOLD_MOCHIPOYO_RUNTIME"
+  ],
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false
+}
