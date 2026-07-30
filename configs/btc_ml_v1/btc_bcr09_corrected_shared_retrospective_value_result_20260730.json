@@ -1,0 +1,151 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR09_SHARED_EXECUTION_COST_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-30T19:50:00+09:00",
+  "status": "READY_CORRECTED_RETROSPECTIVE_VALUE_RESULT_NO_SUPPORTED_MACHINE",
+  "accepted_package": {
+    "filename": "BCR09_SHARED_RETROSPECTIVE_VALUE_GATE_20260730.zip",
+    "sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
+    "deterministic_second_run_match": true
+  },
+  "reproducer": {
+    "path": "scripts/btc_ml_v1/BCR09_shared_retrospective_value_gate/python/run_bcr09_shared_value_gate.py",
+    "sha256": "997a93537f73bfaf6d587c2079d0d0186c34209ae2b5ae99553a276f890bf474",
+    "tests": "4_PASSED"
+  },
+  "integrity": {
+    "machines": 8,
+    "closed_trades": 8474,
+    "endpoint_open_episodes": 3,
+    "missing_exact_execution_rows": 0,
+    "current_high_low_close_used_for_signal": false,
+    "nearest_next_interpolation_used": false,
+    "track_a_entry_count_parity_all_match": true,
+    "track_b_episode_parity_all_match": true,
+    "invalid_initial_warmup_run_accepted": false,
+    "commission": 0.0,
+    "swap_included": false,
+    "rollover_exposed_results": "PRE_SWAP_ONLY"
+  },
+  "classification_counts": {
+    "VALUE_SUPPORTED_RETROSPECTIVE": 0,
+    "VALUE_PROMISING_RETROSPECTIVE": 0,
+    "HOLD_INSUFFICIENT_OR_COST_SENSITIVE": 1,
+    "REJECT_RETROSPECTIVE_VALUE": 7
+  },
+  "machines": {
+    "TRACK_A_F1_COVERAGE_FIRST": {
+      "closed": 1561,
+      "c0_pf": 0.8880651974,
+      "c0_net_usd_1lot": -40703.30,
+      "c0_expectancy": -26.075144,
+      "c2_pf": 0.8407460892,
+      "c2_net_usd_1lot": -58905.80,
+      "same_server_date_trades": 1300,
+      "same_server_date_c0_pf": 1.5130444602,
+      "same_server_date_c0_net": 101272.56,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE": {
+      "closed": 1229,
+      "c0_pf": 0.9077982139,
+      "c0_net_usd_1lot": -26262.73,
+      "c0_expectancy": -21.369186,
+      "c2_pf": 0.8599125135,
+      "c2_net_usd_1lot": -40598.98,
+      "same_server_date_trades": 1023,
+      "same_server_date_c0_pf": 1.6232849083,
+      "same_server_date_c0_net": 91037.43,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_A_F3_STATE_FIDELITY": {
+      "closed": 812,
+      "c0_pf": 0.9318696365,
+      "c0_net_usd_1lot": -12490.33,
+      "c0_expectancy": -15.382180,
+      "c2_pf": 0.8820776601,
+      "c2_net_usd_1lot": -21996.58,
+      "same_server_date_trades": 660,
+      "same_server_date_c0_pf": 1.6775066501,
+      "same_server_date_c0_net": 62314.04,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_A_F4_MINIMUM_EXTRA_PARETO": {
+      "closed": 768,
+      "c0_pf": 0.9069522929,
+      "c0_net_usd_1lot": -16766.03,
+      "c0_expectancy": -21.830768,
+      "c2_pf": 0.8595377480,
+      "c2_net_usd_1lot": -25747.28,
+      "same_server_date_trades": 611,
+      "same_server_date_c0_pf": 1.8919967507,
+      "same_server_date_c0_net": 68871.64,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_B_B1_E0_EMA30_CROSS": {
+      "closed": 1980,
+      "c0_pf": 0.7728795975,
+      "c0_net_usd_1lot": -62395.43,
+      "c0_expectancy": -31.512843,
+      "c2_pf": 0.7066178506,
+      "c2_net_usd_1lot": -85568.555,
+      "same_server_date_trades": 1804,
+      "same_server_date_c0_pf": 0.4399122061,
+      "same_server_date_c0_net": -142958.64,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_B_B1_E1_STACK_BREAK": {
+      "closed": 519,
+      "c0_pf": 0.9177524340,
+      "c0_net_usd_1lot": -15978.65,
+      "c0_expectancy": -30.787380,
+      "c2_pf": 0.8889828222,
+      "c2_net_usd_1lot": -22051.775,
+      "same_server_date_trades": 304,
+      "same_server_date_c0_pf": 0.0396581343,
+      "same_server_date_c0_net": -138348.04,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    },
+    "TRACK_B_B4_E0_EMA20_TOUCH": {
+      "closed": 773,
+      "c0_pf": 1.0006233755,
+      "c0_net_usd_1lot": 108.97,
+      "c0_expectancy": 0.140970,
+      "c2_pf": 0.9496619613,
+      "c2_net_usd_1lot": -8951.03,
+      "same_server_date_trades": 675,
+      "same_server_date_c0_pf": 1.4595882697,
+      "same_server_date_c0_net": 51177.87,
+      "classification": "HOLD_INSUFFICIENT_OR_COST_SENSITIVE"
+    },
+    "TRACK_B_B4_E1_EXTENSION_CONTRACT": {
+      "closed": 832,
+      "c0_pf": 0.9987683904,
+      "c0_net_usd_1lot": -201.97,
+      "c0_expectancy": -0.242752,
+      "c2_pf": 0.9404328172,
+      "c2_net_usd_1lot": -9955.72,
+      "same_server_date_trades": 749,
+      "same_server_date_c0_pf": 1.3694726895,
+      "same_server_date_c0_net": 41739.98,
+      "classification": "REJECT_RETROSPECTIVE_VALUE"
+    }
+  },
+  "monthly_holm": {
+    "active_months_each": 11,
+    "all_adjusted_p_values_c0": 1.0,
+    "all_adjusted_p_values_c2": 1.0,
+    "familywise_monthly_support": false
+  },
+  "interpretation": {
+    "same_server_date_is_validated_filter": false,
+    "same_server_date_role": "OUTCOME_EXPOSED_HOLDING_PATH_PHENOTYPE_ONLY",
+    "b1_current_family_rescue_priority": false,
+    "track_a_and_b4_diagnostic_priority": true,
+    "candidate_promoted": false,
+    "portfolio_selected": false,
+    "shadow_authorized": false
+  },
+  "next_stage": "BCR10_PREREGISTER_HOLDING_AND_ROLLOVER_EXPOSURE_PHENOTYPE_DIAGNOSTIC",
+  "result_document": "docs/btc_ml_v1/BTC_BCR09_CORRECTED_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260730.md"
+}
