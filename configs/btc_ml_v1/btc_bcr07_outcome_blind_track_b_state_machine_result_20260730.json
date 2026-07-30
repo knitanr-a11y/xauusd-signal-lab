@@ -1,0 +1,88 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR07_OUTCOME_BLIND_TRACK_B_FINITE_EXIT_AND_STATE_MACHINE_DESIGN",
+  "recorded_at": "2026-07-30T19:15:00+09:00",
+  "status": "READY_OUTCOME_BLIND_TRACK_B_COMPLETE_STATE_MACHINE_CAPABILITY_RESULT",
+  "input": {
+    "M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BCR06_package_sha256": "04215689d2b861b72e737e000dfe6a6b3d2434ec2caae37b9574edd4b770027b",
+    "contract_commit": "3c44e30c79d79cf4d2cc6ca6d9df8f2f583c9a20"
+  },
+  "machine_count": 4,
+  "passing_machine_count": 4,
+  "machines": [
+    {
+      "machine_id": "TRACK_B_B1_E0_EMA30_CROSS",
+      "entry_count": 1980,
+      "closed_episode_count": 1980,
+      "closed_long_count": 995,
+      "closed_short_count": 985,
+      "open_episode_at_end": 0,
+      "median_holding_bars": 2.0,
+      "p90_holding_bars": 23.0,
+      "maximum_holding_bars": 122,
+      "position_occupancy_rate": 0.5143728656,
+      "distinct_entry_months": 11,
+      "maximum_single_month_entry_share": 0.1055555556,
+      "maximum_episode_start_overlap_share_with_track_a": 0.1464646465,
+      "data_capability_pass": true
+    },
+    {
+      "machine_id": "TRACK_B_B1_E1_STACK_BREAK",
+      "entry_count": 519,
+      "closed_episode_count": 519,
+      "closed_long_count": 249,
+      "closed_short_count": 270,
+      "open_episode_at_end": 0,
+      "median_holding_bars": 27.0,
+      "p90_holding_bars": 103.2,
+      "maximum_holding_bars": 254,
+      "position_occupancy_rate": 0.7133715726,
+      "distinct_entry_months": 11,
+      "maximum_single_month_entry_share": 0.1059730250,
+      "maximum_episode_start_overlap_share_with_track_a": 0.1117533719,
+      "data_capability_pass": true
+    },
+    {
+      "machine_id": "TRACK_B_B4_E0_EMA20_TOUCH",
+      "entry_count": 774,
+      "closed_episode_count": 773,
+      "closed_long_count": 304,
+      "closed_short_count": 469,
+      "open_episode_at_end": 1,
+      "median_holding_bars": 11.0,
+      "p90_holding_bars": 31.8,
+      "maximum_holding_bars": 69,
+      "position_occupancy_rate": 0.3815523358,
+      "distinct_entry_months": 11,
+      "maximum_single_month_entry_share": 0.1072351421,
+      "maximum_episode_start_overlap_share_with_track_a": 0.1782945736,
+      "data_capability_pass": true
+    },
+    {
+      "machine_id": "TRACK_B_B4_E1_EXTENSION_CONTRACT",
+      "entry_count": 833,
+      "closed_episode_count": 832,
+      "closed_long_count": 319,
+      "closed_short_count": 513,
+      "open_episode_at_end": 1,
+      "median_holding_bars": 9.0,
+      "p90_holding_bars": 26.0,
+      "maximum_holding_bars": 65,
+      "position_occupancy_rate": 0.3331454527,
+      "distinct_entry_months": 11,
+      "maximum_single_month_entry_share": 0.1068427371,
+      "maximum_episode_start_overlap_share_with_track_a": 0.1692677071,
+      "data_capability_pass": true
+    }
+  ],
+  "accepted_package": {
+    "filename": "BCR07_OUTCOME_BLIND_TRACK_B_STATE_MACHINES_20260730.zip",
+    "sha256": "7b2643a00179aaa3b09c2854fa52e10e4bbad6ed9ff69d0a58e3d279ea7cb0f4",
+    "deterministic_two_run_sha_match": true
+  },
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "trading_candidate_promoted": false,
+  "next_stage": "BCR08_MT5_SYMBOL_AND_COST_PROVENANCE_EVIDENCE"
+}
