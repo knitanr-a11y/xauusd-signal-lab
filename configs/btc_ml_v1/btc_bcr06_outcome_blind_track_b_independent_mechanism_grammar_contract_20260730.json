@@ -1,0 +1,134 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR06_OUTCOME_BLIND_TRACK_B_INDEPENDENT_MECHANISM_GRAMMAR",
+  "recorded_at": "2026-07-30T18:50:00+09:00",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NEXT",
+  "branch": "feature/btc-fresh-forward-research",
+  "input": {
+    "M15_original_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "server_open_start": "2025-09-13 08:00:00",
+    "server_open_end": "2026-07-30 06:15:00",
+    "Track_A_family_freeze": "configs/btc_ml_v1/btc_bcr05f_track_a_source_fidelity_family_freeze_20260730.json"
+  },
+  "independence_boundary": {
+    "RCI_features_forbidden": true,
+    "source_event_labels_forbidden": true,
+    "source_state_forbidden": true,
+    "M7C_transition_or_threshold_forbidden": true,
+    "Track_A_parameter_variation_not_counted_as_Track_B": true
+  },
+  "causal_boundary": {
+    "fully_closed_M15_history": "ALLOWED",
+    "current_M15_open": "ALLOWED",
+    "current_M15_high_low_close": "FORBIDDEN",
+    "future_bars": "FORBIDDEN",
+    "gap_interpolation": "FORBIDDEN",
+    "higher_timeframe": "FORBIDDEN_PENDING_SEPARATE_CONTRACT"
+  },
+  "families": {
+    "B1_TREND_PULLBACK_CONTINUATION": {
+      "mechanism": "established EMA trend, multi-bar countertrend pullback, then causal resumption confirmation",
+      "directional_grammars": 8,
+      "axes": {
+        "trend": [
+          "S0_DIRECTIONAL_EMA20_30_40_STACK",
+          "S1_STACK_PLUS_DIRECTIONAL_EMA20_AND_EMA30_FOUR_BAR_SLOPES"
+        ],
+        "pullback_horizon": [4, 8],
+        "confirmation": [
+          "C0_PREVIOUS_FULLY_CLOSED_ONE_BAR_RETURN_RESUMES_TREND",
+          "C1_CURRENT_OPEN_GAP_FROM_PREVIOUS_CLOSE_RESUMES_TREND"
+        ]
+      }
+    },
+    "B2_COMPRESSION_EXPANSION": {
+      "mechanism": "causal rolling compression percentile followed by current-open breakout of prior closed range",
+      "directional_grammars": 4,
+      "axes": {
+        "compression_rolling_500_percentile_max": [0.20, 0.40],
+        "breakout_lookback_closed_bars": [20, 50]
+      },
+      "minimum_warmup_observations": 500
+    },
+    "B4_OVEREXTENSION_MEAN_REVERSION": {
+      "mechanism": "previous close is overextended from EMA20 in ATR14 units and a causal opposite-direction confirmation appears",
+      "directional_grammars": 4,
+      "axes": {
+        "absolute_overextension_atr": [1.0, 1.5],
+        "confirmation": [
+          "C0_PREVIOUS_FULLY_CLOSED_ONE_BAR_RETURN_OPPOSES_EXTENSION",
+          "C1_CURRENT_OPEN_GAP_FROM_PREVIOUS_CLOSE_OPPOSES_EXTENSION"
+        ]
+      }
+    }
+  },
+  "total_grammar_count": {
+    "LONG": 16,
+    "SHORT": 16,
+    "TOTAL": 32
+  },
+  "label_free_evaluation": {
+    "metrics": [
+      "fire_count",
+      "fires_per_10000_eligible_rows",
+      "distinct_calendar_months",
+      "distinct_iso_weeks",
+      "maximum_single_month_share",
+      "maximum_single_week_share",
+      "median_inter_fire_bars",
+      "maximum_inter_fire_bars",
+      "same_bar_opposite_direction_conflict_count",
+      "maximum_exact_timestamp_jaccard_with_any_Track_A_member",
+      "maximum_exact_timestamp_overlap_share_with_any_Track_A_member"
+    ],
+    "data_sufficiency_gate": {
+      "minimum_fire_count": 30,
+      "minimum_distinct_months": 6,
+      "maximum_single_month_share": 0.35,
+      "maximum_single_week_share": 0.20
+    },
+    "independence_gate": {
+      "maximum_jaccard_with_any_Track_A_member": 0.25,
+      "maximum_Track_B_fire_overlap_share_with_any_Track_A_member": 0.25
+    },
+    "advance_maximum_per_family_direction": 1,
+    "advance_tiebreak": [
+      "PASS_ALL_DATA_SUFFICIENCY_AND_INDEPENDENCE_GATES",
+      "LOWER_MAXIMUM_SINGLE_MONTH_SHARE",
+      "LOWER_MAXIMUM_TRACK_A_OVERLAP_SHARE",
+      "FIRE_COUNT_CLOSER_TO_150",
+      "FEWER_PREDICATES",
+      "LEXICAL_GRAMMAR_ID"
+    ],
+    "minimum_advanced_grammars": 0
+  },
+  "Track_A_overlap_reference": {
+    "mode": "IDLE_SEEDED_COMPLETE_STATE_MACHINE_ENTRY_TRANSITIONS_OVER_FULL_M15_HISTORY",
+    "members": [
+      "TRACK_A_F1_COVERAGE_FIRST",
+      "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
+      "TRACK_A_F3_STATE_FIDELITY",
+      "TRACK_A_F4_MINIMUM_EXTRA_PARETO"
+    ],
+    "profitability_not_used": true
+  },
+  "explicitly_not_authorized": [
+    "WIN_LOSS_OR_FUTURE_RETURN_LABEL",
+    "WR_PF_DD_MFE_MAE",
+    "TP_SL_TIME_STOP_OR_HOLDING_OPTIMIZATION",
+    "OUTCOME_BASED_GRAMMAR_SELECTION",
+    "RCI_OR_SOURCE_STATE_IN_TRACK_B",
+    "B3_BREAKOUT_RETEST_FAMILY_IN_THIS_STAGE_DUE_PRIOR_SHORT_INTERVAL_SPARSITY",
+    "TRACK_B_PROMOTION_AS_TRADING_CANDIDATE",
+    "FF06",
+    "SHADOW_RUNTIME",
+    "DISCORD",
+    "MT5_ORDER",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+  ],
+  "required_after_completion": "FREEZE_DATA_CAPABLE_INDEPENDENT_TRACK_B_GRAMMARS_THEN_DEFINE_SHARED_TRACK_A_TRACK_B_TRADING_VALUE_GATE",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
