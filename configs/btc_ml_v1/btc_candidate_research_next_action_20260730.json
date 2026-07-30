@@ -2,83 +2,66 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T20:20:00+09:00",
-  "next_stage": "BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_REPLAY",
-  "authorization": "CONTRACT_FROZEN_IMPLEMENTATION_AWAITING_EXPLICIT_USER_AUTHORIZATION",
+  "recorded_at": "2026-07-30T20:39:00+09:00",
+  "next_stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
+  "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_CONTRACT_OR_IMPLEMENTATION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR10_DIAGNOSTIC_COMPLETE_BCR11_FINITE_OVERLAY_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
   "completed_inputs": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
     "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
     "BCR10_package_sha256": "99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0",
-    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
-    "BCR10_episodes": 5975,
-    "BCR10_path_complete": 5829,
-    "BCR10_path_incomplete": 146,
-    "BCR10_overlay_pnl_evaluated": false,
-    "BCR10_candidate_selected": false
+    "BCR11_package_sha256": "6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8",
+    "BCR11_trials": 36,
+    "BCR11_nonbaseline_positive_C0": 0,
+    "BCR11_nonbaseline_PF_ge_1_C0": 0,
+    "BCR11_nonbaseline_positive_C2": 0,
+    "BCR11_nonbaseline_PF_ge_1_C2": 0,
+    "BCR11_overlay_proposals_advanced": 0,
+    "deployable_candidates": 0
   },
-  "diagnostic_basis": {
-    "actual_holding_LE16_all_six_machine_aggregates_positive": true,
-    "actual_holding_GE17_all_six_machine_aggregates_negative": true,
-    "rollover_LE16_all_six_machine_aggregates_positive": true,
-    "same_day_GE17_all_six_machine_aggregates_negative": true,
-    "long_held_loser_positive_MFE_fraction": 0.8978692138,
-    "rollover_loser_positive_at_23_45_fraction": 0.0811320755,
-    "rollover_loser_positive_MFE_fraction": 0.920754717,
-    "exposure_label": "RETROSPECTIVE_FULL_HISTORY_EXPOSED_DIAGNOSTIC_NOT_VALIDATION"
+  "formal_decision": {
+    "Track_A_active_rescue": "CLOSED",
+    "B1_active_rescue": "CLOSED_REJECTED",
+    "B2_active_rescue": "CLOSED_BLOCKED_NO_THRESHOLD_LOOSENING",
+    "B4_active_rescue": "CLOSED",
+    "preserve_all_as_audit_evidence": true,
+    "prospective_or_shadow_proposal": false
   },
-  "frozen_overlay_inventory": [
-    "O0_BASELINE",
-    "O1_MAX_HOLD_16",
-    "O2_MAX_HOLD_32",
-    "O3_MAX_HOLD_64",
-    "O4_SERVER_DAY_FLAT_2345",
-    "O5_MAX_HOLD_16_AND_SERVER_DAY_FLAT_2345"
+  "recommended_new_family_requirements": [
+    "The economic mechanism must be materially different from Track A, B1, B2 and B4.",
+    "Freeze the mechanism grammar and causal data boundary before opening its outcome results.",
+    "Do not use BCR09-BCR11 losses to select entry-hour, weekday, ATR, direction or regime filters for the old families.",
+    "Keep Track A source evidence separate from the new Track B mechanism.",
+    "Use exact M15 boundary semantics and no gap interpolation or fallback.",
+    "Require a finite preregistered grammar and multiple-trial control before value evaluation."
   ],
-  "machine_population": [
-    "TRACK_A_F1_COVERAGE_FIRST",
-    "TRACK_A_F2_HIGH_COVERAGE_INTERMEDIATE",
-    "TRACK_A_F3_STATE_FIDELITY",
-    "TRACK_A_F4_MINIMUM_EXTRA_PARETO",
-    "TRACK_B_B4_E0_EMA20_TOUCH",
-    "TRACK_B_B4_E1_EXTENSION_CONTRACT"
-  ],
-  "implementation_tasks_after_authorization": [
-    "Verify exact BCR09, BCR10 and M15 SHA values.",
-    "Replay all six unchanged machines from IDLE under exactly six frozen overlays.",
-    "Use BCR09 C0 and C2 execution/cost assumptions without per-machine exceptions.",
-    "Apply max-hold age in theoretical 15-minute boundaries and label overdue exits after gaps.",
-    "Apply exact 23:45 server-day flat, suppress same-boundary entries and use no time fallback.",
-    "Report all 36 trials with direction, exit reason, PF, net, expectancy, DD, losing streak, monthly and rollover metrics.",
-    "Produce a non-promotional Pareto table and deterministic repeat package.",
-    "Update all handoff layers after audit."
-  ],
-  "acceptance_checks": [
-    "EXACTLY_SIX_MACHINES_AND_SIX_OVERLAYS",
-    "THIRTY_SIX_TRIALS_REPORTED",
-    "UNCHANGED_BASE_FORMULAS",
-    "IDLE_INITIALIZATION",
-    "NO_SAME_BOUNDARY_REENTRY",
-    "MAX_HOLD_AND_DAY_FLAT_SEMANTICS_EXACT",
-    "C0_C2_SHARED_COST_PARITY",
-    "GAP_CASES_EXPLICIT",
-    "NO_PROMOTION_OR_PORTFOLIO",
-    "DETERMINISTIC_REPEAT_SHA",
-    "NO_RUNTIME_CHANGE"
+  "candidate_design_classes_for_user_choice": [
+    {
+      "id": "BREAKOUT_RETEST_REACCELERATION",
+      "description": "A causal structural break followed by a retest and renewed directional displacement."
+    },
+    {
+      "id": "CAUSAL_HTF_REGIME_PLUS_LTF_EXECUTION",
+      "description": "A separately contracted higher-timeframe regime built only from fully closed aggregated bars, with M15 execution."
+    },
+    {
+      "id": "DIRECTIONALLY_ASYMMETRIC_NEW_MECHANISM",
+      "description": "Separate LONG and SHORT economic mechanisms rather than mirrored thresholds."
+    }
   ],
   "explicitly_not_authorized": [
-    "BCR11_IMPLEMENTATION_BEFORE_USER_AUTHORIZATION",
-    "BASE_THRESHOLD_OR_FORMULA_CHANGE",
-    "TP_SL_OR_TRAILING_STOP",
-    "ATR_HOUR_WEEKDAY_DIRECTION_OR_REGIME_FILTER",
-    "OTHER_MAX_HOLD_OR_SERVER_FLAT_TIME",
-    "PER_MACHINE_CUSTOM_OVERLAY_INVENTORY",
-    "LOT_OPTIMIZATION",
+    "BCR12_CONTRACT_OR_IMPLEMENTATION_BEFORE_USER_AUTHORIZATION",
+    "PROMOTE_ANY_BCR11_OVERLAY",
+    "ANOTHER_MAX_HOLD_OR_SERVER_FLAT_TIME",
+    "TP_SL_OR_TRAILING_STOP_RESCUE",
+    "ENTRY_HOUR_WEEKDAY_ATR_DIRECTION_OR_REGIME_FILTER_ON_CURRENT_FAMILIES",
+    "TRACK_A_B1_B2_B4_THRESHOLD_OR_FORMULA_RETUNE",
     "PORTFOLIO_SELECTION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
@@ -87,8 +70,9 @@
     "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
   ],
   "user_action_required_now": true,
-  "required_user_action": "AUTHORIZE_OR_DECLINE_BCR11_IMPLEMENTATION",
+  "required_user_action": "AUTHORIZE_BCR12_NEW_TRACK_B_DESIGN_OR_CHOOSE_ANOTHER_RESEARCH_DIRECTION",
   "bat_required_now": false,
+  "upload_required_now": false,
   "runtime_change_required": false,
-  "handoff_update_required_after_completion": true
+  "handoff_update_required_after_next_decision": true
 }
