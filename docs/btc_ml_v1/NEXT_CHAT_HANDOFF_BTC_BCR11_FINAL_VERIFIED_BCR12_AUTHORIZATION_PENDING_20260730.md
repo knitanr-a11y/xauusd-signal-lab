@@ -2,7 +2,7 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- verified at: `2026-07-30T21:14:00+09:00`
+- verified at: `2026-07-30T21:46:00+09:00`
 - status: `BTC_REDESIGN_BCR11_COMPLETE_NO_CAUSAL_HOLDING_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT`
 - next stage: `BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN`
 - BCR12 authorization: `PENDING_EXPLICIT_USER_AUTHORIZATION`
@@ -18,6 +18,14 @@ The following handoff layers were checked together and found consistent:
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
 6. `docs/btc_ml_v1/BTC_BCR11_FINITE_CAUSAL_HOLDING_OVERLAY_DEVELOPMENT_RESULT_20260730.md`
 7. `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_result_20260730.json`
+
+Read-order maintenance correction:
+
+- `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md` omitted two companion JSON files that were already present in the frozen handoff-policy read order.
+- The stable entry was corrected on the authoritative branch by commit `5aa938cee2655edcb67faca7f46c8092d2c3442e`.
+- The restored files are `configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_development_contract_20260730.json` and `configs/btc_ml_v1/btc_bcr10_holding_rollover_path_diagnostic_result_20260730.json`.
+- The complete 17-file required read order was then read in order on the authoritative branch.
+- This was a handoff-maintenance correction only. No BCR11 fact, status, decision, Track decision or BCR12 authorization boundary changed.
 
 Verified facts:
 
