@@ -1,0 +1,158 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "stage": "BCR05B_OUTCOME_BLIND_FINITE_TRACK_A_ENTRY_GRAMMAR",
+  "status": "READY_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_FIDELITY_RESULT",
+  "input": {
+    "bcr04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "long_primary_events": 16,
+    "short_primary_events": 10,
+    "eligible_idle_controls": 438
+  },
+  "implementation": {
+    "script": "scripts/btc_ml_v1/BCR05B_outcome_blind_finite_entry_grammar/python/run_bcr05b_finite_entry_grammar.py",
+    "script_commit": "7343e1d1a872f9d7666fabac5652dbfd45c3154e",
+    "local_script_sha256": "8c38095f07f00a8bb1320773fd0ef3e13d415aedfd39f38e55b8bb609b972f93",
+    "tests": "tests/btc_ml_v1/test_bcr05b_finite_entry_grammar.py",
+    "test_commit": "22e6df2a3bd55c30c39f5d0715175d3006004d0a",
+    "test_result": "4_PASSED_PLUS_TWO_IDENTICAL_FROZEN_INPUT_PACKAGE_RUNS"
+  },
+  "package": {
+    "filename": "BCR05B_OUTCOME_BLIND_FINITE_ENTRY_GRAMMAR_20260730.zip",
+    "sha256": "525be07cab36d9582637a5db523d16f876a4d7cc06b1103bfdc14b29dcec65c9",
+    "deterministic_reproduction_sha_match": true,
+    "members": 7
+  },
+  "grammar_inventory": {
+    "long": 12,
+    "short": 12,
+    "total": 24,
+    "unique_ids": 24,
+    "all_primary_events_retained_in_denominator": true,
+    "all_eligible_idle_controls_retained": true,
+    "forbidden_source_context_predicates_used": false
+  },
+  "pareto_frontier": {
+    "long_count": 3,
+    "short_count": 4,
+    "criterion": "MAXIMIZE_SOURCE_RECALL_MINIMIZE_CONTROL_FIRE_RATE"
+  },
+  "advanced": {
+    "long": [
+      {
+        "tier": "FULL_COVERAGE",
+        "grammar_id": "A_LONG_E0_Z1_P0",
+        "predicates": [
+          "RCI9_TURN_UP",
+          "RCI9_LE_0"
+        ],
+        "source_event_hits": 16,
+        "source_event_total": 16,
+        "source_recall": 1.0,
+        "control_hits": 29,
+        "control_total": 438,
+        "control_fire_rate": 0.06621004566210046,
+        "source_event_density_among_fires": 0.35555555555555557,
+        "event_hit_days": 8,
+        "single_day_dominance": false
+      },
+      {
+        "tier": "BALANCED_COVERAGE",
+        "grammar_id": "A_LONG_E1_Z2_P0",
+        "predicates": [
+          "RCI9_TURN_UP",
+          "BULLISH_EMA_STACK",
+          "RCI9_LE_NEG40"
+        ],
+        "source_event_hits": 13,
+        "source_event_total": 16,
+        "source_recall": 0.8125,
+        "control_hits": 0,
+        "control_total": 438,
+        "control_fire_rate": 0.0,
+        "source_event_density_among_fires": 1.0,
+        "event_hit_days": 7,
+        "single_day_dominance": false,
+        "zero_controls_interpretation": "SOURCE_INTERVAL_OBSERVATION_NOT_PROFITABILITY_OR_FUTURE_ZERO_FALSE_POSITIVE_GUARANTEE"
+      }
+    ],
+    "long_high_coverage_tier": "EMPTY_NO_PARETO_GRAMMAR_WITH_RECALL_GE_0_90_LT_1_00",
+    "short": [
+      {
+        "tier": "FULL_COVERAGE",
+        "grammar_id": "A_SHORT_E0_Z1_P1",
+        "predicates": [
+          "RCI9_TURN_DOWN",
+          "RCI9_GE_0",
+          "PREVIOUS_CLOSED_RETURN_LT_0"
+        ],
+        "source_event_hits": 10,
+        "source_event_total": 10,
+        "source_recall": 1.0,
+        "control_hits": 42,
+        "control_total": 438,
+        "control_fire_rate": 0.0958904109589041,
+        "source_event_density_among_fires": 0.19230769230769232,
+        "event_hit_days": 5,
+        "single_day_dominance": false
+      },
+      {
+        "tier": "HIGH_COVERAGE",
+        "grammar_id": "A_SHORT_E1_Z1_P1",
+        "predicates": [
+          "RCI9_TURN_DOWN",
+          "BEARISH_EMA_STACK",
+          "RCI9_GE_0",
+          "PREVIOUS_CLOSED_RETURN_LT_0"
+        ],
+        "source_event_hits": 9,
+        "source_event_total": 10,
+        "source_recall": 0.9,
+        "control_hits": 9,
+        "control_total": 438,
+        "control_fire_rate": 0.02054794520547945,
+        "source_event_density_among_fires": 0.5,
+        "event_hit_days": 5,
+        "single_day_dominance": false
+      },
+      {
+        "tier": "BALANCED_COVERAGE",
+        "grammar_id": "A_SHORT_E1_Z2_P0",
+        "predicates": [
+          "RCI9_TURN_DOWN",
+          "BEARISH_EMA_STACK",
+          "RCI9_GE_40"
+        ],
+        "source_event_hits": 8,
+        "source_event_total": 10,
+        "source_recall": 0.8,
+        "control_hits": 2,
+        "control_total": 438,
+        "control_fire_rate": 0.0045662100456621,
+        "source_event_density_among_fires": 0.8,
+        "event_hit_days": 5,
+        "single_day_dominance": false
+      }
+    ]
+  },
+  "interpretation": {
+    "entry_fidelity_variants_advanced": 5,
+    "profitability_candidates_selected": 0,
+    "strict_lower_control_rate_assumed_better_for_trading": false,
+    "zero_control_hits_assumed_future_zero": false,
+    "integrated_formula_frozen": false,
+    "next_required_stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS"
+  },
+  "integrity": {
+    "event_distance_predicate_used": false,
+    "source_state_age_predicate_used": false,
+    "continuous_threshold_search_used": false,
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false,
+    "ff06_created": false,
+    "runtime_modified": false
+  }
+}
