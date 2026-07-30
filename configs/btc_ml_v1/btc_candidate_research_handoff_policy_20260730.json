@@ -1,23 +1,22 @@
 {
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
-  "recorded_at": "2026-07-30T07:01:00+09:00",
+  "recorded_at": "2026-07-30T11:35:00+09:00",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "authoritative_branch": "feature/btc-fresh-forward-research",
   "status": "HANDOFF_AUTHORITY_AND_CONTINUOUS_MAINTENANCE_FROZEN",
   "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md",
+  "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR01_SCHEMA_ORDER_CORRECTED_RERUN_READY_20260730.md",
   "required_read_order": [
     "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SNAPSHOT_READY_20260730.md",
+    "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_REDESIGN_BCR01_SCHEMA_ORDER_CORRECTED_RERUN_READY_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json",
     "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
-    "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
-    "configs/btc_ml_v1/btc_d1_m7c_primary_evidence_manifest_20260730.json",
-    "docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md",
-    "configs/btc_ml_v1/btc_d1b_collector_evidence_manifest_20260730.json",
+    "docs/btc_ml_v1/BTC_BCR01_SCHEMA_PHYSICAL_ORDER_CORRECTION_20260730.md",
+    "configs/btc_ml_v1/bcr01_schema_physical_order_incident_20260730.json",
     "docs/btc_ml_v1/BTC_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_CONTRACT_20260730.md",
-    "configs/btc_ml_v1/btc_bcr01_outcome_blind_source_snapshot_contract_20260730.json",
+    "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
+    "docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md",
     "configs/btc_ml_v1/btc_candidate_research_redesign_contract_20260730.json",
     "docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md"
@@ -57,6 +56,7 @@
     "allowed_inputs": [
       "USER_UPLOADED_M7C_PACKAGE_SHA256_870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
       "USER_UPLOADED_COLLECTOR_PACKAGE_SHA256_b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
+      "USER_UPLOADED_INVALID_BCR01_V100_PACKAGE_SHA256_47c38b81a465f1fa9adfbcd7901644cca8d3ab4f03f71cb9dd7353b368b602f1",
       "config/mochipoyo_alert_research/forced_reboot_recovery_contract_20260724.json",
       "scripts/mochipoyo_alert_research/run_collect_events_cloudflare_forever.bat",
       "scripts/mochipoyo_alert_research/run_collect_events_forever.py",
@@ -80,24 +80,26 @@
       "RESEARCH_VS_FREEZE_VS_SHADOW_VS_LIVE"
     ]
   },
-  "current_status": "BTC_REDESIGN_D1_COMPLETE_BCR01_OUTCOME_BLIND_SOURCE_SNAPSHOT_READY",
-  "current_decision": "ACCEPT_D1_M7C_AND_COLLECTOR_PROVENANCE_IMPLEMENT_BCR01_ALLOWLISTED_LOGICAL_SNAPSHOT",
-  "current_next_action": "RUN_BCR01_ONCE_AND_UPLOAD_99_UPLOAD_PACKAGE_ZIP",
+  "current_status": "BTC_REDESIGN_BCR01_V100_INVALID_SCHEMA_ORDER_CORRECTED_V101_RERUN_READY",
+  "current_decision": "REJECT_V100_ERROR_PACKAGE_AS_IMPLEMENTATION_INVALID_AUTHORIZE_ONE_V101_REPLACEMENT_RUN",
+  "current_next_action": "PULL_AND_RUN_BCR01_V101_ONCE_UPLOAD_FIRST_ZIP",
   "current_evidence": {
     "M7C_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
     "Collector_package_sha256": "b65ddd0b7c240d5acd26c271b228142929574d82ad5e96eadec1e1f37d62b3fe",
-    "D1_M7C_audit": "docs/btc_ml_v1/BTC_D1_M7C_PRIMARY_EVIDENCE_PACKAGE_AUDIT_20260730.md",
-    "D1B_Collector_audit": "docs/btc_ml_v1/BTC_D1B_COLLECTOR_LOG_AND_CODE_AUDIT_20260730.md",
+    "invalid_BCR01_v100_package_sha256": "47c38b81a465f1fa9adfbcd7901644cca8d3ab4f03f71cb9dd7353b368b602f1",
+    "BCR01_v101_script_commit": "81ce359f919fba7b174ce2f8c5c25429b934ef2e",
+    "BCR01_v101_test_commit": "0da97025d2f2cef5b98f51523da9ffc98e3223a8",
+    "BCR01_v101_tests": "4_PASSED",
     "performance_interpretation_performed": false
   },
   "currently_authorized": [
-    "ONE_BCR01_READ_ONLY_LOGICAL_SNAPSHOT_RUN",
-    "UPLOAD_BCR01_99_UPLOAD_PACKAGE_ZIP"
+    "ONE_BCR01_V101_REPLACEMENT_READ_ONLY_LOGICAL_SNAPSHOT_RUN",
+    "UPLOAD_FIRST_BCR01_V101_99_UPLOAD_PACKAGE_ZIP"
   ],
   "currently_not_authorized": [
-    "SECOND_BCR01_RUN_WITHOUT_PROVEN_INVALID_FIRST_PACKAGE",
+    "MORE_THAN_ONE_BCR01_V101_RUN",
     "RAW_SQLITE_WAL_SHM_UPLOAD",
-    "EVENT_LEDGER_IMPLEMENTATION_BEFORE_BCR01_AUDIT",
+    "EVENT_LEDGER_IMPLEMENTATION_BEFORE_VALID_BCR01_AUDIT",
     "CANDIDATE_FORMULA_DESIGN",
     "OUTCOME_PERFORMANCE_INTERPRETATION",
     "WR_PF_DD_MFE_MAE_ANALYSIS",
