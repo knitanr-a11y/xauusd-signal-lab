@@ -2,95 +2,92 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T21:46:00+09:00",
-  "next_stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
-  "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_CONTRACT_OR_IMPLEMENTATION",
+  "recorded_at": "2026-07-30T21:57:00+09:00",
+  "current_status": "BTC_REDESIGN_BCR12_B3_BREAKOUT_RETEST_REACCELERATION_CONTRACT_FROZEN_BCR13_AUTHORIZATION_PENDING",
+  "completed_stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
+  "completed_decision": "FREEZE_BCR12_B3_BREAKOUT_RETEST_REACCELERATION_FAMILY_NO_OUTCOME_OPENED_NO_IMPLEMENTATION",
+  "next_stage": "BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_IMPLEMENTATION_OR_RUN",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR12_B3_CONTRACT_FROZEN_BCR13_AUTHORIZATION_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
-    "old_handoffs": "AUDIT_HISTORY_ONLY",
-    "final_verification_at": "2026-07-30T21:46:00+09:00"
+    "old_handoffs": "AUDIT_HISTORY_ONLY"
   },
-  "read_order_correction": {
-    "type": "HANDOFF_MAINTENANCE_ONLY",
-    "stable_entry_commit": "5aa938cee2655edcb67faca7f46c8092d2c3442e",
-    "latest_handoff_update_commit": "475c579429f60dafbf5535108d68932fe4d6ead9",
-    "current_state_update_commit": "adf516409b55d84d0fdcb14d69796f102bf5e992",
-    "required_read_order_count": 17,
-    "required_read_order_completed": true,
-    "status_changed": false,
-    "decision_changed": false,
-    "next_stage_changed": false,
-    "authorization_changed": false
+  "BCR12_contract": {
+    "family_id": "B3_BREAKOUT_RETEST_REACCELERATION",
+    "document": "docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md",
+    "json": "configs/btc_ml_v1/btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json",
+    "markdown_commit": "b9ab8decdbb9be3e09822d92ce1c270a86a39918",
+    "json_commit": "0232261adfddfaa4bc7e79c748838387374aabf2",
+    "machines": 8,
+    "lookback_L": [32, 64],
+    "breakout_displacement_D_ATR": [0.25, 0.5],
+    "first_retest_deadline_W_bars": [4, 8],
+    "outcome_opened": false,
+    "implementation_created": false,
+    "candidate_promoted": false
   },
-  "completed_inputs": {
-    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
-    "BCR09_package_sha256": "92b989ce7b0b76acab0bb6205c1d8e5cfdd9d2f86c42e74781e38177c79c45fa",
-    "BCR10_package_sha256": "99ebfeba9a83ff6eedadec35bf37cfe63e4b8dee116436d4be04c672b567d5e0",
-    "BCR11_package_sha256": "6e10e296e57f2ba9359f29e83711acd9069944f31f9cca78ec65d6587c1299d8",
-    "BCR11_trials": 36,
-    "BCR11_nonbaseline_positive_C0": 0,
-    "BCR11_nonbaseline_PF_ge_1_C0": 0,
-    "BCR11_nonbaseline_positive_C2": 0,
-    "BCR11_nonbaseline_PF_ge_1_C2": 0,
-    "BCR11_overlay_proposals_advanced": 0,
-    "deployable_candidates": 0
-  },
-  "formal_decision": {
-    "Track_A_active_rescue": "CLOSED",
-    "B1_active_rescue": "CLOSED_REJECTED",
-    "B2_active_rescue": "CLOSED_BLOCKED_NO_THRESHOLD_LOOSENING",
-    "B4_active_rescue": "CLOSED",
-    "preserve_all_as_audit_evidence": true,
-    "prospective_or_shadow_proposal": false
-  },
-  "next_chat_startup_action": [
-    "Read the exact files listed by START_HERE in order on the required branch.",
-    "Report the formal BCR11 status and BCR12 authorization boundary.",
-    "Do not infer BCR12 authorization from the opening of a new chat.",
-    "Stop and ask the user if any branch, state, handoff or evidence conflict is found."
-  ],
-  "recommended_new_family_requirements": [
-    "The economic mechanism must be materially different from Track A, B1, B2 and B4.",
-    "Freeze the mechanism grammar and causal data boundary before opening its outcome results.",
-    "Do not use BCR09-BCR11 losses to select entry-hour, weekday, ATR, direction or regime filters for the old families.",
-    "Keep Track A source evidence separate from the new Track B mechanism.",
-    "Use exact M15 boundary semantics and no gap interpolation or fallback.",
-    "Require a finite preregistered grammar and multiple-trial control before value evaluation."
-  ],
-  "candidate_design_classes_for_user_choice": [
-    {
-      "id": "BREAKOUT_RETEST_REACCELERATION",
-      "description": "A causal structural break followed by a retest and renewed directional displacement."
+  "BCR13_if_authorized": {
+    "purpose": "IMPLEMENT_AND_AUDIT_THE_EXACT_FROZEN_B3_STATE_MACHINES_WITHOUT_OUTCOME_FIELDS",
+    "required_inputs": {
+      "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+      "BCR12_contract_document": "docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md",
+      "BCR12_contract_json": "configs/btc_ml_v1/btc_bcr12_materially_new_outcome_blind_track_b_mechanism_design_contract_20260730.json"
     },
-    {
-      "id": "CAUSAL_HTF_REGIME_PLUS_LTF_EXECUTION",
-      "description": "A separately contracted higher-timeframe regime built only from fully closed aggregated bars, with M15 execution."
+    "required_work": [
+      "CREATE_A_STANDALONE_STAGE_SPECIFIC_IMPLEMENTATION",
+      "IMPLEMENT_ALL_EIGHT_MACHINES_EXACTLY",
+      "ADD_UNIT_AND_EXACT_PATH_INTEGRATION_TESTS",
+      "RUN_TWO_DETERMINISTIC_OUTPUT_BUILDS",
+      "REPORT_BREAKOUT_RETEST_REACCEL_ENTRY_EXIT_AND_CANCELLATION_COUNTS",
+      "REPORT_DIRECTION_MONTH_HOLDING_OCCUPANCY_GAP_AND_STATE_INTEGRITY",
+      "APPLY_UNCHANGED_BCR07_CAPABILITY_GATE",
+      "REPORT_ALL_EIGHT_MACHINES_WITHOUT_DROPPING_FAILURES"
+    ],
+    "capability_gate": {
+      "minimum_closed_episodes_total": 50,
+      "minimum_closed_episodes_each_direction": 20,
+      "minimum_entry_months": 6,
+      "maximum_single_month_entry_share": 0.35,
+      "maximum_p90_holding_bars": 384,
+      "maximum_holding_bars": 1500,
+      "maximum_endpoint_open_episodes": 1,
+      "state_integrity_required": true,
+      "fallback_used_allowed": false
     },
-    {
-      "id": "DIRECTIONALLY_ASYMMETRIC_NEW_MECHANISM",
-      "description": "Separate LONG and SHORT economic mechanisms rather than mirrored thresholds."
-    }
-  ],
+    "outcome_fields_forbidden": [
+      "RETURN",
+      "WIN_LOSS",
+      "PF",
+      "PNL",
+      "MFE",
+      "MAE",
+      "FUTURE_EXIT_RESULT"
+    ],
+    "promotion_authorized": false,
+    "portfolio_authorized": false,
+    "prospective_or_shadow_authorized": false
+  },
   "explicitly_not_authorized": [
-    "BCR12_CONTRACT_OR_IMPLEMENTATION_BEFORE_USER_AUTHORIZATION",
-    "NEW_CHAT_OPEN_AS_IMPLICIT_BCR12_AUTHORIZATION",
-    "PROMOTE_ANY_BCR11_OVERLAY",
-    "ANOTHER_MAX_HOLD_OR_SERVER_FLAT_TIME",
-    "TP_SL_OR_TRAILING_STOP_RESCUE",
-    "ENTRY_HOUR_WEEKDAY_ATR_DIRECTION_OR_REGIME_FILTER_ON_CURRENT_FAMILIES",
-    "TRACK_A_B1_B2_B4_THRESHOLD_OR_FORMULA_RETUNE",
+    "BCR13_IMPLEMENTATION_OR_RUN_BEFORE_USER_AUTHORIZATION",
+    "BCR14_RETROSPECTIVE_VALUE_GATE",
+    "B3_OUTCOME_ACCESS",
+    "ADDITIONAL_B3_GRID_OR_THRESHOLD",
+    "LONG_ONLY_OR_SHORT_ONLY_RESCUE",
+    "TRACK_A_B1_B2_B4_RETUNE_OR_RESCUE",
     "PORTFOLIO_SELECTION",
     "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
-    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS"
+    "LIVE_READY",
+    "MODIFY_OR_STOP_GOLD_MOCHIPOYO_MONITORS",
+    "GOLD_MOCHIPOYO_WRITEBACK"
   ],
   "user_action_required_now": true,
-  "required_user_action": "AUTHORIZE_BCR12_NEW_TRACK_B_DESIGN_OR_CHOOSE_ANOTHER_RESEARCH_DIRECTION",
+  "required_user_action": "EXPLICITLY_AUTHORIZE_BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT_OR_CHOOSE_ANOTHER_DIRECTION",
   "bat_required_now": false,
   "upload_required_now": false,
   "runtime_change_required": false,
