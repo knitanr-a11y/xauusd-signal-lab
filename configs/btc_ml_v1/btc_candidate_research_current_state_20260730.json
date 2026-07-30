@@ -2,15 +2,17 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T20:39:00+09:00",
+  "recorded_at": "2026-07-30T21:14:00+09:00",
   "status": "BTC_REDESIGN_BCR11_COMPLETE_NO_CAUSAL_HOLDING_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT",
   "decision": "ACCEPT_BCR11_NO_NONBASELINE_OVERLAY_POSITIVE_CLOSE_CURRENT_TRACK_A_B4_RESCUE_PATH_NO_PROMOTION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_NO_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT_20260730.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR11_FINAL_VERIFIED_BCR12_AUTHORIZATION_PENDING_20260730.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
-    "continuous_updates_required": true
+    "continuous_updates_required": true,
+    "final_verification_at": "2026-07-30T21:14:00+09:00",
+    "final_verification_result": "CONSISTENT_NO_BCR11_FACTUAL_CORRECTION_REQUIRED"
   },
   "frozen_market_data": {
     "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
@@ -84,6 +86,7 @@
   "recommended_next": {
     "stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
     "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION",
+    "new_chat_open_is_authorization": false,
     "allowed_direction_examples": [
       "BREAKOUT_RETEST_REACCELERATION",
       "CAUSAL_HTF_REGIME_PLUS_LTF_EXECUTION",
@@ -106,6 +109,7 @@
     "TP_SL_trailing_stop": true,
     "ATR_hour_weekday_direction_regime_filter_on_current_families": true,
     "portfolio_selection": true,
+    "BCR12_without_explicit_user_authorization": true,
     "prospective_start": true,
     "shadow_runtime": true,
     "discord_send": true,
