@@ -1,0 +1,131 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05C_OUTCOME_BLIND_EXIT_AND_STATE_SIGNATURE_ANALYSIS",
+  "recorded_at": "2026-07-30T18:20:00+09:00",
+  "status": "IMPLEMENTATION_DETAILS_FROZEN_BEFORE_EXIT_FEATURE_OUTPUT",
+  "branch": "feature/btc-fresh-forward-research",
+  "input": {
+    "BCR04_package_sha256": "5044fc3c79f8ca4d4962f41f29156e9db8035383d97a1fa4d7cfdea7019496a8",
+    "M7C_package_sha256": "870ea28c530f1db603afb190a0daa84963b6c7c3d4142ca0859dce1ddb655295",
+    "long_exit_events": 17,
+    "active_long_controls": 223,
+    "short_exit_events": 10,
+    "active_short_controls": 168
+  },
+  "population": {
+    "LONG_EXIT": {
+      "positive_event_class": "VALID_LONG_EXIT_EVENT",
+      "control_event_class": "ACTIVE_LONG_NON_EVENT_CONTROL"
+    },
+    "SHORT_EXIT": {
+      "positive_event_class": "VALID_SHORT_EXIT_EVENT",
+      "control_event_class": "ACTIVE_SHORT_NON_EVENT_CONTROL"
+    },
+    "feature_eligible_core_required": true,
+    "event_rows_must_all_be_retained": true
+  },
+  "feature_families": {
+    "X1_RCI_EXIT_SHAPE": {
+      "continuous": ["rci9", "rci9_delta1", "rci14", "rci14_delta1", "rci18", "rci18_delta1"],
+      "binary": ["direction_opposite_rci9_turn"],
+      "categorical": ["rci9_fixed_zone"]
+    },
+    "X2_EMA_TREND_STRUCTURE": {
+      "continuous": [
+        "ema20_minus_ema30_bps", "ema30_minus_ema40_bps",
+        "ema20_slope_1_bps", "ema20_slope_4_bps", "ema20_slope_8_bps",
+        "ema30_slope_1_bps", "ema30_slope_4_bps", "ema30_slope_8_bps",
+        "ema40_slope_1_bps", "ema40_slope_4_bps", "ema40_slope_8_bps"
+      ],
+      "categorical": ["ema_alignment"]
+    },
+    "X3_CLOSED_BAR_REVERSAL_LOCATION": {
+      "continuous": [
+        "closed_return_1_bps", "closed_return_4_bps", "closed_return_16_bps",
+        "previous_body_ratio", "previous_upper_wick_ratio", "previous_lower_wick_ratio",
+        "previous_range_bps", "current_open_gap_from_previous_close_bps",
+        "current_open_distance_to_20_high_bps", "current_open_distance_to_20_low_bps",
+        "current_open_minus_ema20_atr14"
+      ]
+    },
+    "X4_VOLATILITY_CONTEXT": {
+      "continuous": ["atr14", "atr14_atr50_ratio", "realized_vol_32_bps", "bb_width20_bps"],
+      "categorical": ["atr14_band", "realized_vol32_band", "bb_width20_band"]
+    }
+  },
+  "fixed_rci9_zones": {
+    "Z_NEG_EXTREME": "rci9 <= -40",
+    "Z_NEG_MID": "-40 < rci9 <= 0",
+    "Z_POS_MID": "0 < rci9 < 40",
+    "Z_POS_EXTREME": "rci9 >= 40"
+  },
+  "statistics": {
+    "continuous": "MANN_WHITNEY_U_TWO_SIDED_ASYMPTOTIC_TIE_CORRECTED_AND_CLIFFS_DELTA",
+    "binary_categorical": "FISHER_EXACT_TWO_SIDED_ONE_VS_REST_WITH_HALDANE_ANSCOMBE_0_5_FOR_REPORTED_OR",
+    "fdr": "BENJAMINI_HOCHBERG_Q_0_10_WITHIN_DIRECTION_FAMILY_STATISTIC_TYPE",
+    "continuous_nontrivial_abs_cliffs_delta_min": 0.33,
+    "continuous_large_descriptive_abs_cliffs_delta_min": 0.474,
+    "binary_nontrivial_abs_prevalence_difference_min": 0.20,
+    "binary_nontrivial_corrected_or_outside": [0.5, 2.0],
+    "binary_large_descriptive_abs_prevalence_difference_min": 0.30,
+    "binary_large_descriptive_corrected_or_outside": [0.3333333333, 3.0],
+    "leave_one_exit_day_sign_retention_min": 0.80,
+    "leave_one_exit_sign_retention_min": 0.80,
+    "minimum_distinct_exit_days": 3,
+    "maximum_shortlisted_families_per_direction": 3,
+    "minimum_shortlisted_families": 0
+  },
+  "family_representative_tiebreak": [
+    "FDR_SUPPORTED_BEFORE_DESCRIPTIVE_ONLY",
+    "LOWER_Q_VALUE",
+    "LARGER_ABSOLUTE_EFFECT",
+    "HIGHER_MINIMUM_STABILITY",
+    "LEXICAL_FEATURE_NAME"
+  ],
+  "m7c_decomposition": {
+    "classes": ["EXACT_MATCH", "LATE_1_BAR", "MISSED", "COMPARISON_NOT_AVAILABLE"],
+    "exact_and_late_must_remain_separate": true,
+    "pre_exit_state_divergence_recorded": true,
+    "gap_unavailable_case_recorded": true
+  },
+  "one_bar_timing": {
+    "label": "POST_SOURCE_EXIT_ONE_BAR_TIMING_DESCRIPTIVE_ONLY",
+    "only_exact_next_m15_boundary": true,
+    "may_report": [
+      "direction_opposite_rci9_turn_next_row",
+      "fixed_rci9_zone_change_next_row",
+      "m7c_exit_emitted_next_row",
+      "proxy_state_next_row"
+    ],
+    "may_enter_exact_exit_feature_shortlist": false
+  },
+  "state_divergence": {
+    "proxy_state_replay": "PROPAGATE_RECORDED_M7C_EMITTED_TRANSITIONS_ACROSS_THEORETICAL_15_MINUTE_GRID; MISSING_DECISION_ROW_MEANS_NO_RECORDED_TRANSITION_AND_STATE_PERSISTS",
+    "analysis_horizon": "UNTIL_FIRST_LATER_BOUNDARY_WITH_PROXY_STATE_BEFORE_EQUAL_TO_SOURCE_STATE_BEFORE_OR_END_OF_M7C_EVIDENCE",
+    "record": [
+      "divergent_boundary_count",
+      "calendar_m15_boundaries_until_resync",
+      "first_resync_time_utc",
+      "later_genuine_primary_raw_alert_ids_while_divergent",
+      "later_primary_rejected_only_due_to_proxy_non_idle_when_entry_market_predicate_was_direction_correct"
+    ],
+    "post_m7c_evidence_events": "RETAIN_WITH_COMPARISON_NOT_AVAILABLE"
+  },
+  "forbidden": [
+    "CURRENT_M15_HIGH_LOW_CLOSE",
+    "FUTURE_PRICE_RETURN",
+    "WIN_LOSS",
+    "MFE_MAE",
+    "TP_SL",
+    "PROFITABILITY_THRESHOLD_SEARCH",
+    "SOURCE_EVENT_DISTANCE_AS_EXIT_PREDICTOR",
+    "SOURCE_STATE_AGE_AS_STANDALONE_FUTURE_EXIT_PREDICATE",
+    "FINAL_EXIT_FORMULA",
+    "RESYNCHRONIZATION_POLICY_SELECTION",
+    "INTEGRATED_CANDIDATE",
+    "FF06",
+    "SHADOW_OR_LIVE_ACTION"
+  ],
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false
+}
