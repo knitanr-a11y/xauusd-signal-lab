@@ -1,0 +1,56 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR05A_OUTCOME_BLIND_TRACK_A_SOURCE_SIGNATURE_COMPARISON",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "status": "V100_PRE_ACCEPTANCE_INVALID_V101_CORRECTION_FROZEN",
+  "invalid_local_package": {
+    "sha256": "838dc8cacdcb086302cfa48f3a5818fdbc7e2ac61c041337381be57df996dcdb",
+    "accepted": false,
+    "root_cause": "DISTANCE_TO_NEAREST_SOURCE_EVENT_EVENT_BIN_IS_LABEL_DERIVED_SELF_IDENTIFICATION",
+    "outcomes_opened": false,
+    "performance_interpretation_performed": false,
+    "candidate_formula_designed": false
+  },
+  "feature_roles": {
+    "CANDIDATE_CAUSAL": [
+      "MARKET_FEATURES_FROM_CLOSED_M15_AND_CURRENT_OPEN",
+      "BROKER_SERVER_HOUR",
+      "BROKER_SERVER_DAY_OF_WEEK",
+      "BOUNDARY_KNOWN_GAP_FLAGS"
+    ],
+    "FIDELITY_CONTEXT_ONLY": [
+      "SOURCE_STATE",
+      "SOURCE_STATE_AGE",
+      "DISTANCE_TO_PREVIOUS_GENUINE_SOURCE_EVENT"
+    ],
+    "LABEL_DERIVED_OR_FUTURE_SOURCE_EVENT": [
+      "CURRENT_EVENT_MEMBERSHIP",
+      "DISTANCE_TO_NEXT_SOURCE_EVENT",
+      "NEAREST_SOURCE_EVENT_DISTANCE_WHEN_FUTURE_DEPENDENT"
+    ]
+  },
+  "v101_rules": {
+    "remove_nearest_event_distance_from_inferential_tests": true,
+    "source_state_age_in_separate_descriptive_output_only": true,
+    "source_state_age_excluded_from_shortlist": true,
+    "family_E_shortlist_eligible_features": [
+      "BROKER_SERVER_HOUR",
+      "BROKER_SERVER_DAY_OF_WEEK",
+      "OBSERVED_GAP_BEFORE_FLAG",
+      "GAP_ADJACENT",
+      "CAUSAL_LOOKBACK_GAP_COUNTS"
+    ],
+    "recompute_fdr_after_test_set_change": true,
+    "prior_rci9_anchor_preserved": true
+  },
+  "explicitly_forbidden": [
+    "CITE_V100_LOCAL_PACKAGE_AS_RESULT",
+    "USE_EVENT_DISTANCE_AS_TRIGGER_FEATURE",
+    "USE_FUTURE_SOURCE_EVENT_DISTANCE",
+    "PROMOTE_SOURCE_STATE_AGE_DIRECTLY_TO_STANDALONE_CANDIDATE",
+    "OPEN_OUTCOMES",
+    "FINAL_FORMULA",
+    "FF06",
+    "SHADOW_RUNTIME"
+  ]
+}
