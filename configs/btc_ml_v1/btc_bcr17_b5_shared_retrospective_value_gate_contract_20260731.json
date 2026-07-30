@@ -1,0 +1,105 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+  "recorded_at": "2026-07-31T00:45:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "CONTRACT_FROZEN_BEFORE_B5_VALUE_ACCESS",
+  "authorization": {
+    "user_authorized_BCR17": true,
+    "value_access": true,
+    "automatic_promotion": false,
+    "portfolio": false,
+    "prospective_start": false,
+    "shadow": false,
+    "discord": false,
+    "mt5_order": false
+  },
+  "frozen_input": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "symbol": "BTCUSD#",
+    "bar_side": "BID",
+    "latest_row_contract": "CLOSED"
+  },
+  "source_capability_package": {
+    "name": "BCR16_B5_OUTCOME_BLIND_CAPABILITY_AUDIT_20260731.zip",
+    "sha256": "c469be9455bd5639de336684e0fdcaebf6a72dc6f0bae623acefa5e0cb506653",
+    "capability_survivors": 8,
+    "episode_rows": 844,
+    "endpoint_open": 0
+  },
+  "machine_inventory": [
+    "TRACK_B_B5_R06_B075_W08_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R06_B075_W16_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R06_B100_W08_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R06_B100_W16_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R12_B075_W08_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R12_B100_W08_H1_IMPULSE_M15_RECLAIM",
+    "TRACK_B_B5_R12_B100_W16_H1_IMPULSE_M15_RECLAIM"
+  ],
+  "execution_cost_contract": {
+    "profit_currency": "USD",
+    "lot": 1.0,
+    "point": 0.01,
+    "commission_usd_1lot": 0.0,
+    "swap_included": false,
+    "spread_price_formula": "CSV_SPREAD_POINTS_X_POINT",
+    "LONG_C0": "ENTRY_BID_OPEN_PLUS_ENTRY_SPREAD_TO_EXIT_BID_OPEN",
+    "SHORT_C0": "ENTRY_BID_OPEN_TO_EXIT_BID_OPEN_PLUS_EXIT_SPREAD",
+    "C0": "OBSERVED_SPREAD_ONLY",
+    "C2_slippage_fraction_of_spread_per_fill": 0.25,
+    "C2": "C0_PLUS_25_PERCENT_OF_CONTEMPORANEOUS_SPREAD_ADVERSE_ON_EACH_FILL",
+    "same_server_date": "FULL_KNOWN_COST_NO_ROLLOVER",
+    "rollover_exposed": "PRE_SWAP_ONLY_NO_PROFITABILITY_CLAIM_WITHOUT_FINANCING"
+  },
+  "path_metrics": {
+    "MFE_MAE_opened": true,
+    "selection_use": false,
+    "LONG": "BID_INTRABAR_EXTREMES_RELATIVE_TO_ENTRY_ASK_EQUIVALENT",
+    "SHORT": "ASK_APPROXIMATION_BID_EXTREME_PLUS_CONTEMPORANEOUS_SPREAD_RELATIVE_TO_ENTRY_BID",
+    "exit_bar": "EXIT_OPEN_ONLY_NOT_EXIT_BAR_HIGH_LOW"
+  },
+  "multiple_testing": {
+    "unit": "MONTHLY_NET_BY_ENTRY_MONTH",
+    "test": "EXACT_ONE_SIDED_WILCOXON_SIGNED_RANK_GREATER_THAN_ZERO",
+    "zero_months": "EXCLUDED_FROM_SIGNED_RANK",
+    "family": "EIGHT_FROZEN_B5_MACHINES",
+    "adjustment": "HOLM_SEPARATELY_FOR_C0_AND_C2",
+    "alpha": 0.05
+  },
+  "classification": {
+    "VALUE_SUPPORTED_RETROSPECTIVE": "C0_NET_POSITIVE_AND_PF_GT_1_AND_C2_NET_POSITIVE_AND_PF_GT_1_AND_C2_HOLM_P_LE_0_05",
+    "VALUE_PROMISING_RETROSPECTIVE": "C0_NET_POSITIVE_AND_PF_GT_1_AND_C2_NET_POSITIVE_AND_PF_GT_1_BUT_C2_HOLM_P_GT_0_05",
+    "HOLD_COST_SENSITIVE": "C0_NET_POSITIVE_AND_PF_GT_1_BUT_C2_NOT_POSITIVE_OR_PF_NOT_GT_1",
+    "REJECT_RETROSPECTIVE_VALUE": "C0_NET_NOT_POSITIVE_OR_PF_NOT_GT_1"
+  },
+  "reporting": {
+    "all_eight_required": true,
+    "both_directions_required": true,
+    "all_entry_months_required": true,
+    "same_date_and_rollover_subsets_required": true,
+    "exit_reason_subsets_required": true,
+    "post_result_machine_deletion": false,
+    "post_result_direction_deletion": false,
+    "threshold_or_exit_rescue": false
+  },
+  "outputs": [
+    "bcr17_trade_ledger.csv",
+    "bcr17_machine_summary.csv",
+    "bcr17_direction_summary.csv",
+    "bcr17_monthly_summary.csv",
+    "bcr17_rollover_summary.csv",
+    "bcr17_exit_reason_summary.csv",
+    "bcr17_multiple_testing.csv",
+    "bcr17_summary.json",
+    "manifest.json"
+  ],
+  "next_boundary": {
+    "no_automatic_candidate_promotion": true,
+    "no_portfolio": true,
+    "no_prospective_or_shadow": true,
+    "requires_new_explicit_user_authorization_after_result": true
+  }
+}
