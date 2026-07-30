@@ -2,16 +2,16 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-31T00:45:00+09:00",
-  "status": "BTC_REDESIGN_BCR17_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_VALUE_ACCESS_AUTHORIZED_NO_RESULT_YET",
-  "decision": "ACCEPT_BCR17_CONTRACT_AND_IMPLEMENTATION_READY_AWAIT_USER_LOCAL_99_UPLOAD_PACKAGE_NO_AUTOMATIC_PROMOTION",
+  "recorded_at": "2026-07-31T01:30:00+09:00",
+  "status": "BTC_REDESIGN_BCR17_COMPLETE_ONE_PROMISING_ONE_HOLD_SIX_REJECT_NO_SUPPORTED_BCR18_AUTHORIZATION_PENDING",
+  "decision": "ACCEPT_BCR17_DETERMINISTIC_VALUE_RESULT_FREEZE_R12_B075_W16_AS_PROMISING_RESEARCH_SURVIVOR_R12_B100_W16_AS_COST_SENSITIVE_HOLD_NO_PROMOTION",
   "handoff_authority": {
     "stable_entry": "START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md",
-    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR17_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260731.md",
+    "latest_dated_handoff": "docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR17_COMPLETE_ONE_PROMISING_ONE_HOLD_BCR18_AUTHORIZATION_PENDING_20260731.md",
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
-    "final_verification_at": "2026-07-31T00:45:00+09:00",
-    "final_verification_result": "BCR17_CONTRACT_IMPLEMENTATION_AND_STANDARD_BAT_READY_ACTUAL_VALUE_RESULT_PENDING"
+    "final_verification_at": "2026-07-31T01:30:00+09:00",
+    "final_verification_result": "BCR17_DETERMINISTIC_VALUE_RESULT_ACCEPTED_ONE_PROMISING_ONE_HOLD_SIX_REJECT_NO_SUPPORTED"
   },
   "frozen_market_data": {
     "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
@@ -27,52 +27,67 @@
     "B3_status": "CLOSED_NO_CAPABILITY_SURVIVOR_NO_RESCUE",
     "machines_passed": 0,
     "machines_failed": 8,
-    "BCR14_status": "NOT_APPLICABLE_ZERO_SURVIVORS",
-    "B3_outcome_opened": false
+    "BCR14_status": "NOT_APPLICABLE_ZERO_SURVIVORS"
   },
   "bcr16": {
     "family_id": "B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM",
     "accepted_inner_package_sha256": "c469be9455bd5639de336684e0fdcaebf6a72dc6f0bae623acefa5e0cb506653",
     "machines_passed": 8,
-    "machines_failed": 0,
     "closed_episode_rows": 844,
-    "endpoint_open": 0,
-    "candidate_promoted": false
+    "endpoint_open": 0
   },
   "bcr17": {
     "stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
-    "authorization": "USER_AUTHORIZED",
-    "contract_status": "FROZEN_BEFORE_VALUE_REPLAY",
-    "contract_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_CONTRACT_20260731.md",
-    "contract_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_contract_20260731.json",
-    "implementation_status": "IMPLEMENTATION_AND_LOCAL_TESTS_READY_FROZEN_INPUT_LOCAL_RUN_PENDING",
-    "implementation_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_IMPLEMENTATION_READY_20260731.md",
-    "implementation_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_implementation_ready_20260731.json",
-    "python_path": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/python/run_bcr17_b5_shared_value_gate.py",
-    "test_path": "tests/btc_ml_v1/test_bcr17_b5_shared_value_gate.py",
-    "runner_bat": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
-    "local_tests": "6_PASSED",
-    "actual_frozen_input_run_completed": false,
-    "deterministic_package_received": false,
-    "value_result_available": false,
+    "status": "COMPLETE",
+    "result_document": "docs/btc_ml_v1/BTC_BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_RESULT_20260731.md",
+    "result_json": "configs/btc_ml_v1/btc_bcr17_b5_shared_retrospective_value_gate_result_20260731.json",
+    "result_document_commit": "b945a6ba4f5a0b38c5e61d1dce3ea037a714fa76",
+    "result_json_commit": "c079a0bcaf861af68e9d98a08b910067758135cf",
+    "accepted_outer_sha256": "7e157046a11f65c18a030cc1a18665d0de737f652b0e02ca32b260b7edb3b1b8",
+    "accepted_inner_sha256": "dc8420a6edb104799919a51195cc03b7023377bca2c1d1eb75b0792164337ec7",
+    "deterministic_repeat_match": true,
+    "trade_rows": 844,
+    "classification_counts": {
+      "supported": 0,
+      "promising": 1,
+      "hold_cost_sensitive": 1,
+      "reject": 6
+    },
     "candidate_promoted": false,
     "deployable_candidates": 0
   },
-  "execution_cost_contract": {
-    "C0": "OBSERVED_SPREAD_ONLY",
-    "C2": "C0_PLUS_25_PERCENT_CONTEMPORANEOUS_SPREAD_ADVERSE_EACH_FILL",
-    "commission": 0,
-    "swap_included": false,
-    "rollover_exposed": "PRE_SWAP_ONLY",
-    "profit_currency": "USD",
-    "lot": 1.0
+  "promising_research_survivor": {
+    "machine_id": "TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM",
+    "status": "VALUE_PROMISING_RETROSPECTIVE_NOT_PROMOTED",
+    "trades": 107,
+    "C0_pf": 1.049454092667,
+    "C0_net_usd_1lot": 1509.24,
+    "C2_pf": 1.007930096021,
+    "C2_net_usd_1lot": 245.49,
+    "C2_expectancy_usd_1lot": 2.29429906542,
+    "C2_max_drawdown_usd_1lot": 9803.0,
+    "C2_Holm_p": 1.0,
+    "positive_C2_months": 5,
+    "negative_C2_months": 6,
+    "LONG_C2_net": -1654.90,
+    "SHORT_C2_net": 1900.39,
+    "same_server_date_C2_net": 7965.94,
+    "rollover_exposed_pre_swap_C2_net": -7720.45,
+    "direction_deletion_authorized": false,
+    "rollover_filter_authorized": false
   },
-  "classification_contract": {
-    "supported": "C0_AND_C2_POSITIVE_PF_GT_1_AND_C2_HOLM_P_LE_0_05",
-    "promising": "C0_AND_C2_POSITIVE_PF_GT_1_BUT_C2_HOLM_P_GT_0_05",
-    "hold": "C0_POSITIVE_PF_GT_1_BUT_C2_NOT_POSITIVE",
-    "reject": "C0_NOT_POSITIVE_OR_PF_NOT_GT_1",
-    "automatic_promotion": false
+  "cost_sensitive_hold": {
+    "machine_id": "TRACK_B_B5_R12_B100_W16_H1_IMPULSE_M15_RECLAIM",
+    "C0_pf": 1.038446382326,
+    "C0_net_usd_1lot": 961.99,
+    "C2_pf": 0.997862230907,
+    "C2_net_usd_1lot": -54.26
+  },
+  "research_assessment": {
+    "candidate_level_traction": "MODEST_FIRST_POSITIVE_SIGNAL_NOT_ROBUST",
+    "process_level_traction": "POSITIVE",
+    "supported_machine_count": 0,
+    "deployable_candidates": 0
   },
   "research_track_decisions": {
     "Track_A_current_family": "PRESERVE_AS_AUDIT_EVIDENCE_ACTIVE_RESCUE_CLOSED",
@@ -80,33 +95,23 @@
     "Track_B_B2": "BLOCKED_INSUFFICIENT_DENSITY_NO_THRESHOLD_RESCUE",
     "Track_B_B3": "CLOSED_NO_CAPABILITY_SURVIVOR_NO_RESCUE",
     "Track_B_B4": "PRESERVE_AS_AUDIT_EVIDENCE_ACTIVE_RESCUE_CLOSED",
-    "Track_B_B5": "EIGHT_CAPABILITY_SURVIVORS_VALUE_GATE_IMPLEMENTATION_READY_RESULT_PENDING",
+    "Track_B_B5": "ONE_PROMISING_RESEARCH_SURVIVOR_ONE_COST_SENSITIVE_HOLD_NO_SUPPORTED_NO_PROMOTION",
     "deployable_candidates": 0
   },
-  "output_handoff_contract": {
-    "output_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate",
-    "resolved_user_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate\\LATEST",
-    "sole_upload_file": "99_UPLOAD_PACKAGE.zip",
-    "explorer_select_after_success": true,
-    "upload_only_selected_zip": true,
-    "upload_zip_members": [
-      "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE_20260731.zip",
-      "deterministic_repeat.json",
-      "package_sha256.txt"
-    ]
-  },
+  "recommended_next_stage": "BCR18_B5_PROMISING_SURVIVOR_PROSPECTIVE_PREREGISTRATION",
+  "BCR18_authorization": "PENDING_EXPLICIT_USER_AUTHORIZATION",
   "currently_authorized": [
-    "RUN_BCR17_ON_EXACT_FROZEN_INPUT_AND_ACCEPTED_BCR16_PACKAGE",
-    "UPLOAD_AND_AUDIT_BCR17_99_UPLOAD_PACKAGE",
-    "REPORT_ALL_EIGHT_B5_MACHINES_AND_BOTH_DIRECTIONS",
-    "REPORT_C0_C2_PF_PNL_WIN_LOSS_MFE_MAE_AND_HOLM"
+    "REPORT_AND_PRESERVE_BCR17_RESULT",
+    "EXPLAIN_PROMISING_AND_HOLD_CLASSIFICATIONS_WITHOUT_PROMOTION"
   ],
   "currently_not_authorized": [
+    "BCR18_CONTRACT_OR_PROSPECTIVE_START_WITHOUT_EXPLICIT_AUTHORIZATION",
     "AUTOMATIC_CANDIDATE_PROMOTION",
     "POST_RESULT_MACHINE_OR_DIRECTION_DELETION",
-    "B5_THRESHOLD_OR_EXIT_RESCUE",
+    "RETROSPECTIVE_SAME_DATE_OR_ROLLOVER_FILTER",
+    "ROLLOVER_FLAT_OR_MAX_HOLDING_RESCUE",
+    "B5_THRESHOLD_OR_EXIT_RETUNE",
     "PORTFOLIO_SELECTION",
-    "PROSPECTIVE_START",
     "SHADOW_RUNTIME",
     "DISCORD",
     "MT5_ORDER",
@@ -116,16 +121,10 @@
     "GOLD_MOCHIPOYO_WRITEBACK"
   ],
   "required_user_action": {
-    "pull_branch": "feature/btc-fresh-forward-research",
-    "run": "scripts/btc_ml_v1/BCR17_b5_shared_retrospective_value_gate/01_run_BCR17.bat",
-    "upload": [
-      "99_UPLOAD_PACKAGE.zip"
-    ],
-    "output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR17_b5_shared_retrospective_value_gate\\LATEST",
-    "on_failure": "PROVIDE_COMPLETE_CONSOLE_ERROR_NO_FALLBACK_OR_CONTRACT_CHANGE"
+    "action": "EXPLICITLY_AUTHORIZE_OR_DECLINE_BCR18_B5_PROMISING_SURVIVOR_PROSPECTIVE_PREREGISTRATION",
+    "bat_required_now": false,
+    "upload_required_now": false,
+    "runtime_change_required": false
   },
-  "next_phase": "AWAIT_USER_LOCAL_BCR17_99_UPLOAD_PACKAGE",
-  "next_phase_requires_user_bat": true,
-  "next_phase_requires_runtime_change": false,
   "candidate_count_deployable": 0
 }
