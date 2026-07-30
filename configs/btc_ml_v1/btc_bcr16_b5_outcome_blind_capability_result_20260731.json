@@ -1,0 +1,107 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "recorded_at": "2026-07-31T00:33:00+09:00",
+  "stage": "BCR16_B5_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "status": "BCR16_COMPLETE_EIGHT_OF_EIGHT_B5_MACHINES_PASS_CAPABILITY",
+  "decision": "ACCEPT_BCR16_DETERMINISTIC_LABEL_FREE_RESULT_FREEZE_EIGHT_B5_CAPABILITY_SURVIVORS_AWAIT_EXPLICIT_BCR17_VALUE_GATE_AUTHORIZATION",
+  "accepted_package": {
+    "outer_upload_sha256": "2504c83c0e1cd6b9c336420cb8435f4c599493c076a5bed0028f3717e834229f",
+    "inner_package_name": "BCR16_B5_OUTCOME_BLIND_CAPABILITY_AUDIT_20260731.zip",
+    "inner_package_sha256": "c469be9455bd5639de336684e0fdcaebf6a72dc6f0bae623acefa5e0cb506653",
+    "deterministic_repeat_match": true,
+    "outer_crc_passed": true,
+    "inner_crc_passed": true,
+    "manifest_hashes_and_bytes_exact": true
+  },
+  "frozen_input": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "rows": 30661,
+    "first_time": "2025-09-13 08:00:00",
+    "last_time": "2026-07-30 06:15:00",
+    "complete_H1_bars": 7630,
+    "append_only_source_sha256_at_run": "9cb2db4f2d4ffaeaa4bdbedb9a0db620bde30397e093f2c0694280c6032bdd7f",
+    "prefix_rehydrated_exact_sha": true,
+    "fallback_or_interpolation_used": false
+  },
+  "capability": {
+    "machines_reported": 8,
+    "machines_passed": 8,
+    "machines_failed": 0,
+    "all_eight_reported": true,
+    "endpoint_open_all_zero": true,
+    "state_integrity_all_passed": true,
+    "simultaneous_conflicts_all_zero": true,
+    "exact_entry_missing_all_zero": true,
+    "gate": {
+      "minimum_closed_episodes_total": 50,
+      "minimum_closed_episodes_each_direction": 20,
+      "minimum_entry_months": 6,
+      "maximum_single_month_entry_share": 0.35,
+      "maximum_p90_holding_bars": 384,
+      "maximum_holding_bars": 1500,
+      "maximum_endpoint_open_episodes": 1,
+      "state_integrity_required": true,
+      "fallback_or_interpolation_allowed": false
+    },
+    "observed_ranges": {
+      "H1_impulses": [253, 421],
+      "pullbacks": [166, 281],
+      "entries_and_closed_episodes": [82, 131],
+      "closed_LONG": [42, 67],
+      "closed_SHORT": [40, 66],
+      "distinct_entry_months": [11, 11],
+      "maximum_single_month_entry_share": [0.104651162791, 0.13],
+      "holding_p50_bars": [9.0, 12.0],
+      "holding_p90_bars": [32.0, 32.0],
+      "holding_max_bars": [32, 33],
+      "position_occupancy": [0.038682322244, 0.05675146771]
+    }
+  },
+  "machines": [
+    {"id":"TRACK_B_B5_R06_B075_W08_H1_IMPULSE_M15_RECLAIM","H1_impulses":421,"entries":131,"closed":131,"LONG":67,"SHORT":64,"months":11,"max_month_share":0.114503816794,"holding_p50":9.0,"holding_p90":32.0,"holding_max":33,"occupancy":0.056294846706,"capability_pass":true},
+    {"id":"TRACK_B_B5_R06_B075_W16_H1_IMPULSE_M15_RECLAIM","H1_impulses":398,"entries":130,"closed":130,"LONG":64,"SHORT":66,"months":11,"max_month_share":0.115384615385,"holding_p50":10.0,"holding_p90":32.0,"holding_max":33,"occupancy":0.05675146771,"capability_pass":true},
+    {"id":"TRACK_B_B5_R06_B100_W08_H1_IMPULSE_M15_RECLAIM","H1_impulses":332,"entries":100,"closed":100,"LONG":50,"SHORT":50,"months":11,"max_month_share":0.13,"holding_p50":12.0,"holding_p90":32.0,"holding_max":32,"occupancy":0.04670580561,"capability_pass":true},
+    {"id":"TRACK_B_B5_R06_B100_W16_H1_IMPULSE_M15_RECLAIM","H1_impulses":316,"entries":103,"closed":103,"LONG":50,"SHORT":53,"months":11,"max_month_share":0.116504854369,"holding_p50":12.0,"holding_p90":32.0,"holding_max":32,"occupancy":0.048206131768,"capability_pass":true},
+    {"id":"TRACK_B_B5_R12_B075_W08_H1_IMPULSE_M15_RECLAIM","H1_impulses":320,"entries":105,"closed":105,"LONG":55,"SHORT":50,"months":11,"max_month_share":0.114285714286,"holding_p50":9.0,"holding_p90":32.0,"holding_max":32,"occupancy":0.047064579256,"capability_pass":true},
+    {"id":"TRACK_B_B5_R12_B075_W16_H1_IMPULSE_M15_RECLAIM","H1_impulses":305,"entries":107,"closed":107,"LONG":54,"SHORT":53,"months":11,"max_month_share":0.11214953271,"holding_p50":10.0,"holding_p90":32.0,"holding_max":32,"occupancy":0.048303979126,"capability_pass":true},
+    {"id":"TRACK_B_B5_R12_B100_W08_H1_IMPULSE_M15_RECLAIM","H1_impulses":264,"entries":82,"closed":82,"LONG":42,"SHORT":40,"months":11,"max_month_share":0.121951219512,"holding_p50":11.5,"holding_p90":32.0,"holding_max":32,"occupancy":0.038682322244,"capability_pass":true},
+    {"id":"TRACK_B_B5_R12_B100_W16_H1_IMPULSE_M15_RECLAIM","H1_impulses":253,"entries":86,"closed":86,"LONG":42,"SHORT":44,"months":11,"max_month_share":0.104651162791,"holding_p50":11.0,"holding_p90":32.0,"holding_max":32,"occupancy":0.040215264188,"capability_pass":true}
+  ],
+  "structural_path_categories_not_profitability": {
+    "structural_success_per_machine_range": [49, 79],
+    "structural_failure_per_machine_range": [15, 28],
+    "thesis_expiry_per_machine_range": [18, 24],
+    "interpret_as_win_rate": false
+  },
+  "outcome_isolation": {
+    "entry_price_opened": false,
+    "exit_price_opened": false,
+    "return_opened": false,
+    "win_loss_opened": false,
+    "PF_opened": false,
+    "PnL_opened": false,
+    "MFE_opened": false,
+    "MAE_opened": false,
+    "value_evaluation_performed": false,
+    "candidate_promoted": false,
+    "portfolio_selected": false,
+    "prospective_start_set": false,
+    "shadow_started": false,
+    "discord_sent": false,
+    "mt5_order_sent": false
+  },
+  "BCR17_boundary": {
+    "recommended_stage": "BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE",
+    "authorized": false,
+    "requires_explicit_user_authorization": true,
+    "survivors": 8,
+    "required_cost_cases": ["C0", "C2"],
+    "all_eight_trials_must_be_reported": true,
+    "post_result_machine_or_side_deletion": false,
+    "multiple_testing_control_required": true
+  },
+  "candidate_promoted": false,
+  "deployable_candidates": 0
+}
