@@ -21,13 +21,20 @@ set "SCRIPT=scripts\btc_ml_v1\BCR08_mt5_symbol_cost_provenance\python\run_bcr08_
 
 set "PYTHON_CMD="
 where python >nul 2>&1
-if not errorlevel 1 set "PYTHON_CMD=python"
-if not defined PYTHON_CMD (
-  where py >nul 2>&1
-  if not errorlevel 1 set "PYTHON_CMD=py -3"
+if not errorlevel 1 (
+  python -c "import MetaTrader5" >nul 2>&1
+  if not errorlevel 1 set "PYTHON_CMD=python"
 )
 if not defined PYTHON_CMD (
-  echo [BCR08] FAILED: Python was not found.
+  where py >nul 2>&1
+  if not errorlevel 1 (
+    py -3 -c "import MetaTrader5" >nul 2>&1
+    if not errorlevel 1 set "PYTHON_CMD=py -3"
+  )
+)
+if not defined PYTHON_CMD (
+  echo [BCR08] FAILED: No Python interpreter with MetaTrader5 was found.
+  echo [BCR08] No package was generated. Do not install or change anything yet.
   pause
   exit /b 9009
 )
@@ -50,6 +57,7 @@ if not exist "%CSV_PATH%" (
 echo ============================================================
 echo BCR08 - MT5 SYMBOL AND COST PROVENANCE
 echo ============================================================
+echo Python             : %PYTHON_CMD%
 echo Expected data path : %EXPECTED_DATA_PATH%
 echo BTC M15 CSV        : %CSV_PATH%
 echo Expected symbol    : %EXPECTED_SYMBOL%
