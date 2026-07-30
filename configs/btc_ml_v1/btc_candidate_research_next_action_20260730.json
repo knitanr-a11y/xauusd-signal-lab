@@ -2,7 +2,7 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T21:14:00+09:00",
+  "recorded_at": "2026-07-30T21:46:00+09:00",
   "next_stage": "BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN",
   "authorization": "AWAIT_EXPLICIT_USER_AUTHORIZATION_BEFORE_CONTRACT_OR_IMPLEMENTATION",
   "handoff_authority": {
@@ -11,7 +11,19 @@
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "required_branch": "feature/btc-fresh-forward-research",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
-    "final_verification_at": "2026-07-30T21:14:00+09:00"
+    "final_verification_at": "2026-07-30T21:46:00+09:00"
+  },
+  "read_order_correction": {
+    "type": "HANDOFF_MAINTENANCE_ONLY",
+    "stable_entry_commit": "5aa938cee2655edcb67faca7f46c8092d2c3442e",
+    "latest_handoff_update_commit": "475c579429f60dafbf5535108d68932fe4d6ead9",
+    "current_state_update_commit": "adf516409b55d84d0fdcb14d69796f102bf5e992",
+    "required_read_order_count": 17,
+    "required_read_order_completed": true,
+    "status_changed": false,
+    "decision_changed": false,
+    "next_stage_changed": false,
+    "authorization_changed": false
   },
   "completed_inputs": {
     "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
