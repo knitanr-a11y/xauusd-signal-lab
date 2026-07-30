@@ -1,0 +1,114 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR04_OUTCOME_BLIND_DECISION_UNIVERSE_AND_CONTROL_WINDOWS",
+  "recorded_at": "2026-07-30T13:46:00+09:00",
+  "branch": "feature/btc-fresh-forward-research",
+  "status": "PREREGISTERED_BEFORE_ACTUAL_FEATURE_COMPARISON",
+  "outcomes_opened": false,
+  "performance_interpretation_performed": false,
+  "candidate_formula_designed": false,
+  "frozen_inputs": {
+    "bcr02_package_sha256": "5251428a456b7ee0a659d9ccd4b7ea2d4afde5e7e426c0b5da1ca60c5d0576b2",
+    "btc_m15_original_path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
+    "btc_m15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "prospective_start_utc": "2026-07-20T14:54:15Z",
+    "server_offset_hours_for_inspected_interval": 3
+  },
+  "decision_universe": {
+    "start_rule": "FIRST_EXACT_15_MINUTE_BOUNDARY_STRICTLY_AFTER_PROSPECTIVE_START",
+    "start_utc": "2026-07-20T15:00:00Z",
+    "end_rule": "LATEST_BCR02_BTC_SOURCE_EVENT_BAR_TIME_UTC",
+    "end_utc": "2026-07-30T01:30:00Z",
+    "frequency_minutes": 15,
+    "theoretical_rows_expected": 907,
+    "retain_missing_current_bar_rows": true,
+    "nearest_next_interpolated_fallback": false
+  },
+  "state_contract": {
+    "seed": "LATEST_PRE_START_BTC_STATE_FROM_BCR02_SEED_HISTORY",
+    "seed_state_at_first_boundary": "ACTIVE_LONG",
+    "state_before_event_must_match_bcr02": true,
+    "non_event_state_persists": true,
+    "one_btc_event_max_per_boundary": true
+  },
+  "event_classes": [
+    "PRIMARY_LONG_EVENT",
+    "PRIMARY_SHORT_EVENT",
+    "VALID_LONG_EXIT_EVENT",
+    "VALID_SHORT_EXIT_EVENT",
+    "REENTRY_EVENT",
+    "OPPOSITE_EVENT_IGNORED",
+    "IDLE_NON_EVENT_CONTROL",
+    "ACTIVE_LONG_NON_EVENT_CONTROL",
+    "ACTIVE_SHORT_NON_EVENT_CONTROL"
+  ],
+  "distance_bins_bars": [
+    {"label": "EVENT", "min": 0, "max": 0},
+    {"label": "D1", "min": 1, "max": 1},
+    {"label": "D2_4", "min": 2, "max": 4},
+    {"label": "D5_8", "min": 5, "max": 8},
+    {"label": "D9_16", "min": 9, "max": 16},
+    {"label": "D17_32", "min": 17, "max": 32},
+    {"label": "D33_PLUS", "min": 33, "max": null}
+  ],
+  "transition_age_bins_bars": [
+    {"label": "A0", "min": 0, "max": 0},
+    {"label": "A1", "min": 1, "max": 1},
+    {"label": "A2_4", "min": 2, "max": 4},
+    {"label": "A5_8", "min": 5, "max": 8},
+    {"label": "A9_16", "min": 9, "max": 16},
+    {"label": "A17_32", "min": 17, "max": 32},
+    {"label": "A33_PLUS", "min": 33, "max": null}
+  ],
+  "quantile_method": {
+    "population": "ALL_FEATURE_ELIGIBLE_DECISION_ROWS",
+    "probabilities": [0.2, 0.4, 0.6, 0.8],
+    "ties": "LEFT_CLOSED_RIGHT_OPEN_EXCEPT_TOP_BIN",
+    "outcome_selected": false,
+    "used_for": ["ATR14_BAND", "BB_WIDTH20_BAND", "REALIZED_VOL32_BAND"]
+  },
+  "causal_feature_horizons": {
+    "rci": [9, 14, 18],
+    "ema": [20, 30, 40],
+    "ema_slope_bars": [1, 4, 8],
+    "closed_return_bars": [1, 4, 16],
+    "atr": [14, 50],
+    "realized_vol_bars": [16, 32, 96],
+    "bollinger_window": 20,
+    "rolling_location_bars": [20, 50]
+  },
+  "gap_policy": {
+    "never_fill_missing_bars": true,
+    "retain_theoretical_grid_rows": true,
+    "current_open_allowed_only_when_exact_current_bar_exists": true,
+    "exact_previous_closed_bar_flag_required": true,
+    "rolling_features_use_observed_closed_rows_only": true,
+    "gap_in_lookback_counts_recorded": true,
+    "core_feature_eligible_requires_current_bar_and_exact_previous_bar": true
+  },
+  "rci_turn_definition": {
+    "delta1": "RCI_T_MINUS_RCI_T_MINUS_1",
+    "turn_up": "DELTA1_GT_0_AND_PREVIOUS_DELTA1_LE_0",
+    "turn_down": "DELTA1_LT_0_AND_PREVIOUS_DELTA1_GE_0"
+  },
+  "track_b_capability_probes": {
+    "trend_pullback_long": "BULLISH_EMA_STACK_AND_CURRENT_OPEN_BETWEEN_EMA20_AND_EMA40",
+    "trend_pullback_short": "BEARISH_EMA_STACK_AND_CURRENT_OPEN_BETWEEN_EMA40_AND_EMA20",
+    "compression_low": "BB_WIDTH20_IN_LOWEST_PREREGISTERED_QUINTILE",
+    "breakout_up": "CURRENT_OPEN_GT_PREVIOUS_CLOSED_20_BAR_HIGH",
+    "breakout_down": "CURRENT_OPEN_LT_PREVIOUS_CLOSED_20_BAR_LOW",
+    "overextension": "ABS_CURRENT_OPEN_MINUS_EMA20_DIV_ATR14_GE_1_5",
+    "purpose": "LABEL_FREE_DENSITY_AND_DATA_CAPABILITY_ONLY_NOT_CANDIDATE_SELECTION"
+  },
+  "required_integrity_checks": [
+    "EXACT_907_ROW_THEORETICAL_GRID",
+    "UNIQUE_DECISION_TIME",
+    "ALL_76_BTC_SOURCE_EVENTS_MAP_ONCE",
+    "BCR02_STATE_BEFORE_AFTER_PARITY",
+    "NO_EVENT_REMOVAL",
+    "NO_CURRENT_HIGH_LOW_CLOSE_USE",
+    "NO_OUTCOME_FIELD_READ_OR_EXPORTED",
+    "NO_GAP_INTERPOLATION",
+    "ALL_HASHES_AND_COUNTS_RECORDED"
+  ]
+}
