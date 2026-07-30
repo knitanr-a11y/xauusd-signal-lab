@@ -2,7 +2,7 @@
   "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
   "repository": "knitanr-a11y/xauusd-signal-lab",
   "branch": "feature/btc-fresh-forward-research",
-  "recorded_at": "2026-07-30T21:14:00+09:00",
+  "recorded_at": "2026-07-30T21:46:00+09:00",
   "status": "BTC_REDESIGN_BCR11_COMPLETE_NO_CAUSAL_HOLDING_OVERLAY_ADVANCES_NEW_TRACK_B_FAMILY_NEXT",
   "decision": "ACCEPT_BCR11_NO_NONBASELINE_OVERLAY_POSITIVE_CLOSE_CURRENT_TRACK_A_B4_RESCUE_PATH_NO_PROMOTION",
   "handoff_authority": {
@@ -11,8 +11,22 @@
     "policy": "configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json",
     "old_handoffs": "AUDIT_HISTORY_ONLY",
     "continuous_updates_required": true,
-    "final_verification_at": "2026-07-30T21:14:00+09:00",
-    "final_verification_result": "CONSISTENT_NO_BCR11_FACTUAL_CORRECTION_REQUIRED"
+    "final_verification_at": "2026-07-30T21:46:00+09:00",
+    "final_verification_result": "CONSISTENT_AFTER_READ_ORDER_CORRECTION_NO_BCR11_FACTUAL_CHANGE"
+  },
+  "read_order_correction": {
+    "type": "HANDOFF_MAINTENANCE_ONLY",
+    "stable_entry_commit": "5aa938cee2655edcb67faca7f46c8092d2c3442e",
+    "latest_handoff_update_commit": "475c579429f60dafbf5535108d68932fe4d6ead9",
+    "restored_files": [
+      "configs/btc_ml_v1/btc_bcr11_finite_causal_holding_overlay_development_contract_20260730.json",
+      "configs/btc_ml_v1/btc_bcr10_holding_rollover_path_diagnostic_result_20260730.json"
+    ],
+    "required_read_order_count": 17,
+    "required_read_order_completed": true,
+    "status_changed": false,
+    "decision_changed": false,
+    "bcr12_authorization_changed": false
   },
   "frozen_market_data": {
     "path": "C:\\Users\\regen\\AppData\\Roaming\\MetaQuotes\\Terminal\\2FA8A7E69CED7DC259B1AD86A247F675\\MQL5\\Files\\btcusdsharp_m15.csv",
