@@ -1,0 +1,54 @@
+{
+  "project": "BTC_CANDIDATE_RESEARCH_REDESIGN",
+  "stage": "BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_AUDIT",
+  "recorded_at": "2026-07-30T23:05:00+09:00",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-fresh-forward-research",
+  "classification": "BCR13_OUTPUT_HANDOFF_WORKFLOW_INCIDENT_CORRECTED",
+  "incident": {
+    "incorrect_output_root": "REPOSITORY_RELATIVE_outputs/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/latest",
+    "incorrect_upload_instruction": "UPLOAD_THREE_SEPARATE_FILES",
+    "intentional_specification_change": false,
+    "research_logic_affected": false,
+    "outcome_opened": false
+  },
+  "restored_standard_contract": {
+    "output_root_environment": "%LOCALAPPDATA%\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit",
+    "resolved_user_output_dir": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST",
+    "sole_upload_file": "99_UPLOAD_PACKAGE.zip",
+    "resolved_user_upload_file": "C:\\Users\\regen\\AppData\\Local\\xauusd_signal_lab\\btc_ml_v1\\outputs\\BCR13_b3_outcome_blind_density_audit\\LATEST\\99_UPLOAD_PACKAGE.zip",
+    "explorer_select_after_success": true,
+    "pause_after_run": true,
+    "upload_only_selected_zip": true,
+    "upload_zip_members": [
+      "BCR13_B3_OUTCOME_BLIND_DENSITY_AUDIT_20260730.zip",
+      "deterministic_repeat.json",
+      "package_sha256.txt"
+    ]
+  },
+  "correction_commits": {
+    "runner_bat": "5ae358ab06c3183da2486d31ffa8d4f1721c57f4",
+    "open_results_bat": "5809d2a09ed8d31aab646901a0716c028ce0480e",
+    "readme": "e281ff1ef9f1c3fc3dcbae91520fd9584d1f0e48",
+    "correction_document": "92f2341c8d9f345b47aaa1304834772308292f9b"
+  },
+  "unchanged": {
+    "BTC_M15_sha256": "b8de00d117a119f9bf2f417b6228fe0ca0779c88f71a80b134bb9244d6768148",
+    "BTC_M15_rows": 30661,
+    "B3_machine_count": 8,
+    "formula_or_threshold_changed": false,
+    "causal_boundary_changed": false,
+    "capability_gate_changed": false,
+    "B3_outcome_access": false,
+    "candidate_promoted": false,
+    "BCR14_authorized": false
+  },
+  "user_action": {
+    "pull_branch": "feature/btc-fresh-forward-research",
+    "run": "scripts/btc_ml_v1/BCR13_b3_outcome_blind_density_audit/01_run_BCR13.bat",
+    "upload": [
+      "99_UPLOAD_PACKAGE.zip"
+    ],
+    "on_failure": "PROVIDE_COMPLETE_CONSOLE_ERROR_NO_FALLBACK"
+  }
+}
