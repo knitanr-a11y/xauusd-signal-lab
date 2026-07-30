@@ -2,8 +2,8 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-fresh-forward-research`
-- current status: `BTC_REDESIGN_BCR16_B5_IMPLEMENTATION_READY_FROZEN_INPUT_LOCAL_RUN_PENDING_NO_OUTCOME_OPENED`
-- updated: `2026-07-31T00:03:00+09:00`
+- current status: `BTC_REDESIGN_BCR16_COMPLETE_EIGHT_OF_EIGHT_B5_MACHINES_PASS_CAPABILITY_BCR17_AUTHORIZATION_PENDING`
+- updated: `2026-07-31T00:33:00+09:00`
 - handoff verification: `FINAL_VERIFIED_FOR_NEXT_CHAT`
 
 ## 1. branch hard gate
@@ -16,27 +16,26 @@
 
 ## 2. 唯一の最新版handoff
 
-`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260731.md`
+`docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_COMPLETE_EIGHT_OF_EIGHT_PASS_BCR17_AUTHORIZATION_PENDING_20260731.md`
 
 上記以外のhandoffは、ここから明示されない限り`AUDIT_HISTORY_ONLY`。
 
 ## 3. 必須read order
 
 1. `START_HERE_BTC_CANDIDATE_RESEARCH_NEXT_CHAT.md`
-2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_IMPLEMENTATION_READY_LOCAL_RUN_PENDING_20260731.md`
+2. `docs/btc_ml_v1/NEXT_CHAT_HANDOFF_BTC_BCR16_COMPLETE_EIGHT_OF_EIGHT_PASS_BCR17_AUTHORIZATION_PENDING_20260731.md`
 3. `configs/btc_ml_v1/btc_candidate_research_current_state_20260730.json`
 4. `configs/btc_ml_v1/btc_candidate_research_next_action_20260730.json`
 5. `configs/btc_ml_v1/btc_candidate_research_handoff_policy_20260730.json`
-6. `docs/btc_ml_v1/BTC_BCR16_B5_OUTCOME_BLIND_CAPABILITY_IMPLEMENTATION_READY_20260731.md`
-7. `configs/btc_ml_v1/btc_bcr16_b5_outcome_blind_capability_implementation_ready_20260731.json`
-8. `docs/btc_ml_v1/BTC_BCR15_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_DESIGN_CONTRACT_20260731.md`
-9. `configs/btc_ml_v1/btc_bcr15_causal_h1_impulse_m15_pullback_reclaim_design_contract_20260731.json`
-10. `docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_RESULT_20260730.md`
-11. `configs/btc_ml_v1/btc_bcr13_b3_outcome_blind_density_and_state_machine_result_20260730.json`
-12. `docs/btc_ml_v1/BTC_BCR13_LOCALAPPDATA_SINGLE_UPLOAD_ZIP_WORKFLOW_CORRECTION_20260730.md`
-13. `docs/btc_ml_v1/BTC_BCR12_MATERIALLY_NEW_OUTCOME_BLIND_TRACK_B_MECHANISM_DESIGN_CONTRACT_20260730.md`
-14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
-15. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
+6. `docs/btc_ml_v1/BTC_BCR16_B5_OUTCOME_BLIND_CAPABILITY_RESULT_20260731.md`
+7. `configs/btc_ml_v1/btc_bcr16_b5_outcome_blind_capability_result_20260731.json`
+8. `docs/btc_ml_v1/BTC_BCR16_B5_OUTCOME_BLIND_CAPABILITY_IMPLEMENTATION_READY_20260731.md`
+9. `configs/btc_ml_v1/btc_bcr16_b5_outcome_blind_capability_implementation_ready_20260731.json`
+10. `docs/btc_ml_v1/BTC_BCR15_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM_DESIGN_CONTRACT_20260731.md`
+11. `configs/btc_ml_v1/btc_bcr15_causal_h1_impulse_m15_pullback_reclaim_design_contract_20260731.json`
+12. `docs/btc_ml_v1/BTC_BCR13_B3_OUTCOME_BLIND_DENSITY_AND_STATE_MACHINE_RESULT_20260730.md`
+13. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_REDESIGN_MOCHIPOYO_DERIVED_AND_INDEPENDENT_20260730.md`
+14. `docs/btc_ml_v1/BTC_CANDIDATE_RESEARCH_HANDOFF_MAINTENANCE_POLICY_20260730.md`
 
 この順番より前にrepo全体検索、code search、古いhandoff探索をしない。
 
@@ -60,49 +59,46 @@ MOCHIPOYOの一般探索は禁止。Collector/M7C/M8C/M9/M10を停止・再起�
 
 ## 5. 現在地
 
-BCR13:
+BCR13/B3:
 
-- B3 machines: `0/8 capability pass`
-- B3: `CLOSED_NO_CAPABILITY_SURVIVOR_NO_RESCUE`
-- BCR14: `NOT_APPLICABLE_ZERO_SURVIVORS`
-- B3 value fields: unopened
+- capability pass: `0/8`
+- status: `CLOSED_NO_CAPABILITY_SURVIVOR_NO_RESCUE`
+- BCR14: not applicable
 
-BCR15/BCR16:
+BCR15/BCR16/B5:
 
 - family: `B5_CAUSAL_H1_IMPULSE_M15_PULLBACK_RECLAIM`
 - frozen machines: `8`
-- causal complete-H1 construction: implemented
-- synthetic/exact-path tests: `6 passed`
-- actual frozen 30,661-row run: pending
+- deterministic capability package accepted
+- capability pass: `8/8`
+- entries/closed: `82–131`
+- LONG/SHORT: `42–67 / 40–66`
+- entry months: `11`
+- p90 holding: `32` bars
+- occupancy: `3.87%–5.68%`
 - B5 return/win-loss/PF/PnL/MFE/MAE: unopened
 - promoted/deployable candidates: `0`
 
-## 6. 現在の次作業
+## 6. 手ごたえ
 
-GitHub DesktopでbranchをPullし、次を実行する。
+候補-levelの能力面では初めて明確な手ごたえが出た。十分な密度、方向バランス、月分散、有限holding、低occupancyを8 machinesすべてが満たした。
 
-`scripts\btc_ml_v1\BCR16_b5_h1_impulse_m15_reclaim_capability_audit\01_run_BCR16.bat`
+ただし損益の手ごたえは未確認。structural success/failureはstate-machine終了区分であり、win/lossではない。
 
-出力先:
+## 7. 現在の次作業
 
-`C:\Users\regen\AppData\Local\xauusd_signal_lab\btc_ml_v1\outputs\BCR16_b5_h1_impulse_m15_reclaim_capability_audit\LATEST`
+推奨stage:
 
-成功後、Explorerで選択された次の1ファイルだけをアップロードする。
+`BCR17_B5_SHARED_RETROSPECTIVE_VALUE_GATE`
 
-`99_UPLOAD_PACKAGE.zip`
-
-失敗時は完全なconsole errorを提示する。別CSV、SHA変更、row count変更、類似ファイルfallbackは禁止。
-
-## 7. value境界
-
-B5 value evaluationは未承認。BCR16 packageの受領・能力監査前にreturn、win/loss、PF、PnL、MFE、MAE、portfolio、prospective start、shadowへ進まない。
+BCR17は未承認。明示承認前にreturn、win/loss、PF、PnL、MFE、MAEを開かない。
 
 ## 8. runtime protection
 
 Collector、M7C、M8C、M9、M10を停止・再起動・初期化・変更しない。GOLD/MOCHIPOYO側へBTC研究結果を書き込まない。
 
-Discord、MT5発注、live-ready、final signalは未承認。
+Discord、MT5発注、portfolio、prospective start、shadow、live-ready、final signalは未承認。
 
 ## 9. fail-closed
 
-branch、最新版handoff、current state、next action、BCR15 contract、BCR16 readinessが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
+branch、最新版handoff、current state、next action、BCR15 contract、BCR16 resultが矛盾する場合は作業停止。記憶、古いhandoff、default branch、似たファイルで補わない。
