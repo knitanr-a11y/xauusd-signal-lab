@@ -3,12 +3,23 @@
   "unit_tests": {
     "command": "pytest -q",
     "result": "4 passed",
+    "packaged_runtime_loader_result": "4 passed",
     "covered": [
       "semiannual January/July boundary",
       "causal session horizon guard",
       "720-minute exact M1 score maturity",
       "IMPULSE_EARLY episode restart"
     ]
+  },
+  "runtime_payload": {
+    "format": "ZIP_SPLIT_INTO_RAW_BASE64_RAW_REPOSITORY_PARTS",
+    "reconstructed_size_bytes": 19999,
+    "sha256": "a78d6731e624fc325ac4d5dd359a81d11ecd594cd6bb2aad4ab75b061031b3d9",
+    "members": {
+      "frozen_router.py": "42fca518315a084080cd108f76428a2508071082936bec8bef24e106de939fd3",
+      "frozen_wave.py": "add8950401c542cf394709dfeb8664975e45e43c2842ccfb2af2b112af1b239e",
+      "shadow_runtime.py": "82f874cb534050339c95bfa65fc2a47a126eb1fed625b9dfbe8e5d7fa5ef3b69"
+    }
   },
   "full_data_bootstrap": {
     "result": "PASS",
