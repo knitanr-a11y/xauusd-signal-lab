@@ -31,7 +31,8 @@ SEMIANNUAL_EXPANDING
 - 1ポジション非重複。
 - episode当たり1回だけ。
 - runner、2回目entry、片側削除を行わない。
-- Discord、AI、MT5注文、実売買はOFF。
+- AI判断、MT5注文、実売買はOFF。
+- DiscordはShadow判断から分離する。ユーザーが2026-08-01に許可したentry通知sidecarだけを `GOLD_V19_DISCORD_ENTRY_ALERT_ADDENDUM_20260801.md` に従って使用できる。
 
 ## 3. 方向ルーター
 
@@ -135,6 +136,8 @@ runtime停止中にclosed M15判定が複数進んでいた場合は、episode�
 
 これは「後からCSVを見て取引したことにする」backfillを防ぐためである。
 
+Discord notifierも起動時の `accepted_trades` をbaselineにし、停止中に発生したentryを後から通知しない。
+
 ## 10. 出力
 
 state root:
@@ -145,6 +148,7 @@ state root:
 
 - `runtime_state.json`
 - `runtime_health.json`
+- `discord_notifier_state.json`
 - `models/YYYY-MM-DD/manifest.json`
 - `score_history.csv.gz`
 - `pending_scores.csv.gz`
@@ -152,9 +156,13 @@ state root:
 - `outputs/shadow_candidate_ledger.csv`
 - `outputs/shadow_trade_ledger.csv`
 - `outputs/score_history_invalid_gap_ledger.csv`
+- `outputs/discord_charts/*.png`
 - `logs/shadow_runtime.log`
+- `logs/discord_notifier.log`
 
 ## 11. 起動手順
+
+Shadow runtime:
 
 1. `01_INSTALL.bat`を実行する。
 2. `02_BOOTSTRAP_ACTIVATE.bat`を初めて実行すると、`local_config.json`がなければexampleから作成してNotepadを開く。
@@ -164,10 +172,20 @@ state root:
 6. `03_RUN_LOOP.bat`を開いたままにする。
 7. `04_STATUS.bat`で状態を確認する。
 
-CSV sourceを推測したり、似たファイルへfallbackしたりしない。
+Discord entry通知:
+
+1. branch更新後は `01_INSTALL.bat`を再実行する。
+2. `06_CONFIGURE_DISCORD.bat`でWebhook URLをローカル入力する。
+3. `07_TEST_DISCORD.bat`で日本語テスト通知とM15チャートを確認する。
+4. `08_RUN_DISCORD_ALERTS.bat`を`03_RUN_LOOP.bat`と同時に開いたままにする。
+5. `09_DISCORD_STATUS.bat`で通知状態を確認する。
+
+CSV sourceを推測したり、似たファイルへfallbackしたりしない。Webhook URLをGitHubやチャットへ貼らない。
 
 ## 12. 現在の限界
 
 GitHubへ実装しただけでは、ユーザーPC上のloopは起動しない。CSV pathを設定し、BATを実行した時点からProspective Shadowが始まる。
 
 本Shadowの目的は新しい未来データで固定候補を観測することであり、短期間の勝敗を見てP85/P95、波動尺度、TP/SLを変更しない。
+
+Discordはentryを目視確認するための配送経路にすぎず、通知成功・失敗を候補選択や成績判定へ使用しない。
