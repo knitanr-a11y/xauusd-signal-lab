@@ -1,0 +1,101 @@
+{
+  "contract_id": "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+  "contract_version": "2026-08-01-v1",
+  "authorization": {
+    "prospective_shadow": true,
+    "observation_only": true,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  },
+  "instrument": "XAUUSD",
+  "time_contract": {
+    "basis": "MT5_BROKER_SERVER_NAIVE",
+    "latest_csv_row": "CLOSED_BY_CONTRACT",
+    "open_or_asof_bars": "PROHIBITED",
+    "entry_execution_timeframe": "M1_EXACT",
+    "fallback": "PROHIBITED",
+    "same_m1_tp_sl_collision": "SL_FIRST"
+  },
+  "direction_router": {
+    "family": "E40_HTF_DIRECTION_ROUTER",
+    "role": "MEDIUM_HORIZON_DIRECTIONAL_PRIOR",
+    "label_target_usd": 40.0,
+    "label_stop_usd": 20.0,
+    "label_horizon_exact_m1_minutes": 720,
+    "model_schedule": "SEMIANNUAL_EXPANDING",
+    "update_months": [1, 7],
+    "training_start": "2023-01-01",
+    "calibration_window": "PREVIOUS_SIX_CALENDAR_MONTHS",
+    "rank_lookback_days": 60,
+    "rank_reference": "PAST_ONLY_EXCLUDING_CURRENT_MT5_SERVER_DATE",
+    "threshold": 0.90,
+    "threshold_scope": "SEPARATE_BY_DIRECTION"
+  },
+  "wave_grammar": {
+    "causal": true,
+    "future_confirmed_zigzag": false,
+    "scales": [
+      "M15_K080",
+      "M15_K140",
+      "H1_K080",
+      "H1_K140",
+      "H4_K060",
+      "H4_K100"
+    ],
+    "eligible_state": "IMPULSE_EARLY",
+    "entry_rule": "FIRST_ELIGIBLE_P90_ONLY_PER_CAUSAL_IMPULSE_EARLY_EPISODE",
+    "one_entry_per_episode": true,
+    "cycle_phase": "EXCLUDED_BY_V17_RESULT"
+  },
+  "value_contract": {
+    "target_usd": 20.0,
+    "stop_usd": 10.0,
+    "horizon_exact_m1_minutes": 480,
+    "fixed_spread_usd": 0.30,
+    "recorded_spread_gate_points_max": 30,
+    "one_position_non_overlap": true,
+    "runner": false,
+    "second_entry": false,
+    "side_deletion": false
+  },
+  "causal_session_horizon_guard": {
+    "enabled": true,
+    "purpose": "CAUSAL_TRANSLATION_OF_RETROSPECTIVE_720_CONTIGUOUS_M1_ELIGIBILITY",
+    "weekday_last_bar_offset_minutes_from_observed_session_start": 1378,
+    "friday_last_bar_offset_minutes_from_observed_session_start": 1377,
+    "unexpected_future_gap": "INVALIDATE_OBSERVATION_AND_LOG",
+    "predeclared_early_close_overrides": true,
+    "historical_parity": {
+      "accepted_trades": 169,
+      "reference_trades": 169,
+      "timestamp_overlap": "169/169",
+      "profit_factor": 2.0299563195716415,
+      "net_usd": 730.959999999995
+    }
+  },
+  "runtime": {
+    "activation": "NO_BACKFILL",
+    "active_episode_at_activation": "MARK_CONSUMED",
+    "restart_recovery": "REBUILD_EPISODE_STATE_WITHOUT_TRADING_MISSED_DECISIONS",
+    "missed_multiple_decisions": "RECOVERY_REPLAY_NOT_TRADED",
+    "automatic_semiannual_update": true,
+    "update_transition": "FAIL_CLOSED_UNTIL_NEW_MODEL_AND_CALIBRATION_ARE_CAUSALLY_AVAILABLE",
+    "old_model_fallback_across_boundary": false,
+    "score_history_maturity": "PROMOTE_ONLY_AFTER_720_EXACT_CONTIGUOUS_M1_MINUTES",
+    "state_location": "%LOCALAPPDATA%/xauusd_signal_lab/gold_v19_shadow"
+  },
+  "frozen_prohibitions": [
+    "DO_NOT_CHANGE_P90",
+    "DO_NOT_SWITCH_TO_P85_OR_P95",
+    "DO_NOT_CHANGE_WAVE_SCALES",
+    "DO_NOT_CHANGE_EPISODE_DEFINITION",
+    "DO_NOT_CHANGE_TP20_SL10",
+    "DO_NOT_CHANGE_480_MINUTE_VALUE_HORIZON",
+    "DO_NOT_DELETE_LONG_OR_SHORT",
+    "DO_NOT_ADD_RUNNER",
+    "DO_NOT_ADD_SECOND_ENTRY",
+    "DO_NOT_CONNECT_DISCORD_AI_OR_MT5_ORDER"
+  ]
+}
