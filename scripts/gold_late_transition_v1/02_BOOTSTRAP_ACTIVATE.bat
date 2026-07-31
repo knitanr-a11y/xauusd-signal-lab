@@ -7,20 +7,19 @@ set "EXAMPLE=%CONFIG_DIR%\local_config.example.json"
 set "PY=%LOCALAPPDATA%\xauusd_signal_lab\gold_late_transition_v1_shadow\venv\Scripts\python.exe"
 if not exist "%PY%" (
   echo [BLOCKED] Run 01_INSTALL.bat first.
+  pause
   exit /b 2
 )
-if not exist "%ROOT%\config\gold_wave_shadow_v19\local_config.json" (
-  echo [BLOCKED] V19 local_config.json was not found. Keep the existing V19 setup unchanged.
-  exit /b 2
-)
-if not exist "%CONFIG%" (
-  copy "%EXAMPLE%" "%CONFIG%" >nul
-  echo [INFO] Created Challenger local_config.json. It references the existing V19 local config.
-)
+if not exist "%CONFIG%" copy "%EXAMPLE%" "%CONFIG%" >nul
 pushd "%ROOT%"
 "%PY%" -m scripts.gold_late_transition_v1.shadow_runtime --config "%CONFIG%" bootstrap --activate
 set "RC=%ERRORLEVEL%"
 popd
-if not "%RC%"=="0" exit /b %RC%
-echo [OK] No-backfill Late Transition V1 prospective shadow activated.
-endlocal
+if not "%RC%"=="0" (
+  echo [BLOCKED] Challenger bootstrap failed. Review the error above.
+  pause
+  exit /b %RC%
+)
+echo [OK] No-backfill Challenger prospective shadow activated.
+pause
+exit /b 0
