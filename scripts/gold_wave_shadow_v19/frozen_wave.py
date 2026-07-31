@@ -1,5 +1,13 @@
 from pathlib import Path
+import io
+import zipfile
 
-_PARTS = ['frozen_wave_part01.pyinc', 'frozen_wave_part02.pyinc', 'frozen_wave_part03.pyinc']
-_SOURCE = "".join((Path(__file__).with_name(part)).read_text(encoding="utf-8") for part in _PARTS)
+_PARTS = [
+    "runtime_payload_part00.bin",
+    "runtime_payload_part01.bin",
+    "runtime_payload_part02.bin",
+]
+_PAYLOAD = b"".join(Path(__file__).with_name(part).read_bytes() for part in _PARTS)
+with zipfile.ZipFile(io.BytesIO(_PAYLOAD)) as archive:
+    _SOURCE = archive.read("frozen_wave.py").decode("utf-8")
 exec(compile(_SOURCE, str(Path(__file__)), "exec"), globals(), globals())
