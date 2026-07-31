@@ -1,0 +1,52 @@
+{
+  "date": "2026-08-01",
+  "authorization": "USER_AUTHORIZED_CHALLENGER_PROSPECTIVE_SHADOW_AND_DISCORD_ENTRY_ALERTS",
+  "scope": "GOLD_LATE_TRANSITION_V1_OBSERVATION_ONLY_DELIVERY_ADAPTER",
+  "strategy_contract_unchanged": true,
+  "v19_contract_unchanged": true,
+  "allowed_event": "NEW_ACCEPTED_CHALLENGER_SHADOW_ENTRY_ONLY",
+  "prohibited_events": [
+    "NO_SIGNAL",
+    "ORDINARY_M15_DECISION",
+    "SUPPRESSED_EVENT",
+    "RECOVERY_BACKFILL",
+    "MISSED_ENTRY_REPLAY",
+    "EXIT_NOTIFICATION",
+    "AI_JUDGEMENT",
+    "MT5_ORDER",
+    "LIVE_TRADING"
+  ],
+  "message": {
+    "language": "Japanese",
+    "fields": [
+      "direction",
+      "MT5_server_entry_time",
+      "entry_price",
+      "TP20_price",
+      "SL10_price",
+      "IMPULSE_LATE_or_CORRECTION_EARLY_state",
+      "chosen_rank_below_P90",
+      "V19_priority_notice",
+      "observation_only_notice"
+    ],
+    "attach_chart": true,
+    "chart_timeframe": "M15",
+    "chart_bars": 80
+  },
+  "delivery": {
+    "transport": "Discord webhook",
+    "webhook_source": "EXISTING_V19_LOCAL_CONFIG_READ_ONLY",
+    "webhook_copied_to_challenger_config": false,
+    "webhook_committed_to_git": false,
+    "duplicate_process_lock": true,
+    "startup_policy": "NO_BACKFILL_BASELINE_CURRENT_ACCEPTED_TRADES",
+    "downtime_policy": "DO_NOT_SEND_DELAYED_MISSED_ENTRY_ALERTS"
+  },
+  "runtime_separation": {
+    "v19_runtime_modified": false,
+    "challenger_runtime_separate": true,
+    "notifier_is_sidecar": true,
+    "shadow_decision_depends_on_discord": false,
+    "discord_failure_blocks_shadow_runtime": false
+  }
+}
