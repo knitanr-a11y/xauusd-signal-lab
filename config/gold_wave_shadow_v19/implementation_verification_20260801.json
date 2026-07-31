@@ -11,6 +11,17 @@
       "IMPULSE_EARLY episode restart"
     ]
   },
+  "discord_notifier_tests": {
+    "command": "PYTHONPATH=. python -m pytest -q tests/test_gold_wave_shadow_v19_discord.py",
+    "result": "4 passed",
+    "covered": [
+      "no-backfill accepted-trade baseline",
+      "LONG TP20/SL10 message values",
+      "SHORT Japanese observation-only message",
+      "duplicate notifier process lock"
+    ],
+    "network_webhook_test": "REQUIRES_USER_PC_WEBHOOK_AND_IS_NOT_RUN_IN_REPOSITORY_TESTS"
+  },
   "runtime_payload": {
     "format": "ZIP_SPLIT_INTO_RAW_BASE64_RAW_REPOSITORY_PARTS",
     "reconstructed_size_bytes": 19999,
