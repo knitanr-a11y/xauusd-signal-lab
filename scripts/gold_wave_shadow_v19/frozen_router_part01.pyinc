@@ -1,0 +1,141 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
+
+import joblib
+import numpy as np
+import pandas as pd
+from lightgbm import LGBMClassifier
+from numba import njit
+
+SEED = 60731
+FIXED_SPREAD = 0.30
+SPREAD_GATE_POINTS = 30
+SCORE_LOOKBACK_DAYS = 60
+E40_TARGET = 40.0
+E40_STOP = 20.0
+E40_HORIZON = 720
+T20_TARGET = 20.0
+T20_STOP = 10.0
+T20_HORIZON = 480
+TRAIN_START = pd.Timestamp("2023-01-01")
+
+CTX_SUFFIX = [
+    "atr14", "ret3_atr", "ret10_atr", "eff5", "close_loc",
+    "atr_ratio14_50", "dist_ema20_atr", "ema20_slope4_atr",
+    "compression10_atr", "vol_ratio20",
+]
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def read_csv_any(path: Path) -> pd.DataFrame:
+    try:
+        frame = pd.read_csv(path)
+        if len(frame.columns) == 1:
+            frame = pd.read_csv(path, sep=";")
+    except Exception:
+        frame = pd.read_csv(path, sep=None, engine="python")
+    frame.columns = [str(c).strip().lower() for c in frame.columns]
+    required = {"time", "open", "high", "low", "close", "tick_volume", "spread"}
+    missing = sorted(required - set(frame.columns))
+    if missing:
+        raise ValueError(f"{path}: missing required columns {missing}")
+    frame["time"] = pd.to_datetime(frame["time"], format="%Y.%m.%d %H:%M:%S", errors="raise")
+    for col in ["open", "high", "low", "close", "tick_volume", "spread", "real_volume"]:
+        if col in frame.columns:
+            frame[col] = pd.to_numeric(frame[col], errors="raise")
+    return frame
+
+
+def read_union(paths: Iterable[Path], *, keep: str = "last") -> pd.DataFrame:
+    paths = [Path(p) for p in paths]
+    if not paths:
+        raise ValueError("At least one source path is required")
+    frames: list[pd.DataFrame] = []
+    for source_rank, path in enumerate(paths):
+        if not path.exists():
+            raise FileNotFoundError(path)
+        frame = read_csv_any(path)
+        frame["_source_rank"] = source_rank
+        frames.append(frame)
+    merged = pd.concat(frames, ignore_index=True)
+    duplicate = merged[merged.duplicated("time", keep=False)].copy()
+    if len(duplicate):
+        compare_cols = [c for c in ["open", "high", "low", "close", "tick_volume", "spread", "real_volume"] if c in duplicate.columns]
+        conflicts = duplicate.groupby("time")[compare_cols].nunique(dropna=False)
+        conflicts = conflicts[(conflicts > 1).any(axis=1)]
+        if len(conflicts):
+            raise ValueError(f"Source overlap conflict at {len(conflicts)} timestamps")
+    merged = merged.sort_values(["time", "_source_rank"])
+    merged = merged.drop_duplicates("time", keep=keep)
+    merged = merged.sort_values("time").drop(columns="_source_rank").reset_index(drop=True)
+    if merged.time.duplicated().any() or not merged.time.is_monotonic_increasing:
+        raise ValueError("Merged time series is not unique and monotonic")
+    ohlc_bad = (
+        (merged.high < merged[["open", "close"]].max(axis=1))
+        | (merged.low > merged[["open", "close"]].min(axis=1))
+        | (merged.high < merged.low)
+    )
+    if bool(ohlc_bad.any()):
+        raise ValueError(f"Invalid OHLC rows: {int(ohlc_bad.sum())}")
+    return merged
+
+
+def atr14_ewm(frame: pd.DataFrame) -> pd.Series:
+    high = frame.high.to_numpy(float)
+    low = frame.low.to_numpy(float)
+    close = frame.close.to_numpy(float)
+    tr = np.empty(len(frame), dtype=float)
+    tr[0] = high[0] - low[0]
+    tr[1:] = np.maximum.reduce([
+        high[1:] - low[1:],
+        np.abs(high[1:] - close[:-1]),
+        np.abs(low[1:] - close[:-1]),
+    ])
+    return pd.Series(tr).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+
+
+def lean_features(frame: pd.DataFrame, prefix: str, delta: pd.Timedelta) -> pd.DataFrame:
+    atr = atr14_ewm(frame)
+    candle_range = (frame.high - frame.low).replace(0, np.nan)
+    body = frame.close - frame.open
+    out = pd.DataFrame({"time_key": frame.time + delta})
+
+    def put(name: str, values) -> None:
+        out[f"{prefix}_{name}"] = np.asarray(values, dtype=np.float32)
+
+    put("atr14", atr)
+    put("body_atr", body / atr)
+    put("range_atr", candle_range / atr)
+    put("body_ratio", body.abs() / candle_range)
+    put("close_loc", (frame.close - frame.low) / candle_range)
+    put("upper_wick_atr", (frame.high - frame[["open", "close"]].max(axis=1)) / atr)
+    put("lower_wick_atr", (frame[["open", "close"]].min(axis=1) - frame.low) / atr)
+    put("vol_ratio20", frame.tick_volume / frame.tick_volume.rolling(20, min_periods=20).median())
+    put("vol_ratio5_20", frame.tick_volume.rolling(5, min_periods=5).mean() / frame.tick_volume.rolling(20, min_periods=20).mean())
+    put("atr_ratio14_50", atr / atr.rolling(50, min_periods=50).median())
+    put("range_ratio20", candle_range / candle_range.rolling(20, min_periods=20).median())
+    for n in [1, 3, 5, 10, 20]:
+        put(f"ret{n}_atr", (frame.close - frame.close.shift(n)) / atr)
+    absdiff = frame.close.diff().abs()
+    for n in [3, 5, 10]:
+        put(f"eff{n}", (frame.close - frame.close.shift(n)).abs() / absdiff.rolling(n, min_periods=n).sum().replace(0, np.nan))
+    for n in [5, 10]:
+        prior_high = frame.high.shift(1).rolling(n, min_periods=n).max()
+        prior_low = frame.low.shift(1).rolling(n, min_periods=n).min()
+        put(f"dist_prior{n}_high_atr", (frame.close - prior_high) / atr)
+        put(f"dist_prior{n}_low_atr", (frame.close - prior_low) / atr)
+        put(f"compression{n}_atr", (prior_high - prior_low) / atr)
+    for n in [20, 50, 200]:
+        ema = frame.close.ewm(span=n, adjust=False, min_periods=n).mean()
