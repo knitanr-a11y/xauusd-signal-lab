@@ -23,7 +23,7 @@
       "authoritative V19 early-episode ID consumption",
       "V19 webhook secret is referenced without copying it into Challenger config",
       "fail-closed on V19 score rows beyond authoritative processed cursor",
-      "binary payload paths are forced -text by .gitattributes and the reconstructed ZIP SHA is validated before opening"
+      "all three payload parts decode from ASCII Base64 and reproduce the frozen ZIP SHA256"
     ]
   },
   "compile_check": {
@@ -48,7 +48,7 @@
     "GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801.zip": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c"
   },
   "user_pc_pending": [
-    "pull payload transport fix",
+    "pull ASCII Base64 transport update",
     "bootstrap activation",
     "READY and V19 parity status",
     "Discord Japanese test delivery",
@@ -57,22 +57,23 @@
     "continuous Challenger Discord notifier loop"
   ],
   "runtime_payload": {
-    "format": "RAW_BASE64_RAW_WITH_GIT_BINARY_ATTRIBUTES_AND_RUNTIME_SHA_VALIDATION",
+    "format": "THREE_ASCII_BASE64_TEXT_PARTS_WITH_WHITESPACE_TOLERANT_STRICT_DECODE_AND_FULL_SHA_VALIDATION",
     "reconstructed_size_bytes": 17370,
     "sha256": "0b59b0d91cf9dedaf81fd23c2b16fd03f23a44a790e4c5bf80914dbcb9e4c69a",
     "members": {
       "shadow_runtime_core.py": "246d701cbfbea0560e1e859f61c9587ee438459fcdd5739d9f1f11bab9431915",
       "discord_notifier_core.py": "89ac045ab756dc736cd21d444d1c8dd6a16e2080d963b9d72c895af73f4cf0fb"
     },
-    "repository_parts": {
-      "runtime_payload_part00.raw": "a983411ed165aaf7f3275c2b832e57c12b7aac7a35ec9fbfd7df26cc0e8525bf",
-      "runtime_payload_part01.b64": "277da09fe2e7599dffc5f2aabd87d2179d96afd8c9b229e00ded6a7204c7eccd",
-      "runtime_payload_part02.raw": "04e867edf1629fb83c3afac4fb261bdfa30807acd73048dbf9eb731666e3dd94"
-    },
+    "repository_parts": [
+      "runtime_payload_part00_v2.raw",
+      "runtime_payload_part01.b64",
+      "runtime_payload_part02_v2.b64"
+    ],
     "transport_fix": {
       "result": "PASS",
-      "incident": "WINDOWS_CRLF_CHECKOUT_CORRUPTED_UNATTRIBUTED_RAW_BINARY_PARTS_AND_FAILED_WITH_BAD_ZIP_MAGIC",
-      "resolution": "RENAME_RAW_PARTS_FORCE_BINARY_IN_GITATTRIBUTES_AND_VALIDATE_RECONSTRUCTED_SHA_BEFORE_ZIP_OPEN",
+      "incident": "RAW_BINARY_REPOSITORY_DELIVERY_PRODUCED_USER_PC_BAD_ZIP_AND_SHA256_MISMATCH",
+      "resolution": "ABANDON_RAW_BINARY_TRANSPORT_AND_DECODE_ALL_PARTS_FROM_ASCII_BASE64_TEXT",
+      "crlf_safe": true,
       "strategy_contract_changed": false,
       "v19_changed": false
     }
