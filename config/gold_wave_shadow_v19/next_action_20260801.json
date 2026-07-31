@@ -1,0 +1,23 @@
+{
+  "next_action": "USER_PC_BOOTSTRAP_ACTIVATE_AND_RUN_OBSERVATION_ONLY_LOOP",
+  "steps": [
+    "Copy local_config.example.json to local_config.json.",
+    "Replace every C:\\REPLACE_ME path with the exact current CSV path.",
+    "Run scripts/gold_wave_shadow_v19/01_INSTALL.bat.",
+    "Run scripts/gold_wave_shadow_v19/02_BOOTSTRAP_ACTIVATE.bat once.",
+    "Confirm READY status and activation cutoff.",
+    "Run scripts/gold_wave_shadow_v19/03_RUN_LOOP.bat while collecting prospective observations.",
+    "Use 04_STATUS.bat to inspect state and health."
+  ],
+  "stop_conditions": [
+    "Any runtime parity or source-data contract error",
+    "Unexpected CSV schema or overlap conflict",
+    "Model update cannot be built causally",
+    "Unexpected session gap invalidates an open observation"
+  ],
+  "not_stop_conditions": [
+    "A short losing streak",
+    "A month with few signals",
+    "P85 or P95 looking better after activation"
+  ]
+}
