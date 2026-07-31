@@ -6,12 +6,13 @@
 
 最初に読む順番:
 
-1. `docs/gold_wave_shadow_v19/GOLD_V19_PROSPECTIVE_SHADOW_IMPLEMENTATION_20260801.md`
-2. `docs/gold_wave_shadow_v19/GOLD_V19_DISCORD_ENTRY_ALERT_ADDENDUM_20260801.md`
-3. `config/gold_wave_shadow_v19/frozen_contract_20260801.json`
-4. `config/gold_wave_shadow_v19/discord_alert_contract_20260801.json`
-5. `config/gold_wave_shadow_v19/current_state_20260801.json`
-6. `config/gold_wave_shadow_v19/next_action_20260801.json`
+1. `docs/gold_wave_shadow_v19/NEXT_CHAT_HANDOFF_GOLD_V19_SHADOW_READY_DISCORD_ENTRY_ALERT_NEXT_20260801.md`
+2. `docs/gold_wave_shadow_v19/GOLD_V19_PROSPECTIVE_SHADOW_IMPLEMENTATION_20260801.md`
+3. `docs/gold_wave_shadow_v19/GOLD_V19_DISCORD_ENTRY_ALERT_ADDENDUM_20260801.md`
+4. `config/gold_wave_shadow_v19/frozen_contract_20260801.json`
+5. `config/gold_wave_shadow_v19/discord_alert_contract_20260801.json`
+6. `config/gold_wave_shadow_v19/current_state_20260801.json`
+7. `config/gold_wave_shadow_v19/next_action_20260801.json`
 
 Shadow判断はDiscord、AI判断、MT5注文、実売買に依存しません。
 
