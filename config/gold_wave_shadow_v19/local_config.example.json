@@ -8,6 +8,17 @@
     "friday_last_bar_offset_minutes": 1377,
     "session_overrides": {}
   },
+  "discord": {
+    "enabled": false,
+    "webhook_url": "",
+    "username": "GOLD V19 Shadow",
+    "notify_entry": true,
+    "notify_exit": false,
+    "attach_chart": true,
+    "chart_timeframe": "M15",
+    "chart_bars": 80,
+    "poll_seconds": 2
+  },
   "data_sources": {
     "M1": [
       "C:\\REPLACE_ME\\gold_v3_2023_2026_m1.csv",
