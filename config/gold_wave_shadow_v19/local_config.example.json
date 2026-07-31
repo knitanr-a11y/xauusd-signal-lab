@@ -1,0 +1,33 @@
+{
+  "shadow_id": "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+  "contract_version": "2026-08-01-v1",
+  "state_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_v19_shadow",
+  "poll_seconds": 2,
+  "session_guard": {
+    "weekday_last_bar_offset_minutes": 1378,
+    "friday_last_bar_offset_minutes": 1377,
+    "session_overrides": {}
+  },
+  "data_sources": {
+    "M1": [
+      "C:\\REPLACE_ME\\gold_v3_2023_2026_m1.csv",
+      "C:\\REPLACE_ME\\goldsharp_m1.csv"
+    ],
+    "M5": [
+      "C:\\REPLACE_ME\\gold_v3_2023_2026_m5.csv",
+      "C:\\REPLACE_ME\\goldsharp_m5.csv"
+    ],
+    "M15": [
+      "C:\\REPLACE_ME\\gold_v3_2023_2026_m15.csv",
+      "C:\\REPLACE_ME\\goldsharp_m15.csv"
+    ],
+    "H1": [
+      "C:\\REPLACE_ME\\gold_v3_2023_2026_h1.csv",
+      "C:\\REPLACE_ME\\goldsharp_h1.csv"
+    ],
+    "H4": [
+      "C:\\REPLACE_ME\\gold_v3_2023_2026_h4.csv",
+      "C:\\REPLACE_ME\\goldsharp_h4.csv"
+    ]
+  }
+}
