@@ -1,6 +1,6 @@
 {
   "date": "2026-08-01",
-  "stage": "GOLD_V20_FIRST_P90_IMPULSE_EARLY_PROSPECTIVE_SHADOW_READY_DISCORD_ENTRY_ALERT_IMPLEMENTED",
+  "stage": "GOLD_V20_FIRST_P90_IMPULSE_EARLY_PROSPECTIVE_SHADOW_READY_DISCORD_ENTRY_ALERT_USER_PC_TEST_PASSED",
   "formal_status": "V19_FROZEN_PROSPECTIVE_SHADOW_AUTHORIZED_OBSERVATION_ONLY_DISCORD_ENTRY_DELIVERY_AUTHORIZED",
   "primary_policy": "SEMIANNUAL_EXPANDING_P90_FIRST_PER_IMPULSE_EARLY_EPISODE_TP20_SL10",
   "historical_trade_frequency_per_month": 6.76,
@@ -11,7 +11,14 @@
   "github_implementation": true,
   "discord_entry_alert_authorized": true,
   "discord_adapter_implemented": true,
-  "discord_webhook_configured_on_user_pc": false,
+  "discord_webhook_configured_on_user_pc": true,
+  "discord_user_pc_test_passed": true,
+  "discord_user_pc_test_evidence": {
+    "message_received": true,
+    "m15_chart_received": true,
+    "test_chart_title": "GOLD V19 Shadow | UNKNOWN | M15 | MT5 2026-07-31T11:45:00",
+    "note": "UNKNOWN and entry_00000 are expected for the connection test before the first accepted Shadow trade"
+  },
   "discord_notification_scope": "NEW_ACCEPTED_SHADOW_ENTRY_ONLY",
   "discord_affects_strategy": false,
   "ai_judgement": false,
