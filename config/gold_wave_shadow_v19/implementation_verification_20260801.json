@@ -1,0 +1,37 @@
+{
+  "date": "2026-08-01",
+  "unit_tests": {
+    "command": "pytest -q",
+    "result": "4 passed",
+    "covered": [
+      "semiannual January/July boundary",
+      "causal session horizon guard",
+      "720-minute exact M1 score maturity",
+      "IMPULSE_EARLY episode restart"
+    ]
+  },
+  "full_data_bootstrap": {
+    "result": "PASS",
+    "active_model_boundary": "2026-07-01",
+    "latest_full_feature_decision_time": "2026-07-30 20:45:00",
+    "latest_session_guarded_decision_time": "2026-07-30 11:45:00",
+    "score_history_rows": 873,
+    "pending_score_rows": 12,
+    "activation": "NO_BACKFILL_READY"
+  },
+  "historical_causal_guard_parity": {
+    "result": "PASS",
+    "runtime_policy_trades": 169,
+    "v19_reference_trades": 169,
+    "timestamp_overlap": 169,
+    "extra": 0,
+    "missing": 0,
+    "profit_factor": 2.0299563195716415,
+    "net_usd": 730.959999999995,
+    "unexpected_gap_first_candidates_invalidated": 5
+  },
+  "v19_authoritative_package": {
+    "filename": "GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801.zip",
+    "sha256": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c"
+  }
+}
