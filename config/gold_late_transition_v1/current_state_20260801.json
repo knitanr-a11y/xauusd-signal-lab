@@ -1,7 +1,7 @@
 {
   "date": "2026-08-01",
-  "stage": "GOLD_LATE_TRANSITION_V1_PAYLOAD_DELIVERY_INCIDENT_FIXED_PENDING_USER_PC_RETRY",
-  "formal_status": "AUTHORIZED_OBSERVATION_ONLY_IMPLEMENTED_PAYLOAD_SELF_REPAIR_LOADER_ADDED_PENDING_LOCAL_BOOTSTRAP_RETRY",
+  "stage": "GOLD_LATE_TRANSITION_V1_ASCII_BASE64_PAYLOAD_TRANSPORT_READY_PENDING_USER_PC_RETRY",
+  "formal_status": "AUTHORIZED_OBSERVATION_ONLY_IMPLEMENTED_ASCII_BASE64_TRANSPORT_PENDING_LOCAL_BOOTSTRAP_RETRY",
   "primary_policy": "SEMIANNUAL_EXPANDING_SUB_P90_FIRST_PER_IMPULSE_LATE_OR_CORRECTION_EARLY_EVENT_TP20_SL10_V19_PRIORITY",
   "historical_resolved_only_trades": 123,
   "historical_profit_factor": 1.947,
@@ -20,7 +20,9 @@
     "user_pc_bad_zip_seen": true,
     "user_pc_sha256_mismatch_seen": true,
     "bootstrap_failed_closed_before_activation": true,
-    "self_repair_loader_implemented": true,
+    "raw_binary_transport_abandoned": true,
+    "all_parts_ascii_base64": true,
+    "whitespace_tolerant_strict_decode": true,
     "expected_payload_sha256": "0b59b0d91cf9dedaf81fd23c2b16fd03f23a44a790e4c5bf80914dbcb9e4c69a"
   },
   "user_pc_bootstrap_activated": false,
