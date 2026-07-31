@@ -1,11 +1,11 @@
 {
-  "next_action": "PULL_PAYLOAD_FIX_RERUN_CHALLENGER_BOOTSTRAP_TEST_DISCORD_AND_START_LOOPS",
+  "next_action": "PULL_ASCII_BASE64_TRANSPORT_RERUN_CHALLENGER_BOOTSTRAP_TEST_DISCORD_AND_START_LOOPS",
   "steps": [
     "Keep the existing V19 03_RUN_LOOP.bat and 08_RUN_DISCORD_ALERTS.bat running.",
-    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop to receive the Windows payload checkout fix.",
+    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop until head cc8deb72940953f313bd5e4f322ac45bdc184ed9 or later is present.",
     "Do not rerun V19 bootstrap.",
-    "Challenger 01_INSTALL.bat does not need to be rerun when its venv already exists; rerunning it is harmless.",
-    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once. The window now pauses on success or failure.",
+    "Challenger 01_INSTALL.bat does not need to be rerun when its venv already exists.",
+    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once. All payload parts are now ASCII Base64 text and the full frozen SHA256 is checked before execution.",
     "Run scripts/gold_late_transition_v1/04_STATUS.bat and confirm READY with v19_parity PASS.",
     "Run scripts/gold_late_transition_v1/06_CONFIGURE_DISCORD.bat.",
     "Run scripts/gold_late_transition_v1/07_TEST_DISCORD.bat and confirm the Japanese message and M15 chart.",
