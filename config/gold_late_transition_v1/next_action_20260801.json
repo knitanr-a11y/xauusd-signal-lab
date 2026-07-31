@@ -1,12 +1,13 @@
 {
-  "next_action": "PULL_ACTIVATE_CHALLENGER_TEST_DISCORD_AND_RUN_SEPARATE_LOOPS",
+  "next_action": "PULL_PAYLOAD_FIX_RERUN_CHALLENGER_BOOTSTRAP_TEST_DISCORD_AND_START_LOOPS",
   "steps": [
     "Keep the existing V19 03_RUN_LOOP.bat and 08_RUN_DISCORD_ALERTS.bat running.",
-    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop.",
-    "Run scripts/gold_late_transition_v1/01_INSTALL.bat.",
-    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once.",
+    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop to receive the Windows payload checkout fix.",
+    "Do not rerun V19 bootstrap.",
+    "Challenger 01_INSTALL.bat does not need to be rerun when its venv already exists; rerunning it is harmless.",
+    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once. The window now pauses on success or failure.",
     "Run scripts/gold_late_transition_v1/04_STATUS.bat and confirm READY with v19_parity PASS.",
-    "Run scripts/gold_late_transition_v1/06_CONFIGURE_DISCORD.bat. It references the existing V19 local webhook without copying it.",
+    "Run scripts/gold_late_transition_v1/06_CONFIGURE_DISCORD.bat.",
     "Run scripts/gold_late_transition_v1/07_TEST_DISCORD.bat and confirm the Japanese message and M15 chart.",
     "Run scripts/gold_late_transition_v1/03_RUN_LOOP.bat and keep it open.",
     "Run scripts/gold_late_transition_v1/08_RUN_DISCORD_ALERTS.bat and keep it open.",
