@@ -1,38 +1,39 @@
 {
   "track_id": "GOLD_UNCOVERED_V1",
   "date": "2026-08-02",
-  "status": "RUN_USER_PC_READONLY_SOURCE_AUDIT",
+  "status": "STOP_CURRENT_GU1_FORMULAS_NO_FORMAL_CANDIDATE",
   "branch": "feature/gold-uncovered-v1-research",
-  "recommended_clone": "C:\\gold-uncovered-v1",
-  "next_order": [
-    "Create a separate clone at C:\\gold-uncovered-v1 on feature/gold-uncovered-v1-research",
-    "Do not alter C:\\gold-v19-shadow or C:\\gold-challenger-c1",
-    "Run scripts\\gold_uncovered_v1\\00_AUDIT_SOURCES_READONLY.bat",
-    "Inspect the generated latest_source_audit.json",
-    "Freeze a new authoritative source manifest only after all required checks pass"
+  "user_pc_action_required": false,
+  "current_decision": "Do not run source audit BATs, clone GU1, or execute research on the user PC. The research was completed in the assistant execution environment.",
+  "completed_vectors": [
+    "H4_D1_REGIME_TRANSITION",
+    "VOLUME_PRICE_EFFORT_RESULT",
+    "DAILY_REFERENCE_LEVELS",
+    "RAW_CANDLE_NATIVE_ML"
   ],
-  "phase0_allowed": [
-    "search raw candle files below %APPDATA%\\MetaQuotes\\Terminal",
-    "read file bytes and CSV rows",
-    "calculate SHA256 and source metadata",
-    "compare exact overlapping raw candle values",
-    "write audit JSON under %LOCALAPPDATA%\\xauusd_signal_lab\\gold_uncovered_v1_research"
+  "prohibited_next_actions": [
+    "delete SHORT from EFFORT_RESULT_DIVERGENCE_REVERSAL",
+    "retune any volume threshold",
+    "select only favorable evaluation periods",
+    "retune ML probability thresholds",
+    "add time or volatility filters after results",
+    "rename and repeat the same formulas",
+    "start Shadow or Discord",
+    "modify V19 or Challenger C1"
   ],
-  "phase0_prohibited": [
-    "read V19 or Challenger local config/state",
-    "modify candle files",
-    "derive or merge authoritative candles",
-    "calculate features",
-    "calculate labels or outcomes",
-    "calculate WR, PF, PnL or DD",
-    "create Shadow or Discord runtime"
+  "allowed_future_direction": "Only a newly preregistered structural vector that explicitly accounts for repeated examination of the common historical data. Stronger evidence should rely on future accumulation or a genuinely external causal data source rather than further rescue of these formulas.",
+  "authoritative_read_order": [
+    "docs/gold_uncovered_v1/GOLD_UNCOVERED_V1_RESEARCH_AUDIT_20260802.md",
+    "config/gold_uncovered_v1/formal_status_20260802.json",
+    "config/gold_uncovered_v1/current_state_20260802.json"
   ],
-  "pass_requirements": [
-    "exactly one usable historical source for required M1/M5/M15/H1/H4 roles",
-    "historical required hashes match source_reference_20260802.json",
-    "exactly one usable sharp source for required M1/M5/H1/H4 roles",
-    "all required files have expected schema, strictly increasing unique time and no malformed rows",
-    "old/sharp overlap has zero shared-value mismatches for M1/M5/H1/H4"
-  ],
-  "on_failure": "STOP_AND_REPORT; do not guess, select a similar file, or continue to Phase 1"
+  "authorization": {
+    "research_only": true,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "merge": false
+  }
 }
