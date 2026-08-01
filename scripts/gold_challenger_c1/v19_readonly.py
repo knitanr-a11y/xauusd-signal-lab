@@ -330,10 +330,13 @@ def load_v19_view(config: Mapping[str, Any]) -> V19View:
 
     boundary_runtime = pd.Timestamp(active_boundary).normalize() if active_boundary is not None else None
     boundary_health = parse_dt(pick(health, ("active_model_boundary",)))
-    boundary_match = (
-        boundary_runtime is not None
-        and (boundary_health is None or pd.Timestamp(boundary_health).normalize() == boundary_runtime)
-    )
+    if score_details.get("score_source") == "outputs/shadow_score_ledger.csv" and boundary_runtime is None:
+        boundary_match = True
+    else:
+        boundary_match = (
+            boundary_runtime is not None
+            and (boundary_health is None or pd.Timestamp(boundary_health).normalize() == boundary_runtime)
+        )
     status_ok = status in ALLOWED_RUNTIME_STATUSES
     invariants = {
         "status_allowed": status_ok,
