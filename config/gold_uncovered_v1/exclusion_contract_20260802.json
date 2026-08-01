@@ -1,0 +1,47 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "status": "FROZEN_BEFORE_SOURCE_AUDIT_AND_OUTCOMES",
+  "created_date": "2026-08-02",
+  "purpose": "Prevent reuse or rescue of already-covered V19 and Challenger C1 structures",
+  "running_systems_untouched": [
+    "C:\\gold-v19-shadow",
+    "C:\\gold-challenger-c1",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_v19_shadow",
+    "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_challenger_c1_shadow"
+  ],
+  "prohibited_inputs": [
+    "V19 raw scores",
+    "V19 directional percentile ranks",
+    "V19 model or calibration files",
+    "V19 aggregate wave states",
+    "V19 episode identifiers",
+    "V19 candidate or trade ledgers",
+    "V19 runtime or Discord state",
+    "Challenger C1 entry inputs, wave states, ranks, candidates, trades, runtime or Discord state",
+    "V10/V17/V18/V19 signal and outcome ledgers as entry-generation inputs"
+  ],
+  "covered_formula_families": [
+    {
+      "family": "V19_FIRST_P90_IMPULSE_EARLY",
+      "static_description": "E40 selected direction AND direction-specific rank >= 0.90 AND causal IMPULSE_EARLY AND first eligible event per episode",
+      "new_candidate_action": "DO_NOT_REIMPLEMENT_OR_INVERT"
+    },
+    {
+      "family": "CHALLENGER_C1_SUBP90_LATE_OR_CORRECTION",
+      "static_description": "E40 selected direction AND chosen rank < 0.90 AND causal IMPULSE_LATE or CORRECTION_EARLY AND transition onset",
+      "new_candidate_action": "DO_NOT_REIMPLEMENT_RESCUE_OR_BAND_SELECT"
+    }
+  ],
+  "prohibited_relations": [
+    "enter when V19 rejects",
+    "enter opposite V19",
+    "use V19 or C1 as filter, ensemble, priority, fallback or confirmation",
+    "select a C1 rank band after observing its reported outcomes",
+    "reuse V19 or C1 TP/SL solely because their retrospective results were favorable"
+  ],
+  "allowed_reference_use": [
+    "Read frozen written contracts to identify already-covered structural concepts",
+    "After a GU1 formula is frozen, perform post-hoc overlap and additivity audit without changing GU1 entries"
+  ],
+  "required_independence_test": "Every GU1 entry must be reproducible from raw closed candles and GU1 code only"
+}
