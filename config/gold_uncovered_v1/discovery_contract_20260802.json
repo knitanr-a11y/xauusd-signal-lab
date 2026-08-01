@@ -1,0 +1,103 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "status": "FROZEN_BEFORE_SOURCE_AUDIT_AND_OUTCOMES",
+  "created_date": "2026-08-02",
+  "time_basis": "MT5_BROKER_SERVER_NAIVE_BAR_OPEN",
+  "latest_csv_row": "CLOSED_BY_CONTRACT",
+  "higher_timeframe_availability": "BAR_OPEN_PLUS_TIMEFRAME_NOT_AFTER_DECISION",
+  "phase1_families": {
+    "COMPRESSION_RELEASE": {
+      "timeframe": "M15",
+      "prior_range_bars": [8, 16, 32],
+      "compression_range_atr_max": [2.0, 3.0, 4.0],
+      "expansion_range_atr_min": [1.2, 1.5],
+      "close_location_long_min": [0.7],
+      "close_location_short_max": [0.3],
+      "break_buffer_atr": [0.0, 0.1],
+      "event": "first closed M15 expansion close outside the prior closed range after compression"
+    },
+    "FAILED_BREAK_REVERSAL": {
+      "timeframe": "M15",
+      "prior_range_bars": [8, 16, 32],
+      "break_buffer_atr": [0.0, 0.1, 0.2],
+      "reclaim_within_closed_bars": [1, 2, 3],
+      "minimum_break_excursion_atr": [0.1, 0.25],
+      "reclaim_close_location": [0.55],
+      "event": "causal break of prior closed range followed by closed-bar reclaim; direction is toward reclaimed range"
+    },
+    "PULLBACK_RESUMPTION": {
+      "timeframe": "M15_WITH_CAUSAL_H1_CONTEXT",
+      "ema_pairs": [[20, 50], [30, 80]],
+      "h1_slope_lookback_bars": [4, 8],
+      "h1_slope_atr_min": [0.0, 0.05],
+      "m15_pullback_distance_atr": [0.25, 0.5, 1.0],
+      "resumption_trigger": ["CLOSE_BEYOND_PREVIOUS_BAR_EXTREME", "TWO_BAR_CLOSE_REVERSAL"],
+      "event": "first causal resumption trigger after price retraces toward the fast M15 EMA while H1 trend context remains aligned"
+    },
+    "SESSION_TRANSITION": {
+      "timeframe": "M1_AND_M15",
+      "session_restart_gap_minutes_min": [30],
+      "opening_range_minutes": [15, 30, 60],
+      "opening_displacement_atr_min": [0.5, 1.0],
+      "event_modes": ["OPENING_RANGE_CONTINUATION", "OPENING_RANGE_FAILED_BREAK_RECLAIM"],
+      "event": "first closed decision after an already-observed restart/opening range satisfies the fixed continuation or reclaim mode"
+    },
+    "VOLATILITY_STATE_CHANGE": {
+      "timeframe": "M15",
+      "short_long_windows": [[5, 20], [10, 50]],
+      "low_state_ratio_max": [0.7, 0.8],
+      "release_ratio_min": [1.2, 1.5, 2.0],
+      "direction_trigger": ["CLOSE_BEYOND_PRIOR_8_BAR_RANGE", "CLOSE_BEYOND_PRIOR_BAR_EXTREME"],
+      "event": "first directional closed-bar trigger when realized range transitions from fixed low state to release state"
+    }
+  },
+  "event_deduplication": {
+    "same_formula_same_side": "first event only until formula eligibility becomes false",
+    "same_timestamp_opposite_sides": "reject as ambiguous",
+    "time_gap": "decision rows must be causal and strictly increasing"
+  },
+  "phase2_label_free_density_gates": {
+    "minimum_total_events": 80,
+    "maximum_total_events": 2500,
+    "minimum_active_calendar_months": 18,
+    "minimum_events_each_fixed_forward_period": 8,
+    "minimum_long_events": 20,
+    "minimum_short_events": 20,
+    "maximum_single_month_share": 0.2,
+    "maximum_pairwise_jaccard_for_separate_proposals": 0.8,
+    "minimum_median_event_spacing_minutes": 30,
+    "required_periods": ["2024H2", "2025H1", "2025H2", "2026H1"]
+  },
+  "high_overlap_resolution": "Before outcomes, if two definitions have Jaccard above 0.80, retain only the lower-complexity canonical definition; record both and the deterministic tie-break",
+  "phase2_allowed_outputs": [
+    "counts",
+    "calendar distributions",
+    "side distributions",
+    "hour distributions",
+    "volatility-bucket distributions",
+    "spacing and clustering",
+    "pairwise overlap",
+    "source and causal-timing audits"
+  ],
+  "phase2_forbidden_outputs": [
+    "future returns",
+    "TP or SL labels",
+    "wins or losses",
+    "win rate",
+    "profit factor",
+    "PnL",
+    "drawdown",
+    "outcome-based rankings",
+    "V19 or Challenger performance comparison"
+  ],
+  "phase3_requirement": "Commit candidate proposal formulas and formal gates before enabling any outcome module",
+  "random_seed_reserved_for_later_formal_audit": 20260802,
+  "authorization": {
+    "research_only": true,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  }
+}
