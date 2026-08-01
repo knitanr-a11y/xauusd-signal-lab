@@ -365,6 +365,7 @@ def load_v19_view(config: Mapping[str, Any]) -> V19View:
             "health_path": str(health_path),
             "trade_ledger_path": str(trade_path),
             "score_ledger_latest": None if score_latest is None else str(score_latest),
+            "score_cursor_match": cursor_match,
             "accepted_trades": accepted_trades,
             "invariants": invariants,
             **score_details,
