@@ -1,0 +1,42 @@
+{
+  "study_id": "GOLD_SCALP_M1_MIXTURE_V1",
+  "formal_status": "RETROSPECTIVE_M1_MIXTURE_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "user_exit_boundary": {
+    "stop_usd_max": 5.0,
+    "target_usd_min": 5.0,
+    "breakeven_allowed": true
+  },
+  "candidate_event_rows": 152712,
+  "v1a_lightgbm": {
+    "calibration_pass_rows": 0,
+    "formal_evaluation_pass_rows": 0,
+    "best_calibration": {
+      "method": "RANK60",
+      "threshold": 0.9,
+      "n": 411,
+      "median_monthly_trades": 65.5,
+      "win_rate": 0.4549878345,
+      "profit_factor": 1.221781,
+      "net_usd": 169.39,
+      "additional_cost_0p60_pf": 0.914607
+    },
+    "corresponding_evaluation": {
+      "n": 2839,
+      "median_monthly_trades": 145.0,
+      "win_rate": 0.305037,
+      "profit_factor": 0.862277,
+      "net_usd": -1039.38,
+      "additional_cost_0p60_pf": 0.685914,
+      "positive_blocks": 0
+    }
+  },
+  "v1b_raw_sequence_cnn": {
+    "calibration_pass_rows": 0,
+    "formal_evaluation_pass_rows": 0,
+    "best_calibration_pf": 0.823999,
+    "corresponding_evaluation_pf": 0.699090
+  },
+  "decision": "NO_SHADOW_NO_DISCORD_NO_DEPLOYMENT",
+  "v19_modified": false,
+  "challenger_c1_modified": false
+}
