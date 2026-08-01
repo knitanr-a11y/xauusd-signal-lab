@@ -1,0 +1,73 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "study_id": "GU1_VOLUME_PRICE_EFFORT_RESULT_V1",
+  "status": "FROZEN_BEFORE_ANY_STUDY_OUTCOME_CALCULATION",
+  "created_date": "2026-08-02",
+  "reason": "A separate follow-on vector after the H4/D1 transition family set failed its discovery gates. This is not a threshold or parameter rescue of that study.",
+  "inputs": {
+    "allowed": ["raw closed M1 aggregated to causal M15 OHLC tick_volume spread"],
+    "v19": false,
+    "challenger_c1": false,
+    "e40": false,
+    "rank": false,
+    "wave": false,
+    "prior_signal_ledgers": false
+  },
+  "periods": {
+    "discovery": ["2023H1", "2023H2", "2024H1"],
+    "untouched_evaluation": ["2024H2", "2025H1", "2025H2", "2026H1", "2026JUL"]
+  },
+  "value_contract": {
+    "tp_usd": 20.0,
+    "sl_usd": 10.0,
+    "horizon_exact_m1_minutes": 480,
+    "fixed_spread_usd": 0.30,
+    "recorded_spread_points_max": 30,
+    "same_m1_collision": "SL_FIRST",
+    "one_position_per_family": true
+  },
+  "families": {
+    "VOLUME_ABSORPTION_REVERSAL": {
+      "condition": "current M15 tick volume >= past-only rolling-60 P80; true range <= 0.80 ATR14; directional wick >= 45% of range; close is back beyond the bar midpoint away from the wick",
+      "direction": "opposite the dominant wick",
+      "event": "first eligible closed M15 bar after ineligibility"
+    },
+    "VOLUME_CLIMAX_CONTINUATION": {
+      "condition": "current M15 tick volume >= past-only rolling-60 P90; true range >= 1.50 ATR14; close location >= 0.80 for LONG or <= 0.20 for SHORT; close beyond prior 8-bar range",
+      "direction": "same as close-location extreme",
+      "event": "first eligible closed M15 bar after ineligibility"
+    },
+    "DRYUP_PULLBACK_RESUMPTION": {
+      "condition": "EMA20 and EMA50 aligned; previous closed M15 bar touched EMA20, had tick volume <= 0.70 past-only rolling-20 median and range <= 0.80 ATR14; current bar volume >= 1.20 median and closes beyond previous extreme in trend direction",
+      "direction": "EMA20 versus EMA50",
+      "event": "first resumption after each dry-up pullback"
+    },
+    "EFFORT_RESULT_DIVERGENCE_REVERSAL": {
+      "condition": "three-bar tick-volume sum >= past-only rolling-60 P80 of three-bar sums; absolute three-bar net close progress <= 0.30 ATR14; current close breaks the previous bar extreme away from the prior three-bar net direction",
+      "direction": "opposite the prior three-bar net direction",
+      "event": "first eligible closed M15 bar after ineligibility"
+    },
+    "VOLUME_STATE_RELEASE": {
+      "condition": "past five-bar mean tick volume divided by past twenty-bar mean was <=0.80 on prior bar and is >=1.50 now; current close breaks prior 8-bar range",
+      "direction": "break direction",
+      "event": "first eligible closed M15 bar after ineligibility"
+    }
+  },
+  "discovery_gate": {
+    "minimum_resolved_trades": 30,
+    "pf_min": 1.20,
+    "positive_net_each_discovery_half": true,
+    "minimum_long_trades": 10,
+    "minimum_short_trades": 10,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0
+  },
+  "selection": "Select exactly one complete discovery-gate pass with highest PF; tie within 0.01 uses lower DD then family id. If none pass, do not inspect evaluation outcomes.",
+  "authorization": {
+    "research_only": true,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false
+  }
+}
