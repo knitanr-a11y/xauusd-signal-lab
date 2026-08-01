@@ -12,12 +12,14 @@ No rescue adjustment is authorized. V19 is unchanged.
 
 ## Reproduction commands
 
+Configure the four research paths described in `RESEARCH_PATH_CONFIGURATION.md`, then run:
+
 ```bat
-python -m compileall scripts/gold_challenger_c1
+python -m compileall scripts\gold_challenger_c1
 set PYTHONPATH=scripts
-python -m pytest -q tests/gold_challenger_c1
+python -m pytest -q tests\gold_challenger_c1
 python -m gold_challenger_c1.run_reproduction
-python -m gold_challenger_c1.robustness_audit
+python -m gold_challenger_c1.run_robustness
 ```
 
 These are research commands only. No BAT runtime, Shadow, Discord, AI, live CSV monitor, local state root, or MT5 order implementation exists in this branch.

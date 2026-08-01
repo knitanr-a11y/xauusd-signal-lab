@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
+import os
 import json,hashlib
 import numpy as np
 import pandas as pd
@@ -12,7 +13,11 @@ from .portfolio_accounting import simulate_v19_priority,summarize_pnl,monthly_co
 from .parity_audit import first_router_mismatch
 from .contracts import ALLOWED_ENTRY_COLUMNS
 
-ROOT=Path('/mnt/data');BASE=ROOT/'GOLD_CHALLENGER_C1_V2_DATA_V3_RESEARCH_20260801';OUT=BASE/'outputs';CFG=BASE/'config';DER=BASE/'derived_sources';OUT.mkdir(exist_ok=True)
+ROOT=Path(os.environ.get('GOLD_C1_SOURCE_ROOT','/mnt/data')).resolve()
+BASE=Path(os.environ.get('GOLD_C1_RESEARCH_ROOT',str(ROOT/'GOLD_CHALLENGER_C1_V2_DATA_V3_RESEARCH_20260801'))).resolve()
+OUT=BASE/'outputs';CFG=BASE/'config';DER=BASE/'derived_sources';OUT.mkdir(parents=True,exist_ok=True)
+V10_REFERENCE=Path(os.environ.get('GOLD_C1_V10_REFERENCE',str(ROOT/'gold_challenger_c1_work'/'inputs'/'GOLD_NEXT_CHAT_REQUESTED_RESEARCH_INPUTS_20260801'/'V10_E40_signal_ledger.csv.gz'))).resolve()
+V19_REFERENCE_ROOT=Path(os.environ.get('GOLD_C1_V19_REFERENCE_ROOT',str(ROOT/'gold_challenger_c1_work'/'v19'/'GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801'))).resolve()
 
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def writej(name,obj):(OUT/name).write_text(json.dumps(obj,ensure_ascii=False,indent=2,default=str),encoding='utf-8')
@@ -32,7 +37,7 @@ def period(t):
 
 def main():
  data=load_data(); rr=build_semiannual_ledger(data); rr.ledger.to_csv(OUT/'data_v3_e40_router_ledger.csv.gz',index=False,compression='gzip');writej('model_update_metadata.json',rr.model_metadata)
- refp=ROOT/'gold_challenger_c1_work'/'inputs'/'GOLD_NEXT_CHAT_REQUESTED_RESEARCH_INPUTS_20260801'/'V10_E40_signal_ledger.csv.gz';ref=pd.read_csv(refp,parse_dates=['entry_time']);mismatch=first_router_mismatch(ref,rr.ledger,rr.model_metadata,data);writej('first_mismatch.json',mismatch)
+ refp=V10_REFERENCE;ref=pd.read_csv(refp,parse_dates=['entry_time']);mismatch=first_router_mismatch(ref,rr.ledger,rr.model_metadata,data);writej('first_mismatch.json',mismatch)
  wave=build_wave_ledger(rr.ledger,data);wave.to_csv(OUT/'data_v3_router_wave_ledger.csv.gz',index=False,compression='gzip')
  x=pd.DataFrame({'decision_dt':wave.entry_time,'origin_id':wave.origin_id.astype(int),'entry_idx':wave.entry_idx.astype(int),'chosen_side':wave.chosen_side.astype(str),'chosen_rank':wave.chosen_rank.astype(float),'wave_state':wave.wave_state.astype(str),'episode_id':0,'previous_decision_dt':wave.entry_time.shift()})
  x=x.loc[:,ALLOWED_ENTRY_COLUMNS].copy();cand,events=build_candidates(x);cand['period']=cand.decision_dt.map(period);cand['entry_time']=cand.decision_dt
@@ -41,7 +46,7 @@ def main():
  if not all(v for k,v in checks.items() if k.endswith('exact')):raise RuntimeError('RAW_M1_DUAL_EXECUTION_MISMATCH')
  cand_exec.to_csv(OUT/'data_v3_candidate_natural_execution.csv',index=False);events.to_csv(OUT/'data_v3_candidate_event_timeline.csv',index=False)
  # Frozen V19 timestamps are read-only; outcomes are recalculated from DATA_V3 M1.
- v19root=ROOT/'gold_challenger_c1_work'/'v19'/'GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801';v=pd.read_csv(v19root/'trades_SEMIANNUAL_EXPANDING_P90.csv',parse_dates=['entry_time']);idx=pd.Index(data['M1'].time);v['entry_idx']=idx.get_indexer(v.entry_time);v=v[v.entry_idx>=0].copy();vbase=v[['origin_id','entry_time','entry_idx','chosen_side']].copy();vexec=execute_candidates(vbase.rename(columns={'entry_time':'decision_dt'}),data['M1']);vexec['entry_time']=vexec.decision_dt
+ v19root=V19_REFERENCE_ROOT;v=pd.read_csv(v19root/'trades_SEMIANNUAL_EXPANDING_P90.csv',parse_dates=['entry_time']);idx=pd.Index(data['M1'].time);v['entry_idx']=idx.get_indexer(v.entry_time);v=v[v.entry_idx>=0].copy();vbase=v[['origin_id','entry_time','entry_idx','chosen_side']].copy();vexec=execute_candidates(vbase.rename(columns={'entry_time':'decision_dt'}),data['M1']);vexec['entry_time']=vexec.decision_dt
  # Validate frozen V19 natural outcome on DATA_V3.
  vr=v.merge(vexec[['origin_id','natural_pnl','natural_exit_idx']],on='origin_id',suffixes=('_ref','_v3'));vpar={'trades':len(vr),'pnl_exact':bool(np.allclose(vr.immediate_pnl,vr.natural_pnl,atol=1e-9)),'exit_time_exact':bool(np.array_equal(pd.to_datetime(data['M1'].time.to_numpy()[vr.natural_exit_idx.to_numpy(int)]).to_numpy(),pd.to_datetime(data['M1'].time.to_numpy()[vr.immediate_exit_idx.to_numpy(int)]).to_numpy()))};writej('v19_data_v3_execution_parity.json',vpar)
  cc,vv,comb,supp=simulate_v19_priority(cand_exec,vexec,data['M1'],preempt=True);cc.to_csv(OUT/'data_v3_challenger_v19_priority_trades.csv',index=False);vv.to_csv(OUT/'data_v3_v19_recalculated_trades.csv',index=False);comb.to_csv(OUT/'data_v3_combined_portfolio.csv',index=False);supp.to_csv(OUT/'data_v3_suppressed_events.csv',index=False)
