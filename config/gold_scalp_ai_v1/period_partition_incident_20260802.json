@@ -1,0 +1,26 @@
+{
+  "incident_id": "GOLD_SCALP_AI_V1_PERIOD_PARTITION_INCIDENT_001",
+  "date": "2026-08-02",
+  "severity": "INVALIDATED_CALIBRATION_GATE_OUTPUT",
+  "issue": "The candidate period assignment labeled every row before 2025-01-01 as CAL, thereby mixing the 2023-01 through 2024-06 training interval into the intended 2024H2 calibration interval.",
+  "impact": {
+    "invalid": [
+      "printed calibration n WR PF net",
+      "threshold pass decisions",
+      "selected q decisions"
+    ],
+    "not_directly_changed": [
+      "exact M1 outcome resolver",
+      "raw source hashes",
+      "2025-2026 row-level outcomes"
+    ],
+    "required_action": "Rerun V1 and V1B from scratch with TRAIN and CAL separated. Do not reuse prior selected thresholds or candidate conclusions."
+  },
+  "fix": "Period labels are TRAIN before 2024-07-01, CAL from 2024-07-01 through 2024-12-31, then four evaluation blocks.",
+  "status": "FIXED_RERUN_COMPLETE_ALL_CORRECTED_THRESHOLDS_FAILED",
+  "rerun_results": {
+    "absolute_score": "ALL_THRESHOLDS_FAILED",
+    "rolling_60d_rank": "ALL_THRESHOLDS_FAILED",
+    "semiannual_expanding_diagnostic": "ALL_THRESHOLDS_FAILED"
+  }
+}
