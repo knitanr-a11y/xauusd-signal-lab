@@ -1,0 +1,26 @@
+{
+  "status": "RETROSPECTIVE_THREE_ADAPTIVE_VECTORS_COMPLETE_NO_CALIBRATION_PASS",
+  "date": "2026-08-02",
+  "studies": [
+    "M1_SHAPE_STATE_ATLAS",
+    "POST_ENTRY_PATH_MANAGER",
+    "ONLINE_ADAPTIVE_EXPERT_PORTFOLIO"
+  ],
+  "calibration_pass_count": 0,
+  "evaluation_opened": false,
+  "next_recommended": "HIERARCHICAL_COUNTERFACTUAL_BARRIER_ROUTER",
+  "user_boundary": {
+    "existing_candle_data_only": true,
+    "stop_usd_max": 5.0,
+    "target_usd_min": 5.0,
+    "breakeven_allowed": true,
+    "standard_spread_usd": 0.30,
+    "median_monthly_trades_target_min": 20,
+    "positive_pnl_win_rate_target_min": 0.50
+  },
+  "authorization": "RESEARCH_ONLY",
+  "shadow": false,
+  "discord": false,
+  "mt5_order": false,
+  "live_trading": false
+}
