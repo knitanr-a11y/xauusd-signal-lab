@@ -1,0 +1,38 @@
+{
+  "study_id": "GOLD_SCALP_AI_V1_CONSOLIDATED",
+  "date": "2026-08-02",
+  "formal_status": "RETROSPECTIVE_SCALP_AI_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "goal": {
+    "target_usd_range": [5.0, 10.0],
+    "stop_usd_max": 5.0,
+    "desired_win_rate_min": 0.6
+  },
+  "tested_contracts": [
+    "TP5_SL3_H120",
+    "TP7P5_SL4_H180",
+    "TP10_SL5_H240"
+  ],
+  "tested_ai_modes": [
+    "LOCAL_ONLY_LIGHTGBM",
+    "LOCAL_PLUS_HTF_LIGHTGBM",
+    "V19_STYLE_60D_DIRECTIONAL_RANK",
+    "V19_STYLE_SEMIANNUAL_EXPANDING_UPDATE_DIAGNOSTIC"
+  ],
+  "decision": "DO_NOT_START_SHADOW_OR_DISCORD",
+  "reasons": [
+    "No corrected 2024H2 calibration threshold passed the preregistered gate.",
+    "Corrected win rates remained approximately 22% to 36%, far below 60%.",
+    "Profit factor was below 1.0 for every corrected pooled calibration row.",
+    "Additional-cost stress was below 1.0 for every corrected row.",
+    "Rolling rank and semiannual expanding updates did not rescue the signal."
+  ],
+  "next_research_boundary": "A materially new event-first structural entry family is required. Do not retune this every-M5 classifier with post-result session, volatility, side, or month filters.",
+  "authorization": {
+    "research_only": true,
+    "prospective_shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  }
+}
