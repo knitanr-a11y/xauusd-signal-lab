@@ -5,6 +5,7 @@ set "STATE=%LOCALAPPDATA%\xauusd_signal_lab\gold_uncovered_v1_research"
 set "REFERENCE=%ROOT%\config\gold_uncovered_v1\source_reference_20260802.json"
 set "SCRIPT=%ROOT%\scripts\gold_uncovered_v1\source_audit.py"
 set "RUNNER=%ROOT%\scripts\gold_uncovered_v1\source_audit_runner.py"
+set "SELFTEST=%ROOT%\scripts\gold_uncovered_v1\self_test.py"
 set "OUT=%STATE%\latest_source_audit.json"
 
 if not exist "%STATE%" mkdir "%STATE%"
@@ -23,6 +24,12 @@ if not exist "%SCRIPT%" (
 if not exist "%RUNNER%" (
   echo [BLOCKED] Source audit runner is missing:
   echo %RUNNER%
+  pause
+  exit /b 2
+)
+if not exist "%SELFTEST%" (
+  echo [BLOCKED] Source audit self-test is missing:
+  echo %SELFTEST%
   pause
   exit /b 2
 )
@@ -48,6 +55,20 @@ if errorlevel 1 (
   exit /b 2
 )
 
+%PY% -m compileall -q scripts\gold_uncovered_v1
+if errorlevel 1 (
+  popd
+  echo [BLOCKED] GU1 Python compilation failed.
+  pause
+  exit /b 2
+)
+%PY% -m scripts.gold_uncovered_v1.self_test
+if errorlevel 1 (
+  popd
+  echo [BLOCKED] GU1 source audit self-test failed.
+  pause
+  exit /b 2
+)
 %PY% -m scripts.gold_uncovered_v1.source_audit_runner --reference "%REFERENCE%" --output "%OUT%"
 set "RC=%ERRORLEVEL%"
 popd
