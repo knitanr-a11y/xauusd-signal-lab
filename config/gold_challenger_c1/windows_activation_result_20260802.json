@@ -1,0 +1,44 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "recorded_date": "2026-08-02",
+  "source": "USER_PC_BOOTSTRAP_OUTPUT",
+  "mode": "OBSERVATION_ONLY",
+  "status": "READY",
+  "activated": true,
+  "retrospective_formal_status": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_FAILED",
+  "v19_frozen_and_read_only": true,
+  "v19_status": "RUNNING",
+  "v19_parity": "PASS",
+  "v19_last_processed": "2026-07-31 11:45:00",
+  "challenger_last_processed_decision_dt": "2026-07-31 11:45:00",
+  "open_trade": null,
+  "counters": {
+    "accepted_trades": 0,
+    "closed_trades": 0,
+    "suppressed_v19_priority": 0,
+    "suppressed_challenger_open": 0,
+    "recovery_replay_not_traded": 0,
+    "v19_preempts": 0,
+    "invalid_gap": 0
+  },
+  "bootstrap_updated_at_utc": "2026-08-01T19:22:25.837032+00:00",
+  "warnings": [
+    "PANDAS_FUTUREWARNING_ONLY_NON_BLOCKING"
+  ],
+  "verified_not_started": [
+    "03_RUN_SHADOW_LOOP",
+    "07_TEST_DISCORD",
+    "08_RUN_DISCORD_ALERTS"
+  ],
+  "next_required": [
+    "04_SHADOW_STATUS",
+    "06_VALIDATE_DISCORD",
+    "07_TEST_DISCORD"
+  ],
+  "prohibitions_unchanged": [
+    "NO_MT5_ORDER",
+    "NO_AI_JUDGEMENT",
+    "NO_REAL_TRADING",
+    "NO_V19_MODIFICATION"
+  ]
+}
