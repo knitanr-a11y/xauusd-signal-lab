@@ -1,0 +1,38 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-01",
+  "stage": "USER_PC_01_INSTALL_SHADOW",
+  "status": "FIX_COMMITTED_USER_RETRY_PENDING",
+  "classification": "WINDOWS_PYTHONPATH_MISSING",
+  "observed_error": "ModuleNotFoundError: No module named 'gold_challenger_c1' during pytest collection",
+  "root_cause": "01_INSTALL_SHADOW.bat ran pytest from the repository root without adding the repository scripts directory to PYTHONPATH; tests import gold_challenger_c1 as a top-level package located under scripts/gold_challenger_c1",
+  "affected_tests": [
+    "tests/gold_challenger_c1/test_contracts.py",
+    "tests/gold_challenger_c1/test_execution.py",
+    "tests/gold_challenger_c1/test_parity.py"
+  ],
+  "not_affected": [
+    "candidate research contract",
+    "candidate entry logic",
+    "E40 rank logic",
+    "wave grammar",
+    "exact M1 execution logic",
+    "V19 files",
+    "V19 runtime state",
+    "V19 running processes"
+  ],
+  "activation_effect": "NONE; failure occurred during install verification before bootstrap activation",
+  "fix": {
+    "commit": "9c51774dc7576397d1c75d2277185bff85fb34c7",
+    "changes": [
+      "set PYTHONPATH=%ROOT%\\scripts;%PYTHONPATH% before import and pytest",
+      "add explicit gold_challenger_c1 import check before compileall and pytest"
+    ]
+  },
+  "required_user_action": [
+    "Fetch origin and Pull origin in the separate C:\\gold-challenger-c1 clone",
+    "confirm branch feature/gold-v19-challenger-c1-audit",
+    "rerun 01_INSTALL_SHADOW.bat",
+    "do not run bootstrap unless install ends with [OK]"
+  ]
+}
