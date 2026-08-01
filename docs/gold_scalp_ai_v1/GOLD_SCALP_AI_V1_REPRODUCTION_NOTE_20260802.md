@@ -14,7 +14,7 @@ Package name:
 
 SHA256:
 
-`b694ddff99034ea555942e43916a76707a575ed7a3174e671e6ee5c03c8d64b0`
+`82622c0c4681f12ab810cc8373be03aa432b91c5b7337877a01930ae87aae9e6`
 
 The package contains:
 
@@ -22,7 +22,7 @@ The package contains:
 - Japanese result summary;
 - formal status and verification JSON;
 - preregistration and compute-amendment records;
-- period-partition incident record;
+- final period-partition incident record after the corrected reruns;
 - corrected absolute-score and rolling-rank calibration ladders;
 - semiannual expanding diagnostic output;
 - AUC diagnostics;
