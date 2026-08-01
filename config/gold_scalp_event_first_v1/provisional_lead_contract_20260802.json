@@ -1,0 +1,78 @@
+{
+  "contract_id": "GOLD_SCALP_EVENT_FIRST_V1_REOPEN_GAPDOWN_RECLAIM_LONG_AI",
+  "status": "PROVISIONAL_RESEARCH_LEAD_ONLY",
+  "instrument": "XAUUSD",
+  "time_basis": "MT5_BROKER_SERVER_NAIVE",
+  "decision_time": "01:05",
+  "event": {
+    "previous_reference": "PREVIOUS_COMPLETED_M5_CLOSE",
+    "current_session_first_m5_open": "01:00",
+    "gap_direction": "DOWN",
+    "minimum_gap_usd": 0.25,
+    "first_m5_direction": "UP",
+    "minimum_reclaim_fraction_of_gap": 0.25,
+    "side": "LONG",
+    "entry": "01:05_NEXT_M1_OPEN"
+  },
+  "ai_filter": {
+    "model": "LIGHTGBM_SMALL_REGULARIZED",
+    "n_estimators": 80,
+    "learning_rate": 0.04,
+    "num_leaves": 7,
+    "min_child_samples": 8,
+    "subsample": 0.8,
+    "colsample_bytree": 0.7,
+    "reg_alpha": 1.0,
+    "reg_lambda": 3.0,
+    "random_state": 20260802,
+    "threshold_basis": "2024H2_PREDICTION_MEDIAN_P50",
+    "threshold": 0.732653477650135,
+    "threshold_change_prohibited": true
+  },
+  "value_contract": {
+    "target_usd": 5.0,
+    "stop_usd": 3.0,
+    "horizon_exact_m1_minutes": 120,
+    "fixed_spread_usd": 0.30,
+    "recorded_entry_spread_points_max": 30,
+    "same_m1_target_stop_collision": "SL_FIRST",
+    "one_position_non_overlap": true,
+    "fallback": "PROHIBITED"
+  },
+  "corrected_results": {
+    "calibration": {
+      "period": "2024H2",
+      "base_event_rows": 25,
+      "selected_trades": 13,
+      "positive_pnl_win_rate": 0.7692307692307693,
+      "tp_hit_rate": 0.15384615384615385,
+      "profit_factor": 2.7385257301803674,
+      "net_usd": 12.499999999997726,
+      "max_drawdown_usd": 5.980000000000928
+    },
+    "evaluation": {
+      "period": "2025-01-01_THROUGH_2026-07-31",
+      "base_event_rows": 57,
+      "selected_trades": 16,
+      "positive_pnl_wins": 11,
+      "positive_pnl_win_rate": 0.6875,
+      "tp_hit_rate": 0.625,
+      "profit_factor": 3.440666666666645,
+      "net_usd": 36.60999999999967,
+      "max_drawdown_usd": 3.0,
+      "wilson_95_lower": 0.4440435583474066,
+      "wilson_95_upper": 0.8583535614521797
+    }
+  },
+  "frozen_prohibitions": [
+    "DO_NOT_CHANGE_0105_DECISION_TIME",
+    "DO_NOT_CHANGE_GAP_0P25",
+    "DO_NOT_CHANGE_RECLAIM_0P25",
+    "DO_NOT_CHANGE_LONG_ONLY",
+    "DO_NOT_CHANGE_TP5_SL3",
+    "DO_NOT_CHANGE_P50_THRESHOLD",
+    "DO_NOT_ADD_POST_RESULT_HOUR_MONTH_VOLATILITY_FILTERS",
+    "DO_NOT_START_SHADOW_WITHOUT_EXPLICIT_AUTHORIZATION",
+    "DO_NOT_CONNECT_MT5_ORDER_OR_LIVE_TRADING"
+  ]
+}
