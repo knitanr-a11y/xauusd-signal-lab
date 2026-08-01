@@ -1,0 +1,99 @@
+{
+  "classification": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_FAILED",
+  "all_gates_pass": false,
+  "gates": {
+    "minimum_resolved_trades": true,
+    "pooled_pf": true,
+    "pooled_net_positive": true,
+    "positive_forward_periods": true,
+    "long_pf": true,
+    "short_pf": true,
+    "direction_counts": true,
+    "cost_060_pf": true,
+    "bootstrap": true,
+    "matched_random": true,
+    "pseudo_wave": true,
+    "leave_one_scale_out": true,
+    "combined_pf_degradation": false,
+    "combined_dd_increase": true,
+    "dual_execution": true
+  },
+  "base": {
+    "trades": 124,
+    "wins": 64,
+    "losses": 60,
+    "win_rate": 0.5161290322580645,
+    "gross_profit": 1121.0499999999984,
+    "gross_loss": 585.8600000000006,
+    "pf": 1.9135117604888492,
+    "net": 535.1899999999978,
+    "ev": 4.316048387096756,
+    "max_dd": 80.0
+  },
+  "combined": {
+    "trades": 293,
+    "wins": 157,
+    "losses": 136,
+    "win_rate": 0.5358361774744027,
+    "gross_profit": 2561.7099999999946,
+    "gross_loss": 1295.5600000000018,
+    "pf": 1.9772993917688035,
+    "net": 1266.1499999999928,
+    "ev": 4.321331058020453,
+    "max_dd": 60.220000000000255
+  },
+  "v19": {
+    "trades": 169,
+    "wins": 93,
+    "losses": 76,
+    "win_rate": 0.5502958579881657,
+    "gross_profit": 1440.6599999999962,
+    "gross_loss": 709.7000000000012,
+    "pf": 2.0299563195716415,
+    "net": 730.959999999995,
+    "ev": 4.325207100591687,
+    "max_dd": 80.0
+  },
+  "monthly_pnl_correlation": 0.0003109656147501037,
+  "matched_random": {
+    "feasible": true,
+    "iterations": 2000,
+    "actual_net": 535.1899999999978,
+    "actual_pf": 1.9135117604888492,
+    "net_percentile": 1.0,
+    "pf_percentile": 0.9985,
+    "pool_trades": 1145
+  },
+  "pseudo_wave": {
+    "iterations": 2000,
+    "actual_net": 535.1899999999978,
+    "actual_pf": 1.9135117604888492,
+    "net_percentile": 1.0,
+    "pf_percentile": 1.0,
+    "median_trades": 143.0
+  },
+  "bootstrap": {
+    "iterations": 2000,
+    "months": 25,
+    "net_positive_probability": 1.0,
+    "pf_above_1_probability": 1.0,
+    "net_p05": 286.19799999999685,
+    "net_median": 539.4699999999966,
+    "pf_p05": 1.434369489473355,
+    "pf_median": 1.9311652564041524
+  },
+  "overlap": {
+    "raw_onsets": 188,
+    "same_timestamp_v19": 0,
+    "inside_v19_open": 1,
+    "inside_v19_open_rate": 0.005319148936170213,
+    "resolved_net_additive_trades": 124
+  },
+  "failed_gate_detail": {
+    "gate": "combined_pf_degradation",
+    "v19_pf": 2.0299563195716415,
+    "allowed_minimum": 1.9799563195716415,
+    "observed_combined_pf": 1.9772993917688035,
+    "shortfall": 0.002656927802838
+  }
+}

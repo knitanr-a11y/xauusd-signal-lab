@@ -1,0 +1,25 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "local_research_archive_sha256": "53a67c34e78abe97b8b73c1891ef8645aa817a3c8d015001ba42569a56d5fedf",
+  "audit_report_sha256": "a3a7c1c435324436b4ab88c7666df398396ce581fa224f4fbaeb0d9703e3811a",
+  "selected_output_hashes": {
+    "frozen_research_contract.json": "7479aec0203b9e1264caa0ff149af44071de5fb318619bc4851309fe5eaa7308",
+    "source_manifest.json": "79dc75b31d57518dab595035bace4515c6feca820d248149373d6da16726b892",
+    "formal_robustness_contract.json": "ee1b4f0b1c0f25ab8f4495c8fd53f682f2d189b5d5d77c71fe4ed2a5f6cc9fdb",
+    "formal_status.json": "40e99c04aab0b2568161fed46a0af15d9310875c393e2d552a7191b5a1935f7f",
+    "first_mismatch.json": "c8c2d51c374752ab8a1da8c242038b36211fa5c8fb1671778871b3b36ef33a70",
+    "base_result.json": "e91da7b174d90b0bf99a59e4ce2345352d0209de01707d54b9ba6be8bc9d0b84",
+    "formal_robustness_result.json": "cf96d78b467aded92c26a74dc6cb95a7acc49518eafbb587862c64758e8cc00c",
+    "raw_m1_dual_execution_parity.json": "6593a4859bd44840529ce0b46d1098e33b9ad1e806f2adcad6cfb09cc2325406",
+    "v19_data_v3_execution_parity.json": "a1be67fc33756d68a8c9d7c914caa5c8ea5ddd5564ebf415d4aedbca34d2ac53",
+    "accounting_report_correction.json": "b9c46c12d73652fde564f147c0cdf7ffe73b5ba5396a2cde80bdd1aa6377f407",
+    "phase0_source_merge_correction.json": "929fe6766c27927a64f20324a838664c7f0adfd637d66dfce1bcb08aa8f29640",
+    "pytest_final.txt": "768f90d32058ed3988232ff25b9dd43db4f08b2808a1d090779c59fe4dd1e961"
+  },
+  "verification": {
+    "compileall": "PASS",
+    "pytest": "15 PASSED",
+    "raw_m1_dual_execution": "188 EXACT",
+    "v19_data_v3_execution": "169 EXACT"
+  }
+}

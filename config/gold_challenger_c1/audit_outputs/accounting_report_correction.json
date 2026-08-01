@@ -1,0 +1,10 @@
+{
+  "classification": "ACCOUNTING_REPORT_CORRECTION_NOT_STRATEGY_CHANGE",
+  "initial_base_monthly_correlation_included_one_unresolved_observation_as_zero_month_sum": 0.019628949295771452,
+  "correct_resolved_only_monthly_correlation": 0.0003109656147501037,
+  "initial_preempt_counterfactual_dd_was_computed_on_unsorted_concatenation": 80.0,
+  "correct_exit_time_sorted_counterfactual_max_dd": 63.42000000000053,
+  "candidate_entries_changed": false,
+  "candidate_pnl_changed": false,
+  "formal_gate_changed": false
+}
