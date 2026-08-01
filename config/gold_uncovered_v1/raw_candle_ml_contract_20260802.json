@@ -1,0 +1,76 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "study_id": "GU1_RAW_CANDLE_NATIVE_ML_V1",
+  "status": "FROZEN_BEFORE_ANY_MODEL_TRAINING_OR_OUTCOME_RESULT",
+  "created_date": "2026-08-02",
+  "positioning": "A separate model-native vector after three handcrafted study sets produced no formal candidate. It is not a rescue or parameter adjustment of those studies.",
+  "prohibited_inputs": ["V19", "Challenger C1", "E40", "rank ledgers", "wave state", "episodes", "prior signals", "prior trade outcomes"],
+  "allowed_inputs": ["causally closed raw M15", "causally closed H1", "causally closed H4", "causally closed D1", "MT5 server-time calendar fields"],
+  "time_split": {
+    "train": "2023-01-03 through 2024-06-30",
+    "calibration_and_discovery_gate": "2024-07-01 through 2024-12-31",
+    "untouched_evaluation": ["2025H1", "2025H2", "2026H1", "2026JUL"]
+  },
+  "labels": {
+    "long": "TP20 before SL10 within 480 exact contiguous M1 minutes, SL first on same minute",
+    "short": "TP20 before SL10 within 480 exact contiguous M1 minutes, SL first on same minute",
+    "time_or_invalid": "time exit is negative class; non-contiguous or missing exact M1 is excluded"
+  },
+  "features": {
+    "M15": ["returns 1,2,4,8,16", "ATR14, ATR50 and ratio", "range/body/wicks/close-location normalized by ATR14", "EMA20/50/200 distances and fixed slopes", "RSI14", "tick-volume 5/20 ratio and 60-bar z-score", "recorded spread"],
+    "H1_H4_D1": ["returns", "ATR14", "EMA20/50 distances and fixed slopes", "RSI14"],
+    "calendar": ["MT5 hour sine/cosine", "weekday sine/cosine"]
+  },
+  "model": {
+    "family": "LightGBM binary, separate LONG and SHORT",
+    "fixed_parameters": {
+      "n_estimators": 400,
+      "learning_rate": 0.03,
+      "num_leaves": 31,
+      "min_child_samples": 100,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_alpha": 0.1,
+      "reg_lambda": 1.0,
+      "random_state": 20260802,
+      "n_jobs": -1
+    },
+    "class_weight": "training negative/positive ratio separately by side"
+  },
+  "candidate_rule": {
+    "threshold": "direction-specific 95th percentile of calibration predicted probabilities; threshold construction is label-free",
+    "both_sides": "choose the larger probability divided by its frozen threshold; exact tie rejected",
+    "entry": "exact M1 open at M15 decision time",
+    "spread_points_max": 30,
+    "one_position": true
+  },
+  "calibration_gate_before_evaluation": {
+    "minimum_resolved_trades": 30,
+    "pooled_pf_min": 1.20,
+    "positive_net": true,
+    "minimum_long_trades": 10,
+    "minimum_short_trades": 10,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0,
+    "long_auc_min": 0.55,
+    "short_auc_min": 0.55
+  },
+  "evaluation_gates": {
+    "minimum_resolved_trades": 80,
+    "pooled_pf_min": 1.25,
+    "positive_periods_min": 3,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0,
+    "each_direction_min_trades": 20,
+    "additional_cost_060_pf_min": 1.10,
+    "month_block_bootstrap_positive_probability_min": 0.90
+  },
+  "value_contract": {
+    "tp_usd": 20.0,
+    "sl_usd": 10.0,
+    "horizon_exact_m1_minutes": 480,
+    "fixed_spread_usd": 0.30,
+    "same_m1_collision": "SL_FIRST"
+  },
+  "authorization": {"research_only": true, "shadow": false, "discord": false, "ai_judgement": false, "mt5_order": false}
+}

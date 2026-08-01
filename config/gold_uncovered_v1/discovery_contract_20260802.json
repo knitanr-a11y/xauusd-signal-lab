@@ -1,0 +1,104 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "status": "CORRECTED_AND_FROZEN_BEFORE_ANY_GU1_OUTCOME_CALCULATION",
+  "created_date": "2026-08-02",
+  "correction_reason": "The initially listed intraday families were structurally duplicative of prior independent price-action and activity-release audits. They were replaced before GU1 outcomes were calculated.",
+  "independence": {
+    "raw_candles_only": true,
+    "v19_inputs_used": false,
+    "challenger_c1_inputs_used": false,
+    "e40_used": false,
+    "rank_used": false,
+    "wave_or_episode_used": false,
+    "prior_signal_or_outcome_ledgers_used": false
+  },
+  "time_contract": {
+    "basis": "MT5_BROKER_SERVER_NAIVE_BAR_OPEN",
+    "latest_csv_row": "CLOSED_BY_CONTRACT",
+    "higher_timeframe_available_at": "BAR_OPEN_PLUS_TIMEFRAME",
+    "entry": "EXACT_M1_OPEN_AT_M15_DECISION_TIME",
+    "same_m1_tp_sl": "SL_FIRST",
+    "fallback": "PROHIBITED"
+  },
+  "selection_design": {
+    "discovery_periods": ["2023H1", "2023H2", "2024H1"],
+    "untouched_evaluation_periods": ["2024H2", "2025H1", "2025H2", "2026H1", "2026JUL"],
+    "primary_value_contract": {
+      "tp_usd": 20.0,
+      "sl_usd": 10.0,
+      "horizon_exact_m1_minutes": 480,
+      "fixed_spread_usd": 0.30,
+      "recorded_spread_points_max": 30,
+      "one_position_per_family": true
+    },
+    "discovery_gate": {
+      "minimum_resolved_trades": 30,
+      "profit_factor_min": 1.20,
+      "positive_net_in_each_discovery_half": true,
+      "minimum_long_trades": 10,
+      "minimum_short_trades": 10,
+      "long_profit_factor_min": 1.0,
+      "short_profit_factor_min": 1.0
+    },
+    "selection_rule": "Among families passing every discovery gate, select exactly one with highest discovery PF; tie within 0.01 PF goes to lower max DD, then lexicographic family id. If none pass, stop with no candidate.",
+    "evaluation_rule": "Run the selected frozen family unchanged on all untouched evaluation periods. Do not select a different family after seeing evaluation results."
+  },
+  "fixed_families": {
+    "D1_H4_ALIGNMENT_BREAK": {
+      "direction": "D1 EMA20 slope sign equals H4 EMA20 slope sign after the prior closed H4 bar was not aligned",
+      "regime_onset": "first closed H4 alignment onset",
+      "intraday_confirmation": "first closed M15 close beyond the prior 16 closed M15 bar high or low in the aligned direction",
+      "maximum_confirmation_delay_hours": 48
+    },
+    "D1_VOL_EXPANSION_CONTINUATION": {
+      "direction": "sign of the closed D1 candle body",
+      "regime_onset": "D1 ATR14 divided by past-only rolling 60-D1 median crosses from below 1.15 to at least 1.15 and absolute D1 body is at least 0.50 ATR14",
+      "intraday_confirmation": "first closed M15 close beyond the prior 8 closed M15 bar high or low in the D1 direction",
+      "maximum_confirmation_delay_hours": 48
+    },
+    "H4_RANGE_TO_TREND_PULLBACK": {
+      "direction": "sign of H4 close minus EMA20",
+      "regime_onset": "H4 Kaufman efficiency ratio over 20 closed H4 bars crosses from at most 0.20 to at least 0.35 while EMA20 slope has the same sign",
+      "intraday_confirmation": "first M15 pullback touching EMA20 followed by a close beyond the previous M15 extreme in the regime direction",
+      "maximum_confirmation_delay_hours": 48
+    },
+    "D1_EXHAUSTION_REVERSAL": {
+      "direction": "opposite the prior D1 candle body",
+      "regime_onset": "closed D1 true range at least 1.80 ATR14, directional wick at least 45 percent of range, and close back inside the previous closed D1 range",
+      "intraday_confirmation": "first closed M15 close through the exhaustion D1 midpoint in the reversal direction",
+      "maximum_confirmation_delay_hours": 48
+    },
+    "D1_H4_DISAGREEMENT_RESOLUTION": {
+      "direction": "existing closed D1 EMA20 slope sign",
+      "regime_onset": "H4 EMA20 slope sign changes to the D1 sign after at least three consecutive closed H4 bars of opposite nonzero sign",
+      "intraday_confirmation": "first closed M15 close beyond the prior 12 closed M15 bar high or low in the resolved direction",
+      "maximum_confirmation_delay_hours": 48
+    }
+  },
+  "event_rules": {
+    "one_event_per_regime_onset": true,
+    "first_confirmation_only": true,
+    "opposite_side_same_decision": "REJECT_AMBIGUOUS",
+    "missing_exact_entry_m1": "REJECT",
+    "unexpected_m1_gap_within_outcome_horizon": "INVALID_NOT_RESOLVED"
+  },
+  "formal_evaluation_gates_if_a_discovery_family_is_selected": {
+    "minimum_evaluation_resolved_trades": 50,
+    "pooled_pf_min": 1.25,
+    "pooled_net_positive": true,
+    "positive_evaluation_periods_min": 4,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0,
+    "each_direction_min_trades": 15,
+    "additional_cost_060_pf_min": 1.10,
+    "month_block_bootstrap_net_positive_probability_min": 0.90
+  },
+  "authorization": {
+    "research_only": true,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  }
+}

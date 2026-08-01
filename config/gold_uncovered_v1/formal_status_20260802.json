@@ -1,0 +1,38 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "date": "2026-08-02",
+  "formal_status": "RETROSPECTIVE_MULTI_VECTOR_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "candidate_count": 0,
+  "studies": {
+    "h4_d1_regime_transition": "NO_DISCOVERY_PASS",
+    "volume_price_effort_result": "DISCOVERY_PASS_EVALUATION_FAIL_SHORT_PF",
+    "daily_reference_levels": "NO_DISCOVERY_PASS",
+    "raw_candle_native_ml": "CALIBRATION_PASS_EVALUATION_FAIL"
+  },
+  "source_authority": {
+    "raw_hashes_match": true,
+    "old_sharp_overlap_exact": true,
+    "historical_m15_derivation_exact_rows": "81781/81781",
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "exact_m1_execution": true
+  },
+  "prohibitions": [
+    "NO_SIDE_DELETION_RESCUE",
+    "NO_THRESHOLD_RESCUE",
+    "NO_PERIOD_DELETION",
+    "NO_POST_RESULT_TIME_OR_VOLATILITY_FILTER",
+    "NO_GU1_SHADOW",
+    "NO_GU1_DISCORD",
+    "NO_AI_JUDGEMENT",
+    "NO_MT5_ORDER",
+    "NO_MERGE"
+  ],
+  "existing_runtime_boundary": {
+    "v19": "UNTOUCHED",
+    "challenger_c1": "UNTOUCHED"
+  },
+  "research_package": {
+    "filename": "GOLD_UNCOVERED_V1_RESEARCH_20260802.zip",
+    "sha256": "e4c06f123f1e87d0311758c7132478caecde75ac09edc3eb3f5fc00811cbeb70"
+  }
+}

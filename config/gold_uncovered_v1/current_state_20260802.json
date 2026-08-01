@@ -1,0 +1,44 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "date": "2026-08-02",
+  "branch": "feature/gold-uncovered-v1-research",
+  "base_branch": "main",
+  "base_commit": "7c3e9ee3e8bfb21f024a273cc3d695d273c0abd5",
+  "status": "RETROSPECTIVE_MULTI_VECTOR_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "mode": "AUDIT_ONLY_RESEARCH_ONLY",
+  "research_location": "ASSISTANT_EXECUTION_ENVIRONMENT_NOT_USER_PC",
+  "independent_from": [
+    "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+    "GOLD_CHALLENGER_C1_V2_DATA_V3"
+  ],
+  "running_systems": {
+    "v19": "RUNNING_UNTOUCHED",
+    "challenger_c1": "RUNNING_UNTOUCHED"
+  },
+  "completed_studies": [
+    "H4_D1_REGIME_TRANSITION",
+    "VOLUME_PRICE_EFFORT_RESULT",
+    "DAILY_REFERENCE_LEVELS",
+    "RAW_CANDLE_NATIVE_ML"
+  ],
+  "study_results": {
+    "H4_D1_REGIME_TRANSITION": "NO_DISCOVERY_PASS",
+    "VOLUME_PRICE_EFFORT_RESULT": "DISCOVERY_PASS_EVALUATION_FAIL_SHORT_PF",
+    "DAILY_REFERENCE_LEVELS": "NO_DISCOVERY_PASS",
+    "RAW_CANDLE_NATIVE_ML": "CALIBRATION_PASS_EVALUATION_FAIL"
+  },
+  "formal_outcome_status": "RETROSPECTIVE_MULTI_VECTOR_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "candidate_count": 0,
+  "authoritative_report": "docs/gold_uncovered_v1/GOLD_UNCOVERED_V1_RESEARCH_AUDIT_20260802.md",
+  "authoritative_status": "config/gold_uncovered_v1/formal_status_20260802.json",
+  "authorization": {
+    "research_only": true,
+    "additional_outcome_evaluation_on_same_formulas": false,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "merge": false
+  }
+}

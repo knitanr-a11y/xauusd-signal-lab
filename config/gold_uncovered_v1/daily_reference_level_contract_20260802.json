@@ -1,0 +1,77 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "study_id": "GU1_DAILY_REFERENCE_LEVEL_V1",
+  "status": "FROZEN_BEFORE_ANY_STUDY_OUTCOME_CALCULATION",
+  "created_date": "2026-08-02",
+  "reason": "A separate third vector after the H4/D1 transition study failed discovery and the volume-price study failed untouched evaluation. It does not alter or rescue either prior study.",
+  "inputs": {
+    "allowed": ["raw closed D1 reference bars", "raw closed M15 bars derived from M1", "exact M1 execution"],
+    "v19": false,
+    "challenger_c1": false,
+    "e40": false,
+    "rank": false,
+    "wave": false,
+    "volume_price_selected_family": false
+  },
+  "periods": {
+    "discovery": ["2023H1", "2023H2", "2024H1"],
+    "untouched_evaluation": ["2024H2", "2025H1", "2025H2", "2026H1", "2026JUL"]
+  },
+  "value_contract": {
+    "tp_usd": 20.0,
+    "sl_usd": 10.0,
+    "horizon_exact_m1_minutes": 480,
+    "fixed_spread_usd": 0.30,
+    "recorded_spread_points_max": 30,
+    "same_m1_collision": "SL_FIRST",
+    "one_position_per_family": true
+  },
+  "families": {
+    "PREVDAY_BREAK_HOLD": {
+      "event": "first two consecutive closed M15 closes outside the latest fully closed D1 high or low",
+      "direction": "outside direction",
+      "entry": "second confirming M15 close time"
+    },
+    "PREVDAY_SWEEP_RECLAIM": {
+      "event": "first closed M15 excursion at least 0.10 M15 ATR14 beyond latest closed D1 high or low followed by a close back inside",
+      "direction": "toward the prior-day range",
+      "entry": "reclaiming M15 close time"
+    },
+    "PREVDAY_MIDPOINT_REJECTION": {
+      "event": "first M15 touch of the latest closed D1 midpoint followed by a close beyond the previous M15 extreme away from the midpoint",
+      "direction": "side of the first M15 open after the D1 reference became available",
+      "entry": "rejecting M15 close time"
+    },
+    "INSIDE_DAY_BREAKOUT": {
+      "event": "latest closed D1 bar is fully inside its preceding D1 bar; first M15 close outside the inside-day high or low",
+      "direction": "break direction"
+    },
+    "THREE_DAY_BALANCE_BREAK": {
+      "event": "combined high-low range of the latest three closed D1 bars is at most 1.50 latest D1 ATR14; first M15 close outside that three-day range",
+      "direction": "break direction"
+    }
+  },
+  "event_rules": {
+    "one_event_per_reference_and_family": true,
+    "first_confirmation_only": true,
+    "ambiguous_both_sides": "REJECT",
+    "reference_availability": "D1 bar open time plus one day not after M15 decision time"
+  },
+  "discovery_gate": {
+    "minimum_resolved_trades": 30,
+    "pf_min": 1.20,
+    "positive_net_each_discovery_half": true,
+    "minimum_long_trades": 10,
+    "minimum_short_trades": 10,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0
+  },
+  "selection": "Select exactly one complete discovery-gate pass with highest PF; tie within 0.01 uses lower DD then family id. If none pass, do not inspect evaluation outcomes.",
+  "authorization": {
+    "research_only": true,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false
+  }
+}

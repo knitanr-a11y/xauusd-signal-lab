@@ -1,0 +1,29 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "date": "2026-08-02",
+  "scope": "PHASE0_READONLY_SOURCE_AUDIT_TOOL_ONLY",
+  "branch": "feature/gold-uncovered-v1-research",
+  "verification": {
+    "python_compile": "PASS",
+    "isolated_fixture_pytest": {
+      "status": "PASS",
+      "tests": 4,
+      "coverage": [
+        "valid source schema and monotonic time",
+        "duplicate timestamp rejection",
+        "exact old/sharp overlap",
+        "overlap mismatch detection",
+        "complete required-source Phase 0 PASS"
+      ]
+    },
+    "stdlib_self_test": "PASS",
+    "source_scan_cache_runner": "IMPLEMENTED",
+    "windows_bat": "IMPLEMENTED_NOT_YET_RUN_ON_USER_PC"
+  },
+  "user_pc_source_audit": "PENDING",
+  "outcomes_calculated": false,
+  "features_calculated": false,
+  "candidate_events_calculated": false,
+  "v19_or_challenger_state_read": false,
+  "authorization": "SOURCE_AUDIT_ONLY"
+}

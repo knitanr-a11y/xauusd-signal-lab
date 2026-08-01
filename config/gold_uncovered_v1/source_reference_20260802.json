@@ -1,0 +1,93 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "status": "REFERENCE_ONLY_UNTIL_USER_PC_READONLY_AUDIT",
+  "created_date": "2026-08-02",
+  "search_root": "%APPDATA%\\MetaQuotes\\Terminal",
+  "historical_sources": {
+    "M1": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_m1.csv",
+      "expected_sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "expected_rows": 1225431,
+      "expected_first_time": "2023-01-03 01:00:00",
+      "expected_last_time": "2026-06-19 19:54:00"
+    },
+    "M5": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_m5.csv",
+      "expected_sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+      "expected_rows": 245327,
+      "expected_first_time": "2023-01-03 01:00:00",
+      "expected_last_time": "2026-06-19 19:50:00"
+    },
+    "M15": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_m15.csv",
+      "expected_sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "expected_rows": 81781,
+      "expected_first_time": "2023-01-03 01:00:00",
+      "expected_last_time": "2026-06-19 19:45:00"
+    },
+    "H1": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_h1.csv",
+      "expected_sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+      "expected_rows": 20459,
+      "expected_first_time": "2023-01-03 01:00:00",
+      "expected_last_time": "2026-06-19 19:00:00"
+    },
+    "H4": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_h4.csv",
+      "expected_sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+      "expected_rows": 5352,
+      "expected_first_time": "2023-01-03 00:00:00",
+      "expected_last_time": "2026-06-19 16:00:00"
+    },
+    "D1": {
+      "relative_suffix": "MQL5\\Files\\gold_v3_2023_2026\\gold_v3_2023_2026_d1.csv",
+      "expected_sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6",
+      "expected_rows": 894,
+      "expected_first_time": "2023-01-03 00:00:00",
+      "expected_last_time": "2026-06-19 00:00:00",
+      "required": false
+    }
+  },
+  "sharp_sources": {
+    "M1": {
+      "filename": "goldsharp_m1.csv",
+      "previous_frozen_snapshot_sha256": "91a308536321190fe30199e61175fdca6a22c757ff3f8e5f6ea99d759f0a4353",
+      "previous_snapshot_last_time": "2026-07-31 23:13:00"
+    },
+    "M5": {
+      "filename": "goldsharp_m5.csv",
+      "previous_frozen_snapshot_sha256": "a52fe90c3a509ceb1c8616611fe9424381227754d896aa26d7705a905f1f7d78",
+      "previous_snapshot_last_time": "2026-07-31 23:05:00"
+    },
+    "M15": {
+      "filename": "goldsharp_m15.csv",
+      "required": false,
+      "policy": "absence is allowed; do not substitute or derive during Phase 0"
+    },
+    "H1": {
+      "filename": "goldsharp_h1.csv",
+      "previous_frozen_snapshot_sha256": "fcf1ac5a0d2e2f99e988ee499a8f1dd6dd759b1269005849d264b5f89b146755",
+      "previous_snapshot_last_time": "2026-07-31 22:00:00"
+    },
+    "H4": {
+      "filename": "goldsharp_h4.csv",
+      "previous_frozen_snapshot_sha256": "b38a6bc12cf41e21e7ff9f8cef833a343d2297188875a40025c3d21c446dfbad",
+      "previous_snapshot_last_time": "2026-07-31 16:00:00"
+    },
+    "D1": {
+      "filename": "goldsharp_d1.csv",
+      "required": false,
+      "previous_frozen_snapshot_sha256": "b4b3a7efc66e42d292b5299465952fc9df3fff304eb52ea7553e958ac4ef4434",
+      "previous_snapshot_last_time": "2026-07-30 00:00:00"
+    }
+  },
+  "required_timeframes": ["M1", "M5", "M15_HISTORICAL", "H1", "H4"],
+  "required_overlap_checks": ["M1", "M5", "H1", "H4"],
+  "shared_value_columns": ["open", "high", "low", "close", "tick_volume", "spread", "real_volume"],
+  "prohibitions": [
+    "do not read V19 local_config or state to locate sources",
+    "do not read Challenger C1 local_config or state to locate sources",
+    "do not modify any candle CSV",
+    "do not calculate outcomes in Phase 0"
+  ]
+}
