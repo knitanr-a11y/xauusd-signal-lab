@@ -16,7 +16,10 @@ if not exist "%VENV%\Scripts\python.exe" (
 if errorlevel 1 goto :fail
 "%VENV%\Scripts\python.exe" -m pip install -r "%ROOT%\scripts\gold_challenger_c1\requirements_shadow.txt"
 if errorlevel 1 goto :fail
+set "PYTHONPATH=%ROOT%\scripts;%PYTHONPATH%"
 pushd "%ROOT%"
+"%VENV%\Scripts\python.exe" -c "import gold_challenger_c1; print('[OK] Python import path:', gold_challenger_c1.__file__)"
+if errorlevel 1 goto :fail_pop
 "%VENV%\Scripts\python.exe" -m compileall scripts\gold_challenger_c1
 if errorlevel 1 goto :fail_pop
 "%VENV%\Scripts\python.exe" -m pytest -q tests\gold_challenger_c1
