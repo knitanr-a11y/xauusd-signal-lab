@@ -6,8 +6,13 @@
   "v19": {
     "local_config_path": "C:\\gold-v19-shadow\\config\\gold_wave_shadow_v19\\local_config.json",
     "read_only": true,
-    "require_status": "READY",
-    "require_parity": "PASS"
+    "require_contract_version": "2026-08-01-v1",
+    "allowed_runtime_statuses": [
+      "READY",
+      "RUNNING"
+    ],
+    "require_cursor_match": true,
+    "score_source": "V19_SCORE_HISTORY_PENDING_AND_ACTIVE_CALIBRATION"
   },
   "data_sources": {
     "inherit_from_v19": true,
