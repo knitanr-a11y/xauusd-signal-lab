@@ -1,0 +1,45 @@
+{
+  "study_id": "GOLD_SCALP_EVENT_FIRST_V1",
+  "date": "2026-08-02",
+  "source_contract": {
+    "validated_data_family": "DATA_V3_RETAINED_RAW_CANDLES_AND_REBUILT_CAUSAL_FEATURES",
+    "m1_rows": 1266508,
+    "causal_m5_decision_rows": 251967,
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "higher_timeframe_after_close_only": true
+  },
+  "provisional_lead_verification": {
+    "exact_m1_independent_recheck_trades": 16,
+    "pnl_mismatches": 0,
+    "exit_index_mismatches": 0,
+    "reason_mismatches": 0,
+    "one_position_non_overlap": "PASS",
+    "seed_tests": 5,
+    "seed_eval_win_rate_min": 0.6666666666666666,
+    "seed_eval_win_rate_max": 0.6875,
+    "seed_eval_pf_min": 3.028888888888866,
+    "seed_eval_pf_max": 3.440666666666645,
+    "seed_eval_dd_usd": 3.0,
+    "additional_cost_1p00_pf": 2.0305,
+    "additional_cost_1p00_net_usd": 20.61,
+    "month_block_bootstrap_p_net_positive": 0.99895,
+    "month_block_bootstrap_p_win_rate_ge_60pct": 0.8077
+  },
+  "freshness_limitations": {
+    "2025H1_selected_trades": 7,
+    "2025H2_selected_trades": 8,
+    "2026H1_selected_trades": 0,
+    "2026JUL_selected_trades": 1,
+    "2026JUL_net_usd": -3.0
+  },
+  "selection_bias": {
+    "large_multi_hypothesis_search": true,
+    "result_requires_fresh_prospective_data": true,
+    "deployable_claim_allowed": false
+  },
+  "running_system_isolation": {
+    "v19_modified": false,
+    "challenger_c1_modified": false,
+    "v19_or_c1_used_as_candidate_input": false
+  }
+}

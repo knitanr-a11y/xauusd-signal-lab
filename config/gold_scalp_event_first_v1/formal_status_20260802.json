@@ -1,0 +1,32 @@
+{
+  "study_id": "GOLD_SCALP_EVENT_FIRST_V1",
+  "date": "2026-08-02",
+  "formal_status": "RETROSPECTIVE_EVENT_FIRST_RESEARCH_COMPLETE_PROVISIONAL_DAILY_REOPEN_GAP_LONG_AI_LEAD_NO_DEPLOYMENT",
+  "provisional_research_lead": true,
+  "deployable_candidate": false,
+  "shadow_authorized": false,
+  "discord_authorized": false,
+  "mt5_order_authorized": false,
+  "live_trading_authorized": false,
+  "merge_as_validated_strategy": false,
+  "v19_modified": false,
+  "challenger_c1_modified": false,
+  "summary": {
+    "event_families": 66,
+    "event_episode_rows": 1334782,
+    "direct_rule_combinations": 198,
+    "direct_rule_gate_passes": 0,
+    "phase_a_ai_formal_calibration_passes": 0,
+    "confluence_gate_passes": 0,
+    "inverse_gate_passes": 0,
+    "random_placebo_combinations": 300,
+    "random_placebo_gate_passes": 0,
+    "union_ai_formal_calibration_passes": 0,
+    "side_specific_pre2025_gate_passes": 4,
+    "side_specific_ai_formal_calibration_passes": 2,
+    "daily_reopen_simple_rule_pre2025_gate_passes": 19,
+    "daily_reopen_ai_formal_calibration_passes": 2
+  },
+  "decision": "PROVISIONAL_RESEARCH_LEAD_ONLY",
+  "next_valid_step": "FRESH_NO_BACKFILL_PROSPECTIVE_SHADOW_ONLY_AFTER_EXPLICIT_USER_AUTHORIZATION"
+}
