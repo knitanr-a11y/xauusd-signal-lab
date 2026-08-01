@@ -1,0 +1,82 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-01",
+  "implementation_status": "GITHUB_IMPLEMENTED_USER_PC_ACTIVATION_PENDING",
+  "retrospective_formal_status": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_FAILED",
+  "authorization": "USER_AUTHORIZED_OBSERVATION_ONLY_PROSPECTIVE_SHADOW_AND_DISCORD_ENTRY_NOTIFICATIONS",
+  "runtime": {
+    "mode": "OBSERVATION_ONLY_PROSPECTIVE_SHADOW",
+    "state_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_challenger_c1_shadow",
+    "v19_access": "READ_ONLY",
+    "e40_source": "V19 outputs/shadow_score_ledger.csv",
+    "second_e40_router_training": false,
+    "no_backfill": true,
+    "fresh_entry_gate": "loaded DATA_V3 M1 latest timestamp must equal decision_dt",
+    "v19_priority": "SUPPRESS_WHILE_OPEN_OR_SAME_TIMESTAMP; PREEMPT_ONLY_AT_ACTUAL_LATER_V19_ENTRY",
+    "mt5_order": false,
+    "ai_judgement": false
+  },
+  "discord": {
+    "sidecar": true,
+    "webhook_source": "EXISTING_V19_LOCAL_CONFIG_READ_ONLY",
+    "notify": "NEW_ACCEPTED_CHALLENGER_ENTRY_ONLY",
+    "no_delayed_missed_alerts": true,
+    "chart": "M15_80_BARS",
+    "failure_affects_shadow": false
+  },
+  "delivery": {
+    "ordinary_utf8_python": true,
+    "zip": false,
+    "binary_payload": false,
+    "base64_source": false,
+    "dynamic_exec": false
+  },
+  "local_verification": {
+    "environment": "isolated Linux Python verification; actual Windows checkout pending",
+    "compileall": "PASS",
+    "pytest": "12 PASSED",
+    "static_ast": "PASS",
+    "forbidden_packaging_scan": "PASS",
+    "v19_write_path_scan": "PASS"
+  },
+  "source_sha256": {
+    "discord_delivery.py": "586182f43cafee88be6ccc60fc6d84069d9dfea1f9de5a5204925e34191bebb7",
+    "discord_notifier.py": "92f5415dccb5a69fd8d78867c2ea1eecda64116453a57a81354ba314a9897e52",
+    "shadow_common.py": "606831d9f93597d4dc83836928235bf3b413bed033bd442dc9d6dfe5b5491542",
+    "shadow_data.py": "ad82d262e4d184a33b723498970f65227f800e1126f10a0baf9fc2e826eef4b4",
+    "shadow_engine.py": "48cda1b236ccf405847431d8f25e0a5e2e5884b9807d0dd2d05d7291191ea526",
+    "shadow_runtime.py": "442bf4a5a15aec75f06b34be0999167524c903bb4d57646cf24790888b926dc2",
+    "v19_readonly.py": "3eb6024dd9ae1cedde1e0a0ee032978c4a4ec5f4f971f2a79ab2af3cbcd91599",
+    "prospective_shadow_contract": "7a2044c4dd9222de2425cc1180a20c1d19ebdd79d5e719ae3969794d65ff20df",
+    "discord_alert_contract": "ee1f7147fe281dd76943c88b54b1aa5f4a1c258261a54d53a57c2432eb663170",
+    "implementation_doc": "9b23cc372dacbda46bb0332232a90d92b58a3dc5af7d6656d443c9cd682d04b3"
+  },
+  "activation_claim": false,
+  "discord_delivery_claim": false,
+  "v19_modified": false,
+  "next_required_evidence": [
+    "separate Windows clone/worktree on feature/gold-v19-challenger-c1-audit",
+    "01_INSTALL_SHADOW passes on user PC",
+    "02_BOOTSTRAP_ACTIVATE_SHADOW reports READY without modifying V19",
+    "04_SHADOW_STATUS shows READY/activated/V19 PASS",
+    "07_TEST_DISCORD arrives",
+    "continuous loops then started by user"
+  ],
+  "github_verification": {
+    "branch": "feature/gold-v19-challenger-c1-audit",
+    "contract_commit": "8d8da67a0ba313be143095cb9d4af7cb0f19754f",
+    "implementation_commit": "f1cb5c7532399c62f88137e9428e0ba8cfee03b7",
+    "source_blob_identity": "PASS",
+    "source_blob_sha1": {
+      "discord_delivery.py": "80a5d3716c6c74845d2bc8281e48827c9839c939",
+      "discord_notifier.py": "d9ba0d98294e2117fd6a59e2826820066923abcc",
+      "shadow_common.py": "2e6380a2bfa62651f20a1b20ff60b8485f602926",
+      "shadow_data.py": "869e94c653984dc018826193e4315e0feb118a72",
+      "shadow_engine.py": "3e9bdbbb0a462175b69a55844807c1518dfbbc9c",
+      "shadow_runtime.py": "206aa142bb3fcccccdb9e32089d56c4ff5349427",
+      "v19_readonly.py": "e692554937b68de3668873f75b4e93795b7b4af1"
+    },
+    "allowed_path_diff_only": true,
+    "v19_forbidden_path_changes": 0
+  }
+}

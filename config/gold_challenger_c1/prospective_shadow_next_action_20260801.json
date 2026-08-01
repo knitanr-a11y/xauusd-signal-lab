@@ -1,0 +1,31 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-01",
+  "status": "USER_PC_ACTIVATION_PENDING",
+  "do_not_touch": "C:\\gold-v19-shadow or its running V19 windows",
+  "recommended_clone": "C:\\gold-challenger-c1",
+  "branch": "feature/gold-v19-challenger-c1-audit",
+  "order": [
+    "01_INSTALL_SHADOW.bat",
+    "02_BOOTSTRAP_ACTIVATE_SHADOW.bat",
+    "04_SHADOW_STATUS.bat",
+    "06_VALIDATE_DISCORD.bat",
+    "07_TEST_DISCORD.bat",
+    "03_RUN_SHADOW_LOOP.bat",
+    "08_RUN_DISCORD_ALERTS.bat"
+  ],
+  "stop_before_loops_unless": [
+    "Shadow status READY",
+    "activated true",
+    "V19 parity PASS",
+    "Discord test received"
+  ],
+  "not_authorized": [
+    "MT5 order",
+    "AI judgement",
+    "real trading",
+    "V19 modification"
+  ],
+  "first_bootstrap_behavior": "first run creates external local_config.json and stops for review; rerun after confirming V19 config path and DATA_V3 source inheritance",
+  "current_github_head_before_verification_commit": "f1cb5c7532399c62f88137e9428e0ba8cfee03b7"
+}
