@@ -1,0 +1,182 @@
+                event_id = candidate_event_id(row)
+                in_recovery = recovery_cutoff is not None and current_time <= recovery_cutoff
+                decision = "ACCEPTED"
+                reason = "ACCEPTED"
+                if in_recovery:
+                    decision = "SUPPRESSED"
+                    reason = "RECOVERY_REPLAY_NOT_TRADED"
+                    state.counters["recovery_replay_events"] += 1
+                elif state.open_position is not None:
+                    decision = "SUPPRESSED"
+                    reason = f"{state.open_position.system}_POSITION_OPEN"
+                event = {
+                    "event_id": event_id,
+                    "origin_id": int(row["origin_id"]),
+                    "entry_idx": int(idx),
+                    "entry_time": str(current_time),
+                    "direction": str(row["chosen_side"]),
+                    "chosen_rank": float(row["chosen_rank"]),
+                    "wave_state": str(row["wave_state"]),
+                    "causal_zone": zone,
+                    "decision": decision,
+                    "reason": reason,
+                    "entry_open": float(m1.iloc[idx]["open"]),
+                }
+                candidate_rows.append(event)
+                if decision == "ACCEPTED":
+                    position = position_from_row(
+                        "CHALLENGER", row, idx, float(m1.iloc[idx]["open"]), zone
+                    )
+                    state.open_position = position
+                    state.counters["accepted_trades"] += 1
+                    event.update(
+                        {
+                            "accepted_trade_count": state.counters["accepted_trades"],
+                            "entry_price": position.entry_price,
+                            "tp_price": position.tp_price,
+                            "sl_price": position.sl_price,
+                            "observation_only": True,
+                            "mt5_order": False,
+                        }
+                    )
+                else:
+                    state.counters["suppressed_events"] += 1
+                    suppressed_rows.append(dict(event))
+                    if in_recovery:
+                        recovery_rows.append(dict(event))
+
+            state.previous_decision_time = str(current_time)
+            state.previous_side = str(row["chosen_side"])
+            state.previous_selected_zone = zone
+            state.last_processed_decision_time = str(current_time)
+
+        if state.open_position is not None:
+            resolution = resolve_on_bar(
+                state.open_position,
+                idx,
+                float(m1.iloc[idx]["open"]),
+                float(m1.iloc[idx]["high"]),
+                float(m1.iloc[idx]["low"]),
+            )
+            if resolution is not None:
+                finalize(idx, resolution[0], resolution[1])
+        state.last_processed_m1_time = str(pd.Timestamp(m1.iloc[idx]["time"]))
+
+    if parse_time(state.last_processed_decision_time) != v19_last_decision:
+        raise RuntimeError(
+            f"Challenger decision cursor did not reach V19 cursor: {state.last_processed_decision_time} != {v19_last_decision}"
+        )
+    validate_v19_parity(state, v19_runtime)
+    state.status = "READY"
+    state.last_iteration_utc = now_utc()
+
+    # Append ledgers before advancing the state cursor. Unique IDs make crash retries idempotent.
+    append_csv_rows(paths["candidate"], candidate_rows, unique_key="event_id")
+    append_csv_rows(paths["trade"], trade_rows, unique_key="trade_id")
+    append_csv_rows(paths["suppressed"], suppressed_rows, unique_key="event_id")
+    append_csv_rows(paths["v19"], v19_rows, unique_key="event_id")
+    append_csv_rows(paths["recovery"], recovery_rows, unique_key="event_id")
+    write_runtime_state(runtime_path, state)
+    write_json(
+        root / "runtime_health.json",
+        health_payload(
+            state,
+            "READY",
+            v19_state_root=str(v19_root),
+            recovery_cutoff=None if recovery_cutoff is None else str(recovery_cutoff),
+            new_score_rows=int(len(new_scores)),
+            v19_parity="PASS",
+        ),
+    )
+    if logger:
+        logger.info(
+            "READY new_scores=%s accepted=%s resolved=%s open=%s",
+            len(new_scores),
+            state.counters["accepted_trades"],
+            state.counters["resolved_trades"],
+            None if state.open_position is None else state.open_position.system,
+        )
+    return state
+
+
+def run_once(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    root = state_root(config, config_path)
+    log = logger_for(root)
+    try:
+        _, _, v19_runtime, _, _, _, cutoff = load_dependencies(config, config_path)
+        process_iteration(config_path, recovery_cutoff=cutoff, logger=log)
+    except Exception as exc:
+        state_path = root / "runtime_state.json"
+        state = read_runtime_state(state_path) if state_path.exists() else RuntimeState()
+        state.status = "BLOCKED"
+        write_json(root / "runtime_health.json", health_payload(state, "BLOCKED", str(exc)))
+        raise
+
+
+def loop(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    root = state_root(config, config_path)
+    log = logger_for(root)
+    lock = process_lock(root)
+    delay = max(1, int(config.get("poll_seconds", 2)))
+    # Everything already present at process start is recovery replay and cannot create a new Challenger entry.
+    _, _, _, _, _, _, startup_cutoff = load_dependencies(config, config_path)
+    log.info("Starting with no-backfill recovery cutoff MT5=%s", startup_cutoff)
+    try:
+        while True:
+            try:
+                process_iteration(config_path, recovery_cutoff=startup_cutoff, logger=log)
+            except Exception as exc:
+                state_path = root / "runtime_state.json"
+                state = read_runtime_state(state_path) if state_path.exists() else RuntimeState()
+                state.status = "BLOCKED"
+                write_json(root / "runtime_health.json", health_payload(state, "BLOCKED", str(exc)))
+                log.exception("Runtime iteration blocked; fail-closed")
+            time.sleep(delay)
+    except KeyboardInterrupt:
+        log.info("Stopped by user")
+    finally:
+        lock.close()
+
+
+def status(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    root = state_root(config, config_path)
+    health = root / "runtime_health.json"
+    if health.exists():
+        print(json.dumps(read_json(health), ensure_ascii=False, indent=2))
+    else:
+        print(json.dumps({"status": "NOT_STARTED", "path": str(health)}, ensure_ascii=False, indent=2))
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="GOLD Late Transition V1 observation-only shadow")
+    parser.add_argument("--config", required=True, type=Path)
+    sub = parser.add_subparsers(dest="command", required=True)
+    bootstrap_parser = sub.add_parser("bootstrap")
+    bootstrap_parser.add_argument("--activate", action="store_true")
+    sub.add_parser("once")
+    sub.add_parser("loop")
+    sub.add_parser("status")
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "bootstrap":
+            bootstrap(args.config, bool(args.activate))
+        elif args.command == "once":
+            run_once(args.config)
+        elif args.command == "loop":
+            loop(args.config)
+        elif args.command == "status":
+            status(args.config)
+        return 0
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

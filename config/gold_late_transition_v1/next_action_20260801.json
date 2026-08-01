@@ -1,26 +1,17 @@
 {
-  "next_action": "PULL_ASCII_BASE64_TRANSPORT_RERUN_CHALLENGER_BOOTSTRAP_TEST_DISCORD_AND_START_LOOPS",
+  "next_action": "PULL_PLAIN_UTF8_SOURCE_UPDATE_RERUN_CHALLENGER_BOOTSTRAP_THEN_VERIFY_STATUS",
   "steps": [
     "Keep the existing V19 03_RUN_LOOP.bat and 08_RUN_DISCORD_ALERTS.bat running.",
-    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop until head cc8deb72940953f313bd5e4f322ac45bdc184ed9 or later is present.",
+    "Fetch and pull feature/gold-v19-wave-shadow in GitHub Desktop.",
     "Do not rerun V19 bootstrap.",
-    "Challenger 01_INSTALL.bat does not need to be rerun when its venv already exists.",
-    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once. All payload parts are now ASCII Base64 text and the full frozen SHA256 is checked before execution.",
+    "Do not rerun Challenger 01_INSTALL.bat when its venv already exists.",
+    "Run scripts/gold_late_transition_v1/02_BOOTSTRAP_ACTIVATE.bat once.",
     "Run scripts/gold_late_transition_v1/04_STATUS.bat and confirm READY with v19_parity PASS.",
-    "Run scripts/gold_late_transition_v1/06_CONFIGURE_DISCORD.bat.",
-    "Run scripts/gold_late_transition_v1/07_TEST_DISCORD.bat and confirm the Japanese message and M15 chart.",
-    "Run scripts/gold_late_transition_v1/03_RUN_LOOP.bat and keep it open.",
-    "Run scripts/gold_late_transition_v1/08_RUN_DISCORD_ALERTS.bat and keep it open.",
-    "Use 04_STATUS.bat and 09_DISCORD_STATUS.bat for inspection."
+    "Only after READY, configure and test Challenger Discord, then start its two continuous loops."
   ],
   "do_not": [
-    "Do not stop, modify, re-bootstrap, or replace the V19 shadow merely to activate the Challenger.",
+    "Do not stop, modify, re-bootstrap, or replace the V19 shadow.",
     "Do not paste or copy the Discord webhook into chat or GitHub.",
-    "Do not treat historical or interim prospective performance as authorization for live trading.",
-    "Do not change rank, wave states, TP/SL, volatility filter, direction, or timing during the prospective evidence window."
-  ],
-  "prospective_review_gate": {
-    "minimum_resolved_observations": 30,
-    "minimum_full_calendar_months_after_activation": 4
-  }
+    "Do not change the frozen Challenger strategy contract."
+  ]
 }

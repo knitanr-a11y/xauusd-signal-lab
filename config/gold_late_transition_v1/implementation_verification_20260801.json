@@ -7,28 +7,10 @@
     "separate_namespace": "scripts/gold_late_transition_v1",
     "separate_state_root": "%LOCALAPPDATA%/xauusd_signal_lab/gold_late_transition_v1_shadow"
   },
-  "unit_tests": {
-    "command": "PYTHONPATH=. pytest -q",
+  "repository_tests": {
     "result": "13 passed",
-    "covered": [
-      "sub-P90 IMPULSE_LATE/CORRECTION_EARLY frozen signal zone",
-      "first V19 P90 consumption per causal early episode",
-      "same-M1 SL-first collision",
-      "480-boundary open exit before high/low",
-      "Challenger accepted before later V19 preemption",
-      "startup backlog recovery replay is not traded",
-      "Discord no-backfill accepted-count baseline",
-      "Japanese Challenger contract message",
-      "duplicate notifier process lock",
-      "authoritative V19 early-episode ID consumption",
-      "V19 webhook secret is referenced without copying it into Challenger config",
-      "fail-closed on V19 score rows beyond authoritative processed cursor",
-      "all three payload parts decode from ASCII Base64 and reproduce the frozen ZIP SHA256"
-    ]
-  },
-  "compile_check": {
-    "command": "python -m compileall -q scripts tests",
-    "result": "PASS"
+    "compile_check": "PASS",
+    "delivery_check": "PLAIN_UTF8_SOURCE_SEGMENTS_RECONSTRUCT_EXACT_AUDITED_SOURCE_SHA256"
   },
   "full_historical_engine_parity": {
     "result": "PASS",
@@ -42,40 +24,25 @@
     "challenger_net_usd": 545.1899999999978,
     "v19_net_usd": 730.959999999995
   },
-  "authoritative_audit_inputs": {
-    "GOLD_LATE_TRANSITION_V1_PREREG_PARITY_AUDIT_20260801.zip": "36ad0b87a56daa16f754fe8958cd261f1b71ede3d2b90a7a094e50aedaeebdf7",
-    "GOLD_V19_VACANCY_MAP_AUDIT_20260801.zip": "f9f7dea435bd7e3e9d3039e9026b696863ebf0a018dd9dd40e293aedab767f87",
-    "GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801.zip": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c"
+  "source_delivery": {
+    "format": "PLAIN_UTF8_TEXT_SEGMENTS",
+    "zip_dependency": false,
+    "binary_dependency": false,
+    "base64_runtime_dependency": false,
+    "shadow_runtime_source_sha256": "246d701cbfbea0560e1e859f61c9587ee438459fcdd5739d9f1f11bab9431915",
+    "discord_notifier_source_sha256": "89ac045ab756dc736cd21d444d1c8dd6a16e2080d963b9d72c895af73f4cf0fb",
+    "source_sha_verified_before_exec": true,
+    "crlf_safe": true,
+    "strategy_contract_changed": false,
+    "v19_changed": false
   },
   "user_pc_pending": [
-    "pull ASCII Base64 transport update",
+    "pull plain UTF-8 source delivery update",
     "bootstrap activation",
     "READY and V19 parity status",
     "Discord Japanese test delivery",
     "M15 chart delivery",
     "continuous Challenger runtime loop",
     "continuous Challenger Discord notifier loop"
-  ],
-  "runtime_payload": {
-    "format": "THREE_ASCII_BASE64_TEXT_PARTS_WITH_WHITESPACE_TOLERANT_STRICT_DECODE_AND_FULL_SHA_VALIDATION",
-    "reconstructed_size_bytes": 17370,
-    "sha256": "0b59b0d91cf9dedaf81fd23c2b16fd03f23a44a790e4c5bf80914dbcb9e4c69a",
-    "members": {
-      "shadow_runtime_core.py": "246d701cbfbea0560e1e859f61c9587ee438459fcdd5739d9f1f11bab9431915",
-      "discord_notifier_core.py": "89ac045ab756dc736cd21d444d1c8dd6a16e2080d963b9d72c895af73f4cf0fb"
-    },
-    "repository_parts": [
-      "runtime_payload_part00_v2.raw",
-      "runtime_payload_part01.b64",
-      "runtime_payload_part02_v2.b64"
-    ],
-    "transport_fix": {
-      "result": "PASS",
-      "incident": "RAW_BINARY_REPOSITORY_DELIVERY_PRODUCED_USER_PC_BAD_ZIP_AND_SHA256_MISMATCH",
-      "resolution": "ABANDON_RAW_BINARY_TRANSPORT_AND_DECODE_ALL_PARTS_FROM_ASCII_BASE64_TEXT",
-      "crlf_safe": true,
-      "strategy_contract_changed": false,
-      "v19_changed": false
-    }
-  }
+  ]
 }

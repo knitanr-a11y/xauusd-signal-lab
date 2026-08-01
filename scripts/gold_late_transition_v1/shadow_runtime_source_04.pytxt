@@ -1,0 +1,163 @@
+    if not future_rows.empty:
+        first_future = pd.Timestamp(future_rows.iloc[0]["entry_time"])
+        raise RuntimeError(
+            "V19 score ledger contains rows beyond its last processed decision; "
+            "their session eligibility is not yet authoritative, so Challenger fails closed "
+            f"(runtime_last={last_processed}, first_future={first_future})"
+        )
+    scores = score_rows_with_m1(normalized_scores, m1)
+    if scores.empty or pd.Timestamp(scores.iloc[-1]["entry_time"]) != last_processed:
+        latest = None if scores.empty else pd.Timestamp(scores.iloc[-1]["entry_time"])
+        raise RuntimeError(
+            f"V19 score ledger cursor mismatch: ledger_latest={latest} runtime_last={last_processed}"
+        )
+    return v19_config, v19_root, v19_runtime, ledger_path, m1, scores, last_processed
+
+
+def bootstrap(config_path: Path, activate: bool) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    root = state_root(config, config_path)
+    root.mkdir(parents=True, exist_ok=True)
+    runtime_path = root / "runtime_state.json"
+    if runtime_path.exists() and read_json(runtime_path).get("activated"):
+        raise RuntimeError("Shadow is already activated; bootstrap is intentionally one-time")
+    _, v19_root, v19_runtime, ledger_path, m1, scores, cutoff = load_dependencies(config, config_path)
+    state = RuntimeState()
+    seed_event_state(state, scores)
+    state.v19_baseline_accepted_trades = v19_accepted_count(v19_runtime)
+    state.v19_reconstructed_accepted_trades = 0
+    state.open_position = open_trade_from_v19_runtime(v19_runtime, m1)
+    state.activation_cutoff_decision_time = str(cutoff)
+    state.last_processed_decision_time = str(cutoff)
+    state.last_processed_m1_time = str(pd.Timestamp(m1.iloc[-1]["time"]))
+    state.activation_time_utc = now_utc()
+    state.activated = bool(activate)
+    state.status = "READY" if activate else "BOOTSTRAP_VALIDATED_NOT_ACTIVATED"
+    state.last_iteration_utc = now_utc()
+    write_runtime_state(runtime_path, state)
+    write_json(
+        root / "runtime_health.json",
+        health_payload(
+            state,
+            state.status,
+            v19_state_root=str(v19_root),
+            v19_score_ledger=str(ledger_path),
+            activation_policy="NO_BACKFILL_MARK_CURRENT_EVENT_CONSUMED",
+            discord_authorized=True,
+        ),
+    )
+    print(json.dumps(read_json(root / "runtime_health.json"), ensure_ascii=False, indent=2))
+
+
+def candidate_event_id(row: Mapping[str, Any]) -> str:
+    return f"LT1|{pd.Timestamp(row['entry_time']).isoformat()}|{int(row['origin_id'])}"
+
+
+def trade_id(system: str, row: Mapping[str, Any]) -> str:
+    return f"{system}|{pd.Timestamp(row['entry_time']).isoformat()}|{int(row['origin_id'])}"
+
+
+def process_iteration(
+    config_path: Path,
+    recovery_cutoff: pd.Timestamp | None,
+    logger: logging.Logger | None = None,
+) -> RuntimeState:
+    config = read_json(config_path)
+    validate_local_config(config)
+    root = state_root(config, config_path)
+    runtime_path = root / "runtime_state.json"
+    if not runtime_path.exists():
+        raise FileNotFoundError("Run 02_BOOTSTRAP_ACTIVATE.bat first")
+    original = read_runtime_state(runtime_path)
+    if not original.activated:
+        raise RuntimeError("Shadow is not activated")
+    state = RuntimeState.from_jsonable(original.to_jsonable())
+    _, v19_root, v19_runtime, _, m1, scores, v19_last_decision = load_dependencies(config, config_path)
+    paths = output_paths(root)
+
+    last_decision = parse_time(state.last_processed_decision_time)
+    last_m1 = parse_time(state.last_processed_m1_time)
+    if last_decision is None or last_m1 is None:
+        raise RuntimeError("Runtime cursor is missing")
+
+    new_scores = scores[scores["entry_time"] > last_decision].copy()
+    decision_by_idx = {int(row.entry_idx): row._asdict() for row in new_scores.itertuples(index=False)}
+    if last_m1 > pd.Timestamp(m1.iloc[-1]["time"]):
+        raise RuntimeError("Exact M1 history moved backwards or was truncated")
+    start_idx_values = m1.index[m1["time"] > last_m1].tolist()
+    start_idx = start_idx_values[0] if start_idx_values else len(m1)
+    if len(new_scores) and int(new_scores["entry_idx"].min()) < start_idx:
+        raise RuntimeError(
+            "A V19 score row appeared behind the Challenger M1 cursor; fail-closed to avoid "
+            "processing a future V19 priority event late"
+        )
+
+    candidate_rows: list[dict[str, Any]] = []
+    trade_rows: list[dict[str, Any]] = []
+    suppressed_rows: list[dict[str, Any]] = []
+    v19_rows: list[dict[str, Any]] = []
+    recovery_rows: list[dict[str, Any]] = []
+
+    def finalize(idx: int, pnl: float, reason: str) -> None:
+        position = state.open_position
+        if position is None:
+            raise RuntimeError("Attempted to finalize without an open position")
+        exit_time = pd.Timestamp(m1.iloc[idx]["time"])
+        row = {
+            "trade_id": trade_id(position.system, {"entry_time": position.entry_time, "origin_id": position.origin_id}),
+            **asdict(position),
+            "exit_idx": int(idx),
+            "exit_time": str(exit_time),
+            "pnl_usd": float(pnl),
+            "exit_reason": reason,
+            "resolved_at_utc": now_utc(),
+        }
+        if position.system == "CHALLENGER":
+            trade_rows.append(row)
+            state.counters["resolved_trades"] += 1
+            if reason == "V19_PREEMPT":
+                state.counters["v19_preemptions"] += 1
+        state.open_position = None
+
+    for idx in range(start_idx, len(m1)):
+        if idx in decision_by_idx:
+            row = decision_by_idx[idx]
+            current_time = pd.Timestamp(row["entry_time"])
+            v19_signal = update_v19_episode(state, row)
+            if v19_signal:
+                accepted = state.open_position is None or state.open_position.system != "V19"
+                if state.open_position is not None and state.open_position.system == "CHALLENGER":
+                    finalize(idx, pnl_at_open(state.open_position, float(m1.iloc[idx]["open"])), "V19_PREEMPT")
+                if state.open_position is None:
+                    state.open_position = position_from_row(
+                        "V19", row, idx, float(m1.iloc[idx]["open"]), "V19_FIRST_P90_IMPULSE_EARLY"
+                    )
+                    state.v19_reconstructed_accepted_trades += 1
+                    state.counters["observed_v19_entries"] += 1
+                v19_rows.append(
+                    {
+                        "event_id": f"V19|{current_time.isoformat()}|{int(row['origin_id'])}",
+                        "entry_time": str(current_time),
+                        "origin_id": int(row["origin_id"]),
+                        "direction": row["chosen_side"],
+                        "chosen_rank": float(row["chosen_rank"]),
+                        "accepted": bool(accepted),
+                        "reason": "ACCEPTED" if accepted else "V19_POSITION_OPEN_EPISODE_CONSUMED",
+                    }
+                )
+
+            zone = selected_zone(
+                str(row["chosen_side"]), float(row["chosen_rank"]), str(row["wave_state"])
+            )
+            gap_ok = is_exact_15_minutes(state.previous_decision_time, current_time)
+            onset = bool(
+                zone is not None
+                and gap_ok
+                and (
+                    str(row["chosen_side"]) != state.previous_side
+                    or zone != state.previous_selected_zone
+                )
+            )
+            if onset:
+                state.counters["candidate_onsets"] += 1

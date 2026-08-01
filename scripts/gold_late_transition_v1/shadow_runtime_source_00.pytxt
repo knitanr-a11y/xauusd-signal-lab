@@ -1,0 +1,230 @@
+from __future__ import annotations
+
+import argparse
+import csv
+import datetime as dt
+import json
+import logging
+import os
+import sys
+import time
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any, Iterable, Mapping, Sequence
+
+import numpy as np
+import pandas as pd
+
+SHADOW_ID = "GOLD_LATE_TRANSITION_VACANCY_V1_SHADOW"
+CONTRACT_VERSION = "2026-08-01-v1"
+RUNTIME_VERSION = "2026-08-01-runtime-v1"
+V19_SHADOW_ID = "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW"
+V19_CONTRACT_VERSION = "2026-08-01-v1"
+TARGET_STATES = {"IMPULSE_LATE", "CORRECTION_EARLY"}
+RANK_CEILING = 0.90
+TP_USD = 20.0
+SL_USD = 10.0
+FIXED_SPREAD_USD = 0.30
+HORIZON_M1_BARS = 480
+PROSPECTIVE_MIN_RESOLVED = 30
+PROSPECTIVE_MIN_MONTHS = 4
+
+
+def now_utc() -> str:
+    return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def normalize_name(value: Any) -> str:
+    return (
+        str(value)
+        .strip()
+        .lower()
+        .replace("<", "")
+        .replace(">", "")
+        .replace("-", "_")
+        .replace(" ", "_")
+    )
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as handle:
+        value = json.load(handle)
+    if not isinstance(value, dict):
+        raise ValueError(f"JSON root must be an object: {path}")
+    return value
+
+
+def write_json(path: Path, value: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    os.replace(temporary, path)
+
+
+def expand_path(value: str, base: Path | None = None) -> Path:
+    expanded = os.path.expandvars(os.path.expanduser(value))
+    path = Path(expanded)
+    if not path.is_absolute() and base is not None:
+        path = base / path
+    return path.resolve()
+
+
+def repository_root(config_path: Path) -> Path:
+    # config/gold_late_transition_v1/local_config.json -> repository root
+    return config_path.resolve().parents[2]
+
+
+def state_root(config: Mapping[str, Any], config_path: Path) -> Path:
+    value = config.get("state_dir")
+    if not isinstance(value, str) or not value:
+        raise ValueError("state_dir is missing")
+    return expand_path(value, repository_root(config_path))
+
+
+def validate_local_config(config: Mapping[str, Any]) -> None:
+    if config.get("shadow_id") != SHADOW_ID:
+        raise ValueError("Late Transition shadow_id mismatch")
+    if config.get("contract_version") != CONTRACT_VERSION:
+        raise ValueError("Late Transition contract_version mismatch")
+    if not isinstance(config.get("v19"), dict):
+        raise ValueError("v19 dependency config is missing")
+
+
+def v19_config_path(config: Mapping[str, Any], config_path: Path) -> Path:
+    value = config.get("v19", {}).get("config_path")
+    if not isinstance(value, str) or not value:
+        raise ValueError("v19.config_path is missing")
+    return expand_path(value, repository_root(config_path))
+
+
+def validate_v19_config(config: Mapping[str, Any]) -> None:
+    if config.get("shadow_id") != V19_SHADOW_ID:
+        raise ValueError("V19 shadow_id mismatch")
+    if config.get("contract_version") != V19_CONTRACT_VERSION:
+        raise ValueError("V19 contract_version mismatch")
+
+
+def v19_state_root(v19_config: Mapping[str, Any], v19_path: Path) -> Path:
+    value = v19_config.get("state_dir")
+    if not isinstance(value, str) or not value:
+        raise ValueError("V19 state_dir is missing")
+    return expand_path(value, repository_root(v19_path))
+
+
+def path_list(value: Any, base: Path) -> list[Path]:
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
+        return []
+    result: list[Path] = []
+    for item in value:
+        if isinstance(item, str) and item.strip():
+            result.append(expand_path(item, base))
+    return result
+
+
+def read_table(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(path)
+    errors: list[str] = []
+    for kwargs in (
+        {"sep": ","},
+        {"sep": ";"},
+        {"sep": "\t"},
+        {"sep": None, "engine": "python"},
+    ):
+        try:
+            frame = pd.read_csv(path, encoding="utf-8-sig", **kwargs)
+            if frame.shape[1] > 1:
+                frame.columns = [normalize_name(column) for column in frame.columns]
+                return frame
+        except Exception as exc:  # pragma: no cover - useful in user environment
+            errors.append(f"{kwargs}: {exc}")
+    raise RuntimeError(f"Could not read CSV {path}: {' | '.join(errors)}")
+
+
+def pick_column(frame: pd.DataFrame, aliases: Sequence[str], required: bool = True) -> str | None:
+    for alias in aliases:
+        name = normalize_name(alias)
+        if name in frame.columns:
+            return name
+    if required:
+        raise ValueError(
+            f"Required column missing. aliases={list(aliases)} available={list(frame.columns)}"
+        )
+    return None
+
+
+def parse_timestamp_series(series: pd.Series) -> pd.Series:
+    values = pd.to_datetime(series, errors="coerce")
+    try:
+        if values.dt.tz is not None:
+            values = values.dt.tz_localize(None)
+    except AttributeError:
+        pass
+    return values
+
+
+def load_ohlc_union(paths: Sequence[Path]) -> pd.DataFrame:
+    frames: list[pd.DataFrame] = []
+    for source_order, path in enumerate(paths):
+        if not path.exists():
+            continue
+        frame = read_table(path)
+        time_col = pick_column(frame, ("datetime", "time", "timestamp", "date_time"), required=False)
+        if time_col is None and "date" in frame.columns and "time" in frame.columns:
+            timestamp = pd.to_datetime(
+                frame["date"].astype(str) + " " + frame["time"].astype(str),
+                errors="coerce",
+            )
+        elif time_col is not None:
+            timestamp = parse_timestamp_series(frame[time_col])
+        else:
+            raise ValueError(f"No timestamp column in {path}")
+        required = [pick_column(frame, (name,)) for name in ("open", "high", "low", "close")]
+        normalized = pd.DataFrame(
+            {
+                "time": timestamp,
+                "open": pd.to_numeric(frame[required[0]], errors="coerce"),
+                "high": pd.to_numeric(frame[required[1]], errors="coerce"),
+                "low": pd.to_numeric(frame[required[2]], errors="coerce"),
+                "close": pd.to_numeric(frame[required[3]], errors="coerce"),
+                "_source_order": source_order,
+            }
+        ).dropna(subset=["time", "open", "high", "low", "close"])
+        frames.append(normalized)
+    if not frames:
+        raise FileNotFoundError("No readable OHLC source files")
+    result = (
+        pd.concat(frames, ignore_index=True)
+        .sort_values(["time", "_source_order"])
+        .drop_duplicates("time", keep="last")
+        .sort_values("time")
+        .drop(columns="_source_order")
+        .reset_index(drop=True)
+    )
+    if result["time"].duplicated().any():
+        raise RuntimeError("Duplicate M1 timestamps remain after merge")
+    return result
+
+
+def normalize_score_ledger(path: Path) -> pd.DataFrame:
+    raw = read_table(path)
+    time_col = pick_column(
+        raw,
+        (
+            "entry_time",
+            "decision_time",
+            "decision_dt",
+            "entry_dt",
+            "timestamp",
+            "time",
+        ),
+    )
+    side_col = pick_column(raw, ("chosen_side", "selected_side", "direction", "side", "signal"))
+    rank_col = pick_column(
+        raw,
+        (
+            "chosen_rank",

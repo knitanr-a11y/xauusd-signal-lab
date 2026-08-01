@@ -1,0 +1,212 @@
+            "selected_rank",
+            "direction_rank",
+            "percentile_rank",
+            "rank",
+        ),
+    )
+    wave_col = pick_column(
+        raw,
+        (
+            "wave_state",
+            "selected_wave_state",
+            "causal_wave_state",
+            "selected_zone",
+            "wave_zone",
+            "causal_zone",
+        ),
+    )
+    origin_col = pick_column(raw, ("origin_id", "decision_id", "row_id"), required=False)
+    schedule_col = pick_column(raw, ("schedule", "model_schedule", "router_schedule"), required=False)
+    atr_col = pick_column(raw, ("m15_atr14", "atr14_m15", "atr14"), required=False)
+    early_episode_col = pick_column(
+        raw,
+        ("wave_early_episode_id", "early_episode_id", "selected_early_episode_id"),
+        required=False,
+    )
+
+    result = pd.DataFrame(
+        {
+            "entry_time": parse_timestamp_series(raw[time_col]),
+            "chosen_side": raw[side_col].astype(str).str.upper().str.strip(),
+            "chosen_rank": pd.to_numeric(raw[rank_col], errors="coerce"),
+            "wave_state": raw[wave_col].astype(str).str.upper().str.strip(),
+            "origin_id": (
+                pd.to_numeric(raw[origin_col], errors="coerce")
+                if origin_col is not None
+                else pd.Series(np.arange(len(raw)), index=raw.index, dtype=float)
+            ),
+            "schedule": raw[schedule_col].astype(str).str.upper().str.strip()
+            if schedule_col is not None
+            else "SEMIANNUAL_EXPANDING",
+            "m15_atr14": pd.to_numeric(raw[atr_col], errors="coerce") if atr_col is not None else np.nan,
+            "wave_early_episode_id": (
+                pd.to_numeric(raw[early_episode_col], errors="coerce")
+                if early_episode_col is not None
+                else np.nan
+            ),
+        }
+    )
+    result = result.dropna(subset=["entry_time", "chosen_rank", "origin_id"])
+    result = result[result["chosen_side"].isin(["LONG", "SHORT"])]
+    result = result[result["chosen_rank"].between(0.0, 1.0, inclusive="both")]
+    if schedule_col is not None:
+        result = result[result["schedule"].eq("SEMIANNUAL_EXPANDING")]
+    result["origin_id"] = result["origin_id"].astype(np.int64)
+    result = (
+        result.sort_values(["entry_time", "origin_id"])
+        .drop_duplicates(["entry_time", "origin_id"], keep="last")
+        .reset_index(drop=True)
+    )
+    if result.empty:
+        raise RuntimeError("V19 score ledger contains no valid SEMIANNUAL_EXPANDING rows")
+    return result
+
+
+def parse_time(value: Any) -> pd.Timestamp | None:
+    if value in (None, "", "nan", "NaN"):
+        return None
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return None
+    parsed = pd.Timestamp(parsed)
+    if parsed.tzinfo is not None:
+        parsed = parsed.tz_localize(None)
+    return parsed
+
+
+def nested_pick(source: Mapping[str, Any], names: Sequence[str]) -> Any:
+    normalized = {normalize_name(key): value for key, value in source.items()}
+    for name in names:
+        value = normalized.get(normalize_name(name))
+        if value not in (None, "", "nan", "NaN"):
+            return value
+    return None
+
+
+def v19_accepted_count(runtime: Mapping[str, Any]) -> int:
+    try:
+        return int(runtime.get("counters", {}).get("accepted_trades", 0))
+    except (TypeError, ValueError, AttributeError):
+        return 0
+
+
+def validate_v19_runtime(runtime: Mapping[str, Any]) -> tuple[pd.Timestamp, pd.Timestamp]:
+    if not bool(runtime.get("activated")):
+        raise RuntimeError("V19 shadow is not activated")
+    status = str(runtime.get("status", "")).upper()
+    if status and status not in {"READY", "RUNNING", "HEALTHY"}:
+        raise RuntimeError(f"V19 runtime is not READY: {status}")
+    last_processed = parse_time(runtime.get("last_processed_decision_time"))
+    latest_guarded = parse_time(runtime.get("latest_session_guarded_decision_time"))
+    if last_processed is None:
+        raise RuntimeError("V19 last_processed_decision_time is missing")
+    if latest_guarded is None:
+        latest_guarded = last_processed
+    if latest_guarded > last_processed:
+        raise RuntimeError(
+            "V19 score processing is behind its latest session-guarded decision "
+            f"({last_processed} < {latest_guarded})"
+        )
+    return last_processed, latest_guarded
+
+
+def score_ledger_path(config: Mapping[str, Any], v19_root: Path) -> Path:
+    value = config.get("v19", {}).get("score_ledger_path")
+    if isinstance(value, str) and value:
+        return expand_path(value, v19_root)
+    return v19_root / "outputs" / "shadow_score_ledger.csv"
+
+
+def process_lock(root: Path):
+    path = root / "runtime.lock"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = path.open("a+b")
+    if path.stat().st_size == 0:
+        handle.write(b"\0")
+        handle.flush()
+    handle.seek(0)
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:  # pragma: no cover - Windows is the intended runtime
+            import fcntl
+
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as exc:
+        handle.close()
+        raise RuntimeError("Late Transition shadow runtime is already running") from exc
+    return handle
+
+
+def logger_for(root: Path) -> logging.Logger:
+    (root / "logs").mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger("gold_late_transition_v1")
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    for handler in (
+        logging.FileHandler(root / "logs" / "shadow_runtime.log", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ):
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
+
+
+@dataclass
+class Position:
+    system: str
+    origin_id: int
+    entry_idx: int
+    entry_time: str
+    direction: str
+    entry_open: float
+    entry_price: float
+    tp_price: float
+    sl_price: float
+    chosen_rank: float
+    wave_state: str
+    causal_zone: str
+
+
+@dataclass
+class RuntimeState:
+    shadow_id: str = SHADOW_ID
+    contract_version: str = CONTRACT_VERSION
+    runtime_version: str = RUNTIME_VERSION
+    activated: bool = False
+    status: str = "NOT_ACTIVATED"
+    activation_cutoff_decision_time: str | None = None
+    activation_time_utc: str | None = None
+    last_processed_decision_time: str | None = None
+    last_processed_m1_time: str | None = None
+    previous_decision_time: str | None = None
+    previous_side: str | None = None
+    previous_selected_zone: str | None = None
+    v19_previous_decision_time: str | None = None
+    v19_previous_side: str | None = None
+    v19_previous_wave_state: str | None = None
+    v19_episode_serial: int = 0
+    v19_current_episode_key: str | None = None
+    v19_current_episode_consumed: bool = False
+    consumed_v19_episode_keys: list[str] = field(default_factory=list)
+    v19_baseline_accepted_trades: int = 0
+    v19_reconstructed_accepted_trades: int = 0
+    open_position: Position | None = None
+    counters: dict[str, int] = field(
+        default_factory=lambda: {
+            "candidate_onsets": 0,
+            "accepted_trades": 0,
+            "resolved_trades": 0,
+            "suppressed_events": 0,
+            "recovery_replay_events": 0,
+            "v19_preemptions": 0,
+            "observed_v19_entries": 0,
+        }
+    )
+    last_iteration_utc: str | None = None
+
+    def to_jsonable(self) -> dict[str, Any]:
+        value = asdict(self)

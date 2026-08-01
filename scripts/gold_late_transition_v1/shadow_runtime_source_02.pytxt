@@ -1,0 +1,191 @@
+        value["open_trade"] = value.pop("open_position")
+        return value
+
+    @classmethod
+    def from_jsonable(cls, value: Mapping[str, Any]) -> "RuntimeState":
+        source = dict(value)
+        opened = source.pop("open_trade", source.pop("open_position", None))
+        if isinstance(opened, dict):
+            source["open_position"] = Position(**opened)
+        else:
+            source["open_position"] = None
+        state = cls(**source)
+        defaults = cls().counters
+        state.counters = {**defaults, **dict(state.counters)}
+        return state
+
+
+def read_runtime_state(path: Path) -> RuntimeState:
+    value = read_json(path)
+    state = RuntimeState.from_jsonable(value)
+    if state.shadow_id != SHADOW_ID or state.contract_version != CONTRACT_VERSION:
+        raise RuntimeError("Late Transition runtime state contract mismatch")
+    return state
+
+
+def write_runtime_state(path: Path, state: RuntimeState) -> None:
+    write_json(path, state.to_jsonable())
+
+
+def append_csv_rows(path: Path, rows: Iterable[Mapping[str, Any]], unique_key: str | None = None) -> None:
+    records = [dict(row) for row in rows]
+    if not records:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if unique_key and path.exists() and path.stat().st_size:
+        existing: set[str] = set()
+        with path.open("r", encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                value = row.get(unique_key)
+                if value is not None:
+                    existing.add(str(value))
+        records = [row for row in records if str(row.get(unique_key)) not in existing]
+        if not records:
+            return
+    columns: list[str] = []
+    for record in records:
+        for key in record:
+            if key not in columns:
+                columns.append(key)
+    file_exists = path.exists() and path.stat().st_size > 0
+    if file_exists:
+        with path.open("r", encoding="utf-8-sig", newline="") as handle:
+            reader = csv.reader(handle)
+            header = next(reader, [])
+        if header:
+            columns = header
+    with path.open("a", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
+        if not file_exists:
+            writer.writeheader()
+        for record in records:
+            writer.writerow(record)
+
+
+def selected_zone(side: str, rank: float, wave_state: str) -> str | None:
+    if rank >= RANK_CEILING or wave_state not in TARGET_STATES:
+        return None
+    return f"NON_IE_SUBP90_{wave_state}"
+
+
+def is_exact_15_minutes(previous: str | None, current: pd.Timestamp) -> bool:
+    if previous is None:
+        return False
+    before = parse_time(previous)
+    return before is not None and current - before == pd.Timedelta(minutes=15)
+
+
+def update_v19_episode(state: RuntimeState, row: Mapping[str, Any]) -> bool:
+    current_time = pd.Timestamp(row["entry_time"])
+    side = str(row["chosen_side"])
+    wave_state = str(row["wave_state"])
+    rank = float(row["chosen_rank"])
+    episode_raw = row.get("wave_early_episode_id")
+    try:
+        episode_id = int(float(episode_raw)) if not pd.isna(episode_raw) else -1
+    except (TypeError, ValueError):
+        episode_id = -1
+
+    if wave_state == "IMPULSE_EARLY":
+        if episode_id >= 0:
+            key = f"SEMIANNUAL_EXPANDING|{side}|{episode_id}"
+            state.v19_current_episode_key = key
+        else:
+            same_episode = bool(
+                state.v19_previous_wave_state == "IMPULSE_EARLY"
+                and state.v19_previous_side == side
+                and is_exact_15_minutes(state.v19_previous_decision_time, current_time)
+            )
+            if not same_episode or state.v19_current_episode_key is None:
+                state.v19_episode_serial += 1
+                state.v19_current_episode_key = (
+                    f"SEMIANNUAL_EXPANDING|{side}|FALLBACK|{current_time.isoformat()}|"
+                    f"{state.v19_episode_serial}"
+                )
+        key = str(state.v19_current_episode_key)
+        consumed = key in state.consumed_v19_episode_keys
+        signal = rank >= 0.90 and not consumed
+        if signal:
+            state.consumed_v19_episode_keys.append(key)
+        state.v19_current_episode_consumed = key in state.consumed_v19_episode_keys
+    else:
+        signal = False
+        state.v19_current_episode_key = None
+        state.v19_current_episode_consumed = False
+    state.v19_previous_decision_time = str(current_time)
+    state.v19_previous_side = side
+    state.v19_previous_wave_state = wave_state
+    return signal
+
+
+def execution_prices(direction: str, entry_open: float) -> tuple[float, float, float]:
+    if direction == "LONG":
+        entry = entry_open + FIXED_SPREAD_USD
+        return entry, entry + TP_USD, entry - SL_USD
+    entry = entry_open
+    return entry, entry - TP_USD, entry + SL_USD
+
+
+def position_from_row(system: str, row: Mapping[str, Any], entry_idx: int, entry_open: float, zone: str) -> Position:
+    direction = str(row["chosen_side"])
+    entry_price, tp_price, sl_price = execution_prices(direction, entry_open)
+    return Position(
+        system=system,
+        origin_id=int(row["origin_id"]),
+        entry_idx=int(entry_idx),
+        entry_time=str(pd.Timestamp(row["entry_time"])),
+        direction=direction,
+        entry_open=float(entry_open),
+        entry_price=float(entry_price),
+        tp_price=float(tp_price),
+        sl_price=float(sl_price),
+        chosen_rank=float(row["chosen_rank"]),
+        wave_state=str(row["wave_state"]),
+        causal_zone=zone,
+    )
+
+
+def pnl_at_open(position: Position, exit_open: float) -> float:
+    if position.direction == "LONG":
+        return float(exit_open - position.entry_price)
+    return float(position.entry_price - (exit_open + FIXED_SPREAD_USD))
+
+
+def resolve_on_bar(position: Position, idx: int, open_price: float, high: float, low: float) -> tuple[float, str] | None:
+    if idx - position.entry_idx >= HORIZON_M1_BARS:
+        return pnl_at_open(position, open_price), "TIME"
+    if position.direction == "LONG":
+        if low <= position.sl_price:
+            return -SL_USD, "SL"
+        if high >= position.tp_price:
+            return TP_USD, "TP"
+    else:
+        # For a short, the ask is bid + fixed spread.
+        if high + FIXED_SPREAD_USD >= position.sl_price:
+            return -SL_USD, "SL"
+        if low + FIXED_SPREAD_USD <= position.tp_price:
+            return TP_USD, "TP"
+    return None
+
+
+def open_trade_from_v19_runtime(runtime: Mapping[str, Any], m1: pd.DataFrame) -> Position | None:
+    opened = runtime.get("open_trade")
+    if not isinstance(opened, dict) or not opened:
+        return None
+    normalized = {normalize_name(key): value for key, value in opened.items()}
+    direction = str(
+        nested_pick(normalized, ("direction", "side", "signal", "selected_side")) or ""
+    ).upper()
+    entry_time = parse_time(
+        nested_pick(
+            normalized,
+            ("entry_dt", "entry_time", "entry_datetime", "decision_time", "decision_dt", "time"),
+        )
+    )
+    if direction not in {"LONG", "SHORT"} or entry_time is None:
+        raise RuntimeError("V19 open_trade lacks direction or entry time")
+    index_map = {pd.Timestamp(value): index for index, value in enumerate(m1["time"])}
+    if entry_time not in index_map:
+        raise RuntimeError(f"V19 open trade entry time is absent from exact M1: {entry_time}")
+    entry_idx = index_map[entry_time]
+    entry_open = float(m1.iloc[entry_idx]["open"])

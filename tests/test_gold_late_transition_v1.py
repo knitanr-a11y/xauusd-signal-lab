@@ -221,3 +221,24 @@ def test_future_score_rows_beyond_v19_cursor_fail_closed(tmp_path: Path):
         assert "contains rows beyond its last processed decision" in str(exc)
     else:
         raise AssertionError("Future unprocessed score rows must fail closed")
+
+
+
+
+def test_utf8_source_segments_match_verified_core_sha256() -> None:
+    import hashlib
+
+    root = Path(__file__).resolve().parents[1]
+    package = root / "scripts" / "gold_late_transition_v1"
+    expected = {
+        "shadow_runtime": "246d701cbfbea0560e1e859f61c9587ee438459fcdd5739d9f1f11bab9431915",
+        "discord_notifier": "89ac045ab756dc736cd21d444d1c8dd6a16e2080d963b9d72c895af73f4cf0fb",
+    }
+    for stem, digest in expected.items():
+        source = "".join(
+            path.read_text(encoding="utf-8")
+            for path in sorted(package.glob(f"{stem}_source_*.pytxt"))
+        )
+        assert hashlib.sha256(source.encode("utf-8")).hexdigest() == digest
+    assert not list(package.glob("runtime_payload_part*"))
+    assert not (package / "payload_loader.py").exists()
