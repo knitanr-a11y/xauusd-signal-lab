@@ -1,48 +1,38 @@
 {
   "date": "2026-08-01",
-  "implementation": {
-    "result": "PASS",
-    "mode": "OBSERVATION_ONLY_PROSPECTIVE_SHADOW_WITH_DISCORD_ENTRY_DELIVERY",
-    "v19_modified": false,
-    "separate_namespace": "scripts/gold_late_transition_v1",
-    "separate_state_root": "%LOCALAPPDATA%/xauusd_signal_lab/gold_late_transition_v1_shadow"
-  },
-  "repository_tests": {
-    "result": "13 passed",
-    "compile_check": "PASS",
-    "delivery_check": "PLAIN_UTF8_SOURCE_SEGMENTS_RECONSTRUCT_EXACT_AUDITED_SOURCE_SHA256"
-  },
-  "full_historical_engine_parity": {
-    "result": "PASS",
-    "challenger_entries": "123/123 exact ordered origin IDs",
-    "challenger_pnl": "123/123 exact",
-    "challenger_exit_index": "123/123 exact",
-    "challenger_v19_preemption_flags": "123/123 exact",
-    "v19_entries": "169/169 exact ordered origin IDs",
-    "v19_pnl": "169/169 exact",
-    "v19_exit_index": "169/169 exact",
+  "implementation_status": "BLOCKED_NOT_ACTIVATION_READY",
+  "reason": "USER_PC_UTF8_SOURCE_SHA256_MISMATCH_AFTER_PRIOR_ZIP_RAW_AND_BASE64_DELIVERY_FAILURES",
+  "v19_modified": false,
+  "bootstrap_intentionally_disabled": true,
+  "historical_reaudit": {
+    "result": "PASS_REPRODUCED_BY_TWO_SEQUENTIAL_IMPLEMENTATIONS",
+    "candidate_onsets": 184,
+    "challenger_entries": 123,
+    "challenger_profit_factor": 1.9467405272114702,
     "challenger_net_usd": 545.1899999999978,
-    "v19_net_usd": 730.959999999995
+    "challenger_max_drawdown_usd": 70.0,
+    "v19_entries": 169,
+    "v19_profit_factor": 2.0299563195716415,
+    "v19_net_usd": 730.959999999995,
+    "v19_max_drawdown_usd": 80.0,
+    "combined_profit_factor": 1.992680232739033,
+    "combined_net_usd": 1276.1499999999928,
+    "combined_max_drawdown_usd": 60.220000000000255,
+    "checkpoint_restart": "5/5_PASS",
+    "no_backfill": "4/4_PASS"
   },
-  "source_delivery": {
-    "format": "PLAIN_UTF8_TEXT_SEGMENTS",
-    "zip_dependency": false,
-    "binary_dependency": false,
-    "base64_runtime_dependency": false,
-    "shadow_runtime_source_sha256": "246d701cbfbea0560e1e859f61c9587ee438459fcdd5739d9f1f11bab9431915",
-    "discord_notifier_source_sha256": "89ac045ab756dc736cd21d444d1c8dd6a16e2080d963b9d72c895af73f4cf0fb",
-    "source_sha_verified_before_exec": true,
-    "crlf_safe": true,
-    "strategy_contract_changed": false,
-    "v19_changed": false
+  "interpretation": {
+    "historical_arithmetic": "REPRODUCIBLE_FROM_RAW_M1_AND_FROZEN_DECISION_LEDGER",
+    "prospective_profitability": "UNPROVEN",
+    "candidate_selection": "RETROSPECTIVE_AND_SELECTION_BIASED",
+    "github_runtime_delivery": "UNTRUSTED_AND_BLOCKED"
   },
-  "user_pc_pending": [
-    "pull plain UTF-8 source delivery update",
-    "bootstrap activation",
-    "READY and V19 parity status",
-    "Discord Japanese test delivery",
-    "M15 chart delivery",
-    "continuous Challenger runtime loop",
-    "continuous Challenger Discord notifier loop"
+  "required_before_future_activation_proposal": [
+    "plain direct Python implementation without packaging or reconstruction layers",
+    "actual Windows checkout verification",
+    "full 123 Challenger and 169 V19 historical parity",
+    "restart and no-backfill verification",
+    "V19 priority verification",
+    "Discord isolation verification"
   ]
 }
