@@ -1,0 +1,211 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "created_date": "2026-08-01",
+  "phase": "PREREGISTRATION_BEFORE_RESULT_CALCULATION",
+  "v2_original_data_available": false,
+  "old_123_status": "UNEXPECTED_DISCOVERY_DIAGNOSTIC_NOT_REPRODUCTION_TARGET",
+  "source_records": [
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_m1(3).csv",
+      "sha256": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+      "rows": 1225431,
+      "first_time": "2023-01-03 01:00:00",
+      "last_time": "2026-06-19 19:54:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_m5(3).csv",
+      "sha256": "c47c0a136e8a953bf219bfbcb80a79ccacac3afb04a0ed6e825843eba143948d",
+      "rows": 245327,
+      "first_time": "2023-01-03 01:00:00",
+      "last_time": "2026-06-19 19:50:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_m15(3).csv",
+      "sha256": "e327bedd180dae6429ed658ea714bc1229fb026262124248cdd5fff38fdeaa28",
+      "rows": 81781,
+      "first_time": "2023-01-03 01:00:00",
+      "last_time": "2026-06-19 19:45:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_h1(3).csv",
+      "sha256": "fb9d4ad228c02383a14ac86309f7306a799b0ef8d076f015a72b70daaddafc4a",
+      "rows": 20459,
+      "first_time": "2023-01-03 01:00:00",
+      "last_time": "2026-06-19 19:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_h4(3).csv",
+      "sha256": "5cd0d4427c752bd3feffd17b91fbd1ed3cd35ee5210887fa1726f01184367913",
+      "rows": 5352,
+      "first_time": "2023-01-03 00:00:00",
+      "last_time": "2026-06-19 16:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "gold_v3_2023_2026_d1(3).csv",
+      "sha256": "58d9b8e6716b3dedf4d310b3de5a914ab062c50578bae54dc85a2c8fddf689f6",
+      "rows": 894,
+      "first_time": "2023-01-03 00:00:00",
+      "last_time": "2026-06-19 00:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "goldsharp_m1(3).csv",
+      "sha256": "91a308536321190fe30199e61175fdca6a22c757ff3f8e5f6ea99d759f0a4353",
+      "rows": 155109,
+      "first_time": "2026-02-24 01:08:00",
+      "last_time": "2026-07-31 23:13:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "goldsharp_m5(3).csv",
+      "sha256": "a52fe90c3a509ceb1c8616611fe9424381227754d896aa26d7705a905f1f7d78",
+      "rows": 91824,
+      "first_time": "2025-04-14 21:40:00",
+      "last_time": "2026-07-31 23:05:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "goldsharp_h1(3).csv",
+      "sha256": "fcf1ac5a0d2e2f99e988ee499a8f1dd6dd759b1269005849d264b5f89b146755",
+      "rows": 20152,
+      "first_time": "2023-03-03 08:00:00",
+      "last_time": "2026-07-31 22:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "goldsharp_h4(3).csv",
+      "sha256": "b38a6bc12cf41e21e7ff9f8cef833a343d2297188875a40025c3d21c446dfbad",
+      "rows": 10039,
+      "first_time": "2020-01-31 04:00:00",
+      "last_time": "2026-07-31 16:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "RAW_CANDLE_SOURCE",
+      "file": "goldsharp_d1(3).csv",
+      "sha256": "b4b3a7efc66e42d292b5299465952fc9df3fff304eb52ea7553e958ac4ef4434",
+      "rows": 5006,
+      "first_time": "2007-05-01 00:00:00",
+      "last_time": "2026-07-30 00:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "3"
+    },
+    {
+      "role": "REJECTED_PARTIAL_DERIVATION_AUDIT_ONLY",
+      "file": "goldsharp_m15_v3_derived_from_m1.csv",
+      "sha256": "12f6189fa5af097c5bb6dad52b70905ce1de52420999e9e8b2e53fe5d04608a7",
+      "rows": 10351,
+      "first_time": "2026-02-24 01:00:00",
+      "last_time": "2026-07-31 23:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "DATA_V3_DERIVED",
+      "derivation": "M1 time floor 15m; OHLC first/max/min/last; tick_volume sum; spread min; real_volume sum",
+      "old_v3_equivalence": "81781/81781 exact rows and all derived fields",
+      "usable_for_research": false,
+      "rejection": "SOURCE_MERGE_MISMATCH_FROM_PARTIAL_FIRST_BUCKET"
+    },
+    {
+      "role": "V10_E40_SIGNAL_LEDGER_REFERENCE_ONLY",
+      "file": "V10_E40_signal_ledger.csv.gz",
+      "sha256": "a668a082cf2634e62c923c69aedd30807b8f8aa6079cd89a923f7f3d37c65126",
+      "rows": 87952,
+      "first_time": "2024-07-01 01:15:00",
+      "last_time": "2026-07-30 08:45:00",
+      "duplicate_time_count": 65964,
+      "strictly_ascending": false
+    },
+    {
+      "role": "V17_FROZEN_GRAMMAR_SOURCE",
+      "file": "V17_frozen_grammar_source.py",
+      "sha256": "e9d0c83cf2df109bbe3e884fa7a67fc94e7ec60f595ac7f367e86e5d852ceacc"
+    },
+    {
+      "role": "V18_WAVE_TIMELINE_REFERENCE_ONLY",
+      "file": "V18_wave_state_timeline.csv.gz",
+      "sha256": "99e303f7b8e37938c5c0ef1736c829c49e661fec4f85bc80881514ff52a3b39f",
+      "rows": 21988,
+      "first_time": "2024-07-01 01:15:00",
+      "last_time": "2026-07-30 08:45:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true
+    },
+    {
+      "role": "V18_POLICY_SUMMARY_REFERENCE_ONLY",
+      "file": "V18_policy_value_summary.csv",
+      "sha256": "8ff602e4acbce63bbfa67a44d05d9b760acba4c8d78781c07368c72ff44be391",
+      "rows": 12
+    },
+    {
+      "role": "V19_FROZEN_ROUTER_SOURCE_READONLY",
+      "file": "frozen_router_v19_readonly.py",
+      "sha256": "42fca518315a084080cd108f76428a2508071082936bec8bef24e106de939fd3"
+    },
+    {
+      "role": "V19_AUTH_PACKAGE",
+      "file": "GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801(2)(1).zip",
+      "sha256": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c"
+    },
+    {
+      "role": "AUTHORITATIVE_DERIVED_CANDLE_SOURCE",
+      "file": "gold_m15_v3_derived_from_full_m1_union.csv",
+      "sha256": "544aea77562b1448cd21b368cdf55f2c34935e445fc6855c4226bb6c27a5f41f",
+      "rows": 84522,
+      "first_time": "2023-01-03 01:00:00",
+      "last_time": "2026-07-31 23:00:00",
+      "duplicate_time_count": 0,
+      "strictly_ascending": true,
+      "version": "DATA_V3_DERIVED_FULL_M1_UNION",
+      "derivation": "old+sharp M1 union after exact-overlap validation, then 15m floor; OHLC first/max/min/last; tick_volume sum; spread min; real_volume sum",
+      "old_broker_m15_equivalence": "81781/81781 exact all fields"
+    }
+  ],
+  "merge_contract": {
+    "method": "concat then sort time,source_rank; reject overlap conflicts; drop duplicate time keep last",
+    "old_sharp_overlap": "all overlapping rows exact for M1/M5/H1/H4/D1; derived M15 overlap exact",
+    "time_semantics": "CSV time is bar open time"
+  },
+  "source_prohibitions": [
+    "do not use V10 outcome columns to generate entries",
+    "do not tune DATA_V3 toward old 123 trades",
+    "do not modify V19 files or state"
+  ],
+  "m15_authoritative_source": "gold_m15_v3_derived_from_full_m1_union.csv",
+  "phase0_correction": "sharp-only M1 derivation rejected before result calculation; full M1 union derivation frozen instead"
+}
