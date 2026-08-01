@@ -4,6 +4,7 @@ for %%I in ("%~dp0..\..") do set "ROOT=%%~fI"
 set "STATE=%LOCALAPPDATA%\xauusd_signal_lab\gold_uncovered_v1_research"
 set "REFERENCE=%ROOT%\config\gold_uncovered_v1\source_reference_20260802.json"
 set "SCRIPT=%ROOT%\scripts\gold_uncovered_v1\source_audit.py"
+set "RUNNER=%ROOT%\scripts\gold_uncovered_v1\source_audit_runner.py"
 set "OUT=%STATE%\latest_source_audit.json"
 
 if not exist "%STATE%" mkdir "%STATE%"
@@ -16,6 +17,12 @@ if not exist "%REFERENCE%" (
 if not exist "%SCRIPT%" (
   echo [BLOCKED] Source audit script is missing:
   echo %SCRIPT%
+  pause
+  exit /b 2
+)
+if not exist "%RUNNER%" (
+  echo [BLOCKED] Source audit runner is missing:
+  echo %RUNNER%
   pause
   exit /b 2
 )
@@ -41,7 +48,7 @@ if errorlevel 1 (
   exit /b 2
 )
 
-%PY% -m scripts.gold_uncovered_v1.source_audit --reference "%REFERENCE%" --output "%OUT%"
+%PY% -m scripts.gold_uncovered_v1.source_audit_runner --reference "%REFERENCE%" --output "%OUT%"
 set "RC=%ERRORLEVEL%"
 popd
 
