@@ -1,0 +1,26 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date_jst": "2026-08-02",
+  "status": "WINDOWS_DISCORD_TEST_SUCCESS",
+  "observation_only": true,
+  "mt5_order": false,
+  "real_trading": false,
+  "v19_modified": false,
+  "validation": {
+    "shadow_status": "READY",
+    "activated": true,
+    "v19_status": "RUNNING",
+    "v19_parity": "PASS",
+    "webhook_source": "V19_LOCAL_CONFIG",
+    "discord_username": "GOLD Challenger C1 Shadow",
+    "test_notification_received": true,
+    "test_message": "GOLD Challenger C1 Shadow Discord接続テスト / 観測専用通知です。実注文は行いません。"
+  },
+  "next_order": [
+    "03_RUN_SHADOW_LOOP.bat",
+    "08_RUN_DISCORD_ALERTS.bat",
+    "04_SHADOW_STATUS.bat",
+    "09_DISCORD_STATUS.bat"
+  ],
+  "operating_rule": "Keep 03 and 08 command windows open. Closing either window stops only that Challenger process. Do not stop or modify V19."
+}
