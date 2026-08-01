@@ -1,0 +1,107 @@
+{
+  "contract_id": "GOLD_LATE_TRANSITION_VACANCY_V1_SHADOW",
+  "contract_version": "2026-08-01-v1",
+  "authorization": {
+    "audit_only": false,
+    "prospective_shadow": true,
+    "observation_only": true,
+    "discord_entry_delivery": true,
+    "live_ready": false,
+    "final_signal": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  },
+  "origin": "RETROSPECTIVE_VACANCY_MAP_LEAD_REQUIRING_FRESH_PROSPECTIVE_EVIDENCE",
+  "v19_separation": {
+    "v19_frozen_contract_changed": false,
+    "v19_runtime_changed": false,
+    "v19_discord_contract_changed": false,
+    "v19_files_written_by_challenger": false,
+    "portfolio_priority": "V19_ALWAYS_PRIORITY",
+    "dependency": "READ_ONLY_V19_SCORE_LEDGER_AND_RUNTIME_STATE"
+  },
+  "signal_contract": {
+    "router_schedule": "SEMIANNUAL_EXPANDING",
+    "rank_source": "DIRECTION_SELECTED_PAST_ONLY_RANK_FROM_FROZEN_V19_SCORE_LEDGER",
+    "rank_condition": "chosen_rank < 0.90",
+    "selected_direction_wave_states": [
+      "IMPULSE_LATE",
+      "CORRECTION_EARLY"
+    ],
+    "event": "FIRST_CONFIRMABLE_EXACT_STATE_EVENT_ONSET_ONLY",
+    "event_key": "CONTIGUOUS_15_MINUTE_DECISIONS_WITH_SAME_SELECTED_DIRECTION_AND_SAME_SELECTED_ZONE",
+    "new_event_when": [
+      "selected_direction_changes",
+      "selected_zone_changes",
+      "previous_origin_gap_is_not_15_minutes"
+    ],
+    "gap_policy": "FAIL_CLOSED_NO_ENTRY_ON_FIRST_ORIGIN_AFTER_NON_15_MINUTE_GAP",
+    "latest_csv_row": "CLOSED_BY_CONTRACT",
+    "open_or_asof_bars": "PROHIBITED",
+    "future_confirmed_wave_or_zigzag": "PROHIBITED"
+  },
+  "execution_contract": {
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "entry": "EXACT_M1_OPEN_AT_DECISION_INDEX",
+    "target_usd": 20.0,
+    "stop_usd": 10.0,
+    "fixed_spread_usd": 0.3,
+    "horizon_exact_m1_bars": 480,
+    "horizon_boundary": "EXIT_AT_480TH_BOUNDARY_M1_OPEN_BEFORE_USING_THAT_BARS_HIGH_LOW",
+    "same_m1_tp_sl_collision": "SL_FIRST",
+    "one_total_position": "V19_AND_CHALLENGER_COMBINED"
+  },
+  "portfolio_contract": {
+    "entry_when_v19_open": "SUPPRESS_AND_CONSUME_CHALLENGER_EVENT",
+    "entry_when_challenger_open": "SUPPRESS_AND_CONSUME_LATER_CHALLENGER_EVENT",
+    "v19_arrives_while_challenger_open": "CLOSE_CHALLENGER_AT_CURRENT_EXACT_M1_OPEN_THEN_ACCEPT_V19",
+    "v19_dependency_unavailable": "FAIL_CLOSED_NO_NEW_ENTRY_AND_DO_NOT_ADVANCE_CURSOR",
+    "missed_during_runtime_downtime": "RECOVERY_REPLAY_NOT_TRADED",
+    "active_event_at_first_activation": "MARK_CONSUMED_NO_BACKFILL"
+  },
+  "history_and_gate_contract": {
+    "health_gate": "OFF",
+    "rolling_gate": "OFF",
+    "candidate_survival_gate": "OFF",
+    "resolved_only_rule": "ONLY_EXIT_DT_LE_CURRENT_ENTRY_DT_MAY_ENTER_ANY_FUTURE_GATE_HISTORY",
+    "unresolved_results_in_history": "PROHIBITED"
+  },
+  "discord_contract": {
+    "allowed_event": "NEW_ACCEPTED_CHALLENGER_SHADOW_ENTRY_ONLY",
+    "no_signal": false,
+    "recovery_replay": false,
+    "missed_entry_delayed_replay": false,
+    "notify_exit": false,
+    "language": "Japanese",
+    "attach_m15_chart": true,
+    "webhook_source": "READ_EXISTING_V19_LOCAL_CONFIG_WITHOUT_COPYING_SECRET",
+    "affects_strategy": false
+  },
+  "prospective_evidence_gate": {
+    "minimum_resolved_observations": 30,
+    "minimum_full_calendar_months_after_activation": 4,
+    "interim_results_may_change_contract": false
+  },
+  "frozen_prohibitions": [
+    "DO_NOT_ADD_LOW_VOL_FILTER_AFTER_SEEING_LOW_VOL_RESULT",
+    "DO_NOT_ADD_JULY_RESCUE_FILTER",
+    "DO_NOT_ADD_RANK_FLOOR_OR_CHANGE_P90_CEILING",
+    "DO_NOT_DELETE_LONG_OR_SHORT",
+    "DO_NOT_DELETE_IMPULSE_LATE_OR_CORRECTION_EARLY",
+    "DO_NOT_CHANGE_TP20_SL10_OR_480_M1_HORIZON",
+    "DO_NOT_USE_FUTURE_V19_OVERLAP_TO_FILTER_AT_ENTRY",
+    "DO_NOT_USE_FUTURE_EXIT_RESULTS_TO_SELECT_OR_GATE_CURRENT_ENTRY",
+    "DO_NOT_WRITE_OR_MODIFY_V19_STATE_LEDGER_CONFIG_OR_CONTRACT",
+    "DO_NOT_ENABLE_AI_MT5_ORDER_FINAL_SIGNAL_OR_LIVE_READY"
+  ],
+  "input_sha256": {
+    "v19_authoritative_zip": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c",
+    "research_inputs_zip": "0c552d383247368d5b99cc68f5ea971651a12c08d1ddfb518563a6cb160614d5",
+    "m1_history": "dec61b435ceb1df687baced57862de214793e0270e30c67d84f510f9f119b9d2",
+    "m1_extension": "91a308536321190fe30199e61175fdca6a22c757ff3f8e5f6ea99d759f0a4353",
+    "merged_causal_timeline": "af97593fad78a83e6e67c6b5be1e599c29f0c949684111eca5e3a308d0d19374",
+    "v19_trade_reference": "1ced2f09d95f81fc8517aec70d881ae4446e3516eef0db216ef27e8f0211aec8",
+    "vacancy_audit_reference": "0bdb9888ce9c6f5378dd3f3a39b552006017f467c6f92d0ce403b55452536138"
+  }
+}

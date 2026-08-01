@@ -1,0 +1,177 @@
+    entry_price, tp_price, sl_price = execution_prices(direction, entry_open)
+    origin_raw = nested_pick(normalized, ("origin_id", "decision_id", "trade_id"))
+    try:
+        origin_id = int(float(origin_raw))
+    except (TypeError, ValueEError):
+        origin_id = -1
+    rank_raw = nested_pick(normalized, ("chosen_rank", "rank", "direction_rank"))
+    try:
+        rank = float(rank_raw)
+    except (TypeError, ValueError):
+        rank = 0.90
+    return Position(
+        system="V19",
+        origin_id=origin_id,
+        entry_idx=entry_idx,
+        entry_time=str(entry_time),
+        direction=direction,
+        entry_open=entry_open,
+        entry_price=entry_price,
+        tp_price=tp_price,
+        sl_price=sl_price,
+        chosen_rank=rank,
+        wave_state="IMPULSE_EARLY",
+        causal_zone="V19_FIRST_P90_IMPULSE_EARLY",
+    )
+
+
+def v19_open_signature(runtime: Mapping[str, Any]) -> tuple[str, pd.Timestamp] | None:
+    opened = runtime.get("open_trade")
+    if not isinstance(opened, dict) or not opened:
+        return None
+    normalized = {normalize_name(key): value for key, value in opened.items()}
+    direction = str(
+        nested_pick(normalized, ("direction", "side", "signal", "selected_side")) or ""
+    ).upper()
+    entry_time = parse_time(
+        nested_pick(normalized, ("entry_dt", "entry_time", "entry_datetime", "decision_time", "decision_dt", "time"))
+    )
+    if direction not in {"LONG", "SHORT"} or entry_time is None:
+        return None
+    return direction, entry_time
+
+
+def state_open_signature(state: RuntimeState) -> tuple[str, pd.Timestamp] | None:
+    position = state.open_position
+    if position is None or position.system != "V19":
+        return None
+    return position.direction, pd.Timestamp(position.entry_time)
+
+
+def validate_v19_parity(state: RuntimeState, v19_runtime: Mapping[str, Any]) -> None:
+    expected_count = state.v19_baseline_accepted_trades + state.v19_reconstructed_accepted_trades
+    actual_count = v19_accepted_count(v19_runtime)
+    if expected_count != actual_count:
+        raise RuntimeError(
+            f"V19 accepted count parity mismatch: reconstructed={expected_count} actual={actual_count}"
+        )
+    ours = state_open_signature(state)
+    actual = v19_open_signature(v19_runtime)
+    if ours != actual:
+        raise RuntimeError(f"V19 open position parity mismatch: reconstructed={ours} actual={actual}")
+
+
+def seed_event_state(state: RuntimeState, scores: pd.DataFrame) -> None:
+    for row in scores.itertuples(index=False):
+        mapping = row._asdict()
+        update_v19_episode(state, mapping)
+        current_time = pd.Timestamp(mapping["entry_time"])
+        state.previous_decision_time = str(current_time)
+        state.previous_side = str(mapping["chosen_side"])
+        state.previous_selected_zone = selected_zone(
+            str(mapping["chosen_side"]), float(mapping["chosen_rank"]), str(mapping["wave_state"])
+        )
+
+
+def score_rows_with_m1(scores: pd.DataFrame, m1: pd.DataFrame) -> pd.DataFrame:
+    index_map = pd.Series(m1.index.to_numpy(), index=m1["time"]).to_dict()
+    result = scores.copy()
+    result["entry_idx"] = result["entry_time"].map(index_map)
+    missing = result["entry_idx"].isna()
+    if missing.any():
+        sample = result.loc[missing, "entry_time"].head(5).tolist()
+        raise RuntimeError(f"Score decision times are absent from exact M1: {sample}")
+    result["entry_idx"] = result["entry_idx"].astype(int)
+    return result
+
+
+def output_paths(root: Path) -> dict[str, Path]:
+    output = root / "outputs"
+    return {
+        "candidate": output / "shadow_candidate_ledger.csv",
+        "trade": output / "shadow_trade_ledger.csv",
+        "suppressed": output / "shadow_suppressed_ledger.csv",
+        "v19": output / "v19_priority_ledger.csv",
+        "recovery": output / "recovery_replay_ledger.csv",
+    }
+
+
+def full_calendar_months_elapsed(start_value: str | None, current_value: str | None) -> int:
+    start = parse_time(start_value)
+    current = parse_time(current_value)
+    if start is None or current is None or current <= start:
+        return 0
+    next_month = (start.to_period("M") + 1).start_time
+    current_month = current.to_period("M").start_time
+    return max(0, (current_month.year * 12 + current_month.month) - (next_month.year * 12 + next_month.month))
+
+def health_payload(state: RuntimeState, status: str, detail: str | None = None, **extra: Any) -> dict[str, Any]:
+    full_months = full_calendar_months_elapsed(
+        state.activation_cutoff_decision_time, state.last_processed_decision_time
+    )
+    resolved = int(state.counters.get("resolved_trades", 0))
+    return {
+        "shadow_id": SHADOW_ID,
+        "contract_version": CONTRACT_VERSION,
+        "runtime_version": RUNTIME_VERSION,
+        "status": status,
+        "detail": detail,
+        "activated": state.activated,
+        "last_processed_decision_time": state.last_processed_decision_time,
+        "last_processed_m1_time": state.last_processed_m1_time,
+        "open_trade": asdict(state.open_position) if state.open_position else None,
+        "counters": state.counters,
+        "v19_priority": True,
+        "observation_only": True,
+        "live_ready": False,
+        "final_signal": False,
+        "mt5_order": False,
+        "ai_judgement": False,
+        "prospective_evidence_gate": {
+            "resolved_observations": resolved,
+            "minimum_resolved_observations": PROSPECTIVE_MIN_RESOLVED,
+            "full_calendar_months_after_activation": full_months,
+            "minimum_full_calendar_months": PROSPECTIVE_MIN_MONTHS,
+            "eligible_for_review": bool(
+                resolved >= PROSPECTIVE_MIN_RESOLVED and full_months >= PROSPECTIVE_MIN_MONTHS
+            ),
+            "contract_change_authorized": False,
+        },
+        "updated_at_utc": now_utc(),
+        **extra,
+    }
+
+
+def load_dependencies(config: Mapping[str, Any], config_path: Path) -> tuple[
+    dict[str, Any], Path, dict[str, Any], Path, pd.DataFrame, pd.DataFrame, pd.Timestamp
+]:
+    v19_path = v19_config_path(config, config_path)
+    if not v19_path.exists():
+        raise FileNotFoundError(f"V19 local config not found: {v19_path}")
+    v19_config = read_json(v19_path)
+    validate_v19_config(v19_config)
+    v19_root = v19_state_root(v19_config, v19_path)
+    runtime_path = v19_root / "runtime_state.json"
+    if not runtime_path.exists():
+        raise FileNotFoundError(f"V19 runtime state not found: {runtime_path}")
+    v19_runtime = read_json(runtime_path)
+    last_processed, _ = validate_v19_runtime(v19_runtime)
+    base = repository_root(v19_path)
+    data_sources = v19_config.get("data_sources")
+    if not isinstance(data_sources, dict):
+        raise ValueError("V19 data_sources are missing")
+    m1_paths = path_list(data_sources.get("M1"), base)
+    existing_m1_paths = [path for path in m1_paths if path.exists()]
+    if not existing_m1_paths:
+        raise FileNotFoundError("No V19 M1 source exists")
+    max_lag = max(5, int(config.get("v19", {}).get("max_dependency_lag_seconds", 30)))
+    newest_m1_mtime = max(path.stat().st_mtime for path in existing_m1_paths)
+    if newest_m1_mtime - runtime_path.stat().st_mtime > max_lag:
+        raise RuntimeError(
+            "V19 runtime state is older than the newest M1 source; wait for V19 03_RUN_LOOP.bat "
+            "to catch up before Challenger processing"
+        )
+    m1 = load_ohlc_union(m1_paths)
+    ledger_path = score_ledger_path(config, v19_root)
+    normalized_scores = normalize_score_ledger(ledger_path)
+    future_rows = normalized_scores[normalized_scores["entry_time"] > last_processed]

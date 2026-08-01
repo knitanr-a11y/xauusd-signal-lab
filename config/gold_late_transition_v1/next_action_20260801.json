@@ -1,0 +1,22 @@
+{
+  "next_action": "DO_NOT_RETRY_CHALLENGER_RUNTIME_REIMPLEMENT_AND_VERIFY_ON_ACTUAL_WINDOWS_CHECKOUT_FIRST",
+  "steps": [
+    "Keep the existing frozen V19 03_RUN_LOOP.bat and 08_RUN_DISCORD_ALERTS.bat running unchanged.",
+    "Do not run Challenger 02_BOOTSTRAP_ACTIVATE.bat, 03_RUN_LOOP.bat, 06_CONFIGURE_DISCORD.bat, 07_TEST_DISCORD.bat, or 08_RUN_DISCORD_ALERTS.bat.",
+    "Treat the Challenger GitHub runtime as blocked and untrusted.",
+    "Reimplement without packaging or source reconstruction layers.",
+    "Verify from an actual Windows checkout before asking the user to run any command.",
+    "Repeat full historical parity, restart, no-backfill, V19-priority, and Discord-isolation tests on that checkout.",
+    "Only after those checks pass may a new activation proposal be presented."
+  ],
+  "historical_evidence": {
+    "status": "REPRODUCED_BY_TWO_SEQUENTIAL_IMPLEMENTATIONS",
+    "limitation": "RETROSPECTIVE_AND_SELECTION_BIASED_NOT_PROSPECTIVE_PROOF"
+  },
+  "do_not": [
+    "Do not stop, modify, re-bootstrap, or replace the frozen V19 shadow.",
+    "Do not bypass the Challenger bootstrap block.",
+    "Do not claim the Challenger runtime is ready based on Linux-only or in-memory tests.",
+    "Do not change the frozen Challenger strategy contract using interim results."
+  ]
+}

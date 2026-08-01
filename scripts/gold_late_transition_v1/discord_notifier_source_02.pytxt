@@ -1,0 +1,167 @@
+            ensure_ascii=False,
+        )
+        + "\r\n"
+    )
+    if image and image.exists():
+        add(
+            f"--{boundary}\r\nContent-Disposition: form-data; name=\"files[0]\"; "
+            f"filename=\"{image.name}\"\r\nContent-Type: image/png\r\n\r\n"
+        )
+        parts.append(image.read_bytes())
+        add("\r\n")
+    add(f"--{boundary}--\r\n")
+    request = urllib.request.Request(
+        url,
+        data=b"".join(parts),
+        method="POST",
+        headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": "GOLD-Late-Transition-Shadow-Discord/1.0",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            if response.getcode() not in (200, 204):
+                raise RuntimeError(f"Discord returned HTTP {response.getcode()}")
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(
+            f"Discord returned HTTP {exc.code}: {exc.read(500).decode('utf-8', 'replace')}"
+        ) from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Discord connection failed: {exc.reason}") from exc
+
+
+def notifier_state(runtime: Mapping[str, Any]) -> dict[str, Any]:
+    count = accepted_count(runtime)
+    return {
+        "shadow_id": SHADOW_ID,
+        "contract_version": CONTRACT_VERSION,
+        "notifier_version": NOTIFIER_VERSION,
+        "activated_at_utc": now_utc(),
+        "startup_policy": "NO_BACKFILL; baseline current accepted_trades and notify future increments only",
+        "baseline_accepted_trades": count,
+        "last_seen_accepted_trades": count,
+        "sent_entry_notifications": 0,
+        "last_sent_at_utc": None,
+        "last_error": None,
+    }
+
+
+def loop(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    discord, webhook_url = discord_settings(config, config_path)
+    root = state_root(config, config_path)
+    logger = logger_for(root)
+    lock = lock_instance(root)
+    runtime_path = root / "runtime_state.json"
+    if not runtime_path.exists():
+        raise FileNotFoundError(f"Runtime state not found: {runtime_path}")
+    runtime = read_json(runtime_path)
+    state = notifier_state(runtime)
+    notifier_path = root / "discord_notifier_state.json"
+    write_json(notifier_path, state)
+    seen = accepted_count(runtime)
+    delay = max(1, int(discord.get("poll_seconds", config.get("poll_seconds", 2))))
+    logger.info("READY; no-backfill baseline accepted_trades=%s", seen)
+    try:
+        while True:
+            try:
+                runtime = read_json(runtime_path)
+                current = accepted_count(runtime)
+                if current < seen:
+                    logger.warning("accepted_trades moved backwards: %s -> %s", seen, current)
+                    seen = current
+                elif current > seen:
+                    if current - seen != 1:
+                        logger.warning(
+                            "Missed %s entries while notifier was unavailable; delayed alerts suppressed",
+                            current - seen,
+                        )
+                        seen = current
+                    else:
+                        event = event_from(runtime, root)
+                        image = None
+                        try:
+                            image = chart(config, config_path, discord, event, root)
+                        except Exception:
+                            logger.exception("Chart generation failed; sending text only")
+                        send(
+                            webhook_url,
+                            str(discord.get("username", "GOLD Late Transition Shadow")),
+                            message(event),
+                            image,
+                        )
+                        seen = current
+                        state["sent_entry_notifications"] = int(state["sent_entry_notifications"]) + 1
+                        state["last_sent_at_utc"] = now_utc()
+                        state["last_error"] = None
+                        logger.info(
+                            "Sent entry alert count=%s side=%s MT5=%s",
+                            current,
+                            event["side"],
+                            event["entry_time"],
+                        )
+                state["last_seen_accepted_trades"] = seen
+                write_json(notifier_path, state)
+            except Exception as exc:
+                state["last_error"] = {"at_utc": now_utc(), "message": str(exc)}
+                write_json(notifier_path, state)
+                logger.exception("Notifier iteration failed")
+            time.sleep(delay)
+    except KeyboardInterrupt:
+        logger.info("Stopped by user")
+    finally:
+        lock.close()
+
+
+def test(config_path: Path) -> None:
+    config = read_json(config_path)
+    discord, webhook_url = discord_settings(config, config_path)
+    root = state_root(config, config_path)
+    runtime_path = root / "runtime_state.json"
+    runtime = read_json(runtime_path) if runtime_path.exists() else {}
+    event = event_from(runtime, root)
+    image = None
+    try:
+        image = chart(config, config_path, discord, event, root)
+    except Exception:
+        pass
+    send(
+        webhook_url,
+        str(discord.get("username", "GOLD Late Transition Shadow")),
+        "✅ **GOLD Late Transition V1 Shadow Discord接続テスト**\n"
+        "新規accepted entryだけを通知します。観測専用で、実注文は行いません。",
+        image,
+    )
+    print("Discord test notification sent.")
+
+
+def status(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    path = state_root(config, config_path) / "discord_notifier_state.json"
+    print(
+        json.dumps(
+            read_json(path) if path.exists() else {"status": "NOT_STARTED", "path": str(path)},
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="GOLD Late Transition V1 Discord notifier")
+    parser.add_argument("--config", required=True, type=Path)
+    parser.add_argument("command", choices=["configure", "test", "loop", "status"])
+    args = parser.parse_args(argv)
+    try:
+        {"configure": configure, "test": test, "loop": loop, "status": status}[args.command](args.config)
+        return 0
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

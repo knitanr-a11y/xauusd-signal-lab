@@ -1,0 +1,44 @@
+{
+  "date": "2026-08-01",
+  "authorization": "USER_AUTHORIZED_DISCORD_ENTRY_ALERTS_FOR_VISUAL_REVIEW",
+  "scope": "GOLD_V19_OBSERVATION_ONLY_DELIVERY_ADAPTER",
+  "strategy_contract_unchanged": true,
+  "allowed_event": "NEW_ACCEPTED_SHADOW_ENTRY_ONLY",
+  "prohibited_events": [
+    "NO_SIGNAL",
+    "RECOVERY_BACKFILL",
+    "MISSED_ENTRY_REPLAY",
+    "AI_JUDGEMENT",
+    "MT5_ORDER",
+    "LIVE_TRADING"
+  ],
+  "message": {
+    "language": "Japanese",
+    "fields": [
+      "direction",
+      "MT5_server_entry_time",
+      "entry_price",
+      "TP20_price",
+      "SL10_price",
+      "IMPULSE_EARLY_state",
+      "observation_only_notice"
+    ],
+    "attach_chart": true,
+    "chart_timeframe": "M15",
+    "chart_bars": 80
+  },
+  "delivery": {
+    "transport": "Discord webhook",
+    "webhook_storage": "config/gold_wave_shadow_v19/local_config.json only",
+    "webhook_committed_to_git": false,
+    "duplicate_process_lock": true,
+    "startup_policy": "NO_BACKFILL_BASELINE_CURRENT_ACCEPTED_TRADES",
+    "downtime_policy": "DO_NOT_SEND_DELAYED_MISSED_ENTRY_ALERTS"
+  },
+  "runtime_separation": {
+    "shadow_runtime_modified": false,
+    "notifier_is_sidecar": true,
+    "shadow_decision_depends_on_discord": false,
+    "discord_failure_blocks_shadow_runtime": false
+  }
+}

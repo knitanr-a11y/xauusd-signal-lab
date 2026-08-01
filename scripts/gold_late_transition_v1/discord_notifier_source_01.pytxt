@@ -1,0 +1,177 @@
+        "chosen_rank": number(source.get("chosen_rank")),
+    }
+
+
+def price(value: Any) -> str:
+    parsed = number(value)
+    return "不明" if parsed is None else f"{parsed:.2f}"
+
+
+def rank_text(value: Any) -> str:
+    parsed = number(value)
+    return "不明" if parsed is None else f"{parsed:.3f}"
+
+
+def message(event: Mapping[str, Any]) -> str:
+    side = str(event.get("side", "UNKNOWN"))
+    icon = "🟢" if side == "LONG" else "🔴" if side == "SHORT" else "⚪"
+    return "\n".join(
+        [
+            "📣 **GOLD Late Transition V1 Shadow エントリー候補**",
+            f"方向: {icon} **{side}**",
+            f"時刻（MT5）: `{event.get('entry_time', '不明')}`",
+            f"Entry: `{price(event.get('entry'))}`",
+            f"TP: `{price(event.get('tp'))}` / SL: `{price(event.get('sl'))}`",
+            f"波動状態: `{event.get('wave_state', '不明')}`",
+            f"方向rank: `{rank_text(event.get('chosen_rank'))}`（P90未満）",
+            "条件: 状態eventの最初の確定地点のみ",
+            "優先順位: V19発火時はV19を優先",
+            "状態: **観測専用・実注文なし**",
+        ]
+    )
+
+
+def parse_time(value: Any) -> dt.datetime | None:
+    text = str(value).strip().replace("Z", "+00:00")
+    try:
+        parsed = dt.datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=None) if parsed.tzinfo else parsed
+
+
+def read_ohlc(path: Path):
+    import pandas as pd
+
+    frame = None
+    error: Exception | None = None
+    for kwargs in ({"sep": ";"}, {"sep": ","}, {"sep": "\t"}, {"sep": None, "engine": "python"}):
+        try:
+            trial = pd.read_csv(path, encoding="utf-8-sig", **kwargs)
+            if trial.shape[1] >= 5:
+                frame = trial
+                break
+        except Exception as exc:  # pragma: no cover - user data diagnostics
+            error = exc
+    if frame is None:
+        raise RuntimeError(&"Could not read {path}: {error}")
+    frame = frame.rename(columns={column: normalize_name(column) for column in frame.columns})
+    if "datetime" in frame:
+        timestamp = pd.to_datetime(frame["datetime"], errors="coerce")
+    elif "date" in frame and "time" in frame:
+        timestamp = pd.to_datetime(
+            frame["date"].astype(str) + " " + frame["time"].astype(str), errors="coerce"
+        )
+    elif "time" in frame:
+        timestamp = pd.to_datetime(frame["time"], errors="coerce")
+    else:
+        raise ValueError(f"No time column in {path}")
+    required = ["open", "high", "low", "close"]
+    if any(column not in frame for column in required):
+        raise ValueError(&"OHLC columns are missing in {path}")
+    result = frame.assign(timestamp=timestamp)[["timestamp", *required]].copy()
+    for column in required:
+        result[column] = pd.to_numeric(result[column], errors="coerce")
+    return result.dropna().sort_values("timestamp")
+
+
+def chart(
+    config: Mapping[str, Any],
+    config_path: Path,
+    discord: Mapping[str, Any],
+    event: Mapping[str, Any],
+    root: Path,
+) -> Path | None:
+    if not discord.get("attach_chart", True):
+        return None
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    from matplotlib.patches import Rectangle
+
+    source_path = v19_config_path(config, config_path)
+    source_config = read_json(source_path)
+    base = repository_root(source_path)
+    timeframe = str(discord.get("chart_timeframe", "M15")).upper()
+    raw_paths = source_config.get("data_sources", {}).get(timeframe, [])
+    if isinstance(raw_paths, str):
+        raw_paths = [raw_paths]
+    frames = [
+        read_ohlc(expand_path(item, base))
+        for item in raw_paths
+        if isinstance(item, str) and expand_path(item, base).exists()
+    ]
+    if not frames:
+        return None
+    bars = pd.concat(frames).drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+    when = parse_time(event.get("entry_time"))
+    if when:
+        bars = bars[bars["timestamp"] <= when]
+    bars = bars.tail(max(30, min(200, int(discord.get("chart_bars", 80))))).reset_index(drop=True)
+    if bars.empty:
+        return None
+
+    figure, axis = plt.subplots(figsize=(12, 6.5), dpi=120)
+    x = mdates.date2num(list(bars["timestamp"].dt.to_pydatetime()))
+    width = (x[1] - x[0]) * 0.68 if len(x) > 1 else 0.006
+    for index, row in bars.iterrows():
+        color = "#2ca02c" if row["close"] >= row["open"] else "#d62728"
+        axis.vlines(x[index], row["low"], row["high"], color=color, linewidth=1)
+        bottom = min(row["open"], row["close"])
+        axis.add_patch(
+            Rectangle(
+                (x[index] - width / 2, bottom),
+                width,
+                max(abs(row["close"] - row["open"]), 0.01),
+                facecolor=color,
+                edgecolor=color,
+            )
+        )
+    for key, color, style, label in (
+        ("entry", "#1f77b4", "-", "Entry"),
+        ("tp", "#2ca02c", "--", "TP"),
+        ("sl", "#d62728", "--", "SL"),
+    ):
+        value = number(event.get(key))
+        if value is not None:
+            axis.axhline(value, color=color, linestyle=style, linewidth=1.1, label=f"{label} {value:.2f}")
+    if when:
+        axis.axvline(mdates.date2num(when), color="#9467bd", linestyle=":", label="Entry time")
+    axis.set_title(
+        f"GOLD Late Transition V1 Shadow | {event.get('side')} | {event.get('wave_state')} | "
+        f"{timeframe} | MT5 {event.get('entry_time')}"
+    )
+    axis.set_ylabel("XAUUSD")
+    axis.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M"))
+    axis.grid(alpha=0.2)
+    axis.legend(loc="best")
+    figure.tight_layout()
+    output = (
+        root
+        / "outputs"
+        / "discord_charts"
+        / f"entry_{int(event.get('count', 0)):05d}_{uuid.uuid4().hex[:8]}.png"
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output)
+    plt.close(figure)
+    return output
+
+
+def send(url: str, username: str, content: str, image: Path | None = None) -> None:
+    boundary = "----GoldLateTransition" + uuid.uuid4().hex
+    parts: list[bytes] = []
+
+    def add(text: str) -> None:
+        parts.append(text.encode("utf-8"))
+
+    add(
+        f"--{boundary}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\n"
+        "Content-Type: application/json; charset=utf-8\r\n\r\n"
+    )
+    add(
+        json.dumps(
+            {"username": username, "content": content, "allowed_mentions": {"parse": []}},

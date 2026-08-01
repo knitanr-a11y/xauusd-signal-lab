@@ -1,0 +1,30 @@
+{
+  "date": "2026-08-01",
+  "incident": "USER_PC_RUNTIME_PAYLOAD_SHA256_MISMATCH_AFTER_PULL",
+  "root_cause": "PACKAGED_RAW_BYTES_WERE_UTF8_REENCODED_AND_OR_WINDOWS_LINE_ENDING_TRANSFORMED_DURING_REPOSITORY_DELIVERY",
+  "impact": "CHALLENGER_BOOTSTRAP_FAIL_CLOSED_BEFORE_ANY_STATE_ACTIVATION_OR_ENTRY",
+  "v19_impact": "NONE",
+  "fix": {
+    "loader": "TRY_ONLY_DETERMINISTIC_RAW_CHECKOUT_REPAIR_VARIANTS_AND_ACCEPT_ONLY_THE_FROZEN_FULL_PAYLOAD_SHA256",
+    "accepted_repairs": [
+      "EXACT_BYTES",
+      "CRLF_TO_LF_NORMALIZATION",
+      "UTF8_TO_LATIN1_BYTE_ROUNDTRIP",
+      "CRLF_NORMALIZATION_THEN_UTF8_TO_LATIN1_BYTE_ROUNDTRIP"
+    ],
+    "fail_closed": true,
+    "expected_payload_sha256": "0b59b0d91cf9dedaf81fd23c2b16fd03f23a44a790e4c5bf80914dbcb9e4c69a"
+  },
+  "verification": {
+    "synthetic_recovery_test": "PASS",
+    "new_loader_unit_tests": "5 tests added",
+    "historical_strategy_contract_changed": false,
+    "discord_contract_changed": false,
+    "v19_files_changed": false
+  },
+  "user_pc_next": [
+    "Fetch and pull feature/gold-v19-wave-shadow",
+    "Run Challenger 02_BOOTSTRAP_ACTIVATE.bat again",
+    "If it succeeds, run 04_STATUS.bat and confirm READY plus v19_parity PASS"
+  ]
+}

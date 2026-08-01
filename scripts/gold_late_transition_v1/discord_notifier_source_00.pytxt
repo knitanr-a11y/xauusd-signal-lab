@@ -1,0 +1,183 @@
+from __future__ import annotations
+
+import argparse
+import csv
+import datetime as dt
+import json
+import logging
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+import uuid
+from pathlib import Path
+from typing import Any, Mapping
+
+from .shadow_runtime import (
+    CONTRACT_VERSION,
+    SHADOW_ID,
+    expand_path,
+    normalize_name,
+    read_json,
+    repository_root,
+    state_root,
+    v19_config_path,
+    validate_local_config,
+    validate_v19_config,
+    write_json,
+)
+
+NOTIFIER_VERSION = "2026-08-01-discord-v1"
+
+
+def now_utc() -> str:
+    return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def logger_for(root: Path) -> logging.Logger:
+    (root / "logs").mkdir(parents=True, exist_ok=True)
+    logger = logging.getLogger("gold_late_transition_v1_discord")
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    for handler in (
+        logging.FileHandler(root / "logs" / "discord_notifier.log", encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ):
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
+
+
+def lock_instance(root: Path):
+    path = root / "discord_notifier.lock"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = path.open("a+b")
+    if path.stat().st_size == 0:
+        handle.write(b"\0")
+        handle.flush()
+    handle.seek(0)
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:  # pragma: no cover - Windows is the intended runtime
+            import fcntl
+
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as exc:
+        handle.close()
+        raise RuntimeError("Late Transition Discord notifier is already running") from exc
+    return handle
+
+
+def accepted_count(runtime: Mapping[str, Any]) -> int:
+    try:
+        return int(runtime.get("counters", {}).get("accepted_trades", 0))
+    except (AttributeError, TypeError, ValueError):
+        return 0
+
+
+def discord_settings(config: Mapping[str, Any], config_path: Path) -> tuple[dict[str, Any], str]:
+    validate_local_config(config)
+    value = config.get("discord")
+    if not isinstance(value, dict) or not value.get("enabled"):
+        raise ValueError("Discord is not configured; run 06_CONFIGURE_DISCORD.bat")
+    source = str(value.get("webhook_source", "V19_LOCAL_CONFIG")).upper()
+    if source != "V19_LOCAL_CONFIG":
+        raise ValueError("Only V19_LOCAL_CONFIG webhook source is authorized")
+    source_path = v19_config_path(config, config_path)
+    source_config = read_json(source_path)
+    validate_v19_config(source_config)
+    source_discord = source_config.get("discord")
+    if not isinstance(source_discord, dict) or not source_discord.get("enabled"):
+        raise ValueError("V19 Discord is not configured")
+    url = source_discord.get("webhook_url")
+    if not isinstance(url, str) or not url.startswith(
+        ("https://discord.com/api/webhooks/", "https://discordapp.com/api/webhooks/")
+    ):
+        raise ValueError("V19 Discord webhook URL is invalid")
+    return value, url
+
+
+def configure(config_path: Path) -> None:
+    config = read_json(config_path)
+    validate_local_config(config)
+    # Validate the existing local V19 secret without copying or printing it.
+    source_path = v19_config_path(config, config_path)
+    source_config = read_json(source_path)
+    validate_v19_config(source_config)
+    source_discord = source_config.get("discord")
+    if not isinstance(source_discord, dict) or not source_discord.get("enabled"):
+        raise ValueError("Configure V19 Discord first; no webhook secret is copied")
+    url = source_discord.get("webhook_url")
+    if not isinstance(url, str) or not url.startswith(
+        ("https://discord.com/api/webhooks/", "https://discordapp.com/api/webhooks/")
+    ):
+        raise ValueError("V19 Discord webhook URL is invalid")
+    config["discord"] = {
+        "enabled": True,
+        "webhook_source": "V19_LOCAL_CONFIG",
+        "username": "GOLD Late Transition Shadow",
+        "notify_entry": True,
+        "notify_exit": False,
+        "attach_chart": True,
+        "chart_timeframe": "M15",
+        "chart_bars": 80,
+        "poll_seconds": int(config.get("poll_seconds", 2)),
+    }
+    write_json(config_path, config)
+    print("Configured. The existing V19 webhook is referenced locally and was not copied or printed.")
+
+
+def accepted_event(root: Path, count: int) -> dict[str, Any]:
+    path = root / "outputs" / "shadow_candidate_ledger.csv"
+    if not path.exists() or path.stat().st_size == 0:
+        return {}
+    best: dict[str, Any] = {}
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        for raw in csv.DictReader(handle):
+            row = {normalize_name(key): value for key, value in raw.items()}
+            if str(row.get("decision", "")).upper() != "ACCEPTED":
+                continue
+            try:
+                row_count = int(float(row.get("accepted_trade_count", -1)))
+            except (TypeError, ValueError):
+                continue
+            if row_count == count:
+                best = row
+    return best
+
+
+def number(value: Any) -> float | None:
+    try:
+        result = float(value)
+        return result if result == result else None
+    except (TypeError, ValueError):
+        return None
+
+
+def event_from(runtime: Mapping[str, Any], root: Path) -> dict[str, Any]:
+    count = accepted_count(runtime)
+    ledger = accepted_event(root, count)
+    opened = runtime.get("open_trade") if isinstance(runtime.get("open_trade"), dict) else {}
+    if str(opened.get("system", "")).upper() != "CHALLENGER":
+        opened = {}
+    source = {**ledger, **{normalize_name(key): value for key, value in opened.items()}}
+    side = str(source.get("direction", source.get("side", "UNKNOWN"))).upper()
+    entry = number(source.get("entry_price"))
+    tp = number(source.get("tp_price"))
+    sl = number(source.get("sl_price"))
+    if entry is not None:
+        tp = tp if tp is not None else entry + (20.0 if side == "LONG" else -20.0)
+        sl = sl if sl is not None else entry + (-10.0 if side == "LONG" else 10.0)
+    return {
+        "count": count,
+        "side": side,
+        "entry_time": str(source.get("entry_time", runtime.get("last_processed_decision_time", "UNKNOWN"))),
+        "entry": entry,
+        "tp": tp,
+        "sl": sl,
+        "wave_state": str(source.get("wave_state", "UNKNOWN")),

@@ -1,0 +1,38 @@
+{
+  "date": "2026-08-01",
+  "implementation_status": "BLOCKED_NOT_ACTIVATION_READY",
+  "reason": "USER_PC_UTF8_SOURCE_SHA256_MISMATCH_AFTER_PRIOR_ZIP_RAW_AND_BASE64_DELIVERY_FAILURES",
+  "v19_modified": false,
+  "bootstrap_intentionally_disabled": true,
+  "historical_reaudit": {
+    "result": "PASS_REPRODUCED_BY_TWO_SEQUENTIAL_IMPLEMENTATIONS",
+    "candidate_onsets": 184,
+    "challenger_entries": 123,
+    "challenger_profit_factor": 1.9467405272114702,
+    "challenger_net_usd": 545.1899999999978,
+    "challenger_max_drawdown_usd": 70.0,
+    "v19_entries": 169,
+    "v19_profit_factor": 2.0299563195716415,
+    "v19_net_usd": 730.959999999995,
+    "v19_max_drawdown_usd": 80.0,
+    "combined_profit_factor": 1.992680232739033,
+    "combined_net_usd": 1276.1499999999928,
+    "combined_max_drawdown_usd": 60.220000000000255,
+    "checkpoint_restart": "5/5_PASS",
+    "no_backfill": "4/4_PASS"
+  },
+  "interpretation": {
+    "historical_arithmetic": "REPRODUCIBLE_FROM_RAW_M1_AND_FROZEN_DECISION_LEDGER",
+    "prospective_profitability": "UNPROVEN",
+    "candidate_selection": "RETROSPECTIVE_AND_SELECTION_BIASED",
+    "github_runtime_delivery": "UNTRUSTED_AND_BLOCKED"
+  },
+  "required_before_future_activation_proposal": [
+    "plain direct Python implementation without packaging or reconstruction layers",
+    "actual Windows checkout verification",
+    "full 123 Challenger and 169 V19 historical parity",
+    "restart and no-backfill verification",
+    "V19 priority verification",
+    "Discord isolation verification"
+  ]
+}

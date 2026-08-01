@@ -1,0 +1,59 @@
+{
+  "date": "2026-08-01",
+  "unit_tests": {
+    "command": "pytest -q",
+    "result": "4 passed",
+    "packaged_runtime_loader_result": "4 passed",
+    "covered": [
+      "semiannual January/July boundary",
+      "causal session horizon guard",
+      "720-minute exact M1 score maturity",
+      "IMPULSE_EARLY episode restart"
+    ]
+  },
+  "discord_notifier_tests": {
+    "command": "PYTHONPATH=. python -m pytest -q tests/test_gold_wave_shadow_v19_discord.py",
+    "result": "4 passed",
+    "covered": [
+      "no-backfill accepted-trade baseline",
+      "LONG TP20/SL10 message values",
+      "SHORT Japanese observation-only message",
+      "duplicate notifier process lock"
+    ],
+    "network_webhook_test": "REQUIRES_USER_PC_WEBHOOK_AND_IS_NOT_RUN_IN_REPOSITORY_TESTS"
+  },
+  "runtime_payload": {
+    "format": "ZIP_SPLIT_INTO_RAW_BASE64_RAW_REPOSITORY_PARTS",
+    "reconstructed_size_bytes": 19999,
+    "sha256": "a78d6731e624fc325ac4d5dd359a81d11ecd594cd6bb2aad4ab75b061031b3d9",
+    "members": {
+      "frozen_router.py": "42fca518315a084080cd108f76428a2508071082936bec8bef24e106de939fd3",
+      "frozen_wave.py": "add8950401c542cf394709dfeb8664975e45e43c2842ccfb2af2b112af1b239e",
+      "shadow_runtime.py": "82f874cb534050339c95bfa65fc2a47a126eb1fed625b9dfbe8e5d7fa5ef3b69"
+    }
+  },
+  "full_data_bootstrap": {
+    "result": "PASS",
+    "active_model_boundary": "2026-07-01",
+    "latest_full_feature_decision_time": "2026-07-30 20:45:00",
+    "latest_session_guarded_decision_time": "2026-07-30 11:45:00",
+    "score_history_rows": 873,
+    "pending_score_rows": 12,
+    "activation": "NO_BACKFILL_READY"
+  },
+  "historical_causal_guard_parity": {
+    "result": "PASS",
+    "runtime_policy_trades": 169,
+    "v19_reference_trades": 169,
+    "timestamp_overlap": 169,
+    "extra": 0,
+    "missing": 0,
+    "profit_factor": 2.0299563195716415,
+    "net_usd": 730.959999999995,
+    "unexpected_gap_first_candidates_invalidated": 5
+  },
+  "v19_authoritative_package": {
+    "filename": "GOLD_FIRST_P90_IMPULSE_EARLY_EPISODE_ROBUSTNESS_V19_20260801.zip",
+    "sha256": "4d1b2cdd05e2908370cc6f614b90d4b8f03a4d16aaf9e847e32ddcf512953a8c"
+  }
+}

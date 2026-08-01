@@ -10,6 +10,8 @@ venv/
 .env
 .env.*
 config/gold_ml_v1/local_runtime_paths.local.json
+config/gold_wave_shadow_v19/local_config.json
+config/gold_late_transition_v1/local_config.json
 
 # MT4/MT5 exported market data and reports
 # Keep broker data local or upload manually for analysis.

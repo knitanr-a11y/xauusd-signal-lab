@@ -1,0 +1,26 @@
+{
+  "shadow_id": "GOLD_LATE_TRANSITION_VACANCY_V1_SHADOW",
+  "contract_version": "2026-08-01-v1",
+  "state_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_late_transition_v1_shadow",
+  "poll_seconds": 2,
+  "v19": {
+    "config_path": "config\\gold_wave_shadow_v19\\local_config.json",
+    "score_ledger_path": "outputs\\shadow_score_ledger.csv",
+    "required_shadow_id": "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+    "required_contract_version": "2026-08-01-v1",
+    "portfolio_priority": "V19_ALWAYS_PRIORITY",
+    "read_only": true,
+    "max_dependency_lag_seconds": 30
+  },
+  "discord": {
+    "enabled": false,
+    "webhook_source": "V19_LOCAL_CONFIG",
+    "username": "GOLD Late Transition Shadow",
+    "notify_entry": true,
+    "notify_exit": false,
+    "attach_chart": true,
+    "chart_timeframe": "M15",
+    "chart_bars": 80,
+    "poll_seconds": 2
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "next_action": "PULL_DISCORD_ADAPTER_CONFIGURE_WEBHOOK_TEST_AND_RUN_BOTH_LOOPS",
+  "steps": [
+    "In GitHub Desktop, fetch and pull feature/gold-v19-wave-shadow.",
+    "Run scripts/gold_wave_shadow_v19/01_INSTALL.bat again to install matplotlib.",
+    "Keep the existing CSV paths and Shadow activation state unchanged.",
+    "Run scripts/gold_wave_shadow_v19/06_CONFIGURE_DISCORD.bat and enter the webhook URL locally.",
+    "Run scripts/gold_wave_shadow_v19/07_TEST_DISCORD.bat and confirm the Japanese test message and M15 chart.",
+    "Run scripts/gold_wave_shadow_v19/03_RUN_LOOP.bat while collecting prospective observations.",
+    "Run scripts/gold_wave_shadow_v19/08_RUN_DISCORD_ALERTS.bat alongside the Shadow loop.",
+    "Use 04_STATUS.bat for Shadow state and 09_DISCORD_STATUS.bat for delivery state."
+  ],
+  "stop_conditions": [
+    "Any runtime parity or source-data contract error",
+    "Unexpected CSV schema or overlap conflict",
+    "Model update cannot be built causally",
+    "Unexpected session gap invalidates an open observation"
+  ],
+  "discord_delivery_errors": [
+    "Discord errors do not stop or alter the Shadow runtime",
+    "Do not replay alerts missed while the notifier was stopped",
+    "Do not run two notifier loops at once",
+    "Never commit or paste the webhook URL"
+  ],
+  "not_stop_conditions": [
+    "A short losing streak",
+    "A month with few signals",
+    "P85 or P95 looking better after activation",
+    "A temporary Discord outage when the Shadow runtime remains healthy"
+  ]
+}
