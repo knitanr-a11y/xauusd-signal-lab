@@ -1,0 +1,43 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-01",
+  "allowed_event": "NEW_ACCEPTED_CHALLENGER_ENTRY_ONLY",
+  "prohibited_events": [
+    "NO_SIGNAL",
+    "RECOVERY_REPLAY_NOT_TRADED",
+    "MISSED_ENTRY",
+    "SUPPRESSED_EVENT",
+    "V19_ENTRY",
+    "EXIT",
+    "TP",
+    "SL",
+    "TIME",
+    "V19_PREEMPT"
+  ],
+  "message_fields": [
+    "chosen_side",
+    "MT5 decision and entry time",
+    "entry price",
+    "TP20 price",
+    "SL10 price",
+    "wave_state",
+    "chosen_rank",
+    "V19 priority notice",
+    "observation-only notice",
+    "retrospective gate failure notice"
+  ],
+  "chart": {
+    "enabled": true,
+    "timeframe": "M15",
+    "bars": 80
+  },
+  "webhook": {
+    "source": "existing V19 local_config.json",
+    "copied_to_challenger_config": false,
+    "committed_to_git": false
+  },
+  "startup": "NO_BACKFILL_BASELINE_CURRENT_ACCEPTED_COUNT",
+  "downtime": "DO_NOT_SEND_DELAYED_MISSED_ALERTS",
+  "process_lock": true,
+  "shadow_dependency": false
+}

@@ -1,0 +1,28 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "contract_version": "2026-08-01-prospective-shadow-v1",
+  "state_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_challenger_c1_shadow",
+  "poll_seconds": 10,
+  "v19": {
+    "local_config_path": "C:\\gold-v19-shadow\\config\\gold_wave_shadow_v19\\local_config.json",
+    "read_only": true,
+    "require_status": "READY",
+    "require_parity": "PASS"
+  },
+  "data_sources": {
+    "inherit_from_v19": true,
+    "M1": [],
+    "M5": [],
+    "H1": [],
+    "H4": []
+  },
+  "discord": {
+    "enabled": true,
+    "webhook_source": "V19_LOCAL_CONFIG",
+    "username": "GOLD Challenger C1 Shadow",
+    "attach_chart": true,
+    "chart_timeframe": "M15",
+    "chart_bars": 80,
+    "poll_seconds": 10
+  }
+}
