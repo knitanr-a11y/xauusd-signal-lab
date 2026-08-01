@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import gzip
 import json
 import os
+from collections import deque
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 
 
 def expand_path(value: str) -> Path:
@@ -12,7 +15,7 @@ def expand_path(value: str) -> Path:
 
 
 def read_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as handle:
+    with path.open("r", encoding="utf-8-sig") as handle:
         value = json.load(handle)
     if not isinstance(value, dict):
         raise ValueError(f"JSON root must be an object: {path}")
@@ -33,10 +36,26 @@ def redact(value: Any) -> Any:
     return value
 
 
-def list_files(root: Path) -> list[str]:
+def relevant_files(root: Path) -> list[str]:
     if not root.exists() or not root.is_dir():
         return []
-    return sorted(str(path.relative_to(root)) for path in root.rglob("*") if path.is_file())
+    keep_names = {
+        "runtime_state.json",
+        "runtime_health.json",
+        "score_history.csv.gz",
+        "pending_scores.csv.gz",
+        "shadow_score_ledger.csv",
+        "shadow_trade_ledger.csv",
+        "score_history_invalid_gap_ledger.csv",
+        "discord_notifier_state.json",
+    }
+    found: list[str] = []
+    for path in root.rglob("*"):
+        if not path.is_file() or "venv" in {part.lower() for part in path.parts}:
+            continue
+        if path.name.lower() in keep_names or path.suffix.lower() in {".log"}:
+            found.append(str(path.relative_to(root)))
+    return sorted(found)
 
 
 def discover_candidates() -> list[str]:
@@ -62,6 +81,49 @@ def discover_candidates() -> list[str]:
     return sorted(found)
 
 
+def _open_text(path: Path) -> TextIO:
+    if path.suffix.lower() == ".gz":
+        return gzip.open(path, "rt", encoding="utf-8-sig", newline="")
+    return path.open("r", encoding="utf-8-sig", newline="")
+
+
+def inspect_table(path: Path, tail_rows: int = 3) -> dict[str, Any]:
+    report: dict[str, Any] = {
+        "path": str(path),
+        "exists": path.exists(),
+    }
+    if not path.exists():
+        return report
+    report["bytes"] = path.stat().st_size
+    with _open_text(path) as handle:
+        header_line = handle.readline()
+        if not header_line:
+            report["empty"] = True
+            return report
+        delimiter = ";" if header_line.count(";") >= max(header_line.count(","), header_line.count("\t")) else "," if header_line.count(",") >= header_line.count("\t") else "\t"
+        header = next(csv.reader([header_line.rstrip("\r\n")], delimiter=delimiter))
+        first: list[str] | None = None
+        tail: deque[list[str]] = deque(maxlen=tail_rows)
+        rows = 0
+        for row in csv.reader(handle, delimiter=delimiter):
+            if not row or not any(str(cell).strip() for cell in row):
+                continue
+            rows += 1
+            if first is None:
+                first = row
+            tail.append(row)
+    report.update(
+        {
+            "delimiter": delimiter,
+            "columns": header,
+            "row_count": rows,
+            "first_row": first,
+            "last_rows": list(tail),
+        }
+    )
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Read-only audit of the configured GOLD V19 runtime")
     parser.add_argument("--config", required=True, type=Path, help="Challenger local_config.json")
@@ -69,7 +131,7 @@ def main() -> int:
 
     challenger_path = args.config.resolve()
     report: dict[str, Any] = {
-        "mode": "READ_ONLY",
+        "mode": "READ_ONLY_COMPACT_SCHEMA_AUDIT",
         "challenger_config_path": str(challenger_path),
         "challenger_config_exists": challenger_path.exists(),
     }
@@ -95,18 +157,21 @@ def main() -> int:
         state_root = expand_path(state_value)
         report["v19_state_root"] = str(state_root)
         report["v19_state_root_exists"] = state_root.exists()
-        report["v19_state_files"] = list_files(state_root)
-        report["expected_paths"] = {
-            "runtime_state": str(state_root / "runtime_state.json"),
-            "runtime_health": str(state_root / "runtime_health.json"),
-            "score_ledger": str(state_root / "outputs" / "shadow_score_ledger.csv"),
-            "trade_ledger": str(state_root / "outputs" / "shadow_trade_ledger.csv"),
-            "score_history": str(state_root / "score_history.csv.gz"),
-            "pending_scores": str(state_root / "pending_scores.csv.gz"),
+        report["v19_relevant_files"] = relevant_files(state_root)
+
+        runtime_state = state_root / "runtime_state.json"
+        runtime_health = state_root / "runtime_health.json"
+        report["runtime_state"] = redact(read_json(runtime_state)) if runtime_state.exists() else {"exists": False}
+        report["runtime_health"] = redact(read_json(runtime_health)) if runtime_health.exists() else {"exists": False}
+
+        table_paths = {
+            "score_history": state_root / "score_history.csv.gz",
+            "pending_scores": state_root / "pending_scores.csv.gz",
+            "invalid_gap_ledger": state_root / "outputs" / "score_history_invalid_gap_ledger.csv",
+            "legacy_score_ledger": state_root / "outputs" / "shadow_score_ledger.csv",
+            "legacy_trade_ledger": state_root / "outputs" / "shadow_trade_ledger.csv",
         }
-        report["expected_path_exists"] = {
-            name: Path(path).exists() for name, path in report["expected_paths"].items()
-        }
+        report["tables"] = {name: inspect_table(path) for name, path in table_paths.items()}
         report["discovered_runtime_files"] = discover_candidates()
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
