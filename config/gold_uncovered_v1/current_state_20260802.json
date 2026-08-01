@@ -1,0 +1,43 @@
+{
+  "track_id": "GOLD_UNCOVERED_V1",
+  "date": "2026-08-02",
+  "branch": "feature/gold-uncovered-v1-research",
+  "base_branch": "main",
+  "base_commit": "7c3e9ee3e8bfb21f024a273cc3d695d273c0abd5",
+  "status": "GU1_PHASE0_SOURCE_AUTHORITY_AUDIT_PENDING",
+  "mode": "AUDIT_ONLY_RESEARCH_ONLY",
+  "independent_from": [
+    "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+    "GOLD_CHALLENGER_C1_V2_DATA_V3"
+  ],
+  "running_systems": {
+    "v19": "RUNNING_UNTOUCHED",
+    "challenger_c1": "RUNNING_UNTOUCHED"
+  },
+  "completed": [
+    "created branch from main rather than V19 or Challenger branch",
+    "froze structural exclusion contract",
+    "froze five outcome-blind event families and parameter grids",
+    "froze label-free density and redundancy gates",
+    "created source reference for independent read-only audit"
+  ],
+  "not_started": [
+    "user-PC source audit",
+    "authoritative source manifest freeze",
+    "feature calculation",
+    "event density calculation",
+    "candidate proposal freeze",
+    "outcome evaluation"
+  ],
+  "formal_outcome_status": "NOT_EVALUATED",
+  "authorization": {
+    "source_audit": true,
+    "label_free_density": false,
+    "outcome_evaluation": false,
+    "shadow": false,
+    "discord": false,
+    "ai_judgement": false,
+    "mt5_order": false,
+    "live_trading": false
+  }
+}
