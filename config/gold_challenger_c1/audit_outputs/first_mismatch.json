@@ -1,0 +1,29 @@
+{
+  "status": "MISMATCH",
+  "classification": "DATA_VERSION_MISMATCH",
+  "timestamp": "2024-07-02 01:15:00",
+  "merge_status": "right_only",
+  "reference_chosen_side": null,
+  "reproduced_chosen_side": "SHORT",
+  "reference_LONG_rank": null,
+  "reproduced_LONG_rank": 0.008566533409480296,
+  "reference_SHORT_rank": null,
+  "reproduced_SHORT_rank": 0.251284980011422,
+  "reference_P90": null,
+  "reproduced_P90": false,
+  "training_cutoff": "2023-12-31 12:00:00",
+  "calibration_start": "2024-01-01 00:00:00",
+  "calibration_cutoff": "2024-07-01 00:00:00",
+  "used_H1_row": {
+    "row_index": 8852,
+    "bar_open_time": "2024-07-01 23:00:00",
+    "bar_close_time": "2024-07-02 00:00:00"
+  },
+  "used_H4_row": {
+    "row_index": 6824,
+    "bar_open_time": "2024-07-01 20:00:00",
+    "bar_close_time": "2024-07-02 00:00:00"
+  },
+  "source_row_index": 42,
+  "entry_M1_index": 530301
+}
