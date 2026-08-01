@@ -1,0 +1,36 @@
+{
+  "status": "RETROSPECTIVE_HIERARCHICAL_AND_PATH_ROUTER_RESEARCH_COMPLETE_NO_FORMAL_CANDIDATE",
+  "standard_spread_usd_once": 0.30,
+  "boundaries": {
+    "stop_usd_max": 5.0,
+    "target_usd_min": 5.0,
+    "breakeven_allowed": true
+  },
+  "calibration_gate": {
+    "n_min": 120,
+    "median_monthly_min": 20,
+    "positive_pnl_win_rate_min": 0.50,
+    "profit_factor_min": 1.20,
+    "positive_months_min": 4
+  },
+  "vectors": {
+    "hierarchical_counterfactual": "FAILED",
+    "event_direction_anchored": "FAILED",
+    "tradability_first_break_follow": "FAILED",
+    "false_break_reclaim_fade": "FAILED",
+    "false_break_consensus": "FAILED"
+  },
+  "closest_high_frequency": {
+    "family": "FALSE_BREAK_RECLAIM_FADE",
+    "n": 140,
+    "median_monthly": 25.5,
+    "win_rate": 0.4785714286,
+    "profit_factor": 1.211640,
+    "net_usd": 68.51
+  },
+  "evaluation_access_incident": "2025+ trade metrics remained closed, but diagnostic AUC touched 2025+ labels; treat all results as retrospective exploratory only.",
+  "shadow_authorized": false,
+  "discord_authorized": false,
+  "mt5_order_authorized": false,
+  "live_trading_authorized": false
+}
