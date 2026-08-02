@@ -1,0 +1,66 @@
+{
+  "study": "GOLD_SCALP_EVENT_SEQUENCE_GRAMMAR_V1",
+  "date": "2026-08-02",
+  "formal_status": "RETROSPECTIVE_EVENT_SEQUENCE_MULTI_VECTOR_COMPLETE_NO_FORMAL_CANDIDATE",
+  "decision": "NO_FORMAL_CANDIDATE",
+  "data_boundary": "existing GOLD candle data only",
+  "execution_contract": {
+    "time": "MT5 broker-server naive",
+    "closed_rows_only": true,
+    "spread_usd_once": 0.30,
+    "initial_sl_max_usd": 5.0,
+    "tp_min_usd": 5.0,
+    "breakeven_allowed": true,
+    "exact_m1_resolution": true,
+    "same_m1_priority": "protective stop first",
+    "one_position_nonoverlap": true
+  },
+  "vectors": {
+    "ordered_existing_event_grammars": {
+      "grammar_count": 20,
+      "sequence_candidates": 40766,
+      "calibration_passes": 0
+    },
+    "causal_strength_and_dwell": {
+      "component_count": 68,
+      "filtered_candidates": 27779,
+      "core_n": 169,
+      "core_wr": 0.307692,
+      "core_pf": 0.701374,
+      "core_net_usd": -146.30
+    },
+    "direction_and_timing": {
+      "candidate_count": 78993,
+      "catalog_n": 49,
+      "catalog_wr": 0.326531,
+      "catalog_pf": 0.974396,
+      "catalog_net_usd": -2.65
+    },
+    "raw_m5_finite_state_grammars": {
+      "grammar_count": 14,
+      "candidate_count": 58075,
+      "balanced_n": 214,
+      "balanced_wr": 0.308411,
+      "balanced_pf": 0.595440,
+      "balanced_net_usd": -221.97
+    },
+    "pseudo_forward_promotion": {
+      "unified_natural_ledger_rows": 1042192,
+      "paper_component_block_observations": 22,
+      "one_prior_eligible": 0,
+      "two_prior_eligible": 0,
+      "consecutive_two_eligible": 0
+    }
+  },
+  "prohibitions": [
+    "NO_POST_RESULT_RESCUE",
+    "NO_SHADOW",
+    "NO_DISCORD",
+    "NO_MT5_ORDER",
+    "NO_LIVE_TRADING",
+    "NO_PROMOTION",
+    "NO_MERGE_AUTHORIZATION",
+    "DO_NOT_MODIFY_V19",
+    "DO_NOT_MODIFY_CHALLENGER_C1"
+  ]
+}
