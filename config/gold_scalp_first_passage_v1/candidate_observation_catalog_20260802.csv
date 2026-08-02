@@ -1,0 +1,4 @@
+candidate_id,status,source,target_block,n,win_rate,profit_factor,net_usd,reason
+FP_HTF_PULLBACK_RESUME_2024H2,OBSERVATION_ONLY_SINGLE_BLOCK,EVENT_SPECIFIC_FIRST_PASSAGE,2024H2,25,0.44,1.560882,38.14,Positive target block but not repeated in later blocks
+FP_M5_GAP_FILL_2025H2,OBSERVATION_ONLY_SINGLE_BLOCK,EVENT_SPECIFIC_FIRST_PASSAGE,2025H2,66,0.363636,1.239541,38.65,Positive target block but win rate below 50 and no repeated confirmation
+FP_COMPRESSION_RELEASE_2025H1,OBSERVATION_ONLY_SINGLE_BLOCK,EVENT_SPECIFIC_FIRST_PASSAGE,2025H1,38,0.368421,1.118860,11.47,Small positive target block below PF and win-rate gates
