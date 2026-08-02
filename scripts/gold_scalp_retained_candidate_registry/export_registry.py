@@ -10,7 +10,7 @@ from io import StringIO
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-CSV_PATH = ROOT / "config/gold_scalp_retained_candidate_registry/retained_candidate_catalog_20260802.csv"
+CSV_PATH = ROOT / "config/gold_scalp_retained_candidate_registry/retained_candidate_catalog_20260802_v2.csv"
 
 
 def parse_args() -> argparse.Namespace:
