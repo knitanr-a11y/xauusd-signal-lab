@@ -9,3 +9,5 @@ REGIME_SPECIALIST_COMPLETE_PORTFOLIO,regime_specialist_stack,807,0.3928,0.9489,F
 FIRST_PASSAGE_GLOBAL_AND_EMPIRICAL,first_passage,0,,,All six calibration sequences produced zero formal passes,feature/gold-scalp-first-passage-v1-research,90
 EVENT_SEQUENCE_GRAMMAR_COMPLETE,event_sequence_grammar,0,,,No repeatable promoted component survived,feature/gold-scalp-event-sequence-grammar-v1-research,91
 ACTIVATION_RETEST_ALL_EVENT_STACK,activation_retest_broad,2012,0.3613,1.006,Near flat only; not a candidate and partial exit failed universally,feature/gold-scalp-activation-retest-v1-research,93
+RANGE_ACTIVATION_RETEST_FOLLOW,range_follow_activation_retest,213,0.488263,0.939888,Range LONG and SHORT follow families were unprofitable; do not restore by side or event deletion,feature/gold-scalp-long-range-activation-partial-v1-research,95
+RANGE_SETUP_FAILURE_CONTINUATION,range_failure_activation_retest,167,0.461078,0.919156,Pre-activation failure and post-activation collapse continuation both failed with no promoted engine,feature/gold-scalp-long-range-activation-partial-v1-research,95
