@@ -1,0 +1,53 @@
+{
+  "status": "RETROSPECTIVE_LONG_RANGE_ACTIVATION_PARTIAL_COMPLETE_TWO_PROVISIONAL_TREND_LONG_LEADS_RANGE_REJECTED_NO_DEPLOYMENT",
+  "date": "2026-08-02",
+  "execution_contract": {
+    "data": "existing GOLD candles only",
+    "time": "MT5 broker-server naive",
+    "spread_usd_once": 0.3,
+    "initial_sl_usd_max": 5.0,
+    "first_tp_usd_min": 5.0,
+    "one_position_nonoverlap": true
+  },
+  "main_profiles": {
+    "CATALOG": {"n": 234, "wr": 0.4700854701, "pf": 0.8816900590, "net_usd": -67.8566666667, "dd_usd": 147.5516666667, "median_monthly": 3.0},
+    "BALANCED": {"n": 213, "wr": 0.4882629108, "pf": 0.9398883557, "net_usd": -30.6900000000, "dd_usd": 108.0516666667, "median_monthly": 3.0}
+  },
+  "family_results": {
+    "TREND_LONG_CATALOG": {"n": 54, "wr": 0.5740740741, "pf": 1.4482028986, "net_usd": 51.5433333333},
+    "TREND_LONG_BALANCED": {"n": 47, "wr": 0.5744680851, "pf": 1.4521000000, "net_usd": 45.2100000000},
+    "RANGE_LONG": {"n": 106, "wr": 0.4716981132, "pf": 0.8676847796, "net_usd": -33.5300000000},
+    "RANGE_SHORT_CATALOG": {"n": 74, "wr": 0.3918918919, "pf": 0.5814078191, "net_usd": -85.8700000000},
+    "RANGE_SHORT_BALANCED": {"n": 60, "wr": 0.45, "pf": 0.7303678249, "net_usd": -42.3700000000}
+  },
+  "range_failure_result": {"n": 167, "wr": 0.4610778443, "pf": 0.9191557968, "net_usd": -31.4233333333, "median_monthly": 7.0, "retained_rows": 0},
+  "provisional_observation_leads": [
+    {
+      "candidate_id": "TREND_LONG_EFFORT_LEVEL_P1_BASE_P50",
+      "n": 53,
+      "wr": 0.6037735849,
+      "pf": 1.7001432518,
+      "net_usd": 68.425,
+      "dd_usd": 20.23,
+      "median_monthly": 1.0,
+      "status": "PROVISIONAL_OBSERVATION_LEAD"
+    },
+    {
+      "candidate_id": "TREND_LONG_HTF_LEVEL_P1_BASE_P50",
+      "n": 47,
+      "wr": 0.6595744681,
+      "pf": 2.082,
+      "net_usd": 86.56,
+      "dd_usd": 15.0,
+      "median_monthly": 1.0,
+      "status": "PROVISIONAL_OBSERVATION_LEAD"
+    }
+  ],
+  "descriptive_four_lead_stack": {"n": 249, "wr": 0.5742971888, "pf": 1.4547389801, "net_usd": 232.84, "dd_usd": 30.35, "median_monthly": 6.0, "boundary": "post-result descriptive only"},
+  "deployment_authorized": false,
+  "shadow_authorized": false,
+  "discord_authorized": false,
+  "mt5_order_authorized": false,
+  "v19_modified": false,
+  "challenger_c1_modified": false
+}
