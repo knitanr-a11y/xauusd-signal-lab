@@ -1,0 +1,11 @@
+item_id,family,forward_n,forward_wr,forward_pf,reason,source_branch,source_pr
+EVENT_ANCHORED_Q975,fixed_score_event_anchored,866,0.316397,0.860553,Fixed threshold forward collapse; do not restore,feature/gold-scalp-candidate-stack-v1-research,88
+FALSE_BREAK_STACK_COMPONENT,false_break_stack,287,0.337979,1.056511,Standalone forward quality failed; not retained,feature/gold-scalp-candidate-stack-v1-research,88
+HIERARCHICAL_STACK_COMPONENT,hierarchical_stack,321,0.336449,0.994844,Fixed threshold forward failure,feature/gold-scalp-candidate-stack-v1-research,88
+PCA_SAME_EVENT_WIN_CONSENSUS,path_shape_pca,3,0.0,0.0,Attractive calibration followed by three losses,feature/gold-scalp-path-shape-neighbors-v1-research,92
+AE_SAME_EVENT_WIN_CONSENSUS,path_shape_autoencoder,15,0.266667,0.606061,Forward reversal after calibration,feature/gold-scalp-path-shape-neighbors-v1-research,92
+MULTISCALE_SAME_EVENT_WIN_CONSENSUS,path_shape_multiscale,8,0.125,0.238095,Forward reversal after calibration,feature/gold-scalp-path-shape-neighbors-v1-research,92
+REGIME_SPECIALIST_COMPLETE_PORTFOLIO,regime_specialist_stack,807,0.3928,0.9489,Frequency met but total portfolio unprofitable,feature/gold-scalp-regime-stack-v1-research,89
+FIRST_PASSAGE_GLOBAL_AND_EMPIRICAL,first_passage,0,,,All six calibration sequences produced zero formal passes,feature/gold-scalp-first-passage-v1-research,90
+EVENT_SEQUENCE_GRAMMAR_COMPLETE,event_sequence_grammar,0,,,No repeatable promoted component survived,feature/gold-scalp-event-sequence-grammar-v1-research,91
+ACTIVATION_RETEST_ALL_EVENT_STACK,activation_retest_broad,2012,0.3613,1.006,Near flat only; not a candidate and partial exit failed universally,feature/gold-scalp-activation-retest-v1-research,93
