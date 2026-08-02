@@ -58,15 +58,19 @@ It uses no ML model, no score rank, no wave grammar, and no existing-candidate e
 
 The entry-generation logic is independent. This does not claim that two independent systems can never produce an entry at the same timestamp. A timestamp-level portfolio overlap study would require authoritative historical V19 and Challenger accepted-entry ledgers as explicit read-only comparison inputs. Those ledgers were not used as candidate inputs in this research.
 
+## Reproduction correction
+
+A fresh rerun against the current uploaded M1 union produced 1,239,131 canonical M1 rows. The earlier report snapshot used 1,167,591 rows. The fresh rerun is authoritative. A separate report wording bug that hard-coded both 2024H1 and 2024H2 as excluded was corrected; the actual coverage table excludes only 2024H1.
+
 ## Result
 
 The independent family condition was satisfied, but performance failed:
 
-- exact-M1 pseudo-forward selected trades: 33;
-- win rate: 45.45%;
-- PF: 0.78125;
-- net: -15.75 USD;
-- max drawdown: 32.25 USD;
+- exact-M1 pseudo-forward selected trades: 10;
+- win rate: 30.00%;
+- PF: 0.535714;
+- net: -13.00 USD;
+- max drawdown: 13.75 USD;
 - formal observation candidates: zero.
 
 Therefore the family is recorded as completed negative research and is not added to Shadow or the retained-candidate registry.
