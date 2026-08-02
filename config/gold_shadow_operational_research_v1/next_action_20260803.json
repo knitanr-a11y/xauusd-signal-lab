@@ -1,19 +1,20 @@
 {
-  "next_action": "USER_PC_FIRST_READ_ONLY_OPERATIONAL_SNAPSHOT",
+  "next_action": "CONTINUE_THREE_NATURAL_SHADOWS_AND_COLLECT_POST_20260803_EVIDENCE",
   "steps": [
-    "Create or use a separate checkout such as C:\\gold-operational-research",
-    "In that separate checkout switch to feature/gold-shadow-operational-research-v1",
-    "Do not switch the active V19, Challenger C1 or P75 checkout away from its running branch",
-    "Keep all source Shadow loops running; the collector is read-only",
-    "Run scripts/gold_shadow_operational_research_v1/01_COLLECT_SNAPSHOT.bat",
-    "Confirm local_config.json state_root paths if prompted",
-    "Share the generated GOLD_SHADOW_OPERATIONAL_SNAPSHOT_*.zip for audit"
+    "Keep V19 Shadow unchanged",
+    "Keep Challenger C1 V19-priority contract unchanged",
+    "Keep P75 State Survival Shadow unchanged",
+    "Do not suppress same-time, near-time or opposite-direction entries",
+    "Preserve all accepted prospective entries and resolved outcomes after 2026-08-03",
+    "When evidence is provided, evaluate only the preregistered overlap, correlation, DD, delivery and recovery fields"
   ],
-  "concurrent_write_policy": "If a source ledger changes during collection, mark the snapshot non-atomic and collect again; do not stop or alter the source runtime automatically.",
+  "historical_audit_decision": "No cross-system priority or global one-position rule is adopted from retrospective diagnostics.",
+  "user_pc_collector_required_now": false,
+  "future_snapshot_role": "Optional evidence transfer for genuinely prospective post-20260803 observations, not a prerequisite for the completed historical audit.",
   "do_not": [
-    "Do not run this branch by replacing an active Shadow checkout",
-    "Do not copy this collector into a source state root",
-    "Do not edit V19, Challenger C1 or P75 files",
-    "Do not infer zero performance from a missing optional system"
+    "Do not change V19, Challenger C1 or P75 conditions",
+    "Do not rescue performance by deleting a side, month, session or overlap cohort",
+    "Do not adopt the retrospectively attractive first-arrival suppression policy",
+    "Do not infer exact historical overlap from reconstructed ledgers"
   ]
 }
