@@ -1,0 +1,37 @@
+{
+  "status": "RETROSPECTIVE_PATH_SHAPE_MULTI_REPRESENTATION_COMPLETE_NO_FORMAL_CANDIDATE",
+  "formal_candidate_count": 0,
+  "promotion_eligible_count": 0,
+  "contracts": {
+    "spread_usd_once": 0.30,
+    "max_initial_sl_usd": 5.0,
+    "min_tp_usd": 5.0,
+    "breakeven_allowed": true,
+    "representation_fit_period": "2023H1",
+    "outcome_labels_used_for_representation": false
+  },
+  "pca_same_event": {
+    "calibration": {"block":"2024H1","n":113,"wr":0.548673,"pf":1.67826,"net":87.76,"dd":14.73,"positive_months":6,"median_monthly":19.0},
+    "target": {"block":"2024H2","n":3,"wr":0.0,"pf":0.0,"net":-9.0}
+  },
+  "autoencoder_same_event": {
+    "calibration": {"block":"2025H2","n":25,"wr":0.60,"pf":2.50,"net":45.0,"dd":10.0,"positive_months":4,"median_monthly":4.0},
+    "target": {"block":"2026H1","n":15,"wr":0.266667,"pf":0.606061,"net":-13.0,"dd":18.0}
+  },
+  "multiscale_same_event": {
+    "calibration": {"block":"2025H2","n":42,"wr":0.52381,"pf":1.809153,"net":47.74,"dd":28.76,"positive_months":4,"median_monthly":7.0},
+    "target": {"block":"2026H1","n":8,"wr":0.125,"pf":0.238095,"net":-16.0,"dd":21.0}
+  },
+  "implementation_incident": "Initial cross-event selection omitted filtering saved summaries by requested k. Corrected k-filter results only are formal.",
+  "decision": "NO_FORMAL_CANDIDATE",
+  "next_boundary": "CAUSAL_ACTIVATION_AND_RETEST_EXECUTION_LAYER",
+  "prohibitions": [
+    "NO_SHADOW",
+    "NO_DISCORD",
+    "NO_MT5_ORDER",
+    "NO_LIVE_TRADING",
+    "NO_PROMOTION",
+    "NO_MERGE_WITHOUT_EXPLICIT_AUTHORIZATION",
+    "DO_NOT_MODIFY_V19_OR_CHALLENGER_C1"
+  ]
+}
