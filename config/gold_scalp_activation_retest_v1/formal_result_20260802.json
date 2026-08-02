@@ -1,0 +1,50 @@
+{
+  "formal_status": "RETROSPECTIVE_ACTIVATION_RETEST_FIVE_VECTOR_COMPLETE_PROVISIONAL_VOLUME_ABSORPTION_PARTIAL_EXIT_CATALOG_LEAD_NO_DEPLOYMENT",
+  "standard_spread_usd_once": 0.3,
+  "initial_sl_max_usd": 5.0,
+  "tp_min_usd": 5.0,
+  "breakeven_allowed": true,
+  "broad_activation_retest": {
+    "setups": 170664,
+    "contracts": 138,
+    "entry_rows": 4176176,
+    "components": 3864,
+    "catalog": {"n": 922, "wr": 0.342733, "pf": 0.972411, "net": -70.44, "median_monthly": 22.0},
+    "balanced": {"n": 1376, "wr": 0.352471, "pf": 0.964369, "net": -138.13, "median_monthly": 45.0},
+    "broad": {"n": 2012, "wr": 0.361332, "pf": 1.005972, "net": 33.02, "dd": 334.69, "median_monthly": 68.0}
+  },
+  "partial_only_specialist": {
+    "candidate_family": "VOLUME_ABSORPTION_SHORT_ACTIVATION3_RETEST_PARTIAL50_TP5_TP10_SL5",
+    "catalog": {"n": 60, "wr": 0.6, "pf": 1.618056, "net": 74.166667, "dd": 23.333333, "median_monthly": 2.0},
+    "balanced": {"n": 74, "wr": 0.581081, "pf": 1.478495, "net": 74.166667, "dd": 25.0, "median_monthly": 3.0},
+    "exit": {
+      "initial_sl_usd": 5.0,
+      "first_tp_usd": 5.0,
+      "first_close_fraction": 0.5,
+      "remaining_stop_after_first_tp": "BREAKEVEN",
+      "final_tp_usd": 10.0,
+      "horizon_minutes": 240
+    }
+  },
+  "partial_only_all_event_replication": {
+    "catalog": {"n": 1800, "wr": 0.481111, "pf": 0.942005, "net": -265.485},
+    "balanced": {"n": 2255, "wr": 0.480266, "pf": 0.935606, "net": -368.35},
+    "broad": {"n": 3581, "wr": 0.476962, "pf": 0.901126, "net": -910.79}
+  },
+  "reasons_not_formal": [
+    "the specialist family was isolated after broad-vector results were visible",
+    "the partial-only restriction was motivated by observed TP10 dependency",
+    "frequency is only about two to three trades per month",
+    "2025H1 remained negative",
+    "the broad all-event partial-exit replication failed",
+    "fresh no-backfill prospective confirmation is absent"
+  ],
+  "authorization": {
+    "shadow": false,
+    "discord": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "promotion": false,
+    "merge": false
+  }
+}
