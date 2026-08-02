@@ -1,0 +1,12 @@
+{
+  "date": "2026-08-03",
+  "research_id": "GOLD_SHADOW_OPERATIONAL_RESEARCH_V1",
+  "formal_status": "READ_ONLY_COLLECTOR_IMPLEMENTED_PENDING_USER_PC_FIRST_SNAPSHOT",
+  "branch": "feature/gold-shadow-operational-research-v1",
+  "source_system_modification": false,
+  "discord_send": false,
+  "mt5_api": false,
+  "order_send": false,
+  "portfolio_priority_policy": false,
+  "next_action": "Run the read-only collector once on the user PC and inspect the generated snapshot before defining any recurring cadence."
+}
