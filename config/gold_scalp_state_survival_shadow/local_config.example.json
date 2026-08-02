@@ -1,0 +1,26 @@
+{
+  "candidate_id": "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3",
+  "contract_version": "2026-08-02-shadow-v1",
+  "state_dir": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_scalp_state_survival_shadow",
+  "poll_seconds": 10,
+  "v19_local_config_path": "..\\gold_wave_shadow_v19\\local_config.json",
+  "data_sources": {
+    "inherit_from_v19": true,
+    "M1": [],
+    "M5": [],
+    "M15": [],
+    "H1": [],
+    "H4": []
+  },
+  "discord": {
+    "enabled": true,
+    "webhook_source": "V19_LOCAL_CONFIG",
+    "webhook_url": "",
+    "username": "GOLD State Survival Shadow",
+    "attach_chart": true,
+    "chart_bars": 80
+  },
+  "mt5_orders_enabled": false,
+  "final_signal_enabled": false,
+  "live_ready": false
+}

@@ -1,0 +1,80 @@
+{
+  "contract_id": "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3_SHADOW_20260802",
+  "candidate_id": "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3",
+  "contract_version": "2026-08-02-shadow-v1",
+  "formal_status": "PROSPECTIVE_SHADOW_IMPLEMENTED_PENDING_USER_PC_ACTIVATION",
+  "research_cutoff_signal_time": "2026-07-31 19:30:00",
+  "prospective_start_rule": "bootstrap at the latest existing closed M15 row and accept only a later newly appended closed M15 row",
+  "time_contract": {
+    "timezone": "MT5 broker-server naive time",
+    "csv_latest_row": "closed by contract",
+    "open_candles_allowed": false,
+    "future_features_allowed": false
+  },
+  "state_grammar": {
+    "session": "decision_time hour: S01 before 08:00, S08 before 15:00, otherwise S15",
+    "h1_h4_alignment": "UP when close > EMA20 > EMA50 on both last fully closed H1 and H4; DOWN when close < EMA20 < EMA50 on both; otherwise MIXED",
+    "volatility": "current M15 ATR14 versus prior 5760 closed-M15 ATR14 tertiles",
+    "momentum": "(current close - close four M15 rows earlier) / current ATR14; UP >= 0.50, DOWN <= -0.50, otherwise FLAT",
+    "expansion": "current M15 high-low divided by prior 96 closed-M15 range median; COMP <= 0.80, EXP >= 1.50, otherwise NORM",
+    "candle_type": "BULL or BEAR when absolute body/range >= 0.60; otherwise WEAK"
+  },
+  "selected_state_actions": {
+    "S08|UP|LOW|UP|NORM|WEAK": "SHORT",
+    "S08|UP|MID|UP|COMP|WEAK": "SHORT",
+    "S01|UP|LOW|UP|NORM|WEAK": "LONG",
+    "S08|MIXED|LOW|UP|EXP|BULL": "SHORT"
+  },
+  "entry": {
+    "signal_source": "newly appended closed M15 row",
+    "entry_time": "exact signal_time plus 15 minutes M1 open",
+    "missing_exact_m1": "suppress fail-closed",
+    "spread_usd_once": 0.3,
+    "one_position_nonoverlap": true
+  },
+  "episode_rearm": {
+    "entry_occurrence": "first occurrence while armed",
+    "rearm": "M1 position has exited and the same exact state was absent for two consecutive closed M15 rows"
+  },
+  "exit": {
+    "initial_stop_usd": 5.0,
+    "partial_target_usd": 5.0,
+    "partial_fraction": 0.75,
+    "remainder_fraction": 0.25,
+    "remainder_stop_after_partial": "breakeven",
+    "final_target_usd": 10.0,
+    "horizon_minutes": 240,
+    "same_bar_priority": "initial SL first; after partial, BE before final TP on later bars",
+    "resolutions": [
+      "exact M1 primary",
+      "conservative M5 mirror"
+    ]
+  },
+  "monthly_health": {
+    "decision_time": "first eligible entry decision for each state in each new MT5 calendar month",
+    "history": "same half-year, same state/action, actually executed prospective trades only",
+    "resolved_requirement": "both M1 and M5 exit_time strictly before decision_time",
+    "minimum_resolved_trades": 10,
+    "suspend_if": "cumulative M1 net <= 0 OR cumulative M5 net <= 0",
+    "duration": "remainder of the current calendar half-year",
+    "bootstrap": "empty result history; no pre-cutoff backfill"
+  },
+  "discord": {
+    "enabled": true,
+    "event": "newly accepted pseudo-entry only",
+    "notify_no_signal": false,
+    "notify_suppression": false,
+    "notify_exit": false,
+    "webhook_secret_committed": false,
+    "default_source": "read existing local V19 webhook configuration"
+  },
+  "safety": {
+    "shadow": true,
+    "discord_entry_notification": true,
+    "mt5_orders": false,
+    "demo_orders": false,
+    "final_signal": false,
+    "live_ready": false,
+    "ai_judgement": false
+  }
+}
