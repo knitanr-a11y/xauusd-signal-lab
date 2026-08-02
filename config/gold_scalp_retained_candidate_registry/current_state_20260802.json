@@ -1,0 +1,19 @@
+{
+  "status": "GOLD_SCALP_RETAINED_CANDIDATE_REGISTRY_V1_READY_RESEARCH_ONLY",
+  "as_of": "2026-08-02",
+  "active_registry_records": 15,
+  "tiers": {
+    "PROSPECTIVE_CATALOG": 2,
+    "PROVISIONAL_OBSERVATION_LEAD": 2,
+    "OBSERVATION_ONLY": 8,
+    "DESCRIPTIVE_ONLY": 3
+  },
+  "deployment_authorized": false,
+  "shadow_authorized": false,
+  "discord_authorized": false,
+  "mt5_order_authorized": false,
+  "frozen_systems_untouched": [
+    "V19",
+    "Challenger C1"
+  ]
+}
