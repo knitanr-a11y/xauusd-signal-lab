@@ -2,12 +2,15 @@
 
 正式状態: **`AUDIT_COMPLETE_NO_FORMAL_PROMOTION`**
 
-## データ
+## 再現訂正
 
-- M1統合: 1,167,591行（2023-01-03 01:00:00 ～ 2026-07-31 23:56:00）
+現在のアップロード済みデータで再実行した結果を正式版とします。
+
+- M1統合: 1,239,131行（2023-01-03 01:00:00 ～ 2026-07-31 23:56:00）
 - M5統合: 253,557行（2023-01-03 01:00:00 ～ 2026-07-31 23:50:00）
-- M1の重複は後から追加されたチャンクを優先し、goldsharp重複部分は完全一致を確認しました。
-- 2024H1・2024H2はexact M1 coverage不足のため、正式な擬似forward対象から除外しました。
+- 以前の結果スナップショットはM1が1,167,591行でした。現在データでの再実行結果を優先します。
+- exact M1 coverageが99%未満のblockだけを動的に除外しました。実際の除外は2024H1だけです。
+- goldsharp重複部分114,032行は完全一致しました。
 
 ## 研究した独立family
 
@@ -15,18 +18,16 @@
 - server時刻01・08・15時のopening range拡張と初回retest
 - daily reopen gapの保持と順方向継続
 
-## 段階別成績
+V19のE40・P90・IMPULSE_EARLY・episode、Challenger C1のIMPULSE_LATE／CORRECTION_EARLY・rank・preemptionは使用していません。
 
-- CATALOG / RAW_SELECTED_EXACT_M1: 33件、勝率45.45%、PF0.7812、損益-15.75、DD32.25
-- CATALOG / GLOBAL_DEDUP_EXACT_M1: 33件、勝率45.45%、PF0.7812、損益-15.75、DD32.25
+## 正式な擬似forward成績
+
+- CATALOG / RAW_SELECTED_EXACT_M1: 10件、勝率30.00%、PF0.5357、損益-13.00、DD13.75
+- CATALOG / GLOBAL_DEDUP_EXACT_M1: 10件、勝率30.00%、PF0.5357、損益-13.00、DD13.75
 - CATALOG / HEALTH_GATE_1_PRIOR_POSITIVE_BLOCK: 0件
 - CATALOG / HEALTH_GATE_2_PRIOR_POSITIVE_BLOCKS: 0件
 - CATALOG / RESOLVED_ONLY_LIVE_REPLAY_1BLOCK: 0件
-- BALANCED / RAW_SELECTED_EXACT_M1: 33件、勝率45.45%、PF0.7812、損益-15.75、DD32.25
-- BALANCED / GLOBAL_DEDUP_EXACT_M1: 33件、勝率45.45%、PF0.7812、損益-15.75、DD32.25
-- BALANCED / HEALTH_GATE_1_PRIOR_POSITIVE_BLOCK: 0件
-- BALANCED / HEALTH_GATE_2_PRIOR_POSITIVE_BLOCKS: 0件
-- BALANCED / RESOLVED_ONLY_LIVE_REPLAY_1BLOCK: 0件
+- BALANCEDはcalibration選択0件
 
 ## 後付けで見えた小標本（不採用）
 
@@ -37,5 +38,6 @@
 ## 判定
 
 - 同一engine・同一固定exitで、2つ以上の擬似forward target blockを通過した観察候補はありませんでした。
+- このfamilyはV19・Challenger C1と独立していますが、成績不合格です。
 - live_ready / final_signal / Shadow / Discord / MT5発注はすべてOFFです。
 - V19・Challenger C1・P75 State Survival Shadow・統合レジストリは変更していません。
