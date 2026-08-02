@@ -1,0 +1,48 @@
+{
+  "as_of": "2026-08-02",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "sources": [
+    {
+      "research": "event_first_and_candidate_stack",
+      "branch": "feature/gold-scalp-candidate-stack-v1-research",
+      "pr": 88,
+      "primary_file": "config/gold_scalp_candidate_stack_v1/candidate_catalog_20260802.csv"
+    },
+    {
+      "research": "regime_specialist_stack",
+      "branch": "feature/gold-scalp-regime-stack-v1-research",
+      "pr": 89,
+      "primary_file": "docs/gold_scalp_regime_stack_v1/GOLD_SCALP_REGIME_STACK_V1_AUDIT_20260802.md"
+    },
+    {
+      "research": "first_passage",
+      "branch": "feature/gold-scalp-first-passage-v1-research",
+      "pr": 90,
+      "primary_file": "config/gold_scalp_first_passage_v1/candidate_observation_catalog_20260802.csv"
+    },
+    {
+      "research": "event_sequence_grammar",
+      "branch": "feature/gold-scalp-event-sequence-grammar-v1-research",
+      "pr": 91,
+      "primary_file": "config/gold_scalp_event_sequence_grammar_v1/candidate_observation_catalog_20260802.csv"
+    },
+    {
+      "research": "path_shape_neighbors",
+      "branch": "feature/gold-scalp-path-shape-neighbors-v1-research",
+      "pr": 92,
+      "primary_file": "config/gold_scalp_path_shape_neighbors_v1/candidate_observation_catalog_20260802.csv"
+    },
+    {
+      "research": "activation_retest",
+      "branch": "feature/gold-scalp-activation-retest-v1-research",
+      "pr": 93,
+      "primary_file": "config/gold_scalp_activation_retest_v1/candidate_observation_catalog_20260802.csv"
+    },
+    {
+      "research": "long_range_activation_partial",
+      "branch": "feature/gold-scalp-long-range-activation-partial-v1-research",
+      "pr": 95,
+      "primary_file": "config/gold_scalp_long_range_activation_partial_v1/candidate_observation_catalog_20260802.csv"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "status": "GOLD_SCALP_RETAINED_CANDIDATE_REGISTRY_V1_READY_RESEARCH_ONLY",
+  "as_of": "2026-08-02",
+  "authoritative_catalog": "retained_candidate_catalog_20260802_v2.csv",
+  "active_registry_records": 17,
+  "tiers": {
+    "PROSPECTIVE_CATALOG": 2,
+    "PROVISIONAL_OBSERVATION_LEAD": 4,
+    "OBSERVATION_ONLY": 8,
+    "DESCRIPTIVE_ONLY": 3
+  },
+  "latest_added_candidates": [
+    "TREND_LONG_EFFORT_LEVEL_P1_BASE_P50",
+    "TREND_LONG_HTF_LEVEL_P1_BASE_P50"
+  ],
+  "descriptive_four_lead_stack": {
+    "n": 249,
+    "wr": 0.5742971888,
+    "pf": 1.4547389801,
+    "net_usd": 232.84,
+    "dd_usd": 30.35,
+    "median_monthly": 6.0,
+    "validation_status": "POST_RESULT_DESCRIPTIVE_ONLY"
+  },
+  "deployment_authorized": false,
+  "shadow_authorized": false,
+  "discord_authorized": false,
+  "mt5_order_authorized": false,
+  "frozen_systems_untouched": [
+    "V19",
+    "Challenger C1"
+  ]
+}
