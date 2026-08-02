@@ -37,6 +37,12 @@
       "branch": "feature/gold-scalp-activation-retest-v1-research",
       "pr": 93,
       "primary_file": "config/gold_scalp_activation_retest_v1/candidate_observation_catalog_20260802.csv"
+    },
+    {
+      "research": "long_range_activation_partial",
+      "branch": "feature/gold-scalp-long-range-activation-partial-v1-research",
+      "pr": 95,
+      "primary_file": "config/gold_scalp_long_range_activation_partial_v1/candidate_observation_catalog_20260802.csv"
     }
   ]
 }
