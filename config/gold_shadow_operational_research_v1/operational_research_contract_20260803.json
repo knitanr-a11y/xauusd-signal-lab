@@ -1,0 +1,50 @@
+{
+  "research_id": "GOLD_SHADOW_OPERATIONAL_RESEARCH_V1",
+  "contract_version": "2026-08-03-v1",
+  "formal_status": "PREREGISTERED_READ_ONLY_OPERATIONAL_COLLECTION",
+  "systems": [
+    "GOLD_V19_FIRST_P90_IMPULSE_EARLY_SHADOW",
+    "GOLD_CHALLENGER_C1_V2_DATA_V3",
+    "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3"
+  ],
+  "source_policy": {
+    "read_only": true,
+    "source_file_write": false,
+    "source_file_delete": false,
+    "source_file_rename": false,
+    "source_runtime_start_stop": false,
+    "source_config_change": false,
+    "webhook_read": false,
+    "mt5_api": false
+  },
+  "time_policy": {
+    "strategy_timestamps": "MT5 broker-server naive time",
+    "filesystem_freshness": "Windows local filesystem modification time, diagnostic only",
+    "timezone_conversion": false
+  },
+  "frozen_observations": [
+    "system availability and cursor",
+    "accepted entry count and timestamp",
+    "direction agreement or opposition",
+    "exact same-time entry overlap",
+    "entry proximity within 15 and 60 minutes",
+    "open-position interval overlap",
+    "per-system resolved PnL and drawdown when available",
+    "naive combined PnL and drawdown without portfolio suppression",
+    "Discord delivery ledger presence and lag when timestamps are available",
+    "restart/recovery counters and stale runtime files",
+    "duplicate trade IDs or duplicate entry keys"
+  ],
+  "prohibitions": [
+    "DO_NOT_CHANGE_V19",
+    "DO_NOT_CHANGE_CHALLENGER_C1",
+    "DO_NOT_CHANGE_P75_STATE_SURVIVAL",
+    "DO_NOT_SELECT_PRIORITY_AFTER_RESULTS",
+    "DO_NOT_SUPPRESS_A_SYSTEM_AFTER_RESULTS",
+    "DO_NOT_CREATE_ORDERS",
+    "DO_NOT_SEND_DISCORD",
+    "DO_NOT_BACKFILL_MISSED_PROSPECTIVE_ENTRIES",
+    "DO_NOT_TREAT_MISSING_SYSTEM_AS_ZERO_PERFORMANCE"
+  ],
+  "first_decision_boundary": "Collect data only. Any portfolio priority or suppression proposal requires a separate frozen contract and explicit user authorization."
+}
