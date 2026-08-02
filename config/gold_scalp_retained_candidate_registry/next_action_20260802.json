@@ -1,15 +1,25 @@
 {
-  "next_research": "INDEPENDENT_LONG_AND_RANGE_ACTIVATION_RETEST_ENGINES",
+  "next_research": "SESSION_AND_DAILY_LEVEL_GEOMETRY_ENGINES",
   "rules": [
     "Read START_HERE_GOLD_SCALP_RETAINED_CANDIDATE_REGISTRY.md first",
+    "Use retained_candidate_catalog_20260802_v2.csv as the authoritative registry",
     "Treat retained catalog as a registry, not a deployable portfolio",
     "Use dedupe_group before combining records",
+    "Do not restore rejected range activation/retest families",
     "Add only independently preregistered engines",
     "Require pseudo-forward evidence and preserve no-deployment boundary"
   ],
   "target_missing_families": [
-    "independent_LONG_activation_retest",
-    "range_reclaim_activation_retest",
-    "non_volume_absorption_structural_cause"
-  ]
+    "previous_day_high_low_sweep_reclaim",
+    "session_opening_range_expansion_retest",
+    "daily_reopen_gap_level_interaction",
+    "independent_session_level_SHORT_or_range_engine"
+  ],
+  "fixed_research_boundary": {
+    "one_eligible_trade_per_frozen_level_per_session": true,
+    "spread_usd_once": 0.3,
+    "initial_sl_usd_max": 5.0,
+    "first_tp_usd_min": 5.0,
+    "staged_exit_allowed": true
+  }
 }
