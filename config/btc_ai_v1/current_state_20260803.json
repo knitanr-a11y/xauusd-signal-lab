@@ -1,0 +1,19 @@
+{
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "formal_status": "BTC_AI_V1_DATA_ACQUISITION_SCRIPT_READY_PENDING_MT5_EXPORT",
+  "old_btc_research_authority": false,
+  "requested_history_start": "2023-01-01 00:00:00",
+  "requested_history_end": "LATEST_FULLY_CLOSED_2026_BAR",
+  "time_semantics": "MT5 broker-server naive time",
+  "timeframes": ["M1", "M5", "M15", "H1", "H4", "D1"],
+  "closed_bars_only": true,
+  "candidate_discovery_started": false,
+  "gold_runtime_modified": false,
+  "mt5_orders": false,
+  "discord": false,
+  "live_ready": false,
+  "final_signal": false,
+  "next_action": "Run BTC_AI_History_Exporter.mq5 in MT5, then provide the complete BTC_AI_RESEARCH_DATA folder as a ZIP for source and coverage audit."
+}
