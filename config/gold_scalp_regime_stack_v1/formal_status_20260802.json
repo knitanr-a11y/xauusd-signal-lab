@@ -1,0 +1,46 @@
+{
+  "status": "RETROSPECTIVE_REGIME_SPECIALIST_STACK_COMPLETE_NO_FORMAL_PORTFOLIO",
+  "best_frequency_portfolio": {
+    "n": 807,
+    "median_monthly": 20.0,
+    "wr": 0.39281288723667906,
+    "pf": 0.9488912954901193,
+    "net": -95.33,
+    "dd": 223.61
+  },
+  "best_promotion": {
+    "rule": "TWO_BLOCK",
+    "n": 80,
+    "wr": 0.3875,
+    "pf": 1.2963714925295347,
+    "net": 56.93,
+    "dd": 34.0,
+    "median_monthly": 0.0
+  },
+  "descriptive_stable_core": {
+    "n": 226,
+    "wr": 0.4247787610619469,
+    "pf": 1.2918216291110487,
+    "net": 160.06999999999312,
+    "dd": 71.61000000000104,
+    "median_monthly": 7.0,
+    "positive_months": 15,
+    "months": 37,
+    "post_result_descriptive_only": true
+  },
+  "execution_contract": {
+    "spread_usd_once": 0.3,
+    "sl_max_usd": 5.0,
+    "tp_min_usd": 5.0,
+    "breakeven_allowed": true,
+    "same_m1_collision": "PROTECTIVE_STOP_FIRST",
+    "one_position_non_overlap": true
+  },
+  "authorization": {
+    "shadow": false,
+    "discord": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "merge": false
+  }
+}
