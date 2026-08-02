@@ -1,11 +1,13 @@
 {
   "next_action": "USER_PC_FIRST_READ_ONLY_OPERATIONAL_SNAPSHOT",
   "steps": [
-    "Switch to feature/gold-shadow-operational-research-v1 in a separate checkout or after stopping no source process is required",
+    "Switch to feature/gold-shadow-operational-research-v1",
+    "Keep V19, Challenger C1 and P75 Shadow running; the collector is read-only",
     "Run scripts/gold_shadow_operational_research_v1/01_COLLECT_SNAPSHOT.bat",
     "Confirm local_config.json state_root paths if prompted",
     "Share the generated GOLD_SHADOW_OPERATIONAL_SNAPSHOT_*.zip for audit"
   ],
+  "concurrent_write_policy": "If a source ledger changes during collection, mark the snapshot non-atomic and collect again; do not stop or alter the source runtime automatically.",
   "do_not": [
     "Do not copy this collector into a source state root",
     "Do not edit V19, Challenger C1 or P75 files",
