@@ -1,0 +1,15 @@
+{
+  "next_research": "INDEPENDENT_LONG_AND_RANGE_ACTIVATION_RETEST_ENGINES",
+  "rules": [
+    "Read START_HERE_GOLD_SCALP_RETAINED_CANDIDATE_REGISTRY.md first",
+    "Treat retained catalog as a registry, not a deployable portfolio",
+    "Use dedupe_group before combining records",
+    "Add only independently preregistered engines",
+    "Require pseudo-forward evidence and preserve no-deployment boundary"
+  ],
+  "target_missing_families": [
+    "independent_LONG_activation_retest",
+    "range_reclaim_activation_retest",
+    "non_volume_absorption_structural_cause"
+  ]
+}
