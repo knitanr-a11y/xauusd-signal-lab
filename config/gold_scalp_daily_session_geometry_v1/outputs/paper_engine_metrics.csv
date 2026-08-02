@@ -1,0 +1,2 @@
+profile,target_block,engine,family,event_key,policy,n,wr,pf,net,dd,positive_months,negative_months,median_monthly
+CATALOG,2026H1,OR01_ORH_E1_T0.25_R0.25_STRONG,OPENING_RANGE_FIRST_RETEST,OR01_ORH_LONG,P50_TP5_TP7P5_SL4_H180,10,0.3,0.5357142857142857,-13.0,13.75,1,4,1.5
