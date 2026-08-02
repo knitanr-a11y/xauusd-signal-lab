@@ -1,0 +1,33 @@
+{
+  "status": "RETROSPECTIVE_CANDIDATE_STACK_CALIBRATION_PASS_FORWARD_FAIL_NO_FORMAL_PORTFOLIO",
+  "standard_spread_usd_once": 0.30,
+  "sl_max_usd": 5.0,
+  "tp_min_usd": 5.0,
+  "fixed_stack_calibration": {
+    "trades": 130,
+    "median_monthly": 20.5,
+    "win_rate": 0.5538461538461539,
+    "profit_factor": 2.05622062605296,
+    "net_usd": 238.2199999999889,
+    "max_drawdown_usd": 23.910000000002583,
+    "positive_months": 6
+  },
+  "fixed_stack_evaluation_exploratory": {
+    "trades": 1474,
+    "median_monthly": 51.0,
+    "win_rate": 0.324966078697422,
+    "profit_factor": 0.9188676098975087,
+    "net_usd": -379.5000000000073,
+    "max_drawdown_usd": 515.3100000000004
+  },
+  "decision": "NO_FORMAL_PORTFOLIO",
+  "architecture_decision": "RETAIN_FROZEN_INDEPENDENT_CANDIDATE_CATALOG",
+  "authorization": {
+    "research": true,
+    "prospective_shadow": false,
+    "discord": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "merge": false
+  }
+}
