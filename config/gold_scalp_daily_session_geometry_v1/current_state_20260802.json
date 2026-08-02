@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-02",
+  "research_id": "GOLD_SCALP_DAILY_SESSION_GEOMETRY_V1",
+  "formal_status": "AUDIT_COMPLETE_NO_FORMAL_PROMOTION",
+  "entry_generation_independent_of_v19": true,
+  "entry_generation_independent_of_challenger_c1": true,
+  "v19_modified": false,
+  "challenger_c1_modified": false,
+  "p75_state_survival_shadow_modified": false,
+  "canonical_m1_rows": 1239131,
+  "canonical_m5_rows": 253557,
+  "excluded_exact_m1_blocks": [
+    "2024H1"
+  ],
+  "exact_m1_selected_trades": 10,
+  "exact_m1_win_rate": 0.3,
+  "exact_m1_profit_factor": 0.5357142857142857,
+  "exact_m1_net_usd": -13.0,
+  "exact_m1_max_drawdown_usd": 13.75,
+  "formal_candidate_count": 0,
+  "registry_append": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_order": false,
+  "final_signal": false,
+  "live_ready": false
+}

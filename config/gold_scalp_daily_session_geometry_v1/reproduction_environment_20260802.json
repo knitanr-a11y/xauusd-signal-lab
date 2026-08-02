@@ -1,0 +1,17 @@
+{
+  "reproduced_on": "2026-08-02",
+  "status": "PASS_WITH_REPORT_GENERATOR_CORRECTION",
+  "authoritative_data_union_rows_m1": 1239131,
+  "authoritative_data_union_rows_m5": 253557,
+  "report_generator_correction": "coverage exclusion text changed from hard-coded 2024H1/2024H2 wording to dynamic coverage-table wording",
+  "formal_metrics_after_reproduction": {
+    "selected_exact_m1_trades": 10,
+    "win_rate": 0.3,
+    "profit_factor": 0.5357142857142857,
+    "net_usd": -13.0,
+    "max_drawdown_usd": 13.75
+  },
+  "result_zip_sha256": "4c34b9c2b2ec8e6e92c29054302cf2e503343972f94f707223137d69c00f51b6",
+  "static_forbidden_reference_scan": "PASS_ONLY_DECLARATIVE_UNCHANGED_FLAGS_FOUND",
+  "formal_result": "AUDIT_COMPLETE_NO_FORMAL_PROMOTION"
+}

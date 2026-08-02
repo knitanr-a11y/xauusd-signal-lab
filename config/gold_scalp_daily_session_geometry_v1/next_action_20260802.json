@@ -1,0 +1,11 @@
+{
+  "decision": "DO_NOT_PROMOTE_DAILY_SESSION_GEOMETRY_V1",
+  "prohibitions": [
+    "do not rescue by deleting LONG or SHORT",
+    "do not rescue by deleting losing months, hours, sessions, or volatility bands",
+    "do not promote the post-result GAP_HOLD_CONT trace",
+    "do not add this family to V19, Challenger C1, P75 Shadow, or the unified retained registry",
+    "do not start Shadow, Discord, or MT5 execution"
+  ],
+  "possible_future_research": "A separately preregistered independent weekly-level or round-number geometry family may be studied, but this completed V1 family must remain unchanged."
+}
