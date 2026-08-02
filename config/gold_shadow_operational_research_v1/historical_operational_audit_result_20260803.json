@@ -1,0 +1,42 @@
+{
+  "date": "2026-08-03",
+  "research_id": "GOLD_SHADOW_OPERATIONAL_RESEARCH_V1",
+  "formal_status": "HISTORICAL_OPERATIONAL_AUDIT_COMPLETE_NO_PRIORITY_CHANGE_PROSPECTIVE_CONTINUES",
+  "authoritative": {
+    "v19": {"trades": 169, "pf": 2.0299563195716415, "net_usd": 730.96, "max_dd_usd": 80.0},
+    "challenger_c1_after_v19_priority": {"trades": 123, "pf": 1.9467405272114702, "net_usd": 545.19, "max_dd_usd": 70.0},
+    "v19_plus_challenger_c1": {"trades": 292, "pf": 1.992680232739033, "net_usd": 1276.15, "max_dd_usd": 60.22},
+    "p75": {"trades": 102, "wins": 58, "losses": 44, "win_rate": 0.5686274509803921, "pf": 1.3323785201546092, "net_usd": 72.2325, "max_dd_usd": 31.25},
+    "arithmetic_parallel_three_system": {"trades": 394, "pf": 1.8971990445012186, "net_usd": 1348.3825, "exact_combined_dd_available": false}
+  },
+  "timestamp_overlap_diagnostic": {
+    "status": "SENSITIVITY_ONLY_NOT_FORMAL",
+    "repair_variants": 4,
+    "same_time_pairs_range": [0, 1],
+    "within_15_minutes_pairs_range": [1, 2],
+    "within_60_minutes_pairs_range": [6, 8],
+    "holding_overlap_pairs_range": [9, 12],
+    "unique_p75_overlap_range": [9, 12],
+    "unique_p75_overlap_rate_range": [0.08823529411764706, 0.11764705882352941],
+    "opposite_direction_overlap_pairs_range": [5, 7],
+    "overlap_common_to_all_four_variants": 8,
+    "opposite_overlap_common_to_all_four_variants": 5,
+    "common_overlap_p75_net_usd": -13.75
+  },
+  "risk": {
+    "v19_challenger_max_positions": 1,
+    "natural_three_system_max_positions": 2,
+    "v19_or_challenger_initial_stop_usd": 10.0,
+    "p75_initial_stop_usd": 5.0,
+    "natural_three_system_max_initial_risk_usd_per_1x_contract": 15.0
+  },
+  "data_limitation": "The authoritative 169- and 123-trade timestamp ledgers were unavailable and the local old M1 file had a 27420-minute corrupted interval. Reconstructed overlap values are not promotion evidence.",
+  "decision": {
+    "change_v19": false,
+    "change_challenger_c1": false,
+    "change_p75": false,
+    "cross_system_suppression": false,
+    "global_one_position": false,
+    "continue_natural_prospective_shadow": true
+  }
+}

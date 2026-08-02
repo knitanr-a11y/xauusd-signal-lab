@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-03",
+  "research_id": "GOLD_SHADOW_OPERATIONAL_RESEARCH_V1",
+  "formal_status": "HISTORICAL_OPERATIONAL_AUDIT_COMPLETE_NO_PRIORITY_CHANGE_PROSPECTIVE_CONTINUES",
+  "branch": "feature/gold-shadow-operational-research-v1",
+  "source_system_modification": false,
+  "discord_send": false,
+  "mt5_api": false,
+  "order_send": false,
+  "portfolio_priority_policy": false,
+  "authoritative_metrics": {
+    "v19_trades": 169,
+    "challenger_c1_trades_after_v19_priority": 123,
+    "v19_challenger_combined_pf": 1.992680232739033,
+    "v19_challenger_combined_net_usd": 1276.15,
+    "v19_challenger_combined_dd_usd": 60.22,
+    "p75_trades": 102,
+    "p75_pf": 1.3323785201546092,
+    "p75_net_usd": 72.2325,
+    "p75_dd_usd": 31.25,
+    "arithmetic_three_system_parallel_pf": 1.8971990445012186,
+    "arithmetic_three_system_parallel_net_usd": 1348.3825
+  },
+  "timestamp_overlap_status": "DIAGNOSTIC_SENSITIVITY_ONLY",
+  "decision": "KEEP_ALL_THREE_SHADOWS_NATURAL_NO_CROSS_SYSTEM_SUPPRESSION",
+  "next_action": "Continue prospective Shadow collection from 2026-08-03 without changing V19, Challenger C1 or P75."
+}

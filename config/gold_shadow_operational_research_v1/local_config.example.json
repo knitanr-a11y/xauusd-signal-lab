@@ -1,0 +1,24 @@
+{
+  "research_id": "GOLD_SHADOW_OPERATIONAL_RESEARCH_V1",
+  "contract_version": "2026-08-03-v1",
+  "output_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_shadow_operational_research_v1",
+  "systems": [
+    {
+      "system_id": "V19",
+      "state_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_v19_shadow",
+      "required": true
+    },
+    {
+      "system_id": "CHALLENGER_C1",
+      "state_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_challenger_c1_shadow",
+      "required": false
+    },
+    {
+      "system_id": "P75_STATE_SURVIVAL",
+      "state_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_scalp_state_survival_shadow",
+      "required": true
+    }
+  ],
+  "freshness_warning_minutes": 30,
+  "proximity_windows_minutes": [0, 15, 60]
+}

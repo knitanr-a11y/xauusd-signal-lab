@@ -1,0 +1,20 @@
+{
+  "next_action": "CONTINUE_THREE_NATURAL_SHADOWS_AND_COLLECT_POST_20260803_EVIDENCE",
+  "steps": [
+    "Keep V19 Shadow unchanged",
+    "Keep Challenger C1 V19-priority contract unchanged",
+    "Keep P75 State Survival Shadow unchanged",
+    "Do not suppress same-time, near-time or opposite-direction entries",
+    "Preserve all accepted prospective entries and resolved outcomes after 2026-08-03",
+    "When evidence is provided, evaluate only the preregistered overlap, correlation, DD, delivery and recovery fields"
+  ],
+  "historical_audit_decision": "No cross-system priority or global one-position rule is adopted from retrospective diagnostics.",
+  "user_pc_collector_required_now": false,
+  "future_snapshot_role": "Optional evidence transfer for genuinely prospective post-20260803 observations, not a prerequisite for the completed historical audit.",
+  "do_not": [
+    "Do not change V19, Challenger C1 or P75 conditions",
+    "Do not rescue performance by deleting a side, month, session or overlap cohort",
+    "Do not adopt the retrospectively attractive first-arrival suppression policy",
+    "Do not infer exact historical overlap from reconstructed ledgers"
+  ]
+}
