@@ -195,23 +195,85 @@ Formal conclusion:
 
 `TRANSITION_EXPERTS_FOUND_HIGH_PF_LOW_DENSITY_LOCAL_EDGES_WITHOUT_TRANSFER_SUPPORT`
 
+## OHLC sequence transition-hazard multi-task cycle
+
+Contract and results:
+
+- `config/btc_ai_v1/ohlc_sequence_transition_hazard_multitask_contract_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_RESULT_20260803.md`
+- `config/btc_ai_v1/ohlc_sequence_multitask_result_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_REPRODUCIBILITY_MANIFEST_20260803.md`
+
+Design:
+
+- 64 consecutive closed M15 bars, equal to 16 hours
+- latest fully closed H1/H4/D1 OHLC context
+- 100,948 continuous sequence/target rows
+- first named phase-transition hazard within 16 future M15 bars
+- LONG/SHORT MFE, MAE and fixed-policy payoff over 480 exact M1 minutes
+- LightGBM lag/summary baseline versus a shared small GRU multi-task model
+- 32 candidate definitions; all 32 passed outcome-blind capability gates
+- 256 exact-M1 execution configurations over 24 calendar months
+
+Aggregate result:
+
+- candidate frequency: 250–1,156 events / 24 months = 10.42–48.17/month
+- positive-net configurations: 88
+- PF >= 1.20: 0
+- provisional development survivors: 0
+- transfer, robustness and 2026 diagnosis not opened
+
+Strongest LightGBM setting:
+
+- `SQ9_009__S1.0_T2.0_H480`
+- 580 completed trades / 24 months = 24.17/month
+- monthly min / median / max: 4 / 23.5 / 60
+- PF 1.1539; net +21,262.16; DD 8,877.90
+- positive months 13/24; positive half-years 3/4
+- half-year PF: 1.0392 / 1.2024 / 0.9315 / 1.4233
+- rejected for PF 1.20 and 15-positive-month gates
+
+Strongest GRU setting:
+
+- `SQ9_030__S1.0_T2.0_H720`
+- 363 / 24 months = 15.13/month
+- monthly min / median / max: 4 / 15.5 / 30
+- PF 1.1496; net +13,276.96; DD 8,037.61
+- positive months 13/24; positive half-years 2/4
+- D1 DOWN PF 1.4606; NEUTRAL PF 1.5100; UP PF 0.7575
+- rejected for PF, time persistence and D1-regime transfer
+
+Model diagnostics:
+
+- LightGBM hazard balanced accuracy: 0.333–0.469
+- GRU hazard balanced accuracy: 0.196–0.281
+- LightGBM MFE/MAE validation Spearman: approximately 0.150–0.247
+- LightGBM fixed-payoff Spearman: approximately 0.000–0.055
+- GRU path-edge Spearman: approximately 0.023–0.102
+- GRU fixed-payoff Spearman: approximately -0.006–0.038
+
+Formal conclusion:
+
+`SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES`
+
+OHLC sequences contained measurable excursion information, but direct trade-payoff ordering remained weak. The GRU did not outperform the simpler LightGBM sequence baseline. The unresolved dependency is the causal event anchor and maturity of the trajectory.
+
 ## Current formal status
 
-`BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_FOUND_NO_SUPPORTED_CANDIDATE`
+`BTC_AI_V1_OHLC_SEQUENCE_INFORMATION_FOUND_NO_STABLE_PAYOFF_ORDERING`
 
-- supported candidates: **0**
-- 2026 was not opened in Cycles A–C
-- local high-PF patterns are hypotheses only
-- no combination, rescue, threshold reduction or minimum-count reduction is authorized
+- formal supported candidates: **0**
+- 2026 was not opened in the state-transition or sequence cycles
+- no local or sequence near-candidate rescue is authorized
 
 ## Current next stage
 
-`BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION`
+`BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION`
 
 Latest handoff:
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_NO_SUPPORT_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_SEQUENCE_NO_SUPPORT_EVENT_ANCHOR_NEXT_20260803.md`
 
-The next method must use OHLC sequences, include all phases/transitions, compare a small temporal model with a non-neural baseline, and pass leave-one-D1-regime-out and leave-one-transition-type-out validation before any PnL shortlist.
+Before another broad model grid, build an outcome-blind causal anchor registry covering range breaks, swings, expansion after compression, phase-transition starts, failed breaks and slope changes. Analyze continuation/reversal hazard by anchor age, ATR distance, maximum extension, pullback depth, acceptance/rejection and higher-timeframe state. Freeze anchor families, density gates and leave-group-out transfer rules before candidate PnL.
 
 No external data, portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
