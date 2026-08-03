@@ -85,6 +85,13 @@
       ]
     }
   },
+  "reproducibility": {
+    "manifest": "docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_REPRODUCIBILITY_MANIFEST_20260803.md",
+    "conversation_package": "BTC_AI_V1_OHLC_STATE_TRANSITION_RESEARCH_20260803.zip",
+    "package_sha256": "0ed9eae486ca2bda53e48b6f19a254637ad31f3ebcbe84a4c9ab2c63e2bb462b",
+    "raw_candles_included": false,
+    "external_data_included": false
+  },
   "formal_interpretation": "PHASE_AND_TRANSITION_CONDITIONAL_SCORING_IMPROVED_LOCAL_EDGE_BUT_DENSITY_TIME_AND_REGIME_TRANSFER_SUPPORT_FAILED",
   "supported_candidates": 0,
   "next_stage": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION",
