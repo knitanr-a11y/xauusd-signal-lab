@@ -1,21 +1,20 @@
 {
   "date": "2026-08-04",
-  "completed": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC",
-  "result": "NO_SUPPORTED_SCHEDULE",
-  "next_stage": "BTC_AI_V1_OHLC_DRIFT_ATTRIBUTION_AND_RANK_STABILITY_FORENSIC",
-  "next_contract": "config/btc_ai_v1/ohlc_drift_attribution_rank_stability_forensic_contract_20260804.json",
-  "objective": "Attribute Stage31 failure using score-rank overlap, past-only drift diagnostics, D1 transfer and training-sample effects before authorizing any new adaptive gate.",
+  "completed": "BTC_AI_V1_OHLC_DECEPTION_AND_META_FAKEOUT_STAGE39_ROBUSTNESS",
+  "result": "SUPPORTED_RESEARCH_CANDIDATES_WITH_STAGE40_2026_DIAGNOSTIC_PENDING",
+  "next_stage": "BTC_AI_V1_OHLC_DECEPTION_META_STACK_CONSUMED_2026_DIAGNOSTIC_OR_FRESH_PROSPECTIVE_PREREGISTRATION",
+  "primary_action": "Run the already-frozen Stage40 2026-01 through 2026-07 diagnostic in an environment that can complete all monthly refits, with no configuration changes or partial-month selection.",
+  "alternative_if_stage40_is_skipped": "Freeze a separate prospective observation-only contract before using any post-freeze data. Do not activate Shadow without explicit user authorization.",
   "allowed": [
-    "audit-only use of Stage31 2024-2025 predictions and diagnostics",
-    "past-only and live-computable diagnostic definition",
-    "all-month and all-D1 reporting"
+    "exact reproduction of the frozen Stage40 diagnostic",
+    "full seven-month all-direction reporting",
+    "fresh prospective preregistration after explicit user authorization"
   ],
   "prohibited": [
-    "candidate PnL",
-    "2026 selection or diagnosis",
-    "post-result month or D1 filtering",
-    "gate reduction",
-    "external or volume data",
+    "altering Q90, lag1, feature set, model seed, direction or execution after seeing 2025 results",
+    "formalizing the post-result deterministic-plus-meta accumulation diagnostic",
+    "claiming 2026 is untouched",
+    "external or volume data without explicit authorization",
     "Shadow",
     "Discord",
     "MT5 orders",
