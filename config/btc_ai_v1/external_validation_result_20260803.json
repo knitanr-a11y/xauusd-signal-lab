@@ -1,0 +1,82 @@
+{
+  "date": "2026-08-03",
+  "status": "INDEPENDENT_HISTORY_ACQUIRED_AND_EVALUATED_NO_SUPPORTED_CANDIDATE_DERIVATIVES_METRICS_NEXT",
+  "fixed_spread_usd_per_btc": 22.5,
+  "binance_usdm_futures": {
+    "source_period": "[2020-01-01, 2023-01-01)",
+    "calendar_months": 36,
+    "m1_rows": 1578240,
+    "minute_coverage": 1.0,
+    "duplicate_timestamps": 0,
+    "non_ascending_timestamps": 0,
+    "gap_count": 0,
+    "funding_months_available": 36,
+    "model_candidates": 48,
+    "development_period": "2021-07 through 2021-12",
+    "development_calendar_months": 6,
+    "development_survivors": 4,
+    "robustness_survivors": 2,
+    "untouched_final_period": "2022-01 through 2022-12",
+    "untouched_final_calendar_months": 12,
+    "final_results": [
+      {
+        "candidate_id": "BEX_CANDLE_CONTEXT_SHORT_XGBR_P95",
+        "completed_trades": 260,
+        "trades_per_month": 21.6666666667,
+        "profit_factor": 0.984985,
+        "net_usd": -536.84,
+        "positive_months": 4,
+        "final_pass": false
+      },
+      {
+        "candidate_id": "BEX_MICRO_FUNDING_SHORT_XGB_P95",
+        "completed_trades": 94,
+        "trades_per_month": 7.8333333333,
+        "profit_factor": 1.110625,
+        "net_usd": 1409.85,
+        "positive_months": 4,
+        "final_pass": false,
+        "failed_gate": "positive_months_required_7_of_12"
+      }
+    ],
+    "supported_candidates": 0,
+    "result_document": "docs/btc_ai_v1/BTC_AI_V1_BINANCE_FUTURES_EXTERNAL_VALIDATION_RESULT_20260803.md"
+  },
+  "binance_spot": {
+    "source_period": "[2018-01-01, 2020-01-01)",
+    "calendar_months": 24,
+    "m1_rows": 1045460,
+    "year_2018_coverage": 0.992435312,
+    "year_2019_coverage": 0.996643836,
+    "duplicate_timestamps": 0,
+    "non_ascending_timestamps": 0,
+    "gap_intervals": 16,
+    "interpolation": false,
+    "valid_exact_m15_decisions": 68875,
+    "model_candidates": 48,
+    "development_period": "2019-01 through 2019-06",
+    "development_calendar_months": 6,
+    "development_survivors": 0,
+    "best_development_pf": 0.7112055042,
+    "untouched_final_period": "2019-07 through 2019-12",
+    "untouched_final_opened": false,
+    "supported_candidates": 0,
+    "result_document": "docs/btc_ai_v1/BTC_AI_V1_BINANCE_SPOT_EXTERNAL_VALIDATION_RESULT_20260803.md"
+  },
+  "combined_independent_history_calendar_months": 60,
+  "combined_independent_m1_rows": 2623700,
+  "formal_supported_candidates": 0,
+  "next_stage": "BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH",
+  "next_evidence": [
+    "Binance futures mark-price and premium-index history",
+    "historical futures metrics when source-integrity audit passes",
+    "Bybit or Deribit open-interest and funding external replication"
+  ],
+  "prohibitions": [
+    "do not rescue the near-positive Binance futures candidate",
+    "do not relax the positive-month final gate",
+    "do not open Binance spot 2019H2 for an outcome-designed candidate without a new preregistration",
+    "do not mix venue prices in one execution ledger",
+    "do not authorize Shadow, Discord or orders"
+  ]
+}
