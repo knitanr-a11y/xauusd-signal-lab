@@ -1,0 +1,24 @@
+{
+  "stage": "BTC_AI_V1_12_DIVERSE_AI_CAPABILITY",
+  "status": "COMPLETE_OUTCOME_BLIND",
+  "evaluation_calendar_months": 24,
+  "raw_candidates": 120,
+  "explicit_pass": 120,
+  "survivors": 60,
+  "survivor_models": {
+    "EXTRA_D8": 18,
+    "HGB_L15": 15,
+    "RANK_ENSEMBLE": 11,
+    "XGB_D3": 9,
+    "CAT_D4": 7
+  },
+  "survivor_directions": {
+    "SHORT": 31,
+    "LONG": 29
+  },
+  "events_range": [272, 2625],
+  "events_per_month_range": [11.3333333333, 109.375],
+  "registry_sha256": "d3db3c2d0a8fe19f6d8621e8c39e0bea9b8fdadbbce26af65ed2400f076324b2",
+  "survivors_sha256": "2d828630511a6094d81cac90c09653e6812664ed172f0e8117b0bda8f54876e2",
+  "2026_used_for_selection": false
+}
