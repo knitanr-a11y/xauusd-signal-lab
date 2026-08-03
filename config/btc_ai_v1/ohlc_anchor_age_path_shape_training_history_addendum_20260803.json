@@ -1,0 +1,19 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_TRAINING_HISTORY_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_MODEL_OUTCOMES",
+  "reason": "The first 2024H1 expanding fold requires pre-2024 anchor-state training rows. The frozen event-anchor evaluation registry begins in 2024 because it was a development-only forensic.",
+  "rule": {
+    "training_only_period": "[2023-01-01, 2024-01-01)",
+    "definitions": "apply the exact same six-family, fifteen-subtype causal anchor code and eligibility rules used by the frozen 2024-2025 registry",
+    "evaluation_registry_2024_2025_modified": false,
+    "2023_outcomes_reported_as_support": false,
+    "2023_threshold_or_family_selection": false,
+    "2023_role": "model fitting only for chronological expanding folds"
+  },
+  "prohibitions": [
+    "do not change an anchor definition for 2023",
+    "do not include 2023 in the 24-month reported support counts",
+    "do not select a family, age or threshold from 2023 standalone performance"
+  ]
+}
