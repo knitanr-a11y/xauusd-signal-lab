@@ -1,0 +1,61 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DECEPTION_AND_LOW_FREQUENCY_SPECIALIST_STACK_20260804",
+  "frozen_before_results": true,
+  "authorization_basis": "USER_REQUESTED_CONTINUED_OHLC_ONLY_RESEARCH_INCLUDING_FAKEOUT_DETECTION_COMBINATIONS_AND_LOW_COUNT_ACCUMULATION",
+  "scope": {
+    "source": "XM BTCUSD# closed OHLC only",
+    "time_basis": "MT5 broker-server naive",
+    "development_discovery": "2024-01-01 through 2024-12-31",
+    "untouched_validation": "2025-01-01 through 2025-12-31",
+    "excluded": ["2026", "volume", "external data", "candidate PnL from prior stages as a feature", "Shadow", "Discord", "MT5 orders"]
+  },
+  "research_change_from_stage36": "New causal event and delayed-entry execution objective, not another threshold/window rescue of the Stage31 model",
+  "event_families": [
+    "intrabar wick sweep and reclaim",
+    "closed breakout followed by first reclaim",
+    "compression sweep and reclaim",
+    "higher-timeframe-opposed sweep and reclaim",
+    "exhaustion sweep and reclaim",
+    "two-sided sweep with closing-side winner",
+    "expansion midpoint failure",
+    "breakout retest acceptance",
+    "reclaim then re-break",
+    "expansion hold continuation",
+    "higher-timeframe aligned pullback rejection"
+  ],
+  "entry": "exact M1 open at the first M15 decision boundary where the event is confirmable",
+  "execution_grid": {
+    "stop_atr": [0.75, 1.0],
+    "target_atr": [1.0, 1.5, 2.0],
+    "horizon_m1_bars": [240, 480],
+    "spread_usd_once": 22.5,
+    "same_m1_collision": "SL first",
+    "specialist_position_policy": "one position per specialist"
+  },
+  "discovery_selection": {
+    "period": "2024 only",
+    "minimum_completed_trades": 6,
+    "must_be_active_in_both_halfyears": true,
+    "minimum_pf": 1.10,
+    "net_positive": true,
+    "maximum_single_halfyear_gross_profit_share": 0.85
+  },
+  "validation_support": {
+    "period": "2025 untouched until after 2024 selection",
+    "minimum_completed_trades": 4,
+    "must_be_active_in_both_halfyears": true,
+    "pf_at_least": 1.0,
+    "net_positive": true,
+    "combined_minimum_trades": 12,
+    "combined_pf_at_least": 1.15,
+    "combined_positive_halfyears_at_least": 3,
+    "block_bootstrap_probability_net_positive_at_least": 0.75
+  },
+  "prohibitions": [
+    "no post-2025 direction deletion",
+    "no month or D1 rescue",
+    "no threshold change after results",
+    "no 2026 inspection",
+    "no promotion from small-count PF alone"
+  ]
+}
