@@ -1,81 +1,64 @@
 {
   "date": "2026-08-03",
-  "formal_status": "OHLC_EVENT_ANCHOR_SURVIVAL_COMPLETE_NO_CORRECTED_SUPPORT_SURVIVOR",
-  "completed_through": "BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC",
-  "next_stage": "BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_CONDITIONAL_MODEL_PREREGISTRATION",
-  "objective": "Use only XM BTCUSD# OHLC to separate future movement magnitude from future direction after every preregistered anchor family. Model the evolving post-anchor state rather than treating the anchor bar as an immediate entry signal. Freeze all features, labels, folds and transfer gates before any candidate PnL evaluation.",
-  "completed_forensic_evidence": {
-    "development_calendar_months": 24,
-    "anchor_events": 28355,
-    "anchor_families": 6,
-    "anchor_subtypes": 15,
-    "raw_support_count_invalidated": 13,
-    "corrected_support_survivors": 0,
-    "candidate_pnl_opened": false,
-    "2026_opened": false,
-    "formal_interpretation": "EVENT_ANCHORS_EXPLAIN_EXCURSION_MAGNITUDE_BUT_NO_PREREGISTERED_ANCHOR_HAS_STABLE_INCREMENTAL_DIRECTIONAL_SURVIVAL_EDGE"
+  "formal_status": "ANCHOR_PATH_AND_DELAYED_CONFIRMATION_COMPLETE_NO_SUPPORT",
+  "completed_through": "BTC_AI_V1_OHLC_DELAYED_CONFIRMATION_STATE_MACHINE_FORENSIC",
+  "next_stage": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_PREREGISTRATION",
+  "objective": "Use only XM BTCUSD# OHLC to test whether recent-only monthly refitting and recalibration improve directional label ordering under concept drift. Compare fixed expanding learning against rolling 3-, 6- and 12-month windows before any candidate PnL evaluation.",
+  "completed_evidence": {
+    "stage29": {
+      "development_months": 24,
+      "anchor_state_rows": 461483,
+      "magnitude_support_survivors": 0,
+      "direction_residual_spearman": 0.054083455,
+      "top_decile_actual_residual_mean": 0.0410575195,
+      "required": 0.08,
+      "direction_support_survivors": 0
+    },
+    "stage30": {
+      "development_months": 24,
+      "first_confirmation_events": 95440,
+      "actionable_events": 70892,
+      "actionable_states": 6,
+      "support_survivors": 0,
+      "best_mean_oriented_residual": 0.00813,
+      "required": 0.08
+    }
   },
-  "required_model_separation": {
-    "magnitude_task": [
-      "future absolute MFE",
-      "future absolute MAE",
-      "future realized range",
-      "post-anchor pullback depth"
-    ],
-    "direction_task": [
-      "incremental continuation versus reversal relative to matched baseline",
-      "next-step cause-specific continuation hazard",
-      "next-step cause-specific reversal hazard"
-    ]
-  },
-  "required_state_after_anchor": [
-    "anchor family and subtype",
-    "anchor direction",
-    "bars since anchor",
-    "directional ATR distance from anchor close",
-    "MFE achieved since anchor",
-    "MAE experienced since anchor",
-    "pullback from the post-anchor favorable extreme",
-    "current range expansion or contraction",
-    "acceptance outside or rejection through the anchor level",
-    "current M15 phase and transition",
-    "closed H1, H4 and D1 state"
-  ],
   "required_preregistration": {
-    "all_six_anchor_families_included": true,
-    "models": [
-      "non-neural discrete-time hazard baseline",
-      "small gradient-boosting magnitude model",
-      "optional small shared model only after baseline completion"
+    "same_frozen_OHLC_feature_and_label_universe": true,
+    "refit_frequency": "monthly",
+    "training_schedules": ["EXPANDING", "ROLLING_3_MONTHS", "ROLLING_6_MONTHS", "ROLLING_12_MONTHS"],
+    "calibration": "past-only monthly calibration window defined before outcomes",
+    "minimum_training_rows_and_label_counts": "outcome-blind and schedule-specific",
+    "evaluation": "each next calendar month in 2024-2025 exactly once",
+    "metrics": [
+      "AUC and balanced accuracy",
+      "top-decile label lift over monthly unconditional rate",
+      "Brier and calibration slope",
+      "monthly and half-year sign persistence",
+      "D1 UP/NEUTRAL/DOWN decomposition",
+      "score PSI and feature PSI"
     ],
-    "development_period": "[2024-01-01, 2026-01-01)",
-    "development_calendar_months": 24,
-    "four_chronological_halfyear_folds": true,
-    "leave_one_D1_regime_out_required": true,
-    "leave_one_anchor_family_out_required": true,
-    "leave_one_halfyear_out_required": true,
-    "matched_baseline_required_for_direction": true,
-    "minimum_candidate_completed_trades_not_below": 96,
-    "minimum_positive_months_not_below": 15,
-    "fixed_spread_usd_per_btc": 22.5,
+    "support_requirement": "one schedule must improve expanding baseline without selecting months or D1 regimes and remain positive across both years",
+    "candidate_pnl_before_support": false,
     "2026_selection_authorized": false
   },
   "allowed": [
-    "OHLC-only post-anchor state table",
-    "separate magnitude and directional hazard modeling",
-    "matched baseline residual targets",
-    "chronological and leave-group-out validation",
-    "candidate PnL only after a full transfer survivor under a new frozen contract"
+    "OHLC-only monthly walk-forward fitting",
+    "rolling and expanding schedule comparison",
+    "past-only recalibration",
+    "drift and monthly discrimination forensic",
+    "2026 diagnostic only after schedule freeze and 2024-2025 support"
   ],
   "prohibited": [
-    "citing the invalid raw 13 forensic passes",
-    "using only compression-expansion or failed-break anchors because of observed results",
-    "combining anchors after outcome inspection",
-    "post-result D1 filter",
-    "changing the frozen survival barriers to rescue an anchor",
-    "using 2026 for feature, anchor, side, threshold, model or exit selection",
-    "external-market, volume, funding, open-interest or order-flow data",
+    "using 2026 to choose a training window or calibration method",
+    "selecting only favorable months or D1 states",
+    "rescuing Stage 29 ages/families or Stage 30 confirmation states",
+    "another broad static pattern or neural-model grid",
+    "reducing count, persistence, PF or transfer gates",
+    "external or volume data",
+    "candidate PnL before a full ordering survivor",
     "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
   ],
-  "frequency_reporting": "Every anchor-state and later completed-trade count must include exact calendar months, monthly average and monthly min/median/max."
+  "frequency_reporting": "All score events and later trades require exact calendar months, monthly average and monthly min/median/max."
 }
