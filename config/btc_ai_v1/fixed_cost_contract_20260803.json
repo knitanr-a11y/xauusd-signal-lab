@@ -1,0 +1,26 @@
+{
+  "contract_id": "BTC_AI_V1_FIXED_SPREAD_22_50_USD_20260803",
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "symbol": "BTCUSD#",
+  "position_size_basis_lot": 1.0,
+  "contract_size_btc_per_lot": 1.0,
+  "point_usd": 0.01,
+  "fixed_spread_usd_per_btc": 22.5,
+  "fixed_spread_points": 2250,
+  "application": "ONCE_PER_COMPLETED_TRADE",
+  "primary_execution_representation": {
+    "long_adjusted_entry": "raw executable M1 open + 22.50 USD",
+    "short_adjusted_entry": "raw executable M1 open - 22.50 USD",
+    "equivalent_realized_pnl_rule": "gross directional price PnL minus 22.50 USD for one lot"
+  },
+  "variable_csv_spread_used_for_candidate_selection": false,
+  "csv_spread_column_role": "AUDIT_ONLY_NOT_PRIMARY_COST",
+  "economic_event_spread_expansion_model": false,
+  "commission_usd": 0.0,
+  "slippage_usd": 0.0,
+  "swap_usd": 0.0,
+  "unmodeled_cost_disclosure": "Economic-event spread expansion, commission, slippage and swap are not modeled. Candidate conclusions apply only to the frozen 22.50 USD spread contract.",
+  "gross_no_cost_metrics": "DIAGNOSTIC_ONLY_NEVER_PROMOTION_BASIS",
+  "change_control": "Any cost change requires a new dated preregistered contract before rerunning affected evaluations."
+}
