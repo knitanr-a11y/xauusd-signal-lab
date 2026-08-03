@@ -1,98 +1,81 @@
 {
   "date": "2026-08-03",
-  "formal_status": "OHLC_SEQUENCE_MULTITASK_COMPLETE_NO_PROVISIONAL_SURVIVOR",
-  "completed_through": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_RESULT",
-  "next_stage": "BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION",
-  "objective": "Continue using only XM BTCUSD# OHLC. Before another broad model search, create an outcome-blind causal event-anchor registry and analyze continuation/reversal hazard as a function of anchor age, ATR distance and trajectory maturity. Freeze anchor families, density gates and transfer tests before any candidate PnL evaluation.",
-  "completed_sequence_evidence": {
+  "formal_status": "OHLC_EVENT_ANCHOR_SURVIVAL_COMPLETE_NO_CORRECTED_SUPPORT_SURVIVOR",
+  "completed_through": "BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC",
+  "next_stage": "BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_CONDITIONAL_MODEL_PREREGISTRATION",
+  "objective": "Use only XM BTCUSD# OHLC to separate future movement magnitude from future direction after every preregistered anchor family. Model the evolving post-anchor state rather than treating the anchor bar as an immediate entry signal. Freeze all features, labels, folds and transfer gates before any candidate PnL evaluation.",
+  "completed_forensic_evidence": {
     "development_calendar_months": 24,
-    "valid_sequence_rows": 100948,
-    "sequence_length_m15": 64,
-    "models": ["LGBM_SEQUENCE_BASELINE", "GRU_MULTITASK"],
-    "raw_candidates": 32,
-    "capability_survivors": 32,
-    "exact_m1_configurations": 256,
-    "positive_net_configurations": 88,
-    "pf_ge_1_20_configurations": 0,
-    "provisional_survivors": 0,
-    "best_lgbm": {
-      "completed_trades": 580,
-      "calendar_months": 24,
-      "trades_per_month": 24.1666666667,
-      "profit_factor": 1.153929,
-      "positive_months": 13,
-      "positive_halfyears": 3
-    },
-    "best_gru": {
-      "completed_trades": 363,
-      "calendar_months": 24,
-      "trades_per_month": 15.125,
-      "profit_factor": 1.149647,
-      "positive_months": 13,
-      "positive_halfyears": 2,
-      "d1_regime_pf_floor_pass": false
-    },
-    "formal_interpretation": "SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES"
+    "anchor_events": 28355,
+    "anchor_families": 6,
+    "anchor_subtypes": 15,
+    "raw_support_count_invalidated": 13,
+    "corrected_support_survivors": 0,
+    "candidate_pnl_opened": false,
+    "2026_opened": false,
+    "formal_interpretation": "EVENT_ANCHORS_EXPLAIN_EXCURSION_MAGNITUDE_BUT_NO_PREREGISTERED_ANCHOR_HAS_STABLE_INCREMENTAL_DIRECTIONAL_SURVIVAL_EDGE"
   },
-  "required_anchor_families": [
-    "causal rolling-range breakout start",
-    "causal rolling swing high or swing low",
-    "first large expansion candle after compression",
-    "outcome-blind phase-transition start",
-    "failed breakout and return-inside event",
-    "EMA slope-sign change or slope-acceleration change"
-  ],
-  "required_anchor_trajectory_fields": [
+  "required_model_separation": {
+    "magnitude_task": [
+      "future absolute MFE",
+      "future absolute MAE",
+      "future realized range",
+      "post-anchor pullback depth"
+    ],
+    "direction_task": [
+      "incremental continuation versus reversal relative to matched baseline",
+      "next-step cause-specific continuation hazard",
+      "next-step cause-specific reversal hazard"
+    ]
+  },
+  "required_state_after_anchor": [
+    "anchor family and subtype",
+    "anchor direction",
     "bars since anchor",
-    "signed ATR distance since anchor",
-    "maximum favorable extension since anchor",
-    "maximum adverse excursion since anchor",
-    "pullback depth from maximum extension",
-    "post-anchor range expansion or contraction",
-    "acceptance outside or rejection back through anchor level",
+    "directional ATR distance from anchor close",
+    "MFE achieved since anchor",
+    "MAE experienced since anchor",
+    "pullback from the post-anchor favorable extreme",
+    "current range expansion or contraction",
+    "acceptance outside or rejection through the anchor level",
     "current M15 phase and transition",
-    "closed H1, H4 and D1 phase context"
+    "closed H1, H4 and D1 state"
   ],
-  "required_forensic_outputs_before_modeling": [
-    "anchor-event counts by exact calendar months",
-    "anchor-age exposure and censoring tables",
-    "continuation and reversal hazard by anchor age bucket",
-    "hazard by ATR-distance and pullback-depth bucket",
-    "D1 UP, NEUTRAL and DOWN decomposition",
-    "four chronological half-year decompositions",
-    "minimum support and missing-group audit",
-    "comparison against matched non-anchor decision times"
-  ],
-  "required_preregistration_before_candidate_pnl": {
-    "anchor_definitions_outcome_blind": true,
-    "all_anchor_families_included": true,
+  "required_preregistration": {
+    "all_six_anchor_families_included": true,
+    "models": [
+      "non-neural discrete-time hazard baseline",
+      "small gradient-boosting magnitude model",
+      "optional small shared model only after baseline completion"
+    ],
     "development_period": "[2024-01-01, 2026-01-01)",
     "development_calendar_months": 24,
-    "minimum_anchor_events_each_halfyear": 100,
-    "minimum_active_months_of_24": 18,
+    "four_chronological_halfyear_folds": true,
     "leave_one_D1_regime_out_required": true,
     "leave_one_anchor_family_out_required": true,
     "leave_one_halfyear_out_required": true,
-    "candidate_minimum_completed_trades_not_below": 96,
-    "candidate_positive_months_not_below": 15,
+    "matched_baseline_required_for_direction": true,
+    "minimum_candidate_completed_trades_not_below": 96,
+    "minimum_positive_months_not_below": 15,
     "fixed_spread_usd_per_btc": 22.5,
     "2026_selection_authorized": false
   },
   "allowed": [
-    "OHLC-only causal event-anchor registry",
-    "survival and competing-risk forensic",
-    "matched non-anchor control analysis",
+    "OHLC-only post-anchor state table",
+    "separate magnitude and directional hazard modeling",
+    "matched baseline residual targets",
     "chronological and leave-group-out validation",
-    "a later preregistered event-anchored model only after forensic completion"
+    "candidate PnL only after a full transfer survivor under a new frozen contract"
   ],
   "prohibited": [
-    "selecting only previously profitable EARLY_IMPULSE or EXHAUSTION_TO_REVERSAL patterns",
-    "another broad GRU or model grid before anchor forensic",
-    "reducing PF, positive-month, minimum-count or D1-transfer gates",
-    "using 2026 for anchor, feature, side, threshold, exit or model selection",
+    "citing the invalid raw 13 forensic passes",
+    "using only compression-expansion or failed-break anchors because of observed results",
+    "combining anchors after outcome inspection",
+    "post-result D1 filter",
+    "changing the frozen survival barriers to rescue an anchor",
+    "using 2026 for feature, anchor, side, threshold, model or exit selection",
     "external-market, volume, funding, open-interest or order-flow data",
-    "combining or rescuing rejected local and sequence near-candidates",
     "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
   ],
-  "frequency_reporting": "Every anchor-event and completed-trade count must include exact calendar months, monthly average and monthly min/median/max."
+  "frequency_reporting": "Every anchor-state and later completed-trade count must include exact calendar months, monthly average and monthly min/median/max."
 }
