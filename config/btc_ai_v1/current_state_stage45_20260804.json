@@ -1,0 +1,18 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_STAGE45_CONSUMED_2026_DIAGNOSTIC_COMPLETE_ONLY_ATR_SHOCK_SPECIALIST_POSITIVE_META_AND_INTERACTION_FAILED_NO_LIVE_PROMOTION",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "pr": 99,
+  "2026_diagnostic": "COMPLETE_2026_01_TO_2026_07",
+  "only_positive_fixed_component": "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240",
+  "meta_stack_2026_pf": 0.874182002832668,
+  "meta_stack_2026_net": -1762.508681642308,
+  "interaction_4h_2026_pf": 0.8783094700207751,
+  "interaction_4h_2026_net": -4179.48629890303,
+  "pf13_14_quarantine": "WATCHLIST_ONLY_NO_FORMAL_RESTORATION",
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false
+}
