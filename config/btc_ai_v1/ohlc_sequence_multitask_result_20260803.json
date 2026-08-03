@@ -1,0 +1,104 @@
+{
+  "date": "2026-08-03",
+  "contract_id": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_20260803",
+  "status": "COMPLETE_NO_PROVISIONAL_DEVELOPMENT_SURVIVOR",
+  "authority": "XM BTCUSD# closed-bar OHLC only",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "development_calendar_months": 24,
+  "sequence": {
+    "m15_length": 64,
+    "lookback_hours": 16,
+    "valid_decision_rows": 100948,
+    "hazard_horizon_m15_bars": 16,
+    "path_horizon_minutes": 480
+  },
+  "models": ["LGBM_SEQUENCE_BASELINE", "GRU_MULTITASK"],
+  "candidate_registry": {
+    "raw_candidates": 32,
+    "capability_survivors": 32,
+    "candidate_frequency_events_over_24_months": {
+      "minimum": 250,
+      "maximum": 1156,
+      "minimum_events_per_month": 10.4166666667,
+      "maximum_events_per_month": 48.1666666667
+    }
+  },
+  "development": {
+    "exact_m1_configurations": 256,
+    "positive_net_configurations": 88,
+    "pf_ge_1_20_configurations": 0,
+    "provisional_survivors": 0,
+    "transfer_opened": false,
+    "robustness_opened": false,
+    "2026_diagnostic_opened": false
+  },
+  "best_configurations": [
+    {
+      "config_key": "SQ9_009__S1.0_T2.0_H480",
+      "model": "LGBM_SEQUENCE_BASELINE",
+      "direction": "SHORT",
+      "score_type": "PAYOFF",
+      "completed_trades": 580,
+      "calendar_months": 24,
+      "trades_per_month": 24.1666666667,
+      "monthly_min_median_max": [4, 23.5, 60],
+      "profit_factor": 1.153929,
+      "net_usd": 21262.159463,
+      "max_dd_usd": 8877.898849,
+      "positive_months": 13,
+      "positive_halfyears": 3,
+      "failed_gates": ["profit_factor_min_1_20", "positive_months_min_15"]
+    },
+    {
+      "config_key": "SQ9_030__S1.0_T2.0_H720",
+      "model": "GRU_MULTITASK",
+      "direction": "SHORT",
+      "score_type": "PATH_EDGE",
+      "completed_trades": 363,
+      "calendar_months": 24,
+      "trades_per_month": 15.125,
+      "monthly_min_median_max": [4, 15.5, 30],
+      "profit_factor": 1.149647,
+      "net_usd": 13276.958595,
+      "max_dd_usd": 8037.609746,
+      "positive_months": 13,
+      "positive_halfyears": 2,
+      "d1_regime_pf_floor_pass": false
+    },
+    {
+      "config_key": "SQ9_006__S0.75_T2.0_H480",
+      "model": "LGBM_SEQUENCE_BASELINE",
+      "direction": "LONG",
+      "score_type": "PATH_EDGE",
+      "completed_trades": 254,
+      "calendar_months": 24,
+      "trades_per_month": 10.5833333333,
+      "monthly_min_median_max": [3, 10.5, 22],
+      "profit_factor": 1.148462,
+      "net_usd": 4648.740889,
+      "positive_months": 11,
+      "positive_halfyears": 3
+    }
+  ],
+  "model_diagnostics": {
+    "lgbm_hazard_balanced_accuracy_validation_range": [0.3329529436, 0.4685491463],
+    "lgbm_hazard_macro_f1_validation_range": [0.3058269157, 0.3514008020],
+    "gru_hazard_balanced_accuracy_validation_range": [0.1961103842, 0.2810488532],
+    "gru_hazard_macro_f1_validation_range": [0.1878504282, 0.3075626950],
+    "lgbm_mfe_mae_spearman_validation_range": [0.1503270404, 0.2465169189],
+    "lgbm_fixed_policy_payoff_spearman_validation_range": [-0.0000971130, 0.0545487379],
+    "gru_path_edge_spearman_validation_range": [0.0226670531, 0.1015518124],
+    "gru_fixed_policy_payoff_spearman_validation_range": [-0.0058311411, 0.0382319659]
+  },
+  "formal_interpretation": "SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES",
+  "formal_supported_candidates": 0,
+  "next_stage": "BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION",
+  "prohibitions": [
+    "do not lower PF or positive-month gates",
+    "do not use 2026 for selection or support",
+    "do not rescue sequence near-candidates",
+    "do not combine prior local phase winners with sequence candidates",
+    "do not use external or volume data",
+    "do not authorize portfolio, Shadow, Discord or MT5 orders"
+  ]
+}
