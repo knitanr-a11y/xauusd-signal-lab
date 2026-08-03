@@ -39,12 +39,13 @@ BTC専用のデータ・コスト・評価契約でゼロベース研究する�
 13. `config/btc_ai_v1/ohlc_transition_conditional_expert_contract_20260803.json`
 14. `docs/btc_ai_v1/BTC_AI_V1_OHLC_TRANSITION_EXPERT_RESULT_20260803.md`
 15. `config/btc_ai_v1/ohlc_transition_expert_result_20260803.json`
-16. `config/btc_ai_v1/current_state_20260803.json`
-17. `config/btc_ai_v1/next_action_20260803.json`
-18. `config/btc_ai_v1/source_data_manifest_20260803.json`
-19. `config/btc_ai_v1/fixed_cost_contract_20260803.json`
-20. `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
-21. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
+16. `docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_REPRODUCIBILITY_MANIFEST_20260803.md`
+17. `config/btc_ai_v1/current_state_20260803.json`
+18. `config/btc_ai_v1/next_action_20260803.json`
+19. `config/btc_ai_v1/source_data_manifest_20260803.json`
+20. `config/btc_ai_v1/fixed_cost_contract_20260803.json`
+21. `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
+22. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
 
 Do not search old handoffs or deleted external-data paths before completing this order.
 
