@@ -16,8 +16,14 @@ This file is the chronological index for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 - `config/btc_ai_v1/handoff_policy_20260803.json`
 - outcome: BTCUSD# source snapshot accepted; GOLD contamination rejected; fixed 22.50 USD spread cost frozen.
 
+## 2026-08-03 — Stage 01: research design preregistration
+
+- `docs/btc_ai_v1/BTC_AI_V1_RESEARCH_DESIGN_PREREGISTRATION_20260803.md`
+- `config/btc_ai_v1/research_design_contract_20260803.json`
+- outcome: development folds, untouched 2026 final test, candidate families, search limits, execution grid, formal gates, robustness controls and no-rescue rules frozen before candidate outcome inspection.
+
 ## Current next stage
 
-`BTC_AI_V1_01_RESEARCH_DESIGN_PREREGISTRATION`
+`BTC_AI_V1_02_CAUSAL_FEATURE_AND_CANDIDATE_REGISTRY_IMPLEMENTATION`
 
-No candidate discovery is authorized until the design contract is committed.
+Development outcomes remain closed until pipeline verification. The 2026 final test remains locked until the finalist registry is frozen.
