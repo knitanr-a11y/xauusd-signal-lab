@@ -1,0 +1,45 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_META_FAKEOUT_ROBUSTNESS_AND_SPECIALIST_ACCUMULATION_20260804",
+  "frozen_before_stage39_results": true,
+  "formal_targets": [
+    "UNION_FIRST_CROSS_L1_LONG_SCORE_CONFIRM_STATE_LGBM_Q90",
+    "UNION_FIRST_CROSS_L1_SHORT_SCORE_CONFIRM_LGBM_Q90",
+    "their preregistered global one-position combined stack"
+  ],
+  "robustness_tests": {
+    "selection_percentile_neighbors": [0.85, 0.90, 0.95],
+    "model_random_seeds": [20260804, 17, 101],
+    "spread_usd": [22.5, 33.75, 45.0],
+    "matched_random_repetitions": 2000,
+    "matched_random_strata": ["month", "direction", "D1 regime", "ATR quintile"],
+    "persistence_reports": ["month", "halfyear", "D1 regime", "direction"]
+  },
+  "formal_support_gates": [
+    "baseline selected combined stack remains supported under the Stage38 gate",
+    "1.5x spread 2025 PF >= 1.0 and net positive",
+    "at least two of three random seeds at Q90 have 2025 PF >= 1.0 and net positive for each direction",
+    "Q85 and Q95 are diagnostic neighbors; at least two of Q85/Q90/Q95 have combined 2025 net positive",
+    "selected combined net is at or above the 95th percentile of matched-random selections",
+    "2025 positive months at least 7 of 12",
+    "at least two D1 regimes have positive 2025 net"
+  ],
+  "specialist_accumulation_diagnostic": {
+    "components": [
+      "Stage37 expansion-midpoint-failure LONG",
+      "Stage38 meta LONG",
+      "Stage38 meta SHORT"
+    ],
+    "predefined_views": [
+      "independent parallel arithmetic",
+      "global first-arrival one-position with simultaneous opposite cancellation",
+      "exact-M15 same-direction agreement"
+    ],
+    "formal_status": "diagnostic only because component 2025 results were already observed before this combination contract"
+  },
+  "prohibited": [
+    "no 2026",
+    "no post-result direction deletion",
+    "no seed or percentile rescue",
+    "no Shadow or live promotion from Stage39 alone"
+  ]
+}
