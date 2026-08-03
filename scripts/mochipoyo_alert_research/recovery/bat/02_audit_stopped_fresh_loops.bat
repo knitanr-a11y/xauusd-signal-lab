@@ -26,17 +26,17 @@ if not exist "%ARCH%" (
 
 echo ============================================================
 echo MOCHIPOYO - STOPPED FRESH LOOPS READ-ONLY DIAGNOSTIC
-echo SELF-CONTAINED BAT - NO REPOSITORY PYTHON REQUIRED
+echo ALL NINE FORWARD LOOPS / SELF-CONTAINED BAT
 echo ============================================================
 echo.
-echo Targets: M9V M9Y M10B M10E M10P M10P2 M10W19
+echo Targets: M9V M9Y M10B M10E M10P M10P2 M10W19 M10W26 M10W34
 echo This BAT only reads/copies diagnostic evidence.
 echo It does NOT remove locks, restart loops, reset runtimes,
 echo change prospective starts, alter state/history, or touch MT5 CSVs.
 echo.
 
 (
-  echo stage=FRESH_LOOP_MASS_STOP_DIAGNOSTIC_AUDIT_ONLY
+  echo stage=ALL_NINE_FRESH_LOOP_STOP_DIAGNOSTIC_AUDIT_ONLY
   echo built_local=%DATE% %TIME%
   echo repository=%CD%
   echo mutations_performed=false
@@ -68,7 +68,7 @@ echo.
   dir /s /b "scripts\mochipoyo_alert_research\recovery"
 ) > "%ARCH%\01_repository_state.txt" 2>&1
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$markers=@('run_m9v_shadow_forever_safe','run_m9y_shadow_forever_safe.py','m10b_runtime.py','m10e_runtime.py','m10p_guarded_runtime.py','m10p2_guarded_runtime.py','m10w19_runtime.py'); $rows=Get-CimInstance Win32_Process ^| Where-Object { $cmd=$_.CommandLine; $cmd -and (($markers ^| ForEach-Object { $cmd -like ('*'+$_+'*') }) -contains $true) } ^| Select-Object ProcessId,CreationDate,CommandLine; if($rows){$rows ^| ConvertTo-Json -Depth 5}else{'[]'}" > "%ARCH%\02_matching_processes.json" 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$markers=@('run_m9v_shadow_forever_safe','run_m9y_shadow_forever_safe.py','m10b_runtime.py','m10e_runtime.py','m10p_guarded_runtime.py','m10p2_guarded_runtime.py','m10w19_runtime.py','run_m10w26_private_snapshot','run_m10w34_private_snapshot.py'); $rows=Get-CimInstance Win32_Process ^| Where-Object { $cmd=$_.CommandLine; $cmd -and (($markers ^| ForEach-Object { $cmd -like ('*'+$_+'*') }) -contains $true) } ^| Select-Object ProcessId,CreationDate,CommandLine; if($rows){$rows ^| ConvertTo-Json -Depth 5}else{'[]'}" > "%ARCH%\02_matching_processes.json" 2>&1
 
 set "INV=%ARCH%\03_file_inventory.txt"
 > "%INV%" echo READ-ONLY FILE INVENTORY
@@ -87,26 +87,55 @@ call :tailcopy "M9Y_log_tail" "%ROOT%\logs\m9y\m9y_shadow_forever.log"
 
 call :capture "M10B_lock" "%ROOT%\m10b_runtime\m10b_shadow_loop.lock"
 call :capture "M10B_runtime" "%ROOT%\m10b_runtime\m10b_runtime_manifest.json"
+call :capture "M10B_status" "%ROOT%\logs\m10b\latest_m10b_shadow_loop_status.json"
 call :capture "M10B_summary" "%ROOT%\outputs\M10B\LATEST\01_summary.json"
+call :tailcopy "M10B_log_tail" "%ROOT%\logs\m10b\m10b_bounded_adapter_forever.log"
 
 call :capture "M10E_lock" "%ROOT%\m10e_runtime\m10e_shadow_loop.lock"
 call :capture "M10E_runtime" "%ROOT%\m10e_runtime\m10e_runtime_manifest.json"
+call :capture "M10E_status" "%ROOT%\logs\m10e\latest_m10e_shadow_loop_status.json"
 call :capture "M10E_summary" "%ROOT%\outputs\M10E\LATEST\01_summary.json"
+call :tailcopy "M10E_log_tail" "%ROOT%\logs\m10e\m10e_bounded_adapter_forever.log"
 
 call :capture "M10P_lock" "%ROOT%\m10p_runtime\m10p_shadow_loop.lock"
 call :capture "M10P_runtime" "%ROOT%\m10p_runtime\m10p_runtime_manifest.json"
 call :capture "M10P_state" "%ROOT%\m10p_runtime\m10p_runtime_state.json"
+call :capture "M10P_status" "%ROOT%\logs\m10p\latest_m10p_shadow_loop_status.json"
 call :capture "M10P_summary" "%ROOT%\outputs\M10P\LATEST\01_summary.json"
+call :tailcopy "M10P_log_tail" "%ROOT%\logs\m10p\m10p_bounded_adapter_forever.log"
 
 call :capture "M10P2_lock" "%ROOT%\m10p2_runtime\m10p2_shadow_loop.lock"
 call :capture "M10P2_runtime" "%ROOT%\m10p2_runtime\m10p2_runtime_manifest.json"
 call :capture "M10P2_state" "%ROOT%\m10p2_runtime\m10p2_runtime_state.json"
+call :capture "M10P2_status" "%ROOT%\logs\m10p2\latest_m10p2_shadow_loop_status.json"
 call :capture "M10P2_summary" "%ROOT%\outputs\M10P2\LATEST\01_summary.json"
+call :tailcopy "M10P2_log_tail" "%ROOT%\logs\m10p2\m10p2_bounded_adapter_forever.log"
 
 call :capture "M10W19_lock" "%ROOT%\m10w19_runtime\m10w19_shadow_loop.lock"
 call :capture "M10W19_runtime" "%ROOT%\m10w19_runtime\m10w19_runtime_manifest.json"
 call :capture "M10W19_state" "%ROOT%\m10w19_runtime\m10w19_runtime_state.json"
+call :capture "M10W19_status" "%ROOT%\logs\m10w19\latest_m10w19_shadow_loop_status.json"
 call :capture "M10W19_summary" "%ROOT%\outputs\M10W19\LATEST\01_summary.json"
+call :tailcopy "M10W19_log_tail" "%ROOT%\logs\m10w19\m10w19_bounded_adapter_forever.log"
+
+call :capture "M10W26_lock" "%ROOT%\m10w26_runtime\m10w26_shadow_loop.lock"
+call :capture "M10W26_runtime" "%ROOT%\m10w26_runtime\m10w26_runtime_manifest.json"
+call :capture "M10W26_state" "%ROOT%\m10w26_runtime\m10w26_runtime_state.json"
+call :capture "M10W26_start_receipt" "%ROOT%\m10w26_runtime\m10w26_runtime_start_receipt.json"
+call :capture "M10W26_status" "%ROOT%\logs\m10w26\latest_m10w26_shadow_loop_status.json"
+call :capture "M10W26_summary" "%ROOT%\outputs\M10W26\LATEST\01_summary.json"
+call :capture "M10W26_snapshot_receipt" "%ROOT%\bounded_csv_source_adapter\loop_snapshots\M10W26\00_snapshot_receipt.json"
+call :tailcopy "M10W26_log_tail" "%ROOT%\logs\m10w26\m10w26_private_snapshot_forever.log"
+
+call :capture "M10W34_lock" "%ROOT%\m10w34_runtime\m10w34_shadow_loop.lock"
+call :capture "M10W34_runtime" "%ROOT%\m10w34_runtime\m10w34_runtime_manifest.json"
+call :capture "M10W34_state" "%ROOT%\m10w34_runtime\m10w34_runtime_state.json"
+call :capture "M10W34_start_receipt" "%ROOT%\m10w34_runtime\m10w34_runtime_start_receipt.json"
+call :capture "M10W34_prestart" "%ROOT%\m10w34_runtime\m10w34_prestart_causal_engine_audit.json"
+call :capture "M10W34_status" "%ROOT%\logs\m10w34\latest_m10w34_shadow_loop_status.json"
+call :capture "M10W34_summary" "%ROOT%\outputs\M10W34\LATEST\01_summary.json"
+call :capture "M10W34_snapshot_receipt" "%ROOT%\bounded_csv_source_adapter\loop_snapshots\M10W34\00_snapshot_receipt.json"
+call :tailcopy "M10W34_log_tail" "%ROOT%\logs\m10w34\m10w34_private_snapshot_forever.log"
 
 set "META=%ROOT%\outputs\M8B\LATEST\06_symbol_metadata.json"
 call :capture "M8B_symbol_metadata" "%META%"
