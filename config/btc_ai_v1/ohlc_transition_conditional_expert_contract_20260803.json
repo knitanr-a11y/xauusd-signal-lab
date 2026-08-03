@@ -1,0 +1,73 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_TRANSITION_CONDITIONAL_EXPERT_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "source": "accepted XM BTCUSD# closed-bar OHLC only",
+  "external_data": false,
+  "volume_features": false,
+  "method": "One LightGBM expert per outcome-blind transition type and direction. Training, calibration and emission are isolated inside the same transition type.",
+  "transition_router": [
+    "INTO_EARLY_IMPULSE",
+    "EARLY_TO_MATURE",
+    "INTO_PULLBACK",
+    "MATURE_TO_EXHAUSTION",
+    "EXHAUSTION_TO_REVERSAL",
+    "OTHER_TRANSITION"
+  ],
+  "expert_design": {
+    "features": "OHLC_BASE_PLUS_STATE",
+    "directions": ["LONG", "SHORT"],
+    "percentiles": [0.9, 0.95],
+    "event_policies": ["FIRST_CROSS_WITHIN_TRANSITION", "FOUR_M15_BAR_COOLDOWN_WITHIN_TRANSITION"],
+    "raw_candidates": 48,
+    "minimum_leaf_size": "max(20, min(120, floor(training_rows / 10)))"
+  },
+  "periods": {
+    "development": "[2024-01-01, 2026-01-01), exactly 24 calendar months",
+    "2026": "diagnostic only after full robustness"
+  },
+  "capability_gates": {
+    "minimum_events_each_halfyear": 10,
+    "minimum_active_months_of_24": 12,
+    "maximum_invalid_entry_rate": 0.01,
+    "maximum_single_month_event_share": 0.30
+  },
+  "execution_grid": {
+    "fixed_spread_usd_per_btc": 22.5,
+    "stops_atr": [0.75, 1.0],
+    "targets_atr": [1.5, 2.0],
+    "maximum_holding_minutes": [480, 720],
+    "same_m1_collision": "SL_FIRST",
+    "one_position_non_overlap": true
+  },
+  "development_gates": {
+    "minimum_completed_trades": 96,
+    "profit_factor_min": 1.20,
+    "net_positive": true,
+    "positive_halfyears_min_of_4": 3,
+    "positive_months_min_of_24": 15,
+    "maximum_single_month_gross_profit_share": 0.35
+  },
+  "regime_transfer_gates": {
+    "D1_regimes": ["UP", "NEUTRAL", "DOWN"],
+    "regimes_with_minimum_20_trades": "PF must be at least 0.90",
+    "maximum_single_D1_regime_gross_profit_share": 0.60,
+    "leave_one_D1_regime_out_median_auc_min": 0.51,
+    "leave_one_D1_regime_out_groups_above_random_min": 2,
+    "minimum_group_test_rows": 200
+  },
+  "robustness": {
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_net_positive_probability_min": 0.90,
+    "matched_random_iterations": 2000,
+    "matched_random_net_percentile_min": 0.95,
+    "no_rescue": true
+  },
+  "prohibitions": [
+    "no transition removal after results",
+    "no use of 2026 for model, threshold, direction, exit or transition selection",
+    "no external data or volume features",
+    "no gate relaxation or promotion",
+    "no Shadow, Discord or orders"
+  ]
+}
