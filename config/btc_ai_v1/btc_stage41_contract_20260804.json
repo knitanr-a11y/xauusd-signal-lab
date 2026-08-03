@@ -1,0 +1,123 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_MULTIPERSPECTIVE_TRAP_SECOND_CHANCE_SYNERGY_FORENSIC_20260804",
+  "frozen_at_utc": "2026-08-03T23:05:00Z",
+  "status": "FROZEN_BEFORE_STAGE41_RESULTS",
+  "authorization_basis": "User explicitly requested broad OHLC-only research including deception detection, combinations of prior candidates, low-frequency accumulation, and seemingly silly hypotheses.",
+  "source_contract": {
+    "symbol": "XM BTCUSD#",
+    "time_basis": "MT5 broker-server naive",
+    "decisions": "closed M15 only",
+    "higher_timeframes": "only bars closed by decision time",
+    "execution": "exact M1",
+    "same_m1_collision": "SL_FIRST",
+    "spread_usd_per_1btc_completed_trade": 22.5,
+    "external_data": false,
+    "volume_features": false,
+    "2026": "PROHIBITED"
+  },
+  "track_a_new_trap_grammar": {
+    "purpose": "Find causal OHLC sequence events not tested in Stage37.",
+    "discovery": "2023-01-01 through 2023-12-31",
+    "validation_1": "2024-01-01 through 2024-12-31",
+    "validation_2": "2025-01-01 through 2025-12-31",
+    "families": [
+      "INSIDE_BAR_FALSE_BREAK",
+      "THREE_BAR_BREAK_TRAP",
+      "DOUBLE_SIDE_SEQUENCE_TRAP",
+      "PREVIOUS_DAY_EXTREME_RECLAIM",
+      "EQUAL_EXTREME_LIQUIDITY_SWEEP",
+      "THREE_CANDLE_IMBALANCE_FILL_REJECT",
+      "EMA_ACCELERATION_FAILURE",
+      "ATR_SHOCK_SECOND_REJECTION",
+      "COMPRESSION_BREAK_RETURN_CONTINUE",
+      "FAILED_PULLBACK_RESUMPTION"
+    ],
+    "fixed_confirm_lags": [1, 2, 4],
+    "execution_grid": {
+      "stop_atr": [0.75, 1.0],
+      "target_atr": [1.0, 1.5, 2.0],
+      "horizon_m1": [240, 480]
+    },
+    "selection_from_discovery_only": true,
+    "discovery_gate": {
+      "min_completed_trades": 6,
+      "active_halfyears": 2,
+      "pf_min": 1.1,
+      "net_positive": true,
+      "max_halfyear_gross_profit_share": 0.85
+    },
+    "formal_validation_gate": {
+      "each_2024_and_2025_min_completed_trades": 4,
+      "each_2024_and_2025_pf_min": 1.0,
+      "each_2024_and_2025_net_positive": true,
+      "combined_2023_2025_pf_min": 1.15,
+      "combined_positive_halfyears_min": 4,
+      "month_block_bootstrap_probability_net_positive_min": 0.8
+    }
+  },
+  "track_b_rejected_signal_second_chance": {
+    "purpose": "Test whether fixed Stage38 meta-rejected signals contain causal delayed second chances or inversion opportunities.",
+    "fixed_sources": [
+      "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
+      "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90"
+    ],
+    "events": [
+      "REJECTED_THEN_DIRECTIONAL_RECOVERY",
+      "REJECTED_THEN_ADVERSE_SWEEP_RECLAIM",
+      "REJECTED_THEN_OPPOSITE_BREAK_CONTINUATION",
+      "REJECTED_THEN_COMPRESSION_RELEASE"
+    ],
+    "fixed_lags": [1, 2, 4, 8],
+    "execution_grid": {
+      "stop_atr": [0.75, 1.0],
+      "target_atr": [1.0, 1.5, 2.0],
+      "horizon_m1": [240, 480]
+    },
+    "discovery": "2024H2",
+    "validation": "2025",
+    "interpretation_cap": "RETROSPECTIVE_DIAGNOSTIC_BECAUSE_2025_COMPONENT_RESULTS_WERE_PREVIOUSLY_VIEWED"
+  },
+  "track_c_fixed_component_synergy": {
+    "purpose": "Measure complementarity and interference among fixed candidates without optimizing a continuous threshold.",
+    "fixed_components": [
+      "STAGE37_DETERMINISTIC_EXPANSION_MIDPOINT_FAILURE_LONG",
+      "STAGE38_META_LONG",
+      "STAGE38_META_SHORT"
+    ],
+    "fixed_policies": [
+      "PARALLEL_ARITHMETIC",
+      "GLOBAL_FIRST_ARRIVAL_ONE_POSITION",
+      "SAME_DIRECTION_AGREEMENT_WITHIN_1H",
+      "SAME_DIRECTION_AGREEMENT_WITHIN_4H",
+      "OPPOSITE_SIGNAL_VETO_WITHIN_1H",
+      "OPPOSITE_SIGNAL_VETO_WITHIN_4H",
+      "DIFFERENT_SOURCE_AFTER_RESOLVED_LOSS_WITHIN_4H",
+      "DIFFERENT_SOURCE_AFTER_RESOLVED_LOSS_WITHIN_12H",
+      "SOURCE_COOLDOWN_4H",
+      "SOURCE_COOLDOWN_12H"
+    ],
+    "reporting_periods": ["2024H2", "2025H1", "2025H2", "ALL"],
+    "selection": "REPORT_ALL_NO_POST_RESULT_POLICY_SELECTION",
+    "interpretation_cap": "RETROSPECTIVE_SYNERGY_DIAGNOSTIC_ONLY"
+  },
+  "track_d_interaction_attribution": {
+    "analyses": [
+      "signal_time_overlap",
+      "holding_interval_overlap",
+      "daily_and_monthly_pnl_correlation",
+      "D1_regime_contribution",
+      "source_order_after_win_or_loss",
+      "cluster_density_and_first_signal_advantage",
+      "same_direction_vs_opposite_direction_followups"
+    ],
+    "no_policy_creation_from_attribution": true
+  },
+  "global_prohibitions": [
+    "DO_NOT_USE_2026",
+    "DO_NOT_CHANGE_STAGE37_OR_STAGE38_FIXED_COMPONENTS",
+    "DO_NOT_SELECT_A_POLICY_AFTER_VIEWING_2025_AND_CALL_IT_FORMAL",
+    "DO_NOT_ADD_MONTH_DIRECTION_D1_OR_VOLATILITY_RESCUE_AFTER_RESULTS",
+    "DO_NOT_ENABLE_SHADOW_DISCORD_MT5_LIVE_READY_OR_FINAL_SIGNAL",
+    "DO_NOT_USE_EXTERNAL_OR_VOLUME_DATA"
+  ]
+}
