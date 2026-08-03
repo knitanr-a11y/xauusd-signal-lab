@@ -1,0 +1,33 @@
+{
+  "policy_id": "BTC_AI_V1_CONTINUOUS_HANDOFF_AND_HISTORY_POLICY_20260803",
+  "date": "2026-08-03",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "requirements": [
+    "Keep START_HERE_BTC_AI_V1.md as the unique restart entry.",
+    "Update current_state and next_action at every completed stage.",
+    "Create a dated immutable result document and JSON for every completed stage.",
+    "Create a dated NEXT_CHAT_HANDOFF document after every material result or authorization boundary.",
+    "Maintain docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md in chronological order.",
+    "Record exact input filenames, SHA256 hashes, branch and commit references.",
+    "Never overwrite frozen contracts or result files; corrections require a dated addendum.",
+    "Clearly separate authoritative results, diagnostics, hypotheses and user authorizations.",
+    "Fail closed on branch, hash, contract or handoff contradiction."
+  ],
+  "restart_rules": {
+    "authority_order": [
+      "START_HERE_BTC_AI_V1.md",
+      "latest explicitly referenced NEXT_CHAT_HANDOFF",
+      "current_state",
+      "next_action",
+      "frozen contracts and stage results"
+    ],
+    "memory_or_old_chat_as_authority": false,
+    "old_btc_bcr_as_authority": false,
+    "old_btc_bcr_role": "AUDIT_HISTORY_ONLY_FOR_DUPLICATION_AVOIDANCE"
+  },
+  "prohibitions": [
+    "Do not write BTC results into GOLD V19, Challenger C1 or P75.",
+    "Do not call any candidate deployable, live-ready or final signal without a separate prospective contract and explicit authorization.",
+    "Do not create Discord or MT5 order execution during retrospective research."
+  ]
+}
