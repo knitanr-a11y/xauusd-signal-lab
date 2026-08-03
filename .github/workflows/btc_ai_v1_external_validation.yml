@@ -1,0 +1,49 @@
+name: BTC AI V1 external validation data
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/btc-ai-v1-data-acquisition
+    paths:
+      - .github/workflows/btc_ai_v1_external_validation.yml
+      - scripts/btc_ai_v1/download_binance_external_validation.py
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Binance BTCUSDT ${{ matrix.year }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        year: [2020, 2021, 2022]
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Download, checksum and audit official Binance archives
+        run: |
+          python scripts/btc_ai_v1/download_binance_external_validation.py \
+            --year "${{ matrix.year }}" \
+            --output-dir "artifacts/binance_btcusdt_${{ matrix.year }}"
+
+      - name: Show audit manifest
+        if: always()
+        run: |
+          if [ -f "artifacts/binance_btcusdt_${{ matrix.year }}/audit_manifest_${{ matrix.year }}.json" ]; then
+            cat "artifacts/binance_btcusdt_${{ matrix.year }}/audit_manifest_${{ matrix.year }}.json"
+          fi
+
+      - name: Upload independently auditable yearly artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-ai-v1-binance-btcusdt-${{ matrix.year }}
+          path: artifacts/binance_btcusdt_${{ matrix.year }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
