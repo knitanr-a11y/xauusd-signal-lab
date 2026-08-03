@@ -1,0 +1,76 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_PHASE_CONDITIONAL_EXPERT_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "motivation": "The global state-feature model did not pass development. This distinct method prevents scores from different OHLC phases from sharing one calibration scale by fitting and calibrating one expert per outcome-blind phase.",
+  "source": "accepted XM BTCUSD# closed-bar OHLC only",
+  "external_data": false,
+  "volume_features": false,
+  "periods": {
+    "folds": "same four expanding folds as ohlc_state_transition_research_contract_20260803.json",
+    "development": "[2024-01-01, 2026-01-01), exactly 24 calendar months",
+    "2026": "diagnostic only and opened only for frozen robustness survivors"
+  },
+  "phase_router": [
+    "RANGE_NEUTRAL",
+    "EARLY_IMPULSE",
+    "MATURE_EXTENSION",
+    "PULLBACK",
+    "EXHAUSTION_REJECTION",
+    "REVERSAL_ATTEMPT"
+  ],
+  "expert_design": {
+    "model": "LightGBM depth-3 classifier",
+    "features": "OHLC_BASE_PLUS_STATE",
+    "training": "each expert is fit only on rows assigned to its phase",
+    "calibration": "threshold percentile is calculated only inside the same phase",
+    "emission": "an expert may emit only while its own phase is active",
+    "directions": ["LONG", "SHORT"],
+    "percentiles": [0.9, 0.95],
+    "event_policies": ["FIRST_CROSS_WITHIN_PHASE", "FOUR_M15_BAR_COOLDOWN_WITHIN_PHASE"],
+    "raw_candidates": 48
+  },
+  "capability_gates": {
+    "minimum_events_each_halfyear": 10,
+    "minimum_active_months_of_24": 12,
+    "maximum_invalid_entry_rate": 0.01,
+    "maximum_single_month_event_share": 0.30
+  },
+  "execution_grid": {
+    "fixed_spread_usd_per_btc": 22.5,
+    "stops_atr": [0.75, 1.0],
+    "targets_atr": [1.5, 2.0],
+    "maximum_holding_minutes": [480, 720],
+    "same_m1_collision": "SL_FIRST",
+    "one_position_non_overlap": true
+  },
+  "development_gates": {
+    "minimum_completed_trades": 96,
+    "profit_factor_min": 1.20,
+    "net_positive": true,
+    "positive_halfyears_min_of_4": 3,
+    "positive_months_min_of_24": 15,
+    "maximum_single_month_gross_profit_share": 0.35
+  },
+  "transition_transfer_gates": {
+    "transition_groups_with_minimum_20_trades": "PF must be at least 0.90",
+    "maximum_single_transition_gross_profit_share": 0.60,
+    "leave_one_transition_out_median_auc_min": 0.505,
+    "leave_one_transition_out_groups_above_random_min": 4,
+    "minimum_group_test_rows": 200
+  },
+  "robustness": {
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_net_positive_probability_min": 0.90,
+    "matched_random_iterations": 2000,
+    "matched_random_net_percentile_min": 0.95,
+    "no_rescue": true
+  },
+  "prohibitions": [
+    "no global threshold shared across phases",
+    "no phase removal after results",
+    "no use of 2026 for expert, threshold, direction, exit or phase selection",
+    "no external data or volume features",
+    "no Shadow, Discord or orders"
+  ]
+}
