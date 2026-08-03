@@ -29,7 +29,7 @@ The nine forward loops are:
 
 `scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat`
 
-The operator now checks collector, M7C and all nine forward-loop process markers before touching a lock. It then verifies the nine immutable runtime starts. Only after every precheck passes does it archive and remove stale locks.
+The operator now checks collector, M7C and all nine forward-loop process markers before touching a lock. It then verifies the nine immutable runtime starts. Only after every precheck passes does it archive every existing lock and then remove stale locks.
 
 It does not reset or delete runtime manifests, starts, state/history, SQLite, bounded journals, private snapshots or MT5 CSVs.
 
@@ -83,7 +83,7 @@ The audit is read-only. It checks process count and runner identity, locks, froz
 ## Permanent prohibitions
 
 - Never rerun an initialized BAT01 or initializer.
-- Never rerun the historical one-time M10P preserved-start recovery BAT02.
+- Never rerun the historical one-time M10P incident recovery BAT02/BAT03.
 - Never reset or edit a prospective start.
 - Never recreate or manually edit runtime/state/start receipts.
 - Never manually delete loop locks, bounded journals or private snapshots.
@@ -91,6 +91,17 @@ The audit is read-only. It checks process count and runner identity, locks, froz
 - Never backfill PC-off gaps from future data.
 - Discord, MT5 orders, `live_ready`, `final_signal` and automatic promotion remain off.
 
+## Verification
+
+The implementation passed:
+
+- Python syntax compilation for both new operators
+- synthetic all-stopped recovery: all 11 protected lock files were archived first and only the active stale locks were removed
+- synthetic running-process block: an active M10W34 process caused exit code 2 and preserved every active lock
+- synthetic all-nine restart-health audit: 9 of 9 process/runtime/start/status/output/snapshot/journal checks passed and the upload package was produced
+
+These tests used isolated temporary data and did not touch the user's real runtime or source CSVs.
+
 ## Status
 
-Implementation is committed to the agent branch for review against `feature/mochipoyo-alert-research`. Both Python files passed syntax compilation. The operators have not been executed on the user's Windows machine and do not claim current local loop health.
+Implementation is committed to the agent branch for review against `feature/mochipoyo-alert-research`. The operators have not been executed on the user's Windows machine and do not claim current local loop health.
