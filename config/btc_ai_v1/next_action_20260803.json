@@ -1,33 +1,21 @@
 {
   "date": "2026-08-03",
-  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
-  "formal_status": "FIRST_SEARCH_CYCLE_COMPLETE_NO_ROBUST_FINALIST_SECOND_CYCLE_PREREGISTRATION_NEXT",
-  "completed_stages": [
-    "BTC_AI_V1_02_CAUSAL_FEATURE_AND_CANDIDATE_REGISTRY_IMPLEMENTATION",
-    "BTC_AI_V1_03_DEVELOPMENT_VALUE_GATE",
-    "BTC_AI_V1_04_ROBUSTNESS_CONTROLS"
+  "next_stage": "BTC_AI_V1_11_SECOND_CYCLE_REGIME_SHIFT_FORENSIC_NO_RESCUE",
+  "objective": "Explain why all five frozen SHORT finalists failed in the already-exposed 2026 seven-month test without changing, rescuing, promoting, or retesting any candidate.",
+  "allowed": [
+    "feature distribution drift diagnostics",
+    "score and threshold drift diagnostics",
+    "monthly direction and volatility regime decomposition",
+    "trade-path and exit-reason decomposition",
+    "comparison of development vs final without new selection"
   ],
-  "first_cycle_classification": "PROMISING_NOT_ROBUST_NO_FINALIST",
-  "next_stage": "BTC_AI_V1_05_INDEPENDENT_SECOND_SEARCH_CYCLE_PREREGISTRATION",
-  "objective": "Freeze a genuinely independent second-cycle hypothesis and model registry before any new outcomes are computed. Do not retune or rescue the first-cycle breakout SHORT cohort.",
-  "cumulative_search_accounting": {
-    "raw_candidates_already_evaluated": 1200,
-    "development_execution_configs_already_evaluated": 19200,
-    "first_cycle_finalists": 0,
-    "multiple_testing_history_must_be_retained": true
-  },
-  "required_second_cycle_boundaries": [
-    "Use the same accepted BTCUSD# source hashes and fixed 22.50 USD spread unless a new user-authorized contract is created.",
-    "Keep the 2026-01-01 through 2026-07-31 final test locked.",
-    "Use candidate/model families independent of the failed first-cycle threshold grid.",
-    "Freeze all labels, model classes, hyperparameters, calibration, event thresholds, execution grid and candidate limit before outcomes.",
-    "Account for the first-cycle search in multiplicity and reporting."
+  "prohibited": [
+    "candidate rescue",
+    "threshold or side change",
+    "new candidate evaluation on 2026 as untouched",
+    "portfolio construction",
+    "prospective shadow authorization"
   ],
-  "prohibitions": [
-    "Do not relax the matched-random 0.95 threshold for BRE_SHORT_041 or BRE_SHORT_047.",
-    "Do not promote or open any of the nine Stage 03 candidates on the 2026 final test.",
-    "Do not modify first-cycle direction, compression, expansion, body, HTF, stop, target or horizon rules.",
-    "Do not construct a portfolio from failed candidates.",
-    "Do not start Shadow, Discord, MT5 orders, live-ready or final signal."
-  ]
+  "frequency_reporting": "Every event and trade count must include its calendar-month denominator and monthly distribution.",
+  "future_validation": "A new candidate requires genuinely new prospective data after the source snapshot or an explicitly labeled non-untouched research status."
 }
