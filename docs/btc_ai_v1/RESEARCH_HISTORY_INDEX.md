@@ -1,115 +1,112 @@
 # BTC AI V1 — Research History Index
 
-This file is the chronological index for `BTC_AI_CANDIDATE_RESEARCH_V1`.
+Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 
-## 2026-08-03 — Stage 00: data acquisition implementation
+## 2026-08-03 — Stage 00 / 00A: source acquisition, audit and cost freeze
 
 - `docs/btc_ai_v1/BTC_AI_MT5_HISTORY_EXPORTER_20260803.md`
-- `mt5/btc_ai_v1/BTC_AI_History_Exporter.mq5`
-- outcome: exporter created on an independent branch; no candidate research started.
-
-## 2026-08-03 — Stage 00A: source acceptance and cost freeze
-
 - `docs/btc_ai_v1/BTC_AI_V1_SOURCE_ACCEPTANCE_AND_FIXED_COST_CONTRACT_20260803.md`
 - `config/btc_ai_v1/source_data_manifest_20260803.json`
 - `config/btc_ai_v1/fixed_cost_contract_20260803.json`
-- outcome: BTCUSD# source accepted; GOLD contamination rejected; fixed 22.50 USD spread frozen.
+- BTCUSD# M1/M5/M15/H1/H4/D1 accepted and hash-frozen.
+- no GOLD contamination; exact M1 reconstruction parity passed.
+- fixed spread frozen at 22.50 USD per completed 1 BTC trade.
 
-## 2026-08-03 — Stage 01: research design preregistration
+## Stage 01: research-design preregistration
 
-- `docs/btc_ai_v1/BTC_AI_V1_RESEARCH_DESIGN_PREREGISTRATION_20260803.md`
 - `config/btc_ai_v1/research_design_contract_20260803.json`
-- outcome: folds, untouched final test, search limits, execution grid and no-rescue rules frozen.
+- four expanding validation folds covering exactly 24 development months, 2024-01 through 2025-12.
+- untouched final period frozen as 2026-01 through 2026-07, exactly seven months.
+- exact-M1 execution, no-rescue, robustness and frequency-reporting contracts frozen.
 
-## 2026-08-03 — First research cycle, Stages 02–04
+## Stages 02–04: deterministic causal-rule cycle
 
-- 1,200 symmetric raw candidates; 300 outcome-blind survivors.
-- 19,200 development configurations over exactly 24 calendar months.
-- nine development base survivors; zero passed all frozen robustness gates.
+- 1,200 raw candidates; 300 outcome-blind capability survivors.
+- 19,200 execution evaluations over 24 months.
+- nine development base survivors; zero passed all robustness controls.
 - classification: `PROMISING_NOT_ROBUST_NO_FINALIST`.
-- `docs/btc_ai_v1/BTC_AI_V1_FIRST_CYCLE_FREQUENCY_ADDENDUM_20260803.md`
+- frequency details: `docs/btc_ai_v1/BTC_AI_V1_FIRST_CYCLE_FREQUENCY_ADDENDUM_20260803.md`.
 
-## 2026-08-03 — Frequency reporting contract
+## Stages 05–10: binary supervised-ML cycle
 
-- `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
-- outcome: every event/trade count must include evaluation months, count per calendar month and monthly distribution.
-
-## 2026-08-03 — Second cycle preregistration
-
-- `docs/btc_ai_v1/BTC_AI_V1_SECOND_CYCLE_PREREGISTRATION_20260803.md`
-- `config/btc_ai_v1/second_cycle_preregistration_20260803.json`
-- outcome: 144 independent expanding-fold supervised directional-rank ML definitions frozen before outcomes.
-
-## 2026-08-03 — Stage 05/06: second-cycle capability
-
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE05_06_ML_CAPABILITY_RESULT_20260803.md`
-- 144 definitions evaluated over 24 calendar months; 72 outcome-blind survivors.
-- survivor frequency: 381–3,284 events in 24 months, 15.88–136.83 events/month.
-
-## 2026-08-03 — Stage 07: second-cycle development
-
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE07_SECOND_CYCLE_DEVELOPMENT_RESULT_20260803.md`
-- 4,608 execution configurations; 11 base survivors over 24 calendar months.
-- frequency: 243–1,015 completed trades in 24 months, 10.13–42.29 trades/month.
-
-## 2026-08-03 — Stage 08: second-cycle robustness
-
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE08_SECOND_CYCLE_ROBUSTNESS_RESULT_20260803.md`
-- 9/11 passed all frozen controls; five overlap-controlled finalists frozen.
-
-## 2026-08-03 — Stage 09: final-test event freeze
-
-- `config/btc_ai_v1/second_cycle_final_test_event_freeze_manifest_20260803.json`
-- five finalist event lists frozen for exactly seven calendar months before PnL replay.
-
-## 2026-08-03 — Stage 10: untouched final result
-
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE10_SECOND_CYCLE_UNTOUCHED_FINAL_RESULT_20260803.md`
-- untouched period: 2026-01 through 2026-07, exactly seven calendar months.
-- all five candidates had negative net; supported candidates: 0.
+- models: LightGBM and regularized logistic regression.
+- 144 definitions; 72 capability survivors.
+- 4,608 execution evaluations over 24 months.
+- 11 development survivors; nine robustness passes; five overlap-controlled finalists.
+- five event lists frozen before PnL.
+- untouched final evaluation: seven months, 2026-01 through 2026-07.
+- all five lost money; supported candidates: 0.
 - classification: `REJECT_UNTOUCHED_FINAL`.
-- the seven-month final test is consumed and cannot be reused as untouched evidence.
+- the seven-month test became consumed and cannot be reused as untouched evidence.
 
-## 2026-08-03 — Stage 11: regime-shift forensic
+## Stage 11: regime and discrimination forensic
 
 - `docs/btc_ai_v1/BTC_AI_V1_STAGE11_REGIME_SHIFT_FORENSIC_20260803.md`
-- `config/btc_ai_v1/stage11_regime_shift_forensic_result_20260803.json`
-- the aggregate 2026 SHORT label rate remained 36.53%, but frozen-finalist AUC fell to approximately 0.508–0.523.
-- daily structure inverted: `d1_ema20_slope4_atr` mean changed from +0.1243 in 2024–2025 to -0.1232 in 2026-01 through 2026-07.
+- 2026 SHORT base-label rate remained 36.53%, but finalist AUC fell to approximately 0.508–0.523.
+- `d1_ema20_slope4_atr` mean changed from +0.1243 in 2024–2025 to -0.1232 in 2026.
 - conclusion: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`.
-- no rescue or candidate selection was performed.
+- no rescue or selection.
 
-## 2026-08-03 — Stage 12: diverse AI preregistration and capability
+## Stages 12–15: diverse classifier AI cycle
 
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_EXPLORATORY_PREREGISTRATION_20260803.md`
-- `config/btc_ai_v1/diverse_ai_exploratory_contract_20260803.json`
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_CAPABILITY_RESULT_20260803.md`
-- tested XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and an equal-rank ensemble.
-- 120 raw candidates; 60 outcome-blind survivors over 24 calendar months.
-- frequency: 272–2,625 events in 24 months, 11.33–109.38 events/month.
+- models: XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and equal-rank ensemble.
+- 120 raw candidates; 60 outcome-blind survivors over 24 months.
+- event frequency: 272–2,625 / 24 months = 11.33–109.38/month.
+- 3,840 execution evaluations; four development survivors.
+- trade frequency: 240–387 / 24 months = 10.00–16.13/month.
+- two passed all robustness controls: `ML3_070` and `ML3_011`.
+- consumed 2026 diagnostic:
+  - `ML3_070`: 68 / 7 months = 9.71/month, PF 0.8814, net -1,151.21.
+  - `ML3_011`: 78 / 7 months = 11.14/month, PF 0.7056, net -5,634.88.
+- supported candidates remained 0.
 
-## 2026-08-03 — Stage 13: diverse AI development
+## Stages 16–20: alternative continuous-target AI cycle
 
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE13_DIVERSE_AI_DEVELOPMENT_RESULT_20260803.md`
-- 3,840 fixed execution evaluations; four base development survivors.
-- frequency: 240–387 trades in 24 months, 10.00–16.13 trades/month.
+- preregistration: `config/btc_ai_v1/alternative_target_contract_20260803.json`.
+- targets: fixed-cost 480-minute close return, MFE−0.75×MAE path edge, fixed 1ATR/2ATR/720-minute policy payoff.
+- models: XGBoost, CatBoost, ExtraTrees and Histogram Gradient Boosting regressors plus rank ensemble.
+- 360 raw candidates; 359 explicit capability passes; 120 balanced survivors.
+- survivor balance: three targets × 40; five models × 24; LONG 60 / SHORT 60.
+- event frequency: 272–2,619 / 24 months = 11.33–109.13/month.
+- 7,680 execution evaluations; six development survivors, all LONG.
+- trade frequency: 310–667 / 24 months = 12.92–27.79/month.
+- three passed all robustness controls: `AT4_110`, `AT4_171`, `AT4_038`.
+- consumed 2026 diagnostic:
+  - `AT4_110`: 52 / 7 months = 7.43/month, PF 0.6625, net -5,362.14.
+  - `AT4_171`: 136 / 7 = 19.43/month, PF 0.7504, net -7,269.98.
+  - `AT4_038`: 39 / 7 = 5.57/month, PF 0.4380, net -8,934.68.
+- all three lost; supported candidates remained 0.
 
-## 2026-08-03 — Stage 14: diverse AI robustness
+## Stages 21–23: pairwise payoff ranking and recency adaptation
 
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE14_DIVERSE_AI_ROBUSTNESS_RESULT_20260803.md`
-- two of four passed all frozen controls: `ML3_070` and `ML3_011`.
-- classification ceiling: `EXPLORATORY_PROSPECTIVE_ONLY` because the historical untouched period was already consumed.
+- contracts:
+  - `config/btc_ai_v1/pairwise_ranking_contract_20260803.json`
+  - `config/btc_ai_v1/pairwise_constant_group_addendum_20260803.json`
+- preregistered XGBoost `rank:pairwise`, CatBoost `YetiRank`, expanding and rolling-12-month schedules.
+- initial nanosecond-to-month group-conversion dry run was invalidated and deleted before candidate generation.
+- constant-payoff training months were excluded from ranker fitting only because they contain no ranking pairs; they remained in calibration, validation and PnL evaluation.
+- CatBoost YetiRank completed no accepted artifact within the month-group execution constraint and was not replaced.
+- XGBoost model series: 24; raw candidates: 144; capability survivors: 71.
+- balance: expanding 35 / rolling 36; LONG 36 / SHORT 35.
+- event frequency: 4,649–6,482 / 24 months = 193.71–270.08/month.
+- 4,544 execution evaluations.
+- positive-net configurations: 0; PF ≥1.15 configurations: 0; development survivors: 0.
+- no robustness or 2026 diagnosis opened.
 
-## 2026-08-03 — Stage 15: diverse AI consumed-period diagnostic
+## Formal closure status
 
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE15_DIVERSE_AI_2026_DIAGNOSTIC_RESULT_20260803.md`
-- diagnostic period: 2026-01 through 2026-07, exactly seven months; not used for selection or support.
-- `ML3_070`: 68 trades / 7 months = 9.71/month, PF 0.8814, net -1,151.21.
-- `ML3_011`: 78 / 7 months = 11.14/month, PF 0.7056, net -5,634.88.
-- supported candidates remain 0; no rescue or promotion.
+- consolidated result: `docs/btc_ai_v1/BTC_AI_V1_STAGE16_23_ALTERNATIVE_TARGET_AND_PAIRWISE_RESULTS_20260803.md`.
+- machine-readable result: `config/btc_ai_v1/stage16_23_result_20260803.json`.
+- supported candidates across all candle-only cycles: **0**.
+- no historical untouched period remains.
+- further same-history candle-only model multiplication is frozen as outcome-driven overfitting risk.
 
 ## Current next stage
 
-`BTC_AI_V1_16_ALTERNATIVE_TARGET_AND_DIRECT_PAYOFF_AI_PREREGISTRATION`
+`BTC_AI_V1_24_RESEARCH_CLOSURE_AND_NEW_EVIDENCE_PLAN`
 
-Freeze genuinely different AI targets such as direct normalized payoff or multi-horizon excursion prediction. No untouched historical evidence remains; any historical survivor is exploratory and requires new future prospective data.
+Latest handoff:
+
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_CANDLE_ONLY_SEARCH_EXHAUSTED_NEW_EVIDENCE_NEXT_20260803.md`
+
+Meaningful next evidence must be genuinely new: post-2026-08 prospective candles, pre-2023 or independent-broker external validation data, or separately authorized causal non-candle sources. No portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
