@@ -2,14 +2,14 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-ai-v1-data-acquisition`
-- status: `BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_FOUND_NO_SUPPORTED_CANDIDATE`
+- status: `BTC_AI_V1_OHLC_SEQUENCE_INFORMATION_FOUND_NO_STABLE_PAYOFF_ORDERING`
 - updated: `2026-08-03`
 
 ## Scope and source authority
 
-BTC専用のデータ・コスト・評価契約でゼロベース研究する。旧BTC BCR、旧stacking、旧5候補はauthorityにしない。GOLD V19、Challenger C1、P75、MOCHIPOYOを変更しない。
+BTCをBTC専用のデータ・コスト・評価契約でゼロベース研究する。旧BTC BCR、旧stacking、旧5候補はauthorityにしない。GOLD V19、Challenger C1、P75、MOCHIPOYOを変更しない。
 
-唯一の正本データは、受領・監査済みのXM `BTCUSD#` closed-bar snapshot:
+唯一の正本データは、受領・監査済みのXM `BTCUSD#` closed-bar OHLC snapshot:
 
 - M1 / M5 / M15 / H1 / H4 / D1
 - MT5 broker-server time
@@ -20,7 +20,7 @@ BTC専用のデータ・コスト・評価契約でゼロベース研究する�
 
 ## Unique latest handoff
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_NO_SUPPORT_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_SEQUENCE_NO_SUPPORT_EVENT_ANCHOR_NEXT_20260803.md`
 
 ## Required read order
 
@@ -31,21 +31,18 @@ BTC専用のデータ・コスト・評価契約でゼロベース研究する�
 5. `config/btc_ai_v1/ohlc_2026_failure_root_cause_20260803.json`
 6. `config/btc_ai_v1/ohlc_state_transition_research_contract_20260803.json`
 7. `docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_RESULT_20260803.md`
-8. `config/btc_ai_v1/ohlc_state_transition_result_20260803.json`
-9. `config/btc_ai_v1/ohlc_phase_conditional_expert_contract_20260803.json`
-10. `config/btc_ai_v1/ohlc_phase_expert_density_addendum_20260803.json`
-11. `docs/btc_ai_v1/BTC_AI_V1_OHLC_PHASE_EXPERT_RESULT_20260803.md`
-12. `config/btc_ai_v1/ohlc_phase_expert_result_20260803.json`
-13. `config/btc_ai_v1/ohlc_transition_conditional_expert_contract_20260803.json`
-14. `docs/btc_ai_v1/BTC_AI_V1_OHLC_TRANSITION_EXPERT_RESULT_20260803.md`
-15. `config/btc_ai_v1/ohlc_transition_expert_result_20260803.json`
-16. `docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_REPRODUCIBILITY_MANIFEST_20260803.md`
-17. `config/btc_ai_v1/current_state_20260803.json`
-18. `config/btc_ai_v1/next_action_20260803.json`
-19. `config/btc_ai_v1/source_data_manifest_20260803.json`
-20. `config/btc_ai_v1/fixed_cost_contract_20260803.json`
-21. `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
-22. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
+8. `docs/btc_ai_v1/BTC_AI_V1_OHLC_PHASE_EXPERT_RESULT_20260803.md`
+9. `docs/btc_ai_v1/BTC_AI_V1_OHLC_TRANSITION_EXPERT_RESULT_20260803.md`
+10. `config/btc_ai_v1/ohlc_sequence_transition_hazard_multitask_contract_20260803.json`
+11. `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_RESULT_20260803.md`
+12. `config/btc_ai_v1/ohlc_sequence_multitask_result_20260803.json`
+13. `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_REPRODUCIBILITY_MANIFEST_20260803.md`
+14. `config/btc_ai_v1/current_state_20260803.json`
+15. `config/btc_ai_v1/next_action_20260803.json`
+16. `config/btc_ai_v1/source_data_manifest_20260803.json`
+17. `config/btc_ai_v1/fixed_cost_contract_20260803.json`
+18. `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
+19. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
 
 Do not search old handoffs or deleted external-data paths before completing this order.
 
@@ -57,50 +54,91 @@ Formal root cause:
 
 `OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
 
-## Completed OHLC state-transition research
+## Previous state-transition cycles
 
-All new cycles used exactly 24 development months, 2024-01 through 2025-12. The consumed 2026 seven-month period was not opened.
+All previous cycles used exactly 24 development months, 2024-01 through 2025-12. The consumed 2026 seven-month period was not opened.
 
-### Global state-feature model
+- global state-feature model: maximum PF 1.1302; formal survivors 0
+- phase experts: maximum PF 1.4538; failed density/transfer; formal survivors 0
+- transition experts: maximum PF 1.6162; failed density/time/regime transfer; formal survivors 0
 
-- 48 candidates / 384 exact-M1 configurations
-- positive net: 72
-- PF >= 1.15: 0
-- maximum PF: 1.1302
-- formal survivors: 0
+Local high-PF patterns remain hypotheses only and may not be combined or rescued.
 
-### Phase-conditional experts
+## Completed OHLC sequence multi-task research
 
-- 48 raw / 42 capability survivors / 336 configurations
-- PF >= 1.20: 32
-- formal survivors: 0
-- `EARLY_IMPULSE LONG`: 64 trades / 24 months = 2.67/month, PF 1.4538, rejected for insufficient density
-- `RANGE_NEUTRAL LONG`: 268 / 24 = 11.17/month, PF 1.3704, rejected for transition concentration
+Each decision used 64 consecutive closed M15 bars, equal to 16 hours, plus the latest fully closed H1/H4/D1 OHLC context.
 
-### Transition-conditional experts
+Targets:
 
-- 48 raw / 26 capability survivors / 208 configurations
-- PF >= 1.20: 30
-- formal survivors: 0
-- `INTO_EARLY_IMPULSE LONG`: 78 / 24 = 3.25/month, PF 1.6162, rejected for density and D1-regime transfer
-- `EXHAUSTION_TO_REVERSAL SHORT`: 79 / 24 = 3.29/month, PF 1.4931, rejected for density and time persistence
+- first named transition within the next 16 M15 bars
+- LONG/SHORT MFE and MAE over 480 exact M1 bars
+- LONG/SHORT fixed-policy payoff using 1 ATR stop, 2 ATR target and 480-minute hold
 
-Formal supported candidates remain **0**. The high-PF local patterns are hypotheses only and may not be combined, rescued or evaluated on 2026.
+Compared models:
+
+- LightGBM lag/summary sequence baseline
+- shared small GRU multi-task model
+
+Results over exactly 24 calendar months:
+
+- valid continuous sequence rows: 100,948
+- raw candidates: 32
+- outcome-blind capability survivors: 32
+- candidate events: 250–1,156 over 24 months = 10.42–48.17/month
+- exact-M1 configurations: 256
+- positive-net configurations: 88
+- PF >= 1.20 configurations: 0
+- provisional survivors: 0
+- transfer, robustness and 2026 diagnosis: not opened
+
+Strongest LightGBM configuration:
+
+- 580 completed trades / 24 months = 24.17/month
+- monthly min / median / max: 4 / 23.5 / 60
+- PF 1.1539
+- net +21,262.16
+- positive months 13/24
+- positive half-years 3/4
+- rejected for PF and monthly-persistence gates
+
+Strongest GRU configuration:
+
+- 363 / 24 months = 15.13/month
+- monthly min / median / max: 4 / 15.5 / 30
+- PF 1.1496
+- net +13,276.96
+- positive months 13/24
+- positive half-years 2/4
+- D1 UP PF 0.7575; failed time/regime transfer
+
+Model finding:
+
+- OHLC sequences carried measurable information about future MFE/MAE
+- direct fixed-policy payoff ordering remained very weak
+- LightGBM hazard and candidate performance exceeded the GRU
+- a general sequence model did not solve the change in payoff meaning across time and D1 state
+
+Formal interpretation:
+
+`SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES`
+
+Formal supported candidates remain **0**.
 
 ## Current next stage
 
-`BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION`
+`BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION`
 
-Use OHLC sequences rather than a single-row score. Include every preregistered phase and transition, compare a small TCN/GRU with a non-neural sequence baseline, and require leave-one-D1-regime-out and leave-one-transition-type-out transfer before PnL shortlisting.
+Do not begin another broad model grid. First create an outcome-blind causal anchor registry covering range breaks, causal swings, expansion after compression, phase-transition starts, failed breaks and slope changes. Analyze continuation/reversal survival hazard by bars-since-anchor, ATR-distance, maximum extension, pullback depth, acceptance/rejection and H1/H4/D1 context. Freeze all anchor families, density gates and transfer tests before candidate PnL.
 
 ## Hard boundaries
 
-- XM BTCUSD# OHLC only; no external or volume data.
-- MT5 broker-server time; no JST conversion.
-- closed bars only; exact M1 execution and no fabricated bars.
-- fixed spread 22.50 USD.
-- every count includes exact calendar months and monthly distribution.
-- no local-winner combination or minimum-count relaxation.
-- no use of 2026 for selection or support.
-- no portfolio, Shadow, Discord, MT5 orders, live-ready or final signal.
-- every stage must leave dated contracts, results, current state, next action and next-chat handoff.
+- XM BTCUSD# OHLC only; no external or volume data
+- MT5 broker-server time; no JST conversion
+- closed bars only; exact M1 execution and no fabricated bars
+- fixed spread 22.50 USD
+- every count includes exact calendar months and monthly distribution
+- no local-winner or sequence near-candidate rescue
+- no PF, positive-month, minimum-count or D1-transfer gate reduction
+- no use of 2026 for selection or support
+- no portfolio, Shadow, Discord, MT5 orders, live-ready or final signal
+- every stage must leave dated contracts, results, current state, next action and next-chat handoff
