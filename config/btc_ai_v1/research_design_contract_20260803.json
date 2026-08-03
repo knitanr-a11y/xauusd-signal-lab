@@ -1,0 +1,174 @@
+{
+  "contract_id": "BTC_AI_V1_01_RESEARCH_DESIGN_PREREGISTRATION_20260803",
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "status": "FROZEN_BEFORE_CANDIDATE_OUTCOME_INSPECTION",
+  "methodology_scope": {
+    "copied_from_gold_candidates": false,
+    "process_only_principles": [
+      "closed-bar causal features",
+      "exact M1 entry and exit replay",
+      "no timeframe fallback",
+      "same-M1 stop-first collision",
+      "frozen contracts before outcomes",
+      "no post-result rescue",
+      "bootstrap, matched-random and pseudo-state controls",
+      "separate retrospective and prospective decisions"
+    ],
+    "ai_role": "AI proposes and audits deterministic hypotheses, feature combinations and code. Every candidate must be fully reproducible without runtime AI judgment.",
+    "old_btc_bcr_authority": false
+  },
+  "data_roles": {
+    "M1": "EXECUTION_ONLY",
+    "M5": "CAUSAL_FEATURES_OPTIONAL",
+    "M15": "PRIMARY_DECISION_GRID_AND_FEATURES",
+    "H1": "CAUSAL_CONTEXT",
+    "H4": "CAUSAL_CONTEXT",
+    "D1": "CAUSAL_CONTEXT",
+    "external_news_or_economic_data": false
+  },
+  "time_contract": {
+    "basis": "MT5_BROKER_SERVER_NAIVE",
+    "closed_bars_only": true,
+    "signal_bar": "M15 bar identified by its open timestamp",
+    "decision_time": "signal M15 open timestamp plus 15 minutes",
+    "entry_time": "exact M1 open at decision_time",
+    "missing_entry_m1": "SUPPRESS_FAIL_CLOSED",
+    "feature_asof": "only bars fully closed no later than decision_time",
+    "future_confirmed_swings_or_zigzag": false
+  },
+  "periods": {
+    "fold_1": {"fit": "[2023-01-01, 2024-01-01)", "validation": "[2024-01-01, 2024-07-01)"},
+    "fold_2": {"fit": "[2023-01-01, 2024-07-01)", "validation": "[2024-07-01, 2025-01-01)"},
+    "fold_3": {"fit": "[2023-01-01, 2025-01-01)", "validation": "[2025-01-01, 2025-07-01)"},
+    "fold_4": {"fit": "[2023-01-01, 2025-07-01)", "validation": "[2025-07-01, 2026-01-01)"},
+    "untouched_final_test": "[2026-01-01, 2026-08-01)",
+    "quarantine_not_used": "[2026-08-01, source_snapshot_end]",
+    "final_test_access": "Only after candidate definitions, parameters, development rankings and finalist list are frozen."
+  },
+  "candidate_families": [
+    "TREND_CONTINUATION_PULLBACK_RECLAIM",
+    "BREAKOUT_COMPRESSION_EXPANSION",
+    "MEAN_REVERSION_EXHAUSTION",
+    "MULTI_TIMEFRAME_ALIGNMENT_OR_DISAGREEMENT",
+    "VOLATILITY_STATE_AND_TRANSITION",
+    "CANDLE_SWING_EPISODE_STATE"
+  ],
+  "feature_boundaries": {
+    "allowed": [
+      "causal returns and momentum",
+      "ATR and normalized volatility",
+      "range, body and wick ratios",
+      "EMA level, slope and alignment",
+      "RSI and MACD derived from closed bars",
+      "past-only rolling highs, lows, breakouts and swings",
+      "volume and tick-volume ratios",
+      "MT5 server hour and day-of-week",
+      "cross-timeframe causal state combinations"
+    ],
+    "prohibited": [
+      "future-confirmed pivot or ZigZag",
+      "future session membership",
+      "absolute price-level optimization",
+      "external news or economic-event labels",
+      "features derived from final-test outcomes",
+      "old BTC candidate identity as a feature or seed"
+    ]
+  },
+  "search_limits": {
+    "maximum_raw_candidates_total": 1200,
+    "maximum_raw_candidates_per_family": 200,
+    "outcome_blind_capability_survivors_max": 300,
+    "development_value_shortlist_max": 20,
+    "finalists_max": 5,
+    "candidate_registry_required": true,
+    "all_candidate_results_retained": true
+  },
+  "outcome_blind_capability_gate": {
+    "uses_pnl": false,
+    "checks": [
+      "causal computability",
+      "event counts by validation fold",
+      "exact M1 entry availability",
+      "missing/gap rate",
+      "event concentration by month",
+      "duplicate or near-duplicate event overlap"
+    ],
+    "minimum_events_each_validation_fold": 20,
+    "maximum_invalid_exact_m1_rate": 0.01,
+    "diversity_selection": "event-overlap and rule-structure only, never PnL"
+  },
+  "execution_grid": {
+    "spread_contract": "config/btc_ai_v1/fixed_cost_contract_20260803.json",
+    "stop_atr14_m15_multipliers": [0.5, 0.75, 1.0, 1.5],
+    "target_R_multipliers": [1.0, 1.5, 2.0, 3.0],
+    "maximum_holding_minutes": [240, 480, 720, 1440],
+    "partial_exit": false,
+    "runner": false,
+    "trailing_stop": false,
+    "one_position_non_overlap_per_candidate": true,
+    "same_m1_tp_sl_collision": "SL_FIRST",
+    "required_m1_continuity": "entry through resolution or horizon",
+    "gap_before_resolution": "INVALID_EXCLUDE_AND_LOG",
+    "direction_policy": "LONG, SHORT or paired direction must be defined before value results; no post-result side deletion."
+  },
+  "development_value_gates": {
+    "minimum_total_validation_trades": 120,
+    "minimum_validation_trades_each_fold": 20,
+    "aggregate_validation_pf_min": 1.15,
+    "aggregate_validation_net_positive": true,
+    "positive_pf_and_net_validation_folds_min": 3,
+    "worst_validation_fold_pf_min": 0.8,
+    "net_to_max_dd_min": 0.25,
+    "single_month_gross_profit_share_max": 0.5
+  },
+  "robustness_controls": {
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_net_positive_probability_min": 0.95,
+    "bootstrap_pf_p05_min": 0.95,
+    "matched_random_iterations": 2000,
+    "matched_random_preserve": ["entry month", "direction", "event count"],
+    "matched_random_net_percentile_min": 0.95,
+    "matched_random_pf_percentile_min": 0.95,
+    "pseudo_state_iterations": 2000,
+    "parameter_neighborhood_required": true,
+    "entry_delay_diagnostics_minutes": [1, 5],
+    "holm_adjustment_across_finalists": true,
+    "holm_adjusted_one_sided_p_max": 0.1
+  },
+  "untouched_final_gates": {
+    "minimum_trades": 40,
+    "pf_min": 1.1,
+    "net_positive": true,
+    "net_to_max_dd_min": 0.25,
+    "absolute_pf_degradation_vs_development_max": 0.25,
+    "single_month_gross_profit_share_max": 0.7,
+    "invalid_exact_m1_rate_max": 0.01
+  },
+  "classification": {
+    "SUPPORTED_RETROSPECTIVE": "all capability, development, robustness and untouched-final gates pass",
+    "PROMISING_NOT_ROBUST": "positive evidence exists but one or more formal gates fail",
+    "REJECT": "no sufficient positive evidence",
+    "automatic_promotion": false,
+    "prospective_shadow_requires_explicit_authorization": true
+  },
+  "no_rescue": [
+    "no threshold adjustment after validation or final results",
+    "no side deletion after results",
+    "no month/session deletion after results",
+    "no exit or horizon change after results",
+    "no final-test re-entry with a modified candidate",
+    "no portfolio construction until individual candidate results are frozen"
+  ],
+  "history_outputs": [
+    "candidate registry and hashes",
+    "outcome-blind capability result",
+    "development value result",
+    "robustness result",
+    "untouched final result",
+    "current_state and next_action",
+    "dated next-chat handoff",
+    "research history index"
+  ]
+}
