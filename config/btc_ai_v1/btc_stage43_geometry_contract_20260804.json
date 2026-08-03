@@ -1,0 +1,37 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_WEIRD_GEOMETRY_AND_CALENDAR_STATE_RESEARCH_20260804",
+  "frozen_at_utc": "2026-08-03T23:52:00Z",
+  "status": "FROZEN_BEFORE_STAGE43_RESULTS",
+  "purpose": "Test deliberately broad and seemingly silly causal price-geometry hypotheses using only closed OHLC and timestamps.",
+  "discovery": "2023",
+  "validation": ["2024", "2025"],
+  "families": [
+    "ROUND_NUMBER_SWEEP_RECLAIM",
+    "PRIOR_DAY_CLOSE_RECLAIM",
+    "IMPULSE_FIB_PULLBACK_CONTINUATION",
+    "RUN_EXHAUSTION_REVERSAL",
+    "RUN_PAUSE_RESUMPTION",
+    "EMA20_FALSE_CROSS",
+    "EMA20_50_SQUEEZE_RELEASE",
+    "DOUBLE_TOUCH_NECKLINE_BREAK",
+    "THREE_CANDLE_STAR_ENGULF",
+    "ALTERNATING_COMPRESSION_RELEASE",
+    "OPENING_RANGE_FALSE_BREAK",
+    "DAILY_RANGE_EXTREME_REJECTION"
+  ],
+  "fixed_round_steps_usd": [100, 500, 1000],
+  "execution_grid": {
+    "stop_atr": [0.75, 1.0],
+    "target_atr": [1.0, 1.5, 2.0],
+    "horizon_m1": [240, 480]
+  },
+  "selection": "2023_ONLY_ONE_CONFIGURATION_PER_SUBTYPE",
+  "gates": "Same as Stage41 Track A",
+  "prohibited": [
+    "NO_2026",
+    "NO_VOLUME",
+    "NO_EXTERNAL_DATA",
+    "NO_POST_RESULT_WEEKDAY_SESSION_OR_DIRECTION_RESCUE",
+    "NO_SHADOW_DISCORD_MT5_LIVE_READY_FINAL_SIGNAL"
+  ]
+}
