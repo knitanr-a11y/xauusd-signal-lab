@@ -1,0 +1,18 @@
+{
+  "stage": "BTC_AI_V1_05_06_SECOND_CYCLE_ML_CAPABILITY",
+  "status": "COMPLETE_OUTCOME_BLIND_CAPABILITY",
+  "evaluation_period": "[2024-01-01, 2026-01-01)",
+  "evaluation_calendar_months": 24,
+  "raw_candidates": 144,
+  "explicit_capability_pass": 144,
+  "capability_survivors": 72,
+  "survivor_direction": {"SHORT": 49, "LONG": 23},
+  "survivor_model": {"LGBM_D3": 26, "LGBM_D5": 21, "LOGIT_EN50": 13, "LOGIT_L2": 12},
+  "survivor_feature_set": {"FULL_CAUSAL": 28, "CORE_MOMENTUM": 28, "MTF_CONTEXT": 16},
+  "events_total_range": [381, 3284],
+  "events_per_calendar_month_range": [15.875, 136.83333333333334],
+  "untouched_final_test_opened": false,
+  "registry_sha256": "b654e5e7e1a59e47180dbf4082968531e8da50cc6c08a3aa7b234251fb0f2418",
+  "survivors_sha256": "23fbfc2691087ceebde11cba61ec40f67ef9321a3bd57c20e1273daa048d8188",
+  "events_sha256": "0d2e3288cc27a525c45c3640cd374a9b8e5b2b51f9a2525e35623493e6999448"
+}
