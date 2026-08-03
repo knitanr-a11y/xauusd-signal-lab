@@ -1,32 +1,41 @@
 {
   "date": "2026-08-03",
-  "formal_status": "CANDLE_ONLY_HISTORICAL_AI_SEARCH_EXHAUSTED_NO_SUPPORTED_CANDIDATE",
-  "completed_through": "BTC_AI_V1_23_PAIRWISE_RANKING_DEVELOPMENT_RESULT",
-  "next_stage": "BTC_AI_V1_24_RESEARCH_CLOSURE_AND_NEW_EVIDENCE_PLAN",
-  "objective": "Freeze the candle-only historical search as complete, preserve every tested model/target and result, and define the next source of genuinely new evidence without selecting another candidate from the consumed history.",
-  "formal_result": {
-    "supported_candidates": 0,
-    "untouched_2026_consumed": true,
-    "historical_untouched_period_remaining": false,
-    "same_data_additional_model_search_authorized": false
+  "formal_status": "INDEPENDENT_2018_2022_HISTORY_EVALUATED_NO_SUPPORTED_CANDIDATE_CONTINUE_NOW",
+  "completed_through": "BTC_AI_V1_BINANCE_SPOT_AND_USDM_FUTURES_EXTERNAL_VALIDATION",
+  "next_stage": "BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH",
+  "objective": "Continue immediately without waiting for new months by adding causal derivatives-state evidence and cross-venue replication. Acquire and audit mark price, premium index, open interest, long-short ratios and funding from official sources, then freeze a new model/period contract before outcomes.",
+  "completed_external_evidence": {
+    "binance_spot_2018_2019_calendar_months": 24,
+    "binance_usdm_2020_2022_calendar_months": 36,
+    "combined_m1_rows": 2623700,
+    "official_monthly_archives_checksum_verified": true,
+    "supported_candidates": 0
   },
-  "acceptable_new_evidence": [
-    "post-2026-08 prospective BTCUSD# candles collected after a new frozen activation date",
-    "pre-2023 BTC candles or an independent-broker dataset used as external validation with source and cost contracts",
-    "separately authorized causal data such as order flow, open interest or funding with independent timestamps and no lookahead"
+  "immediate_source_priority": [
+    "Binance USD-M mark-price and premium-index archived klines",
+    "Binance historical futures metrics when checksum and coverage audit pass",
+    "Bybit open-interest, funding and long-short-ratio history through official market-data endpoints",
+    "Deribit BTC perpetual funding and open-interest replication"
   ],
-  "allowed_now": [
-    "research closure documentation",
-    "prospective data-acquisition design without selecting a live candidate",
-    "external-data availability and source-integrity audit",
-    "comparison of already-frozen results for explanation only"
+  "required_comparisons": [
+    "candle plus traded-volume baseline",
+    "funding-only incremental value",
+    "premium/mark divergence incremental value",
+    "open-interest and long-short-state incremental value",
+    "cross-venue direction and timing stability"
+  ],
+  "evidence_rules": [
+    "Each venue retains a separate price/execution ledger.",
+    "No candidate definition may use a later evaluation period for threshold or side selection.",
+    "The near-positive Binance futures candidate remains rejected and cannot be rescued.",
+    "Every event and trade count includes exact calendar months and monthly distribution.",
+    "Any historical survivor is frozen before cross-venue or later-period evaluation."
   ],
   "prohibited": [
-    "new candle-only threshold, model, target, side, session, exit or horizon search on the same history",
-    "reuse of 2026-01 through 2026-07 as untouched evidence",
-    "promotion or rescue of any prior candidate",
-    "portfolio construction from rejected or exploratory candidates",
-    "Shadow, Discord, MT5 orders, live-ready or final signal without a new explicit authorization and frozen contract"
-  ],
-  "frequency_reporting": "Every event and completed-trade count remains tied to exact calendar months and monthly distribution."
+    "waiting for several months as the only plan",
+    "relaxing the Binance 2022 positive-month gate",
+    "mixing XM, Binance spot, Binance futures, Bybit or Deribit execution prices",
+    "post-result threshold, side, month, feature, target or exit rescue",
+    "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal without explicit authorization"
+  ]
 }
