@@ -5,21 +5,8 @@
   "formal_status": "BTC_AI_V1_SECOND_CYCLE_COMPLETE_NO_SUPPORTED_CANDIDATE_2026_FINAL_CONSUMED_FORENSIC_NEXT",
   "fixed_spread_usd_per_btc": 22.5,
   "frequency_reporting_contract": "config/btc_ai_v1/frequency_reporting_contract_20260803.json",
-  "first_cycle": {
-    "development_calendar_months": 24,
-    "classification": "PROMISING_NOT_ROBUST_NO_FINALIST"
-  },
-  "second_cycle": {
-    "raw_ml_candidates": 144,
-    "capability_survivors": 72,
-    "development_calendar_months": 24,
-    "development_shortlist": 11,
-    "robustness_full_pass": 9,
-    "frozen_finalists": 5,
-    "untouched_final_calendar_months": 7,
-    "supported_retrospective": 0,
-    "classification": "REJECT_UNTOUCHED_FINAL"
-  },
+  "first_cycle": {"development_calendar_months": 24, "classification": "PROMISING_NOT_ROBUST_NO_FINALIST"},
+  "second_cycle": {"raw_ml_candidates": 144, "capability_survivors": 72, "development_calendar_months": 24, "development_shortlist": 11, "robustness_full_pass": 9, "frozen_finalists": 5, "untouched_final_calendar_months": 7, "supported_retrospective": 0, "classification": "REJECT_UNTOUCHED_FINAL"},
   "untouched_final_test": "[2026-01-01, 2026-08-01)",
   "untouched_final_test_opened": true,
   "untouched_final_test_consumed": true,
