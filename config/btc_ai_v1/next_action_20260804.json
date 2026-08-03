@@ -1,20 +1,29 @@
 {
   "date": "2026-08-04",
-  "completed": "BTC_AI_V1_OHLC_DECEPTION_AND_META_FAKEOUT_STAGE39_ROBUSTNESS",
-  "result": "SUPPORTED_RESEARCH_CANDIDATES_WITH_STAGE40_2026_DIAGNOSTIC_PENDING",
-  "next_stage": "BTC_AI_V1_OHLC_DECEPTION_META_STACK_CONSUMED_2026_DIAGNOSTIC_OR_FRESH_PROSPECTIVE_PREREGISTRATION",
-  "primary_action": "Run the already-frozen Stage40 2026-01 through 2026-07 diagnostic in an environment that can complete all monthly refits, with no configuration changes or partial-month selection.",
-  "alternative_if_stage40_is_skipped": "Freeze a separate prospective observation-only contract before using any post-freeze data. Do not activate Shadow without explicit user authorization.",
+  "completed": "BTC_AI_V1_OHLC_MULTIPERSPECTIVE_AND_INTERACTION_ROBUSTNESS_STAGE44",
+  "result": "ONE_NEW_FORMAL_ATR_SHOCK_SPECIALIST_AND_ONE_ROBUST_RETROSPECTIVE_INTERACTION_DIAGNOSTIC",
+  "next_stage": "BTC_AI_V1_STAGE45_FIXED_CONFLICT_STATE_MACHINE_AND_NEW_PATH_ENTROPY_RESEARCH",
+  "primary_actions": [
+    "Freeze a source-transition state machine without changing the five supported research candidates.",
+    "Test multi-scale sign entropy, path complexity, failed efficiency and transition-order specialists using 2023 discovery and separate 2024 and 2025 validation.",
+    "Measure whether conflict-veto information can be represented as a causal pre-entry state without using current trade outcomes.",
+    "Continue reporting all source components and negative results rather than deleting low-frequency candidates."
+  ],
+  "interaction_policy_boundary": "Keep the prior-4h opposite-source veto plus prior-4h same-direction-after-win suppression as robust retrospective diagnostic until fresh prospective evidence exists.",
+  "stage40_boundary": "The separately frozen consumed-2026 diagnostic remains unexecuted and unused. Do not mix a partial Stage40 run into Stage45 selection.",
   "allowed": [
-    "exact reproduction of the frozen Stage40 diagnostic",
-    "full seven-month all-direction reporting",
-    "fresh prospective preregistration after explicit user authorization"
+    "new closed-OHLC causal event families frozen before results",
+    "2023-only discovery with 2024 and 2025 separate validation",
+    "fixed-candidate complementarity and interference diagnostics",
+    "exact M1 execution and cost stress",
+    "full reporting of sparse specialists and negative results"
   ],
   "prohibited": [
-    "altering Q90, lag1, feature set, model seed, direction or execution after seeing 2025 results",
-    "formalizing the post-result deterministic-plus-meta accumulation diagnostic",
-    "claiming 2026 is untouched",
-    "external or volume data without explicit authorization",
+    "using 2026 for Stage45 selection",
+    "changing the Stage37, Stage38 or Stage41 supported candidate definitions",
+    "calling the Stage42 interaction policy untouched validation or live-ready",
+    "external or volume data",
+    "post-result month, direction, D1, session or volatility rescue",
     "Shadow",
     "Discord",
     "MT5 orders",
