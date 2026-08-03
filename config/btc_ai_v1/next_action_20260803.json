@@ -1,41 +1,50 @@
 {
   "date": "2026-08-03",
-  "formal_status": "INDEPENDENT_2018_2022_HISTORY_EVALUATED_NO_SUPPORTED_CANDIDATE_CONTINUE_NOW",
-  "completed_through": "BTC_AI_V1_BINANCE_SPOT_AND_USDM_FUTURES_EXTERNAL_VALIDATION",
-  "next_stage": "BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH",
-  "objective": "Continue immediately without waiting for new months by adding causal derivatives-state evidence and cross-venue replication. Acquire and audit mark price, premium index, open interest, long-short ratios and funding from official sources, then freeze a new model/period contract before outcomes.",
-  "completed_external_evidence": {
-    "binance_spot_2018_2019_calendar_months": 24,
-    "binance_usdm_2020_2022_calendar_months": 36,
-    "combined_m1_rows": 2623700,
-    "official_monthly_archives_checksum_verified": true,
-    "supported_candidates": 0
+  "formal_status": "OHLC_2026_FAILURE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE",
+  "completed_through": "BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC",
+  "next_stage": "BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN",
+  "objective": "Continue immediately using only XM BTCUSD# OHLC. Build causal representations of early impulse, mature extension, exhaustion, pullback and reversal, then test whether candidate value survives leave-one-regime-out and regime-transition holdouts before any new candidate shortlist is opened.",
+  "root_cause": {
+    "short_opportunity_disappeared": false,
+    "daily_and_h4_regime_shift": true,
+    "selected_events_became_deeper_and_more_range_expanded": true,
+    "score_ordering_collapsed": true,
+    "within_d1_regime_relationship_deteriorated": true,
+    "fixed_cost_secondary": true,
+    "simple_d1_filter_not_sufficient": true
   },
-  "immediate_source_priority": [
-    "Binance USD-M mark-price and premium-index archived klines",
-    "Binance historical futures metrics when checksum and coverage audit pass",
-    "Bybit open-interest, funding and long-short-ratio history through official market-data endpoints",
-    "Deribit BTC perpetual funding and open-interest replication"
+  "required_ohlc_state_features": [
+    "causal swing age and distance travelled since swing",
+    "bars and ATR distance since range break",
+    "slope velocity and slope acceleration/deceleration",
+    "range expansion sequence and post-expansion acceptance/rejection",
+    "position inside causal rolling range at several horizons",
+    "impulse versus pullback versus exhaustion phase",
+    "higher-timeframe phase interaction instead of static trend sign only",
+    "adverse/favorable excursion shape using training periods only"
   ],
-  "required_comparisons": [
-    "candle plus traded-volume baseline",
-    "funding-only incremental value",
-    "premium/mark divergence incremental value",
-    "open-interest and long-short-state incremental value",
-    "cross-venue direction and timing stability"
+  "required_validation": [
+    "leave-one-D1-regime-out development",
+    "leave-one-transition-type-out development",
+    "chronological rolling folds",
+    "regime-composition reweighting",
+    "candidate performance inside every coarse D1 and H4 state",
+    "minimum value across regimes, not aggregate PF alone",
+    "fixed 22.50 USD spread throughout"
   ],
-  "evidence_rules": [
-    "Each venue retains a separate price/execution ledger.",
-    "No candidate definition may use a later evaluation period for threshold or side selection.",
-    "The near-positive Binance futures candidate remains rejected and cannot be rescued.",
-    "Every event and trade count includes exact calendar months and monthly distribution.",
-    "Any historical survivor is frozen before cross-venue or later-period evaluation."
+  "allowed": [
+    "OHLC-only forensic and feature engineering",
+    "causal state-transition registry",
+    "outcome-blind density audit",
+    "2023-2025 nested and leave-regime-out development",
+    "2026 diagnostic comparison without support claims"
   ],
   "prohibited": [
-    "waiting for several months as the only plan",
-    "relaxing the Binance 2022 positive-month gate",
-    "mixing XM, Binance spot, Binance futures, Bybit or Deribit execution prices",
-    "post-result threshold, side, month, feature, target or exit rescue",
+    "external-market, funding, open-interest, order-flow or metrics data",
+    "D1-up-only post-result rescue",
+    "threshold, direction, month, feature, exit or horizon rescue of rejected candidates",
+    "reuse of 2026 as untouched support",
     "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal without explicit authorization"
-  ]
+  ],
+  "frequency_reporting": "Every event and trade count must include exact calendar months and monthly distribution."
 }
