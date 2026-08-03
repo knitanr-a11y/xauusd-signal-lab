@@ -1,0 +1,93 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_EVENT_ANCHOR_SURVIVAL_FORENSIC_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC snapshot",
+    "time_semantics": "MT5 broker-server naive time",
+    "external_data": false,
+    "volume_features": false,
+    "development_period": "[2024-01-01, 2026-01-01)",
+    "development_calendar_months": 24,
+    "2026_authorized": false
+  },
+  "anchor_families": [
+    {
+      "id": "RANGE_BREAK_20",
+      "directions": ["UP", "DOWN"],
+      "definition": "current closed M15 close exceeds the prior 20-bar high or falls below the prior 20-bar low"
+    },
+    {
+      "id": "CAUSAL_SWING_TURN_20",
+      "directions": ["UP_FROM_LOW", "DOWN_FROM_HIGH"],
+      "definition": "previous closed M15 bar is a causal 20-bar extreme and the current bar reverses at least 0.30 ATR away from that extreme"
+    },
+    {
+      "id": "COMPRESSION_EXPANSION",
+      "directions": ["UP", "DOWN"],
+      "definition": "prior 16-bar median true range is below 0.75 of the prior 96-bar median and current range is at least 1.80 times the prior 96-bar median with body at least 0.60 of range"
+    },
+    {
+      "id": "PHASE_TRANSITION_START",
+      "directions": ["PHASE_DIRECTION"],
+      "definition": "first occurrence of each preregistered named phase-transition type using the frozen state-transition definitions"
+    },
+    {
+      "id": "FAILED_RANGE_BREAK_20",
+      "directions": ["DOWN_AFTER_FAILED_UP", "UP_AFTER_FAILED_DOWN"],
+      "definition": "previous close was outside the prior 20-bar range and current close returns inside it"
+    },
+    {
+      "id": "EMA20_SLOPE_TURN",
+      "directions": ["UP", "DOWN"],
+      "definition": "causal EMA20 four-bar slope crosses zero and absolute slope change is at least 0.08 ATR"
+    }
+  ],
+  "trajectory_contract": {
+    "anchor_price": "anchor-bar close",
+    "anchor_atr": "M15 ATR14 at anchor close",
+    "maximum_followup_bars_m15": 32,
+    "continuation_barrier_atr": 1.0,
+    "reversal_barrier_atr": 0.75,
+    "same_bar_collision": "REVERSAL_FIRST",
+    "censoring": "neither barrier reached within 32 M15 bars",
+    "observation_checkpoints_bars": [1, 2, 4, 8, 16, 32],
+    "no_interpolation": true,
+    "required_contiguous_m15": true
+  },
+  "required_outputs": [
+    "anchor registry with exact timestamp, family, subtype and direction",
+    "counts over 24 months, events per month and monthly min/median/max",
+    "continuation/reversal/censor rates",
+    "cause-specific hazard by bars-since-anchor",
+    "MFE, MAE, net directional displacement and pullback depth by checkpoint",
+    "breakdown by 2024H1, 2024H2, 2025H1, 2025H2",
+    "breakdown by D1 UP, NEUTRAL and DOWN",
+    "breakdown by ATR-distance-since-anchor and extension maturity bins"
+  ],
+  "forensic_support_gates": {
+    "minimum_events_total": 160,
+    "minimum_events_each_halfyear": 25,
+    "minimum_active_months": 18,
+    "minimum_non_censored_events": 80,
+    "continuation_minus_reversal_rate_abs_min": 0.08,
+    "same_direction_in_all_four_halfyears": true,
+    "same_direction_in_at_least_two_D1_regimes": true,
+    "maximum_single_halfyear_event_share": 0.45
+  },
+  "interpretation_rules": [
+    "This stage is forensic and does not authorize a trading candidate.",
+    "All anchor families remain in the report even when unprofitable or sparse.",
+    "No threshold, family, direction, horizon or barrier may be changed after outcome inspection.",
+    "An anchor family passing forensic gates may only proceed to a separately preregistered conditional model and exact-M1 PnL stage.",
+    "Previously strong EARLY_IMPULSE LONG and EXHAUSTION_TO_REVERSAL SHORT patterns receive no preferential inclusion or threshold treatment."
+  ],
+  "prohibited": [
+    "external or volume data",
+    "2026 selection, diagnosis or support in this stage",
+    "post-result anchor combination",
+    "post-result D1 filter",
+    "candidate PnL ranking",
+    "Shadow, Discord, MT5 orders, live-ready or final signal"
+  ]
+}
