@@ -8,9 +8,7 @@ Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 - no GOLD contamination; exact M1 reaggregation parity passed
 - MT5 broker-server time
 - fixed spread: 22.50 USD per completed 1 BTC trade
-- source and cost contracts:
-  - `config/btc_ai_v1/source_data_manifest_20260803.json`
-  - `config/btc_ai_v1/fixed_cost_contract_20260803.json`
+- source and cost contracts frozen
 
 ## Stage 01 — research-design preregistration
 
@@ -31,61 +29,56 @@ Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 
 - LightGBM and regularized logistic regression
 - 144 definitions; 72 capability survivors
-- 4,608 execution configurations over 24 months
-- 11 development survivors; nine robustness passes; five overlap-controlled finalists
+- 4,608 exact-M1 configurations over 24 months
+- 11 development survivors; nine robustness passes; five finalists
 - untouched 2026 seven-month result: all five lost
 - supported candidates: 0
-- the 2026 period became consumed and cannot be reused as untouched support
+- 2026 became consumed and cannot be reused as untouched support
 
-## Stage 11 — initial regime/discrimination forensic
+## Stage 11 — regime and discrimination forensic
 
-- SHORT opportunity base rate remained 36.53% in 2026
+- SHORT base opportunity remained 36.53% in 2026
 - finalist AUC fell to approximately 0.508–0.523
-- D1 trend geometry reversed
-- preliminary result: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`
+- selected entries became deeper, more mature and more range-expanded
+- formal root cause later finalized as:
+  `OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
 
 ## Stages 12–15 — diverse classifier AI
 
 - XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and rank ensemble
-- 120 raw; 60 capability survivors over 24 months
-- four development survivors; two passed robustness
+- 120 raw; 60 capability survivors
+- four development survivors; two robustness survivors
 - both lost in consumed-period 2026 diagnosis
 - supported candidates remained 0
 
 ## Stages 16–20 — alternative continuous-target AI
 
-- direct close payoff, MFE/MAE path edge and fixed-policy payoff targets
-- tree regressors and rank ensemble
+- direct close payoff, MFE/MAE path edge and fixed-policy payoff
 - 360 raw; 120 balanced survivors
-- 7,680 execution configurations over 24 months
-- six development survivors; three passed robustness
+- 7,680 exact-M1 configurations
+- six development survivors; three robustness survivors
 - all three lost in consumed-period 2026 diagnosis
 - supported candidates remained 0
 
 ## Stages 21–23 — pairwise payoff ranking
 
-- XGBoost `rank:pairwise`, expanding and rolling-12-month schedules
+- XGBoost pairwise ranking, expanding and rolling schedules
 - 144 raw; 71 capability survivors
-- 4,544 execution configurations over 24 months
+- 4,544 exact-M1 configurations
 - positive-net configurations: 0
 - development survivors: 0
 
 ## External-data incident — rejected and non-authoritative
 
-An unsolicited external-market expansion was performed without user authorization. The user rejected it.
-
-Authority correction:
-
-`docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md`
+External-market data was expanded without user authorization. The user rejected it.
 
 Actions completed:
 
-- external data excluded from all candidate research and conclusions
-- related GitHub Actions workflows removed
-- external contracts, manifests, result reports, handoff and download/probe scripts removed from the current branch tree
-- Git commit history retains the incident only for audit
+- external data excluded from all conclusions
+- related workflows, contracts, reports, handoff and download/probe scripts removed from the current branch tree
+- Git history retains the incident only for audit
 
-No future stage may use external data or volume features without explicit user authorization.
+No future stage may use external or volume data without explicit user authorization.
 
 ## OHLC-only 2026 root-cause forensic
 
@@ -94,186 +87,160 @@ Formal documents:
 - `docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md`
 - `config/btc_ai_v1/ohlc_2026_failure_root_cause_20260803.json`
 
-Root cause:
-
-`OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
-
 Key findings:
 
 - generic SHORT opportunity did not disappear
 - D1-up share fell from 44.60% to 15.10%; D1-down rose from 25.71% to 46.69%
-- selected event ret32/ATR changed from -0.150 to -1.154
+- selected ret32/ATR changed from -0.150 to -1.154
 - distance below EMA50/ATR changed from -0.280 to -0.876
 - range expansion changed from 2.31 to 2.91
-- high scores changed from early bearish impulse/correction to mature selloff/late SHORT
+- same high score changed from early bearish impulse/correction to mature selloff/late SHORT
 - score distribution stayed similar but predictive ordering collapsed
-- main 2R stop-first rate rose from about 47.5% to 57.3–58.4%
+- stop-first rate increased materially
 - fixed spread amplified but did not create the failure
-- a D1-up-only rescue is neither sufficient nor authorized
 
-## OHLC state-transition Cycle A — global state-feature model
+Formal root cause:
 
-Contract and results:
+`OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
 
-- `config/btc_ai_v1/ohlc_state_transition_research_contract_20260803.json`
-- `docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_RESULT_20260803.md`
-- `config/btc_ai_v1/ohlc_state_transition_result_20260803.json`
-
-Design:
+## OHLC state-transition Cycle A — global state model
 
 - 100 causal OHLC state-transition features
-- six outcome-blind phases and six transition types
-- LightGBM depth-3 and regularized logistic models
-- 48 candidates; 384 exact-M1 exit configurations
-- development: 24 calendar months
-
-Result:
-
+- 48 candidates; 384 exact-M1 configurations
 - positive-net configurations: 72
 - PF >= 1.15: 0
 - formal survivors: 0
-- best near-setting `ST6_010`: 290 trades / 24 months = 12.08/month; PF 1.1302; +9,209.23; 12 positive months; 3 positive half-years
-- leave-group-out, robustness and 2026 diagnosis not opened
+- best: 290 trades / 24 months = 12.08/month; PF 1.1302; +9,209.23
 
-Formal conclusion:
+Conclusion:
 
 `GLOBAL_OHLC_STATE_FEATURE_MODEL_DID_NOT_REACH_PREREGISTERED_EDGE`
 
-## OHLC state-transition Cycle B — phase-conditional experts
+## OHLC state-transition Cycle B — phase experts
 
-Contracts and results:
-
-- `config/btc_ai_v1/ohlc_phase_conditional_expert_contract_20260803.json`
-- `config/btc_ai_v1/ohlc_phase_expert_density_addendum_20260803.json`
-- `docs/btc_ai_v1/BTC_AI_V1_OHLC_PHASE_EXPERT_RESULT_20260803.md`
-- `config/btc_ai_v1/ohlc_phase_expert_result_20260803.json`
-
-Design:
-
-- one LightGBM expert per outcome-blind phase and direction
-- model fitting, score calibration and event emission isolated within the same phase
-- 48 raw; 42 capability survivors; 336 exact-M1 configurations
-
-Result:
-
-- positive-net configurations: 143
+- 48 raw; 42 capability survivors; 336 configurations
 - PF >= 1.20: 32
 - formal survivors: 0
-- `EARLY_IMPULSE LONG`: 64 / 24 months = 2.67/month; PF 1.4538; +3,797.81; 13 positive months; 4/4 positive half-years; failed frozen 96-trade minimum
-- `RANGE_NEUTRAL LONG`: 268 / 24 = 11.17/month; PF 1.3704; +15,805.22; 17 positive months; 4/4 half-years; failed transition-concentration gate
-- no transfer, robustness or 2026 diagnosis opened
+- `EARLY_IMPULSE LONG`: 64 / 24 months = 2.67/month; PF 1.4538; failed density
+- `RANGE_NEUTRAL LONG`: 268 / 24 = 11.17/month; PF 1.3704; failed transition concentration
 
-Formal conclusion:
+Conclusion:
 
 `PHASE_CONDITIONAL_SCORING_SHOWED_VALUE_BUT_TRANSFER_CONTRACT_NOT_SATISFIED`
 
-## OHLC state-transition Cycle C — transition-conditional experts
+## OHLC state-transition Cycle C — transition experts
 
-Contract and results:
-
-- `config/btc_ai_v1/ohlc_transition_conditional_expert_contract_20260803.json`
-- `docs/btc_ai_v1/BTC_AI_V1_OHLC_TRANSITION_EXPERT_RESULT_20260803.md`
-- `config/btc_ai_v1/ohlc_transition_expert_result_20260803.json`
-
-Design:
-
-- one LightGBM expert per outcome-blind transition type and direction
-- fitting, calibration and emission isolated inside the same transition
-- D1 UP/NEUTRAL/DOWN transfer gates
-- 48 raw; 26 capability survivors; 208 exact-M1 configurations
-
-Result:
-
-- positive-net configurations: 89
+- 48 raw; 26 capability survivors; 208 configurations
 - PF >= 1.20: 30
 - formal survivors: 0
-- `INTO_EARLY_IMPULSE LONG`: 78 / 24 months = 3.25/month; PF 1.6162; +5,200.22; 14 positive months; 3/4 half-years; failed density and D1-regime floor
-- `EXHAUSTION_TO_REVERSAL SHORT`: 79 / 24 = 3.29/month; PF 1.4931; +6,755.63; 12 positive months; 2/4 half-years; failed density and time persistence
-- no leave-D1-out, robustness or 2026 diagnosis opened
+- `INTO_EARLY_IMPULSE LONG`: 78 / 24 = 3.25/month; PF 1.6162; failed density and D1 transfer
+- `EXHAUSTION_TO_REVERSAL SHORT`: 79 / 24 = 3.29/month; PF 1.4931; failed density and time persistence
 
-Formal conclusion:
+Conclusion:
 
 `TRANSITION_EXPERTS_FOUND_HIGH_PF_LOW_DENSITY_LOCAL_EDGES_WITHOUT_TRANSFER_SUPPORT`
 
 ## OHLC sequence transition-hazard multi-task cycle
 
-Contract and results:
+Formal documents:
 
 - `config/btc_ai_v1/ohlc_sequence_transition_hazard_multitask_contract_20260803.json`
 - `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_RESULT_20260803.md`
 - `config/btc_ai_v1/ohlc_sequence_multitask_result_20260803.json`
-- `docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_REPRODUCIBILITY_MANIFEST_20260803.md`
 
 Design:
 
-- 64 consecutive closed M15 bars, equal to 16 hours
-- latest fully closed H1/H4/D1 OHLC context
-- 100,948 continuous sequence/target rows
-- first named phase-transition hazard within 16 future M15 bars
-- LONG/SHORT MFE, MAE and fixed-policy payoff over 480 exact M1 minutes
-- LightGBM lag/summary baseline versus a shared small GRU multi-task model
-- 32 candidate definitions; all 32 passed outcome-blind capability gates
-- 256 exact-M1 execution configurations over 24 calendar months
+- 64 closed M15 bars plus closed H1/H4/D1 OHLC context
+- 100,948 valid continuous sequence rows
+- LightGBM lag/summary baseline versus small GRU multi-task model
+- 32 candidates; 256 exact-M1 configurations
 
-Aggregate result:
+Result:
 
-- candidate frequency: 250–1,156 events / 24 months = 10.42–48.17/month
 - positive-net configurations: 88
 - PF >= 1.20: 0
-- provisional development survivors: 0
-- transfer, robustness and 2026 diagnosis not opened
+- provisional survivors: 0
+- strongest LightGBM: 580 trades / 24 months = 24.17/month; PF 1.1539; 13 positive months
+- strongest GRU: 363 / 24 = 15.13/month; PF 1.1496; 13 positive months; D1-UP PF 0.7575
+- GRU did not outperform LightGBM
+- MFE/MAE ordering existed, fixed-payoff ordering remained weak
 
-Strongest LightGBM setting:
-
-- `SQ9_009__S1.0_T2.0_H480`
-- 580 completed trades / 24 months = 24.17/month
-- monthly min / median / max: 4 / 23.5 / 60
-- PF 1.1539; net +21,262.16; DD 8,877.90
-- positive months 13/24; positive half-years 3/4
-- half-year PF: 1.0392 / 1.2024 / 0.9315 / 1.4233
-- rejected for PF 1.20 and 15-positive-month gates
-
-Strongest GRU setting:
-
-- `SQ9_030__S1.0_T2.0_H720`
-- 363 / 24 months = 15.13/month
-- monthly min / median / max: 4 / 15.5 / 30
-- PF 1.1496; net +13,276.96; DD 8,037.61
-- positive months 13/24; positive half-years 2/4
-- D1 DOWN PF 1.4606; NEUTRAL PF 1.5100; UP PF 0.7575
-- rejected for PF, time persistence and D1-regime transfer
-
-Model diagnostics:
-
-- LightGBM hazard balanced accuracy: 0.333–0.469
-- GRU hazard balanced accuracy: 0.196–0.281
-- LightGBM MFE/MAE validation Spearman: approximately 0.150–0.247
-- LightGBM fixed-payoff Spearman: approximately 0.000–0.055
-- GRU path-edge Spearman: approximately 0.023–0.102
-- GRU fixed-payoff Spearman: approximately -0.006–0.038
-
-Formal conclusion:
+Conclusion:
 
 `SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES`
 
-OHLC sequences contained measurable excursion information, but direct trade-payoff ordering remained weak. The GRU did not outperform the simpler LightGBM sequence baseline. The unresolved dependency is the causal event anchor and maturity of the trajectory.
+## OHLC event-anchor trajectory and survival forensic
+
+Formal contracts and results:
+
+- `config/btc_ai_v1/ohlc_event_anchor_survival_forensic_contract_20260803.json`
+- `config/btc_ai_v1/ohlc_event_anchor_survival_bin_addendum_20260803.json`
+- `config/btc_ai_v1/ohlc_event_anchor_matched_baseline_correction_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_EVENT_ANCHOR_SURVIVAL_RESULT_20260803.md`
+- `config/btc_ai_v1/ohlc_event_anchor_survival_result_20260803.json`
+
+Design:
+
+- six outcome-blind anchor families
+- 15 directed subtypes
+- 28,355 events over exactly 24 calendar months
+- 96 prior contiguous M15 bars and 32 future contiguous bars required
+- continuation +1.00 ATR versus reversal -0.75 ATR; reversal-first collision
+- no candidate PnL and no 2026
+
+### Design incident and correction
+
+The initial raw analysis reported 13 passes. It was invalid because asymmetric barriers and reversal-first collisions structurally biased raw results toward reversal.
+
+Before corrected outcomes, a uniform matched baseline was frozen by:
+
+- half-year
+- D1 regime
+- maturity-distance bin
+- direction
+
+The raw 13-pass count is void and must not be cited.
+
+### Corrected result
+
+- corrected forensic support survivors: **0**
+- candidate PnL opened: no
+- 2026 opened: no
+
+Largest corrected effects:
+
+- compression-expansion DOWN: 128 events / 24 months = 5.33/month; incremental outcome difference -0.1180; failed density
+- range break DOWN: 2,828 / 24 = 117.83/month; incremental -0.0382; unstable across time/D1
+- range break UP: 3,237 / 24 = 134.88/month; incremental -0.0332; stable sign but below five-point gate
+- failed DOWN break followed by UP return: 1,916 / 24 = 79.83/month; incremental +0.0207 across all four half-years; stable but too weak
+
+Magnitude finding:
+
+- compression-expansion increased four-bar MFE by approximately +0.73 to +1.02 ATR
+- it also increased MAE and eight-bar pullback by approximately +0.82 to +0.87 ATR
+- anchors therefore explained two-sided excursion magnitude better than invariant direction
+
+Formal conclusion:
+
+`EVENT_ANCHORS_EXPLAIN_EXCURSION_MAGNITUDE_BUT_NO_PREREGISTERED_ANCHOR_HAS_STABLE_INCREMENTAL_DIRECTIONAL_SURVIVAL_EDGE`
 
 ## Current formal status
 
-`BTC_AI_V1_OHLC_SEQUENCE_INFORMATION_FOUND_NO_STABLE_PAYOFF_ORDERING`
+`BTC_AI_V1_OHLC_EVENT_ANCHORS_EXPLAIN_MAGNITUDE_NO_STABLE_DIRECTIONAL_SURVIVOR`
 
 - formal supported candidates: **0**
-- 2026 was not opened in the state-transition or sequence cycles
-- no local or sequence near-candidate rescue is authorized
+- no event-anchor candidate PnL was opened
+- 2026 was not opened
+- no sparse or weak anchor was rescued
 
 ## Current next stage
 
-`BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION`
+`BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_CONDITIONAL_MODEL_PREREGISTRATION`
 
 Latest handoff:
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_SEQUENCE_NO_SUPPORT_EVENT_ANCHOR_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_EVENT_ANCHOR_NO_SUPPORT_PATH_SHAPE_NEXT_20260803.md`
 
-Before another broad model grid, build an outcome-blind causal anchor registry covering range breaks, swings, expansion after compression, phase-transition starts, failed breaks and slope changes. Analyze continuation/reversal hazard by anchor age, ATR distance, maximum extension, pullback depth, acceptance/rejection and higher-timeframe state. Freeze anchor families, density gates and leave-group-out transfer rules before candidate PnL.
+The next design must retain all anchor families and model the evolving post-anchor state. Magnitude and direction must be separate tasks. Direction must be evaluated as incremental residual versus matched baseline and must transfer across four half-years and D1 regimes before candidate PnL.
 
-No external data, portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
+No external data, portfolio, Shadow, Discord, MT5 orders, live-ready or final signal is authorized.
