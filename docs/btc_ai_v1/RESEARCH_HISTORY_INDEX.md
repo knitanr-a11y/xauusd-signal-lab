@@ -2,162 +2,216 @@
 
 Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 
-## 2026-08-03 — Stage 00 / 00A: XM source acquisition, audit and cost freeze
+## Stage 00 / 00A — XM source acceptance and cost freeze
 
-- `docs/btc_ai_v1/BTC_AI_MT5_HISTORY_EXPORTER_20260803.md`
-- `docs/btc_ai_v1/BTC_AI_V1_SOURCE_ACCEPTANCE_AND_FIXED_COST_CONTRACT_20260803.md`
-- `config/btc_ai_v1/source_data_manifest_20260803.json`
-- `config/btc_ai_v1/fixed_cost_contract_20260803.json`
-- BTCUSD# M1/M5/M15/H1/H4/D1 accepted and hash-frozen.
-- no GOLD contamination; exact M1 reconstruction parity passed.
-- fixed spread frozen at 22.50 USD per completed 1 BTC trade.
+- accepted XM `BTCUSD#` M1/M5/M15/H1/H4/D1 closed-bar snapshot
+- no GOLD contamination; exact M1 reaggregation parity passed
+- MT5 broker-server time
+- fixed spread: 22.50 USD per completed 1 BTC trade
+- source and cost contracts:
+  - `config/btc_ai_v1/source_data_manifest_20260803.json`
+  - `config/btc_ai_v1/fixed_cost_contract_20260803.json`
 
-## Stage 01: XM research-design preregistration
+## Stage 01 — research-design preregistration
 
-- `config/btc_ai_v1/research_design_contract_20260803.json`
-- four expanding validation folds covering 24 development months, 2024-01 through 2025-12.
-- untouched final frozen as 2026-01 through 2026-07, seven months.
-- exact-M1 execution, no-rescue, robustness and frequency contracts frozen.
+- four chronological expanding folds
+- development: 2024-01 through 2025-12, exactly 24 calendar months
+- untouched final initially frozen as 2026-01 through 2026-07, exactly seven months
+- exact-M1, no-rescue, robustness and frequency-reporting contracts frozen
 
-## Stages 02–04: deterministic causal-rule cycle
+## Stages 02–04 — deterministic causal-rule cycle
 
-- 1,200 raw candidates; 300 outcome-blind survivors.
-- 19,200 execution evaluations over 24 months.
-- nine development base survivors; zero passed all robustness controls.
-- classification: `PROMISING_NOT_ROBUST_NO_FINALIST`.
+- 1,200 raw candidates; 300 outcome-blind survivors
+- 19,200 exact-M1 configurations over 24 months
+- nine development base survivors
+- zero passed all robustness controls
+- result: `PROMISING_NOT_ROBUST_NO_FINALIST`
 
-## Stages 05–10: binary supervised-ML cycle
+## Stages 05–10 — binary supervised-ML cycle
 
-- LightGBM and regularized logistic regression.
-- 144 definitions; 72 capability survivors; 4,608 execution evaluations over 24 months.
-- 11 development survivors; nine robustness passes; five finalists.
-- untouched 2026 seven-month result: all five lost; supported candidates 0.
-- the 2026 period became consumed.
+- LightGBM and regularized logistic regression
+- 144 definitions; 72 capability survivors
+- 4,608 execution configurations over 24 months
+- 11 development survivors; nine robustness passes; five overlap-controlled finalists
+- untouched 2026 seven-month result: all five lost
+- supported candidates: 0
+- the 2026 period became consumed and cannot be reused as untouched support
 
-## Stage 11: initial regime and discrimination forensic
+## Stage 11 — initial regime/discrimination forensic
 
-- `docs/btc_ai_v1/BTC_AI_V1_STAGE11_REGIME_SHIFT_FORENSIC_20260803.md`
-- 2026 SHORT base-label rate remained 36.53%, but finalist AUC fell to approximately 0.508–0.523.
-- daily-trend state inverted.
-- preliminary conclusion: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`.
+- SHORT opportunity base rate remained 36.53% in 2026
+- finalist AUC fell to approximately 0.508–0.523
+- D1 trend geometry reversed
+- preliminary result: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`
 
-## Stages 12–15: diverse classifier AI
+## Stages 12–15 — diverse classifier AI
 
-- XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and rank ensemble.
-- 120 raw; 60 outcome-blind survivors over 24 months.
-- four development survivors; two passed robustness.
-- both lost in the consumed seven-month 2026 diagnosis.
-- supported candidates remained 0.
+- XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and rank ensemble
+- 120 raw; 60 capability survivors over 24 months
+- four development survivors; two passed robustness
+- both lost in consumed-period 2026 diagnosis
+- supported candidates remained 0
 
-## Stages 16–20: alternative continuous-target AI
+## Stages 16–20 — alternative continuous-target AI
 
-- direct close payoff, MFE/MAE path edge and fixed-policy payoff targets.
-- XGBoost, CatBoost, ExtraTrees and Histogram Gradient Boosting regressors plus rank ensemble.
-- 360 raw; 120 balanced survivors; 7,680 execution evaluations over 24 months.
-- six development survivors; three passed robustness.
-- all three lost in the consumed 2026 diagnosis.
-- supported candidates remained 0.
+- direct close payoff, MFE/MAE path edge and fixed-policy payoff targets
+- tree regressors and rank ensemble
+- 360 raw; 120 balanced survivors
+- 7,680 execution configurations over 24 months
+- six development survivors; three passed robustness
+- all three lost in consumed-period 2026 diagnosis
+- supported candidates remained 0
 
-## Stages 21–23: pairwise payoff ranking
+## Stages 21–23 — pairwise payoff ranking
 
-- XGBoost `rank:pairwise`, expanding and rolling-12-month schedules.
-- CatBoost YetiRank produced no accepted artifact and was not replaced.
-- 144 raw; 71 capability survivors; 4,544 execution evaluations over 24 months.
-- positive-net configurations: 0; development survivors: 0.
+- XGBoost `rank:pairwise`, expanding and rolling-12-month schedules
+- 144 raw; 71 capability survivors
+- 4,544 execution configurations over 24 months
+- positive-net configurations: 0
+- development survivors: 0
 
-## External-data incident — non-authoritative
+## External-data incident — rejected and non-authoritative
 
-An unsolicited external-data expansion using Binance spot/futures and derivatives archives was performed without user authorization. The user explicitly rejected those sources.
+An unsolicited external-market expansion was performed without user authorization. The user rejected it.
 
 Authority correction:
 
 `docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md`
 
-All external-data contracts, results and artifacts are:
+Actions completed:
 
-- rejected by the user;
-- non-authoritative;
-- excluded from candidate research and conclusions;
-- retained only in Git history as an incident/audit trail.
+- external data excluded from all candidate research and conclusions
+- related GitHub Actions workflows removed
+- external contracts, manifests, result reports, handoff and download/probe scripts removed from the current branch tree
+- Git commit history retains the incident only for audit
 
-No future stage may rely on them.
+No future stage may use external data or volume features without explicit user authorization.
 
 ## OHLC-only 2026 root-cause forensic
 
-Formal result:
+Formal documents:
 
 - `docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md`
 - `config/btc_ai_v1/ohlc_2026_failure_root_cause_20260803.json`
-
-Status:
-
-`COMPLETE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE`
 
 Root cause:
 
 `OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
 
-### Opportunity
+Key findings:
 
-- SHORT target-before-stop base rate remained 36.53% in 2026.
-- generic downside opportunity did not disappear.
+- generic SHORT opportunity did not disappear
+- D1-up share fell from 44.60% to 15.10%; D1-down rose from 25.71% to 46.69%
+- selected event ret32/ATR changed from -0.150 to -1.154
+- distance below EMA50/ATR changed from -0.280 to -0.876
+- range expansion changed from 2.31 to 2.91
+- high scores changed from early bearish impulse/correction to mature selloff/late SHORT
+- score distribution stayed similar but predictive ordering collapsed
+- main 2R stop-first rate rose from about 47.5% to 57.3–58.4%
+- fixed spread amplified but did not create the failure
+- a D1-up-only rescue is neither sufficient nor authorized
 
-### OHLC regime shift
+## OHLC state-transition Cycle A — global state-feature model
 
-- D1-up share: 44.60% in 2024–2025 -> 15.10% in 2026.
-- D1-down share: 25.71% -> 46.69%.
-- all-up H1/H4/D1: 19.19% -> 5.40%.
-- all-down H1/H4/D1: 8.30% -> 18.45%.
-- mean D1 EMA20 slope / ATR: +0.1243 -> -0.1232.
-- D1 slope PSI: 1.4414.
+Contract and results:
 
-### Selected-event geometry shift
+- `config/btc_ai_v1/ohlc_state_transition_research_contract_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_RESULT_20260803.md`
+- `config/btc_ai_v1/ohlc_state_transition_result_20260803.json`
 
-Candidate-trade weighted event means:
+Design:
 
-- D1 trend state: +0.654 -> -0.052.
-- D1 EMA20 slope / ATR: +0.434 -> +0.037.
-- one-bar return / ATR: -0.191 -> -0.493.
-- 32-bar return / ATR: -0.150 -> -1.154.
-- distance from EMA50 / ATR: -0.280 -> -0.876.
-- range expansion: 2.31 -> 2.91.
+- 100 causal OHLC state-transition features
+- six outcome-blind phases and six transition types
+- LightGBM depth-3 and regularized logistic models
+- 48 candidates; 384 exact-M1 exit configurations
+- development: 24 calendar months
 
-The same high score changed from a bearish correction/impulse inside rising or mixed structure to a deeper and more mature selloff. The finalists increasingly entered late and faced rebound/stop-first risk.
+Result:
 
-### Conditional drift versus composition
+- positive-net configurations: 72
+- PF >= 1.15: 0
+- formal survivors: 0
+- best near-setting `ST6_010`: 290 trades / 24 months = 12.08/month; PF 1.1302; +9,209.23; 12 positive months; 3 positive half-years
+- leave-group-out, robustness and 2026 diagnosis not opened
 
-Development candidate-ledger weighted performance:
+Formal conclusion:
 
-- D1 up: 2,693 trades, PF 1.2458, +158,499.26.
-- D1 neutral: 689, PF 1.0707, +14,746.44.
-- D1 down: 292, PF 1.0676, +6,340.25.
+`GLOBAL_OHLC_STATE_FEATURE_MODEL_DID_NOT_REACH_PREREGISTERED_EDGE`
 
-Using development conditional averages with actual 2026 D1-state counts predicted approximately +45,765 USD, while actual 2026 candidate-ledger net was -70,522 USD. Residual conditional deterioration was approximately -116,287 USD.
+## OHLC state-transition Cycle B — phase-conditional experts
 
-Regime composition contributed, but within-regime meaning change was dominant. A D1-up-only rescue is not supported.
+Contracts and results:
 
-### Model and execution deterioration
+- `config/btc_ai_v1/ohlc_phase_conditional_expert_contract_20260803.json`
+- `config/btc_ai_v1/ohlc_phase_expert_density_addendum_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_PHASE_EXPERT_RESULT_20260803.md`
+- `config/btc_ai_v1/ohlc_phase_expert_result_20260803.json`
 
-- MTF AUC fell from approximately 0.525 to 0.508.
-- full-causal AUC fell from 0.540 to 0.523.
-- score distribution remained stable, but score ordering collapsed.
-- four of five event sets underperformed the unconditional 2026 SHORT label rate.
-- main 2R finalist win rate fell from about 42.3% to 36.3–37.1%.
-- main 2R stop-first rate rose from about 47.5% to 57.3–58.4%.
-- fixed spread / ATR increased, but four of five candidates still lost at zero spread.
+Design:
 
-### Methodology gap
+- one LightGBM expert per outcome-blind phase and direction
+- model fitting, score calibration and event emission isolated within the same phase
+- 48 raw; 42 capability survivors; 336 exact-M1 configurations
 
-Bootstrap, matched-random, pseudo-state, neighborhood and delay tests were all conducted inside the 2024–2025 environment. They tested noise and parameter fragility, but not invariance across OHLC state transitions.
+Result:
+
+- positive-net configurations: 143
+- PF >= 1.20: 32
+- formal survivors: 0
+- `EARLY_IMPULSE LONG`: 64 / 24 months = 2.67/month; PF 1.4538; +3,797.81; 13 positive months; 4/4 positive half-years; failed frozen 96-trade minimum
+- `RANGE_NEUTRAL LONG`: 268 / 24 = 11.17/month; PF 1.3704; +15,805.22; 17 positive months; 4/4 half-years; failed transition-concentration gate
+- no transfer, robustness or 2026 diagnosis opened
+
+Formal conclusion:
+
+`PHASE_CONDITIONAL_SCORING_SHOWED_VALUE_BUT_TRANSFER_CONTRACT_NOT_SATISFIED`
+
+## OHLC state-transition Cycle C — transition-conditional experts
+
+Contract and results:
+
+- `config/btc_ai_v1/ohlc_transition_conditional_expert_contract_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_TRANSITION_EXPERT_RESULT_20260803.md`
+- `config/btc_ai_v1/ohlc_transition_expert_result_20260803.json`
+
+Design:
+
+- one LightGBM expert per outcome-blind transition type and direction
+- fitting, calibration and emission isolated inside the same transition
+- D1 UP/NEUTRAL/DOWN transfer gates
+- 48 raw; 26 capability survivors; 208 exact-M1 configurations
+
+Result:
+
+- positive-net configurations: 89
+- PF >= 1.20: 30
+- formal survivors: 0
+- `INTO_EARLY_IMPULSE LONG`: 78 / 24 months = 3.25/month; PF 1.6162; +5,200.22; 14 positive months; 3/4 half-years; failed density and D1-regime floor
+- `EXHAUSTION_TO_REVERSAL SHORT`: 79 / 24 = 3.29/month; PF 1.4931; +6,755.63; 12 positive months; 2/4 half-years; failed density and time persistence
+- no leave-D1-out, robustness or 2026 diagnosis opened
+
+Formal conclusion:
+
+`TRANSITION_EXPERTS_FOUND_HIGH_PF_LOW_DENSITY_LOCAL_EDGES_WITHOUT_TRANSFER_SUPPORT`
+
+## Current formal status
+
+`BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_FOUND_NO_SUPPORTED_CANDIDATE`
+
+- supported candidates: **0**
+- 2026 was not opened in Cycles A–C
+- local high-PF patterns are hypotheses only
+- no combination, rescue, threshold reduction or minimum-count reduction is authorized
 
 ## Current next stage
 
-`BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN`
+`BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION`
 
 Latest handoff:
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_ROOT_CAUSE_DONE_STATE_TRANSITION_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_NO_SUPPORT_NEXT_20260803.md`
 
-Continue immediately with XM BTCUSD# OHLC only. Represent early impulse, mature extension, pullback, continuation, exhaustion and reversal. Freeze leave-one-regime-out and leave-one-transition-type-out validation before opening new candidate outcomes.
+The next method must use OHLC sequences, include all phases/transitions, compare a small temporal model with a non-neural baseline, and pass leave-one-D1-regime-out and leave-one-transition-type-out validation before any PnL shortlist.
 
-No external data, D1-only rescue, portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
+No external data, portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
