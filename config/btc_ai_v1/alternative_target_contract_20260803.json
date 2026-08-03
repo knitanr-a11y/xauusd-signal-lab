@@ -1,0 +1,62 @@
+{
+  "contract_id": "BTC_AI_V1_16_ALTERNATIVE_TARGET_DIRECT_PAYOFF_AI_20260803",
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "status": "FROZEN_BEFORE_ALTERNATIVE_TARGET_OUTCOMES",
+  "classification_ceiling": "EXPLORATORY_PROSPECTIVE_ONLY",
+  "reason": "The 2026-01 through 2026-07 historical final period is already consumed. No historical result in this cycle can establish support.",
+  "fixed_contracts": {
+    "symbol": "BTCUSD#",
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "decision_grid": "CLOSED_M15",
+    "entry": "EXACT_M1_OPEN_AT_M15_DECISION_TIME",
+    "fixed_spread_usd_per_btc": 22.5,
+    "same_m1_collision": "SL_FIRST",
+    "missing_or_gap": "FAIL_CLOSED_NO_INTERPOLATION"
+  },
+  "development_folds": [
+    {"id":"2024H1","train":"[2023-01-01,2023-07-01)","calibration":"[2023-07-01,2024-01-01)","validation":"[2024-01-01,2024-07-01)"},
+    {"id":"2024H2","train":"[2023-01-01,2024-01-01)","calibration":"[2024-01-01,2024-07-01)","validation":"[2024-07-01,2025-01-01)"},
+    {"id":"2025H1","train":"[2023-01-01,2024-07-01)","calibration":"[2024-07-01,2025-01-01)","validation":"[2025-01-01,2025-07-01)"},
+    {"id":"2025H2","train":"[2023-01-01,2025-01-01)","calibration":"[2025-01-01,2025-07-01)","validation":"[2025-07-01,2026-01-01)"}
+  ],
+  "target_registry": {
+    "NET_CLOSE_R_480": "directional close at 480 exact M1 minutes minus fixed spread, divided by entry M15 ATR14; clipped to [-4,4]",
+    "PATH_EDGE_R_480": "directional maximum favorable excursion R minus 0.75 times maximum adverse excursion R over 480 exact M1 minutes; clipped to [-4,4]",
+    "POLICY_PAYOFF_R_720": "realized R of frozen 1.0 ATR stop, 2.0 ATR target, 720-minute maximum hold, SL-first; terminal close if neither hit"
+  },
+  "models": {
+    "XGB_REG_D3": {"n_estimators":250,"learning_rate":0.03,"max_depth":3,"min_child_weight":50,"subsample":0.8,"colsample_bytree":0.8,"reg_lambda":2.0},
+    "CAT_REG_D4": {"iterations":250,"learning_rate":0.03,"depth":4,"l2_leaf_reg":5.0},
+    "EXTRA_REG_D8": {"n_estimators":300,"max_depth":8,"min_samples_leaf":100,"max_features":0.7},
+    "HGB_REG_L15": {"max_iter":250,"learning_rate":0.04,"max_leaf_nodes":15,"min_samples_leaf":200,"l2_regularization":2.0},
+    "RANK_ENSEMBLE": "equal-weight percentile-rank average of the four base regressors within each fold"
+  },
+  "feature_sets": ["MTF_CONTEXT","FULL_CAUSAL"],
+  "directions": ["LONG","SHORT"],
+  "event_threshold_percentiles": [0.90,0.95,0.975],
+  "event_policies": ["FIRST_CROSS","COOLDOWN_4_M15"],
+  "maximum_raw_candidates": 360,
+  "outcome_blind_capability": {
+    "minimum_events_each_validation_fold": 20,
+    "maximum_invalid_entry_rate": 0.01,
+    "survivors_max": 120,
+    "selection": "density, exact-M1 availability, monthly concentration, event overlap and structural diversity only; no PnL"
+  },
+  "execution_grid": {
+    "stop_atr": [0.5,0.75,1.0,1.5],
+    "target_R": [1.0,1.5,2.0,3.0],
+    "maximum_holding_minutes": [240,480,720,1440],
+    "one_position_non_overlap_per_candidate": true
+  },
+  "development_gates": "same frozen gates as research_design_contract_20260803.json",
+  "robustness_controls": "same frozen bootstrap, matched-random, pseudo-state and parameter-neighborhood controls as prior cycles",
+  "consumed_2026_usage": "diagnostic only after exploratory survivor freeze; never selection, support or threshold tuning",
+  "no_rescue": [
+    "no target/model/feature/side/threshold/exit change after results",
+    "no deletion of losing months or directions",
+    "no reuse of 2026 as untouched evidence",
+    "no Shadow, portfolio, Discord, MT5 order, live-ready or final signal without explicit later authorization"
+  ],
+  "reporting": "Every count must include exact calendar months, per-month rate, active and zero months, and monthly min/median/max."
+}
