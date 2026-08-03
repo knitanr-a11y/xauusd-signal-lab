@@ -1,0 +1,41 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_EVENT_ANCHOR_SURVIVAL_BIN_ADDENDUM_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "parent_contract": "config/btc_ai_v1/ohlc_event_anchor_survival_forensic_contract_20260803.json",
+  "direction_mapping": {
+    "RANGE_BREAK_20_UP": 1,
+    "RANGE_BREAK_20_DOWN": -1,
+    "CAUSAL_SWING_TURN_20_UP_FROM_LOW": 1,
+    "CAUSAL_SWING_TURN_20_DOWN_FROM_HIGH": -1,
+    "COMPRESSION_EXPANSION_UP": 1,
+    "COMPRESSION_EXPANSION_DOWN": -1,
+    "FAILED_RANGE_BREAK_20_DOWN_AFTER_FAILED_UP": -1,
+    "FAILED_RANGE_BREAK_20_UP_AFTER_FAILED_DOWN": 1,
+    "EMA20_SLOPE_TURN_UP": 1,
+    "EMA20_SLOPE_TURN_DOWN": -1,
+    "PHASE_TRANSITION_START": "frozen causal phase_direction sign at anchor"
+  },
+  "maturity_distance_bins": [
+    {"id": "M0_LT1", "lower_inclusive": null, "upper_exclusive": 1.0},
+    {"id": "M1_1_TO_2", "lower_inclusive": 1.0, "upper_exclusive": 2.0},
+    {"id": "M2_2_TO_3", "lower_inclusive": 2.0, "upper_exclusive": 3.0},
+    {"id": "M3_GE3", "lower_inclusive": 3.0, "upper_exclusive": null}
+  ],
+  "distance_since_anchor_bins_at_checkpoint": [
+    {"id": "D0_LT0", "lower_inclusive": null, "upper_exclusive": 0.0},
+    {"id": "D1_0_TO_0_5", "lower_inclusive": 0.0, "upper_exclusive": 0.5},
+    {"id": "D2_0_5_TO_1", "lower_inclusive": 0.5, "upper_exclusive": 1.0},
+    {"id": "D3_1_TO_2", "lower_inclusive": 1.0, "upper_exclusive": 2.0},
+    {"id": "D4_GE2", "lower_inclusive": 2.0, "upper_exclusive": null}
+  ],
+  "d1_regime_mapping": {"DOWN": -1, "NEUTRAL": 0, "UP": 1},
+  "multiple_anchor_policy": "retain one event per family/subtype even when several anchors share one timestamp",
+  "phase_transition_policy": "exclude OTHER_TRANSITION and retain only first bar of a run of the same named transition code",
+  "missing_direction_policy": "exclude phase-transition event when frozen phase_direction is zero or missing",
+  "prohibited": [
+    "change bins after outcome inspection",
+    "deduplicate different anchor families by PnL or outcome",
+    "prefer previously profitable phase or transition types"
+  ]
+}
