@@ -2,57 +2,37 @@
   "date": "2026-08-03",
   "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
   "branch": "feature/btc-ai-v1-data-acquisition",
-  "formal_status": "BTC_AI_V1_INDEPENDENT_2018_2022_HISTORY_EVALUATED_NO_SUPPORT_DERIVATIVES_METRICS_RESEARCH_NEXT",
+  "formal_status": "BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_IDENTIFIED_STATE_TRANSITION_RESEARCH_NEXT",
+  "authoritative_source": "XM BTCUSD# closed-bar OHLC snapshot",
+  "time_semantics": "MT5 broker-server naive time",
   "fixed_spread_usd_per_btc": 22.5,
-  "frequency_reporting_contract": "config/btc_ai_v1/frequency_reporting_contract_20260803.json",
-  "xm_btcusd_track": {
-    "source_period": "[2023-01-01, 2026-08-03]",
+  "external_data": {
+    "authorized": false,
+    "used_for_current_conclusion": false,
+    "status": "REJECTED_BY_USER_NON_AUTHORITATIVE_GIT_HISTORY_ONLY",
+    "correction": "docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md"
+  },
+  "ohlc_research": {
+    "xm_source_hash_frozen": true,
+    "gold_contamination_detected": false,
+    "cross_timeframe_reaggregation_exact": true,
     "supported_candidates": 0,
-    "untouched_2026_consumed": true,
-    "same_history_candle_only_search_frozen": true
+    "untouched_2026_consumed": true
   },
-  "immediate_external_validation": {
-    "result": "config/btc_ai_v1/external_validation_result_20260803.json",
-    "combined_calendar_months": 60,
-    "combined_m1_rows": 2623700,
-    "binance_usdm_futures": {
-      "period": "2020-01 through 2022-12",
-      "calendar_months": 36,
-      "minute_coverage": 1.0,
-      "funding_months": 36,
-      "development_survivors": 4,
-      "robustness_survivors": 2,
-      "untouched_2022_supported": 0
-    },
-    "binance_spot": {
-      "period": "2018-01 through 2019-12",
-      "calendar_months": 24,
-      "m1_rows": 1045460,
-      "development_survivors": 0,
-      "untouched_2019H2_opened": false
-    },
-    "supported_candidates": 0
+  "root_cause_forensic": {
+    "status": "COMPLETE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE",
+    "formal_root_cause": "OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION",
+    "short_opportunity_disappeared": false,
+    "regime_composition_changed": true,
+    "within_regime_conditional_relation_changed": true,
+    "score_distribution_stable_but_ordering_collapsed": true,
+    "fixed_spread_primary_cause": false,
+    "simple_d1_filter_sufficient": false,
+    "result_json": "config/btc_ai_v1/ohlc_2026_failure_root_cause_20260803.json",
+    "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md"
   },
-  "near_positive_but_rejected": {
-    "candidate_id": "BEX_MICRO_FUNDING_SHORT_XGB_P95",
-    "untouched_period": "2022-01 through 2022-12",
-    "calendar_months": 12,
-    "completed_trades": 94,
-    "trades_per_month": 7.8333333333,
-    "profit_factor": 1.110625,
-    "net_usd": 1409.85,
-    "positive_months": 4,
-    "required_positive_months": 7,
-    "promoted": false,
-    "rescued": false
-  },
-  "supported_candidates": 0,
-  "next_stage": "BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH",
-  "latest_results": [
-    "docs/btc_ai_v1/BTC_AI_V1_BINANCE_FUTURES_EXTERNAL_VALIDATION_RESULT_20260803.md",
-    "docs/btc_ai_v1/BTC_AI_V1_BINANCE_SPOT_EXTERNAL_VALIDATION_RESULT_20260803.md"
-  ],
-  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_EXTERNAL_5Y_DONE_DERIVATIVES_METRICS_NEXT_20260803.md",
+  "next_stage": "BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN",
+  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_ROOT_CAUSE_DONE_STATE_TRANSITION_NEXT_20260803.md",
   "automatic_promotion": false,
   "prospective_shadow_authorized": false,
   "gold_runtime_modified": false,
