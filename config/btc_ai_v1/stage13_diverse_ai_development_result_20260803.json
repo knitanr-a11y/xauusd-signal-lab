@@ -1,0 +1,18 @@
+{
+  "stage": "BTC_AI_V1_13_DIVERSE_AI_DEVELOPMENT_VALUE",
+  "status": "COMPLETE_DEVELOPMENT_ONLY",
+  "evaluation_period": "[2024-01-01, 2026-01-01)",
+  "evaluation_calendar_months": 24,
+  "capability_survivors": 60,
+  "execution_configs_evaluated": 3840,
+  "configs_passing_all_development_gates": 49,
+  "base_candidates_with_pass": 4,
+  "development_shortlist_count": 4,
+  "shortlist_direction": {"SHORT": 4},
+  "shortlist_models": {"EXTRA_D8": 2, "XGB_D3": 1, "RANK_ENSEMBLE": 1},
+  "trade_count_range": [240, 387],
+  "trades_per_calendar_month_range": [10.0, 16.125],
+  "2026_used_for_selection": false,
+  "grid_sha256": "862bb8e07b04dec88defca1bcb4bb118e479c8c2691d2bcceede42ac892523df",
+  "shortlist_sha256": "f5396ba13dbccd24555a35e53026ddd4f641b907e622a984aec04569bf150ec3"
+}
