@@ -1,0 +1,41 @@
+{
+  "date": "2026-08-03",
+  "status": "COMPLETE_NO_FORMAL_SURVIVOR",
+  "raw_candidates": 48,
+  "capability_survivors": 26,
+  "execution_configs": 208,
+  "positive_net_configs": 89,
+  "pf_ge_1_20_configs": 30,
+  "formal_survivors": 0,
+  "maximum_pf": 1.6161669409,
+  "best_local_patterns": [
+    {
+      "candidate_id": "TX8_000",
+      "transition": "INTO_EARLY_IMPULSE",
+      "direction": "LONG",
+      "completed_trades": 78,
+      "trades_per_calendar_month": 3.25,
+      "profit_factor": 1.6161669409,
+      "net_usd": 5200.2180216,
+      "positive_months": 14,
+      "positive_halfyears": 3,
+      "regime_pf_floor_pass": false,
+      "promoted": false
+    },
+    {
+      "candidate_id": "TX8_037",
+      "transition": "EXHAUSTION_TO_REVERSAL",
+      "direction": "SHORT",
+      "completed_trades": 79,
+      "trades_per_calendar_month": 3.2916666667,
+      "profit_factor": 1.493079,
+      "net_usd": 6755.630972,
+      "positive_months": 12,
+      "positive_halfyears": 2,
+      "regime_pf_floor_pass": true,
+      "promoted": false
+    }
+  ],
+  "2026_opened": false,
+  "conclusion": "TRANSITION_EXPERTS_FOUND_HIGH_PF_LOW_DENSITY_LOCAL_EDGES_WITHOUT_TRANSFER_SUPPORT"
+}
