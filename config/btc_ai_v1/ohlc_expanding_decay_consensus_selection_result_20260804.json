@@ -1,0 +1,25 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_EXPANDING_DECAY_CONSENSUS_SELECTION_FORENSIC_20260804",
+  "formal_status": "BTC_AI_V1_OHLC_EXPANDING_DECAY_CONSENSUS_NO_SUPPORTED_HALF_LIFE",
+  "monthly_schedule_direction_rows": 192,
+  "causal_audit_violations": 0,
+  "supported_half_lives": [],
+  "supported_half_life_count": 0,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false,
+  "direction_summary": [
+    {"schedule":"EXP_DECAY_HL12M","direction":"LONG","median_monthly_events":159.0,"months_ge20":21,"mean_consensus_label_lift":0.041016787505411,"mean_lift_improvement_vs_expanding":-0.0123145975264253,"positive_improvement_months":11,"pass":false},
+    {"schedule":"EXP_DECAY_HL12M","direction":"SHORT","median_monthly_events":100.5,"months_ge20":23,"mean_consensus_label_lift":0.0776067144448243,"mean_lift_improvement_vs_expanding":0.0136422051367552,"positive_improvement_months":12,"pass":false},
+    {"schedule":"EXP_DECAY_HL24M","direction":"LONG","median_monthly_events":194.0,"months_ge20":23,"mean_consensus_label_lift":0.06159671432474,"mean_lift_improvement_vs_expanding":0.0082653292929036,"positive_improvement_months":13,"pass":false},
+    {"schedule":"EXP_DECAY_HL24M","direction":"SHORT","median_monthly_events":119.5,"months_ge20":23,"mean_consensus_label_lift":0.0601246498981181,"mean_lift_improvement_vs_expanding":-0.0038398594099509,"positive_improvement_months":12,"pass":false},
+    {"schedule":"EXP_DECAY_HL3M","direction":"LONG","median_monthly_events":23.0,"months_ge20":15,"mean_consensus_label_lift":0.1101310629585319,"mean_lift_improvement_vs_expanding":0.0683180305216291,"positive_improvement_months":16,"pass":false},
+    {"schedule":"EXP_DECAY_HL3M","direction":"SHORT","median_monthly_events":24.0,"months_ge20":14,"mean_consensus_label_lift":0.0701069918280055,"mean_lift_improvement_vs_expanding":-0.0031404650538399,"positive_improvement_months":8,"pass":false},
+    {"schedule":"EXP_DECAY_HL6M","direction":"LONG","median_monthly_events":89.5,"months_ge20":20,"mean_consensus_label_lift":0.0759554224875198,"mean_lift_improvement_vs_expanding":0.034142390050617,"positive_improvement_months":13,"pass":false},
+    {"schedule":"EXP_DECAY_HL6M","direction":"SHORT","median_monthly_events":47.5,"months_ge20":18,"mean_consensus_label_lift":0.1055629126347371,"mean_lift_improvement_vs_expanding":0.0469890274058132,"positive_improvement_months":13,"pass":false}
+  ]
+}
