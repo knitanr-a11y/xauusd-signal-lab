@@ -1,21 +1,27 @@
 {
   "date": "2026-08-03",
-  "next_stage": "BTC_AI_V1_11_SECOND_CYCLE_REGIME_SHIFT_FORENSIC_NO_RESCUE",
-  "objective": "Explain why all five frozen SHORT finalists failed in the already-exposed 2026 seven-month test without changing, rescuing, promoting, or retesting any candidate.",
+  "next_stage": "BTC_AI_V1_16_ALTERNATIVE_TARGET_AND_DIRECT_PAYOFF_AI_PREREGISTRATION",
+  "objective": "Try genuinely different AI learning targets rather than another classifier on the same target-before-stop label. Freeze direct normalized payoff, multi-horizon excursion, model classes, folds, event conversion and evaluation gates before computing outcomes.",
+  "current_evidence": {
+    "linear_and_lightgbm_second_cycle_supported": 0,
+    "diverse_nonlinear_ai_models_tested": ["XGBoost", "CatBoost", "ExtraTrees", "HistogramGradientBoosting", "equal-rank ensemble"],
+    "diverse_ai_robust_development_survivors": ["ML3_070", "ML3_011"],
+    "diverse_ai_2026_diagnostic_supported": 0
+  },
   "allowed": [
-    "feature distribution drift diagnostics",
-    "score and threshold drift diagnostics",
-    "monthly direction and volatility regime decomposition",
-    "trade-path and exit-reason decomposition",
-    "comparison of development vs final without new selection"
+    "direct normalized payoff regression",
+    "multi-horizon MFE and MAE prediction",
+    "ordinal or ranking objectives",
+    "rolling 2024-2025 development comparison",
+    "new future prospective preregistration"
   ],
   "prohibited": [
-    "candidate rescue",
-    "threshold or side change",
-    "new candidate evaluation on 2026 as untouched",
-    "portfolio construction",
-    "prospective shadow authorization"
+    "reuse of 2026 as untouched evidence",
+    "promotion of ML3_070 or ML3_011",
+    "threshold, side, month, feature, exit or horizon rescue",
+    "portfolio construction from rejected or exploratory candidates",
+    "prospective Shadow without explicit user authorization and a frozen contract"
   ],
-  "frequency_reporting": "Every event and trade count must include its calendar-month denominator and monthly distribution.",
-  "future_validation": "A new candidate requires genuinely new prospective data after the source snapshot or an explicitly labeled non-untouched research status."
+  "frequency_reporting": "Every event and completed-trade count must include evaluation calendar months, count per calendar month, active months and monthly min/median/max.",
+  "evidence_ceiling": "Any new historical result is exploratory until genuinely new future data is observed."
 }
