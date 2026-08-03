@@ -1,0 +1,18 @@
+{
+  "stage": "BTC_AI_V1_07_SECOND_CYCLE_DEVELOPMENT_VALUE",
+  "status": "COMPLETE_DEVELOPMENT_FINAL_TEST_LOCKED",
+  "evaluation_period": "[2024-01-01, 2026-01-01)",
+  "evaluation_calendar_months": 24,
+  "capability_survivors": 72,
+  "execution_configs_evaluated": 4608,
+  "configs_passing_all_development_gates": 71,
+  "base_candidates_with_pass": 11,
+  "development_shortlist_count": 11,
+  "shortlist_direction": {"SHORT": 10, "LONG": 1},
+  "shortlist_models": {"LOGIT_EN50": 5, "LOGIT_L2": 5, "LGBM_D3": 1},
+  "trade_count_range": [243, 1015],
+  "trades_per_calendar_month_range": [10.125, 42.291666666666664],
+  "untouched_final_test_opened": false,
+  "grid_sha256": "2686995dac2efaf646340bde7beb6c775ced40f6c78deb656716881f85abac2d",
+  "shortlist_sha256": "0852f6613aeb2dcc28cb33c5208622f41772f3515a3e678a3af8a1f2911c1699"
+}
