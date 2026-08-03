@@ -1,0 +1,46 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DECEPTION_ROBUSTNESS_AND_META_FAKEOUT_STACK_20260804",
+  "frozen_before_stage38_results": true,
+  "input_candidate": {
+    "source": "Stage37 2024-selected and 2025-validated specialist",
+    "id": "EXPANSION_MIDPOINT_FAILURE_L2_LONG__SL1.00_TP2.00_H480",
+    "meaning": "A large bearish M15 expansion fails; after two closed M15 bars price closes back above the expansion candle midpoint; enter LONG at the next exact M1 open"
+  },
+  "candidate_robustness": {
+    "one_factor_event_perturbations": {
+      "range_expansion_threshold": [1.8, 2.0, 2.2],
+      "body_fraction_threshold": [0.5, 0.6, 0.7],
+      "confirmation_lag_m15": [1, 2, 3, 4],
+      "midpoint_confirmation_tolerance_atr": [-0.1, 0.0, 0.1]
+    },
+    "one_factor_execution_perturbations": {
+      "stop_atr": [0.875, 1.0, 1.125],
+      "target_atr": [1.75, 2.0, 2.25],
+      "horizon_m1": [360, 480, 600],
+      "spread_usd": [22.5, 33.75, 45.0]
+    },
+    "matched_random": "same month, D1 regime, ATR quintile and LONG direction; 2000 replications; exact execution and one-position accounting"
+  },
+  "meta_fakeout_detector": {
+    "candidate_source": "Union of EXPANDING and exponential-decay HL3/6/12/24 previous-month-P90 signals",
+    "event_policies": ["UNION_FIRST_CROSS", "UNION_COOLDOWN4"],
+    "confirmation_lag_m15": [1, 2, 4],
+    "entry": "exact M1 open after the confirmation M15 bar closes",
+    "execution": "SL1.0 ATR, TP2.0 ATR, 480 exact M1 bars, 22.5 USD spread, SL-first collision",
+    "models": ["LOGIT_L2", "LGBM_D3"],
+    "feature_sets": ["SCORE_CONFIRM", "SCORE_CONFIRM_STATE"],
+    "selection_percentiles": [0.5, 0.75, 0.9],
+    "training": "monthly expanding; only candidate outcomes resolved before refit",
+    "discovery": "2024-07 through 2024-12 only",
+    "validation": "2025-01 through 2025-12 untouched until configuration freeze",
+    "selection_gate": "at least 20 discovery trades, active in both 2024H2 quarters, PF >= 1.10, net positive",
+    "support_gate": "2025 at least 30 trades, active both halfyears, PF >= 1.0, net positive; combined PF >= 1.15; at least 2 of 3 halfyears positive; bootstrap positive probability >= 0.75"
+  },
+  "forbidden": [
+    "2026 inspection",
+    "using original outcome labels as features",
+    "using current-month outcomes in training or thresholds",
+    "post-result month, direction, D1 or volatility deletion",
+    "Shadow, Discord, MT5 orders or live-ready promotion"
+  ]
+}
