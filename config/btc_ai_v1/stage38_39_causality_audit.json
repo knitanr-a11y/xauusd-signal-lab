@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "violations": {
+    "train_future_or_current": 0,
+    "train_unresolved_at_refit": 0,
+    "calibration_outside_previous_month": 0,
+    "validation_outside_target_month": 0,
+    "prohibited_feature_count": 0,
+    "2026_candidate_rows": 0,
+    "selection_2025_columns_used": 0
+  },
+  "selection_recomputed_from_2024_only_matches": true,
+  "selected_config_ids": [
+    "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
+    "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90"
+  ],
+  "recomputed_config_ids": [
+    "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
+    "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90"
+  ],
+  "underlying_stage31_33_leakage_status": "PASS_FROM_FROZEN_INPUT_PACKAGES",
+  "stage40_2026_diagnostic": "NOT_EXECUTED_NO_RESULT_USED"
+}
