@@ -1,0 +1,14 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_OHLC_ONLY_ORDERING_AND_ADAPTATION_SEARCH_EXHAUSTED_THROUGH_STAGE35_NO_SUPPORTED_CANDIDATE",
+  "completed_through_stage": 36,
+  "supported_candidates": 0,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "next_action": "WAIT_FOR_EXPLICIT_USER_AUTHORIZATION_OF_NEW_INFORMATION_SOURCE_OR_NEW_LABEL_EXECUTION_OBJECTIVE",
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false
+}
