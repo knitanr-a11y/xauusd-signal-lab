@@ -1,0 +1,27 @@
+{
+  "date": "2026-08-04",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "formal_status": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_NO_SUPPORTED_SCHEDULE",
+  "completed_through_stage": 31,
+  "supported_candidates": 0,
+  "supported_schedules": 0,
+  "stage31": {
+    "formal_months": 24,
+    "evaluations": 192,
+    "available": 192,
+    "leakage_violations": 0,
+    "rolling_3m": {"long_mean_auc_delta": -0.006655899711160089, "short_mean_auc_delta": -0.025056407583437242},
+    "rolling_6m": {"long_mean_auc_delta": -0.0018232630923032238, "short_mean_auc_delta": -0.016842139039106148},
+    "rolling_12m": {"long_mean_auc_delta": 0.00035081540725544896, "short_mean_auc_delta": -0.010314907117047994}
+  },
+  "next_stage": "BTC_AI_V1_OHLC_DRIFT_ATTRIBUTION_AND_RANK_STABILITY_FORENSIC",
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "automatic_promotion": false,
+  "prospective_shadow_authorized": false,
+  "mt5_orders": false,
+  "discord": false,
+  "live_ready": false,
+  "final_signal": false
+}
