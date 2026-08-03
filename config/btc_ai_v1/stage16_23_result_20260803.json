@@ -1,0 +1,43 @@
+{
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "fixed_spread_usd_per_btc": 22.5,
+  "alternative_target_cycle": {
+    "targets": ["NET_CLOSE_R_480", "PATH_EDGE_R_480", "POLICY_PAYOFF_R_720"],
+    "models": ["XGB_REG_D3", "CAT_REG_D4", "EXTRA_REG_D8", "HGB_REG_L15", "RANK_ENSEMBLE"],
+    "raw_candidates": 360,
+    "capability_survivors": 120,
+    "development_calendar_months": 24,
+    "development_configs": 7680,
+    "development_survivors": 6,
+    "robustness_survivors": ["AT4_110", "AT4_171", "AT4_038"],
+    "consumed_2026_diagnostic_calendar_months": 7,
+    "diagnostic_supported_candidates": 0,
+    "diagnostic": [
+      {"candidate_id":"AT4_110","completed_trades":52,"trades_per_month":7.428571,"pf":0.66249,"net":-5362.142827,"target_score_correlation_2026":-0.0262},
+      {"candidate_id":"AT4_171","completed_trades":136,"trades_per_month":19.428571,"pf":0.750441,"net":-7269.979305,"target_score_correlation_2026":0.019641},
+      {"candidate_id":"AT4_038","completed_trades":39,"trades_per_month":5.571429,"pf":0.437998,"net":-8934.679394,"target_score_correlation_2026":-0.03462}
+    ]
+  },
+  "pairwise_ranking_cycle": {
+    "preregistered_models": ["XGB_PAIR_D3", "CAT_YETI_D4"],
+    "catboost_completed_artifacts": 0,
+    "xgb_model_series": 24,
+    "raw_candidates": 144,
+    "capability_survivors": 71,
+    "development_calendar_months": 24,
+    "development_configs": 4544,
+    "positive_net_configs": 0,
+    "pf_1_15_configs": 0,
+    "development_survivors": 0,
+    "best_pf": 0.9971810128
+  },
+  "formal_status": "BTC_AI_V1_CANDLE_ONLY_HISTORICAL_AI_SEARCH_EXHAUSTED_NO_SUPPORTED_CANDIDATE_NEW_PROSPECTIVE_OR_NEW_DATA_NEEDED",
+  "supported_candidates": 0,
+  "untouched_2026_consumed": true,
+  "prospective_shadow_authorized": false,
+  "mt5_orders": false,
+  "discord": false,
+  "live_ready": false,
+  "final_signal": false
+}
