@@ -1,0 +1,89 @@
+{
+  "date": "2026-08-03",
+  "formal_status": "COMPLETE_MATCHED_BASELINE_NO_FORENSIC_SUPPORT_SURVIVOR",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "development_calendar_months": 24,
+  "total_anchor_events": 28355,
+  "anchor_families": 6,
+  "anchor_subtypes": 15,
+  "raw_support_count_invalidated": 13,
+  "corrected_forensic_support_pass_count": 0,
+  "corrected_supporting_subtypes": [],
+  "largest_incremental_effects": [
+    {
+      "anchor_subtype": "COMPRESSION_EXPANSION_DOWN",
+      "events": 128,
+      "calendar_months": 24,
+      "events_per_month": 5.3333333333,
+      "observed_outcome_diff": -0.265625,
+      "matched_baseline_outcome_diff": -0.147576,
+      "incremental_outcome_diff": -0.118049,
+      "same_sign_all_four_halfyears": true,
+      "same_sign_d1_regimes_count": 3,
+      "corrected_pass": false,
+      "failure": "minimum total and half-year density"
+    },
+    {
+      "anchor_subtype": "PHASE_TRANSITION_START_EARLY_TO_MATURE",
+      "events": 161,
+      "calendar_months": 24,
+      "events_per_month": 6.7083333333,
+      "observed_outcome_diff": -0.204969,
+      "matched_baseline_outcome_diff": -0.157542,
+      "incremental_outcome_diff": -0.047427,
+      "same_sign_all_four_halfyears": false,
+      "same_sign_d1_regimes_count": 2,
+      "corrected_pass": false
+    },
+    {
+      "anchor_subtype": "RANGE_BREAK_20_DOWN",
+      "events": 2828,
+      "calendar_months": 24,
+      "events_per_month": 117.8333333333,
+      "observed_outcome_diff": -0.177864,
+      "matched_baseline_outcome_diff": -0.139679,
+      "incremental_outcome_diff": -0.038186,
+      "same_sign_all_four_halfyears": false,
+      "same_sign_d1_regimes_count": 2,
+      "corrected_pass": false
+    },
+    {
+      "anchor_subtype": "RANGE_BREAK_20_UP",
+      "events": 3237,
+      "calendar_months": 24,
+      "events_per_month": 134.875,
+      "observed_outcome_diff": -0.198023,
+      "matched_baseline_outcome_diff": -0.164819,
+      "incremental_outcome_diff": -0.033204,
+      "same_sign_all_four_halfyears": true,
+      "same_sign_d1_regimes_count": 3,
+      "corrected_pass": false,
+      "failure": "incremental separation below five percentage points"
+    },
+    {
+      "anchor_subtype": "FAILED_RANGE_BREAK_20_UP_AFTER_FAILED_DOWN",
+      "events": 1916,
+      "calendar_months": 24,
+      "events_per_month": 79.8333333333,
+      "observed_outcome_diff": -0.146138,
+      "matched_baseline_outcome_diff": -0.16687,
+      "incremental_outcome_diff": 0.020732,
+      "same_sign_all_four_halfyears": true,
+      "same_sign_d1_regimes_count": 2,
+      "corrected_pass": false,
+      "failure": "stable but weak incremental effect"
+    }
+  ],
+  "magnitude_findings": {
+    "compression_expansion_up_incremental_mfe_4_atr": 1.015953,
+    "compression_expansion_up_incremental_mae_4_atr": 0.442725,
+    "compression_expansion_down_incremental_mfe_4_atr": 0.727423,
+    "compression_expansion_down_incremental_mae_4_atr": 0.515511,
+    "compression_expansion_incremental_pullback_8_atr_range": [0.822271, 0.866649]
+  },
+  "formal_conclusion": "EVENT_ANCHORS_EXPLAIN_EXCURSION_MAGNITUDE_BUT_NO_PREREGISTERED_ANCHOR_HAS_STABLE_INCREMENTAL_DIRECTIONAL_SURVIVAL_EDGE",
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "supported_candidates": 0,
+  "next_stage": "BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_CONDITIONAL_MODEL_PREREGISTRATION"
+}
