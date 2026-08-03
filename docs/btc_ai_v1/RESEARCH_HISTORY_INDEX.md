@@ -34,12 +34,12 @@ Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 - untouched 2026 seven-month result: all five lost; supported candidates 0.
 - the 2026 period became consumed.
 
-## Stage 11: regime and discrimination forensic
+## Stage 11: initial regime and discrimination forensic
 
 - `docs/btc_ai_v1/BTC_AI_V1_STAGE11_REGIME_SHIFT_FORENSIC_20260803.md`
 - 2026 SHORT base-label rate remained 36.53%, but finalist AUC fell to approximately 0.508–0.523.
 - daily-trend state inverted.
-- conclusion: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`.
+- preliminary conclusion: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`.
 
 ## Stages 12–15: diverse classifier AI
 
@@ -65,91 +65,99 @@ Chronological authority for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 - 144 raw; 71 capability survivors; 4,544 execution evaluations over 24 months.
 - positive-net configurations: 0; development survivors: 0.
 
-## Stage 24A: immediate Binance USD-M futures acquisition
+## External-data incident — non-authoritative
 
-User rejected waiting several months for new prospective data. Research immediately switched to available independent history.
+An unsolicited external-data expansion using Binance spot/futures and derivatives archives was performed without user authorization. The user explicitly rejected those sources.
 
-- acquisition script: `scripts/btc_ai_v1/download_binance_external_validation.py`
-- workflow: `.github/workflows/btc_ai_v1_external_validation.yml`
-- GitHub Actions run: `30786496193`
-- official `BTCUSDT` USD-M perpetual monthly data, 2020-01 through 2022-12.
-- 36 calendar months; 1,578,240 M1 rows.
-- calendar-minute coverage 100%; duplicates, reversals and gaps all 0.
-- all 36 monthly funding archives available.
-- all source ZIPs verified against published checksums.
+Authority correction:
 
-Contract:
+`docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md`
 
-- `config/btc_ai_v1/binance_external_validation_contract_20260803.json`
-- fit 2020, calibration 2021H1, development 2021H2, untouched final 2022.
-- 48 frozen AI candidates using candle context versus volume/trade-count/taker-buy/funding features.
+All external-data contracts, results and artifacts are:
 
-Development over six calendar months:
+- rejected by the user;
+- non-authoritative;
+- excluded from candidate research and conclusions;
+- retained only in Git history as an incident/audit trail.
 
-- four development survivors.
-- two robustness survivors.
+No future stage may rely on them.
 
-Untouched 2022 over twelve months:
+## OHLC-only 2026 root-cause forensic
 
-- `BEX_CANDLE_CONTEXT_SHORT_XGBR_P95`: 260 trades / 12 months = 21.67/month; PF 0.9850; net -536.84; positive months 4/12; FAIL.
-- `BEX_MICRO_FUNDING_SHORT_XGB_P95`: 94 / 12 = 7.83/month; PF 1.1106; net +1,409.85; positive months 4/12; FAIL versus frozen 7/12 requirement.
+Formal result:
 
-Result:
+- `docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md`
+- `config/btc_ai_v1/ohlc_2026_failure_root_cause_20260803.json`
 
-- `docs/btc_ai_v1/BTC_AI_V1_BINANCE_FUTURES_EXTERNAL_VALIDATION_RESULT_20260803.md`
-- supported candidates: 0.
-- no gate relaxation or rescue.
+Status:
 
-Implementation incident:
+`COMPLETE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE`
 
-- first dry run mixed M15 candidate-row and M1 resolution-row units in the non-overlap gate.
-- the dry run was rejected; accepted rerun compared exact M1 entry and resolution indices.
+Root cause:
 
-## Stage 24B: immediate Binance spot acquisition and validation
+`OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION`
 
-- acquisition script: `scripts/btc_ai_v1/download_binance_spot_external_validation.py`
-- workflow: `.github/workflows/btc_ai_v1_binance_spot_external_validation.yml`
-- GitHub Actions run: `30787147478`
-- official `BTCUSDT` spot monthly data, 2018-01 through 2019-12.
-- 24 calendar months; 1,045,460 M1 rows.
-- duplicates and reversals 0.
-- 16 exchange-gap intervals were retained as gaps and never interpolated.
-- exact usable M15 decisions: 68,875.
-- all source ZIPs verified against published checksums.
+### Opportunity
 
-Contract:
+- SHORT target-before-stop base rate remained 36.53% in 2026.
+- generic downside opportunity did not disappear.
 
-- `config/btc_ai_v1/binance_spot_external_validation_contract_20260803.json`
-- fit 2018H1, calibration 2018H2, development 2019H1, untouched final 2019H2.
-- 48 frozen AI candidates using candle context versus volume/trade-count/taker-buy features.
+### OHLC regime shift
 
-Development over six calendar months:
+- D1-up share: 44.60% in 2024–2025 -> 15.10% in 2026.
+- D1-down share: 25.71% -> 46.69%.
+- all-up H1/H4/D1: 19.19% -> 5.40%.
+- all-down H1/H4/D1: 8.30% -> 18.45%.
+- mean D1 EMA20 slope / ATR: +0.1243 -> -0.1232.
+- D1 slope PSI: 1.4414.
 
-- all 48 candidates failed.
-- best PF: 0.7112 with negative net.
-- robustness and 2019H2 final were not opened.
+### Selected-event geometry shift
 
-Result:
+Candidate-trade weighted event means:
 
-- `docs/btc_ai_v1/BTC_AI_V1_BINANCE_SPOT_EXTERNAL_VALIDATION_RESULT_20260803.md`
-- supported candidates: 0.
+- D1 trend state: +0.654 -> -0.052.
+- D1 EMA20 slope / ATR: +0.434 -> +0.037.
+- one-bar return / ATR: -0.191 -> -0.493.
+- 32-bar return / ATR: -0.150 -> -1.154.
+- distance from EMA50 / ATR: -0.280 -> -0.876.
+- range expansion: 2.31 -> 2.91.
 
-## Immediate external-evidence total
+The same high score changed from a bearish correction/impulse inside rising or mixed structure to a deeper and more mature selloff. The finalists increasingly entered late and faced rebound/stop-first risk.
 
-- independent history added without waiting: 60 calendar months.
-- independent M1 rows: 2,623,700.
-- venues/tracks kept separate: Binance spot and Binance USD-M perpetual.
-- combined result: `config/btc_ai_v1/external_validation_result_20260803.json`.
-- supported candidates: **0**.
+### Conditional drift versus composition
+
+Development candidate-ledger weighted performance:
+
+- D1 up: 2,693 trades, PF 1.2458, +158,499.26.
+- D1 neutral: 689, PF 1.0707, +14,746.44.
+- D1 down: 292, PF 1.0676, +6,340.25.
+
+Using development conditional averages with actual 2026 D1-state counts predicted approximately +45,765 USD, while actual 2026 candidate-ledger net was -70,522 USD. Residual conditional deterioration was approximately -116,287 USD.
+
+Regime composition contributed, but within-regime meaning change was dominant. A D1-up-only rescue is not supported.
+
+### Model and execution deterioration
+
+- MTF AUC fell from approximately 0.525 to 0.508.
+- full-causal AUC fell from 0.540 to 0.523.
+- score distribution remained stable, but score ordering collapsed.
+- four of five event sets underperformed the unconditional 2026 SHORT label rate.
+- main 2R finalist win rate fell from about 42.3% to 36.3–37.1%.
+- main 2R stop-first rate rose from about 47.5% to 57.3–58.4%.
+- fixed spread / ATR increased, but four of five candidates still lost at zero spread.
+
+### Methodology gap
+
+Bootstrap, matched-random, pseudo-state, neighborhood and delay tests were all conducted inside the 2024–2025 environment. They tested noise and parameter fragility, but not invariance across OHLC state transitions.
 
 ## Current next stage
 
-`BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH`
+`BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN`
 
 Latest handoff:
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_EXTERNAL_5Y_DONE_DERIVATIVES_METRICS_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_ROOT_CAUSE_DONE_STATE_TRANSITION_NEXT_20260803.md`
 
-Continue immediately with official mark-price, premium-index, open-interest, funding and long-short-ratio evidence from Binance, Bybit and Deribit. Compare incremental value against the frozen candle/volume baseline. Keep venue execution ledgers separate and do not rescue any rejected candidate.
+Continue immediately with XM BTCUSD# OHLC only. Represent early impulse, mature extension, pullback, continuation, exhaustion and reversal. Freeze leave-one-regime-out and leave-one-transition-type-out validation before opening new candidate outcomes.
 
-No portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
+No external data, D1-only rescue, portfolio, Shadow, Discord, MT5 order, live-ready or final signal is authorized.
