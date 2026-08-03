@@ -1,0 +1,144 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_STATE_TRANSITION_RESEARCH_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "authoritative_source": {
+    "symbol": "BTCUSD#",
+    "venue": "XM MT5",
+    "time_semantics": "broker-server naive time",
+    "inputs": ["M1", "M15", "H1", "H4", "D1"],
+    "closed_bars_only": true,
+    "external_data": false,
+    "volume_features": false,
+    "spread_feature": false
+  },
+  "research_question": "Can causal OHLC state-transition representation distinguish early impulse or continuation from mature extension, exhaustion and reversal, and remain useful when a broad regime or transition type is omitted from training?",
+  "period_roles": {
+    "expanding_folds": [
+      {"name": "2024H1", "fit": "[2023-01-01, 2023-07-01)", "calibration": "[2023-07-01, 2024-01-01)", "validation": "[2024-01-01, 2024-07-01)"},
+      {"name": "2024H2", "fit": "[2023-01-01, 2024-01-01)", "calibration": "[2024-01-01, 2024-07-01)", "validation": "[2024-07-01, 2025-01-01)"},
+      {"name": "2025H1", "fit": "[2023-01-01, 2024-07-01)", "calibration": "[2024-07-01, 2025-01-01)", "validation": "[2025-01-01, 2025-07-01)"},
+      {"name": "2025H2", "fit": "[2023-01-01, 2025-01-01)", "calibration": "[2025-01-01, 2025-07-01)", "validation": "[2025-07-01, 2026-01-01)"}
+    ],
+    "development_calendar_months": 24,
+    "consumed_diagnostic_only": "[2026-01-01, 2026-08-01)",
+    "diagnostic_calendar_months": 7,
+    "2026_support_authorized": false
+  },
+  "causal_feature_families": {
+    "impulse_age_and_distance": [
+      "bars since rolling 20/48/96 high and low",
+      "distance from rolling 20/48/96 high and low divided by ATR",
+      "distance and bars since last causal range break",
+      "signed displacement over 4/8/16/32 bars divided by ATR"
+    ],
+    "maturity_and_exhaustion": [
+      "directional run length",
+      "fraction of directional candles over 8/16 bars",
+      "range expansion relative to rolling median",
+      "distance from EMA20/50 divided by ATR",
+      "slope acceleration and deceleration for EMA20/50",
+      "large-candle count and cumulative body displacement"
+    ],
+    "acceptance_and_rejection": [
+      "post-expansion one/two/four-bar acceptance in expansion direction",
+      "upper/lower wick rejection after expansion",
+      "close retention inside prior large candle",
+      "failed breakout and return-inside-range flags"
+    ],
+    "higher_timeframe_phase": [
+      "H1/H4/D1 trend sign",
+      "H1/H4/D1 slope acceleration or deceleration",
+      "M15 direction versus higher-timeframe direction",
+      "distance travelled since higher-timeframe rolling extreme"
+    ]
+  },
+  "outcome_blind_phase_registry": [
+    "RANGE_NEUTRAL",
+    "EARLY_IMPULSE",
+    "MATURE_EXTENSION",
+    "PULLBACK",
+    "EXHAUSTION_REJECTION",
+    "REVERSAL_ATTEMPT"
+  ],
+  "outcome_blind_transition_registry": [
+    "INTO_EARLY_IMPULSE",
+    "EARLY_TO_MATURE",
+    "INTO_PULLBACK",
+    "MATURE_TO_EXHAUSTION",
+    "EXHAUSTION_TO_REVERSAL",
+    "OTHER_TRANSITION"
+  ],
+  "model_registry": [
+    "LightGBM depth-3 classifier",
+    "regularized logistic classifier"
+  ],
+  "feature_sets": [
+    "OHLC_STATE_ONLY",
+    "OHLC_BASE_PLUS_STATE"
+  ],
+  "directions": ["LONG", "SHORT"],
+  "score_percentiles": [0.9, 0.95, 0.975],
+  "event_policies": ["FIRST_CROSS", "FOUR_M15_BAR_COOLDOWN"],
+  "maximum_raw_candidates": 48,
+  "execution_grid": {
+    "fixed_spread_usd_per_btc": 22.5,
+    "stops_atr": [0.75, 1.0],
+    "targets_atr": [1.5, 2.0],
+    "maximum_holding_minutes": [480, 720],
+    "same_m1_collision": "SL_FIRST",
+    "one_position_non_overlap": true,
+    "missing_m1": "FAIL_CLOSED"
+  },
+  "capability_gates": {
+    "minimum_events_each_halfyear": 20,
+    "minimum_active_months_of_24": 18,
+    "maximum_invalid_entry_rate": 0.01,
+    "maximum_single_month_event_share": 0.25
+  },
+  "development_gates": {
+    "minimum_completed_trades": 120,
+    "profit_factor_min": 1.15,
+    "net_positive": true,
+    "positive_halfyears_min_of_4": 3,
+    "positive_months_min_of_24": 15,
+    "maximum_single_month_gross_profit_share": 0.35
+  },
+  "state_transfer_gates": {
+    "phase_groups_with_minimum_30_trades": "PF must be at least 0.90 and no phase may contribute more than 60 percent of gross profit",
+    "leave_one_phase_out_median_auc_min": 0.51,
+    "leave_one_phase_out_groups_above_random_min": 4,
+    "leave_one_transition_out_median_auc_min": 0.505,
+    "leave_one_transition_out_groups_above_random_min": 4,
+    "minimum_group_test_rows": 300
+  },
+  "robustness": {
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_net_positive_probability_min": 0.9,
+    "matched_random_iterations": 2000,
+    "matched_random_net_percentile_min": 0.95,
+    "parameter_rescue": false,
+    "post_result_phase_filter": false
+  },
+  "2026_diagnostic": {
+    "opened_only_for_frozen_robustness_survivors": true,
+    "promotion_allowed": false,
+    "required_reporting": [
+      "seven calendar months",
+      "total trades and trades per month",
+      "monthly min median max",
+      "PF, net and positive months",
+      "event phase distribution",
+      "late-extension and exhaustion share",
+      "comparison with prior finalist failure geometry"
+    ]
+  },
+  "prohibitions": [
+    "no external market data",
+    "no tick-volume or real-volume feature",
+    "no use of 2026 for model, threshold, side, exit or feature selection",
+    "no D1-up-only rescue",
+    "no post-result phase definition change",
+    "no candidate promotion, Shadow, Discord or MT5 orders"
+  ]
+}
