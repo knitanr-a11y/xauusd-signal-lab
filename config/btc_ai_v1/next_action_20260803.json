@@ -1,50 +1,64 @@
 {
   "date": "2026-08-03",
-  "formal_status": "OHLC_2026_FAILURE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE",
-  "completed_through": "BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC",
-  "next_stage": "BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN",
-  "objective": "Continue immediately using only XM BTCUSD# OHLC. Build causal representations of early impulse, mature extension, exhaustion, pullback and reversal, then test whether candidate value survives leave-one-regime-out and regime-transition holdouts before any new candidate shortlist is opened.",
-  "root_cause": {
-    "short_opportunity_disappeared": false,
-    "daily_and_h4_regime_shift": true,
-    "selected_events_became_deeper_and_more_range_expanded": true,
-    "score_ordering_collapsed": true,
-    "within_d1_regime_relationship_deteriorated": true,
-    "fixed_cost_secondary": true,
-    "simple_d1_filter_not_sufficient": true
+  "formal_status": "OHLC_STATE_TRANSITION_CYCLES_COMPLETE_LOCAL_EDGES_NO_SUPPORT",
+  "completed_through": "BTC_AI_V1_OHLC_TRANSITION_CONDITIONAL_EXPERT_RESULT",
+  "next_stage": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION",
+  "objective": "Use only XM BTCUSD# OHLC to model the causal sequence leading into all outcome-blind phase transitions. Compare a small temporal convolution or GRU model with a simple non-neural sequence baseline, then require leave-one-regime-out and leave-one-transition-out transfer before any PnL shortlist.",
+  "evidence_from_completed_cycles": {
+    "global_state_model_formal_survivors": 0,
+    "phase_expert_formal_survivors": 0,
+    "transition_expert_formal_survivors": 0,
+    "strong_local_patterns_not_candidates": [
+      {
+        "name": "INTO_EARLY_IMPULSE_LONG",
+        "trades": 78,
+        "calendar_months": 24,
+        "trades_per_month": 3.25,
+        "profit_factor": 1.6161669409,
+        "failure": "minimum_trade_density_and_D1_regime_transfer"
+      },
+      {
+        "name": "EXHAUSTION_TO_REVERSAL_SHORT",
+        "trades": 79,
+        "calendar_months": 24,
+        "trades_per_month": 3.2916666667,
+        "profit_factor": 1.493079,
+        "failure": "minimum_trade_density_and_time_persistence"
+      }
+    ]
   },
-  "required_ohlc_state_features": [
-    "causal swing age and distance travelled since swing",
-    "bars and ATR distance since range break",
-    "slope velocity and slope acceleration/deceleration",
-    "range expansion sequence and post-expansion acceptance/rejection",
-    "position inside causal rolling range at several horizons",
-    "impulse versus pullback versus exhaustion phase",
-    "higher-timeframe phase interaction instead of static trend sign only",
-    "adverse/favorable excursion shape using training periods only"
-  ],
-  "required_validation": [
-    "leave-one-D1-regime-out development",
-    "leave-one-transition-type-out development",
-    "chronological rolling folds",
-    "regime-composition reweighting",
-    "candidate performance inside every coarse D1 and H4 state",
-    "minimum value across regimes, not aggregate PF alone",
-    "fixed 22.50 USD spread throughout"
-  ],
+  "required_preregistration": {
+    "sequence_inputs": "causal M15 OHLC sequence with closed H1/H4/D1 OHLC context",
+    "baseline": "non-neural lagged-feature gradient boosting or regularized model",
+    "temporal_models": ["small TCN", "small GRU"],
+    "tasks": [
+      "six-class next phase-transition hazard",
+      "direction-specific future MFE and MAE",
+      "fixed-policy payoff"
+    ],
+    "all_phases_and_transitions_included": true,
+    "phase_transition_balancing_defined_before_outcomes": true,
+    "development": "same four chronological expanding folds covering 2024-01 through 2025-12",
+    "leave_one_D1_regime_out_required": true,
+    "leave_one_transition_type_out_required": true,
+    "minimum_completed_trades_not_below": 96,
+    "positive_months_not_below": 15,
+    "fixed_spread_usd_per_btc": 22.5,
+    "2026_selection_authorized": false
+  },
   "allowed": [
-    "OHLC-only forensic and feature engineering",
-    "causal state-transition registry",
-    "outcome-blind density audit",
-    "2023-2025 nested and leave-regime-out development",
-    "2026 diagnostic comparison without support claims"
+    "OHLC-only causal sequence preparation",
+    "outcome-blind phase and transition labels",
+    "small preregistered temporal AI models",
+    "chronological and leave-group-out validation",
+    "2026 diagnostic only after a frozen full robustness survivor"
   ],
   "prohibited": [
-    "external-market, funding, open-interest, order-flow or metrics data",
-    "D1-up-only post-result rescue",
-    "threshold, direction, month, feature, exit or horizon rescue of rejected candidates",
-    "reuse of 2026 as untouched support",
-    "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal without explicit authorization"
+    "external-market or volume data",
+    "combining the two local winners into a post-result strategy",
+    "reducing minimum trade, positive-month or regime-transfer requirements",
+    "using 2026 for feature, transition, direction, threshold, model or exit selection",
+    "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
   ],
-  "frequency_reporting": "Every event and trade count must include exact calendar months and monthly distribution."
+  "frequency_reporting": "Every event and completed-trade count must include exact calendar months, trades per month and monthly distribution."
 }
