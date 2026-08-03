@@ -6,59 +6,34 @@
   "authoritative_source": "XM BTCUSD# closed-bar OHLC snapshot",
   "time_semantics": "MT5 broker-server naive time",
   "fixed_spread_usd_per_btc": 22.5,
-  "external_data": {
-    "authorized": false,
-    "used_for_current_conclusion": false,
-    "status": "REJECTED_BY_USER_NON_AUTHORITATIVE_GIT_HISTORY_ONLY",
-    "active_workflows_removed": true,
-    "contracts_results_handoff_and_downloaders_removed_from_current_tree": true
-  },
-  "root_cause": {
-    "formal_result": "OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION",
-    "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md"
-  },
+  "external_data": {"authorized": false, "used_for_current_conclusion": false, "status": "REJECTED_BY_USER_NON_AUTHORITATIVE_GIT_HISTORY_ONLY"},
+  "root_cause": {"formal_result": "OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION", "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md"},
   "stage29_anchor_age_path_shape": {
     "formal_result": "ANCHOR_AGE_PATH_SHAPE_ADDS_SMALL_UNSTABLE_DIRECTIONAL_RESIDUAL_AND_DOES_NOT_IMPROVE_MAGNITUDE_BASELINE",
     "development_calendar_months": 24,
     "anchors_2023_2025": 42018,
     "generated_state_rows": 672257,
     "development_state_rows": 461483,
-    "ordinary_directed_baseline_rows": 112784,
     "magnitude_support_survivors": 0,
     "direction_residual_spearman": 0.054083455,
-    "selected_state_rows": 43056,
-    "selected_rows_per_month": 1794.0,
-    "selected_monthly_min_median_max": [1025, 1755.5, 2602],
     "selected_actual_residual_mean": 0.0410575195,
     "required_actual_residual_mean": 0.08,
     "d1_down_actual_residual_mean": -0.0041548079,
     "direction_support_survivors": 0,
     "candidate_pnl_opened": false,
-    "2026_opened": false,
-    "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_RESULT_20260803.md",
-    "result_json": "config/btc_ai_v1/ohlc_anchor_age_path_shape_result_20260803.json"
+    "2026_opened": false
   },
   "stage30_delayed_confirmation": {
     "formal_result": "SIMPLE_DELAYED_CONFIRMATION_STATES_DO_NOT_CREATE_DIRECTIONAL_EDGE_BEYOND_CURRENT_OHLC_BASELINE",
     "development_calendar_months": 24,
     "first_confirmation_events": 95440,
     "actionable_events": 70892,
-    "diagnostic_events": 24548,
     "actionable_states": 6,
     "support_survivors": 0,
-    "largest_positive_oriented_residual": {
-      "state": "MATURE_EXTENSION",
-      "events": 8164,
-      "events_per_month": 340.1667,
-      "mean": 0.00813,
-      "required": 0.08
-    },
-    "accepted_continuation_residual": -0.0266245,
-    "failed_acceptance_reclaim_reversal_residual": -0.0160632,
+    "best_mean_oriented_residual": 0.00813,
+    "required": 0.08,
     "candidate_pnl_opened": false,
-    "2026_opened": false,
-    "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_DELAYED_CONFIRMATION_STATE_MACHINE_RESULT_20260803.md",
-    "result_json": "config/btc_ai_v1/ohlc_delayed_confirmation_state_machine_result_20260803.json"
+    "2026_opened": false
   },
   "cumulative_package": {
     "manifest": "docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_MASTER_PACKAGE_V3_MANIFEST_20260803.md",
@@ -70,7 +45,8 @@
     "external_data_included": false
   },
   "supported_candidates": 0,
-  "next_stage": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_PREREGISTRATION",
+  "next_stage": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC",
+  "next_contract": "config/btc_ai_v1/ohlc_rolling_adaptive_recalibration_forensic_contract_20260803.json",
   "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_DELAYED_CONFIRMATION_NO_SUPPORT_ROLLING_ADAPTIVE_NEXT_20260803.md",
   "automatic_promotion": false,
   "prospective_shadow_authorized": false,
