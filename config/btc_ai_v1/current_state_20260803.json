@@ -2,72 +2,57 @@
   "date": "2026-08-03",
   "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
   "branch": "feature/btc-ai-v1-data-acquisition",
-  "formal_status": "BTC_AI_V1_CANDLE_ONLY_HISTORICAL_AI_SEARCH_EXHAUSTED_NO_SUPPORTED_CANDIDATE_NEW_PROSPECTIVE_OR_NEW_DATA_NEEDED",
-  "symbol": "BTCUSD#",
-  "time_semantics": "MT5 broker-server naive time",
+  "formal_status": "BTC_AI_V1_INDEPENDENT_2018_2022_HISTORY_EVALUATED_NO_SUPPORT_DERIVATIVES_METRICS_RESEARCH_NEXT",
   "fixed_spread_usd_per_btc": 22.5,
   "frequency_reporting_contract": "config/btc_ai_v1/frequency_reporting_contract_20260803.json",
-  "source_hash_frozen": true,
-  "gold_contamination_detected": false,
-  "cross_timeframe_reaggregation_exact": true,
-  "cycles": {
-    "deterministic_rule_cycle": {
-      "raw_candidates": 1200,
-      "development_calendar_months": 24,
-      "development_configs": 19200,
-      "robust_finalists": 0,
-      "classification": "PROMISING_NOT_ROBUST_NO_FINALIST"
-    },
-    "binary_ml_cycle": {
-      "models": ["LightGBM", "regularized_logistic"],
-      "raw_candidates": 144,
-      "development_calendar_months": 24,
-      "frozen_finalists": 5,
-      "untouched_final_calendar_months": 7,
-      "supported_candidates": 0,
-      "classification": "REJECT_UNTOUCHED_FINAL"
-    },
-    "diverse_classifier_cycle": {
-      "models": ["XGBoost", "CatBoost", "ExtraTrees", "HistogramGradientBoosting", "rank_ensemble"],
-      "raw_candidates": 120,
-      "development_calendar_months": 24,
-      "robustness_survivors": 2,
-      "consumed_2026_diagnostic_calendar_months": 7,
-      "supported_candidates": 0
-    },
-    "alternative_target_regression_cycle": {
-      "targets": ["NET_CLOSE_R_480", "PATH_EDGE_R_480", "POLICY_PAYOFF_R_720"],
-      "models": ["XGBoostRegressor", "CatBoostRegressor", "ExtraTreesRegressor", "HistogramGradientBoostingRegressor", "rank_ensemble"],
-      "raw_candidates": 360,
-      "capability_survivors": 120,
-      "development_calendar_months": 24,
-      "development_configs": 7680,
-      "robustness_survivors": 3,
-      "consumed_2026_diagnostic_calendar_months": 7,
-      "supported_candidates": 0
-    },
-    "pairwise_ranking_cycle": {
-      "preregistered_models": ["XGBoost rank:pairwise", "CatBoost YetiRank"],
-      "accepted_model": "XGBoost rank:pairwise",
-      "catboost_completed_artifacts": 0,
-      "raw_candidates": 144,
-      "capability_survivors": 71,
-      "development_calendar_months": 24,
-      "development_configs": 4544,
-      "positive_net_configs": 0,
-      "development_survivors": 0
-    }
+  "xm_btcusd_track": {
+    "source_period": "[2023-01-01, 2026-08-03]",
+    "supported_candidates": 0,
+    "untouched_2026_consumed": true,
+    "same_history_candle_only_search_frozen": true
   },
-  "stage11_forensic_conclusion": "REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE",
+  "immediate_external_validation": {
+    "result": "config/btc_ai_v1/external_validation_result_20260803.json",
+    "combined_calendar_months": 60,
+    "combined_m1_rows": 2623700,
+    "binance_usdm_futures": {
+      "period": "2020-01 through 2022-12",
+      "calendar_months": 36,
+      "minute_coverage": 1.0,
+      "funding_months": 36,
+      "development_survivors": 4,
+      "robustness_survivors": 2,
+      "untouched_2022_supported": 0
+    },
+    "binance_spot": {
+      "period": "2018-01 through 2019-12",
+      "calendar_months": 24,
+      "m1_rows": 1045460,
+      "development_survivors": 0,
+      "untouched_2019H2_opened": false
+    },
+    "supported_candidates": 0
+  },
+  "near_positive_but_rejected": {
+    "candidate_id": "BEX_MICRO_FUNDING_SHORT_XGB_P95",
+    "untouched_period": "2022-01 through 2022-12",
+    "calendar_months": 12,
+    "completed_trades": 94,
+    "trades_per_month": 7.8333333333,
+    "profit_factor": 1.110625,
+    "net_usd": 1409.85,
+    "positive_months": 4,
+    "required_positive_months": 7,
+    "promoted": false,
+    "rescued": false
+  },
   "supported_candidates": 0,
-  "untouched_final_test": "[2026-01-01, 2026-08-01)",
-  "untouched_final_test_consumed": true,
-  "no_historical_untouched_period_remaining": true,
-  "no_reuse_as_untouched_for_modified_or_new_candidates": true,
-  "candle_only_historical_search_frozen": true,
-  "next_stage": "BTC_AI_V1_24_RESEARCH_CLOSURE_AND_NEW_EVIDENCE_PLAN",
-  "latest_result": "config/btc_ai_v1/stage16_23_result_20260803.json",
-  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_CANDLE_ONLY_SEARCH_EXHAUSTED_NEW_EVIDENCE_NEXT_20260803.md",
+  "next_stage": "BTC_AI_V1_25_DERIVATIVES_METRICS_MARK_PREMIUM_OPEN_INTEREST_RESEARCH",
+  "latest_results": [
+    "docs/btc_ai_v1/BTC_AI_V1_BINANCE_FUTURES_EXTERNAL_VALIDATION_RESULT_20260803.md",
+    "docs/btc_ai_v1/BTC_AI_V1_BINANCE_SPOT_EXTERNAL_VALIDATION_RESULT_20260803.md"
+  ],
+  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_EXTERNAL_5Y_DONE_DERIVATIVES_METRICS_NEXT_20260803.md",
   "automatic_promotion": false,
   "prospective_shadow_authorized": false,
   "gold_runtime_modified": false,
