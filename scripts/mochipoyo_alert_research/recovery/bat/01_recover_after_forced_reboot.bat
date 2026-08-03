@@ -68,7 +68,7 @@ echo After every BAT03 window completes at least one successful cycle, run:
 echo scripts\mochipoyo_alert_research\recovery\bat\06_audit_all_nine_restart_health.bat
 echo.
 echo NEVER rerun any initialized BAT01/initializer.
-echo In particular, M10P preserved-start BAT02 and BAT03 health recovery are one-time historical operators and must not be repeated.
+echo The one-time M10P incident recovery BAT02/BAT03 under m10p_incident are historical and must not be repeated.
 echo NEVER reset any prospective start.
 echo If raw MT5 CSVs have a permanent downtime gap, that interval is unobserved and must not be backfilled from future outcomes.
 echo.
