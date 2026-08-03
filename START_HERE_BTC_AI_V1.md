@@ -2,7 +2,7 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative branch: `feature/btc-ai-v1-data-acquisition`
-- status: `BTC_AI_V1_SECOND_CYCLE_COMPLETE_NO_SUPPORTED_CANDIDATE_2026_FINAL_CONSUMED_FORENSIC_NEXT`
+- status: `BTC_AI_V1_DIVERSE_AI_CYCLE_COMPLETE_NO_SUPPORTED_CANDIDATE_ALTERNATIVE_TARGET_RESEARCH_NEXT`
 - updated: `2026-08-03`
 
 ## Scope
@@ -11,7 +11,7 @@ BTCを、GOLDで採用したAI研究方式の方法論を参考にしつつ、BT
 
 ## Unique latest handoff
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_SECOND_CYCLE_NO_SUPPORT_FORENSIC_NEXT_20260803.md`
+`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_DIVERSE_AI_NO_SUPPORT_ALTERNATIVE_TARGET_NEXT_20260803.md`
 
 ## Required read order
 
@@ -23,14 +23,15 @@ BTCを、GOLDで採用したAI研究方式の方法論を参考にしつつ、BT
 6. `config/btc_ai_v1/fixed_cost_contract_20260803.json`
 7. `config/btc_ai_v1/frequency_reporting_contract_20260803.json`
 8. `config/btc_ai_v1/research_design_contract_20260803.json`
-9. `config/btc_ai_v1/second_cycle_preregistration_20260803.json`
-10. `config/btc_ai_v1/second_cycle_final_test_translation_addendum_20260803.json`
-11. `config/btc_ai_v1/second_cycle_final_test_event_freeze_manifest_20260803.json`
-12. `docs/btc_ai_v1/BTC_AI_V1_STAGE05_06_ML_CAPABILITY_RESULT_20260803.md`
-13. `docs/btc_ai_v1/BTC_AI_V1_STAGE07_SECOND_CYCLE_DEVELOPMENT_RESULT_20260803.md`
-14. `docs/btc_ai_v1/BTC_AI_V1_STAGE08_SECOND_CYCLE_ROBUSTNESS_RESULT_20260803.md`
-15. `docs/btc_ai_v1/BTC_AI_V1_STAGE10_SECOND_CYCLE_UNTOUCHED_FINAL_RESULT_20260803.md`
-16. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
+9. `docs/btc_ai_v1/BTC_AI_V1_STAGE11_REGIME_SHIFT_FORENSIC_20260803.md`
+10. `config/btc_ai_v1/stage11_regime_shift_forensic_result_20260803.json`
+11. `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_EXPLORATORY_PREREGISTRATION_20260803.md`
+12. `config/btc_ai_v1/diverse_ai_exploratory_contract_20260803.json`
+13. `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_CAPABILITY_RESULT_20260803.md`
+14. `docs/btc_ai_v1/BTC_AI_V1_STAGE13_DIVERSE_AI_DEVELOPMENT_RESULT_20260803.md`
+15. `docs/btc_ai_v1/BTC_AI_V1_STAGE14_DIVERSE_AI_ROBUSTNESS_RESULT_20260803.md`
+16. `docs/btc_ai_v1/BTC_AI_V1_STAGE15_DIVERSE_AI_2026_DIAGNOSTIC_RESULT_20260803.md`
+17. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
 
 Do not search old handoffs or other branches before completing this order.
 
@@ -40,16 +41,19 @@ Do not search old handoffs or other branches before completing this order.
 - fixed spread: 22.50 USD per BTC.
 - frequency reporting requires month denominator for every count.
 - first cycle: no robust finalist.
-- second cycle: 144 ML definitions, 72 capability survivors, 11 development survivors over 24 months, 9 robustness passes, five finalists.
-- untouched final evaluation: 2026-01 through 2026-07, exactly seven months.
-- all five final candidates lost money; supported candidates: 0.
-- the 2026 seven-month test is consumed and cannot be reused as untouched evidence.
+- second cycle: five final candidates failed the seven-month 2026 untouched test; supported candidates 0.
+- Stage 11 found daily-regime inversion and model-discrimination collapse in 2026.
+- diverse AI cycle tested XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and an equal-rank ensemble.
+- 120 raw diverse-AI candidates, 60 outcome-blind survivors over 24 months, four development survivors and two robustness survivors.
+- the two robustness survivors also lost money in the already-consumed seven-month 2026 diagnostic.
+- supported candidates remain 0.
+- the 2026 seven-month period is consumed and cannot be reused as untouched evidence.
 
 ## Current next stage
 
-`BTC_AI_V1_11_SECOND_CYCLE_REGIME_SHIFT_FORENSIC_NO_RESCUE`
+`BTC_AI_V1_16_ALTERNATIVE_TARGET_AND_DIRECT_PAYOFF_AI_PREREGISTRATION`
 
-Explain development-to-final failure and regime drift without modifying, selecting, rescuing, promoting or retesting a candidate.
+Freeze a genuinely different AI learning target, such as direct normalized payoff or multi-horizon excursion prediction, before outcomes. Historical results can only be exploratory because no untouched historical period remains.
 
 ## Hard boundaries
 
