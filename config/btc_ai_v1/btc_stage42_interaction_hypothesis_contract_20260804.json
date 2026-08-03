@@ -1,0 +1,39 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_INTERACTION_HANDOFF_AND_WIN_EXHAUSTION_DIAGNOSTIC_20260804",
+  "frozen_at_utc": "2026-08-03T23:38:00Z",
+  "status": "FROZEN_AFTER_STAGE41_ATTRIBUTION_BEFORE_STAGE42_POLICY_RESULTS",
+  "hypotheses_derived_from_stage41": [
+    "A different fixed source emitting the opposite direction in the prior four hours is a conflict veto.",
+    "A same-direction different-source signal shortly after a resolved loss may represent independent reconfirmation rather than duplication.",
+    "A same-direction different-source signal shortly after a resolved win may represent late exhaustion and should be suppressed.",
+    "The new 2023-discovered ATR-shock second-rejection LONG may add independent opportunities to the fixed three-component stack."
+  ],
+  "fixed_sources": [
+    "STAGE37_EXPANSION_MIDPOINT_FAILURE_LONG",
+    "STAGE38_META_LONG",
+    "STAGE38_META_SHORT",
+    "STAGE41_ATR_SHOCK_SECOND_REJECTION_L2_LONG"
+  ],
+  "fixed_policies": [
+    "FOUR_SOURCE_GLOBAL_FIRST_ARRIVAL",
+    "FOUR_SOURCE_OPPOSITE_VETO_PRIOR_4H",
+    "FOUR_SOURCE_SUPPRESS_SAME_DIRECTION_AFTER_WIN_PRIOR_4H",
+    "FOUR_SOURCE_OPPOSITE_VETO_AND_WIN_EXHAUSTION_PRIOR_4H",
+    "FOUR_SOURCE_ONLY_SAME_DIRECTION_AFTER_LOSS_PRIOR_4H",
+    "THREE_SOURCE_OPPOSITE_VETO_AND_WIN_EXHAUSTION_PRIOR_4H"
+  ],
+  "evaluation": {
+    "periods": ["2024H2", "2025H1", "2025H2", "ALL"],
+    "cost_stress_extra_usd_per_trade": [0.0, 11.25, 22.5],
+    "month_block_bootstrap_iterations": 5000,
+    "D1_regimes": [-1, 0, 1],
+    "no_threshold_optimization": true
+  },
+  "interpretation_cap": "HYPOTHESIS_DERIVED_RETROSPECTIVE_DIAGNOSTIC_NOT_UNTOUCHED_VALIDATION",
+  "prohibited": [
+    "DO_NOT_CHANGE_4H_TO_A_BETTER_WINDOW_AFTER_RESULTS",
+    "DO_NOT_DELETE_A_SOURCE_OR_DIRECTION_AFTER_RESULTS",
+    "DO_NOT_USE_2026",
+    "DO_NOT_ENABLE_SHADOW_DISCORD_MT5_LIVE_READY_OR_FINAL_SIGNAL"
+  ]
+}
