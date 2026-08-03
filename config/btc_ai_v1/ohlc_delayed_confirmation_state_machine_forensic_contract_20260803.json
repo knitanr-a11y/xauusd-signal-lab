@@ -1,0 +1,111 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DELAYED_CONFIRMATION_STATE_MACHINE_FORENSIC_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_STATE_OUTCOMES",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "time": "MT5 broker-server naive time",
+    "development_period": "[2024-01-01, 2026-01-01)",
+    "calendar_months": 24,
+    "2026_selection_authorized": false,
+    "candidate_pnl_authorized": false
+  },
+  "input": {
+    "reuse_stage29_anchor_age_rows": true,
+    "families": 6,
+    "subtypes": 15,
+    "ages_m15": "1 through 16",
+    "cross_fitted_ordinary_state_residual_required": true,
+    "first_occurrence_per_anchor_and_confirmation_state": true
+  },
+  "mutually_exclusive_state_priority": [
+    {
+      "state": "FAILED_ACCEPTANCE_RECLAIM",
+      "definition": "path_mfe >= 0.50 ATR and path_disp <= -0.10 ATR",
+      "orientation": "REVERSAL"
+    },
+    {
+      "state": "DEEP_PULLBACK_AFTER_EXTENSION",
+      "definition": "path_mfe >= 1.00 ATR and path_pullback >= 0.75 ATR and path_disp > -0.10 ATR",
+      "orientation": "REVERSAL"
+    },
+    {
+      "state": "MATURE_EXTENSION",
+      "definition": "path_disp >= 1.50 ATR or (path_mfe >= 2.00 ATR and path_pullback < 0.75 ATR)",
+      "orientation": "REVERSAL"
+    },
+    {
+      "state": "SHALLOW_PULLBACK_AFTER_EXTENSION",
+      "definition": "path_mfe >= 0.75 ATR and 0.25 <= path_pullback < 0.75 ATR and path_disp >= 0",
+      "orientation": "CONTINUATION"
+    },
+    {
+      "state": "ACCEPTED_CONTINUATION",
+      "definition": "path_disp >= 0.50 ATR and path_pullback < 0.25 ATR",
+      "orientation": "CONTINUATION"
+    },
+    {
+      "state": "ADVERSE_DOMINANT",
+      "definition": "path_mae >= 0.75 ATR and path_mfe < 0.50 ATR",
+      "orientation": "REVERSAL"
+    },
+    {
+      "state": "STALLED_NEAR_ANCHOR",
+      "definition": "age >= 4 and abs(path_disp) < 0.25 ATR and path_mfe < 0.75 ATR and path_mae < 0.75 ATR",
+      "orientation": "DIAGNOSTIC_ONLY"
+    },
+    {
+      "state": "EARLY_UNRESOLVED",
+      "definition": "age <= 3 and no higher-priority state",
+      "orientation": "DIAGNOSTIC_ONLY"
+    },
+    {
+      "state": "OTHER",
+      "definition": "all remaining rows",
+      "orientation": "DIAGNOSTIC_ONLY"
+    }
+  ],
+  "formal_effect": {
+    "continuation_state_value": "actual ordinary-baseline residual in anchor direction",
+    "reversal_state_value": "negative actual ordinary-baseline residual in anchor direction",
+    "name": "oriented_incremental_residual",
+    "reason": "positive means the state moved future continuation/reversal balance in its preregistered orientation relative to an ordinary M15 state"
+  },
+  "support_gates_each_actionable_state": {
+    "minimum_first_occurrence_events_total": 160,
+    "minimum_events_each_halfyear": 25,
+    "minimum_active_months_of_24": 18,
+    "minimum_events_each_D1_regime": 25,
+    "minimum_anchor_families": 4,
+    "maximum_single_family_share": 0.50,
+    "mean_oriented_incremental_residual_min": 0.08,
+    "positive_oriented_mean_all_four_halfyears": true,
+    "positive_oriented_mean_all_three_D1_regimes": true,
+    "maximum_single_halfyear_share": 0.45,
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_probability_mean_positive_min": 0.90
+  },
+  "reporting": {
+    "exact_calendar_months": true,
+    "event_total_and_per_month": true,
+    "monthly_min_median_max": true,
+    "halfyear_D1_family_subtype_age_decomposition": true,
+    "diagnostic_states_reported_but_not_support_candidates": true
+  },
+  "next_step_only_if_support_survivor": {
+    "leave_one_D1_regime_out": true,
+    "leave_one_anchor_family_out": true,
+    "leave_one_halfyear_out": true,
+    "exact_M1_candidate_PnL_requires_new_contract": true
+  },
+  "prohibitions": [
+    "do not tune state definitions after outcomes",
+    "do not select only a favorable anchor family, subtype, age or D1 regime",
+    "do not change continuation/reversal barriers",
+    "do not cite the invalid raw thirteen passes from Stage 28",
+    "do not rescue Stage 29 top ages or families",
+    "do not use 2026 for state, orientation, threshold or candidate selection",
+    "no external or volume data",
+    "no portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
+  ]
+}
