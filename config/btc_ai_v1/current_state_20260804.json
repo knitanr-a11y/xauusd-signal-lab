@@ -2,21 +2,41 @@
   "date": "2026-08-04",
   "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
   "branch": "feature/btc-ai-v1-data-acquisition",
-  "formal_status": "BTC_AI_V1_OHLC_DECEPTION_AND_META_FAKEOUT_STACK_SUPPORTED_ON_2024_DISCOVERY_2025_VALIDATION_STAGE39_ROBUSTNESS_2026_DIAGNOSTIC_NOT_EXECUTED",
-  "completed_through_stage": 39,
+  "pr": 99,
+  "formal_status": "BTC_AI_V1_OHLC_MULTIPERSPECTIVE_STAGE44_COMPLETE_NEW_ATR_SHOCK_SPECIALIST_SUPPORTED_INTERACTION_SYNERGY_ROBUST_DIAGNOSTIC_2026_UNOPENED",
+  "completed_through_stage": 44,
   "supported_research_candidates": [
     "EXPANSION_MIDPOINT_FAILURE_L2_LONG__SL1.00_TP2.00_H480",
     "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
     "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90",
-    "PREREGISTERED_META_LONG_SHORT_GLOBAL_ONE_POSITION_STACK"
+    "PREREGISTERED_META_LONG_SHORT_GLOBAL_ONE_POSITION_STACK",
+    "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240"
   ],
+  "new_stage41_candidate": {
+    "candidate_id": "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240",
+    "selection": "2023_DISCOVERY_ONLY",
+    "validation": ["2024", "2025"],
+    "stage44_robustness": "PASS"
+  },
+  "interaction_policy": {
+    "policy": "OPPOSITE_VETO_PRIOR_4H_PLUS_WIN_EXHAUSTION_PRIOR_4H",
+    "status": "ROBUST_RETROSPECTIVE_DIAGNOSTIC_ONLY",
+    "untouched_validation": false,
+    "prospective_authorized": false
+  },
+  "negative_results_retained": {
+    "meta_rejected_second_chance_supported": 0,
+    "weird_geometry_supported": 0
+  },
   "deterministic_candidate_robustness_supported": true,
   "formal_meta_stack_robustness_supported": true,
+  "stage41_new_candidate_robustness_supported": true,
   "specialist_accumulation": "DIAGNOSTIC_ONLY_NOT_FORMAL",
   "causality_audit": "PASS",
   "stage40_consumed_2026_diagnostic": "CONTRACT_FROZEN_NOT_EXECUTED_NO_RESULT_USED",
-  "candidate_pnl_opened_for_new_delayed_entry_objective": true,
-  "2026_rows_used_in_stage37_39": 0,
+  "2026_status": "UNOPENED_IN_STAGES_41_44",
+  "2026_rows_used_in_stage41_44": 0,
+  "candidate_pnl_opened_for_new_ohlc_objectives": true,
   "external_data": false,
   "volume_features": false,
   "automatic_promotion": false,
