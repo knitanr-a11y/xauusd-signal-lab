@@ -2,7 +2,7 @@
   "date": "2026-08-03",
   "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
   "branch": "feature/btc-ai-v1-data-acquisition",
-  "formal_status": "BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_FOUND_NO_SUPPORTED_CANDIDATE",
+  "formal_status": "BTC_AI_V1_OHLC_SEQUENCE_INFORMATION_FOUND_NO_STABLE_PAYOFF_ORDERING",
   "authoritative_source": "XM BTCUSD# closed-bar OHLC snapshot",
   "time_semantics": "MT5 broker-server naive time",
   "fixed_spread_usd_per_btc": 22.5,
@@ -11,91 +11,67 @@
     "used_for_current_conclusion": false,
     "status": "REJECTED_BY_USER_NON_AUTHORITATIVE_GIT_HISTORY_ONLY",
     "active_workflows_removed": true,
-    "contracts_results_handoff_and_downloaders_removed_from_current_tree": true,
-    "correction": "docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md"
+    "contracts_results_handoff_and_downloaders_removed_from_current_tree": true
   },
   "root_cause": {
     "formal_result": "OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION",
     "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_2026_FAILURE_ROOT_CAUSE_FORENSIC_20260803.md"
   },
-  "ohlc_state_transition_cycles": {
+  "previous_state_transition_cycles": {
+    "formal_survivors": 0,
+    "strong_local_patterns_promoted": false,
+    "formal_interpretation": "PHASE_AND_TRANSITION_CONDITIONAL_SCORING_IMPROVED_LOCAL_EDGE_BUT_DENSITY_TIME_AND_REGIME_TRANSFER_SUPPORT_FAILED"
+  },
+  "ohlc_sequence_multitask": {
+    "contract": "config/btc_ai_v1/ohlc_sequence_transition_hazard_multitask_contract_20260803.json",
+    "result_document": "docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_RESULT_20260803.md",
+    "result_json": "config/btc_ai_v1/ohlc_sequence_multitask_result_20260803.json",
     "development_period": "[2024-01-01, 2026-01-01)",
     "development_calendar_months": 24,
+    "sequence_length_m15": 64,
+    "valid_sequence_rows": 100948,
+    "models": ["LGBM_SEQUENCE_BASELINE", "GRU_MULTITASK"],
+    "raw_candidates": 32,
+    "capability_survivors": 32,
+    "exact_m1_configurations": 256,
+    "positive_net_configurations": 88,
+    "pf_ge_1_20_configurations": 0,
+    "provisional_survivors": 0,
+    "transfer_opened": false,
+    "robustness_opened": false,
     "2026_opened": false,
-    "global_state_model": {
-      "raw_candidates": 48,
-      "execution_configs": 384,
-      "positive_net_configs": 72,
-      "pf_gate_configs": 0,
-      "formal_survivors": 0,
-      "maximum_pf": 1.1301844362,
-      "best_completed_trades": 290,
-      "best_trades_per_month": 12.0833333333
+    "best_lgbm": {
+      "config_key": "SQ9_009__S1.0_T2.0_H480",
+      "completed_trades": 580,
+      "calendar_months": 24,
+      "trades_per_month": 24.1666666667,
+      "profit_factor": 1.153929,
+      "net_usd": 21262.159463,
+      "positive_months": 13,
+      "promoted": false
     },
-    "phase_conditional_experts": {
-      "raw_candidates": 48,
-      "capability_survivors": 42,
-      "execution_configs": 336,
-      "pf_ge_1_20_configs": 32,
-      "formal_survivors": 0,
-      "maximum_pf": 1.4538306464,
-      "strong_local_patterns": [
-        {
-          "name": "EARLY_IMPULSE_LONG",
-          "completed_trades": 64,
-          "calendar_months": 24,
-          "trades_per_month": 2.6666666667,
-          "profit_factor": 1.4538306464,
-          "promoted": false
-        },
-        {
-          "name": "RANGE_NEUTRAL_LONG",
-          "completed_trades": 268,
-          "calendar_months": 24,
-          "trades_per_month": 11.1666666667,
-          "profit_factor": 1.370436,
-          "promoted": false
-        }
-      ]
+    "best_gru": {
+      "config_key": "SQ9_030__S1.0_T2.0_H720",
+      "completed_trades": 363,
+      "calendar_months": 24,
+      "trades_per_month": 15.125,
+      "profit_factor": 1.149647,
+      "net_usd": 13276.958595,
+      "positive_months": 13,
+      "positive_halfyears": 2,
+      "d1_regime_pf_floor_pass": false,
+      "promoted": false
     },
-    "transition_conditional_experts": {
-      "raw_candidates": 48,
-      "capability_survivors": 26,
-      "execution_configs": 208,
-      "pf_ge_1_20_configs": 30,
-      "formal_survivors": 0,
-      "maximum_pf": 1.6161669409,
-      "strong_local_patterns": [
-        {
-          "name": "INTO_EARLY_IMPULSE_LONG",
-          "completed_trades": 78,
-          "calendar_months": 24,
-          "trades_per_month": 3.25,
-          "profit_factor": 1.6161669409,
-          "promoted": false
-        },
-        {
-          "name": "EXHAUSTION_TO_REVERSAL_SHORT",
-          "completed_trades": 79,
-          "calendar_months": 24,
-          "trades_per_month": 3.2916666667,
-          "profit_factor": 1.493079,
-          "promoted": false
-        }
-      ]
-    }
+    "formal_interpretation": "SEQUENCE_INFORMATION_EXISTS_BUT_GENERAL_SEQUENCE_MODELS_DID_NOT_CREATE_STABLE_PAYOFF_ORDERING_ACROSS_TIME_AND_D1_REGIMES"
   },
-  "reproducibility": {
-    "manifest": "docs/btc_ai_v1/BTC_AI_V1_OHLC_STATE_TRANSITION_REPRODUCIBILITY_MANIFEST_20260803.md",
-    "conversation_package": "BTC_AI_V1_OHLC_STATE_TRANSITION_RESEARCH_20260803.zip",
-    "package_sha256": "0ed9eae486ca2bda53e48b6f19a254637ad31f3ebcbe84a4c9ab2c63e2bb462b",
-    "raw_candles_included": false,
-    "external_data_included": false
-  },
-  "formal_interpretation": "PHASE_AND_TRANSITION_CONDITIONAL_SCORING_IMPROVED_LOCAL_EDGE_BUT_DENSITY_TIME_AND_REGIME_TRANSFER_SUPPORT_FAILED",
   "supported_candidates": 0,
-  "next_stage": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_PREREGISTRATION",
-  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_STATE_TRANSITION_LOCAL_EDGES_NO_SUPPORT_NEXT_20260803.md",
+  "next_stage": "BTC_AI_V1_OHLC_EVENT_ANCHORED_TRAJECTORY_AND_SURVIVAL_FORENSIC_PREREGISTRATION",
+  "latest_handoff": "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_SEQUENCE_NO_SUPPORT_EVENT_ANCHOR_NEXT_20260803.md",
+  "reproducibility": {
+    "manifest": "docs/btc_ai_v1/BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_REPRODUCIBILITY_MANIFEST_20260803.md",
+    "conversation_package": "BTC_AI_V1_OHLC_SEQUENCE_MULTITASK_RESEARCH_20260803.zip",
+    "package_sha256": "532b37a89c0b1365af04288a3cc47e83462d990dd7d40b5c825d9c8b8bbcf7ca"
+  },
   "automatic_promotion": false,
   "prospective_shadow_authorized": false,
   "gold_runtime_modified": false,
