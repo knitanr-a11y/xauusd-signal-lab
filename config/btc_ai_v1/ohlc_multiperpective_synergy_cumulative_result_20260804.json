@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_OHLC_MULTIPERSPECTIVE_STAGE44_COMPLETE_NEW_ATR_SHOCK_SPECIALIST_SUPPORTED_INTERACTION_SYNERGY_ROBUST_DIAGNOSTIC_2026_UNOPENED",
+  "new_formal_candidate": {
+    "id": "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240",
+    "2023": {"trades": 19, "pf": 1.1853955798484423, "net": 149.36834869122555},
+    "2024": {"trades": 14, "pf": 1.263332470725329, "net": 462.0401620499906},
+    "2025": {"trades": 16, "pf": 2.4140047498744184, "net": 2412.4085877761704},
+    "all": {"trades": 49, "pf": 1.7087606074948651, "net": 3023.8170985173874, "max_dd": 1428.7761275980188},
+    "bootstrap_probability_net_positive": 0.873,
+    "stage44_robustness": "PASS"
+  },
+  "rejected_signal_second_chance": {"supported": 0, "event_rows": 3156},
+  "weird_geometry": {"supported": 0, "event_rows": 83084},
+  "interaction_diagnostic": {
+    "policy": "OPPOSITE_VETO_PRIOR_4H_PLUS_WIN_EXHAUSTION_PRIOR_4H",
+    "baseline": {"trades": 416, "pf": 1.3695520399989138, "net": 29231.31834493766},
+    "policy_result": {"trades": 395, "pf": 1.4621286655656909, "net": 33536.86668321686, "max_dd": 6445.213512972015},
+    "cost_1_5x_pf": 1.3871511618054824,
+    "cost_2x_pf": 1.3171441563019446,
+    "month_bootstrap_probability_delta_positive": 0.982,
+    "random_same_count_percentile": 0.994,
+    "time_shift_placebo_percentile": 0.989,
+    "interpretation": "ROBUST_RETROSPECTIVE_DIAGNOSTIC_NOT_UNTOUCHED_VALIDATION"
+  },
+  "causal_boundaries": {"2026_rows": 0, "external_data": false, "volume_features": false, "closed_m15": true, "exact_m1": true},
+  "authorization": {"shadow": false, "discord": false, "mt5_orders": false, "live_ready": false, "final_signal": false}
+}
