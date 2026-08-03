@@ -1,0 +1,29 @@
+{
+  "date": "2026-08-03",
+  "status": "COMPLETE_NO_DELAYED_CONFIRMATION_SUPPORT_SURVIVOR",
+  "formal_interpretation": "SIMPLE_DELAYED_CONFIRMATION_STATES_DO_NOT_CREATE_DIRECTIONAL_EDGE_BEYOND_CURRENT_OHLC_BASELINE",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "calendar_months": 24,
+  "all_first_confirmation_events": 95440,
+  "actionable_events": 70892,
+  "diagnostic_events": 24548,
+  "actionable_states": {
+    "FAILED_ACCEPTANCE_RECLAIM": {"orientation":"REVERSAL","events":16111,"per_month":671.2917,"monthly_min_median_max":[599,662.5,757],"mean_oriented_residual":-0.0160632,"bootstrap_probability_positive":0.049,"support_pass":false},
+    "DEEP_PULLBACK_AFTER_EXTENSION": {"orientation":"REVERSAL","events":17417,"per_month":725.7083,"monthly_min_median_max":[633,730.5,831],"mean_oriented_residual":-0.0102714,"bootstrap_probability_positive":0.146,"support_pass":false},
+    "MATURE_EXTENSION": {"orientation":"REVERSAL","events":8164,"per_month":340.1667,"monthly_min_median_max":[281,333.5,417],"mean_oriented_residual":0.0081300,"bootstrap_probability_positive":0.7255,"support_pass":false},
+    "SHALLOW_PULLBACK_AFTER_EXTENSION": {"orientation":"CONTINUATION","events":8528,"per_month":355.3333,"monthly_min_median_max":[290,360.5,401],"mean_oriented_residual":-0.0106579,"bootstrap_probability_positive":0.160,"support_pass":false},
+    "ACCEPTED_CONTINUATION": {"orientation":"CONTINUATION","events":9596,"per_month":399.8333,"monthly_min_median_max":[340,400.0,476],"mean_oriented_residual":-0.0266245,"bootstrap_probability_positive":0.0335,"support_pass":false},
+    "ADVERSE_DOMINANT": {"orientation":"REVERSAL","events":11076,"per_month":461.5,"monthly_min_median_max":[390,462.5,533],"mean_oriented_residual":0.0030533,"bootstrap_probability_positive":0.626,"support_pass":false}
+  },
+  "diagnostic_states": {
+    "STALLED_NEAR_ANCHOR": {"events":1390,"per_month":57.9167,"actual_residual_mean":-0.0059536},
+    "EARLY_UNRESOLVED": {"events":15793,"per_month":658.0417,"actual_residual_mean":0.0069999},
+    "OTHER": {"events":7365,"per_month":306.875,"actual_residual_mean":0.0009552}
+  },
+  "support_survivors": 0,
+  "transfer_opened": false,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "supported_candidates": 0,
+  "next_stage": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_PREREGISTRATION"
+}
