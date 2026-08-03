@@ -1,0 +1,23 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_ANCHOR_PATH_SHAPE_EXCURSION_ZERO_ORIGIN_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_MODEL_OUTCOMES",
+  "issue": "The preparation dry run initialized future and achieved MFE/MAE below zero. If price never moved favorably or adversely, this produced a negative excursion, which conflicts with the frozen excursion definition.",
+  "correction": {
+    "MFE_initial_value": 0.0,
+    "MAE_initial_value": 0.0,
+    "favorable_extreme_initial_value": 0.0,
+    "adverse_extreme_initial_value": 0.0,
+    "dry_run_rows_discarded": true,
+    "model_training_or_outcome_inspection_before_correction": false
+  },
+  "unchanged": [
+    "anchor definitions",
+    "anchor ages",
+    "future horizon",
+    "barriers and collision rule",
+    "features",
+    "folds",
+    "models and gates"
+  ]
+}
