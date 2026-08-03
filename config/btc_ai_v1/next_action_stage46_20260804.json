@@ -1,0 +1,16 @@
+{
+  "date": "2026-08-04",
+  "next_stage": "BTC_AI_V1_STAGE46_CAUSAL_REGIME_BREAK_AND_SPECIALIST_ACCUMULATION_RESEARCH",
+  "allowed": [
+    "Retain ATR shock candidate as low-frequency research specialist.",
+    "Keep PF1.3-1.4 rebound candidates in a separately labelled watchlist.",
+    "Research a newly preregistered past-visible regime-break detector without using 2026 outcomes as an entry filter.",
+    "Search for additional independent low-frequency specialists using 2023 discovery and 2024/2025 validation."
+  ],
+  "prohibited": [
+    "Do not adopt the failed 2h/4h/6h interaction rules.",
+    "Do not restore a candidate solely because it rebounded in 2026.",
+    "Do not use month, direction, D1 or volatility filters selected from 2026 results.",
+    "Do not enable Shadow, Discord, MT5 orders, live-ready or final signal."
+  ]
+}
