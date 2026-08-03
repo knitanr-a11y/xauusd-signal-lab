@@ -10,6 +10,7 @@
     "authorized": false,
     "used_for_current_conclusion": false,
     "status": "REJECTED_BY_USER_NON_AUTHORITATIVE_GIT_HISTORY_ONLY",
+    "active_workflows_removed": true,
     "correction": "docs/btc_ai_v1/USER_SCOPE_CORRECTION_EXTERNAL_DATA_REJECTED_OHLC_AUTHORITY_20260803.md"
   },
   "ohlc_research": {
