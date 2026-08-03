@@ -1,21 +1,21 @@
 {
   "date": "2026-08-03",
   "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
-  "formal_status": "SOURCE_ACCEPTED_FIXED_COST_FROZEN_RESEARCH_DESIGN_NEXT",
-  "next_stage": "BTC_AI_V1_01_RESEARCH_DESIGN_PREREGISTRATION",
-  "objective": "Freeze the causal research objective, train/discovery/validation/untouched-test periods, candidate generation families, exact-M1 execution rules, gap handling, anti-overfit gates and reporting schema before inspecting candidate outcomes.",
-  "required_inputs": [
+  "formal_status": "RESEARCH_DESIGN_FROZEN_PIPELINE_IMPLEMENTATION_NEXT",
+  "completed_stage": "BTC_AI_V1_01_RESEARCH_DESIGN_PREREGISTRATION",
+  "next_stage": "BTC_AI_V1_02_CAUSAL_FEATURE_AND_CANDIDATE_REGISTRY_IMPLEMENTATION",
+  "objective": "Implement deterministic causal feature generation, fold masks, candidate registry creation, outcome-blind capability checks and exact-M1 replay primitives without opening the untouched final-test outcomes.",
+  "candidate_outcome_inspection_authorized": "DEVELOPMENT_PERIOD_ONLY_AFTER_IMPLEMENTATION_VERIFICATION",
+  "untouched_final_test_locked": true,
+  "required_contracts": [
     "config/btc_ai_v1/source_data_manifest_20260803.json",
     "config/btc_ai_v1/fixed_cost_contract_20260803.json",
-    "config/btc_ai_v1/handoff_policy_20260803.json"
+    "config/btc_ai_v1/research_design_contract_20260803.json"
   ],
-  "before_candidate_discovery": [
-    "Define period split with an untouched final evaluation window.",
-    "Define causal features using only closed bars.",
-    "Define entry-time and exact-M1 availability rules.",
-    "Define candidate count, multiple-testing and robustness gates.",
-    "Freeze the design contract in GitHub."
-  ],
-  "candidate_discovery_authorized": false,
-  "reason": "Design contract must be frozen before outcome-driven exploration."
+  "prohibitions": [
+    "Do not inspect 2026 final-test candidate results.",
+    "Do not exceed candidate search limits.",
+    "Do not use old BTC candidates as seeds.",
+    "Do not change cost or period boundaries."
+  ]
 }
