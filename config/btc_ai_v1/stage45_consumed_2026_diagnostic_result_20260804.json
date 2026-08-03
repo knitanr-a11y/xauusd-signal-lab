@@ -1,0 +1,171 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_STAGE45_CONSUMED_2026_DIAGNOSTIC_COMPLETE_ONLY_ATR_SHOCK_SPECIALIST_POSITIVE_META_AND_INTERACTION_FAILED_NO_LIVE_PROMOTION",
+  "period": "2026-01-01 through 2026-07-31",
+  "interpretation": "CONSUMED_2026_DIAGNOSTIC_NOT_PRISTINE_HOLDOUT",
+  "causal_audit": {
+    "underlying_violations": 0,
+    "meta_violations": 0
+  },
+  "fixed_components_2026": {
+    "DET_STAGE37": {
+      "trades": 110,
+      "wins": 33,
+      "losses": 77,
+      "win_rate": 0.3,
+      "gross_profit": 19143.626608897623,
+      "gross_loss": 21316.490830805265,
+      "pf": 0.8980665138950755,
+      "net": -2172.8642219076346,
+      "max_dd": 6092.519713758136,
+      "positive_months": 4,
+      "active_months": 7,
+      "positive_d1_regimes": 2
+    },
+    "META_LONG": {
+      "trades": 47,
+      "wins": 18,
+      "losses": 29,
+      "win_rate": 0.3829787234042553,
+      "gross_profit": 7880.353557530316,
+      "gross_loss": 8732.042211581904,
+      "pf": 0.9024639788248006,
+      "net": -851.6886540515867,
+      "max_dd": 3423.6284670401737,
+      "positive_months": 3,
+      "active_months": 6,
+      "positive_d1_regimes": 2
+    },
+    "META_SHORT": {
+      "trades": 33,
+      "wins": 12,
+      "losses": 21,
+      "win_rate": 0.3636363636363636,
+      "gross_profit": 4365.536569610295,
+      "gross_loss": 5276.356597201017,
+      "pf": 0.8273770904578568,
+      "net": -910.8200275907218,
+      "max_dd": 3075.435533970184,
+      "positive_months": 3,
+      "active_months": 7,
+      "positive_d1_regimes": 2
+    },
+    "TRAP_STAGE41": {
+      "trades": 10,
+      "wins": 4,
+      "losses": 6,
+      "win_rate": 0.4,
+      "gross_profit": 2278.8794612382203,
+      "gross_loss": 1194.244015310751,
+      "pf": 1.9082192851895845,
+      "net": 1084.6354459274692,
+      "max_dd": 763.4469884062102,
+      "positive_months": 3,
+      "active_months": 6,
+      "positive_d1_regimes": 3
+    },
+    "META_STACK": {
+      "trades": 80,
+      "wins": 30,
+      "losses": 50,
+      "win_rate": 0.375,
+      "gross_profit": 12245.890127140612,
+      "gross_loss": 14008.398808782918,
+      "pf": 0.874182002832668,
+      "net": -1762.508681642308,
+      "max_dd": 5862.719920621176,
+      "positive_months": 3,
+      "active_months": 7,
+      "positive_d1_regimes": 2
+    }
+  },
+  "interaction_policies_2026": {
+    "GLOBAL_FIRST_ARRIVAL": {
+      "trades": 196,
+      "wins": 65,
+      "losses": 131,
+      "win_rate": 0.3316326530612244,
+      "gross_profit": 33122.50654951114,
+      "gross_loss": 35851.25766047014,
+      "pf": 0.9238868790377824,
+      "net": -2728.751110958999,
+      "max_dd": 9296.366806084176,
+      "positive_months": 3,
+      "active_months": 7,
+      "positive_d1_regimes": 1
+    },
+    "OPPOSITE_VETO_AND_WIN_EXHAUSTION_2H": {
+      "trades": 190,
+      "wins": 63,
+      "losses": 127,
+      "win_rate": 0.331578947368421,
+      "gross_profit": 31660.587011663207,
+      "gross_loss": 34846.2970980025,
+      "pf": 0.908578232074997,
+      "net": -3185.7100863392848,
+      "max_dd": 9721.584879181137,
+      "positive_months": 4,
+      "active_months": 7,
+      "positive_d1_regimes": 1
+    },
+    "OPPOSITE_VETO_AND_WIN_EXHAUSTION_4H": {
+      "trades": 185,
+      "wins": 60,
+      "losses": 125,
+      "win_rate": 0.3243243243243243,
+      "gross_profit": 30165.719524562108,
+      "gross_loss": 34345.20582346514,
+      "pf": 0.8783094700207751,
+      "net": -4179.48629890303,
+      "max_dd": 10030.53450203356,
+      "positive_months": 4,
+      "active_months": 7,
+      "positive_d1_regimes": 1
+    },
+    "OPPOSITE_VETO_AND_WIN_EXHAUSTION_6H": {
+      "trades": 177,
+      "wins": 56,
+      "losses": 121,
+      "win_rate": 0.3163841807909605,
+      "gross_profit": 28510.88892629253,
+      "gross_loss": 33247.76800358539,
+      "pf": 0.8575279075340622,
+      "net": -4736.879077292866,
+      "max_dd": 9214.06645643035,
+      "positive_months": 5,
+      "active_months": 7,
+      "positive_d1_regimes": 1
+    }
+  },
+  "decisions": {
+    "stage37_deterministic": "2026_DIAGNOSTIC_FAIL_RETAIN_HISTORICAL_RECORD_NO_PROMOTION",
+    "meta_long": "2026_DIAGNOSTIC_FAIL_NO_PROMOTION",
+    "meta_short": "2026_DIAGNOSTIC_FAIL_NO_PROMOTION",
+    "meta_stack": "2026_DIAGNOSTIC_FAIL_NO_PROMOTION",
+    "atr_shock_specialist": "2026_DIAGNOSTIC_POSITIVE_RETAIN_LOW_FREQUENCY_RESEARCH_CANDIDATE",
+    "interaction_policy": "2026_DIAGNOSTIC_FAIL_REJECT_RETROSPECTIVE_SYNERGY_POLICY",
+    "pf13_14_quarantine": "NO_FORMAL_RESTORATION_POST_HOC_WATCHLIST_ONLY"
+  },
+  "atr_shock_uncertainty": {
+    "trades_through_2026_07": 59,
+    "wins": 18,
+    "losses": 41,
+    "pf": 1.7523827043547813,
+    "net": 4108.452544444857,
+    "month_block_probability_net_positive": 0.9153,
+    "month_block_net_p05": -796.5772635798938,
+    "month_block_net_median": 4030.6525100895424,
+    "month_block_net_p95": 9256.084648107308,
+    "trade_bootstrap_probability_net_positive": 0.9418,
+    "trade_bootstrap_pf_p05": 0.9713125706486253,
+    "trade_bootstrap_pf_median": 1.737378811844461,
+    "trade_bootstrap_pf_p95": 2.906579880518397
+  },
+  "authorization": {
+    "shadow": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
