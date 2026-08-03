@@ -1,0 +1,129 @@
+{
+  "project": "MOCHIPOYO_ALERT_RESEARCH",
+  "stage": "ALL_NINE_FORWARD_LOOP_RECOVERY_EXTENSION_IMPLEMENTATION_AUDIT_ONLY",
+  "status": "IMPLEMENTED_NOT_USER_LOCAL_EXECUTED",
+  "recorded_at": "2026-08-03",
+  "branch": "agent/mochipoyo-all-nine-recovery",
+  "target_branch": "feature/mochipoyo-alert-research",
+  "scope": "XAUUSD_GOLD_ONLY",
+  "purpose": "Extend forced-reboot stale-lock recovery, stopped-loop read-only diagnostics, and post-restart health auditing from the original seven bounded-adapter loops to include M10W26 and M10W34 without changing any frozen prospective start or strategy rule.",
+  "all_nine_forward_loops": [
+    "M9V",
+    "M9Y",
+    "M10B",
+    "M10E",
+    "M10P",
+    "M10P2",
+    "M10W19",
+    "M10W26",
+    "M10W34"
+  ],
+  "immutable_starts_mt5_server_time": {
+    "M9V": "2026.07.24 11:04:00",
+    "M9Y": "2026.07.24 12:45:00",
+    "M10B": "2026.07.24 20:54:00",
+    "M10E": "2026.07.24 22:06:00",
+    "M10P": "2026.07.24 23:56:00",
+    "M10P2": "2026.07.27 01:39:00",
+    "M10W19": "2026.07.28 02:31:00",
+    "M10W26": "2026.07.28 15:58:00",
+    "M10W34": "2026.07.28 18:19:00"
+  },
+  "implemented_files": {
+    "forced_reboot_bat_updated": "scripts/mochipoyo_alert_research/recovery/bat/01_recover_after_forced_reboot.bat",
+    "stopped_loop_diagnostic_bat_updated": "scripts/mochipoyo_alert_research/recovery/bat/02_audit_stopped_fresh_loops.bat",
+    "all_nine_recovery_python": "scripts/mochipoyo_alert_research/recovery/python/recover_after_forced_reboot_all_nine.py",
+    "all_nine_health_bat": "scripts/mochipoyo_alert_research/recovery/bat/06_audit_all_nine_restart_health.bat",
+    "all_nine_health_python": "scripts/mochipoyo_alert_research/recovery/python/audit_all_nine_restart_health.py",
+    "operator_addendum": "docs/mochipoyo_alert_research/ALL_NINE_RECOVERY_EXTENSION_20260803.md"
+  },
+  "forced_reboot_behavior": {
+    "allowed_context": "ONLY_AFTER_WINDOWS_OR_PC_FORCED_RESTART_OR_POWER_OFF",
+    "precheck": "All collector/M7C and all nine protected loop process markers must be absent before any lock is touched.",
+    "runtime_start_check": "All nine forward runtime manifests must exist and match their immutable prospective starts.",
+    "mutation": "Archive every existing stale lock first, then remove stale locks only.",
+    "not_modified": [
+      "runtime manifests",
+      "prospective starts",
+      "runtime states",
+      "forward history",
+      "SQLite databases",
+      "bounded CSV journals",
+      "private snapshots",
+      "MT5 source CSVs"
+    ]
+  },
+  "diagnostic_behavior": {
+    "read_only": true,
+    "added_targets": ["M10W26", "M10W34"],
+    "captures": [
+      "processes",
+      "locks",
+      "runtime manifests",
+      "runtime states",
+      "start receipts",
+      "loop status",
+      "latest output summaries",
+      "private snapshot receipts",
+      "log tails",
+      "MT5 feed frontiers"
+    ]
+  },
+  "post_restart_health_behavior": {
+    "read_only": true,
+    "required_order": [
+      "M9V",
+      "M9Y",
+      "M10B",
+      "M10E",
+      "M10P",
+      "M10P2",
+      "M10W19",
+      "M10W26",
+      "M10W34"
+    ],
+    "checks": [
+      "exactly one expected process",
+      "required runner token",
+      "lock present",
+      "runtime SHA matches frozen evidence",
+      "immutable start matches",
+      "RUNNING status",
+      "at least one successful cycle",
+      "zero terminal failures",
+      "latest output PASS and start match",
+      "private snapshot receipt PASS",
+      "snapshot files match receipt",
+      "snapshot is not ahead of verified shared journals"
+    ]
+  },
+  "restart_only": {
+    "M10W26": "scripts/mochipoyo_alert_research/m10w26/bat/03_run_shadow_forever.bat",
+    "M10W34": "scripts/mochipoyo_alert_research/m10w34/bat/03_run_shadow_forever.bat"
+  },
+  "permanent_prohibitions": [
+    "M10W26 BAT01 rerun",
+    "M10W34 BAT01 rerun",
+    "M10P preserved-start recovery BAT02 rerun",
+    "manual lock deletion",
+    "runtime or state recreation",
+    "prospective start reset",
+    "historical backfill",
+    "taskkill or force-close",
+    "journal or private snapshot deletion",
+    "Discord send",
+    "MT5 order",
+    "live_ready",
+    "final_signal",
+    "automatic live promotion"
+  ],
+  "verification": {
+    "python_ast_compile": "PASS",
+    "windows_user_local_execution": false,
+    "recovery_executed": false,
+    "health_audit_executed": false,
+    "runtime_or_start_touched": false,
+    "strategy_formula_or_threshold_changed": false
+  },
+  "next_user_action": "Fetch/Pull the branch after review/merge. Do not run recovery merely to test it. After a genuine forced reboot, use BAT01. For an unexplained stop, use BAT02 first. After BAT03 restarts and one successful cycle per loop, use BAT06."
+}
