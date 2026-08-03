@@ -1,7 +1,7 @@
 {
   "project": "MOCHIPOYO_ALERT_RESEARCH",
   "stage": "ALL_NINE_FORWARD_LOOP_RECOVERY_EXTENSION_IMPLEMENTATION_AUDIT_ONLY",
-  "status": "IMPLEMENTED_NOT_USER_LOCAL_EXECUTED",
+  "status": "IMPLEMENTED_SYNTHETIC_VERIFICATION_PASS_NOT_USER_LOCAL_EXECUTED",
   "recorded_at": "2026-08-03",
   "branch": "agent/mochipoyo-all-nine-recovery",
   "target_branch": "feature/mochipoyo-alert-research",
@@ -104,7 +104,7 @@
   "permanent_prohibitions": [
     "M10W26 BAT01 rerun",
     "M10W34 BAT01 rerun",
-    "M10P preserved-start recovery BAT02 rerun",
+    "M10P incident recovery BAT02/BAT03 rerun",
     "manual lock deletion",
     "runtime or state recreation",
     "prospective start reset",
@@ -119,9 +119,12 @@
   ],
   "verification": {
     "python_ast_compile": "PASS",
+    "synthetic_all_processes_absent_all_eleven_locks_archived_then_removed": "PASS",
+    "synthetic_m10w34_process_present_recovery_blocked_all_active_locks_preserved": "PASS",
+    "synthetic_all_nine_health_process_runtime_start_status_output_snapshot_journal_checks": "PASS_9_OF_9",
     "windows_user_local_execution": false,
-    "recovery_executed": false,
-    "health_audit_executed": false,
+    "real_recovery_executed": false,
+    "real_health_audit_executed": false,
     "runtime_or_start_touched": false,
     "strategy_formula_or_threshold_changed": false
   },
