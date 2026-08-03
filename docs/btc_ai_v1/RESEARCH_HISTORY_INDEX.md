@@ -70,8 +70,46 @@ This file is the chronological index for `BTC_AI_CANDIDATE_RESEARCH_V1`.
 - classification: `REJECT_UNTOUCHED_FINAL`.
 - the seven-month final test is consumed and cannot be reused as untouched evidence.
 
+## 2026-08-03 — Stage 11: regime-shift forensic
+
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE11_REGIME_SHIFT_FORENSIC_20260803.md`
+- `config/btc_ai_v1/stage11_regime_shift_forensic_result_20260803.json`
+- the aggregate 2026 SHORT label rate remained 36.53%, but frozen-finalist AUC fell to approximately 0.508–0.523.
+- daily structure inverted: `d1_ema20_slope4_atr` mean changed from +0.1243 in 2024–2025 to -0.1232 in 2026-01 through 2026-07.
+- conclusion: `REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE`.
+- no rescue or candidate selection was performed.
+
+## 2026-08-03 — Stage 12: diverse AI preregistration and capability
+
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_EXPLORATORY_PREREGISTRATION_20260803.md`
+- `config/btc_ai_v1/diverse_ai_exploratory_contract_20260803.json`
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE12_DIVERSE_AI_CAPABILITY_RESULT_20260803.md`
+- tested XGBoost, CatBoost, ExtraTrees, Histogram Gradient Boosting and an equal-rank ensemble.
+- 120 raw candidates; 60 outcome-blind survivors over 24 calendar months.
+- frequency: 272–2,625 events in 24 months, 11.33–109.38 events/month.
+
+## 2026-08-03 — Stage 13: diverse AI development
+
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE13_DIVERSE_AI_DEVELOPMENT_RESULT_20260803.md`
+- 3,840 fixed execution evaluations; four base development survivors.
+- frequency: 240–387 trades in 24 months, 10.00–16.13 trades/month.
+
+## 2026-08-03 — Stage 14: diverse AI robustness
+
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE14_DIVERSE_AI_ROBUSTNESS_RESULT_20260803.md`
+- two of four passed all frozen controls: `ML3_070` and `ML3_011`.
+- classification ceiling: `EXPLORATORY_PROSPECTIVE_ONLY` because the historical untouched period was already consumed.
+
+## 2026-08-03 — Stage 15: diverse AI consumed-period diagnostic
+
+- `docs/btc_ai_v1/BTC_AI_V1_STAGE15_DIVERSE_AI_2026_DIAGNOSTIC_RESULT_20260803.md`
+- diagnostic period: 2026-01 through 2026-07, exactly seven months; not used for selection or support.
+- `ML3_070`: 68 trades / 7 months = 9.71/month, PF 0.8814, net -1,151.21.
+- `ML3_011`: 78 / 7 months = 11.14/month, PF 0.7056, net -5,634.88.
+- supported candidates remain 0; no rescue or promotion.
+
 ## Current next stage
 
-`BTC_AI_V1_11_SECOND_CYCLE_REGIME_SHIFT_FORENSIC_NO_RESCUE`
+`BTC_AI_V1_16_ALTERNATIVE_TARGET_AND_DIRECT_PAYOFF_AI_PREREGISTRATION`
 
-Forensic explanation only. No candidate rescue, promotion, threshold adjustment or final-test retry.
+Freeze genuinely different AI targets such as direct normalized payoff or multi-horizon excursion prediction. No untouched historical evidence remains; any historical survivor is exploratory and requires new future prospective data.
