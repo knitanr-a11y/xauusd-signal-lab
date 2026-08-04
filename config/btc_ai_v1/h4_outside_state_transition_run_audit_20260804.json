@@ -1,0 +1,108 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_H4_OUTSIDE_STATE_TRANSITION_RESEARCH_RUN_AUDIT",
+  "preregistration_commit": "065f39d9be7bfc37f6b8f6f9b35928251c983e25",
+  "run_type": "SINGLE_SIMULTANEOUS_STATE_ASSOCIATION_AND_FIXED_TRADE_RUN_AFTER_FREEZE",
+  "input_sha256": {
+    "M1": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135",
+    "M15": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6",
+    "H4": "94c2013dc175e340b3d22e229383863ba699aad224ea14d3e6fda90bc857a7d0",
+    "D1": "8485e0249e6320c66cc43efd1ad90f86913eee6ea98e177fc684b4d0f4760c73",
+    "manifest": "a1177b058477fe0157879d7fd9793ad83ed679dc01efc2c268b29ff071073a58",
+    "metadata": "47bc080d821e6e525415a4ccc3108aaab10c96dc5541838cd8df43468f9a3ce7"
+  },
+  "input_rows": {
+    "M1": 1879776,
+    "M15": 125567,
+    "H4": 7860,
+    "D1": 1310
+  },
+  "pipeline": {
+    "outside_events": 332,
+    "raw_candidates": 235,
+    "deduplicated_candidates": 235,
+    "duplicates_removed": 0,
+    "ambiguous_opposite_direction": 0,
+    "one_position_trades": 235,
+    "resolved_only_trades": 235,
+    "unresolved_trades": 0,
+    "exact_entry_m1_missing": 0,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "combined_2024_2026_07_transition_baseline": {
+    "events": 262,
+    "MIDPOINT_REVERSION": 0.1297709923664122,
+    "CONTINUATION_BREAK": 0.33969465648854963,
+    "FAILED_EXTREME_REJECTION": 0.42748091603053434,
+    "NONE_WITHIN_16_M15": 0.10305343511450382
+  },
+  "formal_decisions": [
+    {
+      "state": "STATE_TWO_SIDED_VOLATILITY_SHOCK",
+      "association_gate_pass": false,
+      "trade_gate_pass": false,
+      "combined_events": 18,
+      "combined_trades": 18,
+      "pf": 1.3956092245123932,
+      "net": 2100.888490383397,
+      "pf_2024": 0.7924338567124644,
+      "pf_2025": 1.3469714620067295,
+      "pf_2026_01_07": "INF_ON_2_TRADES",
+      "largest_winner_removed_pf": 1.1081678798130417,
+      "double_cost_pf": 1.3063651112692154,
+      "formal_interpretation": "STATE_HYPOTHESIS_NOT_SUPPORTED_SPARSE_POST_RESULT_PAYOFF_LEAD_ONLY"
+    },
+    {
+      "state": "STATE_H4_TREND_ALIGNED_EXTREME",
+      "association_gate_pass": false,
+      "trade_gate_pass": false,
+      "combined_events": 87,
+      "combined_trades": 59,
+      "pf": 0.5027387454148277,
+      "net": -8315.123029941686,
+      "formal_interpretation": "STATE_HYPOTHESIS_NOT_SUPPORTED"
+    },
+    {
+      "state": "STATE_H4_TREND_OPPOSED_EXTREME",
+      "association_gate_pass": false,
+      "trade_gate_pass": false,
+      "combined_events": 91,
+      "combined_trades": 32,
+      "pf": 1.0345163869455143,
+      "net": 213.71536692781228,
+      "pf_2024": 0.9918796036470218,
+      "pf_2025": 1.505232220255913,
+      "pf_2026_01_07": 0.41670326714195804,
+      "formal_interpretation": "STATE_HYPOTHESIS_NOT_SUPPORTED"
+    },
+    {
+      "state": "STATE_D1_DIRECTION_CONFLICT",
+      "association_gate_pass": false,
+      "trade_gate_pass": false,
+      "combined_events": 125,
+      "combined_trades": 72,
+      "pf": 0.7001701920776566,
+      "net": -5095.1433312964,
+      "formal_interpretation": "STATE_HYPOTHESIS_NOT_SUPPORTED"
+    }
+  ],
+  "causality": {
+    "closed_bars_only": true,
+    "future_or_open_bar_use_count": 0,
+    "prior96_h4_atr_median_shifted_by_one": true,
+    "exact_m1_no_fallback": true,
+    "same_m1_collision": "SL_FIRST",
+    "entry_after_missing_m1_intervals": "POSITION_CONTINUES_NO_SYNTHETIC_BAR",
+    "synthetic_tests_passed": 2
+  },
+  "boundaries": {
+    "stage55_modified": false,
+    "fresh_shadow_authorized": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
