@@ -1,0 +1,17 @@
+{
+  "candidate_id": "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3",
+  "formal_status": "PROSPECTIVE_SHADOW_IMPLEMENTED_PENDING_USER_PC_ACTIVATION",
+  "implementation_branch": "feature/gold-scalp-state-survival-shadow",
+  "shadow_authorized": true,
+  "discord_entry_authorized": true,
+  "mt5_orders_authorized": false,
+  "final_signal_authorized": false,
+  "live_ready": false,
+  "next_action": "run install, bootstrap, Discord test, then Shadow loop on the user Windows checkout",
+  "implementation_environment_verification": "PASS",
+  "pytest": "8 passed",
+  "real_data_bootstrap": "PASS_NO_BACKFILL_ZERO_ENTRIES",
+  "restart_parity": "PASS",
+  "user_windows_activation": false,
+  "user_discord_delivery_test": false
+}

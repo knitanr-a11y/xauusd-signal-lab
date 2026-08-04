@@ -1,0 +1,66 @@
+{
+  "candidate_id": "CANDLE_STATE_SURVIVAL_DUAL_STRICT_EPISODE_HEALTH_P75_V3",
+  "contract_version": "2026-08-02-shadow-v1",
+  "verification_date": "2026-08-02",
+  "formal_status": "IMPLEMENTATION_VERIFIED_PENDING_USER_WINDOWS_ACTIVATION_AND_DISCORD_DELIVERY_EVIDENCE",
+  "source_layout": {
+    "ordinary_utf8_python": true,
+    "dynamic_exec": false,
+    "binary_or_base64_runtime_payload": false,
+    "modules": [
+      "common.py",
+      "state_engine.py",
+      "runtime_execution.py",
+      "runtime_policy.py",
+      "shadow_runtime.py",
+      "discord_delivery.py"
+    ]
+  },
+  "tests": {
+    "pytest": "8 passed",
+    "compileall": "PASS",
+    "post_module_split_retest": "PASS"
+  },
+  "real_data_bootstrap": {
+    "status": "PASS",
+    "latest_existing_m15": "2026-07-31 23:30:00",
+    "cursor": "2026-07-31 23:30:00",
+    "no_backfill": true,
+    "historical_entries_created": 0,
+    "discord_notifications_created": 0,
+    "m1_union_rows": 1239132,
+    "m1_duplicate_rows_removed": 141652,
+    "m1_parser_rejected_rows": 1,
+    "rejected_policy": "audited rejection; no repair or use"
+  },
+  "restart_parity": {
+    "status": "PASS",
+    "cursor_unchanged": true,
+    "trade_count_unchanged": true,
+    "discord_queue_unchanged": true,
+    "health_state_unchanged": true
+  },
+  "focused_contract_tests": [
+    "frozen four state/action pairs",
+    "P75 payout",
+    "same-bar initial SL priority",
+    "spread once",
+    "episode rearm",
+    "Discord persistent dedupe",
+    "malformed CSV audited rejection",
+    "later-source timestamp precedence"
+  ],
+  "safety": {
+    "mt5_orders": false,
+    "demo_orders": false,
+    "final_signal": false,
+    "live_ready": false,
+    "discord_real_send_during_implementation_test": false
+  },
+  "pending": [
+    "Windows checkout install",
+    "Windows no-backfill bootstrap evidence",
+    "Discord connection test using existing local V19 webhook",
+    "continuous Shadow loop start"
+  ]
+}
