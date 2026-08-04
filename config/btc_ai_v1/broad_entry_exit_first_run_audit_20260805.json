@@ -1,0 +1,31 @@
+{
+  "contract": "BTC_AI_V1_BROAD_ENTRY_EXIT_FIRST_PREREGISTRATION_FROZEN_20260805",
+  "preregistration_commit": "c4e1015baad6e7577907911c9911c4df4e6bdeed",
+  "run_type": "SINGLE_SIMULTANEOUS_RETROSPECTIVE_RUN_AFTER_FREEZE",
+  "raw_candidates": 233016,
+  "deduplicated_candidates": 233016,
+  "one_position_trades": 153458,
+  "resolved_trades": 153458,
+  "unresolved_trades": 0,
+  "missing_exact_entry_m1_configuration_rows": 66,
+  "same_m1_collision_rule": "SL_FIRST",
+  "future_or_open_bar_use_count": 0,
+  "health_gate": "OFF_NOT_APPLICABLE",
+  "all_family_decisions": "REJECT",
+  "strongest_gross_diagnostic": {
+    "family": "EVERY_H1_BODY_SIGN_FADE",
+    "config": "TIME240_HARDSTOP_2ATR",
+    "trades": 6973,
+    "gross_pf": 1.058935,
+    "gross_average_usd_per_trade": 13.907920,
+    "cost_adjusted_pf": 0.965430,
+    "cost_adjusted_net_usd": -59912.575186
+  },
+  "stage55_modified": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "automatic_promotion": false
+}
