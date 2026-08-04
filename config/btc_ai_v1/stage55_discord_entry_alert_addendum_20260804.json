@@ -1,0 +1,69 @@
+{
+  "addendum_id": "BTC_AI_V1_STAGE55_DISCORD_ENTRY_ALERT_SIDECAR",
+  "addendum_version": "2026-08-04-v1",
+  "authorization": {
+    "discord_entry_notification": true,
+    "observation_only": true,
+    "mt5_order": false,
+    "live_trading": false,
+    "final_signal": false,
+    "live_ready": false
+  },
+  "relationship_to_frozen_shadow_contract": {
+    "candidate_rules_changed": false,
+    "detector_changed": false,
+    "confirmation_changed": false,
+    "entry_stop_target_changed": false,
+    "research_outcome_dependency": false,
+    "role": "DELIVERY_SIDECAR_ONLY"
+  },
+  "notification_scope": {
+    "send": [
+      "NEWLY_ACCEPTED_M1_FALSE_LONG_REVERSAL_SHORT_ENTRY",
+      "NEWLY_ACCEPTED_M5_LEVEL_REJECTION_REVERSAL_SHORT_ENTRY",
+      "MANUAL_CONNECTION_TEST"
+    ],
+    "do_not_send": [
+      "NO_SIGNAL",
+      "RECOVERY_REPLAY_NOT_TRADED",
+      "PRE_NOTIFIER_ACTIVATION_ENTRY",
+      "STALE_ENTRY_OLDER_THAN_10_MT5_MINUTES",
+      "INVALID_EXACT_M1_CANDIDATE",
+      "SUPPRESSED_OR_BLOCKED_CANDIDATE",
+      "TP_SL_MAX_EXIT",
+      "PERFORMANCE_OR_PROMOTION_DECISION"
+    ]
+  },
+  "message_fields": [
+    "family",
+    "direction_SHORT",
+    "source_decision_time_MT5",
+    "alert_time_MT5",
+    "confirmation_time_MT5",
+    "entry_time_MT5",
+    "entry_price",
+    "stop_price",
+    "target_2R",
+    "risk_distance",
+    "maximum_hold_minutes",
+    "detector_score_and_frozen_threshold_when_available",
+    "observation_only_warning"
+  ],
+  "delivery_contract": {
+    "transport": "DISCORD_WEBHOOK_LOCAL_SECRET_ONLY",
+    "dedupe_key": "candidate_key",
+    "first_notifier_start": "BASELINE_ALL_EXISTING_ACCEPTED_ENTRIES_WITHOUT_SEND",
+    "restart": "SEND_ONLY_UNSEEN_ENTRY_NOT_OLDER_THAN_10_MT5_MINUTES",
+    "failure": "RETRY_WHILE_ENTRY_IS_NOT_STALE_THEN_RECORD_MISSED",
+    "allowed_mentions": "NONE",
+    "chart": "OPTIONAL_M1_FOR_M1_FAMILY_OR_M5_FOR_M5_FAMILY"
+  },
+  "frozen_prohibitions": [
+    "DO_NOT_STORE_WEBHOOK_IN_GITHUB",
+    "DO_NOT_SEND_HISTORICAL_BACKFILL",
+    "DO_NOT_SEND_RECOVERY_REPLAY",
+    "DO_NOT_USE_NOTIFICATION_SUCCESS_OR_FAILURE_FOR_CANDIDATE_SELECTION",
+    "DO_NOT_CHANGE_SHADOW_RULES_FROM_MANUAL_CHART_REVIEW",
+    "DO_NOT_CONNECT_MT5_ORDER_OR_LIVE_TRADING"
+  ]
+}
