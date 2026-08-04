@@ -1,0 +1,137 @@
+{
+  "research_id": "BTC_AI_V1_DAY_OPEN_WIN_RATE_MECHANISM_AUDIT_20260805",
+  "status": "FROZEN_BEFORE_OUTCOME_RUN",
+  "classification": "POST_HOC_MECHANISM_AUDIT_ON_CONSUMED_HISTORY_NOT_FORMAL_VALIDATION",
+  "base_branch": "feature/btc-day-open-exit-mechanism-research",
+  "base_head": "94af7dd62f2e0682911b2eda3e62905427daa34c",
+  "frozen_parent_candidate": "FLIP_OR_4ATR_STOP_BE_AFTER_2ATR",
+  "parent_candidate_immutability": {
+    "entry_and_state_logic_unchanged": true,
+    "broker_day_open_definition_unchanged": true,
+    "initial_stop_atr_multiple": 4.0,
+    "state_flip_exit_unchanged": true,
+    "same_state_reentry_after_exit": false,
+    "exact_m1_entry_no_fallback": true,
+    "closed_ohlc_only": true,
+    "same_m1_adverse_first": true
+  },
+  "objective": "Increase completed-trade net win rate without sacrificing the parent candidate's economic robustness. The parent remains frozen and is not replaced by this audit.",
+  "position_size_btc": 1.0,
+  "base_roundtrip_cost_usd_per_completed_1btc": 22.5,
+  "cost_stress_usd_per_completed_1btc": [33.75, 45.0],
+  "partial_exit_cost_contract": "Cost is proportional to executed BTC quantity. Total base roundtrip cost across all partial and final exits sums to 22.50 USD for a completed 1 BTC trade. Stress recalculates the full completed trade at 33.75 and 45.00 USD.",
+  "configurations": [
+    {
+      "id": "CONTROL_BE2ATR",
+      "type": "control",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.0,
+      "partial_fraction": 0.0,
+      "partial_trigger_atr": 0.0
+    },
+    {
+      "id": "LOCK_0P25ATR_AFTER_2ATR",
+      "type": "profit_lock",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.25,
+      "partial_fraction": 0.0,
+      "partial_trigger_atr": 0.0
+    },
+    {
+      "id": "LOCK_0P50ATR_AFTER_2ATR",
+      "type": "profit_lock",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.5,
+      "partial_fraction": 0.0,
+      "partial_trigger_atr": 0.0
+    },
+    {
+      "id": "LOCK_1P00ATR_AFTER_2ATR",
+      "type": "profit_lock",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 1.0,
+      "partial_fraction": 0.0,
+      "partial_trigger_atr": 0.0
+    },
+    {
+      "id": "PARTIAL_25PCT_AT_1ATR_THEN_BE2",
+      "type": "partial_then_be",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.0,
+      "partial_fraction": 0.25,
+      "partial_trigger_atr": 1.0
+    },
+    {
+      "id": "PARTIAL_50PCT_AT_1ATR_THEN_BE2",
+      "type": "partial_then_be",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.0,
+      "partial_fraction": 0.5,
+      "partial_trigger_atr": 1.0
+    },
+    {
+      "id": "PARTIAL_25PCT_AT_2ATR_AND_BE",
+      "type": "partial_and_be_same_trigger",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.0,
+      "partial_fraction": 0.25,
+      "partial_trigger_atr": 2.0
+    },
+    {
+      "id": "PARTIAL_50PCT_AT_2ATR_AND_BE",
+      "type": "partial_and_be_same_trigger",
+      "trigger_atr": 2.0,
+      "remaining_stop_lock_atr": 0.0,
+      "partial_fraction": 0.5,
+      "partial_trigger_atr": 2.0
+    }
+  ],
+  "execution_contract": {
+    "profit_lock_or_be_becomes_active": "next existing M1 after trigger M1",
+    "partial_fill_price": "exact trigger price when intrabar touched; M1 open if the trigger is already crossed by a favorable gap open",
+    "remaining_quantity_after_partial": "1.0 - partial_fraction",
+    "initial_stop_remains_active_until_next_existing_m1_after_be_or_lock_trigger": true,
+    "state_flip_closes_all_remaining_quantity_at_exact_decision_M1_open": true,
+    "missing_post_entry_m1": "position continues; no artificial bar; existing M1 only",
+    "end_of_data_open_position": "unresolved and excluded without estimated outcome"
+  },
+  "formal_audit_periods": {
+    "sanity": "2023",
+    "formal": ["2024", "2025", "2026-01-through-2026-07"],
+    "recent_diagnostic": "2026-07"
+  },
+  "win_rate_definition": "completed trades with total net_pnl > 0 divided by all completed trades; zero and cost-only scratch trades are not wins",
+  "preregistered_acceptance_gates": {
+    "formal_trade_count_min": 1000,
+    "net_win_rate_min": 0.25,
+    "net_win_rate_improvement_vs_control_min_absolute": 0.05,
+    "combined_pf_min": 1.15,
+    "combined_net_usd_min": 50000.0,
+    "net_to_max_drawdown_min": 2.0,
+    "each_formal_slice_pf_min": 1.0,
+    "each_formal_slice_net_positive": true,
+    "largest_winner_removed_pf_min": 1.10,
+    "double_cost_45usd_pf_min": 1.05,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0,
+    "largest_positive_month_share_of_gross_profit_max": 0.20,
+    "top5_winner_share_of_gross_profit_max": 0.25
+  },
+  "selection_boundary": {
+    "parent_candidate_remains_authoritative_historical_lead": true,
+    "no_variant_can_be_promoted_directly_to_live": true,
+    "passing_variant_status_maximum": "POST_HOC_WIN_RATE_ENHANCED_RETROSPECTIVE_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+    "no_result_based_direction_month_year_volatility_filter": true,
+    "no_ninth_rescue_configuration": true
+  },
+  "runtime_boundary": {
+    "stage55_modified": false,
+    "fresh_shadow_created": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
