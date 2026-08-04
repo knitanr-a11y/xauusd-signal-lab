@@ -1,0 +1,36 @@
+{
+  "date": "2026-08-04",
+  "formal_next_action": "WAIT_USER_DIRECTION_AFTER_ALL_FOUR_PREREGISTERED_BASE_FAMILIES_REJECTED",
+  "completed": [
+    "SEPARATE_BRANCH_CREATED_FROM_AUTHORITATIVE_STAGE55_ARCHIVE_HEAD",
+    "PREREGISTRATION_FROZEN_BEFORE_OUTCOMES",
+    "TWELVE_CONFIGURATIONS_RUN_ONCE_SIMULTANEOUSLY",
+    "RAW_DEDUP_ONE_POSITION_RESOLVED_ONLY_REPORTED_SEPARATELY",
+    "YEAR_HALFYEAR_MONTH_DIRECTION_CAUSAL_VOLATILITY_COST_AND_NEIGHBOR_AUDITS_COMPLETE",
+    "REAL_DATA_REFERENCE_FAST_IMPLEMENTATION_PARITY_CONFIRMED",
+    "ALL_FOUR_FORMAL_BASES_REJECTED"
+  ],
+  "prohibited_automatic_followups": [
+    "DO_NOT_PROMOTE_ATR_IMPULSE_STRUCTURE_STOP_NEIGHBOR",
+    "DO_NOT_RETAIN_ONLY_ATR_IMPULSE_LONG",
+    "DO_NOT_RETAIN_ONLY_2026_JULY",
+    "DO_NOT_RETAIN_ONLY_HIGH_VOLATILITY",
+    "DO_NOT_ADD_A_FIFTH_FAMILY_AFTER_RESULTS",
+    "DO_NOT_RELAX_THRESHOLDS_TO_RESCUE_FREQUENCY",
+    "DO_NOT_DELETE_NEGATIVE_RESULTS",
+    "DO_NOT_CREATE_A_NEW_SHADOW_FROM_THIS_FAILED_CYCLE",
+    "DO_NOT_MODIFY_STAGE55"
+  ],
+  "stage55": {
+    "continue_running": true,
+    "frozen": true,
+    "minimum_closed_trades_per_family": 20,
+    "minimum_calendar_months": 6
+  },
+  "requires_new_user_authorization_for_any_new_cycle": true,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false
+}
