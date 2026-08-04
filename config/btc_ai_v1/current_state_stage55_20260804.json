@@ -1,6 +1,6 @@
 {
   "date": "2026-08-04",
-  "formal_status": "BTC_AI_V1_STAGE55_DUAL_REVERSE_SHORT_PROSPECTIVE_SHADOW_READY_NOT_ACTIVATED_ON_USER_PC",
+  "formal_status": "BTC_AI_V1_STAGE55_DUAL_REVERSE_SHORT_PROSPECTIVE_SHADOW_WITH_DISCORD_ENTRY_ALERT_READY_NOT_ACTIVATED_ON_USER_PC",
   "stage54_formal_survivors": 0,
   "shadow_basis": "POST_SELECTION_DIAGNOSTIC_TWO_FAMILIES",
   "prospective_shadow_authorized": true,
@@ -12,7 +12,11 @@
     "M5_LEVEL_REJECTION_010_M5_TWO_BAR_BEARISH_SHORT_TP2R_MAX480"
   ],
   "observation_only": true,
-  "discord": false,
+  "discord_entry_notification_authorized": true,
+  "discord_entry_sidecar_implemented": true,
+  "discord_user_pc_configured": false,
+  "discord_real_delivery_verified": false,
+  "discord_delivery": "ENTRY_ONLY_SIDECAR_NO_RESEARCH_EFFECT_NO_BACKFILL",
   "mt5_orders": false,
   "live_trading": false,
   "live_ready": false,
