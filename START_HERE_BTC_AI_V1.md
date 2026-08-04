@@ -9,8 +9,9 @@
 
 1. `docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_STAGE55_ACTIVE_SIMPLE_RULE_RESEARCH_NEXT_20260804.md`
 2. `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
-3. `config/btc_ai_v1/current_state_stage55_20260804.json`
-4. `config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json`
+3. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX_V2_20260804.md`
+4. `config/btc_ai_v1/current_state_stage55_20260804.json`
+5. `config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json`
 
 ## Authority
 
@@ -41,6 +42,12 @@ Do not change model, Q70, confirmation, stop, target, hold, family membership or
 Discord is accepted-entry delivery only and must not affect research selection. MT5 orders, live trading, live-ready and final signal remain OFF.
 
 ## Research history
+
+Current top-level index:
+
+`docs/btc_ai_v1/RESEARCH_HISTORY_INDEX_V2_20260804.md`
+
+Detailed layers:
 
 - Stages00–30: `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
 - Stages31–36: `docs/btc_ai_v1/RESEARCH_HISTORY_STAGE31_36_ADDENDUM_20260804.md`
