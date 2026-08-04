@@ -1,14 +1,19 @@
 @echo off
 setlocal
+title GOLD Challenger C1 Shadow - Install
 for %%I in ("%~dp0..\..") do set "ROOT=%%~fI"
 set "STATE=%LOCALAPPDATA%\xauusd_signal_lab\gold_challenger_c1_shadow"
 set "VENV=%STATE%\venv"
+echo ============================================================
+echo GOLD CHALLENGER C1 SHADOW - INSTALL
+echo Observation only / V19 read-only / MT5 orders OFF
+echo ============================================================
 if not exist "%STATE%" mkdir "%STATE%"
 if not exist "%VENV%\Scripts\python.exe" (
   py -3.12 -m venv "%VENV%" 2>nul || python -m venv "%VENV%"
 )
 if not exist "%VENV%\Scripts\python.exe" (
-  echo [BLOCKED] Python venv creation failed.
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Python venv creation failed.
   pause
   exit /b 2
 )
@@ -18,19 +23,19 @@ if errorlevel 1 goto :fail
 if errorlevel 1 goto :fail
 set "PYTHONPATH=%ROOT%\scripts;%PYTHONPATH%"
 pushd "%ROOT%"
-"%VENV%\Scripts\python.exe" -c "import gold_challenger_c1; print('[OK] Python import path:', gold_challenger_c1.__file__)"
+"%VENV%\Scripts\python.exe" -c "import gold_challenger_c1; print('[GOLD_CHALLENGER_C1_SHADOW] [OK] Python import path:', gold_challenger_c1.__file__)"
 if errorlevel 1 goto :fail_pop
 "%VENV%\Scripts\python.exe" -m compileall scripts\gold_challenger_c1
 if errorlevel 1 goto :fail_pop
 "%VENV%\Scripts\python.exe" -m pytest -q tests\gold_challenger_c1
 if errorlevel 1 goto :fail_pop
 popd
-echo [OK] Challenger C1 Shadow environment and tests are ready.
+echo [GOLD_CHALLENGER_C1_SHADOW] [OK] Environment and tests are ready.
 pause
 exit /b 0
 :fail_pop
 popd
 :fail
-echo [BLOCKED] Installation or verification failed.
+echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Installation or verification failed.
 pause
 exit /b 2
