@@ -1,9 +1,16 @@
 # START HERE — BTC AI Candidate Research V1
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
-- authoritative branch: `feature/btc-ai-v1-data-acquisition`
-- status: `BTC_AI_V1_OHLC_ONLY_ORDERING_AND_ADAPTATION_SEARCH_EXHAUSTED_THROUGH_STAGE35_NO_SUPPORTED_CANDIDATE`
+- authoritative archive/runtime branch: `feature/btc-ai-v1-data-acquisition`
+- current status: `BTC_AI_V1_STAGE55_ACTIVE_OBSERVATION_CONTINUES_SIMPLE_HUMAN_READABLE_RULE_RESEARCH_AUTHORIZED_SEPARATELY`
 - updated: `2026-08-04`
+
+## Read first
+
+1. `docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_STAGE55_ACTIVE_SIMPLE_RULE_RESEARCH_NEXT_20260804.md`
+2. `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
+3. `config/btc_ai_v1/current_state_stage55_20260804.json`
+4. `config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json`
 
 ## Authority
 
@@ -11,41 +18,57 @@ Use only accepted XM `BTCUSD#` closed-bar OHLC:
 
 - M1/M5/M15/H1/H4/D1
 - MT5 broker-server naive time
-- closed M15 decisions and exact M1 execution
+- closed-bar decisions and exact-M1 execution
+- missing exact entry M1 means invalid candidate; no fallback
+- same-M1 TP/SL collision is SL first
 - fixed spread 22.50 USD per completed 1 BTC trade
 - no external-market, funding, open-interest, order-flow, tick-volume or real-volume features
 
-Old BTC BCR, stacking and frozen candidates are not authority. Do not modify GOLD V19, Challenger C1, P75 or MOCHIPOYO.
+Old BTC BCR, stacking and frozen candidates are not authority for this BTC AI V1 line. Do not modify GOLD V19, Challenger C1, P75 or MOCHIPOYO.
 
-## Unique latest handoff
+## Stage55 frozen prospective Shadow
 
-`docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_OHLC_ADAPTATION_EXHAUSTED_STAGE36_20260804.md`
+Two post-selection diagnostic reverse-SHORT families are running observation-only on the user PC.
 
-## Research status through Stage 35
+- activation status: `READY_NO_BACKFILL_ACTIVATED`
+- activation cutoff: `2026-08-04 10:52:00` MT5
+- accepted candidates at activation: 0
+- runtime state: `%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow`
+- minimum conclusion gate per family: 20 closed trades and 6 calendar months
 
-- Stage 31 hard rolling 3/6/12M: no supported schedule;
-- Stage 32 past-only drift/rank attribution: no supported live gate;
-- Stage 33 full-history exponential recency 3/6/12/24M: no supported half-life;
-- Stage 34 expanding/decay P90 consensus: no supported half-life;
-- Stage 35 live-causal 1/4/12h cooldown: no supported configuration.
+Do not change model, Q70, confirmation, stop, target, hold, family membership or no-backfill state.
 
-Formal supported candidates remain **0**. Candidate PnL and 2026 were not opened in Stages 31–35.
+Discord is accepted-entry delivery only and must not affect research selection. MT5 orders, live trading, live-ready and final signal remain OFF.
 
-## Current stop rule
+## Research history
 
-Further searches over windows, half-lives, thresholds, cooldowns, direction rescues, favorable months or D1 states are prohibited because they would mine the same consumed 2024–2025 OHLC information universe.
+- Stages00–30: `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
+- Stages31–36: `docs/btc_ai_v1/RESEARCH_HISTORY_STAGE31_36_ADDENDUM_20260804.md`
+- Stages37–55 and current synthesis: `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
 
-A future research cycle requires explicit user authorization for either:
+Key retained research asset outside Stage55:
 
-1. a genuinely new causal information source; or
-2. a new label/execution objective frozen before viewing its outcomes.
+- low-frequency ATR shock second-rejection LONG specialist
 
-## Hard boundaries
+Key promotion stops:
 
-- resolved-only history: `maturity_ns <= current refit_time`;
-- previous complete month only for calibration;
-- no 2026 selection;
-- no candidate PnL;
-- no post-result LONG/SHORT, month, D1 or volatility rescue;
-- no external or volume data without explicit user authorization;
-- Shadow, Discord, MT5 orders, live-ready and final signal remain OFF.
+- Stage37 deterministic midpoint failure failed 2026 diagnosis
+- Stage38/39 meta LONG/SHORT/stack failed 2026 diagnosis
+- 2h/4h/6h interaction policies failed 2026 diagnosis
+- candidates that only rebounded in consumed 2026 are not restored
+
+## Next independent cycle
+
+Research a small preregistered set of simple, human-readable discretionary-style rules on a separate branch and separate clone.
+
+Proposed branch:
+
+`feature/btc-simple-discretionary-rule-research`
+
+Proposed clone:
+
+`C:\xauusd-signal-lab-btc-simple-rules`
+
+First pass is deterministic, not ML. Each family should contain at most one higher-timeframe context, one setup, one confirmation and one fixed execution policy. Do not reopen broad threshold/window/month/direction/D1/volatility rescue or another large grid.
+
+Because historical 2023–2026 OHLC has been heavily consumed, new historical results are retrospective exploratory evidence only. Fresh no-backfill prospective evidence is required before any promotion.
