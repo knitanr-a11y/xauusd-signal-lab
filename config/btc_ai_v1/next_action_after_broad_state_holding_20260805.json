@@ -1,0 +1,29 @@
+{
+  "status": "NEXT_RESEARCH_AUTHORIZATION_PENDING_USER_REVIEW",
+  "do_not_do": [
+    "do not promote H4 day-open continuation to Shadow",
+    "do not keep only LONG",
+    "do not discard 2024",
+    "do not optimize 2ATR versus 4ATR after results",
+    "do not add hour month year or volatility filters from diagnostics"
+  ],
+  "recommended_next_cycle": {
+    "name": "H4_DAY_OPEN_STATE_MECHANISM_RESEARCH",
+    "role": "separate preregistered mechanism audit, not validation",
+    "entry_remains_broad": true,
+    "hypotheses_max": 4,
+    "entry_time_known_dimensions": [
+      "number of consecutive H4 decisions in the same desired state",
+      "first H4 state after broker-day change versus later same-day state",
+      "distance from broker-day open normalized by causal M15 or H4 ATR",
+      "agreement or conflict with broker-week open"
+    ],
+    "required_controls": [
+      "both directions retained",
+      "all years retained",
+      "one simultaneous run after freeze",
+      "no automatic Shadow"
+    ]
+  },
+  "stage55": "UNCHANGED_AND_CONTINUES_SEPARATELY"
+}
