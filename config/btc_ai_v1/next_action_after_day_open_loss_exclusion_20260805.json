@@ -1,0 +1,6 @@
+{
+  "decision": "DO_NOT_PROMOTE_STATIC_ENTRY_LOSS_FILTERS",
+  "reason": "No fixed entry-time risk flag passed retention, temporal confirmation, economic, and loss-selectivity gates simultaneously.",
+  "authorized_next": "A separately preregistered causal loss-cooldown audit based only on already resolved prior trades.",
+  "forbidden": ["threshold tuning", "exact risk-flag combination mining", "direction/month/year/volatility rescue", "parent candidate replacement", "fresh shadow without separate authorization"]
+}
