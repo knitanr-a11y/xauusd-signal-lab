@@ -1,0 +1,40 @@
+{
+  "contract": "BTC_AI_V1_DAY_OPEN_WIN_RATE_MECHANISM_AUDIT_PREREGISTRATION_FROZEN_20260805",
+  "input_sha256": {
+    "m1": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135",
+    "m15": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6",
+    "h4": "94c2013dc175e340b3d22e229383863ba699aad224ea14d3e6fda90bc857a7d0",
+    "d1": "8485e0249e6320c66cc43efd1ad90f86913eee6ea98e177fc684b4d0f4760c73",
+    "manifest": "a1177b058477fe0157879d7fd9793ad83ed679dc01efc2c268b29ff071073a58",
+    "metadata": "47bc080d821e6e525415a4ccc3108aaab10c96dc5541838cd8df43468f9a3ce7"
+  },
+  "raw_h4_events": 7647,
+  "completed_trades": 15080,
+  "unresolved_trades": 0,
+  "control_parity": {
+    "old_trades": 1885,
+    "new_trades": 1885,
+    "exact_match": true
+  },
+  "future_or_open_bar_use_count": 0,
+  "exact_m1_no_fallback": true,
+  "profit_lock_active_next_existing_m1": true,
+  "stage55_modified": false,
+  "parent_candidate_modified": false,
+  "passing_configs": [
+    "LOCK_0P25ATR_AFTER_2ATR",
+    "LOCK_1P00ATR_AFTER_2ATR",
+    "PARTIAL_25PCT_AT_2ATR_AND_BE"
+  ],
+  "maximum_status": "POST_HOC_WIN_RATE_ENHANCED_RETROSPECTIVE_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+  "reference_parity": {
+    "events": 500,
+    "m1_cutoff": "2023-05-11 16:00:00",
+    "all_eight_configs_exact_match": true,
+    "trades_per_config": 122
+  },
+  "synthetic_tests": {
+    "passed": 3,
+    "total": 3
+  }
+}
