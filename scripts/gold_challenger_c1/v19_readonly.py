@@ -147,13 +147,15 @@ def _rank_day_exact(current: pd.DataFrame, history: pd.DataFrame, calibration: p
         return current.assign(rank_long=np.nan, rank_short=np.nan, chosen_side="", chosen_rank=np.nan)
     day = pd.DatetimeIndex(current.entry_time).normalize()[0]
     start = day - pd.Timedelta(days=RANK_LOOKBACK_DAYS)
-    reference = pd.concat(
-        [
-            calibration[["entry_time", "score_long", "score_short"]],
-            history[["entry_time", "score_long", "score_short"]],
-        ],
-        ignore_index=True,
-    )
+    columns = ["entry_time", "score_long", "score_short"]
+    calibration_reference = calibration.loc[:, columns]
+    history_reference = history.loc[:, columns]
+    if history_reference.empty:
+        reference = calibration_reference.copy()
+    elif calibration_reference.empty:
+        reference = history_reference.copy()
+    else:
+        reference = pd.concat([calibration_reference, history_reference], ignore_index=True)
     reference_days = pd.DatetimeIndex(reference.entry_time).normalize()
     reference = reference[(reference_days < day) & (reference_days >= start)]
     ranked = current.copy()
@@ -191,7 +193,14 @@ def _reconstruct_score_ledger(
                 f"V19_{name.upper()}_MODEL_BOUNDARY_MISMATCH expected={expected_boundary.date()} observed={observed}"
             )
 
-    raw = pd.concat([history.assign(_source="HISTORY"), pending.assign(_source="PENDING")], ignore_index=True)
+    history_source = history.assign(_source="HISTORY")
+    pending_source = pending.assign(_source="PENDING")
+    if pending_source.empty:
+        raw = history_source.copy()
+    elif history_source.empty:
+        raw = pending_source.copy()
+    else:
+        raw = pd.concat([history_source, pending_source], ignore_index=True)
     if raw.empty:
         raise RuntimeError("V19_SCORE_HISTORY_AND_PENDING_ARE_EMPTY")
     duplicate = raw.entry_time.duplicated(keep=False)
@@ -212,13 +221,15 @@ def _reconstruct_score_ledger(
     calibration = _read_calibration(calibration_path)
     ranked_parts: list[pd.DataFrame] = []
     ranked_history = pd.DataFrame(columns=["entry_time", "score_long", "score_short"])
+    history_columns = ["entry_time", "score_long", "score_short"]
     for _, group in raw.groupby(pd.DatetimeIndex(raw.entry_time).normalize(), sort=True):
         ranked = _rank_day_exact(group, ranked_history, calibration)
         ranked_parts.append(ranked)
-        ranked_history = pd.concat(
-            [ranked_history, group[["entry_time", "score_long", "score_short"]]],
-            ignore_index=True,
-        )
+        group_history = group.loc[:, history_columns].copy().reset_index(drop=True)
+        if ranked_history.empty:
+            ranked_history = group_history
+        else:
+            ranked_history = pd.concat([ranked_history, group_history], ignore_index=True)
     ledger = pd.concat(ranked_parts, ignore_index=True)
     ledger = ledger[
         [
