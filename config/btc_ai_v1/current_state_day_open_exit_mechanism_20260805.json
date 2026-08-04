@@ -1,0 +1,38 @@
+{
+  "date": "2026-08-05",
+  "status": "BTC_AI_V1_DAY_OPEN_EXIT_MECHANISM_BE2ATR_FORMAL_HISTORICAL_GATE_PASS_RETROSPECTIVE_LEAD_AUTHORIZATION_PENDING",
+  "branch": "feature/btc-day-open-exit-mechanism-research",
+  "head_before_result_commits": "b282d687b80d6fda75872d26c93eb16202514438",
+  "stage55": "ACTIVE_UNCHANGED",
+  "research_cycle": "DAY_OPEN_BROAD_STATE_EXIT_ONLY",
+  "passing_configuration": "FLIP_OR_4ATR_STOP_BE_AFTER_2ATR",
+  "formal_period": {
+    "trades": 1357,
+    "pf": 1.1983471750161903,
+    "net_usd": 78236.14582981562,
+    "max_drawdown_usd": 21915.639803,
+    "net_to_maxdd": 3.569877
+  },
+  "year_slices": {
+    "2024": {"pf": 1.03329, "net_usd": 5316.828278},
+    "2025": {"pf": 1.247066, "net_usd": 38944.897455},
+    "2026_01_07": {"pf": 1.44066, "net_usd": 33974.420096}
+  },
+  "robustness": {
+    "largest_winner_removed_pf": 1.166125,
+    "double_cost_pf": 1.113696,
+    "long_pf": 1.174133,
+    "short_pf": 1.226095,
+    "positive_months": 20,
+    "negative_months": 11
+  },
+  "evidence_label": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "fresh_shadow_authorized": false,
+  "authorization_pending": true,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "automatic_promotion": false
+}

@@ -1,0 +1,45 @@
+{
+  "contract": "BTC_AI_V1_DAY_OPEN_EXIT_MECHANISM_PREREGISTRATION_FROZEN_20260805",
+  "input_sha256": {
+    "m1": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135",
+    "m15": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6",
+    "h4": "94c2013dc175e340b3d22e229383863ba699aad224ea14d3e6fda90bc857a7d0",
+    "d1": "8485e0249e6320c66cc43efd1ad90f86913eee6ea98e177fc684b4d0f4760c73",
+    "manifest": "a1177b058477fe0157879d7fd9793ad83ed679dc01efc2c268b29ff071073a58",
+    "metadata": "47bc080d821e6e525415a4ccc3108aaab10c96dc5541838cd8df43468f9a3ce7"
+  },
+  "input_rows": {"M1": 1879776, "M15": 125567, "H4": 7860, "D1": 1310},
+  "raw_h4_events": 7647,
+  "completed_trades": 15080,
+  "unresolved_trades": 0,
+  "future_or_open_bar_use_count": 0,
+  "exact_m1_no_fallback": true,
+  "be_activation_next_existing_m1": true,
+  "stage55_modified": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "formal_decision": "RETROSPECTIVE_EXIT_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+  "passing_configs": ["FLIP_OR_4ATR_STOP_BE_AFTER_2ATR"],
+  "branch": "feature/btc-day-open-exit-mechanism-research",
+  "base_branch": "feature/btc-day-open-state-mechanism-research",
+  "base_commit": "e9da46be4e4c9de721e976d4c46b3d6c3b10b2ee",
+  "preregistration_commit": "b282d687b80d6fda75872d26c93eb16202514438",
+  "synthetic_tests": {"status": "PASS", "tests": 3},
+  "reference_vs_optimized_parity": {
+    "status": "PASS",
+    "configs": 8,
+    "h4_events": 500,
+    "trades_per_config": 122,
+    "fields": "entry_time, exit_time, entry_price, exit_price, exit_reason, gross_pnl, BE state and H4 elapsed"
+  },
+  "control_parity": {
+    "status": "PASS",
+    "controls": ["BASE_FLIP_OR_2ATR_STOP", "BASE_FLIP_OR_4ATR_STOP"],
+    "comparison": "exact equality to prior day-open state cycle for trades, PF, net, max drawdown and net/DD"
+  },
+  "passing_configuration": "FLIP_OR_4ATR_STOP_BE_AFTER_2ATR",
+  "formal_status": "RETROSPECTIVE_EXIT_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION"
+}

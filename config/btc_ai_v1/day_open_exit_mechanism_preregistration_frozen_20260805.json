@@ -1,0 +1,124 @@
+{
+  "contract_id": "BTC_AI_V1_DAY_OPEN_EXIT_MECHANISM_PREREGISTRATION_FROZEN_20260805",
+  "date": "2026-08-05",
+  "status": "FROZEN_BEFORE_OUTCOMES",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-day-open-exit-mechanism-research",
+  "base_branch": "feature/btc-day-open-state-mechanism-research",
+  "base_head_at_branch_creation": "e9da46be4e4c9de721e976d4c46b3d6c3b10b2ee",
+  "research_scope": "Exit-only mechanism research for the broad H4 broker-day-open continuation state. Entry coverage and desired-state definition remain unchanged.",
+  "entry_contract": {
+    "timeframe": "H4 closed bars",
+    "desired_state": "LONG when the closed H4 close is above the broker-day open belonging to the H4 bar start date; SHORT when below; no state when equal",
+    "entry_and_reversal": "Use the exact M1 open whose timestamp equals the closed-H4 decision time. Open on the first valid state and reverse only when desired state flips.",
+    "same_state_after_exit": "After any stop, break-even exit, or time-loss exit, remain flat until the desired state flips. No same-state re-entry.",
+    "entry_filters": "None beyond valid closed H4, valid broker-day open, non-equal state, causal M15 ATR14, and exact decision M1.",
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "common_execution": {
+    "symbol": "XM BTCUSD#",
+    "position_size": "1 BTC",
+    "roundtrip_cost_usd": 22.5,
+    "double_cost_audit_usd": 45.0,
+    "time_basis": "MT5 broker-server naive time",
+    "closed_ohlc_only": true,
+    "exact_m1_entry": true,
+    "next_m1_fallback": false,
+    "state_flip_exit": "At an exact H4 decision timestamp, close the existing position at that M1 open and immediately open the opposite state at the same open.",
+    "m1_gap_after_entry": "Keep the position open, create no artificial M1, and resume monitoring on the next existing M1.",
+    "intrabar_stop_priority": "At each M1, adverse gap-open is processed first, then the currently active stop. For break-even activation, the new break-even stop becomes active only from the next existing M1 after the activation bar.",
+    "end_of_data": "Open positions are unresolved and excluded without estimated PnL."
+  },
+  "indicator_contract": {
+    "m15_atr14": "Wilder ATR14 from closed M15 bars; use the latest fully closed M15 value known at the H4 decision time.",
+    "h4_structure": "For the structure-stop configuration, use the high or low of the just-closed H4 decision bar, which is fully known at entry time."
+  },
+  "configurations": [
+    {
+      "id": "BASE_FLIP_OR_2ATR_STOP",
+      "role": "control",
+      "initial_stop": "2.0 × decision M15 ATR from entry",
+      "additional_exit": "none"
+    },
+    {
+      "id": "BASE_FLIP_OR_4ATR_STOP",
+      "role": "control",
+      "initial_stop": "4.0 × decision M15 ATR from entry",
+      "additional_exit": "none"
+    },
+    {
+      "id": "FLIP_OR_3ATR_STOP",
+      "role": "candidate_exit",
+      "initial_stop": "3.0 × decision M15 ATR from entry",
+      "additional_exit": "none"
+    },
+    {
+      "id": "FLIP_OR_PREV_H4_STRUCTURE_STOP",
+      "role": "candidate_exit",
+      "initial_stop": "LONG: just-closed H4 low minus 0.10 × decision M15 ATR; SHORT: just-closed H4 high plus 0.10 × decision M15 ATR",
+      "invalid_risk": "If the resulting stop is not strictly adverse to the exact entry open, the entry is invalid; no fallback or substituted stop.",
+      "additional_exit": "none"
+    },
+    {
+      "id": "FLIP_OR_4ATR_STOP_BE_AFTER_1ATR",
+      "role": "candidate_exit",
+      "initial_stop": "4.0 × decision M15 ATR from entry",
+      "break_even": "After an existing M1 first reaches +1.0 × entry ATR in favor, move the stop to the exact entry price beginning with the next existing M1.",
+      "additional_exit": "break-even stop"
+    },
+    {
+      "id": "FLIP_OR_4ATR_STOP_BE_AFTER_2ATR",
+      "role": "candidate_exit",
+      "initial_stop": "4.0 × decision M15 ATR from entry",
+      "break_even": "After an existing M1 first reaches +2.0 × entry ATR in favor, move the stop to the exact entry price beginning with the next existing M1.",
+      "additional_exit": "break-even stop"
+    },
+    {
+      "id": "FLIP_OR_4ATR_STOP_TIMELOSS_3H4",
+      "role": "candidate_exit",
+      "initial_stop": "4.0 × decision M15 ATR from entry",
+      "time_loss": "At the exact M1 open corresponding to the third subsequent closed-H4 decision while the desired state remains unchanged, exit if gross unrealized PnL is less than or equal to zero. If positive, continue until stop or state flip. This check occurs once.",
+      "additional_exit": "single time-loss check"
+    },
+    {
+      "id": "FLIP_OR_4ATR_STOP_TIMELOSS_6H4",
+      "role": "candidate_exit",
+      "initial_stop": "4.0 × decision M15 ATR from entry",
+      "time_loss": "At the exact M1 open corresponding to the sixth subsequent closed-H4 decision while the desired state remains unchanged, exit if gross unrealized PnL is less than or equal to zero. If positive, continue until stop or state flip. This check occurs once.",
+      "additional_exit": "single time-loss check"
+    }
+  ],
+  "formal_periods": {
+    "2023": "implementation and event sanity only",
+    "2024": "stress slice A",
+    "2025": "stress slice B",
+    "2026_01_07": "consumed diagnostic slice C",
+    "combined": "2024-01-01 through 2026-07-31"
+  },
+  "per_configuration_gate": {
+    "frequency": "combined trades >= 100; 2024 >= 20; 2025 >= 20; 2026-01..07 >= 12",
+    "combined": "PF >= 1.15, net > 0, net / max drawdown >= 1.50",
+    "slices": "2024 PF >= 1.00 and net >= 0; 2025 PF >= 1.00 and net >= 0; 2026-01..07 PF >= 0.95",
+    "winner_removed": "PF after removing the largest net winner >= 1.10",
+    "double_cost": "PF at 45 USD roundtrip cost >= 1.05",
+    "direction": "When a direction has at least 30 trades, its PF must be >= 0.85",
+    "data_quality": "exact-entry missing rate <= 1%; future/open/as-of count = 0; no fallback"
+  },
+  "selection_boundary": {
+    "all_eight_run_simultaneously_once": true,
+    "no_post_result_threshold_change": true,
+    "no_direction_month_year_volatility_rescue": true,
+    "no_best_exit_automatic_promotion": true,
+    "historical_maximum_status": "RETROSPECTIVE_EXIT_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+    "new_shadow_requires_separate_user_authorization": true
+  },
+  "runtime_boundaries": {
+    "stage55_modified": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-05",
+  "status": "USER_DECISION_REQUIRED_FOR_FRESH_NO_BACKFILL_SHADOW",
+  "do_not_do": [
+    "Do not tune the 2ATR break-even trigger on consumed history",
+    "Do not select only favorable months, years, directions or volatility slices",
+    "Do not modify or stop Stage55",
+    "Do not enable MT5 orders, live-ready, final signal or Discord"
+  ],
+  "recommended_next_action": {
+    "action": "With explicit user authorization, create a separate frozen no-backfill Prospective Shadow for FLIP_OR_4ATR_STOP_BE_AFTER_2ATR.",
+    "candidate_contract": [
+      "H4 close versus broker-day open determines desired LONG/SHORT state",
+      "Exact M1 open at closed-H4 decision time",
+      "Initial stop 4.0 × latest fully closed M15 ATR14",
+      "After first +2.0 ATR favorable excursion, break-even activates from the next existing M1",
+      "Exit and reverse on desired-state flip",
+      "After stop or BE exit, remain flat until next state flip",
+      "Roundtrip cost audit 22.50 USD",
+      "No backfill"
+    ],
+    "suggested_minimum_observation_gate": "At least 100 closed trades AND 6 calendar months; final number must be frozen before activation.",
+    "runtime": "Separate state root and separate branch from Stage55; Discord remains OFF unless separately authorized."
+  },
+  "alternative_if_not_authorized": "Retain as retrospective lead and continue independent research without further tuning this candidate."
+}
