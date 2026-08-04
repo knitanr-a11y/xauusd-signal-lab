@@ -1,0 +1,28 @@
+{
+  "status": "READY_FOR_SEPARATE_EXIT_ARCHITECTURE_PREREGISTRATION",
+  "date": "2026-08-05",
+  "do_not_do": [
+    "do not promote any state-mechanism family from this retrospective cycle",
+    "do not filter by broker-day phase based on post-hoc diagnostics",
+    "do not filter by day-open ATR distance based on post-hoc diagnostics",
+    "do not rescue the family by LONG-only, year-only, month-only or volatility-only selection",
+    "do not modify, reset or stop Stage55",
+    "do not enable MT5 orders, live-ready, final signal or Discord"
+  ],
+  "next_research_objective": "Keep BASE_FLAT_UNTIL_FLIP entry and desired-state logic unchanged and test exit architecture only.",
+  "proposed_preregistration_scope": {
+    "base_entry": "closed H4 close above broker-day open = LONG state; below = SHORT state; hold same state and flip only when the state changes",
+    "entry_filters": "none beyond the existing broad state definition",
+    "candidate_exit_architectures": [
+      "fixed 3.0 times decision M15 ATR stop plus state-flip exit",
+      "closed-H4 structural stop using the previous fully closed H4 low/high plus a fixed ATR buffer",
+      "2ATR initial stop with break-even movement only after a fixed favorable excursion known from closed M1",
+      "4ATR initial stop with a preregistered underwater-duration exit while retaining state-flip winners"
+    ],
+    "maximum_configurations": 8,
+    "selection_rule": "freeze all exits before outcomes; no use of broker-day phase or distance diagnostics for entry selection",
+    "historical_evidence_label": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY"
+  },
+  "promotion_boundary": "A retrospective exit result cannot directly authorize a live signal. Any passing family still requires a new no-backfill prospective Shadow.",
+  "stage55": "UNCHANGED_AND_CONTINUES_IN_SEPARATE_RUNTIME"
+}
