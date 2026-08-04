@@ -2,16 +2,22 @@
 
 - repository: `knitanr-a11y/xauusd-signal-lab`
 - authoritative archive/runtime branch: `feature/btc-ai-v1-data-acquisition`
-- current status: `BTC_AI_V1_STAGE55_ACTIVE_OBSERVATION_CONTINUES_SIMPLE_HUMAN_READABLE_RULE_RESEARCH_AUTHORIZED_SEPARATELY`
+- current status: `BTC_AI_V1_STAGE55_ACTIVE_OBSERVATION_CONTINUES_SIMPLE_RULE_ANTI_OVERFIT_PREREGISTRATION_NEXT`
 - updated: `2026-08-04`
 
 ## Read first
 
-1. `docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_STAGE55_ACTIVE_SIMPLE_RULE_RESEARCH_NEXT_20260804.md`
-2. `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
-3. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX_V2_20260804.md`
-4. `config/btc_ai_v1/current_state_stage55_20260804.json`
-5. `config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json`
+1. `docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_STAGE55_ACTIVE_SIMPLE_RULE_ANTI_OVERFIT_PREREGISTRATION_NEXT_20260804.md`
+2. `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX_V2_20260804.md`
+3. `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
+4. `docs/btc_ai_v1/BTC_AI_V1_SIMPLE_RULE_ANTI_OVERFIT_RESEARCH_DESIGN_20260804.md`
+5. `config/btc_ai_v1/simple_rule_anti_overfit_research_contract_20260804.json`
+6. `config/btc_ai_v1/current_state_stage55_20260804.json`
+7. `config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json`
+8. `docs/btc_ai_v1/BTC_AI_V1_STAGE55_DUAL_REVERSE_SHORT_PROSPECTIVE_SHADOW_20260804.md`
+9. `config/btc_ai_v1/stage55_dual_reverse_short_shadow_contract_20260804.json`
+
+Read all nine from beginning to end before implementation or outcome calculation.
 
 ## Authority
 
@@ -37,7 +43,7 @@ Two post-selection diagnostic reverse-SHORT families are running observation-onl
 - runtime state: `%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow`
 - minimum conclusion gate per family: 20 closed trades and 6 calendar months
 
-Do not change model, Q70, confirmation, stop, target, hold, family membership or no-backfill state.
+Do not change model, Q70, confirmation, stop, target, hold, family membership, activation cutoff or no-backfill state.
 
 Discord is accepted-entry delivery only and must not affect research selection. MT5 orders, live trading, live-ready and final signal remain OFF.
 
@@ -51,7 +57,7 @@ Detailed layers:
 
 - Stages00–30: `docs/btc_ai_v1/RESEARCH_HISTORY_INDEX.md`
 - Stages31–36: `docs/btc_ai_v1/RESEARCH_HISTORY_STAGE31_36_ADDENDUM_20260804.md`
-- Stages37–55 and current synthesis: `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
+- Stages37–55 and synthesis: `docs/btc_ai_v1/BTC_AI_V1_CUMULATIVE_RESEARCH_RECORD_THROUGH_STAGE55_AND_SIMPLE_RULE_NEXT_20260804.md`
 
 Key retained research asset outside Stage55:
 
@@ -66,7 +72,9 @@ Key promotion stops:
 
 ## Next independent cycle
 
-Research a small preregistered set of simple, human-readable discretionary-style rules on a separate branch and separate clone.
+The immediate next task is preregistration, not backtesting.
+
+Research at most four simple, human-readable deterministic rule families on a separate branch and separate clone.
 
 Proposed branch:
 
@@ -76,6 +84,14 @@ Proposed clone:
 
 `C:\xauusd-signal-lab-btc-simple-rules`
 
-First pass is deterministic, not ML. Each family should contain at most one higher-timeframe context, one setup, one confirmation and one fixed execution policy. Do not reopen broad threshold/window/month/direction/D1/volatility rescue or another large grid.
+Limits:
 
-Because historical 2023–2026 OHLC has been heavily consumed, new historical results are retrospective exploratory evidence only. Fresh no-backfill prospective evidence is required before any promotion.
+- maximum four families
+- one designated base rule per family
+- maximum two robustness neighbors per family
+- maximum twelve configurations total
+- no ML in the first pass
+- neighbors are stress tests and cannot replace a failing base
+- exact rules and numerical gates must be approved and frozen before PnL/PF/win-rate is opened
+
+Because historical 2023–2026-07 OHLC has been heavily consumed, new historical results are retrospective exploratory evidence. Fresh no-backfill prospective evidence is required before promotion.
