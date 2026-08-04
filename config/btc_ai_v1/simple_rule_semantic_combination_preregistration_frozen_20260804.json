@@ -1,0 +1,132 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_SIMPLE_RULE_SEMANTIC_COMBINATION_PREREGISTRATION",
+  "formal_status": "FROZEN_BEFORE_COMBINATION_OUTCOME_RUN",
+  "branch": "feature/btc-simple-rule-combination-research",
+  "base_commit": "c2d9654bc7ebacac22713f959ac15cf1048e5c15",
+  "prior_cycle_status": "ALL_FOUR_FORMAL_BASES_REJECTED_NO_DIRECTION_OR_MONTH_RESCUE",
+  "research_type": "AUDIT_ONLY_RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "selection_boundary": {
+    "chosen_from_price_path_semantics_not_prior_profit_slices": true,
+    "do_not_use_profitable_direction_only": true,
+    "do_not_use_profitable_month_session_volatility_or_year_only": true,
+    "maximum_combination_families": 4,
+    "configurations_per_family": 1,
+    "total_configurations": 4,
+    "machine_learning": false,
+    "post_result_threshold_changes": false
+  },
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "closed_ohlc_only": true,
+    "timeframes": ["M1", "M5", "M15", "H1", "D1"],
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "source_events": "PRIOR_CYCLE_DEDUPLICATED_FORMAL_BASE_CANDIDATES_RECONSTRUCTIBLE_FROM_CLOSED_OHLC",
+    "source_event_fields_allowed": [
+      "family", "config", "direction", "setup_time", "decision_time", "entry_time",
+      "decision_m15_atr", "exact_m1_valid"
+    ],
+    "source_outcomes_prohibited": [
+      "exit_time", "exit_reason", "gross_pnl", "net_pnl", "future_high", "future_low", "future_close"
+    ],
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_usd": 45.0,
+    "tick_or_real_volume": false,
+    "external_market_funding_oi_orderflow": false
+  },
+  "common_execution": {
+    "decision_timestamp": "COMBINATION_TRIGGER_TIMESTAMP",
+    "entry_timestamp": "SAME_TIMESTAMP_EXACT_M1_OPEN",
+    "stop_distance": "1.00_X_LAST_CLOSED_M15_ATR14_AT_DECISION",
+    "target": "2.00_R",
+    "maximum_hold": "360_EXISTING_M1_BARS",
+    "post_entry_missing_m1": "POSITION_CONTINUES_NO_SYNTHETIC_BAR_EXISTING_M1_COUNT_ONLY",
+    "one_position": "WITHIN_COMBINATION_FAMILY",
+    "cross_combination_overlap": "ALLOWED_AND_REPORTED_SEPARATELY"
+  },
+  "combination_families": [
+    {
+      "id": "H1_TREND_ALIGNED_COMPRESSION_FIRST_RETEST",
+      "anchor": "COMPRESSION_BREAKOUT_FIRST_RETEST formal base candidate",
+      "direction_policy": "LONG_AND_SHORT_SYMMETRIC",
+      "additional_context": "At anchor decision, latest closed H1 has close > EMA20 > EMA50 and EMA20 > EMA20[t-3] for LONG; exact inverse for SHORT",
+      "decision": "compression anchor decision",
+      "entry": "exact M1 open at decision"
+    },
+    {
+      "id": "H1_TREND_ALIGNED_PREVIOUS_D1_SWEEP_CLOSE_BACK",
+      "anchor": "PREVIOUS_D1 high/low sweep close-back formal base candidate only",
+      "direction_policy": "LONG_AND_SHORT_SYMMETRIC",
+      "additional_context": "At anchor decision, latest closed H1 has the same directional EMA20/EMA50/slope3 context",
+      "decision": "sweep anchor decision",
+      "entry": "exact M1 open at decision"
+    },
+    {
+      "id": "PREVIOUS_D1_SWEEP_PLUS_ATR_EXHAUSTION_CONCURRENCE",
+      "sources": [
+        "PREVIOUS_D1 high/low sweep close-back formal base candidate",
+        "ATR impulse exhaustion formal base candidate"
+      ],
+      "direction_policy": "SAME_DIRECTION_LONG_OR_SAME_DIRECTION_SHORT",
+      "window": "ABSOLUTE_DECISION_TIME_DIFFERENCE_LE_30_MINUTES",
+      "pairing": "For each later decision, pair the closest same-direction counterpart; ties use earlier counterpart; one candidate per later timestamp and direction",
+      "decision": "later of the two closed-bar decisions",
+      "entry": "exact M1 open at later decision"
+    },
+    {
+      "id": "TREND_PULLBACK_THEN_COMPRESSION_FIRST_RETEST",
+      "anchor": "COMPRESSION_BREAKOUT_FIRST_RETEST formal base candidate",
+      "prior_event": "Most recent HTF trend pullback reclaim formal base candidate in the same direction",
+      "window": "prior pullback decision in [anchor decision - 240 minutes, anchor decision]",
+      "direction_policy": "LONG_AND_SHORT_SYMMETRIC",
+      "decision": "compression anchor decision",
+      "entry": "exact M1 open at decision"
+    }
+  ],
+  "frequency_floor": {
+    "2023_event_and_implementation_sanity_minimum": 3,
+    "2024_to_2026_07_total_minimum": 24,
+    "2024_minimum": 6,
+    "2025_minimum": 6,
+    "2026_01_to_07_minimum": 4,
+    "no_post_result_density_rescue": true
+  },
+  "acceptance_gates": {
+    "2024_to_2026_07_profit_factor_minimum": 1.20,
+    "2024_to_2026_07_net_positive": true,
+    "net_over_max_drawdown_minimum": 1.50,
+    "2024_profit_factor_minimum": 1.05,
+    "2024_net_positive": true,
+    "2025_profit_factor_minimum": 1.05,
+    "2025_net_positive": true,
+    "2026_01_to_07_profit_factor_minimum": 0.90,
+    "largest_winner_removed_profit_factor_minimum": 1.10,
+    "double_cost_profit_factor_minimum": 1.05,
+    "largest_positive_month_share_of_gross_profit_maximum": 0.35,
+    "top_five_winners_share_of_gross_profit_maximum": 0.50,
+    "direction_profit_factor_minimum_if_direction_has_at_least_10_trades": 0.80,
+    "exact_entry_gap_rate_maximum": 0.01,
+    "future_or_open_bar_use_count": 0
+  },
+  "mandatory_reporting": [
+    "raw candidates", "same timestamp dedup", "exact M1 valid", "one-position", "resolved-only",
+    "trades", "trades per month", "win rate", "profit factor", "net", "maximum drawdown",
+    "year", "half-year", "month", "negative month count", "direction", "causal volatility",
+    "largest winner removed", "double cost", "profit concentration", "global one-position audit",
+    "exact M1 gaps", "same-M1 collisions", "post-entry missing-M1 crossings"
+  ],
+  "promotion_boundary": {
+    "maximum_historical_status": "RESEARCH_CANDIDATE_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+    "fresh_no_backfill_shadow_required": true,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false,
+    "stage55_modified": false
+  }
+}
