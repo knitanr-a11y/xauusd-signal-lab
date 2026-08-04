@@ -10,8 +10,9 @@ from typing import Any, Mapping
 import pandas as pd
 
 from .shadow_common import (
-    CANDIDATE_ID, CONTRACT_VERSION, HORIZON_M1, append_csv, load_config, lock_instance,
-    logger_for, now_utc, parse_dt, read_csv_records, read_json, state_root, write_json,
+    CANDIDATE_ID, CONTRACT_VERSION, HORIZON_M1, RUNTIME_LABEL, append_csv, load_config,
+    lock_instance, logger_for, now_utc, parse_dt, read_csv_records, read_json, state_root,
+    write_json,
 )
 from .shadow_data import load_m1, load_wave_data, peek_latest_m1, research_timeline, resolve_data_sources, validate_base_sources
 from .shadow_engine import _entry_prices, default_state, process_new_decisions, process_open_trade
@@ -20,6 +21,7 @@ from .v19_readonly import V19Interval, V19View, load_v19_view
 
 def health_payload(state: Mapping[str, Any], v19: V19View | None, status: str, message: str | None = None) -> dict[str, Any]:
     return {
+        "runtime_label": RUNTIME_LABEL,
         "candidate_id": CANDIDATE_ID,
         "contract_version": CONTRACT_VERSION,
         "status": status,
@@ -45,7 +47,7 @@ def bootstrap(config_path: Path, activate: bool) -> None:
     root.mkdir(parents=True, exist_ok=True)
     state_path = root / "runtime_state.json"
     if state_path.exists() and read_json(state_path).get("activated"):
-        print("Already activated; bootstrap did not reset the no-backfill baseline.")
+        print(f"[{RUNTIME_LABEL}] Already activated; bootstrap did not reset the no-backfill baseline.")
         return
     sources = resolve_data_sources(config)
     validation = validate_base_sources(sources)
@@ -135,11 +137,12 @@ def loop(config_path: Path) -> None:
                 state["last_iteration_utc"] = now_utc()
                 write_json(state_path, state)
                 write_json(root / "runtime_health.json", health_payload(state, None, "BLOCKED", str(exc)))
-                logger.exception("Shadow iteration failed")
+                logger.exception("Challenger C1 Shadow iteration failed")
             time.sleep(delay)
     except KeyboardInterrupt:
         logger.info("Stopped by user")
     finally:
+        logger.info("Challenger C1 observation loop stopped")
         lock.close()
 
 
@@ -147,7 +150,7 @@ def status(config_path: Path) -> None:
     root = state_root(load_config(config_path))
     state = read_json(root / "runtime_state.json") if (root / "runtime_state.json").exists() else {"status": "NOT_BOOTSTRAPPED"}
     health = read_json(root / "runtime_health.json") if (root / "runtime_health.json").exists() else {"status": "NOT_BOOTSTRAPPED"}
-    print(json.dumps({"state": state, "health": health}, ensure_ascii=False, indent=2, default=str))
+    print(json.dumps({"runtime_label": RUNTIME_LABEL, "state": state, "health": health}, ensure_ascii=False, indent=2, default=str))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -171,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
             status(args.config)
         return 0
     except Exception as exc:
-        print(f"ERROR: {exc}", file=__import__("sys").stderr)
+        print(f"[{RUNTIME_LABEL}] ERROR: {exc}", file=__import__("sys").stderr)
         return 2
 
 
