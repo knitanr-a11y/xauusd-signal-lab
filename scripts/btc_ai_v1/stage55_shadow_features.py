@@ -12,21 +12,57 @@ MINUTES = {"H4": 240, "M15": 15, "M5": 5, "M1": 1}
 M1_SOURCE_ID = "H4_M15_M1__EMA_STACK_SLOPE_ADX18__ANTICIPATE_BELOW_050__TWO_BAR_REVERSAL__BASE__LONG__SETUP_ATR050__UPPER_TREND_END"
 M5_SOURCE_ID = "H4_M15_M5__EMA_STACK_SLOPE_ADX18__ANTICIPATE_BELOW_050__TWO_BAR_REVERSAL__BASE__LONG__MICRO_SWING5__UPPER_TREND_END"
 
+
 def expand_path(value: str | Path) -> Path:
     return Path(os.path.expandvars(str(value))).expanduser()
 
 
+def _read_ohlc_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(path)
+    with path.open("r", encoding="utf-8-sig", errors="replace") as handle:
+        header = handle.readline()
+    delimiters = [",", ";", "\t"]
+    delimiter = max(delimiters, key=header.count)
+    if header.count(delimiter) == 0:
+        raise ValueError(f"{path}: unable to detect CSV delimiter from header {header.strip()!r}")
+    d = pd.read_csv(path, sep=delimiter, encoding="utf-8-sig")
+    d.columns = [str(column).strip().lower().lstrip("\ufeff") for column in d.columns]
+    aliases = {
+        "datetime": "time",
+        "date_time": "time",
+        "<date>": "time",
+        "<time>": "time",
+        "o": "open",
+        "h": "high",
+        "l": "low",
+        "c": "close",
+    }
+    d = d.rename(columns={column: aliases.get(column, column) for column in d.columns})
+    return d
+
+
 def load_csv(path: Path, tf: str) -> pd.DataFrame:
-    d = pd.read_csv(path, sep=";")
+    d = _read_ohlc_csv(path)
     required = {"time", "open", "high", "low", "close"}
     missing = required - set(d.columns)
     if missing:
-        raise ValueError(f"{path}: missing columns {sorted(missing)}")
+        raise ValueError(
+            f"{path}: missing columns {sorted(missing)}; detected columns={list(d.columns)}"
+        )
     d["time"] = pd.to_datetime(d["time"], format="%Y.%m.%d %H:%M:%S", errors="raise")
     for c in ["open", "high", "low", "close"]:
         d[c] = pd.to_numeric(d[c], errors="coerce")
     d = d.dropna(subset=["time", "open", "high", "low", "close"]).sort_values("time").drop_duplicates("time").reset_index(drop=True)
     d["close_time"] = d["time"] + pd.to_timedelta(MINUTES[tf], unit="m")
+    d.attrs["source_audit"] = {
+        "path": str(path),
+        "delimiter": "TAB" if delimiter == "\t" else delimiter,
+        "columns": list(d.columns),
+        "rows": int(len(d)),
+        "first_time": str(d["time"].iloc[0]) if len(d) else None,
+        "last_time": str(d["time"].iloc[-1]) if len(d) else None,
+    }
     return add_features(d)
 
 
