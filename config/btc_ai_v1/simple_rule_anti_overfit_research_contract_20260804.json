@@ -1,0 +1,113 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_SIMPLE_HUMAN_READABLE_RULE_ANTI_OVERFIT_RESEARCH_DESIGN",
+  "formal_status": "PREREGISTRATION_FRAMEWORK_READY_EXACT_RULES_AND_NUMERIC_GATES_NOT_YET_FROZEN",
+  "stage55": {
+    "continue_running": true,
+    "frozen": true,
+    "activation_cutoff_mt5": "2026-08-04 10:52:00",
+    "state_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow",
+    "modify_stage55": false
+  },
+  "research_isolation": {
+    "separate_branch_required": true,
+    "proposed_branch": "feature/btc-simple-discretionary-rule-research",
+    "separate_clone_required": true,
+    "proposed_clone": "C:/xauusd-signal-lab-btc-simple-rules"
+  },
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "data": "CLOSED_OHLC_ONLY",
+    "time": "MT5_BROKER_SERVER_NAIVE",
+    "entry": "EXACT_M1_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "external_data": false,
+    "volume_features": false
+  },
+  "historical_evidence_status": "CONSUMED_RETROSPECTIVE_EXPLORATION_ONLY",
+  "first_pass": {
+    "deterministic_only": true,
+    "machine_learning": false,
+    "maximum_families": 4,
+    "base_rules_per_family": 1,
+    "maximum_robustness_neighbors_per_family": 2,
+    "maximum_total_configurations": 12,
+    "neighbors_are_selectable_replacements": false
+  },
+  "initial_family_ids": [
+    "HTF_TREND_PULLBACK_RECLAIM_RESUME",
+    "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK",
+    "COMPRESSION_BREAKOUT_FIRST_RETEST",
+    "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL"
+  ],
+  "rule_complexity_limit": {
+    "maximum_higher_timeframe_contexts": 1,
+    "maximum_setups": 1,
+    "maximum_confirmations": 1,
+    "fixed_execution_policy_required": true
+  },
+  "must_freeze_before_any_outcome_run": [
+    "family_id",
+    "direction_policy",
+    "timeframes",
+    "higher_timeframe_context",
+    "setup",
+    "confirmation",
+    "decision_timestamp",
+    "exact_entry_timestamp",
+    "stop",
+    "target",
+    "maximum_hold",
+    "same_bar_priority",
+    "cost",
+    "one_position_rule",
+    "missing_m1_rule",
+    "frequency_floor",
+    "acceptance_and_rejection_gates",
+    "two_neighbor_definitions"
+  ],
+  "temporal_reporting": {
+    "2023": "IMPLEMENTATION_AND_EVENT_SANITY_AUDIT",
+    "2024": "TEMPORAL_STRESS_SLICE_A",
+    "2025": "TEMPORAL_STRESS_SLICE_B",
+    "2026_01_TO_2026_07": "CONSUMED_DIAGNOSTIC_SLICE_C",
+    "single_run_after_full_freeze": true,
+    "intermediate_result_based_changes": false
+  },
+  "mandatory_metrics": [
+    "trades",
+    "trades_per_month",
+    "win_rate",
+    "profit_factor",
+    "net",
+    "maximum_drawdown",
+    "year_halfyear_month_results",
+    "direction_split_when_applicable",
+    "maximum_winner_removed",
+    "double_cost",
+    "base_vs_preregistered_neighbors",
+    "profit_concentration",
+    "exact_m1_gap_count",
+    "overlap_and_same_m1_collision_audit"
+  ],
+  "anti_overfit_rules": [
+    "Do not choose the maximum-PF configuration.",
+    "The base rule must be designated before results.",
+    "A passing neighbor cannot replace a failing base.",
+    "Do not delete losing families.",
+    "Do not rescue density by relaxing thresholds after results.",
+    "Do not retain only the profitable direction, month, D1 state, volatility state or session after results.",
+    "Do not add a fifth family after results.",
+    "Do not use Discord images or discretionary impressions as selection labels."
+  ],
+  "promotion_boundary": {
+    "historical_pass_status": "RESEARCH_CANDIDATE_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+    "fresh_no_backfill_shadow_required": true,
+    "minimum_trades_and_months_must_be_frozen_before_activation": true,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}
