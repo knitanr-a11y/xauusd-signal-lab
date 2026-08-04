@@ -17,7 +17,7 @@ def expand_path(value: str | Path) -> Path:
     return Path(os.path.expandvars(str(value))).expanduser()
 
 
-def _read_ohlc_csv(path: Path) -> pd.DataFrame:
+def _read_ohlc_csv(path: Path) -> tuple[pd.DataFrame, str]:
     if not path.exists():
         raise FileNotFoundError(path)
     with path.open("r", encoding="utf-8-sig", errors="replace") as handle:
@@ -39,11 +39,11 @@ def _read_ohlc_csv(path: Path) -> pd.DataFrame:
         "c": "close",
     }
     d = d.rename(columns={column: aliases.get(column, column) for column in d.columns})
-    return d
+    return d, delimiter
 
 
 def load_csv(path: Path, tf: str) -> pd.DataFrame:
-    d = _read_ohlc_csv(path)
+    d, delimiter = _read_ohlc_csv(path)
     required = {"time", "open", "high", "low", "close"}
     missing = required - set(d.columns)
     if missing:
