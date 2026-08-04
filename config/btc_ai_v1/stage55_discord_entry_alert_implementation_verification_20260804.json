@@ -1,0 +1,24 @@
+{
+  "date": "2026-08-04",
+  "status": "IMPLEMENTED_LOCAL_TESTS_PASS_REAL_DISCORD_PENDING_USER_PC",
+  "authorization": {
+    "discord_entry_notification": true,
+    "observation_only": true,
+    "mt5_order": false,
+    "live_trading": false
+  },
+  "tests": {
+    "compileall": "PASS",
+    "unittest": "6/6 PASS",
+    "real_webhook_delivery": "PENDING_USER_LOCAL_SECRET_AND_TEST",
+    "windows_loop_activation": "PENDING_USER_PC"
+  },
+  "notification_scope": {
+    "accepted_entry_only": true,
+    "first_start_no_backfill": true,
+    "stale_entry_limit_mt5_minutes": 10,
+    "exit_notifications": false,
+    "recovery_notifications": false,
+    "chart_optional": true
+  }
+}
