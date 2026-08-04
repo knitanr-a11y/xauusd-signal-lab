@@ -1,0 +1,136 @@
+{
+  "contract_id": "BTC_AI_V1_DAY_OPEN_STATE_MECHANISM_PREREGISTRATION_FROZEN_20260805",
+  "status": "FROZEN_BEFORE_OUTCOME_EXECUTION",
+  "research_role": "RETROSPECTIVE_MECHANISM_RESEARCH_ON_CONSUMED_HISTORY",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-day-open-state-mechanism-research",
+  "base_branch": "feature/btc-broad-state-holding-research",
+  "base_commit": "4c4f7599fdbac489b6d83bccf6e8f2b8a9d93266",
+  "source_lead": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION",
+  "objective": "Keep the entry universe broad and test whether state persistence, hysteresis, broker-day reset, broker-week agreement, or one-time stop rearm improves the day-open state mechanism without post-result filtering.",
+  "hard_boundaries": {
+    "stage55_modified": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "machine_learning": false,
+    "future_or_open_bar_features": false,
+    "next_m1_fallback": false,
+    "post_result_direction_month_volatility_rescue": false
+  },
+  "data_contract": {
+    "symbol": "XM BTCUSD#",
+    "time_basis": "MT5 broker-server naive time",
+    "closed_ohlc_only": true,
+    "decision_timeframe": "H4",
+    "execution_timeframe": "exact M1",
+    "decision_timestamp": "closed H4 close_time",
+    "entry_price": "M1 open whose timestamp exactly equals decision timestamp",
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "entry_after_data_end": "UNRESOLVED_END_OF_DATA",
+    "cost_completed_1btc_usd": 22.5,
+    "double_cost_audit_usd": 45.0,
+    "formal_period": "2024-01-01 through 2026-07-31",
+    "sanity_period": "2023",
+    "all_history_label": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY"
+  },
+  "common_state_definition": {
+    "broker_day_open": "open of the closed/ongoing D1 bar for the H4 decision's broker date, known from the D1 bar open",
+    "base_raw_state": "LONG when closed H4 close > broker-day open, SHORT when closed H4 close < broker-day open, unchanged/neutral on equality",
+    "stop_atr": "latest fully closed M15 ATR14 at the H4 decision timestamp",
+    "position_size": "1 BTC",
+    "take_profit": "none",
+    "normal_exit": "exact M1 open at the H4 decision where the effective desired state flips",
+    "gap_stop": "if M1 opens through stop, exit at that M1 open",
+    "intrabar_stop": "otherwise exit at stop price",
+    "holding_across_missing_m1": "position continues; artificial bars are prohibited"
+  },
+  "families": [
+    {
+      "family": "BASE_FLAT_UNTIL_FLIP",
+      "rule": "Use base raw state directly. Enter on the first non-neutral state. Hold through repeated same-state H4 decisions. After stop, remain flat until the raw state flips."
+    },
+    {
+      "family": "PERSISTENCE_TWO_H4",
+      "rule": "An effective state is created or flipped only after two consecutive closed H4 decisions show the same non-neutral raw state. A contrary or neutral decision resets the pending confirmation count. After stop, remain flat until a confirmed opposite effective-state flip."
+    },
+    {
+      "family": "HYSTERESIS_025_H4_ATR",
+      "rule": "LONG threshold is day_open + 0.25 times latest fully closed H4 ATR14; SHORT threshold is day_open - 0.25 times H4 ATR14. Between thresholds, retain the existing effective state and position; if no effective state exists, remain flat. After stop, remain flat until an effective-state flip."
+    },
+    {
+      "family": "BROKER_DAY_RESET_REARM",
+      "rule": "Use base raw state. State flips operate normally. At the first eligible closed H4 decision of each new broker date, permit a fresh entry in the current raw state even if it matches the previous day's state. After stop, remain flat until either a raw-state flip or the first eligible H4 decision of the next broker date. Maximum one day-reset entry per broker date."
+    },
+    {
+      "family": "BROKER_WEEK_OPEN_AGREEMENT",
+      "rule": "Broker week starts Monday 00:00 server time. Week open is the D1 open of that Monday. Effective LONG requires H4 close above both broker-day open and broker-week open; effective SHORT requires close below both. When the two references disagree, retain an existing effective state/position, or remain flat if none. After stop, remain flat until an effective-state flip."
+    },
+    {
+      "family": "ONE_REARM_NEXT_H4_SAME_STATE",
+      "rule": "Use base raw state. After the first stop in a state episode, allow exactly one re-entry at the next valid closed H4 decision if the raw state remains unchanged. A second stop leaves the strategy flat until the raw state flips. Flip resets the one-rearm allowance."
+    }
+  ],
+  "risk_translations": [
+    {
+      "config": "FLIP_OR_2ATR_STOP",
+      "stop_distance": "2.0 times decision M15 ATR14"
+    },
+    {
+      "config": "FLIP_OR_4ATR_STOP",
+      "stop_distance": "4.0 times decision M15 ATR14"
+    }
+  ],
+  "configuration_count": 12,
+  "execution_order": "All 12 configurations are generated and evaluated in one frozen run.",
+  "formal_gate": {
+    "frequency": {
+      "combined_trades_min": 100,
+      "2024_trades_min": 20,
+      "2025_trades_min": 20,
+      "2026_jan_jul_trades_min": 12
+    },
+    "full_pass_one_config": {
+      "combined_pf_min": 1.15,
+      "combined_net_usd_gt": 0,
+      "combined_net_to_maxdd_min": 1.5,
+      "2024_pf_min": 1.0,
+      "2024_net_usd_min": 0,
+      "2025_pf_min": 1.0,
+      "2025_net_usd_min": 0,
+      "2026_jan_jul_pf_min": 0.95,
+      "max_winner_removed_pf_min": 1.10,
+      "double_cost_pf_min": 1.05,
+      "direction_pf_min_when_direction_trades_ge_25": 0.85
+    },
+    "paired_stop_support": {
+      "both_2atr_and_4atr_combined_pf_min": 1.0,
+      "both_2atr_and_4atr_combined_net_usd_min": 0,
+      "require_at_least_one_full_pass": true
+    },
+    "family_pass": "Both stop translations must be nonnegative support and at least one must pass every full gate.",
+    "neighbor_or_variant_rescue": false
+  },
+  "required_outputs": [
+    "raw H4 state decision ledger",
+    "effective-state/action ledger",
+    "completed and unresolved trade ledger",
+    "stage counts",
+    "period performance",
+    "monthly results",
+    "direction results",
+    "state duration diagnostics",
+    "broker-day phase diagnostics",
+    "distance-from-day-open diagnostics",
+    "broker-week agreement diagnostics",
+    "stop and rearm diagnostics",
+    "winner removal and double-cost diagnostics",
+    "input SHA256 and run audit",
+    "synthetic state-machine tests",
+    "reference-versus-optimized parity audit"
+  ],
+  "promotion_boundary": "No fresh Shadow, live-ready state, final signal, Discord delivery, or MT5 order is authorized solely by this retrospective cycle."
+}
