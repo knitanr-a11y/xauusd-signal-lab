@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_SIMPLE_RULE_SEMANTIC_COMBINATIONS_ALL_FOUR_REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE",
+  "branch": "feature/btc-simple-rule-combination-research",
+  "preregistration_commit": "b8357380c4e23ee1b325a7ab0caf2ba9a792e56e",
+  "combination_families": 4,
+  "formal_passes": 0,
+  "fresh_shadow_authorized": false,
+  "stage55": {
+    "continue_running": true,
+    "modified": false,
+    "frozen": true
+  },
+  "controls": {
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
