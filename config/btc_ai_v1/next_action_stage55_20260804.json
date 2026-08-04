@@ -1,18 +1,23 @@
 {
   "date": "2026-08-04",
-  "next_action": "ACTIVATE_STAGE55_ON_USER_PC_AND_COLLECT_FRESH_PROSPECTIVE_DATA",
+  "next_action": "ACTIVATE_STAGE55_AND_DISCORD_ENTRY_SIDECAR_ON_USER_PC",
   "minimum_closed_trades_per_family": 20,
   "minimum_calendar_months": 6,
   "allowed": [
     "Configure exact H4/M15/M5/M1 CSV paths",
-    "Activate once with no backfill",
+    "Activate Shadow once with no backfill",
     "Run the one-minute observation loop",
-    "Review health and raw ledgers without changing parameters"
+    "Configure the Discord Webhook only in local_config.json",
+    "Send one manual Discord connection test",
+    "Run the Discord entry notification sidecar beside the Shadow loop",
+    "Review health, notifications and raw ledgers without changing parameters"
   ],
   "prohibited": [
     "No Q70/checkpoint/confirmation/SL/TP/hold changes",
     "No family deletion",
-    "No Discord or MT5 orders",
+    "No use of Discord delivery or manual chart impressions for candidate selection",
+    "No historical or recovery notification backfill",
+    "No MT5 orders or live trading",
     "No automatic promotion"
   ]
 }
