@@ -1,0 +1,115 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_H4_OUTSIDE_STATE_TRANSITION_RESEARCH_PREREGISTRATION",
+  "formal_status": "FROZEN_BEFORE_STATE_OUTCOMES",
+  "branch": "feature/btc-h4-outside-state-transition-research",
+  "base_branch": "feature/btc-h4-outside-mechanism-audit",
+  "base_head": "6fb7685180fa7fa8d8ad0c4bcf10e12b25797e36",
+  "historical_evidence_status": "RETROSPECTIVE_MECHANISM_RESEARCH_ON_CONSUMED_HISTORY_NOT_SELECTION_VALIDATION",
+  "purpose": "Test whether entry-time-known H4 and D1 states explain which transition follows an H4 outside bar: midpoint reversion, continuation beyond the outside extreme, failed-extreme rejection, or no transition.",
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "closed_ohlc_only": true,
+    "timeframes": ["M1", "M15", "H4", "D1"],
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_usd": 45.0,
+    "health_gate": "OFF_NOT_APPLICABLE",
+    "future_or_open_bar_features": "PROHIBITED"
+  },
+  "shared_outside_event": {
+    "definition": "A closed H4 bar has high >= previous H4 high, low <= previous H4 low, positive range, and closes in the top 20 percent or bottom 20 percent of its range.",
+    "extreme_direction": "TOP means outside close direction LONG and reversion direction SHORT; BOTTOM means outside close direction SHORT and reversion direction LONG.",
+    "state_features_known_at_event_close": [
+      "H4 ATR14",
+      "previous-96-H4 ATR14 median shifted by one H4 bar",
+      "outside H4 range divided by current H4 ATR14",
+      "upside and downside penetration beyond previous H4 high/low divided by H4 ATR14",
+      "H4 EMA20, EMA50, and EMA20 three-bar slope",
+      "latest D1 bar closed no later than the H4 event close: open, high, low, close, ATR14"
+    ]
+  },
+  "transition_window": {
+    "bars": "NEXT_16_EXISTING_M15_BARS_AFTER_H4_CLOSE",
+    "independent_flags": {
+      "MIDPOINT_REVERSION": "First M15 close across the outside H4 midpoint in the reversion direction with body >= 0.20 M15 ATR14.",
+      "CONTINUATION_BREAK": "First M15 close beyond the outside H4 extreme in the outside-close direction by >= 0.10 M15 ATR14.",
+      "FAILED_EXTREME_REJECTION": "First M15 bar that tests or exceeds the outside H4 extreme and closes back inside it in the reversion direction."
+    },
+    "exclusive_first_transition": "Earliest flag timestamp. If MIDPOINT_REVERSION and FAILED_EXTREME_REJECTION occur on the same M15 bar, classify MIDPOINT_REVERSION. If no flag occurs, classify NONE_WITHIN_16_M15.",
+    "all_flags_and_timestamps_retained": true
+  },
+  "state_hypotheses": [
+    {
+      "id": "STATE_TWO_SIDED_VOLATILITY_SHOCK",
+      "conditions": "H4_ATR14 / prior96_H4_ATR14_median >= 1.20; outside_range / H4_ATR14 >= 1.50; minimum of upside and downside penetration / H4_ATR14 >= 0.10.",
+      "preregistered_transition": "MIDPOINT_REVERSION",
+      "trade_translation": "Immediate extreme reversion at the H4 close: TOP enters SHORT, BOTTOM enters LONG."
+    },
+    {
+      "id": "STATE_H4_TREND_ALIGNED_EXTREME",
+      "conditions": "TOP and H4 EMA20 > EMA50 and EMA20[t] > EMA20[t-3], or BOTTOM and H4 EMA20 < EMA50 and EMA20[t] < EMA20[t-3].",
+      "preregistered_transition": "CONTINUATION_BREAK",
+      "trade_translation": "Wait up to 16 existing M15 bars for the preregistered continuation close break, then enter in the outside-close direction."
+    },
+    {
+      "id": "STATE_H4_TREND_OPPOSED_EXTREME",
+      "conditions": "TOP and H4 EMA20 < EMA50 and EMA20[t] < EMA20[t-3], or BOTTOM and H4 EMA20 > EMA50 and EMA20[t] > EMA20[t-3].",
+      "preregistered_transition": "MIDPOINT_REVERSION",
+      "trade_translation": "Wait up to 16 existing M15 bars for midpoint reversion with the fixed body confirmation, then enter in the reversion direction."
+    },
+    {
+      "id": "STATE_D1_DIRECTION_CONFLICT",
+      "conditions": "TOP while latest closed D1 is bearish and its close is at or below its midpoint, or BOTTOM while latest closed D1 is bullish and its close is at or above its midpoint.",
+      "preregistered_transition": "FAILED_EXTREME_REJECTION",
+      "trade_translation": "Wait up to 16 existing M15 bars for failed-extreme rejection, then enter in the reversion direction."
+    }
+  ],
+  "trade_execution": {
+    "stop": "1.00_X_DECISION_M15_ATR14",
+    "target": "2R",
+    "maximum_hold": "720_EXISTING_M1_BARS",
+    "one_position": "WITHIN_STATE_HYPOTHESIS",
+    "cross_state_global_one_position": "AUDIT_ONLY",
+    "entry_after_confirmation": "EXACT_M1_OPEN_AT_CONFIRMATION_CLOSE_TIMESTAMP",
+    "immediate_state_entry": "EXACT_M1_OPEN_AT_H4_CLOSE_TIMESTAMP"
+  },
+  "association_gate": {
+    "minimum_state_events_combined_2024_2026_07": 30,
+    "minimum_state_events_each_slice_2024_2025_2026_01_07": 5,
+    "chosen_transition_rate_minimum": 0.40,
+    "chosen_transition_rate_lift_over_all_outside_baseline_minimum_percentage_points": 0.10,
+    "chosen_transition_rate_ratio_over_baseline_minimum": 1.25,
+    "chosen_transition_must_be_most_frequent_of_three": true,
+    "chosen_transition_margin_over_each_alternative_minimum_percentage_points": 0.05,
+    "temporal_rank_rule": "Chosen transition ranks first in at least two of 2024, 2025, and 2026-01-07 and is not last in any slice."
+  },
+  "trade_gate": {
+    "minimum_trades_combined_2024_2026_07": 30,
+    "minimum_trades_each_slice_2024_2025_2026_01_07": 5,
+    "combined_pf_minimum": 1.20,
+    "combined_net_positive": true,
+    "combined_net_to_max_drawdown_minimum": 1.50,
+    "slice_2024_pf_minimum": 1.05,
+    "slice_2024_net_positive": true,
+    "slice_2025_pf_minimum": 1.05,
+    "slice_2025_net_positive": true,
+    "slice_2026_01_07_pf_minimum": 0.90,
+    "largest_winner_removed_pf_minimum": 1.10,
+    "double_cost_pf_minimum": 1.05,
+    "direction_pf_minimum_when_direction_has_at_least_15_trades": 0.80
+  },
+  "interpretation_boundary": [
+    "No state may be redefined after outcomes.",
+    "Do not retain only a profitable direction, year, month, volatility band, D1 state, or transition.",
+    "Association support without trade-gate support is a mechanism lead only.",
+    "Historical trade-gate support can reach at most RESEARCH_CANDIDATE_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION.",
+    "Do not choose the maximum-PF state after results.",
+    "No fifth state hypothesis or threshold rescue after results.",
+    "Stage55 remains unchanged.",
+    "MT5 orders, live trading, live-ready, final signal, Discord, and automatic promotion remain OFF."
+  ]
+}
