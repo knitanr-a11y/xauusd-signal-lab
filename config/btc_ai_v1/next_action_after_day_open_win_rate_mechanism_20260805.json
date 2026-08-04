@@ -1,0 +1,31 @@
+{
+  "next_action": "AWAIT_USER_AUTHORIZATION_FOR_FRESH_MATCHED_PAIR_SHADOW_CONTRACT_ONLY",
+  "recommended_shadow_pair": [
+    "CONTROL_BE2ATR",
+    "LOCK_0P25ATR_AFTER_2ATR"
+  ],
+  "reason": "The +0.25ATR lock improved win rate, PF, net profit, maximum drawdown and net/DD versus the frozen control on consumed history. It is post-hoc and requires fresh no-backfill confirmation.",
+  "minimum_observation_gate": {
+    "closed_trades_per_variant": 100,
+    "calendar_months": 6,
+    "both_required": true
+  },
+  "freeze_if_authorized": [
+    "entry/state logic",
+    "broker-day open definition",
+    "4ATR initial stop",
+    "2ATR trigger",
+    "0.25ATR lock",
+    "state-flip exit",
+    "no same-state reentry",
+    "exact M1 no fallback",
+    "cost contract",
+    "activation cutoff"
+  ],
+  "do_not_do": [
+    "do not replace parent control retrospectively",
+    "do not backfill",
+    "do not add LOCK_1ATR or partial variants to the first fresh pair",
+    "do not enable MT5 orders/live-ready/final signal/Discord without separate authorization"
+  ]
+}
