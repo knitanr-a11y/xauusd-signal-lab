@@ -7,5 +7,14 @@
     "M15": "C:/path/to/BTCUSD#_M15.csv",
     "M5": "C:/path/to/BTCUSD#_M5.csv",
     "M1": "C:/path/to/BTCUSD#_M1.csv"
+  },
+  "discord": {
+    "enabled": false,
+    "webhook_source": "LOCAL_CONFIG",
+    "webhook_url": "",
+    "username": "BTC Stage55 Shadow",
+    "attach_chart": true,
+    "chart_bars": 120,
+    "poll_seconds": 15
   }
 }
