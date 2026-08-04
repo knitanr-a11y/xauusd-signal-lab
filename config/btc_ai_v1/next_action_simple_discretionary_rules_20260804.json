@@ -1,0 +1,50 @@
+{
+  "date": "2026-08-04",
+  "formal_next_action": "BTC_AI_V1_SIMPLE_HUMAN_READABLE_DISCRETIONARY_STYLE_RULE_RESEARCH_PREREGISTRATION",
+  "stage55": {
+    "continue_running": true,
+    "frozen": true,
+    "activation_cutoff_mt5": "2026-08-04 10:52:00",
+    "minimum_closed_trades_per_family": 20,
+    "minimum_calendar_months": 6,
+    "parameter_changes_allowed": false
+  },
+  "research_isolation": {
+    "separate_branch_required": true,
+    "proposed_branch": "feature/btc-simple-discretionary-rule-research",
+    "separate_clone_required": true,
+    "proposed_clone": "C:/xauusd-signal-lab-btc-simple-rules",
+    "do_not_modify_stage55_checkout": true
+  },
+  "historical_evidence_status": "CONSUMED_RETROSPECTIVE_EXPLORATION_ONLY",
+  "research_principles": [
+    "Use human-readable closed-bar rules.",
+    "First pass must be deterministic and must not use ML.",
+    "Each family should use at most one higher-timeframe context, one setup, one confirmation and one fixed execution policy.",
+    "Preregister a small hypothesis list before viewing outcomes.",
+    "Do not reopen broad threshold, month, direction, D1, volatility, window or cooldown rescue.",
+    "Keep all negative results.",
+    "Require fresh no-backfill prospective evidence before any promotion."
+  ],
+  "initial_families_for_preregistration": [
+    "HTF_TREND_PULLBACK_RECLAIM_RESUME",
+    "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK",
+    "COMPRESSION_BREAKOUT_FIRST_RETEST",
+    "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL"
+  ],
+  "fixed_authority": {
+    "symbol": "XM BTCUSD#",
+    "data": "CLOSED_OHLC_ONLY",
+    "time": "MT5_BROKER_SERVER_NAIVE",
+    "entry": "EXACT_M1_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5
+  },
+  "prohibited": [
+    "No Stage55 model, Q70, confirmation, stop, target or hold changes.",
+    "No Stage55 family deletion.",
+    "No huge grid search disguised as a simple-rule study.",
+    "No use of Discord delivery or visual impressions as selection labels.",
+    "No MT5 orders, live trading, live-ready or final signal."
+  ]
+}
