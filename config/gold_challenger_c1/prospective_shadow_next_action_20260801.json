@@ -1,0 +1,46 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-02",
+  "status": "WINDOWS_READY_DISCORD_TEST_PASSED_LOOPS_NEXT",
+  "do_not_touch": "C:\\gold-v19-shadow or its running V19 windows",
+  "recommended_clone": "C:\\gold-challenger-c1",
+  "branch": "feature/gold-v19-challenger-c1-audit",
+  "minimum_verified_code_head": "bcc51d1da1b62111462fbb7147b2bb43383ad9a1",
+  "activation_record_commit": "b3af4872d1a1c0c15c41c0643d0b8547d62baf16",
+  "discord_test_record_commit": "3f734e453b950bc7b0f75a97508bce9bef19cb70",
+  "windows_activation": {
+    "status": "READY",
+    "activated": true,
+    "v19_status": "RUNNING",
+    "v19_parity": "PASS",
+    "v19_frozen_and_read_only": true,
+    "accepted_trades": 0,
+    "open_trade": null
+  },
+  "discord_validation": {
+    "webhook_source": "V19_LOCAL_CONFIG",
+    "username": "GOLD Challenger C1 Shadow",
+    "test_notification_received": true
+  },
+  "incidents_resolved": [
+    "WINDOWS_PYTHONPATH_MISSING_DURING_01_INSTALL_PYTEST_COLLECTION",
+    "CHALLENGER_ASSUMED_NONEXISTENT_V19_SHADOW_SCORE_AND_TRADE_LEDGERS_AT_BOOTSTRAP",
+    "LEGACY_TEST_EXPECTED_TOP_LEVEL_SCORE_CURSOR_MATCH_DIAGNOSTIC_KEY"
+  ],
+  "next_order": [
+    "03_RUN_SHADOW_LOOP.bat",
+    "08_RUN_DISCORD_ALERTS.bat",
+    "04_SHADOW_STATUS.bat",
+    "09_DISCORD_STATUS.bat"
+  ],
+  "keep_open": [
+    "03_RUN_SHADOW_LOOP.bat command window",
+    "08_RUN_DISCORD_ALERTS.bat command window"
+  ],
+  "not_authorized": [
+    "MT5 order",
+    "AI judgement",
+    "real trading",
+    "V19 modification"
+  ]
+}

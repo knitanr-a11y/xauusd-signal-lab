@@ -1,0 +1,61 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "contract_version": "2026-08-01-prospective-shadow-v1",
+  "mode": "OBSERVATION_ONLY_PROSPECTIVE_SHADOW",
+  "research_contract_reference": "config/gold_challenger_c1/frozen_research_contract.json",
+  "retrospective_formal_status": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_FAILED",
+  "candidate_logic_unchanged": true,
+  "candidate": {
+    "wave_states": [
+      "IMPULSE_LATE",
+      "CORRECTION_EARLY"
+    ],
+    "rank": "chosen_rank < 0.90",
+    "direction": "chosen_side",
+    "entry": "M1 open at timestamp equal to decision_dt",
+    "target_usd": 20.0,
+    "stop_usd": 10.0,
+    "horizon_exact_m1": 480,
+    "fixed_spread_usd": 0.3,
+    "same_m1_priority": "SL_FIRST",
+    "time_exit": "boundary M1 open before reading boundary high/low",
+    "one_position": true
+  },
+  "v19_priority": {
+    "v19_is_read_only": true,
+    "future_precheck": false,
+    "same_timestamp_v19_has_priority": true,
+    "challenger_suppressed_while_v19_open": true,
+    "challenger_preempted_only_at_actual_v19_entry_timestamp": true,
+    "same_exit_index_remains_busy": true
+  },
+  "activation": {
+    "state_root": "%LOCALAPPDATA%\\xauusd_signal_lab\\gold_challenger_c1_shadow",
+    "separate_from_v19": true,
+    "bootstrap": "baseline latest reproduced decision and consume all current/past events",
+    "runtime_restart": "first iteration is recovery-only",
+    "missed_decisions": "RECOVERY_REPLAY_NOT_TRADED",
+    "discord_startup": "baseline current accepted count; no delayed notifications",
+    "fresh_entry_gate": "new entry is accepted only when the loaded DATA_V3 M1 cursor timestamp exactly equals decision_dt; stale single decisions are RECOVERY_REPLAY_NOT_TRADED"
+  },
+  "delivery": {
+    "discord_event": "NEW_ACCEPTED_CHALLENGER_ENTRY_ONLY",
+    "webhook": "read existing V19 local config only",
+    "webhook_committed": false,
+    "notification_failure_affects_shadow": false
+  },
+  "implementation": {
+    "format": "ordinary UTF-8 Python",
+    "zip_payload": false,
+    "binary_payload": false,
+    "base64_source": false,
+    "dynamic_exec": false,
+    "runtime_and_notifier_are_separate_processes": true
+  },
+  "upstream": {
+    "e40_source": "read-only frozen V19 outputs/shadow_score_ledger.csv",
+    "cursor_contract": "score ledger latest decision must exactly equal V19 runtime last_processed decision",
+    "second_router_training": false,
+    "wave_source": "DATA_V3 frozen V17 grammar applied locally"
+  }
+}

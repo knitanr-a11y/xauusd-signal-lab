@@ -1,0 +1,63 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "status": "FROZEN_BEFORE_RESULTS",
+  "audits": [
+    "forward_period",
+    "direction",
+    "normal_and_additional_cost",
+    "month_block_bootstrap",
+    "matched_count_month_direction_random",
+    "pseudo_wave_state",
+    "leave_one_wave_scale_out",
+    "wave_only_e40_only_interaction",
+    "rank_band_mechanism",
+    "v19_overlap_rate",
+    "v19_net_additive_count",
+    "combined_pf_dd_monthly_pnl_correlation",
+    "preempt_vs_no_preempt_fixed_comparison",
+    "raw_m1_dual_execution_recalculation"
+  ],
+  "random_seed": 20260801,
+  "bootstrap_iterations": 2000,
+  "matched_random_iterations": 2000,
+  "pseudo_wave_iterations": 2000,
+  "additional_cost_usd": [
+    0.3,
+    0.6
+  ],
+  "formal_gates": {
+    "minimum_resolved_trades": 80,
+    "pooled_pf_min": 1.2,
+    "pooled_net_positive": true,
+    "positive_forward_periods_min": 4,
+    "long_pf_min": 1.0,
+    "short_pf_min": 1.0,
+    "each_direction_min_trades": 15,
+    "additional_cost_060_pf_min": 1.1,
+    "month_bootstrap_net_positive_probability_min": 0.9,
+    "matched_random_pf_percentile_min": 0.95,
+    "matched_random_net_percentile_min": 0.95,
+    "pseudo_wave_pf_percentile_min": 0.95,
+    "leave_one_scale_out_all_pf_min": 1.0,
+    "v19_combined_pf_degradation_max": 0.05,
+    "v19_combined_dd_increase_max_usd": 20.0,
+    "raw_m1_dual_execution_exact": true
+  },
+  "interpretation_cap": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_ONLY",
+  "methods": {
+    "forward_period": "fixed 2024H2, 2025H1, 2025H2, 2026H1, 2026JUL by resolved entry period",
+    "direction": "LONG and SHORT, no deletion",
+    "cost": "subtract fixed additional 0.30 and 0.60 USD from every resolved Challenger trade",
+    "month_block_bootstrap": "resample complete Challenger exit-month PnL blocks with replacement, same number of months, 2000 iterations",
+    "matched_random": "from all causal sub-P90 wave-state transition onsets, sample exact accepted-candidate counts by entry month and chosen_side; apply same exact M1 and V19-priority portfolio; 2000 iterations",
+    "pseudo_wave": "within each fixed forward period circularly shift the complete wave_state sequence by a random nonzero offset of at least 32 decision rows, then rebuild event onsets with E40 and times unchanged; 2000 iterations",
+    "leave_one_scale_out": "recompute aggregate wave_state six times, omitting exactly one preregistered scale and renormalizing remaining fixed weights",
+    "wave_only": "same target wave-state event onset and chosen_side, without chosen_rank threshold",
+    "e40_only": "first causal transition into chosen_rank < P90 for the chosen_side, without wave-state condition",
+    "interaction": "fixed rank< P90 AND target wave state condition",
+    "rank_bands": "diagnostic [0,.50), [.50,.70), [.70,.80), [.80,.90); no selection",
+    "v19_overlap": "raw Challenger event onset equal to a V19 entry or inside a frozen V19 open interval",
+    "preempt_counterfactual": "main policy closes Challenger only at actual V19 arrival; fixed comparison keeps Challenger and suppresses that V19 entry; comparison cannot change policy",
+    "execution_dual": "Numba/indexed implementation versus one-trade-at-a-time simple loop; entry index, exit index, reason and pnl exact"
+  }
+}

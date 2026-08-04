@@ -1,0 +1,28 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "date": "2026-08-01",
+  "authorization": "USER_AUTHORIZED_OBSERVATION_ONLY_PROSPECTIVE_SHADOW_AND_DISCORD_ENTRY_NOTIFICATIONS",
+  "retrospective_formal_status_remains": "RETROSPECTIVE_STRUCTURAL_ROBUSTNESS_FAILED",
+  "authorization_does_not_mean": [
+    "validated",
+    "deployable",
+    "profitable",
+    "live-ready"
+  ],
+  "allowed": [
+    "separate Challenger observation-only Shadow",
+    "new accepted entry Discord notification",
+    "M15 chart attachment",
+    "read-only V19 priority observation"
+  ],
+  "prohibited": [
+    "MT5 order",
+    "AI judgement",
+    "real trading",
+    "NO_SIGNAL Discord notification",
+    "recovery or missed-entry notification",
+    "delayed backfill",
+    "condition rescue or tuning",
+    "V19 file or state modification"
+  ]
+}

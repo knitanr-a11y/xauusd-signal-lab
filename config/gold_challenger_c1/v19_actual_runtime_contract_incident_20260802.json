@@ -1,0 +1,53 @@
+{
+  "date": "2026-08-02",
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "incident": "CHALLENGER_ASSUMED_NONEXISTENT_V19_SHADOW_SCORE_AND_TRADE_LEDGERS_AT_BOOTSTRAP",
+  "responsibility": "CHALLENGER_IMPLEMENTATION_ERROR_NOT_USER_CONFIGURATION_ERROR",
+  "v19_modified": false,
+  "challenger_activated": false,
+  "observed_v19_contract": {
+    "status": "RUNNING",
+    "activated": true,
+    "last_processed_decision_time": "2026-07-31T11:45:00",
+    "active_model_boundary": "2026-07-01",
+    "score_history": "score_history.csv.gz",
+    "pending_scores": "pending_scores.csv.gz",
+    "score_columns": [
+      "entry_time",
+      "origin_id",
+      "score_long",
+      "score_short",
+      "model_boundary"
+    ],
+    "score_history_rows": 926,
+    "pending_score_rows": 0,
+    "accepted_trades": 0,
+    "legacy_score_ledger_exists": false,
+    "legacy_trade_ledger_exists": false
+  },
+  "fix": {
+    "rank_reconstruction": "V19_ACTIVE_CALIBRATION_PLUS_PAST_60_DAY_SCORES_EXCLUDING_CURRENT_MT5_DATE",
+    "allowed_runtime_statuses": [
+      "READY",
+      "RUNNING"
+    ],
+    "computed_invariants": [
+      "activated",
+      "score_cursor_match",
+      "active_model_boundary_match",
+      "score_history_row_count_match",
+      "pending_score_row_count_match",
+      "trade_ledger_contract_ok"
+    ],
+    "missing_trade_ledger_rule": "ALLOWED_ONLY_WHEN_V19_ACCEPTED_TRADES_IS_ZERO",
+    "primary_fix_commit": "8ac147098cb88c805045d6a43f3805d4a5637a3e",
+    "compatibility_fix_commit": "e2d0623e8303e59bacc8d9381920903a76d73441"
+  },
+  "verification": {
+    "python_compile": "PASS",
+    "actual_runtime_schema_simulation": "PASS",
+    "cursor_mismatch_fail_closed": "PASS",
+    "legacy_unit_test_schema_compatibility": "PASS",
+    "actual_user_pc_bootstrap": "PENDING"
+  }
+}

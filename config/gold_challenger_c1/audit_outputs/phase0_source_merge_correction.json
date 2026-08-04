@@ -1,0 +1,13 @@
+{
+  "classification": "SOURCE_MERGE_MISMATCH",
+  "detected_before_result_calculation": true,
+  "conflict_rows": 1,
+  "first_conflict": "2026-02-24 01:00:00",
+  "last_conflict": "2026-02-24 01:00:00",
+  "cause": "sharp M1 begins at 01:08, creating partial initial M15 bucket",
+  "rejected_source": "goldsharp_m15_v3_derived_from_m1.csv",
+  "replacement_source": "gold_m15_v3_derived_from_full_m1_union.csv",
+  "replacement_sha256": "544aea77562b1448cd21b368cdf55f2c34935e445fc6855c4226bb6c27a5f41f",
+  "replacement_old_m15_exact": "81781/81781 all fields",
+  "candidate_results_seen": false
+}

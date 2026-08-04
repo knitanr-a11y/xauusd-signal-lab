@@ -1,0 +1,144 @@
+{
+  "candidate_id": "GOLD_CHALLENGER_C1_V2_DATA_V3",
+  "contract_status": "FROZEN_BEFORE_ANY_DATA_V3_RESULT",
+  "created_date": "2026-08-01",
+  "research_classification": "RETROSPECTIVE_ONLY",
+  "old_candidate_result": "UNEXPECTED_DISCOVERY_DIAGNOSTIC",
+  "data_version": "3",
+  "router": {
+    "source_algorithm": "READ_ONLY_FROZEN_V19_E40_ROUTER_SOURCE_SHA_42fca518315a084080cd108f76428a2508071082936bec8bef24e106de939fd3",
+    "schedule": "SEMIANNUAL_EXPANDING",
+    "train_start": "2023-01-01",
+    "update_boundaries": "JAN_1_AND_JUL_1",
+    "calibration_window": "PREVIOUS_6_CALENDAR_MONTHS",
+    "label": "TP40_BEFORE_SL20_WITHIN_720_EXACT_M1",
+    "label_spread_usd": 0.3,
+    "label_same_m1_priority": "SL_FIRST",
+    "training_embargo": "720 exact M1 minutes before train_end",
+    "rank_reference": "calibration plus earlier scores from strictly prior MT5 dates in trailing 60 calendar days",
+    "same_day_scores_in_rank": false,
+    "chosen_side": "max(rank_long,rank_short), LONG on exact tie",
+    "chosen_rank": "max(rank_long,rank_short)",
+    "spread_gate_points": 30
+  },
+  "wave": {
+    "grammar": "V17_FROZEN",
+    "closed_bars_only": true,
+    "future_pivot": false,
+    "scales": [
+      {
+        "name": "M15_K080",
+        "tf": "M15",
+        "k": 0.8,
+        "weight": 0.18
+      },
+      {
+        "name": "M15_K140",
+        "tf": "M15",
+        "k": 1.4,
+        "weight": 0.14
+      },
+      {
+        "name": "H1_K080",
+        "tf": "H1",
+        "k": 0.8,
+        "weight": 0.2
+      },
+      {
+        "name": "H1_K140",
+        "tf": "H1",
+        "k": 1.4,
+        "weight": 0.2
+      },
+      {
+        "name": "H4_K060",
+        "tf": "H4",
+        "k": 0.6,
+        "weight": 0.14
+      },
+      {
+        "name": "H4_K100",
+        "tf": "H4",
+        "k": 1.0,
+        "weight": 0.14
+      }
+    ],
+    "selected_states": [
+      "IMPULSE_LATE",
+      "CORRECTION_EARLY"
+    ]
+  },
+  "candidate": {
+    "rank_condition": "chosen_rank < 0.90",
+    "directions": [
+      "LONG",
+      "SHORT"
+    ],
+    "event_definition": "first confirmable onset after an exact 15-minute previous decision when chosen_side or causal eligibility state changes",
+    "non_15m_gap": "first row after gap is consumed and not an entry",
+    "allowed_entry_columns": [
+      "decision_dt",
+      "origin_id",
+      "entry_idx",
+      "chosen_side",
+      "chosen_rank",
+      "wave_state",
+      "episode_id",
+      "previous_decision_dt"
+    ],
+    "forbidden_entry_columns": [
+      "immediate_pnl",
+      "pnl",
+      "mfe",
+      "mae",
+      "exit_dt",
+      "exit_price",
+      "outcome",
+      "winner",
+      "tp_hit",
+      "sl_hit",
+      "future_*",
+      "next_*"
+    ]
+  },
+  "execution": {
+    "entry": "first exact M1 open whose timestamp equals decision_dt; decision_dt is close time of prior M15 bar",
+    "target_usd": 20.0,
+    "stop_usd": 10.0,
+    "horizon_exact_m1": 480,
+    "fixed_spread_usd": 0.3,
+    "same_m1_tp_sl": "SL_FIRST",
+    "time_exit": "boundary M1 open before reading that M1 high/low",
+    "one_position": true
+  },
+  "v19_priority": {
+    "reference": "frozen V19 accepted entry timestamps",
+    "future_overlap_precheck": false,
+    "candidate_suppressed_if_v19_currently_open": true,
+    "challenger_preempted_only_when_v19_entry_timestamp_actually_arrives": true,
+    "preempt_exit": "exact M1 open at actual V19 arrival"
+  },
+  "prohibitions": [
+    "state addition or deletion",
+    "rank threshold tuning",
+    "LONG or SHORT deletion",
+    "TP/SL/horizon change",
+    "good-month selection",
+    "preempt rule selection after results",
+    "implementation changes to approach old 123",
+    "V19 modification",
+    "Shadow",
+    "Discord",
+    "AI",
+    "MT5 order",
+    "live CSV monitoring",
+    "rescue after failed gate"
+  ],
+  "data_source_correction": {
+    "status": "FROZEN_BEFORE_RESULTS",
+    "rejected": "goldsharp_m15_v3_derived_from_m1.csv",
+    "authoritative_m15": "gold_m15_v3_derived_from_full_m1_union.csv",
+    "reason": "partial sharp M1 first bucket caused overlap conflict",
+    "old_broker_equivalence": "81781/81781 exact all fields"
+  }
+}
