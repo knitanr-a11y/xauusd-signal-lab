@@ -12,6 +12,7 @@ from typing import Any, Iterable, Mapping
 
 import pandas as pd
 
+RUNTIME_LABEL = "GOLD_CHALLENGER_C1_SHADOW"
 CANDIDATE_ID = "GOLD_CHALLENGER_C1_V2_DATA_V3"
 CONTRACT_VERSION = "2026-08-01-prospective-shadow-v1"
 FIXED_SPREAD = 0.30
@@ -132,7 +133,7 @@ def logger_for(root: Path, name: str, filename: str) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
-    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    formatter = logging.Formatter(f"%(asctime)s %(levelname)s [{RUNTIME_LABEL}] %(message)s")
     for handler in (
         logging.FileHandler(root / "logs" / filename, encoding="utf-8"),
         logging.StreamHandler(sys.stdout),
