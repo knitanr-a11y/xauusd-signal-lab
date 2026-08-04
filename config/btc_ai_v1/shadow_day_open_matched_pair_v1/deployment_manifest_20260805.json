@@ -1,0 +1,30 @@
+{
+  "deployment_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_PACKAGE_20260805",
+  "archive_name": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_PACKAGE_20260805.zip",
+  "archive_sha256": "ea2ecfe299a83a6e191d0adfe4a9c9a1d2b00ef41e98bb58f7902852d19f92c2",
+  "archive_size": 21742,
+  "install_target": "repository_root",
+  "overwrite_policy": "REFUSE_NON_IDENTICAL_EXISTING_FILES",
+  "parts": [
+    {
+      "path": "artifacts/btc_ai_v1/shadow_day_open_matched_pair_v1/package.part00",
+      "size": 6000,
+      "sha256": "d553d51caa987aa1f7c4fc8d2b0d189f8df74ba20c2bf48f9195ac017be632e4"
+    },
+    {
+      "path": "artifacts/btc_ai_v1/shadow_day_open_matched_pair_v1/package.part01",
+      "size": 6000,
+      "sha256": "e45d7cf4459faefb6b5a47b6cc1a1f9dcea3d5c70f9b2761d29552a7d50c022e"
+    },
+    {
+      "path": "artifacts/btc_ai_v1/shadow_day_open_matched_pair_v1/package.part02",
+      "size": 6000,
+      "sha256": "45dcb273202b029cc989012e69d270334417941b9fc95614a676eefc32dd21e8"
+    },
+    {
+      "path": "artifacts/btc_ai_v1/shadow_day_open_matched_pair_v1/package.part03",
+      "size": 3742,
+      "sha256": "95a5a18ed19ed36e89bf99d054798f791558bfdee25253471b3f1a716c15cad3"
+    }
+  ]
+}

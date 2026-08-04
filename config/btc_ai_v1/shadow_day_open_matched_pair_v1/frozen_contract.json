@@ -1,0 +1,119 @@
+{
+  "contract_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_20260805",
+  "status": "AUTHORIZED_FOR_FRESH_NO_BACKFILL_PROSPECTIVE_SHADOW",
+  "shadow_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1",
+  "version": 1,
+  "asset": "BTCUSD",
+  "time_basis": "MT5_BROKER_SERVER_NAIVE_TIME",
+  "data_contract": {
+    "signal_timeframe": "H4_CLOSED_ONLY",
+    "risk_timeframe": "M15_CLOSED_ONLY",
+    "execution_timeframe": "M1_EXACT_TIMESTAMP_ONLY",
+    "decision_time": "H4_OPEN_TIME_PLUS_4_HOURS",
+    "entry_price": "EXACT_DECISION_M1_OPEN",
+    "fallback": false,
+    "future_open_asof_use": false,
+    "broker_day_open": "D1_OPEN_FOR_H4_SOURCE_BAR_BROKER_DAY"
+  },
+  "activation_contract": {
+    "policy": "FIRST_ELIGIBLE_CLOSED_H4_STRICTLY_AFTER_RUNTIME_INIT_WATERMARK",
+    "no_backfill": true,
+    "fresh_state_reset": true,
+    "activation_file_immutable": true,
+    "existing_shadow_history_import": false
+  },
+  "entry_state": {
+    "long": "CLOSED_H4_CLOSE_GREATER_THAN_BROKER_DAY_OPEN",
+    "short": "CLOSED_H4_CLOSE_LESS_THAN_BROKER_DAY_OPEN",
+    "doji_equal_day_open": "NO_STATE_EVENT",
+    "first_fresh_event": "ENTER_CURRENT_DIRECTION",
+    "same_state": "HOLD_OR_REMAIN_FLAT_NO_REENTRY",
+    "state_flip": "EXIT_OPEN_POSITION_AT_EXACT_DECISION_M1_OPEN_THEN_EVALUATE_NEW_EPISODE"
+  },
+  "common_exit": {
+    "initial_stop_atr": 4.0,
+    "entry_atr": "LATEST_CLOSED_M15_WILDER_ATR14_AT_DECISION",
+    "lock_trigger_atr": 2.0,
+    "lock_offset_atr": 0.25,
+    "lock_activation": "NEXT_EXISTING_M1_AFTER_TRIGGER_M1",
+    "same_m1_priority": "ACTIVE_STOP_BEFORE_NEW_LOCK_TRIGGER",
+    "gap_open": "EXIT_AT_ACTUAL_M1_OPEN",
+    "state_flip_exit": true,
+    "round_trip_cost_usd": 22.5
+  },
+  "arms": [
+    {
+      "arm_id": "CONTROL_LOCK_0P25ATR",
+      "description": "Frozen parent control without cooldown"
+    },
+    {
+      "arm_id": "COOLDOWN_SKIP_NEXT_AFTER_INITIAL_STOP",
+      "description": "Same parent; after INITIAL_SL or INITIAL_SL_GAP_OPEN, skip exactly the next state episode",
+      "skip_count": 1,
+      "skip_rearm": "FOLLOWING_STATE_FLIP",
+      "same_state_delayed_entry": false,
+      "qualifying_exit_reasons": [
+        "INITIAL_SL",
+        "INITIAL_SL_GAP_OPEN"
+      ]
+    }
+  ],
+  "matched_pair_contract": {
+    "same_market_data": true,
+    "same_entry_event_ledger": true,
+    "same_cost": true,
+    "same_entry_and_exit_engine": true,
+    "counterfactual_control_retained": true,
+    "interim_arm_selection": false
+  },
+  "discord_contract": {
+    "enabled": true,
+    "scope": "ENTRY_POINT_NOTIFICATIONS_ONLY",
+    "webhook_environment_variable": "BTC_AI_V1_DAY_OPEN_SHADOW_DISCORD_WEBHOOK_URL",
+    "secret_in_repository": false,
+    "durable_outbox_before_send": true,
+    "idempotent_notification_id": true,
+    "notify_when_cooldown_skips": true,
+    "payload_fields": [
+      "event_id",
+      "decision_time",
+      "direction",
+      "exact_m1_entry_price",
+      "broker_day_open",
+      "closed_m15_atr14",
+      "initial_stop",
+      "plus_2atr_trigger",
+      "plus_0p25atr_lock",
+      "control_arm_status",
+      "cooldown_arm_status",
+      "cooldown_skip_reason"
+    ],
+    "orders_from_discord": false,
+    "mentions": false
+  },
+  "prospective_gate": {
+    "minimum_cooldown_closed_trades": 100,
+    "minimum_calendar_months": 6,
+    "both_required": true,
+    "interim_health_audit_allowed": true,
+    "interim_candidate_selection": false,
+    "automatic_promotion": false,
+    "primary_comparison": "COOLDOWN_MINUS_CONTROL_MATCHED_PAIR"
+  },
+  "frozen_boundary": {
+    "frozen_assets_hash_verified_each_run": true,
+    "edit_in_place_after_activation": false,
+    "rule_change_requires_new_version_and_new_cutoff": true,
+    "runtime_state_and_ledgers_mutable": true,
+    "research_may_continue_in_same_branch": true,
+    "shadow_shared_code_may_be_modified_by_research": false
+  },
+  "controls": {
+    "stage55_modified": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord_entry_audit_only": true
+  }
+}
