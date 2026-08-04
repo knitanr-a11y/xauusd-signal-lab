@@ -1,25 +1,30 @@
 @echo off
 setlocal EnableExtensions
+title GOLD Challenger C1 Shadow - V19 Read-Only Audit
 for %%I in ("%~dp0..\..") do set "ROOT=%%~fI"
 set "STATE=%LOCALAPPDATA%\xauusd_signal_lab\gold_challenger_c1_shadow"
 set "CONFIG=%STATE%\local_config.json"
 set "PY=%STATE%\venv\Scripts\python.exe"
 set "OUT=%STATE%\challenger_v19_readonly_audit.txt"
+echo ============================================================
+echo GOLD CHALLENGER C1 SHADOW - V19 READ-ONLY AUDIT
+echo V19 is read-only / No runtime state reset / MT5 orders OFF
+echo ============================================================
 
 if not exist "%STATE%" mkdir "%STATE%"
 if not exist "%PY%" (
-  echo [BLOCKED] Run 01_INSTALL_SHADOW.bat first.
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Run 01_INSTALL_SHADOW.bat first.
   pause
   exit /b 2
 )
 if not exist "%CONFIG%" (
-  echo [BLOCKED] Challenger local_config.json is missing:
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Challenger local_config.json is missing:
   echo %CONFIG%
   pause
   exit /b 2
 )
 if not exist "%ROOT%\scripts\gold_challenger_c1\audit_v19_runtime.py" (
-  echo [BLOCKED] Audit module is missing from this checkout.
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Audit module is missing from this checkout.
   echo ROOT=%ROOT%
   echo Fetch origin and Pull origin on feature/gold-v19-challenger-c1-audit.
   pause
@@ -28,7 +33,7 @@ if not exist "%ROOT%\scripts\gold_challenger_c1\audit_v19_runtime.py" (
 
 pushd "%ROOT%"
 if errorlevel 1 (
-  echo [BLOCKED] Could not enter repository root:
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Could not enter repository root:
   echo %ROOT%
   pause
   exit /b 2
@@ -37,12 +42,12 @@ if errorlevel 1 (
 set "RC=%ERRORLEVEL%"
 popd
 
-echo [READ-ONLY] Audit written to:
+echo [GOLD_CHALLENGER_C1_SHADOW] [READ-ONLY] Audit written to:
 echo %OUT%
 if exist "%OUT%" (
   start "" notepad "%OUT%"
 ) else (
-  echo [BLOCKED] Audit output was not created.
+  echo [GOLD_CHALLENGER_C1_SHADOW] [BLOCKED] Audit output was not created.
   pause
   exit /b 2
 )
