@@ -1,0 +1,43 @@
+{
+  "date": "2026-08-04",
+  "formal_next_action": "BTC_AI_V1_NEW_INDEPENDENT_OHLC_EVENT_FAMILY_PREREGISTRATION_NEXT",
+  "completed_cycle": "H4_OUTSIDE_STATE_TRANSITION_RESEARCH",
+  "completed_cycle_decision": "ALL_FOUR_STATE_HYPOTHESES_REJECTED",
+  "continue_research": true,
+  "do_not_continue_by": [
+    "Do not threshold-mine the H4 outside volatility shock lead.",
+    "Do not retain only 2025, 2026, high-vol, LONG, or SHORT slices.",
+    "Do not reinterpret the failed midpoint association as another transition after outcomes.",
+    "Do not create a fresh Shadow from this cycle."
+  ],
+  "next_cycle_requirements": {
+    "independent_from_h4_outside": true,
+    "maximum_families": 4,
+    "configurations_per_family": 1,
+    "deterministic_first_pass": true,
+    "machine_learning": false,
+    "closed_ohlc_only": true,
+    "entry_time_known_features_only": true,
+    "exact_m1_no_fallback": true,
+    "same_m1_collision": "SL_FIRST",
+    "result_before_rule_change": false,
+    "single_simultaneous_run_after_freeze": true,
+    "negative_results_retained": true
+  },
+  "recommended_independent_domains_for_preregistration": [
+    "multi-day range acceptance or failure without using H4 outside bars",
+    "previous-week high/low and broker-week opening structure",
+    "D1 close-to-close displacement followed by first H4 retracement",
+    "time-normalized path asymmetry using only closed OHLC"
+  ],
+  "stage55": {
+    "continue_running": true,
+    "modify": false,
+    "state_reset": false
+  },
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false
+}
