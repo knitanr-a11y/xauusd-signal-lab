@@ -1,0 +1,64 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_H4_OUTSIDE_BAR_POST_HOC_MECHANISM_AUDIT_PREREGISTRATION",
+  "formal_status": "FROZEN_BEFORE_VARIANT_OUTCOMES_POST_HOC_MECHANISM_ONLY",
+  "branch": "feature/btc-h4-outside-mechanism-audit",
+  "base_branch": "feature/btc-long-horizon-odd-rule-research",
+  "base_head": "16684cf5040a5f9d379680d2ad639927054cdbc6",
+  "historical_evidence_status": "POST_HOC_MECHANISM_AUDIT_ON_CONSUMED_HISTORY_NOT_SELECTION_VALIDATION",
+  "reason": "The preregistered H4 outside midpoint-reversion base was positive in 2024-2025 but failed the full gate. This audit maps continuation versus reversion mechanics and cannot promote a variant.",
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "closed_ohlc_only": true,
+    "timeframes": ["M1", "M15", "H4"],
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_usd": 45.0,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "shared_setup": "A closed H4 bar has high >= previous H4 high, low <= previous H4 low, positive range, and closes in the top 20% or bottom 20% of its range.",
+  "mechanisms": [
+    {
+      "id": "H4_OUTSIDE_IMMEDIATE_EXTREME_REVERSION",
+      "rule": "At H4 close, top-20% outside bar enters SHORT immediately; bottom-20% outside bar enters LONG immediately."
+    },
+    {
+      "id": "H4_OUTSIDE_MIDPOINT_REVERSION_BODY_CONFIRM",
+      "rule": "Top-20% outside bar waits up to 16 existing M15 bars for the first close below the H4 midpoint with bearish body >= 0.20 M15 ATR, then SHORT. Bottom-20% is symmetric LONG."
+    },
+    {
+      "id": "H4_OUTSIDE_EXTREME_CONTINUATION_CLOSE_BREAK",
+      "rule": "Top-20% outside bar waits up to 16 existing M15 bars for first close >= H4 high + 0.10 M15 ATR, then LONG. Bottom-20% waits for close <= H4 low - 0.10 ATR, then SHORT."
+    },
+    {
+      "id": "H4_OUTSIDE_FAILED_EXTREME_REJECTION",
+      "rule": "Top-20% outside bar waits up to 16 existing M15 bars for first bar with high >= H4 high and close < H4 high, then SHORT. Bottom-20% waits for low <= H4 low and close > H4 low, then LONG."
+    }
+  ],
+  "common_execution": {
+    "stop": "1.00_X_DECISION_M15_ATR14",
+    "target": "2R",
+    "maximum_hold": "720_EXISTING_M1_BARS",
+    "one_position": "WITHIN_MECHANISM",
+    "global_one_position": "AUDIT_ONLY"
+  },
+  "reporting": [
+    "raw_dedup_exact_m1_one_position_resolved",
+    "2023_2024_2025_2026_01_07",
+    "direction",
+    "causal_volatility",
+    "largest_winner_removed",
+    "double_cost",
+    "monthly_concentration"
+  ],
+  "interpretation_boundary": [
+    "No mechanism can replace or rescue the failed formal base.",
+    "Do not choose maximum PF mechanism as a candidate.",
+    "A positive mechanism is only a lead for a separately preregistered fresh prospective development cycle.",
+    "No MT5 orders, live trading, live-ready, final signal or Discord.",
+    "Stage55 remains unchanged."
+  ]
+}
