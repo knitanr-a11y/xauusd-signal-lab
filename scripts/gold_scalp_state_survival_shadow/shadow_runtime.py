@@ -10,8 +10,9 @@ from typing import Any, Mapping
 import pandas as pd
 
 from .common import (
-    CANDIDATE_ID, CONTRACT_VERSION, RESEARCH_CUTOFF, SELECTED_STATE_ACTIONS, append_csv, load_config,
-    lock_instance, logger_for, now_utc, read_csv_records, state_root, write_json,
+    CANDIDATE_ID, CONTRACT_VERSION, RESEARCH_CUTOFF, RUNTIME_LABEL, SELECTED_STATE_ACTIONS,
+    append_csv, load_config, lock_instance, logger_for, now_utc, read_csv_records,
+    state_root, write_json,
 )
 from .discord_delivery import discord_settings, entry_message, make_chart, send
 from .runtime_execution import (
@@ -27,8 +28,10 @@ from .state_engine import build_state_frame, load_market_data
 
 DISCORD_LEDGER_FILENAME = "discord_send_ledger.csv"
 
+
 def _sent_ids(root: Path) -> set[str]:
     return {record.get("event_id", "") for record in read_csv_records(root / DISCORD_LEDGER_FILENAME)}
+
 
 def _deliver_discord_queue(
     state: dict[str, Any],
@@ -69,6 +72,7 @@ def _deliver_discord_queue(
             remaining.append(event)
     state["discord_queue"] = remaining
 
+
 def bootstrap(config_path: Path, force: bool = False) -> dict[str, Any]:
     config = load_config(config_path)
     root = state_root(config, config_path)
@@ -85,6 +89,7 @@ def bootstrap(config_path: Path, force: bool = False) -> dict[str, Any]:
     state = _initial_state(cursor)
     _save_state(root, state)
     report = {
+        "runtime_label": RUNTIME_LABEL,
         "candidate_id": CANDIDATE_ID,
         "contract_version": CONTRACT_VERSION,
         "formal_status": state["formal_status"],
@@ -101,6 +106,7 @@ def bootstrap(config_path: Path, force: bool = False) -> dict[str, Any]:
     }
     write_json(root / "bootstrap_report.json", report)
     return report
+
 
 def run_once(config_path: Path) -> dict[str, Any]:
     config = load_config(config_path)
@@ -143,6 +149,7 @@ def run_once(config_path: Path) -> dict[str, Any]:
         _save_state(root, state)
 
     summary = {
+        "runtime_label": RUNTIME_LABEL,
         "candidate_id": CANDIDATE_ID,
         "formal_status": state["formal_status"],
         "cursor": state["last_processed_m15_time"],
@@ -160,29 +167,45 @@ def run_once(config_path: Path) -> dict[str, Any]:
     write_json(root / "latest_cycle_summary.json", summary)
     return summary
 
+
 def run_loop(config_path: Path) -> None:
     config = load_config(config_path)
     root = state_root(config, config_path)
     logger = logger_for(root, "gold_state_survival_shadow_loop", "shadow_runtime.log")
     lock = lock_instance(root, "shadow_runtime.lock", "State Survival Shadow is already running")
     poll_seconds = max(2, int(config.get("poll_seconds", 10)))
-    logger.info("State Survival Shadow loop started; orders are disabled")
+    logger.info("P75 State Survival observation-only loop started; orders are disabled")
     try:
         while True:
+            if not config_path.exists():
+                logger.error(
+                    "CONFIG_MISSING_STOP path=%s; repository branch or checkout likely changed. "
+                    "The P75 loop is stopping to avoid repeated failed cycles.",
+                    config_path,
+                )
+                break
             try:
                 summary = run_once(config_path)
-                logger.info("cycle cursor=%s entries=%s open=%s", summary["cursor"], summary["total_trades"], summary["open_trade_id"])
+                logger.info(
+                    "cycle cursor=%s entries=%s open=%s",
+                    summary["cursor"],
+                    summary["total_trades"],
+                    summary["open_trade_id"],
+                )
             except Exception:
-                logger.exception("Shadow cycle failed")
+                logger.exception("P75 State Survival Shadow cycle failed")
             time.sleep(poll_seconds)
     finally:
+        logger.info("P75 State Survival observation loop stopped")
         lock.close()
+
 
 def status(config_path: Path) -> dict[str, Any]:
     config = load_config(config_path)
     root = state_root(config, config_path)
     state = _load_state(root)
     result = {
+        "runtime_label": RUNTIME_LABEL,
         "candidate_id": CANDIDATE_ID,
         "contract_version": CONTRACT_VERSION,
         "formal_status": state.get("formal_status"),
@@ -201,6 +224,7 @@ def status(config_path: Path) -> dict[str, Any]:
     }
     return result
 
+
 def test_discord(config_path: Path) -> None:
     config = load_config(config_path)
     settings = discord_settings(config, config_path)
@@ -215,12 +239,14 @@ def test_discord(config_path: Path) -> None:
     )
     send(settings["webhook_url"], settings["username"], content)
 
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="GOLD State Survival P75 prospective Shadow")
     parser.add_argument("command", choices=("bootstrap", "run-once", "run-loop", "status", "test-discord"))
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--force", action="store_true", help="Replace an existing bootstrap state")
     return parser
+
 
 def main() -> None:
     args = _parser().parse_args()
@@ -235,7 +261,8 @@ def main() -> None:
         print(json.dumps(status(config_path), ensure_ascii=False, indent=2, default=str))
     elif args.command == "test-discord":
         test_discord(config_path)
-        print("Discord test sent")
+        print(f"[{RUNTIME_LABEL}] Discord test sent")
+
 
 if __name__ == "__main__":
     main()
