@@ -1,0 +1,3 @@
+local_config.json
+.venv/
+__pycache__/
