@@ -1,14 +1,19 @@
 @echo off
 setlocal
+title GOLD P75 State Survival Shadow - Install
 for %%I in ("%~dp0..\..") do set "ROOT=%%~fI"
 set "STATE=%LOCALAPPDATA%\xauusd_signal_lab\gold_scalp_state_survival_shadow"
 set "VENV=%STATE%\venv"
+echo ============================================================
+echo GOLD P75 STATE SURVIVAL SHADOW - INSTALL
+echo Observation only / MT5 orders OFF
+echo ============================================================
 if not exist "%STATE%" mkdir "%STATE%"
 if not exist "%VENV%\Scripts\python.exe" (
   py -3.12 -m venv "%VENV%" 2>nul || py -3 -m venv "%VENV%" 2>nul || python -m venv "%VENV%"
 )
 if not exist "%VENV%\Scripts\python.exe" (
-  echo [BLOCKED] Python venv creation failed.
+  echo [GOLD_P75_STATE_SURVIVAL_SHADOW] [BLOCKED] Python venv creation failed.
   pause
   exit /b 2
 )
@@ -23,13 +28,13 @@ if errorlevel 1 goto :fail_pop
 if errorlevel 1 goto :fail_pop
 popd
 echo.
-echo [OK] State Survival Shadow environment and tests are ready.
+echo [GOLD_P75_STATE_SURVIVAL_SHADOW] [OK] Environment and tests are ready.
 pause
 exit /b 0
 :fail_pop
 popd
 :fail
 echo.
-echo [BLOCKED] Installation or verification failed.
+echo [GOLD_P75_STATE_SURVIVAL_SHADOW] [BLOCKED] Installation or verification failed.
 pause
 exit /b 2
