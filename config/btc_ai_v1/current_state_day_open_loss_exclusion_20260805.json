@@ -1,0 +1,16 @@
+{
+  "status": "BTC_AI_V1_DAY_OPEN_LOSS_EXCLUSION_NO_FILTER_PASSED_ALL_ANTI_OVERFIT_GATES",
+  "date": "2026-08-05",
+  "branch": "feature/btc-day-open-loss-exclusion-audit",
+  "preregistration_commit": "bf1c2f72998f435a61864924360427a3536c2399",
+  "parent_candidate": "LOCK_0P25ATR_AFTER_2ATR",
+  "parent_candidate_modified": false,
+  "passing_configs": [],
+  "notable_nonpassing": {
+    "SKIP_H4_RANGE_SHOCK_2X_MED20": {"pf": 1.273843, "net_usd": 76118.22, "max_dd_usd": 14012.01},
+    "SKIP_ANY_TWO_OF_FIVE_RISK_FLAGS": {"win_rate": 0.600746, "pf": 1.317806, "net_usd": 72046.44, "retention": 0.592483}
+  },
+  "fresh_shadow_created": false,
+  "stage55_modified": false,
+  "live_boundaries": {"mt5_orders": false, "live_trading": false, "live_ready": false, "final_signal": false, "discord": false}
+}
