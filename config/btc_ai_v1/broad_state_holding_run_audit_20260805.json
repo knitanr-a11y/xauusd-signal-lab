@@ -1,0 +1,36 @@
+{
+  "contract": "BTC_AI_V1_BROAD_STATE_HOLDING_PREREGISTRATION_FROZEN_20260805",
+  "preregistration_commit": "0b8661e75dfd0e0f47edf2f99cfecc567faad376",
+  "run_type": "SINGLE_SIMULTANEOUS_RETROSPECTIVE_RUN_AFTER_FREEZE",
+  "raw_state_decisions": 77672,
+  "completed_trades": 109712,
+  "unresolved_end_of_data_positions": 4,
+  "missing_exact_decision_m1_events": 22,
+  "next_m1_fallback_count": 0,
+  "future_or_open_bar_use_count": 0,
+  "health_gate": "OFF_NOT_APPLICABLE",
+  "synthetic_tests": {
+    "same_state_does_not_reenter": "PASS",
+    "stop_remains_flat_until_state_flip": "PASS"
+  },
+  "reference_parity": {
+    "family": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION",
+    "config": "FLIP_OR_4ATR_STOP",
+    "events": 500,
+    "trades": 122,
+    "python_reference_equals_numba": true
+  },
+  "formal_family_decisions": {
+    "H1_BODY_SIGN_STATE_CONTINUATION": "REJECT",
+    "H1_BODY_SIGN_STATE_FADE": "REJECT",
+    "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION": "REJECT_RETAIN_AS_RETROSPECTIVE_LEAD",
+    "H4_DAY_OPEN_DISPLACEMENT_STATE_FADE": "REJECT"
+  },
+  "stage55_modified": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "automatic_promotion": false
+}
