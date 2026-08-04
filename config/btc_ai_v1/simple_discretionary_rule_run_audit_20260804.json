@@ -1,0 +1,85 @@
+{
+  "date": "2026-08-04",
+  "audit_id": "BTC_AI_V1_SIMPLE_DISCRETIONARY_RULE_SINGLE_FORMAL_RUN_AUDIT",
+  "run_contract": "SINGLE_SIMULTANEOUS_FORMAL_HISTORICAL_RUN_AFTER_PREREGISTRATION_FREEZE",
+  "preregistration_commit": "dfa401d8af2da588d6695b70ad5a2d1ec2dea256",
+  "implementation": {
+    "reference_script_sha256": "dda8453efa92891ffdcab79c85ea220b87b88440eb8823f3c53533ca18961fa1",
+    "optimized_script_sha256": "a37aca2343c1338f0f16d3cbfd0a0e64535868ba37ef763791c00f4cc4837f49",
+    "synthetic_test_sha256": "4c0dbef179912825531766b26f0348fa193776fb72e80b8b96cea7ebd120c008",
+    "full_run_elapsed_seconds": 19.27,
+    "full_run_peak_rss_kb": 671928,
+    "reference_optimized_real_slice_parity": {
+      "slice_start": "2023-01-01 00:00:00",
+      "slice_end_exclusive": "2023-02-16 00:00:00",
+      "raw_configuration_candidates_each": 762,
+      "one_position_trades_each": 558,
+      "raw_candidate_semantics_equal": true,
+      "trade_outcomes_equal": true,
+      "suppressed_candidates_each": 199,
+      "duplicates_removed_each": 3,
+      "ambiguous_opposite_direction_each": 0
+    },
+    "synthetic_tests": [
+      "EXACT_ENTRY_M1_MISSING_INVALIDATES_NO_FALLBACK",
+      "POST_ENTRY_ABSENT_M1_DOES_NOT_CREATE_SYNTHETIC_BAR",
+      "POST_ENTRY_POSITION_CONTINUES_AND_EXISTING_M1_BARS_COUNT_HOLD",
+      "ADVERSE_GAP_OPEN_EXITS_AT_ACTUAL_OPEN",
+      "SAME_M1_SL_TP_COLLISION_USES_SL_FIRST",
+      "SAME_TIMESTAMP_DEDUP_USES_LATEST_SETUP_BY_TIME_ONLY",
+      "OPPOSITE_DIRECTION_SAME_CONFIG_TIMESTAMP_INVALIDATES_BOTH"
+    ]
+  },
+  "input_sha256": {
+    "M1": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135",
+    "M5": "325c8a39776415b5abf59dca940d1d36733f8726f6c6d7e3171fdce8c6aa8bb0",
+    "M15": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6",
+    "H1": "7c04ec467399f00d89c19a59491aef91a4ce54ac834c3edc0c122501ed2306e4",
+    "H4": "94c2013dc175e340b3d22e229383863ba699aad224ea14d3e6fda90bc857a7d0",
+    "D1": "8485e0249e6320c66cc43efd1ad90f86913eee6ea98e177fc684b4d0f4760c73",
+    "export_manifest": "a1177b058477fe0157879d7fd9793ad83ed679dc01efc2c268b29ff071073a58",
+    "symbol_metadata": "47bc080d821e6e525415a4ccc3108aaab10c96dc5541838cd8df43468f9a3ce7"
+  },
+  "input_rows": {
+    "M1": 1879776,
+    "M5": 376123,
+    "M15": 125567,
+    "H1": 31443,
+    "H4": 7860,
+    "D1": 1310
+  },
+  "time_and_causality": {
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "latest_csv_row": "CLOSED_BY_CONTRACT",
+    "entry_period_end_exclusive": "2026-08-01 00:00:00",
+    "decision_uses_closed_bars_only": true,
+    "future_or_open_bar_use_count": 0,
+    "exact_entry_m1_required": true,
+    "entry_fallback_count": 0,
+    "same_m1_collision": "SL_FIRST",
+    "post_entry_missing_m1": "NO_SYNTHETIC_BAR_POSITION_CONTINUES_EXISTING_M1_COUNT_ONLY"
+  },
+  "pipeline": {
+    "raw_candidates": 26426,
+    "deduplicated_candidates": 26420,
+    "same_timestamp_duplicates_removed": 6,
+    "ambiguous_opposite_direction_candidates": 0,
+    "exact_m1_valid_candidates": 26395,
+    "one_position_trades": 20481,
+    "resolved_trades": 20481,
+    "unresolved_trades": 0,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "output_artifact_sha256": {
+    "local_full_markdown_report": "ee6bf59b34e4b9d9d2d10c8a765ead4abe5a3ee01f2c35b23ebc8a438362e4d1",
+    "local_machine_result_json": "58abcb75b715d72f8d10c393ea8842aa9eb4500b9bf0d22386ebf1db8555909a",
+    "local_full_package_zip": "70a6c7fbb91f83a39057f91998faf2c9cb7a048a17d9d4ec62e4d8ceab708218"
+  },
+  "formal_result": "ALL_FOUR_BASES_REJECTED",
+  "stage55_modified": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false
+}
