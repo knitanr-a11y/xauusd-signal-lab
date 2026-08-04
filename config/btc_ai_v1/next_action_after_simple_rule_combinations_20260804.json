@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-04",
+  "formal_next_action": "STOP_SIMPLE_RULE_COMBINATION_MINING_RETAIN_NEGATIVE_RESULTS_CONTINUE_STAGE55_OBSERVATION",
+  "prohibited": [
+    "Do not add a fifth combination after outcomes.",
+    "Do not rescue high/low volatility, direction, month, session or year slices.",
+    "Do not promote any failed combination to prospective Shadow.",
+    "Do not modify Stage55."
+  ],
+  "allowed": [
+    "Preserve code, ledgers, audit and negative results.",
+    "Continue the separately frozen Stage55 prospective observation.",
+    "A future new research cycle requires a genuinely new preregistered hypothesis and user authorization."
+  ],
+  "controls": {
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false
+  }
+}
