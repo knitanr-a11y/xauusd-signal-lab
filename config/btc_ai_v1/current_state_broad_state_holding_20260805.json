@@ -1,0 +1,26 @@
+{
+  "status": "BTC_AI_V1_BROAD_STATE_HOLDING_FORMAL_GATES_REJECTED_H4_DAY_OPEN_CONTINUATION_LEAD_RETAINED",
+  "branch": "feature/btc-broad-state-holding-research",
+  "head_after_result": "d760eeb92aad26e6f98f621b8c73e9b4539083ab",
+  "formal_candidate": null,
+  "retrospective_lead": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION",
+  "lead_translations": [
+    {
+      "config": "FLIP_OR_2ATR_STOP",
+      "trades_2024_2026_07": 1357,
+      "pf": 1.079874,
+      "net_usd": 38861.761154,
+      "max_drawdown_usd": 36599.831667
+    },
+    {
+      "config": "FLIP_OR_4ATR_STOP",
+      "trades_2024_2026_07": 1357,
+      "pf": 1.063097,
+      "net_usd": 39432.642707,
+      "max_drawdown_usd": 30951.262876
+    }
+  ],
+  "new_shadow_authorized": false,
+  "reason_not_authorized": "2024 loss, combined PF below 1.15, Net/DD below 1.50, winner-removal and double-cost gates failed",
+  "stage55_modified": false
+}
