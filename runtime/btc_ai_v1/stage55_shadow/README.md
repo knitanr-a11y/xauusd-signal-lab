@@ -2,14 +2,27 @@
 
 This directory contains the Windows launchers and local configuration example.
 
+## Supported CSV input
+
+Stage55 uses the continuously updated live H4/M15/M5/M1 CSV files.
+
+The reader automatically supports both:
+
+- live exporter comma-delimited files such as `btcusdsharp_h4.csv`
+- research exporter semicolon-delimited files such as `BTCUSD#_H4_....csv`
+
+Required columns are `time, open, high, low, close`. Additional volume/spread columns are allowed and ignored by candidate logic.
+
 ## Shadow runtime
 
 1. Run `01_INSTALL.bat`.
 2. Run `02_BOOTSTRAP_ACTIVATE.bat` once to create `local_config.json`.
-3. Edit the exact H4/M15/M5/M1 CSV paths.
+3. Edit the exact continuously updated H4/M15/M5/M1 CSV paths.
 4. Run `02_BOOTSTRAP_ACTIVATE.bat` again and confirm `READY_NO_BACKFILL_ACTIVATED`.
 5. Keep `03_RUN_LOOP.bat` open.
 6. Check `04_STATUS.bat`.
+
+Every launcher window title and banner starts with `BTC Stage55 Shadow` or `[BTC_STAGE55_SHADOW]`, so it can be distinguished from GOLD and other runtimes.
 
 ## Discord entry notification
 
