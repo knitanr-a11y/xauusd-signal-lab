@@ -1,0 +1,98 @@
+{
+  "contract_id": "BTC_AI_V1_DAY_OPEN_LOSS_COOLDOWN_AUDIT_PREREGISTRATION_FROZEN_20260805",
+  "date": "2026-08-05",
+  "research_type": "post_hoc_causal_loss_cluster_control_audit_on_consumed_history",
+  "parent_branch": "feature/btc-day-open-win-rate-mechanism-audit",
+  "parent_head": "6f9a6f476c5145915a33258290ecc31bf9b55004",
+  "parent_candidate": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION__4ATR_STOP__LOCK_0P25ATR_AFTER_2ATR",
+  "parent_candidate_frozen": true,
+  "objective": "Test whether a fixed causal cooldown based only on already resolved prior strategy trades reduces clustered bad losses without adding price-pattern filters.",
+  "anti_overfit_boundaries": {
+    "no_ml": true,
+    "no_parameter_search": true,
+    "no_threshold_grid": true,
+    "no_direction_month_year_volatility_rescue": true,
+    "maximum_noncontrol_variants": 5,
+    "all_variants_run_once_simultaneously": true,
+    "no_new_variant_after_results": true,
+    "all_history_label": "RETROSPECTIVE_POST_HOC_EVIDENCE_ON_CONSUMED_HISTORY"
+  },
+  "common_parent_logic": {
+    "desired_state": "At each closed H4 decision, LONG when source_close > broker_day_open and SHORT when source_close < broker_day_open.",
+    "entry": "Exact M1 open at the desired-state flip; no fallback.",
+    "initial_stop": "4.00 times decision-time closed M15 Wilder ATR14.",
+    "profit_lock": "After favorable excursion reaches 2.00 entry ATR, from the next existing M1 move stop to +0.25 ATR for LONG or -0.25 ATR for SHORT.",
+    "exit": "Active stop or next desired-state flip.",
+    "after_stop_without_cooldown": "Remain flat until next desired-state flip.",
+    "cost_usd_per_completed_1btc_trade": 22.5,
+    "same_m1_sequence": "At a state flip, close the old position at exact M1 open, finalize its net outcome, update cooldown state, then decide whether the new episode is allowed.",
+    "closed_ohlc_only": true,
+    "resolved_prior_outcomes_only": true,
+    "time_semantics": "MT5 broker-server naive time"
+  },
+  "configurations": [
+    {"id": "CONTROL_NO_COOLDOWN", "rule": "never"},
+    {"id": "SKIP_NEXT_EPISODE_AFTER_INITIAL_STOP", "rule": "After INITIAL_SL or INITIAL_SL_GAP_OPEN, skip exactly the next desired-state episode."},
+    {"id": "SKIP_NEXT_EPISODE_AFTER_ANY_NET_LOSS", "rule": "After any completed trade with net_pnl < 0, skip exactly the next desired-state episode."},
+    {"id": "SKIP_NEXT_EPISODE_AFTER_TWO_CONSECUTIVE_NET_LOSSES", "rule": "After two consecutive completed trades each with net_pnl < 0, skip exactly the next desired-state episode and reset the consecutive-loss counter."},
+    {"id": "WAIT_NEXT_BROKER_DAY_AFTER_INITIAL_STOP", "rule": "After INITIAL_SL or INITIAL_SL_GAP_OPEN, block new entries whose source broker day equals the normalized broker-server date of the stop exit; reconsider on a later broker day."},
+    {"id": "SKIP_NEXT_TWO_EPISODES_AFTER_INITIAL_STOP", "rule": "After INITIAL_SL or INITIAL_SL_GAP_OPEN, skip exactly the next two desired-state episodes."}
+  ],
+  "episode_semantics": {
+    "state_flip_always_closes_existing_position": true,
+    "skipped_episode_remains_flat_until_next_state_flip": true,
+    "skips_do_not_create_synthetic_trade_outcomes": true,
+    "skips_do_not_reset_cooldown_except_by_the_frozen_rule": true,
+    "same_state_delayed_reentry": false
+  },
+  "formal_period": "2024-01-01 through 2026-07-31",
+  "pass_gates_for_noncontrol": {
+    "trade_retention_combined_min": 0.75,
+    "trade_retention_each_2024_2025_2026_min": 0.70,
+    "skipped_trades_combined_min": 100,
+    "skipped_trades_each_2024_2025_2026_min": 20,
+    "win_rate_improvement_vs_control_min_points": 2.0,
+    "combined_pf_min": 1.24,
+    "combined_net_usd_min": 80000.0,
+    "combined_max_drawdown_usd_max": 19000.0,
+    "combined_net_to_maxdd_min": 4.50,
+    "each_2024_2025_2026_pf_min": 1.00,
+    "each_2024_2025_2026_net_positive": true,
+    "largest_winner_removed_pf_min": 1.18,
+    "double_cost_pf_min": 1.13,
+    "long_pf_min": 1.10,
+    "short_pf_min": 1.10,
+    "largest_positive_month_gross_profit_share_max": 0.20,
+    "top5_winner_gross_profit_share_max": 0.25,
+    "matched_skip_selectivity": {
+      "definition": "Map each skipped episode to the frozen control episode at the same event and compare skipped control loss-dollar share with sacrificed control profit-dollar share.",
+      "formal_loss_capture_minus_profit_sacrifice_min_points": 5.0,
+      "2025_loss_capture_gt_profit_sacrifice": true,
+      "2026_loss_capture_gt_profit_sacrifice": true
+    }
+  },
+  "required_outputs": [
+    "cooldown_action_ledger",
+    "skipped_state_episode_ledger",
+    "completed_and_unresolved_trade_ledger",
+    "matched_control_episode_outcome_ledger",
+    "performance_by_period_direction_month_exit_reason",
+    "skip_selectivity_by_period",
+    "configuration_gate_diagnostics",
+    "synthetic_state_machine_tests",
+    "independent_reference_parity",
+    "input_sha256",
+    "run_audit"
+  ],
+  "maximum_status": "POST_HOC_LOSS_COOLDOWN_RETROSPECTIVE_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+  "live_boundaries": {
+    "fresh_shadow": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false,
+    "stage55_modified": false
+  }
+}
