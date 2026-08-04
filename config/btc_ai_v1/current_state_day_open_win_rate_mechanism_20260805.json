@@ -1,0 +1,21 @@
+{
+  "status": "BTC_AI_V1_DAY_OPEN_WIN_RATE_AUDIT_THREE_CONFIGS_PASS_POST_HOC_FRESH_DUAL_SHADOW_AUTHORIZATION_PENDING",
+  "date": "2026-08-05",
+  "branch": "feature/btc-day-open-win-rate-mechanism-audit",
+  "preregistration_commit": "1e7c8a13125dbe0fe19598aebca4b83a10b6037e",
+  "parent_control": "CONTROL_BE2ATR",
+  "recommended_variant": "LOCK_0P25ATR_AFTER_2ATR",
+  "recommended_pair_status": "NOT_ACTIVATED",
+  "passing_configs": [
+    "LOCK_0P25ATR_AFTER_2ATR",
+    "LOCK_1P00ATR_AFTER_2ATR",
+    "PARTIAL_25PCT_AT_2ATR_AND_BE"
+  ],
+  "stage55_modified": false,
+  "fresh_shadow_created": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false
+}
