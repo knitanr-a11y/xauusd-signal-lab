@@ -1,0 +1,45 @@
+{
+  "contract_commit": "b8357380c4e23ee1b325a7ab0caf2ba9a792e56e",
+  "run_type": "SINGLE_SIMULTANEOUS_COMBINATION_RUN_AFTER_FREEZE",
+  "input_sha256": {
+    "m1": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135",
+    "m15": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6",
+    "h1": "7c04ec467399f00d89c19a59491aef91a4ce54ac834c3edc0c122501ed2306e4",
+    "source_candidates": "3948eeb9f12d935a917320ebab2e9eb34db4b16c913c8e96e5da5d7aaca0e016",
+    "prereg": "ea28b0dd21de46db6e036bc95b0c2f42196d3f24452e3972b8799b6f97598039"
+  },
+  "raw_candidates": 909,
+  "deduplicated_candidates": 909,
+  "one_position_trades": 862,
+  "resolved_trades": 862,
+  "unresolved_trades": 0,
+  "future_or_open_bar_use_count": 0,
+  "health_gate": "OFF_NOT_APPLICABLE",
+  "stage55_modified": false,
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "family_decisions": [
+    {
+      "family": "H1_TREND_ALIGNED_COMPRESSION_FIRST_RETEST",
+      "all_gates_pass": false,
+      "formal_decision": "REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE"
+    },
+    {
+      "family": "H1_TREND_ALIGNED_PREVIOUS_D1_SWEEP_CLOSE_BACK",
+      "all_gates_pass": false,
+      "formal_decision": "REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE"
+    },
+    {
+      "family": "PREVIOUS_D1_SWEEP_PLUS_ATR_EXHAUSTION_CONCURRENCE",
+      "all_gates_pass": false,
+      "formal_decision": "REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE"
+    },
+    {
+      "family": "TREND_PULLBACK_THEN_COMPRESSION_FIRST_RETEST",
+      "all_gates_pass": false,
+      "formal_decision": "REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE"
+    }
+  ]
+}
