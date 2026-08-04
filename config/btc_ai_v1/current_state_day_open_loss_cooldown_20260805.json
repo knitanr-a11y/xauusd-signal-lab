@@ -1,0 +1,22 @@
+{
+  "status": "BTC_AI_V1_DAY_OPEN_LOSS_COOLDOWN_NO_VARIANT_PASSED_ALL_FROZEN_GATES_STRONG_ECONOMIC_NEAR_PASS_RETAINED",
+  "date": "2026-08-05",
+  "branch": "feature/btc-day-open-loss-cooldown-audit",
+  "preregistration_commit": "8a7fe42ce8a8bd308b511647054394fc5c3f3a48",
+  "parent_candidate": "LOCK_0P25ATR_AFTER_2ATR",
+  "parent_candidate_modified": false,
+  "passing_configs": [],
+  "strong_near_pass": {
+    "config": "SKIP_NEXT_EPISODE_AFTER_INITIAL_STOP",
+    "trades": 1155,
+    "win_rate": 0.566234,
+    "pf": 1.304298,
+    "net_usd": 96324.73,
+    "max_dd_usd": 18014.22,
+    "net_to_maxdd": 5.347150,
+    "failed_gate": "win_rate_improvement_vs_control_min_points"
+  },
+  "fresh_shadow_created": false,
+  "stage55_modified": false,
+  "live_boundaries": {"mt5_orders": false, "live_trading": false, "live_ready": false, "final_signal": false, "discord": false}
+}
