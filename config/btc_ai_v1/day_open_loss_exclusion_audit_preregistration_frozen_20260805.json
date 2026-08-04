@@ -1,0 +1,106 @@
+{
+  "contract_id": "BTC_AI_V1_DAY_OPEN_LOSS_EXCLUSION_AUDIT_PREREGISTRATION_FROZEN_20260805",
+  "date": "2026-08-05",
+  "research_type": "post_hoc_loss_exclusion_mechanism_audit_on_consumed_history",
+  "parent_branch": "feature/btc-day-open-win-rate-mechanism-audit",
+  "parent_head": "6f9a6f476c5145915a33258290ecc31bf9b55004",
+  "parent_candidate": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION__4ATR_STOP__LOCK_0P25ATR_AFTER_2ATR",
+  "parent_candidate_frozen": true,
+  "stage55_modified": false,
+  "objective": "Test whether a small fixed menu of entry-time-known risk flags can skip disproportionately bad state episodes without sacrificing the broad-entry edge.",
+  "anti_overfit_boundaries": {
+    "no_ml": true,
+    "no_parameter_search": true,
+    "no_threshold_grid": true,
+    "no_direction_month_year_volatility_rescue": true,
+    "maximum_noncontrol_variants": 6,
+    "all_variants_run_once_simultaneously": true,
+    "no_new_variant_after_results": true,
+    "history_label": "RETROSPECTIVE_POST_HOC_EVIDENCE_ON_CONSUMED_HISTORY",
+    "temporal_diagnostics": {
+      "development_diagnostic": "2023-02-03 through 2024-12-31",
+      "confirmation_a": "2025-01-01 through 2025-12-31",
+      "confirmation_b": "2026-01-01 through 2026-07-31"
+    }
+  },
+  "common_entry_and_exit": {
+    "desired_state": "At each closed H4 decision, LONG when source_close > broker_day_open and SHORT when source_close < broker_day_open.",
+    "entry": "Exact M1 open whose timestamp equals the closed H4 decision time; no fallback.",
+    "state_episode_semantics": "On every desired-state flip, close any open position at exact M1 open. Evaluate the fixed skip rule for the new state episode. If skipped, remain flat for the entire unchanged state episode and reconsider only at the next state flip.",
+    "initial_stop": "4.00 times decision-time closed M15 Wilder ATR14.",
+    "profit_lock": "After favorable excursion reaches 2.00 entry ATR, from the next existing M1 move stop to +0.25 ATR for LONG or -0.25 ATR for SHORT.",
+    "exit": "Active stop or next desired-state flip.",
+    "after_stop": "Remain flat until the next desired-state flip.",
+    "same_m1_priority": "An already active adverse stop has priority; profit-lock activation begins only on the next existing M1.",
+    "cost_usd_per_completed_1btc_trade": 22.5,
+    "double_cost_usd": 45.0,
+    "closed_ohlc_only": true,
+    "time_semantics": "MT5 broker-server naive time"
+  },
+  "entry_time_features": {
+    "counter_body": "LONG and source_close <= source_open, or SHORT and source_close >= source_open.",
+    "weak_directional_close": "Directional close-location within source H4 range is below 0.60; zero-range bars are flagged.",
+    "near_day_open": "Absolute source_close minus broker_day_open is below 0.50 times prior closed H4 Wilder ATR14.",
+    "h4_range_shock": "Current closed H4 true range exceeds 2.00 times the median true range of the prior 20 closed H4 bars.",
+    "repeated_same_day_flip": "The prospective entry is the third or later desired-state episode opened within the same broker day.",
+    "all_features_known_at_decision": true
+  },
+  "configurations": [
+    {"id": "CONTROL_NO_SKIP", "skip_rule": "never"},
+    {"id": "SKIP_COUNTER_BODY", "skip_rule": "counter_body"},
+    {"id": "SKIP_WEAK_DIRECTIONAL_CLOSE", "skip_rule": "weak_directional_close"},
+    {"id": "SKIP_NEAR_DAY_OPEN_0P50_H4ATR", "skip_rule": "near_day_open"},
+    {"id": "SKIP_H4_RANGE_SHOCK_2X_MED20", "skip_rule": "h4_range_shock"},
+    {"id": "SKIP_THIRD_OR_LATER_FLIP_SAME_DAY", "skip_rule": "repeated_same_day_flip"},
+    {"id": "SKIP_ANY_TWO_OF_FIVE_RISK_FLAGS", "skip_rule": "risk_flag_count_gte_2"}
+  ],
+  "formal_period": "2024-01-01 through 2026-07-31",
+  "pass_gates_for_noncontrol": {
+    "trade_retention_combined_min": 0.70,
+    "trade_retention_each_2024_2025_2026_min": 0.65,
+    "skipped_trades_combined_min": 100,
+    "skipped_trades_each_2024_2025_2026_min": 20,
+    "win_rate_improvement_vs_control_min_points": 2.0,
+    "combined_pf_min": 1.24,
+    "combined_net_usd_min": 80000.0,
+    "combined_max_drawdown_usd_max": 19000.0,
+    "combined_net_to_maxdd_min": 4.50,
+    "each_2024_2025_2026_pf_min": 1.00,
+    "each_2024_2025_2026_net_positive": true,
+    "largest_winner_removed_pf_min": 1.18,
+    "double_cost_pf_min": 1.13,
+    "long_pf_min": 1.10,
+    "short_pf_min": 1.10,
+    "largest_positive_month_gross_profit_share_max": 0.20,
+    "top5_winner_gross_profit_share_max": 0.25,
+    "loss_selectivity": {
+      "definition": "Among control state episodes, compare the share of total negative net dollars skipped with the share of total positive net dollars sacrificed.",
+      "combined_loss_capture_minus_profit_sacrifice_min_points": 5.0,
+      "confirmation_2025_loss_capture_gt_profit_sacrifice": true,
+      "confirmation_2026_loss_capture_gt_profit_sacrifice": true
+    }
+  },
+  "required_outputs": [
+    "event_feature_ledger",
+    "state_episode_skip_ledger",
+    "completed_and_unresolved_trade_ledger",
+    "matched_control_episode_outcome_ledger",
+    "performance_by_period_direction_month_exit_reason",
+    "loss_selectivity_by_period",
+    "configuration_gate_diagnostics",
+    "synthetic_tests",
+    "independent_reference_parity",
+    "input_sha256",
+    "run_audit"
+  ],
+  "maximum_status": "POST_HOC_LOSS_EXCLUSION_RETROSPECTIVE_LEAD_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+  "live_boundaries": {
+    "fresh_shadow": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
