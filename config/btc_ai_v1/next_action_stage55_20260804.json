@@ -1,23 +1,30 @@
 {
   "date": "2026-08-04",
-  "next_action": "ACTIVATE_STAGE55_AND_DISCORD_ENTRY_SIDECAR_ON_USER_PC",
+  "activation_complete": true,
+  "activation_cutoff_mt5": "2026-08-04 10:52:00",
+  "next_action": "CONTINUE_STAGE55_OBSERVATION_AND_START_SEPARATE_SIMPLE_DISCRETIONARY_RULE_PREREGISTRATION",
   "minimum_closed_trades_per_family": 20,
   "minimum_calendar_months": 6,
-  "allowed": [
-    "Configure exact H4/M15/M5/M1 CSV paths",
-    "Activate Shadow once with no backfill",
-    "Run the one-minute observation loop",
-    "Configure the Discord Webhook only in local_config.json",
-    "Send one manual Discord connection test",
-    "Run the Discord entry notification sidecar beside the Shadow loop",
-    "Review health, notifications and raw ledgers without changing parameters"
+  "stage55_allowed": [
+    "Keep the one-minute observation loop running.",
+    "Keep the Discord accepted-entry sidecar running.",
+    "Review health, notifications and raw ledgers without changing parameters.",
+    "Restart the same frozen runtime after interruption without resetting state."
+  ],
+  "separate_research_allowed": [
+    "Create a separate clone and branch for simple human-readable discretionary-style rules.",
+    "Preregister a small fixed hypothesis list before viewing outcomes.",
+    "Use deterministic closed-bar rules in the first pass.",
+    "Require fresh no-backfill prospective evidence before any promotion."
   ],
   "prohibited": [
-    "No Q70/checkpoint/confirmation/SL/TP/hold changes",
-    "No family deletion",
-    "No use of Discord delivery or manual chart impressions for candidate selection",
-    "No historical or recovery notification backfill",
-    "No MT5 orders or live trading",
-    "No automatic promotion"
-  ]
+    "No Q70/checkpoint/confirmation/SL/TP/hold changes.",
+    "No Stage55 family deletion.",
+    "No new research code in the Stage55 runtime checkout.",
+    "No use of Discord delivery or manual chart impressions for candidate selection.",
+    "No historical or recovery notification backfill.",
+    "No MT5 orders or live trading.",
+    "No automatic promotion."
+  ],
+  "authoritative_next_research_contract": "config/btc_ai_v1/next_action_simple_discretionary_rules_20260804.json"
 }
