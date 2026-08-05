@@ -9,8 +9,18 @@ This compatibility correction changes only CSV parsing:
 - accept full `time` timestamps and MT5 `<DATE>` plus `<TIME>` pairs;
 - require the same canonical OHLC fields and fail closed with a detected-column diagnostic.
 
-The model, 95 features, Q20 threshold, parent rule, activation policy, review gates, and Stage55 remain unchanged. The prior failed initialization aborted before activation, so no activation cutoff or prospective ledger was created.
+The model, 95 features, Q20 threshold, parent rule, activation policy, review gates, and Stage55 remain unchanged.
 
-## User-PC commands after pulling this commit
+## User-PC launchers
 
-Use `launchers/02_INIT_ONCE_CSV_COMPAT.bat` for the one-time activation. After activation, use `launchers/03_PROCESS_CSV_COMPAT.bat` for continued processing. The original `02_INIT_ONCE.bat` and `03_PROCESS.bat` remain preserved as frozen historical launchers.
+- one-time activation: `launchers/02_INIT_ONCE_CSV_COMPAT.bat`;
+- continuous observation: `launchers/03_PROCESS_CSV_COMPAT.bat`;
+- status: `launchers/04_STATUS.bat`.
+
+`03_PROCESS_CSV_COMPAT.bat` is a 60-second continuous loop. Its window title is:
+
+`BTC AI V1 Full95 Q20 Shadow - ACTIVE OBSERVATION LOOP`
+
+It continues after normal cycles and stops without automatic retry when the process command returns an error. Closing the window stops only the Full95 Q20 Shadow; Stage55 remains separate.
+
+The formal activation completed at `2026-08-05 20:00:00` MT5 broker time. Do not rerun the one-time activation launcher.
