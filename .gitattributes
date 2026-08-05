@@ -1,0 +1,13 @@
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/bootstrap/*.py text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/bootstrap/*.json text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/bundles/* -text
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/config/*.json text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/docs/*.md text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/model/*.json text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/research/*.json text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/runtime/*.md text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/tests/*.py text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/requirements.txt text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/launchers/local_paths.example.bat text eol=lf
+runtime/btc_ai_v1/full95_all_q20_shadow_v1/launchers/0*.bat text eol=crlf
+scripts/btc_ai_v1/repair_full95_shadow_windows_checkout.py text eol=lf
