@@ -1,0 +1,4 @@
+{
+  "required": ["shadow_id", "status", "activation_watermark_h4_close_broker_time", "closed_trades", "ai_eligible_episodes", "ai_skipped_episodes", "completed_calendar_months", "review_gates", "prospective_metrics", "updated_at_utc"],
+  "allowed_status": ["NOT_INITIALIZED", "ACTIVE_WAITING_FOR_FIRST_POST_CUTOFF_H4", "ACTIVE_PROSPECTIVE_OBSERVATION", "EARLY_FUTILITY_REVIEW_ELIGIBLE_NO_PROMOTION", "PRIMARY_REVIEW_ELIGIBLE_NO_AUTO_PROMOTION"]
+}

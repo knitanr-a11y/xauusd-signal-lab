@@ -1,0 +1,46 @@
+{
+  "lgbm_model.txt": {
+    "bytes": 103312,
+    "chunks": [
+      "bundles/lgbm_model_txt_000.gzpart.b64",
+      "bundles/lgbm_model_txt_001_part0.b64",
+      "bundles/lgbm_model_txt_001_part1_0.b64",
+      "bundles/lgbm_model_txt_001_part1_1.b64",
+      "bundles/lgbm_model_txt_001_part1_2.b64",
+      "bundles/lgbm_model_txt_001_part1_3.b64",
+      "bundles/lgbm_model_txt_001_part2.b64",
+      "bundles/lgbm_model_txt_001_part3.b64",
+      "bundles/lgbm_model_txt_002.gzpart.b64",
+      "bundles/lgbm_model_txt_003.gzpart.b64"
+    ],
+    "compressed_bytes": 28709,
+    "compression": "gzip-sliced",
+    "output": "model/lgbm_model.txt",
+    "sha256": "040c53776910ec45fcedafc22f214c56193a0d219ae2ad7e52710388dd8bf9a8"
+  },
+  "parent_matched_pair_engine_v1.py": {
+    "bytes": 39247,
+    "chunks": [
+      "bundles/parent_matched_pair_engine_v1_py_000.gzpart.b64",
+      "bundles/parent_matched_pair_engine_v1_py_001.gzpart.b64"
+    ],
+    "compressed_bytes": 9576,
+    "compression": "gzip-sliced",
+    "output": "scripts/parent_matched_pair_engine_v1.py",
+    "sha256": "d0172c3e668fcf71dd1af79585834349e78ec69ae339926010bca499cd7bdab0"
+  },
+  "shadow_full95_all_q20_v1.py": {
+    "bytes": 45416,
+    "chunks": [
+      "bundles/shadow_full95_all_q20_v1_py_000_part0.b64",
+      "bundles/shadow_full95_all_q20_v1_py_000_part1.b64",
+      "bundles/shadow_full95_all_q20_v1_py_000_part2.b64",
+      "bundles/shadow_full95_all_q20_v1_py_000_part3.b64",
+      "bundles/shadow_full95_all_q20_v1_py_001.gzpart.b64"
+    ],
+    "compressed_bytes": 11649,
+    "compression": "gzip-sliced",
+    "output": "scripts/shadow_full95_all_q20_v1.py",
+    "sha256": "dc8ddb2108145563489cb305b854e947a1e6ac7dc499c2fb3f43ba655abda3e5"
+  }
+}

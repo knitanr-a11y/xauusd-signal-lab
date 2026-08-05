@@ -1,0 +1,6 @@
+{
+  "notification_type": "AUDIT_ONLY_FULL95_Q20_STATE_EPISODE",
+  "required_fields": ["Side", "Exact M1 entry", "Decision time", "Control", "AI Full95 Q20", "AI score / threshold", "Event ID"],
+  "orders": false,
+  "webhook_environment_variable": "BTC_AI_V1_FULL95_Q20_DISCORD_WEBHOOK_URL"
+}

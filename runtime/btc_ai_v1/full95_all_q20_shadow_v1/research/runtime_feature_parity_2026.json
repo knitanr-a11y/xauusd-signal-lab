@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "reference": "research_feature_table.pkl",
+  "comparison_period": "2026-01-01 <= entry_time < 2026-08-01",
+  "matched_episode_rows": 286,
+  "feature_count": 95,
+  "rows_with_any_difference_over_1e-10": 0,
+  "max_abs_difference": 2.842170943040401e-14,
+  "context_start_for_validation": "2025-09-01",
+  "historical_exact_m1_context_exclusions": [
+    {
+      "decision_time": "2026-03-29T04:00:00",
+      "reason": "MISSING_EXACT_DECISION_M1_CONTEXT_ONLY"
+    }
+  ],
+  "diagnostics": {
+    "context_closed_trades_before_watermark": 187,
+    "context_total_closed_trades": 476,
+    "context_last_state": "LONG",
+    "context_current_position": {
+      "arm": "CONTEXT_CONTROL_COUNTERFACTUAL",
+      "entry_event_id": "84af5f3d046530e75ed0",
+      "direction": "LONG",
+      "entry_idx": 1878393,
+      "entry_time": "2026-08-02 04:00:00",
+      "entry_price": 62824.7,
+      "entry_atr": 73.25901792421199,
+      "initial_stop": 62531.66392830315,
+      "lock_trigger": 62971.21803584842,
+      "lock_stop": 62843.01475448105,
+      "lock_active": true,
+      "lock_trigger_idx": 1878407,
+      "monitor_idx": 1879593
+    }
+  }
+}
