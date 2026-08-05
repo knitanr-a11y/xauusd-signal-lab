@@ -1,0 +1,38 @@
+{
+  "assets": [
+    {
+      "path": "scripts/btc_ai_v1/shadow_day_open_matched_pair_v1.py",
+      "sha256": "d0172c3e668fcf71dd1af79585834349e78ec69ae339926010bca499cd7bdab0"
+    },
+    {
+      "path": "config/btc_ai_v1/shadow_day_open_matched_pair_v1/frozen_contract.json",
+      "sha256": "9c373f192d3a8583b4ad7c7cb93538be5beda0cb3153f70cdfca70496fe2afc4"
+    },
+    {
+      "path": "config/btc_ai_v1/shadow_day_open_matched_pair_v1/activation_authorization_20260805.json",
+      "sha256": "6f40d081fbe6342de947a66c563f9814d8464e3c2d99e424020023f74fb01f60"
+    },
+    {
+      "path": "config/btc_ai_v1/shadow_day_open_matched_pair_v1/discord_entry_schema.json",
+      "sha256": "e0aef4024ceb84d1d276d60822a4a163e7be04b5855526a53cb32f90b085c903"
+    },
+    {
+      "path": "config/btc_ai_v1/shadow_day_open_matched_pair_v1/runtime_state_schema.json",
+      "sha256": "a095db2b28321a2006c7621c3d60335c544b0cbdac976aaf7e3a6519ebccfa0f"
+    },
+    {
+      "path": "tests/btc_ai_v1/test_shadow_day_open_matched_pair_v1.py",
+      "sha256": "3d5e06853a69bd58dc2707d670cb73c94add767bb74873409cdce2da53d8fbc1"
+    },
+    {
+      "path": "docs/btc_ai_v1/BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_IMPLEMENTATION_20260805.md",
+      "sha256": "422001504be54708c7629540c54b46c91c49983765d334979b8926ac6505b407"
+    }
+  ],
+  "contract_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_20260805",
+  "created_at_user_local": "2026-08-05T08:03:00+09:00",
+  "edit_policy": "NO_IN_PLACE_EDITS_AFTER_ACTIVATION_NEW_VERSION_AND_NEW_CUTOFF_REQUIRED",
+  "manifest_version": 1,
+  "paths_relative_to": "repo_root",
+  "shadow_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1"
+}

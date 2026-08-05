@@ -1,0 +1,7 @@
+{
+  "decision": "RETAIN_ONE_EPISODE_AFTER_FULL_STOP_COOLDOWN_AS_POST_HOC_ECONOMIC_LEAD_ONLY",
+  "reason": "It passed all frozen economic, temporal, robustness, direction, concentration, retention, and matched-loss-selectivity gates, but did not improve win rate by the preregistered 2 points.",
+  "recommended_prospective_design_if_authorized": "Matched-pair no-backfill Shadow: frozen LOCK_0P25ATR parent versus the same parent plus exactly one skipped state episode after INITIAL_SL or INITIAL_SL_GAP_OPEN.",
+  "do_not_combine": ["static risk-flag filter", "additional threshold", "direction/month/year/volatility filter"],
+  "fresh_shadow_requires_separate_user_authorization": true
+}

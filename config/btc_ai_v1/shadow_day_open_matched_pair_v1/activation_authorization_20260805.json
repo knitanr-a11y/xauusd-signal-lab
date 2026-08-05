@@ -1,0 +1,15 @@
+{
+  "authorization_id": "BTC_AI_V1_DAY_OPEN_MATCHED_PAIR_SHADOW_V1_AUTH_20260805",
+  "authorized_at_user_local": "2026-08-05T08:03:00+09:00",
+  "authorized_action": "IMPLEMENT_AND_INITIALIZE_FRESH_NO_BACKFILL_MATCHED_PAIR_SHADOW_WITH_DISCORD_ENTRY_NOTIFICATIONS",
+  "branch_policy": "USE_CURRENT_BRANCH_AND_FREEZE_SHADOW_ASSETS_BY_PATH_AND_SHA256",
+  "authorized_arms": [
+    "CONTROL_LOCK_0P25ATR",
+    "COOLDOWN_SKIP_NEXT_AFTER_INITIAL_STOP"
+  ],
+  "discord_scope": "ENTRY_POINT_AUDIT_NOTIFICATION_ONLY",
+  "orders_authorized": false,
+  "runtime_initialization": "MUST_RUN_WHERE_CURRENT_MT5_CSV_AND_WEBHOOK_SECRET_EXIST",
+  "historical_backfill_authorized": false,
+  "stage55_change_authorized": false
+}
