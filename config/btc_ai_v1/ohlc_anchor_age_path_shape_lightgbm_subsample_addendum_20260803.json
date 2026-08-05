@@ -1,0 +1,24 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_ANCHOR_PATH_SHAPE_LGBM_SUBSAMPLE_FREQ_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_ACCEPTED_MODEL_OUTCOMES",
+  "issue": "The initial dry-run wrapper set subsample=0.8 but omitted subsample_freq. In LightGBM this leaves row bagging disabled and does not satisfy the preregistered model contract.",
+  "correction": {
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "feature_fraction": 0.8,
+    "total_boosting_rounds": 350,
+    "checkpoint_training": "175 + 175 rounds with identical parameters and init_model continuation",
+    "initial_2024_fold_metrics_invalidated": true,
+    "partial_2025_models_invalidated": true,
+    "accepted_results_require_all_four_folds_rerun": true
+  },
+  "unchanged": [
+    "data rows and targets",
+    "anchor definitions and ages",
+    "features",
+    "folds",
+    "model depth, leaves, learning rate and regularization",
+    "support gates"
+  ]
+}

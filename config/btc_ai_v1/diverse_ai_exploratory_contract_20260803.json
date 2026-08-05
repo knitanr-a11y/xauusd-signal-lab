@@ -1,0 +1,32 @@
+{
+  "contract_id": "BTC_AI_V1_12_DIVERSE_AI_EXPLORATORY_CYCLE_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_DIVERSE_AI_OUTCOME_COMPUTATION",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "development_calendar_months": 24,
+  "consumed_2026_period_role": "FORENSIC_DIAGNOSTIC_ONLY_NOT_SELECTION",
+  "fixed_spread_usd_per_btc": 22.5,
+  "label": {
+    "target_atr": 1.5,
+    "stop_atr": 1.0,
+    "horizon_exact_m1_minutes": 720,
+    "same_m1_collision": "SL_FIRST"
+  },
+  "models": [
+    {"id":"XGB_D3","type":"XGBoost","params":{"n_estimators":250,"learning_rate":0.03,"max_depth":3,"min_child_weight":50,"subsample":0.8,"colsample_bytree":0.8,"reg_lambda":2.0,"tree_method":"hist","random_state":20260803}},
+    {"id":"CAT_D4","type":"CatBoost","params":{"iterations":250,"learning_rate":0.03,"depth":4,"l2_leaf_reg":5.0,"random_seed":20260803}},
+    {"id":"EXTRA_D8","type":"ExtraTrees","params":{"n_estimators":300,"max_depth":8,"min_samples_leaf":100,"max_features":0.7,"class_weight":"balanced","random_state":20260803}},
+    {"id":"HGB_L15","type":"HistGradientBoosting","params":{"max_iter":250,"learning_rate":0.04,"max_leaf_nodes":15,"min_samples_leaf":200,"l2_regularization":2.0,"random_state":20260803}},
+    {"id":"RANK_ENSEMBLE","type":"EqualWeightFoldPercentileRankEnsemble","members":["XGB_D3","CAT_D4","EXTRA_D8","HGB_L15"]}
+  ],
+  "feature_sets": ["MTF_CONTEXT","FULL_CAUSAL"],
+  "directions": ["LONG","SHORT"],
+  "percentiles": [0.9,0.95,0.975],
+  "event_policies": ["FIRST_CROSS_FROM_BELOW","FOUR_M15_BAR_COOLDOWN"],
+  "raw_candidate_count": 120,
+  "capability_survivors_max": 60,
+  "development_shortlist_max": 20,
+  "exploratory_survivors_max": 5,
+  "final_test_replay": false,
+  "classification_ceiling": "EXPLORATORY_PROSPECTIVE_ONLY"
+}

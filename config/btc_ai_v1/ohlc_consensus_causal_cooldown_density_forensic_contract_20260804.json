@@ -1,0 +1,30 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_CONSENSUS_CAUSAL_COOLDOWN_DENSITY_FORENSIC_20260804",
+  "date": "2026-08-04",
+  "stage": 35,
+  "status": "FROZEN_BEFORE_STAGE35_OUTCOMES",
+  "parent_result": "BTC_AI_V1_OHLC_EXPANDING_DECAY_CONSENSUS_NO_SUPPORTED_HALF_LIFE",
+  "objective": "Determine whether consensus counts are inflated by adjacent M15 repeats and whether causal first-signal cooldowns preserve lift at independently usable density.",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "period": "2024-01 through 2025-12",
+    "2026_authorized": false,
+    "candidate_pnl_authorized": false
+  },
+  "inputs": ["Stage34 consensus_event_audit.csv.gz"],
+  "cooldowns_hours": [1, 4, 12],
+  "selection": "For each schedule and direction in chronological order, accept a consensus event only when decision_time >= last accepted decision_time + cooldown. Cooldown carries across calendar-month boundaries. No label is used.",
+  "outputs": ["accepted events per month", "accepted months with at least 10 events", "median monthly events", "label lift and improvement versus raw consensus", "D1 and year lift", "suppression rate", "inter-arrival distribution"],
+  "support_gates": {
+    "calendar_months": 24,
+    "months_with_at_least_10_events_min": 20,
+    "median_monthly_events_min": 15,
+    "mean_lift_improvement_vs_raw_consensus_min": 0.02,
+    "positive_improvement_months_min": 15,
+    "positive_absolute_lift_both_2024_and_2025": true,
+    "positive_absolute_lift_all_D1_regimes": true,
+    "maximum_single_halfyear_positive_improvement_share": 0.5,
+    "same_half_life_and_cooldown_pass_LONG_and_SHORT": true
+  },
+  "prohibitions": ["no label-aware dedup", "no reset at favorable months", "no post-result cooldown/side/D1 rescue", "no PnL", "no 2026", "no Shadow, Discord, MT5 orders, live-ready or final signal"]
+}

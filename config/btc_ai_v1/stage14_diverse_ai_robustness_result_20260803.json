@@ -1,0 +1,17 @@
+{
+  "stage": "BTC_AI_V1_14_DIVERSE_AI_ROBUSTNESS",
+  "status": "COMPLETE_EXPLORATORY_SURVIVORS_FROZEN",
+  "evaluation_period": "[2024-01-01, 2026-01-01)",
+  "evaluation_calendar_months": 24,
+  "shortlist_count": 4,
+  "bootstrap_pass": 2,
+  "matched_random_pass": 4,
+  "pseudo_state_pass": 4,
+  "parameter_neighborhood_pass": 4,
+  "all_robustness_pass": 2,
+  "exploratory_survivors": ["ML3_070", "ML3_011"],
+  "classification_ceiling": "EXPLORATORY_PROSPECTIVE_ONLY",
+  "results_sha256": "fe127a46b5c98a7f8b06bd65c85650de305dec3b267a02318cb890114e81e6aa",
+  "survivor_registry_sha256": "eb2a225b536e0a2175476f1d036c1dc93f9784b4cf34b9b028ba001b6490e575",
+  "untouched_final_test_available": false
+}

@@ -1,0 +1,57 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DRIFT_ATTRIBUTION_AND_RANK_STABILITY_FORENSIC_20260804",
+  "date": "2026-08-04",
+  "stage": 32,
+  "status": "FROZEN_BEFORE_STAGE32_DIAGNOSTIC_RESULTS",
+  "parent_result": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_NO_SUPPORTED_SCHEDULE",
+  "objective": "Determine whether hard-window failure is caused by sample loss, score-rank instability, or state-dependent label meaning drift before testing any new adaptive gate.",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "period": "2024-01 through 2025-12",
+    "2026_authorized": false,
+    "candidate_pnl_authorized": false,
+    "external_or_volume_features": false
+  },
+  "inputs": [
+    "Stage31 monthly prediction audit",
+    "Stage31 monthly metrics",
+    "Stage31 feature PSI",
+    "frozen D1 regimes and labels"
+  ],
+  "comparisons": [
+    "monthly score Spearman between EXPANDING and each rolling schedule by direction",
+    "P90 selection Jaccard overlap and common-versus-exclusive label rates",
+    "previous-month score PSI and feature PSI versus next-month AUC and lift difference",
+    "rank stability by D1 UP NEUTRAL DOWN and half-year",
+    "training sample size and positive-rate change versus ordering change"
+  ],
+  "causal_candidate_inputs_allowed_for_later_gate": [
+    "previous complete month score PSI",
+    "previous complete month feature PSI",
+    "current refit training row count and class rate",
+    "current refit model-score disagreement on past-only calibration rows"
+  ],
+  "forbidden_for_later_gate": [
+    "current validation-month labels",
+    "future AUC or P90 lift",
+    "2026 outcomes",
+    "post-result month or D1 selection",
+    "candidate PnL",
+    "Stage29 family or age rescue",
+    "Stage30 state rescue"
+  ],
+  "diagnostic_requirements": {
+    "calendar_months": 24,
+    "report_all_directions_schedules_months": true,
+    "both_2024_and_2025": true,
+    "all_D1_regimes": true,
+    "no_new_signal_or_schedule_selection_in_stage32": true
+  },
+  "authorization": {
+    "shadow": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}

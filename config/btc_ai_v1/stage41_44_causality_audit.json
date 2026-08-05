@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "contract_hashes": {
+    "btc_stage41_contract_20260804.json": "97eb2f1f809cf511c7b7fc331dda986f32ecdfa904d5da69086e6aa53791ae58",
+    "btc_stage42_interaction_hypothesis_contract_20260804.json": "26a926620593bb71a65688b1acc89bc52716fa3382046f7c20c81c030fd5a4ea",
+    "btc_stage43_geometry_contract_20260804.json": "5760a55e1b4a8e9eca0dd48e92d181265a77539a76fd264bf27386208fa37250",
+    "btc_stage44_robustness_contract_20260804.json": "372f8bfef14cf570c31b5fef54a9853623be49d8f4f22be0e838bb3aa52d17a9"
+  },
+  "max_decision_time": {
+    "stage41_track_a": "2025-12-31 23:45:00",
+    "stage41_track_b": "2025-12-31 20:15:00",
+    "stage42": "2025-12-29 03:45:00",
+    "stage43": "2025-12-31 22:45:00"
+  },
+  "checks": {
+    "2026_rows_used": 0,
+    "external_or_volume_features_used": 0,
+    "track_a_selection_uses_2023_columns_only": true,
+    "stage42_policy_contract_frozen_before_execution": true,
+    "stage44_contract_frozen_before_robustness_execution": true,
+    "post_result_interaction_not_misrepresented_as_untouched": true
+  }
+}

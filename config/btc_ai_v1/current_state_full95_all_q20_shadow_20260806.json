@@ -1,0 +1,32 @@
+{
+  "date": "2026-08-06",
+  "formal_status": "BTC_AI_V1_STAGE55_ACTIVE_FULL95_ALL_Q20_SHADOW_IMPLEMENTED_NOT_ACTIVATED",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "candidate_id": "FULL95_ALL_Q20",
+  "package_root": "runtime/btc_ai_v1/full95_all_q20_shadow_v1",
+  "github_implementation_complete": true,
+  "user_pc_activated": false,
+  "activation_cutoff_mt5": null,
+  "no_backfill": true,
+  "matched_arms": [
+    "CONTROL_LOCK_0P25ATR",
+    "AI_FULL95_ALL_Q20"
+  ],
+  "historical_evidence": "CONSUMED_POSTHOC_NOT_FORMAL",
+  "model_retraining_after_activation": false,
+  "candidate_switching_after_activation": false,
+  "stage55": {
+    "continues_running": true,
+    "frozen": true,
+    "activation_cutoff_mt5": "2026-08-04 10:52:00",
+    "modified_by_full95_work": false,
+    "state_reset": false
+  },
+  "discord": "ENTRY_AUDIT_OUTBOX_OPTIONAL_NO_RESEARCH_EFFECT",
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "automatic_promotion": false
+}

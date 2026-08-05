@@ -1,0 +1,136 @@
+{
+  "contract_id": "BTC_AI_V1_STAGE55_DUAL_FALSE_LONG_REVERSAL_SHORT_PROSPECTIVE_SHADOW",
+  "contract_version": "2026-08-04-v1",
+  "formal_status": "PROSPECTIVE_OBSERVATION_ONLY_POST_SELECTION_OVERFIT_TEST",
+  "authorization": {
+    "prospective_shadow": true,
+    "observation_only": true,
+    "discord": false,
+    "mt5_order": false,
+    "live_trading": false,
+    "automatic_promotion": false,
+    "final_signal": false
+  },
+  "instrument": "BTCUSD#",
+  "activation": {
+    "mode": "NO_BACKFILL",
+    "contract_date": "2026-08-04",
+    "actual_cutoff": "LATEST_CLOSED_M1_AT_FIRST_ACTIVATION",
+    "active_source_positions_at_activation": "MARK_CONSUMED",
+    "missed_after_long_runtime_gap": "RECOVERY_REPLAY_NOT_TRADED",
+    "max_recoverable_poll_gap_minutes": 10
+  },
+  "time_contract": {
+    "basis": "MT5_BROKER_SERVER_NAIVE",
+    "closed_bars_only": true,
+    "open_or_asof_bars": "PROHIBITED",
+    "entry": "NEXT_EXACT_M1_OPEN_AT_CONFIRMATION_CLOSE_TIME",
+    "m1_gap": "INVALIDATE_CANDIDATE",
+    "same_m1_sl_tp_collision": "SL_FIRST",
+    "fallback": "PROHIBITED"
+  },
+  "cost_contract": {
+    "roundtrip_fixed_usd": 22.5,
+    "applied_per_short_trade": true
+  },
+  "source_long_grammar": {
+    "upper_trend": "H4 close > EMA20 > EMA50; EMA20 slope3/ATR > 0; ADX14 >= 18",
+    "setup": "last closed M15 close > EMA20 > EMA50; current Donchian20 high is breakout level",
+    "timing_zone": "trigger close remains 0.00 to 0.50 M15 ATR below breakout level",
+    "trigger": "BASE two-bar bullish reversal",
+    "source_one_position": "SEPARATE_BY_M1_AND_M5_SOURCE",
+    "M1_source_stop": "0.50 M15 ATR",
+    "M5_source_stop": "prior five-bar M5 low - 0.10 M5 ATR",
+    "source_exit": "H4 trend end or 1440 exact M1 minutes"
+  },
+  "candidate_families": [
+    {
+      "id": "M1_CP30_Q70_M1_BEARISH_EMA20_15M_SHORT_TP2R_MAX240",
+      "source": "M1_TWO_BAR_LONG_SOURCE",
+      "detector": {
+        "checkpoint_minutes": 30,
+        "model": "LOGISTIC_C0.5_BALANCED",
+        "threshold": "TRAIN_SCORE_Q70",
+        "training": "FROZEN_BOOTSTRAP_THROUGH_2026_07_NO_FUTURE_REFIT_DURING_STAGE55",
+        "pooled_training_sources": [
+          "M5_EMA_RECLAIM",
+          "M5_TWO_BAR",
+          "M1_TWO_BAR"
+        ],
+        "model_artifact": "config/m1_cp30_logistic_q70_bootstrap_model_202608.json",
+        "model_artifact_sha256": "8c57a94efa03dd3c7ff9527e11f860e7e77d52a80f4f6bfadb26da97255c11a0",
+        "resolved_history": "data/m1_cp30_resolved_checkpoint_history_through_202607.csv",
+        "resolved_history_sha256": "2d381113298a2e24dc9803aedcab9e8fc1c710a80a0907e4946981af4ed8e1cc",
+        "resolved_history_distribution": "PACKAGE_ONLY_REPRODUCIBILITY_INPUT_NOT_REQUIRED_BY_RUNTIME"
+      },
+      "confirmation": "within 15 minutes after alert, closed M1 close < EMA20 and body <= -0.10 M1 ATR",
+      "entry": "next exact M1 open",
+      "stop": "recent five closed M5 highs + 0.10 current M5 ATR",
+      "target": "2R",
+      "max_hold_exact_m1_minutes": 240,
+      "one_position": "WITHIN_FAMILY"
+    },
+    {
+      "id": "M5_LEVEL_REJECTION_010_M5_TWO_BAR_BEARISH_SHORT_TP2R_MAX480",
+      "source": "M5_TWO_BAR_LONG_SOURCE",
+      "detector": "first checkpoint at 15 or 30 minutes where level reached within 0.05 M15 ATR, close <= level - 0.10 M15 ATR, bearish body",
+      "confirmation": "within 30 minutes after alert, closed M5 two-bar bearish reversal with body <= -0.10 M5 ATR",
+      "entry": "next exact M1 open",
+      "stop": "highest M5 high since source LONG decision + 0.10 confirmation M5 ATR",
+      "target": "2R",
+      "max_hold_exact_m1_minutes": 480,
+      "one_position": "WITHIN_FAMILY"
+    }
+  ],
+  "historical_translation_audit": {
+    "source_M1_timestamps": "972/972",
+    "source_M5_timestamps": "326/326",
+    "M5_shadow_rule_path_timestamps": "57/57",
+    "M1_monthly_research_procedure_timestamps": "51/52",
+    "M1_excluded_gap_case": "2023-10-08 02:22 entry; exact 02:21 M1 open absent",
+    "prospective_M1_detector": "FROZEN_2026_08_BOOTSTRAP_MODEL; historical PnL is not reinterpreted as a new backtest",
+    "interpretation": "Shadow fails closed on exact-M1 gaps and uses a frozen activation model to avoid post-activation refit discretion."
+  },
+  "observation_gate": {
+    "minimum_closed_trades_per_family": 20,
+    "minimum_calendar_months": 6,
+    "evaluate_when": "BOTH_REQUIREMENTS_MET",
+    "report_only": [
+      "trades",
+      "wins",
+      "PF",
+      "net",
+      "max_drawdown",
+      "monthly_results",
+      "largest_winner_removed",
+      "cost_2x_diagnostic"
+    ],
+    "automatic_candidate_deletion": false,
+    "automatic_parameter_change": false,
+    "automatic_promotion": false
+  },
+  "runtime": {
+    "state_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow",
+    "primary_outputs": [
+      "shadow_candidate_ledger.csv",
+      "shadow_trade_ledger.csv",
+      "source_m1_synthetic_long_ledger.csv",
+      "source_m5_synthetic_long_ledger.csv"
+    ],
+    "runtime_state": "runtime_state.json",
+    "runtime_health": "runtime_health.json"
+  },
+  "frozen_prohibitions": [
+    "DO_NOT_CHANGE_Q70_OR_CHECKPOINT_30",
+    "DO_NOT_CHANGE_M1_CONFIRMATION_15M",
+    "DO_NOT_CHANGE_LEVEL_REJECTION_010",
+    "DO_NOT_CHANGE_M5_TWO_BAR_CONFIRMATION",
+    "DO_NOT_CHANGE_STOPS",
+    "DO_NOT_CHANGE_TP2R",
+    "DO_NOT_CHANGE_MAX_HOLD",
+    "DO_NOT_DELETE_UNFAVORABLE_SIGNALS",
+    "DO_NOT_BACKFILL_PRE_ACTIVATION",
+    "DO_NOT_CONNECT_DISCORD_OR_MT5_ORDER",
+    "DO_NOT_CALL_STAGE54_POST_SELECTION_RESULTS_FORMAL_VALIDATION"
+  ]
+}

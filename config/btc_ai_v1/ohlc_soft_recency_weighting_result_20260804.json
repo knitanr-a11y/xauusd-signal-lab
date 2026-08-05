@@ -1,0 +1,27 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_SOFT_RECENCY_WEIGHTING_FORENSIC_20260804",
+  "formal_status": "BTC_AI_V1_OHLC_SOFT_RECENCY_WEIGHTING_NO_SUPPORTED_HALF_LIFE",
+  "formal_months": 24,
+  "weighted_schedule_direction_rows": 192,
+  "available_rows": 192,
+  "leakage_violation_count": 0,
+  "supported_half_lives": [],
+  "supported_half_life_count": 0,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false,
+  "direction_summary": [
+    {"schedule":"EXP_DECAY_HL3M","direction":"LONG","mean_auc_improvement":0.0004283581479531,"positive_auc_months":14,"mean_p90_lift_improvement":0.0387063832192994,"positive_p90_lift_months":15,"median_score_psi":0.3543899668042787,"pass":false},
+    {"schedule":"EXP_DECAY_HL3M","direction":"SHORT","mean_auc_improvement":-0.0128016421631032,"positive_auc_months":8,"mean_p90_lift_improvement":0.0029877327218877,"positive_p90_lift_months":10,"median_score_psi":0.4523069077394266,"pass":false},
+    {"schedule":"EXP_DECAY_HL6M","direction":"LONG","mean_auc_improvement":0.0024362727984945,"positive_auc_months":14,"mean_p90_lift_improvement":-0.0064657778901341,"positive_p90_lift_months":11,"median_score_psi":0.1860800425631321,"pass":false},
+    {"schedule":"EXP_DECAY_HL6M","direction":"SHORT","mean_auc_improvement":-0.007236728776711,"positive_auc_months":9,"mean_p90_lift_improvement":0.0205499629474213,"positive_p90_lift_months":11,"median_score_psi":0.2227622269849471,"pass":false},
+    {"schedule":"EXP_DECAY_HL12M","direction":"LONG","mean_auc_improvement":0.0021010717944752,"positive_auc_months":15,"mean_p90_lift_improvement":-0.0166591764863038,"positive_p90_lift_months":13,"median_score_psi":0.1642598257945008,"pass":false},
+    {"schedule":"EXP_DECAY_HL12M","direction":"SHORT","mean_auc_improvement":-0.0047181284150065,"positive_auc_months":5,"mean_p90_lift_improvement":0.0113353802846283,"positive_p90_lift_months":15,"median_score_psi":0.1709382696937532,"pass":false},
+    {"schedule":"EXP_DECAY_HL24M","direction":"LONG","mean_auc_improvement":0.0019569260866405,"positive_auc_months":13,"mean_p90_lift_improvement":-0.0154931023716466,"positive_p90_lift_months":12,"median_score_psi":0.1553675797610424,"pass":false},
+    {"schedule":"EXP_DECAY_HL24M","direction":"SHORT","mean_auc_improvement":-0.0041276560424667,"positive_auc_months":8,"mean_p90_lift_improvement":-0.0077395950021244,"positive_p90_lift_months":10,"median_score_psi":0.163416951846972,"pass":false}
+  ]
+}

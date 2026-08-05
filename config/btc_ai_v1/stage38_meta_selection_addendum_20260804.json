@@ -1,0 +1,16 @@
+{
+  "addendum_id": "BTC_AI_V1_STAGE38_META_SELECTION_TIEBREAK_20260804",
+  "frozen_before_meta_results": true,
+  "selection_scope": "one configuration per direction selected from 2024-07 through 2024-12 only",
+  "eligibility": "contract discovery gate",
+  "tie_break_order": [
+    "positive discovery quarters descending",
+    "discovery PF descending",
+    "discovery net descending",
+    "discovery completed trades descending",
+    "discovery max drawdown ascending",
+    "configuration id ascending"
+  ],
+  "combined_stack": "the frozen LONG and SHORT winners are combined with one global position; simultaneous opposite signals cancel; simultaneous same-direction signals choose the lower lexicographic configuration id",
+  "no_2025_deletion": true
+}

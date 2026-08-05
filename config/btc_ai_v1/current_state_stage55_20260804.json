@@ -1,0 +1,42 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_STAGE55_DUAL_REVERSE_SHORT_PROSPECTIVE_SHADOW_ACTIVE_ON_USER_PC_SIMPLE_DISCRETIONARY_RULE_RESEARCH_AUTHORIZED_SEPARATELY",
+  "stage54_formal_survivors": 0,
+  "shadow_basis": "POST_SELECTION_DIAGNOSTIC_TWO_FAMILIES",
+  "prospective_shadow_authorized": true,
+  "package_implemented": true,
+  "user_pc_activated": true,
+  "activation_status": "READY_NO_BACKFILL_ACTIVATED",
+  "activation_cutoff_mt5": "2026-08-04 10:52:00",
+  "accepted_candidates_at_activation": 0,
+  "families": [
+    "M1_CP30_Q70_M1_BEARISH_EMA20_15M_SHORT_TP2R_MAX240",
+    "M5_LEVEL_REJECTION_010_M5_TWO_BAR_BEARISH_SHORT_TP2R_MAX480"
+  ],
+  "observation_only": true,
+  "discord_entry_notification_authorized": true,
+  "discord_entry_sidecar_implemented": true,
+  "discord_enabled_in_local_config": true,
+  "discord_notifier_started_user_reported": true,
+  "discord_real_test_receipt_explicitly_recorded": false,
+  "discord_delivery": "ENTRY_ONLY_SIDECAR_NO_RESEARCH_EFFECT_NO_BACKFILL",
+  "windows_runtime_fixes": {
+    "live_csv_comma_delimiter_supported": true,
+    "research_csv_semicolon_delimiter_still_supported": true,
+    "console_title_and_log_label": "BTC_STAGE55_SHADOW",
+    "activation_state_reset": false
+  },
+  "runtime_state_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow",
+  "minimum_closed_trades_per_family": 20,
+  "minimum_calendar_months": 6,
+  "new_research_authorized": {
+    "direction": "SIMPLE_HUMAN_READABLE_DISCRETIONARY_STYLE_RULES",
+    "must_be_separate_from_stage55": true,
+    "historical_data_status": "CONSUMED_RETROSPECTIVE_EXPLORATION_ONLY",
+    "promotion_requires_fresh_no_backfill_prospective_evidence": true
+  },
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false
+}

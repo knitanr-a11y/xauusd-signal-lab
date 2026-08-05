@@ -1,0 +1,38 @@
+{
+  "date": "2026-08-03",
+  "status": "COMPLETE_NO_FORMAL_SURVIVOR",
+  "raw_candidates": 48,
+  "capability_survivors": 42,
+  "execution_configs": 336,
+  "positive_net_configs": 143,
+  "pf_ge_1_20_configs": 32,
+  "formal_survivors": 0,
+  "maximum_pf": 1.4538306464,
+  "early_impulse_best": {
+    "candidate_id": "PX7_008",
+    "phase": "EARLY_IMPULSE",
+    "direction": "LONG",
+    "completed_trades": 64,
+    "trades_per_calendar_month": 2.6666666667,
+    "profit_factor": 1.4538306464,
+    "net_usd": 3797.8079445,
+    "positive_months": 13,
+    "positive_halfyears": 4,
+    "promoted": false
+  },
+  "range_neutral_best": {
+    "candidate_id": "PX7_003",
+    "phase": "RANGE_NEUTRAL",
+    "direction": "LONG",
+    "completed_trades": 268,
+    "trades_per_calendar_month": 11.1666666667,
+    "profit_factor": 1.370436,
+    "net_usd": 15805.216349,
+    "positive_months": 17,
+    "positive_halfyears": 4,
+    "failed_gate": "transition_gross_profit_concentration",
+    "promoted": false
+  },
+  "2026_opened": false,
+  "conclusion": "PHASE_CONDITIONAL_SCORING_SHOWED_VALUE_BUT_TRANSFER_CONTRACT_NOT_SATISFIED"
+}

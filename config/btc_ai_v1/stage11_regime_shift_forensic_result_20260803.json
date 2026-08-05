@@ -1,0 +1,38 @@
+{
+  "stage": "BTC_AI_V1_11_SECOND_CYCLE_REGIME_SHIFT_FORENSIC_NO_RESCUE",
+  "date": "2026-08-03",
+  "status": "COMPLETE_DIAGNOSTIC_ONLY_NO_RESCUE",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "forensic_period": "[2026-01-01, 2026-08-01)",
+  "forensic_calendar_months": 7,
+  "short_label_rate_development_halves": {
+    "2024H1": 0.3351296932,
+    "2024H2": 0.3552391384,
+    "2025H1": 0.3577354522,
+    "2025H2": 0.3680719765
+  },
+  "short_label_rate_2026_7m": 0.3653386454,
+  "largest_feature_drift": {
+    "feature": "d1_ema20_slope4_atr",
+    "psi": 1.4414085595,
+    "development_mean": 0.1243024070,
+    "forensic_mean": -0.1231814092,
+    "standardized_mean_shift": -0.4774802853
+  },
+  "daily_trend_mean": {
+    "development": 0.1888647846,
+    "forensic": -0.3159241939
+  },
+  "finalist_auc_range_2026": [0.5080113930, 0.5231679150],
+  "finalist_event_lift_vs_baseline": {
+    "ML2_126": 0.9235222668,
+    "ML2_106": 1.0454531685,
+    "ML2_127": 0.9601876374,
+    "ML2_090": 0.9271115489,
+    "ML2_104": 0.9700204710
+  },
+  "formal_conclusion": "REGIME_AND_CONDITIONAL_RELATIONSHIP_SHIFT_MODEL_DISCRIMINATION_COLLAPSE",
+  "candidate_selection_performed": false,
+  "candidate_rescue_performed": false,
+  "2026_reuse_for_selection": false
+}

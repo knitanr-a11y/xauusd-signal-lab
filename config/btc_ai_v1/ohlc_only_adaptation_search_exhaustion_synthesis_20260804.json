@@ -1,0 +1,22 @@
+{
+  "document_id": "BTC_AI_V1_OHLC_ONLY_ADAPTATION_SEARCH_EXHAUSTION_SYNTHESIS_20260804",
+  "date": "2026-08-04",
+  "stage": 36,
+  "formal_status": "BTC_AI_V1_OHLC_ONLY_ORDERING_AND_ADAPTATION_SEARCH_EXHAUSTED_THROUGH_STAGE35_NO_SUPPORTED_CANDIDATE",
+  "scope": "Accepted XM BTCUSD# closed-bar OHLC, 2024-2025 formal selection period, exact-M1 labels, no external or volume data.",
+  "evidence": [
+    {"stage":31,"test":"hard rolling 3/6/12M","result":"0 supported schedules; hard windows reduced samples and harmed SHORT ordering"},
+    {"stage":32,"test":"drift attribution and rank stability","result":"past-visible rank instability confirmed; no past-only diagnostic consistently predicted next-month benefit"},
+    {"stage":33,"test":"soft exponential recency 3/6/12/24M","result":"0 supported half-lives; LONG local improvements did not transfer to SHORT or all gates"},
+    {"stage":34,"test":"expanding/decay P90 consensus intersection","result":"0 supported half-lives; precision gains failed density, persistence, D1 or both directions"},
+    {"stage":35,"test":"causal 1/4/12h cooldown","result":"0 supported configurations; cooldown generally reduced lift and density"}
+  ],
+  "supported_candidates": 0,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "stop_rule": {
+    "no_more_allowed_without_new_preregistration_and_user_authorization": ["additional half-life/window/threshold/cooldown grids", "post-result LONG-only or SHORT-only rescue", "month/D1/volatility filtering selected from these outcomes", "candidate PnL opening", "2026 schedule selection"],
+    "valid_future_research_requires_one_of": ["a genuinely new causal information source explicitly authorized by the user", "a new label/execution objective frozen before viewing its outcomes", "new prospective data collected after a frozen candidate exists"]
+  },
+  "authorization": {"shadow":false,"discord":false,"mt5_orders":false,"live_ready":false,"final_signal":false}
+}

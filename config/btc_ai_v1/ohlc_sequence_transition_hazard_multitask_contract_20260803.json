@@ -1,0 +1,198 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_SEQUENCE_TRANSITION_HAZARD_MULTITASK_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_OUTCOME_INSPECTION",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC snapshot",
+    "allowed_timeframes": ["M1", "M15", "H1", "H4", "D1"],
+    "time_semantics": "MT5 broker-server naive time",
+    "external_data": false,
+    "volume_features": false,
+    "spread_feature": false,
+    "fixed_spread_usd_per_btc": 22.5
+  },
+  "development_folds": [
+    {
+      "id": "2024H1",
+      "fit": "[2023-01-01, 2023-07-01)",
+      "calibration": "[2023-07-01, 2024-01-01)",
+      "validation": "[2024-01-01, 2024-07-01)"
+    },
+    {
+      "id": "2024H2",
+      "fit": "[2023-01-01, 2024-01-01)",
+      "calibration": "[2024-01-01, 2024-07-01)",
+      "validation": "[2024-07-01, 2025-01-01)"
+    },
+    {
+      "id": "2025H1",
+      "fit": "[2023-01-01, 2024-07-01)",
+      "calibration": "[2024-07-01, 2025-01-01)",
+      "validation": "[2025-01-01, 2025-07-01)"
+    },
+    {
+      "id": "2025H2",
+      "fit": "[2023-01-01, 2025-01-01)",
+      "calibration": "[2025-01-01, 2025-07-01)",
+      "validation": "[2025-07-01, 2026-01-01)"
+    }
+  ],
+  "sequence_contract": {
+    "decision_grid": "closed M15",
+    "sequence_length_m15": 64,
+    "lookback_hours": 16,
+    "sequence_continuity": "all 64 M15 timestamps must be exactly 15 minutes apart",
+    "static_context": "last fully closed H1, H4 and D1 OHLC-derived context at decision time",
+    "normalization": "fit-period median and IQR only; IQR floor 1e-6",
+    "missing_values": "fit-period median after causal feature creation",
+    "raw_price_levels": false
+  },
+  "sequence_features": [
+    "ret1_atr", "ret4_atr", "ret16_atr", "ret32_atr",
+    "range_atr", "body_frac", "upper_wick_frac", "lower_wick_frac", "close_pos",
+    "dist_ema20_atr", "dist_ema50_atr", "ema20_slope4_atr", "ema50_slope8_atr",
+    "ema20_slope_accel_1", "ema20_slope_accel_4", "ema50_slope_accel_4",
+    "rsi14", "macd_hist_atr", "atr_ratio", "atr_state", "range_expansion96",
+    "pos_20", "pos_48", "pos_96",
+    "bars_since_high_48", "bars_since_low_48",
+    "age_since_up_break_48", "age_since_down_break_48",
+    "signed_body_atr", "run_len", "maturity_distance", "exhaustion_pressure",
+    "phase_code", "transition_code"
+  ],
+  "static_context_features": [
+    "h1_ret4_atr", "h1_rsi14", "h1_ema20_slope4_atr", "h1_slope_accel", "h1_dist_ema20_atr", "h1_dist_ema50_atr", "h1_trend",
+    "h4_ret4_atr", "h4_rsi14", "h4_ema20_slope4_atr", "h4_slope_accel", "h4_dist_ema20_atr", "h4_dist_ema50_atr", "h4_trend",
+    "d1_ret4_atr", "d1_rsi14", "d1_ema20_slope4_atr", "d1_slope_accel", "d1_dist_ema20_atr", "d1_dist_ema50_atr", "d1_trend"
+  ],
+  "target_contract": {
+    "hazard": {
+      "classes": [
+        "INTO_EARLY_IMPULSE",
+        "EARLY_TO_MATURE",
+        "INTO_PULLBACK",
+        "MATURE_TO_EXHAUSTION",
+        "EXHAUSTION_TO_REVERSAL",
+        "NO_NAMED_TRANSITION_WITHIN_HORIZON"
+      ],
+      "horizon_m15_bars": 16,
+      "definition": "first future named transition within the next 16 closed M15 bars; otherwise no named transition"
+    },
+    "path": {
+      "horizon_minutes": 480,
+      "outputs": [
+        "long_mfe_atr", "long_mae_atr", "long_policy_payoff_atr",
+        "short_mfe_atr", "short_mae_atr", "short_policy_payoff_atr"
+      ],
+      "entry": "exact next M1 open adjusted by fixed 22.50 USD spread",
+      "mfe_mae": "exact M1 path normalized by decision ATR14",
+      "policy": "1.0 ATR stop, 2.0 ATR target, 480-minute maximum hold, SL first on same-M1 collision"
+    },
+    "purge": "fit and calibration rows are valid only when both hazard and path targets fully mature before the period end"
+  },
+  "model_registry": {
+    "LGBM_SEQUENCE_BASELINE": {
+      "description": "non-neural lag and sequence-summary baseline",
+      "lag_indices": [0, 1, 2, 4, 8, 16, 32, 63],
+      "summary_statistics": ["mean", "std", "min", "max", "first_last_delta"],
+      "classifier": "LightGBM multiclass depth 4",
+      "regressors": "six LightGBM Huber/L2 regressors depth 4",
+      "random_seed": 20260803
+    },
+    "GRU_MULTITASK": {
+      "sequence_encoder": "one-layer GRU hidden_size 32",
+      "static_context_mlp": [32, 16],
+      "shared_layer": 32,
+      "hazard_head": "six-class softmax",
+      "path_head": "six continuous outputs",
+      "loss": "cross entropy plus mean SmoothL1 over robust-scaled path targets",
+      "hazard_class_weight": "inverse square-root frequency, clipped to [0.5, 4.0] and normalized to mean 1",
+      "optimizer": "AdamW",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "batch_size": 512,
+      "maximum_epochs": 10,
+      "early_stopping_patience": 2,
+      "gradient_clip_norm": 1.0,
+      "random_seed": 20260803,
+      "device": "CPU"
+    }
+  },
+  "candidate_conversion": {
+    "models": ["LGBM_SEQUENCE_BASELINE", "GRU_MULTITASK"],
+    "directions": ["LONG", "SHORT"],
+    "score_types": {
+      "PAYOFF": "predicted fixed-policy payoff ATR",
+      "PATH_EDGE": "predicted MFE ATR minus 0.75 times predicted MAE ATR"
+    },
+    "calibration_percentiles": [0.95, 0.975],
+    "event_policies": ["FIRST_CROSS", "COOLDOWN4"],
+    "maximum_candidates": 32
+  },
+  "capability_gates": {
+    "minimum_events_each_validation_halfyear": 20,
+    "minimum_active_months_of_24": 18,
+    "maximum_single_month_event_share": 0.25,
+    "maximum_invalid_entry_rate": 0.01
+  },
+  "development_execution_grid": {
+    "stop_atr": [0.75, 1.0],
+    "target_atr": [1.5, 2.0],
+    "maximum_hold_minutes": [480, 720],
+    "same_m1_collision": "SL_FIRST",
+    "one_position_non_overlap": true
+  },
+  "provisional_development_gates": {
+    "minimum_completed_trades_over_24_months": 96,
+    "profit_factor_min": 1.2,
+    "net_positive": true,
+    "positive_months_min_of_24": 15,
+    "positive_halfyears_min_of_4": 3,
+    "maximum_single_month_gross_profit_share": 0.35,
+    "D1_regime_pf_floor_for_regimes_with_at_least_20_trades": 0.9,
+    "maximum_D1_regime_gross_profit_share": 0.65
+  },
+  "transfer_gates_after_provisional_development": {
+    "leave_one_D1_regime_out": {
+      "groups": ["UP", "NEUTRAL", "DOWN"],
+      "minimum_test_rows_per_group": 300,
+      "metric": "Spearman correlation between score and fixed-policy payoff",
+      "minimum_median_correlation": 0.01,
+      "minimum_groups_positive": 2
+    },
+    "leave_one_transition_type_out": {
+      "groups": [
+        "INTO_EARLY_IMPULSE",
+        "EARLY_TO_MATURE",
+        "INTO_PULLBACK",
+        "MATURE_TO_EXHAUSTION",
+        "EXHAUSTION_TO_REVERSAL"
+      ],
+      "minimum_test_rows_per_group": 200,
+      "metric": "Spearman correlation between score and fixed-policy payoff",
+      "minimum_median_correlation": 0.005,
+      "minimum_groups_positive": 3
+    },
+    "requirement": "all applicable transfer gates must pass before robustness"
+  },
+  "robustness_if_transfer_passes": {
+    "month_block_bootstrap_iterations": 2000,
+    "bootstrap_net_positive_probability_min": 0.9,
+    "matched_random_iterations": 2000,
+    "matched_random_net_percentile_min": 0.95,
+    "neighbor_exit_positive_required": true
+  },
+  "2026_contract": {
+    "period": "[2026-01-01, 2026-08-01)",
+    "status": "consumed diagnostic only",
+    "open_condition": "only after a frozen provisional-development, transfer and robustness survivor",
+    "support_claim_authorized": false
+  },
+  "prohibitions": [
+    "do not select only EARLY_IMPULSE LONG or EXHAUSTION_TO_REVERSAL SHORT because of prior local results",
+    "do not reduce the 96-trade or monthly persistence gates",
+    "do not use 2026 for feature, model, score, threshold, side, transition, exit or horizon selection",
+    "do not use volume or external data",
+    "do not rescue a rejected candidate",
+    "do not authorize portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "contract_id": "BTC_AI_V1_04_ROBUSTNESS_CONTROL_PROTOCOL_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_AFTER_DEVELOPMENT_SHORTLIST_BEFORE_CONTROL_OUTPUTS",
+  "input_shortlist_sha256": "95e2117517be524e647595d3d6a6cf7334218c1bad8b9893d09e0a1ef6609365",
+  "final_test_accessed": false,
+  "random_seed": 20260803,
+  "month_block_bootstrap": {
+    "iterations": 2000,
+    "unit": "calendar month, preserving within-month realized trade order",
+    "pass": {
+      "net_positive_probability_min": 0.95,
+      "pf_p05_min": 0.95
+    }
+  },
+  "matched_random": {
+    "iterations": 2000,
+    "pool": "all causally feature-ready M15 decision rows in the same development month with exact M1 entry",
+    "preserve": [
+      "calendar month",
+      "candidate direction",
+      "raw event count by month"
+    ],
+    "execution": "same fixed spread, stop, target, horizon and one-position accounting",
+    "sampling": "without replacement within month; deterministic independent iteration seeds",
+    "pass": {
+      "actual_net_percentile_min": 0.95,
+      "actual_pf_percentile_min": 0.95
+    }
+  },
+  "pseudo_state": {
+    "iterations": 2000,
+    "construction": "cyclically shift each candidate's monthly boolean event mask by a non-zero random offset within that month, preserving monthly count and local clustering/spacing",
+    "execution": "same direction and execution contract",
+    "pass": {
+      "actual_net_percentile_min": 0.95,
+      "actual_pf_percentile_min": 0.95
+    }
+  },
+  "parameter_neighborhood": {
+    "neighbors": "one adjacent grid step in stop ATR, target R, or horizon, changing one dimension at a time",
+    "pass": {
+      "positive_pf_and_net_fraction_min": 0.5,
+      "median_pf_min": 1.0,
+      "median_net_positive": true
+    }
+  },
+  "entry_delay_diagnostics": {
+    "minutes": [
+      1,
+      5
+    ],
+    "formal_gate": false,
+    "purpose": "fragility diagnostic only; not eligible for rescue or selection"
+  },
+  "finalist_selection": {
+    "requires_all_formal_controls": true,
+    "maximum": 5,
+    "ranking": [
+      "development positive folds desc",
+      "development worst fold PF desc",
+      "development PF desc",
+      "development net/DD desc",
+      "candidate_id asc"
+    ],
+    "event_jaccard_max_between_finalists": 0.8,
+    "if_fewer_pass": "freeze fewer finalists; do not relax controls"
+  },
+  "prohibitions": [
+    "do not change the nine development definitions",
+    "do not alter 22.50 USD spread",
+    "do not delete or add directions after control results",
+    "do not alter stop, target, horizon, month, session or threshold to rescue",
+    "do not inspect 2026 final-test outcomes before finalist registry freeze"
+  ]
+}

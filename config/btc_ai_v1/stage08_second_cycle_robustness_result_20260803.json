@@ -1,0 +1,17 @@
+{
+  "stage": "BTC_AI_V1_08_SECOND_CYCLE_ROBUSTNESS",
+  "status": "COMPLETE_FINALIST_REGISTRY_FROZEN",
+  "evaluation_period": "[2024-01-01, 2026-01-01)",
+  "evaluation_calendar_months": 24,
+  "shortlist_count": 11,
+  "bootstrap_pass": 9,
+  "matched_random_pass": 11,
+  "pseudo_state_pass": 11,
+  "parameter_neighborhood_pass": 11,
+  "all_robustness_pass": 9,
+  "frozen_finalists": 5,
+  "finalist_ids": ["ML2_126", "ML2_106", "ML2_127", "ML2_090", "ML2_104"],
+  "untouched_final_test_opened": false,
+  "results_sha256": "6b320d0e767698bde68ffb20f9ae3ca9af0184a5fa49d308aee47a3a081eca7e",
+  "finalist_sha256": "f6cb129cb631a58dbd4a7c6b25a0741dfa44f9919e4511d3989a30cde1448f1a"
+}

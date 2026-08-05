@@ -1,0 +1,47 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DRIFT_ATTRIBUTION_AND_RANK_STABILITY_FORENSIC_20260804",
+  "date": "2026-08-04",
+  "stage": 32,
+  "formal_status": "BTC_AI_V1_HARD_WINDOW_SAMPLE_LOSS_AND_PAST_VISIBLE_RANK_INSTABILITY_NO_SUPPORTED_LIVE_DRIFT_GATE",
+  "period": "2024-01 through 2025-12",
+  "calendar_months": 24,
+  "validation_rank_comparisons": 144,
+  "past_only_calibration_comparisons": 144,
+  "causal_audit": {
+    "past_only_calibration_future_or_current_rows": 0,
+    "labels_used_in_past_only_disagreement_metric": false,
+    "2026_used": false,
+    "candidate_pnl_opened": false
+  },
+  "lagged_diagnostics": {
+    "max_absolute_spearman": 0.3715415019762845,
+    "max_record": {
+      "schedule": "ROLLING_12M",
+      "direction": "SHORT",
+      "input": "prev_score_spearman",
+      "target": "auc_delta",
+      "months": 23,
+      "spearman": 0.3715415019762845
+    },
+    "interpretation": "No past-only diagnostic had a stable direction across all schedules, directions and both targets; no live adaptive gate is supported."
+  },
+  "formal_conclusion": [
+    "Hard rolling windows materially reduce training sample size.",
+    "Rolling and expanding rankings already disagree on the previous complete month before validation outcomes are known.",
+    "Validation-month rank overlap deteriorates further, especially for shorter windows.",
+    "SHORT rolling-exclusive selections have materially lower realized label rates than EXPANDING-exclusive selections for all rolling windows.",
+    "Sample loss alone is insufficient because its relation to AUC delta is weak and sign-inconsistent.",
+    "PSI, class-rate change, sample ratio and past-only model disagreement do not consistently predict next-month AUC or P90-lift delta.",
+    "Stage32 cannot authorize a live adaptive gate, signal, schedule or PnL opening."
+  ],
+  "authorization": {
+    "candidate_pnl": false,
+    "2026": false,
+    "shadow": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  },
+  "next_stage": "BTC_AI_V1_OHLC_SOFT_RECENCY_WEIGHTING_FORENSIC"
+}

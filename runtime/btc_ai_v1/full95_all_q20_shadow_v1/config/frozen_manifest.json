@@ -1,0 +1,237 @@
+{
+  "contract_id": "BTC_AI_V1_FULL95_ALL_Q20_PROSPECTIVE_SHADOW_V1_PREREGISTRATION_20260806",
+  "paths_relative_to": "package_root",
+  "asset_count": 46,
+  "assets": [
+    {
+      "path": "bootstrap/materialize_assets.py",
+      "sha256": "d3102ae4bd73fc671967e34b2cf668a273fc189bf1b6d301cff632e7894ba48d",
+      "bytes": 1716
+    },
+    {
+      "path": "bootstrap/materialize_assets_manifest.json",
+      "sha256": "7aa479855c91de1373a4da41446ad45f37dbbb33f632377d4cc762123822680d",
+      "bytes": 1725
+    },
+    {
+      "path": "bundles/lgbm_model_txt_000.gzpart.b64",
+      "sha256": "95ddb3482151694e9ff74cc5c10153ef57bfa55c6b43930362ef4401186e5b8b",
+      "bytes": 9600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part0.b64",
+      "sha256": "bd86bc7f278d32d8c07c75006ad834c98376dd19e5a501c83aa356da8119ff8a",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part1_0.b64",
+      "sha256": "5746ec100d18bee0bed4f476525f71cac5447f3c0bd1f24862abcb8f01b2b4c0",
+      "bytes": 600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part1_1.b64",
+      "sha256": "674ee20059822a93cdf1aac9d508e2f6a6771781475c5d7d7cc021b5fe6f17fb",
+      "bytes": 600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part1_2.b64",
+      "sha256": "62648f880d1eace965ea70bb723ec23f1ad3151fa20d27b515fb8b72eaff5ac7",
+      "bytes": 600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part1_3.b64",
+      "sha256": "c15cbafa76a171b67a2eafadbe310fb1cb479f572ff99e2ace70ce6a66fe896c",
+      "bytes": 600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part2.b64",
+      "sha256": "20af2eae23a266eff427ee0476b9beb6d6ae3c9934274388a2cd16d3f0227f6c",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/lgbm_model_txt_001_part3.b64",
+      "sha256": "ed64a992fc54dabe6381579c192cb78b21f440ed8cf16dd70f37d6a320639503",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/lgbm_model_txt_002.gzpart.b64",
+      "sha256": "ca25c4270d3aab88bb0718c57b1e27ad720f48e107a0bdb9255560e7cecc4bbf",
+      "bytes": 9600
+    },
+    {
+      "path": "bundles/lgbm_model_txt_003.gzpart.b64",
+      "sha256": "bd8d322be00e6357aae3b7a51aa7065109e4e6df7b6e888f282643080a65dc03",
+      "bytes": 9480
+    },
+    {
+      "path": "bundles/parent_matched_pair_engine_v1_py_000.gzpart.b64",
+      "sha256": "10e83bc05eaf1315b4657b3b82f0d6d71d9d9dbd22c8adbd6bdb0b2cf66f1208",
+      "bytes": 9600
+    },
+    {
+      "path": "bundles/parent_matched_pair_engine_v1_py_001.gzpart.b64",
+      "sha256": "98878d811261ea59a739d6c26fbde789264372e6123922f5b3fefd0797b256fd",
+      "bytes": 3168
+    },
+    {
+      "path": "bundles/shadow_full95_all_q20_v1_py_000_part0.b64",
+      "sha256": "54408b2adf570a2bf5f6cccdb19799f7a524f62b4c904deeb0fc67de08c26911",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/shadow_full95_all_q20_v1_py_000_part1.b64",
+      "sha256": "db6173084ecac0e54f386f85caf1795d3685fa117d99f2244c3a8d6d1400d97f",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/shadow_full95_all_q20_v1_py_000_part2.b64",
+      "sha256": "314cc74775ceb5d5ddcb38ca3c765e60f9014ab68cf63e8419f4c3f381eff70b",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/shadow_full95_all_q20_v1_py_000_part3.b64",
+      "sha256": "71fc58512d996c0d3b7cdb2a9033af4f2dad7f2dbca5d470dfcf6ba2c8c8736d",
+      "bytes": 2400
+    },
+    {
+      "path": "bundles/shadow_full95_all_q20_v1_py_001.gzpart.b64",
+      "sha256": "64c1c77a17c03b47b12bbb796cebc1a65b5a8c095e786a8db46e4feb549ad3a7",
+      "bytes": 5932
+    },
+    {
+      "path": "config/activation_authorization_20260806.json",
+      "sha256": "8d6a4626db5721d24ae258fcfb2c5643dbbf32033b643156e22d8e64424018cc",
+      "bytes": 500
+    },
+    {
+      "path": "config/discord_entry_schema.json",
+      "sha256": "f3c2fd4fa6c912165672c7ff03c616b5f912b498041f1f49d9272036853e4e10",
+      "bytes": 292
+    },
+    {
+      "path": "config/preregistration_contract.json",
+      "sha256": "1ec33605530970d54dac8496651a5efc0fee0310e0b3f36376f28441b35d5e0f",
+      "bytes": 3520
+    },
+    {
+      "path": "config/runtime_state_schema.json",
+      "sha256": "aa61baca2e7018a9f2d9f11c9382332693f6f285984cdb6f90e3c641d31ff84f",
+      "bytes": 447
+    },
+    {
+      "path": "docs/IMPLEMENTATION_RESULT_JA.md",
+      "sha256": "ef2f23d4226b6a0a40b1f06fdd7107df9b8f10c248d88886e19351f0c2e135db",
+      "bytes": 1279
+    },
+    {
+      "path": "docs/PROSPECTIVE_SHADOW_CONTRACT_JA.md",
+      "sha256": "1f797019301575bbcf8b64c64cec0b969bcdfa580c6df871ae112b41d2d4ee79",
+      "bytes": 2025
+    },
+    {
+      "path": "docs/RESEARCH_INTEGRITY_RULES_JA.md",
+      "sha256": "5208c7b56a8ba02b51c3f36fdffa404f4c728fde6364aaafa489571cdea0c2ec",
+      "bytes": 726
+    },
+    {
+      "path": "docs/RUNBOOK_JA.md",
+      "sha256": "aceca4e9af10c07d9e65dd3738f1e4456fced3fd20c30deeba671f5de119cbc6",
+      "bytes": 1004
+    },
+    {
+      "path": "launchers/00_INSTALL_REQUIREMENTS.bat",
+      "sha256": "a0564803db73a27c87475e08663af392814583a6ebb4c75d215b00fcffa58542",
+      "bytes": 132
+    },
+    {
+      "path": "launchers/01_VERIFY.bat",
+      "sha256": "a257cf10806c52b13a4c989cb9a75b69ed8dc29d2867c73e29787dfd22377583",
+      "bytes": 147
+    },
+    {
+      "path": "launchers/02_INIT_ONCE.bat",
+      "sha256": "983d0b608ab833c795f755c96cffed94e21de7bbbf9b81cf8e782e5fd9c2645a",
+      "bytes": 407
+    },
+    {
+      "path": "launchers/03_PROCESS.bat",
+      "sha256": "1fc3ee7741341b7433de05aa2ac331cfacd3cc2263e7216f710672f926bc5fd3",
+      "bytes": 263
+    },
+    {
+      "path": "launchers/04_STATUS.bat",
+      "sha256": "785613fbce2ab164ab5c157d93672d327b935bcc35e8b6dbfb24ba45375be927",
+      "bytes": 140
+    },
+    {
+      "path": "launchers/05_DISPATCH_OUTBOX.bat",
+      "sha256": "264c47936fc89148a1b5d41d52075f388c4a7bdf69e2c3b9cc0728f9ffab61f9",
+      "bytes": 149
+    },
+    {
+      "path": "launchers/local_paths.example.bat",
+      "sha256": "5b9fa2a599097075e20d1e01f7e2194f479e6830e99f690a14f43ef2f241d526",
+      "bytes": 231
+    },
+    {
+      "path": "model/feature_order.json",
+      "sha256": "e79d1df2c633b4b3095735b2be7bd02a023d55418bd9af186b3e022038172069",
+      "bytes": 2148
+    },
+    {
+      "path": "model/imputer_medians.json",
+      "sha256": "d07d404a729bd9cc67fec9bbbef0964a3e0e5529a5afb163f3ba715ae243ded2",
+      "bytes": 3840
+    },
+    {
+      "path": "model/lgbm_model.txt",
+      "sha256": "040c53776910ec45fcedafc22f214c56193a0d219ae2ad7e52710388dd8bf9a8",
+      "bytes": 103312
+    },
+    {
+      "path": "model/threshold.json",
+      "sha256": "78f5d066fd932ae205ef0be1931b9ca093861f4bac78ade30856a49ec8ab4348",
+      "bytes": 132
+    },
+    {
+      "path": "model/training_metadata.json",
+      "sha256": "47c552aaea3de5e624711e2560826d02896e7b38745338a669faf5120b014f11",
+      "bytes": 871
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "d5d6377bcbd449920c6eb0af82c901e520b11f05ebd0d6435d778d70620fc205",
+      "bytes": 50
+    },
+    {
+      "path": "research/runtime_feature_parity_2026.json",
+      "sha256": "bd257b9656cba469d1862ac7f53941d52cfd36d97c32a32834fbdfcde0f756af",
+      "bytes": 1151
+    },
+    {
+      "path": "research/runtime_smoke_validation.json",
+      "sha256": "cfc2bd50d18f8a85b298454f2add5c29a84e94b7b2d0ea0325fa259fee60acd3",
+      "bytes": 312
+    },
+    {
+      "path": "runtime/README.md",
+      "sha256": "b01f431cf7196c2c542693ce130dd859753744952a8186f81dd05a0861819946",
+      "bytes": 141
+    },
+    {
+      "path": "scripts/parent_matched_pair_engine_v1.py",
+      "sha256": "d0172c3e668fcf71dd1af79585834349e78ec69ae339926010bca499cd7bdab0",
+      "bytes": 39247
+    },
+    {
+      "path": "scripts/shadow_full95_all_q20_v1.py",
+      "sha256": "dc8ddb2108145563489cb305b854e947a1e6ac7dc499c2fb3f43ba655abda3e5",
+      "bytes": 45416
+    },
+    {
+      "path": "tests/test_runtime_logic.py",
+      "sha256": "3f131cb8bf11996cf922b9127fcc1c0c540f409e1e86079bbe6ced7dee77cb5a",
+      "bytes": 1316
+    }
+  ]
+}

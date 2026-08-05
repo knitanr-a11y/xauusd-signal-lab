@@ -1,0 +1,104 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_SCHEDULE_OUTCOMES",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "time": "MT5 broker-server naive time",
+    "external_or_volume_features": false,
+    "evaluation_period": "[2024-01-01, 2026-01-01)",
+    "evaluation_calendar_months": 24,
+    "2026_selection_authorized": false,
+    "candidate_pnl_authorized": false
+  },
+  "feature_and_label_universe": {
+    "features": "frozen 100 causal OHLC state-transition features",
+    "directions": ["LONG", "SHORT"],
+    "label": "1 ATR stop / 1.5 ATR target-before-stop over exact future M1 path",
+    "closed_M15_decision": true,
+    "missing_exact_M1": "exclude fail closed"
+  },
+  "monthly_prequential_evaluation": {
+    "refit_frequency": "first closed M15 decision of each calendar month",
+    "validation": "all eligible decisions in the immediately following calendar month",
+    "each_month_evaluated_once": true,
+    "training_schedules": [
+      {"name":"EXPANDING","start":"2023-01-01","end":"validation month start"},
+      {"name":"ROLLING_3M","months":3},
+      {"name":"ROLLING_6M","months":6},
+      {"name":"ROLLING_12M","months":12}
+    ],
+    "minimum_training_rows": 6000,
+    "minimum_positive_labels_each_side": 400,
+    "insufficient_schedule_month": "unavailable, never substituted"
+  },
+  "models": {
+    "primary": "LightGBM binary classifier",
+    "parameters": {
+      "num_leaves": 15,
+      "max_depth": 4,
+      "learning_rate": 0.03,
+      "n_estimators": 250,
+      "min_child_samples": 120,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 1,
+      "feature_fraction": 0.8,
+      "lambda_l2": 5.0,
+      "seed": 20260803
+    },
+    "class_weight": "training-month positive-rate inverse weighting clipped to [0.5, 3.0]",
+    "broad_model_grid": false
+  },
+  "calibration": {
+    "method": "past-only percentile ranking within the immediately preceding complete calendar month",
+    "top_tail": "P90",
+    "fallback_if_previous_month_missing": "schedule month unavailable",
+    "no_future_or_validation_month_calibration": true
+  },
+  "monthly_outputs_each_schedule_side": [
+    "AUC",
+    "balanced accuracy at training prior threshold",
+    "Brier score",
+    "score PSI versus calibration month",
+    "unconditional positive rate",
+    "P90 event count",
+    "P90 positive rate",
+    "P90 label lift over unconditional rate",
+    "D1 UP/NEUTRAL/DOWN P90 lift",
+    "score mean and P90"
+  ],
+  "schedule_support_gates_against_expanding": {
+    "available_months_min_of_24": 20,
+    "mean_AUC_improvement_min": 0.01,
+    "median_AUC_improvement_positive": true,
+    "months_with_positive_AUC_improvement_min": 15,
+    "mean_P90_label_lift_improvement_min": 0.02,
+    "months_with_positive_P90_lift_min": 15,
+    "positive_mean_P90_lift_in_2024_and_2025": true,
+    "positive_mean_P90_lift_in_all_three_D1_regimes": true,
+    "maximum_single_halfyear_dependency": "no half-year may contribute more than 50% of total positive lift",
+    "score_PSI_median_max": 0.25
+  },
+  "selection_rule": {
+    "one_schedule_may_be_supported_only_if_all_gates_pass_for_both_LONG_and_SHORT_or_a_direction_was_preregistered_separately": false,
+    "formal_supported_schedule_requires_same_schedule_pass_LONG_and_SHORT": true,
+    "direction_specific_rescue": false,
+    "candidate_PnL_after_schedule_support": "requires a new dated contract"
+  },
+  "2026_diagnostic_only_after_freeze": {
+    "allowed_only_if_schedule_support_passes_2024_2025": true,
+    "period": "2026-01 through 2026-07",
+    "role": "diagnostic only, never untouched support",
+    "no_schedule_change_after_2026": true
+  },
+  "prohibitions": [
+    "do not use 2026 to choose rolling window, parameters, side or calibration",
+    "do not omit bad months or D1 states",
+    "do not tune P90 after outcomes",
+    "do not rescue Stage 29 ages/families or Stage 30 states",
+    "do not add a broad model grid",
+    "do not open PnL before a schedule support survivor",
+    "no external or volume data",
+    "no portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
+  ]
+}

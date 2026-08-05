@@ -1,0 +1,87 @@
+{
+  "contract_id": "BTC_AI_V1_05_INDEPENDENT_SECOND_SEARCH_CYCLE_PREREGISTRATION_20260803",
+  "date": "2026-08-03",
+  "research_id": "BTC_AI_CANDIDATE_RESEARCH_V1",
+  "status": "FROZEN_BEFORE_SECOND_CYCLE_OUTCOME_COMPUTATION",
+  "independence": {
+    "first_cycle_candidates_used_as_seeds": false,
+    "first_cycle_breakout_short_rules_reused": false,
+    "second_cycle_family": "EXPANDING_FOLD_SUPERVISED_DIRECTIONAL_RANK_MODELS",
+    "cumulative_raw_hypotheses_before_cycle": 1200,
+    "second_cycle_candidate_limit": 144
+  },
+  "source_and_cost": {
+    "source_manifest": "config/btc_ai_v1/source_data_manifest_20260803.json",
+    "fixed_cost_contract": "config/btc_ai_v1/fixed_cost_contract_20260803.json",
+    "fixed_spread_usd_per_btc": 22.5,
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "closed_bars_only": true
+  },
+  "periods": {
+    "fold_1": {"model_train": "[2023-01-01, 2023-07-01)", "calibration": "[2023-07-01, 2024-01-01)", "validation": "[2024-01-01, 2024-07-01)"},
+    "fold_2": {"model_train": "[2023-01-01, 2024-01-01)", "calibration": "[2024-01-01, 2024-07-01)", "validation": "[2024-07-01, 2025-01-01)"},
+    "fold_3": {"model_train": "[2023-01-01, 2024-07-01)", "calibration": "[2024-07-01, 2025-01-01)", "validation": "[2025-01-01, 2025-07-01)"},
+    "fold_4": {"model_train": "[2023-01-01, 2025-01-01)", "calibration": "[2025-01-01, 2025-07-01)", "validation": "[2025-07-01, 2026-01-01)"},
+    "untouched_final_test": "[2026-01-01, 2026-08-01)",
+    "final_test_access": "LOCKED_UNTIL_SECOND_CYCLE_FINALIST_REGISTRY_IS_FROZEN"
+  },
+  "supervised_label": {
+    "decision_grid": "M15_CLOSED_BAR",
+    "entry": "EXACT_M1_OPEN_AT_DECISION_TIME",
+    "direction_specific": true,
+    "stop_atr14_m15": 1.0,
+    "target_atr14_m15": 1.5,
+    "horizon_exact_m1_minutes": 720,
+    "same_m1_collision": "SL_FIRST",
+    "spread": "22.50_USD_ADJUSTED_ENTRY",
+    "positive": "TARGET_BEFORE_STOP_WITHIN_HORIZON",
+    "negative": "ALL_OTHER_VALID_RESOLUTIONS",
+    "gap_or_missing_entry": "INVALID_EXCLUDED",
+    "label_maturity": "origin plus full 720-minute horizon must be observed before use"
+  },
+  "feature_sets": {
+    "CORE_MOMENTUM": ["ret1_atr", "ret4_atr", "ret16_atr", "ret32_atr", "rsi14", "macd_hist_atr", "dist_ema20_atr", "dist_ema50_atr", "ema20_slope4_atr", "ema50_slope8_atr", "range_atr", "body_frac", "upper_wick_frac", "lower_wick_frac", "close_pos", "vol_ratio20", "vol_ratio96", "atr_ratio", "atr_state"],
+    "MTF_CONTEXT": ["CORE_MOMENTUM", "m15_trend", "h1_trend", "h4_trend", "d1_trend", "h1_ret4_atr", "h4_ret4_atr", "d1_ret4_atr", "h1_ema20_slope4_atr", "h4_ema20_slope4_atr", "d1_ema20_slope4_atr"],
+    "FULL_CAUSAL": ["MTF_CONTEXT", "break_high_20_atr", "break_low_20_atr", "break_high_48_atr", "break_low_48_atr", "break_high_96_atr", "break_low_96_atr", "pos_20", "pos_48", "pos_96", "range_expansion96", "hour_sin", "hour_cos", "dow_sin", "dow_cos"]
+  },
+  "model_specs": [
+    {"id": "LGBM_D3", "type": "LightGBM", "params": {"n_estimators": 300, "learning_rate": 0.03, "num_leaves": 7, "max_depth": 3, "min_child_samples": 200, "subsample": 0.8, "colsample_bytree": 0.8, "reg_lambda": 1.0, "random_state": 20260803}},
+    {"id": "LGBM_D5", "type": "LightGBM", "params": {"n_estimators": 300, "learning_rate": 0.03, "num_leaves": 15, "max_depth": 5, "min_child_samples": 300, "subsample": 0.8, "colsample_bytree": 0.8, "reg_lambda": 2.0, "random_state": 20260803}},
+    {"id": "LOGIT_L2", "type": "LogisticRegression", "params": {"penalty": "l2", "C": 0.25, "solver": "lbfgs", "max_iter": 1000, "class_weight": "balanced", "random_state": 20260803}},
+    {"id": "LOGIT_EN50", "type": "LogisticRegression", "params": {"penalty": "elasticnet", "l1_ratio": 0.5, "C": 0.1, "solver": "saga", "max_iter": 1500, "class_weight": "balanced", "random_state": 20260803}}
+  ],
+  "score_conversion": {
+    "calibration": "PAST_SIX_CALENDAR_MONTHS_ONLY_PER_FOLD_MODEL_FEATURE_SET_AND_DIRECTION",
+    "percentile_thresholds": [0.9, 0.95, 0.975],
+    "event_policies": ["FIRST_CROSS_FROM_BELOW", "FOUR_M15_BAR_COOLDOWN"],
+    "candidate_count": "4 models x 3 feature sets x 2 directions x 3 percentiles x 2 event policies = 144",
+    "no_absolute_probability_threshold": true
+  },
+  "outcome_blind_capability": {
+    "minimum_events_each_validation_fold": 20,
+    "minimum_active_calendar_months_of_24": 18,
+    "maximum_single_month_event_share": 0.25,
+    "maximum_invalid_exact_m1_rate": 0.01,
+    "maximum_survivors": 72,
+    "selection_without_pnl": true
+  },
+  "development_and_robustness": {
+    "execution_grid": "UNCHANGED_FROM_RESEARCH_DESIGN_CONTRACT_20260803",
+    "development_gates": "UNCHANGED_FROM_RESEARCH_DESIGN_CONTRACT_20260803",
+    "robustness_controls": "UNCHANGED_FROM_ROBUSTNESS_CONTROL_PROTOCOL_20260803",
+    "development_shortlist_max": 20,
+    "finalists_max": 5,
+    "cumulative_multiple_testing_history_retained": true
+  },
+  "reporting": {
+    "required_for_every_count": ["evaluation start", "evaluation end", "calendar months", "active months", "total trades", "trades per calendar month", "zero-trade months", "monthly minimum median maximum", "monthly count artifact"]
+  },
+  "no_rescue": [
+    "no model or feature-set deletion after outcomes",
+    "no percentile change after outcomes",
+    "no label target stop or horizon change after outcomes",
+    "no side deletion after outcomes",
+    "no event-policy change after outcomes",
+    "no final-test opening without a frozen robustness finalist"
+  ]
+}

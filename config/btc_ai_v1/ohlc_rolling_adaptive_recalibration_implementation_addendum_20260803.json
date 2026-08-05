@@ -1,0 +1,42 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_IMPLEMENTATION_ADDENDUM_20260803",
+  "parent_contract": "config/btc_ai_v1/ohlc_rolling_adaptive_recalibration_forensic_contract_20260803.json",
+  "status": "IMPLEMENTATION_DETAIL_FROZEN_BEFORE_FORMAL_EXECUTION",
+  "causality": {
+    "monthly_cutoff": "first closed M15 decision_time present in each validation calendar month",
+    "training_decision_rule": "decision_time < first validation-month closed M15 decision_time",
+    "training_resolution_rule": "maturity_ns <= first validation-month closed M15 decision_time",
+    "calibration_window": "immediately preceding complete calendar month only",
+    "validation_window": "current calendar month only and scored after model/threshold freeze",
+    "2026_selection_rows": 0
+  },
+  "metric_details": {
+    "p90_label_lift": "selected positive rate minus unconditional positive rate, absolute proportion",
+    "score_psi": "calibration-month equal-frequency decile bins applied to validation-month scores; epsilon 1e-6",
+    "feature_psi": "same decile PSI per frozen feature, diagnostic only; median, P90 and maximum reported",
+    "calibration_slope": "unregularized diagnostic logistic slope of validation label on score logit",
+    "d1_regimes": [
+      "UP",
+      "NEUTRAL",
+      "DOWN"
+    ],
+    "class_weight": "positive label weight = clip(1 / resolved training positive rate, 0.5, 3.0); negative weight = 1.0"
+  },
+  "fail_closed": [
+    "exactly 100 frozen causal OHLC features required",
+    "future/outcome/volume/external feature-name tokens rejected",
+    "missing previous-month calibration makes schedule-month unavailable",
+    "insufficient train rows or positive-label count makes schedule-month unavailable",
+    "no fallback schedule substitution",
+    "any leakage audit violation aborts the run"
+  ],
+  "authorization": {
+    "candidate_pnl": false,
+    "2026_selection": false,
+    "shadow": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}

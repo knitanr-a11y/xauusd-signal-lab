@@ -1,0 +1,6 @@
+{
+  "quantile": 0.2,
+  "threshold": -0.6767195721445508,
+  "comparison": "SKIP_IF_SCORE_LT_THRESHOLD",
+  "score_equality": "ENTER"
+}

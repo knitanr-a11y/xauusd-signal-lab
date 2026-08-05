@@ -1,0 +1,42 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_DECEPTION_AND_META_STACK_CONSUMED_2026_DIAGNOSTIC_20260804",
+  "frozen_before_2026_scores_or_results": true,
+  "period": "2026-01-01 through 2026-07-31 complete calendar months",
+  "interpretation": "diagnostic only; 2026 was consumed by earlier BTC research cycles and is not a pristine holdout",
+  "fixed_components": [
+    "EXPANSION_MIDPOINT_FAILURE_L2_LONG__SL1.00_TP2.00_H480",
+    "UNION_FIRST_CROSS_L1_LONG_SCORE_CONFIRM_STATE_LGBM_Q90",
+    "UNION_FIRST_CROSS_L1_SHORT_SCORE_CONFIRM_LGBM_Q90",
+    "preregistered meta LONG+SHORT global one-position stack"
+  ],
+  "underlying_score_models": [
+    "EXPANDING",
+    "EXP_DECAY_HL3M",
+    "EXP_DECAY_HL6M",
+    "EXP_DECAY_HL12M",
+    "EXP_DECAY_HL24M"
+  ],
+  "causality": {
+    "underlying_models": "monthly refit using only labels resolved before refit",
+    "underlying_threshold": "previous complete month P90",
+    "meta_models": "monthly expanding using only candidate trades exited before refit",
+    "meta_threshold": "previous complete month score P90",
+    "entry": "one closed M15 confirmation bar later at exact M1 open",
+    "execution": "SL1 ATR, TP2 ATR, 480 exact M1 bars, spread 22.5 USD, SL-first"
+  },
+  "diagnostic_gates": {
+    "meta_combined_pf_min": 1.0,
+    "meta_combined_net_positive": true,
+    "meta_combined_positive_months_min": 4,
+    "meta_each_direction_net_nonnegative": true,
+    "deterministic_candidate_pf_min": 1.0,
+    "deterministic_candidate_net_positive": true
+  },
+  "forbidden": [
+    "no 2026 month deletion",
+    "no direction deletion",
+    "no percentile, lag, feature or seed change",
+    "no Shadow activation without a separate user authorization",
+    "no claim that 2026 is untouched"
+  ]
+}

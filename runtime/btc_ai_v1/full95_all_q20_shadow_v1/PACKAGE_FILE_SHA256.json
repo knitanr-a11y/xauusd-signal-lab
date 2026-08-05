@@ -1,0 +1,23 @@
+{
+  "format": "GITHUB_CHUNKED_FROZEN_BUNDLE_V1",
+  "frozen_manifest_path": "config/frozen_manifest.json",
+  "materialized_assets": [
+    {
+      "path": "scripts/parent_matched_pair_engine_v1.py",
+      "sha256": "d0172c3e668fcf71dd1af79585834349e78ec69ae339926010bca499cd7bdab0",
+      "bytes": 39247
+    },
+    {
+      "path": "scripts/shadow_full95_all_q20_v1.py",
+      "sha256": "dc8ddb2108145563489cb305b854e947a1e6ac7dc499c2fb3f43ba655abda3e5",
+      "bytes": 45416
+    },
+    {
+      "path": "model/lgbm_model.txt",
+      "sha256": "040c53776910ec45fcedafc22f214c56193a0d219ae2ad7e52710388dd8bf9a8",
+      "bytes": 103312
+    }
+  ],
+  "materializer": "bootstrap/materialize_assets.py",
+  "note": "The frozen manifest verifies every bundle chunk, the materializer, and the reconstructed assets."
+}

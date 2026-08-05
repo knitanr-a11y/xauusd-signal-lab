@@ -1,0 +1,25 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_CONSENSUS_CAUSAL_COOLDOWN_DENSITY_FORENSIC_20260804",
+  "formal_status": "BTC_AI_V1_OHLC_CONSENSUS_CAUSAL_COOLDOWN_NO_SUPPORTED_CONFIGURATION",
+  "monthly_records": 576,
+  "causal_selection_violations": 0,
+  "supported_configurations": [],
+  "supported_configuration_count": 0,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false,
+  "best_positive_change_record": {
+    "schedule": "EXP_DECAY_HL6M",
+    "direction": "SHORT",
+    "cooldown_hours": 12,
+    "months_ge10": 10,
+    "median_monthly_events": 8.0,
+    "mean_lift_improvement_vs_raw": 0.01766052830325,
+    "positive_improvement_months": 12,
+    "pass": false
+  }
+}

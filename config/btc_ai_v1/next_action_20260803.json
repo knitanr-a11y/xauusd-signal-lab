@@ -1,0 +1,64 @@
+{
+  "date": "2026-08-03",
+  "formal_status": "ANCHOR_PATH_AND_DELAYED_CONFIRMATION_COMPLETE_NO_SUPPORT",
+  "completed_through": "BTC_AI_V1_OHLC_DELAYED_CONFIRMATION_STATE_MACHINE_FORENSIC",
+  "next_stage": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_PREREGISTRATION",
+  "objective": "Use only XM BTCUSD# OHLC to test whether recent-only monthly refitting and recalibration improve directional label ordering under concept drift. Compare fixed expanding learning against rolling 3-, 6- and 12-month windows before any candidate PnL evaluation.",
+  "completed_evidence": {
+    "stage29": {
+      "development_months": 24,
+      "anchor_state_rows": 461483,
+      "magnitude_support_survivors": 0,
+      "direction_residual_spearman": 0.054083455,
+      "top_decile_actual_residual_mean": 0.0410575195,
+      "required": 0.08,
+      "direction_support_survivors": 0
+    },
+    "stage30": {
+      "development_months": 24,
+      "first_confirmation_events": 95440,
+      "actionable_events": 70892,
+      "actionable_states": 6,
+      "support_survivors": 0,
+      "best_mean_oriented_residual": 0.00813,
+      "required": 0.08
+    }
+  },
+  "required_preregistration": {
+    "same_frozen_OHLC_feature_and_label_universe": true,
+    "refit_frequency": "monthly",
+    "training_schedules": ["EXPANDING", "ROLLING_3_MONTHS", "ROLLING_6_MONTHS", "ROLLING_12_MONTHS"],
+    "calibration": "past-only monthly calibration window defined before outcomes",
+    "minimum_training_rows_and_label_counts": "outcome-blind and schedule-specific",
+    "evaluation": "each next calendar month in 2024-2025 exactly once",
+    "metrics": [
+      "AUC and balanced accuracy",
+      "top-decile label lift over monthly unconditional rate",
+      "Brier and calibration slope",
+      "monthly and half-year sign persistence",
+      "D1 UP/NEUTRAL/DOWN decomposition",
+      "score PSI and feature PSI"
+    ],
+    "support_requirement": "one schedule must improve expanding baseline without selecting months or D1 regimes and remain positive across both years",
+    "candidate_pnl_before_support": false,
+    "2026_selection_authorized": false
+  },
+  "allowed": [
+    "OHLC-only monthly walk-forward fitting",
+    "rolling and expanding schedule comparison",
+    "past-only recalibration",
+    "drift and monthly discrimination forensic",
+    "2026 diagnostic only after schedule freeze and 2024-2025 support"
+  ],
+  "prohibited": [
+    "using 2026 to choose a training window or calibration method",
+    "selecting only favorable months or D1 states",
+    "rescuing Stage 29 ages/families or Stage 30 confirmation states",
+    "another broad static pattern or neural-model grid",
+    "reducing count, persistence, PF or transfer gates",
+    "external or volume data",
+    "candidate PnL before a full ordering survivor",
+    "portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
+  ],
+  "frequency_reporting": "All score events and later trades require exact calendar months, monthly average and monthly min/median/max."
+}

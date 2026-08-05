@@ -1,0 +1,65 @@
+{
+  "date": "2026-08-03",
+  "status": "COMPLETE_NO_MAGNITUDE_OR_DIRECTION_SUPPORT_SURVIVOR",
+  "formal_interpretation": "ANCHOR_AGE_PATH_SHAPE_ADDS_SMALL_UNSTABLE_DIRECTIONAL_RESIDUAL_AND_DOES_NOT_IMPROVE_MAGNITUDE_BASELINE",
+  "development_period": "[2024-01-01, 2026-01-01)",
+  "calendar_months": 24,
+  "training_only_2023": true,
+  "anchors_2023_2025": 42018,
+  "anchor_age_rows_generated": 672257,
+  "development_anchor_state_rows": 461483,
+  "ordinary_directed_baseline_rows": 112784,
+  "families": 6,
+  "subtypes": 15,
+  "ages": "1 through 16 closed M15 bars",
+  "magnitude": {
+    "target_mfe4": {"baseline_spearman": 0.1478352351, "combined_spearman": 0.1456325135, "spearman_improvement": -0.0022027216, "mae_reduction_fraction": -0.0153861566, "support_pass": false},
+    "target_mae4": {"baseline_spearman": 0.1531168496, "combined_spearman": 0.1534951020, "spearman_improvement": 0.0003782524, "mae_reduction_fraction": -0.0109399822, "support_pass": false},
+    "target_range4": {"baseline_spearman": 0.3336417289, "combined_spearman": 0.3368328898, "spearman_improvement": 0.0031911609, "mae_reduction_fraction": -0.0218256279, "support_pass": false},
+    "support_survivors": 0
+  },
+  "direction": {
+    "cross_fitted_residual_spearman": 0.0540834550,
+    "selected_state_rows": 43056,
+    "calendar_months": 24,
+    "selected_rows_per_month": 1794.0,
+    "active_months": 24,
+    "monthly_min_median_max": [1025, 1755.5, 2602],
+    "selected_actual_residual_mean": 0.0410575195,
+    "required_actual_residual_mean": 0.08,
+    "selected_observed_outcome_mean": -0.1479468599,
+    "selected_baseline_expectation_mean": -0.1890043797,
+    "halfyear_actual_residual_means": {"2024H1": 0.0539665144, "2024H2": 0.0402193804, "2025H1": 0.0551685839, "2025H2": 0.0202111879},
+    "d1_actual_residual_means": {"DOWN": -0.0041548079, "NEUTRAL": 0.0465491377, "UP": 0.0658901983},
+    "family_gain_share_max": 0.3662439614,
+    "all_six_families_represented": true,
+    "support_pass": false
+  },
+  "feature_gain_share": {
+    "current_ohlc": 0.7925862613,
+    "post_anchor_path_core": 0.1939577802,
+    "anchor_family_identity": 0.0071056509,
+    "anchor_subtype_identity": 0.0063503077
+  },
+  "implementation_incidents": [
+    "Parquet unavailable; serialization changed before modeling without row changes.",
+    "Negative dry-run MFE/MAE invalidated and rebuilt with zero origin before modeling.",
+    "Initial LightGBM run without subsample_freq invalidated; all folds rerun with bagging_freq=1.",
+    "Redundant large CSV aggregation timeout replaced by compact NPZ-based aggregation without model changes."
+  ],
+  "artifacts": {
+    "formal_report": "docs/btc_ai_v1/BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_RESULT_20260803.md",
+    "contract": "config/btc_ai_v1/ohlc_anchor_age_path_shape_conditional_model_contract_20260803.json",
+    "training_addendum": "config/btc_ai_v1/ohlc_anchor_age_path_shape_training_history_addendum_20260803.json",
+    "excursion_addendum": "config/btc_ai_v1/ohlc_anchor_age_path_shape_excursion_definition_addendum_20260803.json",
+    "subsample_addendum": "config/btc_ai_v1/ohlc_anchor_age_path_shape_lightgbm_subsample_addendum_20260803.json",
+    "monthly_counts": "direction_selected_monthly_counts.csv",
+    "fold_metrics": "fold_target_metrics.csv",
+    "feature_importance": "direction_residual_feature_importance.csv"
+  },
+  "transfer_opened": false,
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "supported_candidates": 0,
+  "next_stage": "BTC_AI_V1_OHLC_DELAYED_CONFIRMATION_STATE_MACHINE_FORENSIC_PREREGISTRATION"
+}

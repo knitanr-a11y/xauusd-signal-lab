@@ -1,0 +1,40 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_STAGE44_NEW_TRAP_AND_INTERACTION_ROBUSTNESS_20260804",
+  "frozen_at_utc": "2026-08-04T00:05:00Z",
+  "status": "FROZEN_BEFORE_STAGE44_RESULTS",
+  "candidate": "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240",
+  "candidate_one_factor_variants": {
+    "shock_range_atr": [2.0, 2.5, 3.0],
+    "confirm_lag": [1, 2, 4],
+    "close_position_floor": [0.65, 0.70, 0.75],
+    "stop_atr": [0.5, 0.75, 1.0],
+    "target_atr": [1.5, 2.0, 2.5],
+    "horizon_m1": [180, 240, 360],
+    "extra_spread_usd": [0.0, 11.25, 22.5]
+  },
+  "candidate_gates": {
+    "base_must_remain_positive_in_2023_2024_2025": true,
+    "at_least_70_percent_nonbase_variants_combined_pf_gt_1": true,
+    "at_least_60_percent_nonbase_variants_2024_and_2025_net_positive": true,
+    "matched_random_net_percentile_min": 0.95
+  },
+  "interaction_policy": "OPPOSITE_VETO_AND_WIN_EXHAUSTION",
+  "interaction_neighbor_windows_hours": [2, 4, 6],
+  "interaction_source_dropout": [
+    "NONE",
+    "DROP_DET_STAGE37",
+    "DROP_META_LONG",
+    "DROP_META_SHORT",
+    "DROP_TRAP_STAGE41"
+  ],
+  "interaction_placebos": {
+    "matched_random_removals": 5000,
+    "source_time_shift_within_month": 1000
+  },
+  "interpretation": "Robustness of already-derived hypotheses; not a new untouched validation.",
+  "prohibited": [
+    "NO_2026",
+    "NO_POST_RESULT_PARAMETER_RESCUE",
+    "NO_SHADOW_DISCORD_MT5_LIVE_READY_FINAL_SIGNAL"
+  ]
+}

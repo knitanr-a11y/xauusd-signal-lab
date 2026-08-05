@@ -1,0 +1,33 @@
+{
+  "date": "2026-08-06",
+  "formal_next_action": "USER_PC_VERIFY_CONFIGURE_AND_ONE_TIME_NO_BACKFILL_ACTIVATE_FULL95_ALL_Q20_SHADOW",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "package_root": "runtime/btc_ai_v1/full95_all_q20_shadow_v1",
+  "steps": [
+    "Copy launchers/local_paths.example.bat to launchers/local_paths.bat.",
+    "Set exact M1, M15, H1, H4 and D1 CSV paths; do not guess paths.",
+    "Run launchers/00_INSTALL_REQUIREMENTS.bat.",
+    "Run launchers/01_VERIFY.bat and require frozen verification success.",
+    "Run launchers/02_INIT_ONCE.bat exactly once.",
+    "Record the activation cutoff and do not delete or recreate state.",
+    "Run launchers/03_PROCESS.bat on the chosen schedule and use launchers/04_STATUS.bat for health checks."
+  ],
+  "before_activation": {
+    "stage55_must_continue_unchanged": true,
+    "full95_runtime_state_must_not_preexist_from_a_test": true,
+    "exact_csv_paths_required": true,
+    "historical_results_must_not_be_used_to_retune": true
+  },
+  "after_activation_prohibited": [
+    "model retraining",
+    "feature changes",
+    "threshold changes",
+    "LONG-only or Top30 substitution",
+    "activation reset",
+    "historical backfill",
+    "nearest-M1 fallback",
+    "automatic promotion",
+    "MT5 orders or live trading"
+  ]
+}

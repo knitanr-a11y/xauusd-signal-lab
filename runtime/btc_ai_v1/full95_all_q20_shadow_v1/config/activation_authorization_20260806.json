@@ -1,0 +1,9 @@
+{
+  "authorization_time_user_tz": "2026-08-06T00:35:00+09:00",
+  "authorization_text_summary": "Proceed to a Shadow test while avoiding further post-hoc candidate switching and poor research practice.",
+  "authorized_scope": "Build a fresh no-backfill audit-only matched-pair Shadow package. User-PC activation remains a separate one-time action.",
+  "orders_authorized": false,
+  "live_trading_authorized": false,
+  "stage55_change_authorized": false,
+  "existing_shadow_change_authorized": false
+}

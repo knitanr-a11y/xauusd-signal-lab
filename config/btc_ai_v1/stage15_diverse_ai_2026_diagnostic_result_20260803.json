@@ -1,0 +1,36 @@
+{
+  "stage": "BTC_AI_V1_15_DIVERSE_AI_2026_CONSUMED_PERIOD_DIAGNOSTIC",
+  "status": "COMPLETE_DIAGNOSTIC_ONLY_NO_SUPPORT",
+  "period": "[2026-01-01, 2026-08-01)",
+  "calendar_months": 7,
+  "candidate_count": 2,
+  "results": [
+    {
+      "candidate_id": "ML3_070",
+      "model_id": "EXTRA_D8",
+      "completed_trades": 68,
+      "trades_per_calendar_month": 9.7142857143,
+      "pf": 0.881437,
+      "net": -1151.207505,
+      "max_dd": 3893.630349,
+      "calibration_auc": 0.537252,
+      "diagnostic_2026_auc": 0.522436
+    },
+    {
+      "candidate_id": "ML3_011",
+      "model_id": "XGB_D3",
+      "completed_trades": 78,
+      "trades_per_calendar_month": 11.1428571429,
+      "pf": 0.705556,
+      "net": -5634.875513,
+      "max_dd": 7790.578089,
+      "calibration_auc": 0.528509,
+      "diagnostic_2026_auc": 0.508387
+    }
+  ],
+  "events_sha256": "f98192bad39b689c3db59fd73378e6a98dac0d0aaeb3be3a4d44ea3271c9921a",
+  "results_sha256": "f706ae10bffbf4c2cf88c89b672fb56d29dd7705c9202ea78c44c038bdb19270",
+  "support_claim": false,
+  "selection_use": false,
+  "rescue_or_promotion": false
+}

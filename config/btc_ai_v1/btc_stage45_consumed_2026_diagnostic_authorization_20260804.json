@@ -1,0 +1,43 @@
+{
+  "contract_id": "BTC_AI_V1_STAGE45_CONSUMED_2026_FIXED_CANDIDATE_AND_SYNERGY_DIAGNOSTIC_20260804",
+  "frozen_at_jst": "2026-08-04T08:31:00+09:00",
+  "authorization": "USER_EXPLICITLY_REQUESTED_2026_VALIDATION",
+  "interpretation": "CONSUMED_2026_DIAGNOSTIC_NOT_PRISTINE_HOLDOUT",
+  "period": "2026-01-01 through 2026-07-31",
+  "fixed_candidates": [
+    "EXPANSION_MIDPOINT_FAILURE_L2_LONG__SL1.00_TP2.00_H480",
+    "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
+    "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90",
+    "ATR_SHOCK_SECOND_REJECTION_L2_LONG__SL0.75_TP2.00_H240"
+  ],
+  "fixed_meta_inputs": [
+    "EXPANDING",
+    "EXP_DECAY_HL3M",
+    "EXP_DECAY_HL6M",
+    "EXP_DECAY_HL12M",
+    "EXP_DECAY_HL24M"
+  ],
+  "fixed_interaction_diagnostics": [
+    "GLOBAL_FIRST_ARRIVAL_ONE_POSITION",
+    "OPPOSITE_VETO_PRIOR_2H_PLUS_WIN_EXHAUSTION_PRIOR_2H",
+    "OPPOSITE_VETO_PRIOR_4H_PLUS_WIN_EXHAUSTION_PRIOR_4H",
+    "OPPOSITE_VETO_PRIOR_6H_PLUS_WIN_EXHAUSTION_PRIOR_6H"
+  ],
+  "execution": {
+    "closed_m15": true,
+    "exact_m1": true,
+    "same_m1_collision": "SL_FIRST",
+    "spread_usd_per_1btc_trade": 22.5,
+    "meta_stop_atr": 1.0,
+    "meta_target_atr": 2.0,
+    "meta_horizon_m1": 480
+  },
+  "prohibitions": [
+    "NO_PARAMETER_CHANGE_AFTER_2026_RESULTS",
+    "NO_MONTH_DIRECTION_D1_RESCUE",
+    "NO_PARTIAL_MONTH_SELECTION",
+    "NO_CLAIM_OF_PRISTINE_HOLDOUT",
+    "NO_EXTERNAL_OR_VOLUME_FEATURES",
+    "NO_SHADOW_DISCORD_MT5_LIVE_READY_OR_FINAL_SIGNAL"
+  ]
+}

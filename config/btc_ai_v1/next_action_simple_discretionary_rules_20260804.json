@@ -1,0 +1,88 @@
+{
+  "date": "2026-08-04",
+  "formal_next_action": "BTC_AI_V1_SIMPLE_HUMAN_READABLE_RULE_ANTI_OVERFIT_PREREGISTRATION_USER_REVIEW_NEXT",
+  "design_authority": [
+    "docs/btc_ai_v1/BTC_AI_V1_SIMPLE_RULE_ANTI_OVERFIT_RESEARCH_DESIGN_20260804.md",
+    "config/btc_ai_v1/simple_rule_anti_overfit_research_contract_20260804.json",
+    "docs/btc_ai_v1/NEXT_CHAT_HANDOFF_BTC_AI_V1_STAGE55_ACTIVE_SIMPLE_RULE_ANTI_OVERFIT_PREREGISTRATION_NEXT_20260804.md"
+  ],
+  "stage55": {
+    "continue_running": true,
+    "frozen": true,
+    "activation_cutoff_mt5": "2026-08-04 10:52:00",
+    "minimum_closed_trades_per_family": 20,
+    "minimum_calendar_months": 6,
+    "parameter_changes_allowed": false,
+    "state_reset_allowed": false
+  },
+  "research_isolation": {
+    "separate_branch_required": true,
+    "proposed_branch": "feature/btc-simple-discretionary-rule-research",
+    "separate_clone_required": true,
+    "proposed_clone": "C:/xauusd-signal-lab-btc-simple-rules",
+    "do_not_modify_stage55_checkout": true,
+    "new_branch_creation_status": "NOT_CONFIRMED_YET"
+  },
+  "immediate_task": {
+    "type": "PREREGISTRATION_ONLY",
+    "run_backtest_now": false,
+    "open_pnl_pf_win_rate_now": false,
+    "user_approval_required_before_outcome_run": true,
+    "maximum_families": 4,
+    "base_rules_per_family": 1,
+    "maximum_neighbors_per_family": 2,
+    "maximum_total_configurations": 12,
+    "first_pass_machine_learning": false
+  },
+  "initial_families_for_preregistration": [
+    "HTF_TREND_PULLBACK_RECLAIM_RESUME",
+    "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK",
+    "COMPRESSION_BREAKOUT_FIRST_RETEST",
+    "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL"
+  ],
+  "must_propose_for_each_family": [
+    "direction_policy",
+    "timeframes",
+    "one_higher_timeframe_context_maximum",
+    "one_setup",
+    "one_confirmation",
+    "decision_timestamp",
+    "exact_m1_entry_timestamp",
+    "fixed_stop",
+    "fixed_target",
+    "fixed_maximum_hold",
+    "same_m1_collision_rule",
+    "missing_m1_rule",
+    "one_position_non_overlap_rule",
+    "frequency_floor",
+    "numerical_acceptance_and_rejection_gates",
+    "maximum_two_robustness_neighbors"
+  ],
+  "historical_evidence_status": "CONSUMED_RETROSPECTIVE_EXPLORATION_ONLY",
+  "anti_overfit_rules": [
+    "Designate the base rule before outcomes.",
+    "Do not choose the maximum-PF configuration.",
+    "Neighbors are stress tests and cannot replace a failing base.",
+    "Do not add a fifth family after outcomes.",
+    "Do not retain only a profitable direction, month, session, D1 state, volatility state or year.",
+    "Do not relax thresholds after outcomes to rescue frequency.",
+    "Keep all negative results.",
+    "Require fresh no-backfill prospective evidence before promotion."
+  ],
+  "fixed_authority": {
+    "symbol": "XM BTCUSD#",
+    "data": "CLOSED_OHLC_ONLY",
+    "time": "MT5_BROKER_SERVER_NAIVE",
+    "entry": "EXACT_M1_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5
+  },
+  "prohibited": [
+    "No Stage55 model, Q70, confirmation, stop, target or hold changes.",
+    "No Stage55 family deletion or state reset.",
+    "No broad grid search disguised as a simple-rule study.",
+    "No backtest or outcome opening before preregistration approval.",
+    "No use of Discord delivery or visual impressions as selection labels.",
+    "No MT5 orders, live trading, live-ready or final signal."
+  ]
+}

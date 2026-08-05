@@ -1,0 +1,34 @@
+{
+  "date": "2026-08-04",
+  "status": "PASS_WITH_EXACT_M1_GAP_FAIL_CLOSED",
+  "source_parity": {
+    "M1_LONG": "972/972",
+    "M5_LONG": "326/326"
+  },
+  "short_parity": {
+    "M5_rule_path": "57/57",
+    "M1_monthly_research_procedure": "51/52"
+  },
+  "excluded_m1_gap": {
+    "expected_diagnostic_entry": "2023-10-08 02:22:00",
+    "required_exact_entry": "2023-10-08 02:21:00",
+    "reason": "exact M1 open absent",
+    "shadow_action": "INVALIDATE_CANDIDATE"
+  },
+  "causal_checks": {
+    "closed_bars_only": true,
+    "next_exact_m1_open": true,
+    "no_pre_activation_backfill": true,
+    "future_m15_confirmation_as_feature": false,
+    "discord": false,
+    "mt5_orders": false
+  },
+  "smoke_test": {
+    "latest_m1_close": "2026-08-03 03:03:00",
+    "activation_status": "READY_NO_BACKFILL_ACTIVATED",
+    "second_run_status": "READY_OBSERVATION_ONLY",
+    "accepted_candidates": 0,
+    "recovery_candidates": 0
+  },
+  "prospective_m1_model": "FROZEN_2026_08_BOOTSTRAP; NO HISTORICAL PERFORMANCE REINTERPRETATION"
+}

@@ -1,0 +1,27 @@
+{
+  "contract_id": "BTC_AI_V1_FREQUENCY_REPORTING_CONTRACT_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_USER_REQUEST",
+  "rule": "A total event or trade count without its calendar-month denominator is incomplete.",
+  "required_fields": [
+    "evaluation_start",
+    "evaluation_end",
+    "calendar_months_in_scope",
+    "active_months",
+    "total_events_or_completed_trades",
+    "events_or_trades_per_calendar_month",
+    "events_or_trades_per_active_month",
+    "zero_count_months",
+    "monthly_minimum",
+    "monthly_median",
+    "monthly_maximum",
+    "monthly_count_artifact"
+  ],
+  "applies_to": [
+    "capability events",
+    "development completed trades",
+    "robustness trade samples",
+    "untouched final test",
+    "prospective shadow"
+  ]
+}

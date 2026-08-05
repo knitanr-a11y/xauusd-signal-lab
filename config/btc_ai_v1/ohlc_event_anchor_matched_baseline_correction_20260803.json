@@ -1,0 +1,33 @@
+{
+  "correction_id": "BTC_AI_V1_OHLC_EVENT_ANCHOR_MATCHED_BASELINE_CORRECTION_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_AFTER_DESIGN_FLAW_DETECTION_BEFORE_MATCHED_BASELINE_OUTCOME",
+  "parent_contract": "config/btc_ai_v1/ohlc_event_anchor_survival_forensic_contract_20260803.json",
+  "invalidated_intermediate_result": "raw continuation-minus-reversal support gates",
+  "reason": "The continuation barrier is 1.0 ATR, the reversal barrier is 0.75 ATR and same-bar collisions are reversal-first. Raw reversal dominance is therefore structurally expected even without an anchor and cannot establish anchor information.",
+  "matched_baseline": {
+    "universe": "all eligible closed M15 decision rows in 2024-01 through 2025-12 with 96 prior contiguous bars and 32 future contiguous bars",
+    "directions": [1, -1],
+    "outcome_barriers": "identical 1.0 ATR continuation, 0.75 ATR reversal and reversal-first collision",
+    "matching_strata": ["halfyear", "D1 regime", "maturity-distance bin", "direction"],
+    "anchor_subtype_exclusion": "exclude the exact timestamp/direction rows belonging to the evaluated subtype from its baseline pool",
+    "estimator": "weight each matched-stratum baseline rate by the observed anchor subtype's stratum distribution",
+    "checkpoint_comparison": "apply the same weighting to displacement, MFE, MAE and pullback checkpoints"
+  },
+  "corrected_forensic_gates": {
+    "minimum_events_total": 160,
+    "minimum_events_each_halfyear": 25,
+    "minimum_active_months": 18,
+    "minimum_non_censored_events": 80,
+    "absolute_incremental_continuation_minus_reversal_min": 0.05,
+    "incremental_effect_same_sign_all_four_halfyears": true,
+    "incremental_effect_same_sign_at_least_two_D1_regimes": true,
+    "maximum_single_halfyear_event_share": 0.45
+  },
+  "interpretation": [
+    "The raw 13-subtype support count is void and must never be cited as evidence.",
+    "The correction is applied uniformly to all preregistered anchor families and directions.",
+    "No barrier, anchor definition, horizon, maturity bin or matching stratum may be changed after matched-baseline outcome inspection.",
+    "This remains forensic and does not authorize candidate PnL."
+  ]
+}

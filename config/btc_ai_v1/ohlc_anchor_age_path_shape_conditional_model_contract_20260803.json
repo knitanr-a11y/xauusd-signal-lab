@@ -1,0 +1,138 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_ANCHOR_AGE_PATH_SHAPE_CONDITIONAL_MODEL_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_MODEL_OUTCOMES",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC snapshot",
+    "time": "MT5 broker-server naive time",
+    "external_or_volume_features": false,
+    "development_period": "[2024-01-01, 2026-01-01)",
+    "development_calendar_months": 24,
+    "2026_selection_authorized": false
+  },
+  "anchor_registry": {
+    "reuse_frozen_registry": "btc_ohlc_event_anchor_survival/anchor_registry_with_trajectory.csv",
+    "families": [
+      "RANGE_BREAK_20",
+      "CAUSAL_SWING_TURN_20",
+      "COMPRESSION_EXPANSION",
+      "PHASE_TRANSITION_START",
+      "FAILED_RANGE_BREAK_20",
+      "EMA20_SLOPE_TURN"
+    ],
+    "subtypes": 15,
+    "post_anchor_ages_m15_bars": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+    "minimum_contiguous_history_m15": 96,
+    "minimum_future_bars_after_state": 4,
+    "duplicate_same_anchor_age_rows": "keep_each_anchor_family_subtype_as_separate_state"
+  },
+  "state_features": {
+    "anchor_identity": ["family", "subtype", "direction"],
+    "age_path": [
+      "bars_since_anchor",
+      "directional_ATR_distance_from_anchor_close",
+      "MFE_already_achieved_since_anchor",
+      "MAE_already_experienced_since_anchor",
+      "pullback_from_favorable_extreme",
+      "path_total_variation_ATR",
+      "acceptance_outside_anchor_level",
+      "rejection_through_anchor_level"
+    ],
+    "current_OHLC": "frozen 100 causal OHLC state-transition features at the current closed M15 bar",
+    "higher_timeframe": "closed H1/H4/D1 OHLC features already contained in the frozen feature set"
+  },
+  "future_targets_from_each_state": {
+    "horizon_m15_bars": 4,
+    "magnitude": [
+      "future maximum favorable excursion in anchor direction / current ATR",
+      "future maximum adverse excursion / current ATR",
+      "future four-bar high-low range / current ATR"
+    ],
+    "direction": {
+      "continuation_barrier_ATR": 1.0,
+      "reversal_barrier_ATR": 0.75,
+      "same_bar_collision": "REVERSAL_FIRST",
+      "censor_value": 0,
+      "continuation_value": 1,
+      "reversal_value": -1,
+      "formal_target": "observed outcome value minus cross-fitted ordinary-M15 baseline expectation"
+    }
+  },
+  "models": {
+    "ordinary_state_baseline": [
+      "LightGBM magnitude regression on non-anchor ordinary M15 rows",
+      "LightGBM directional-outcome regression on non-anchor ordinary M15 rows"
+    ],
+    "anchor_conditional": [
+      "LightGBM residual magnitude regression",
+      "LightGBM directional matched-baseline residual regression"
+    ],
+    "fixed_parameters": {
+      "boosting_type": "gbdt",
+      "num_leaves": 15,
+      "max_depth": 4,
+      "learning_rate": 0.03,
+      "n_estimators": 350,
+      "min_child_samples": 120,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 5.0,
+      "random_seed": 20260803
+    },
+    "broad_model_grid": false
+  },
+  "folds": [
+    {"validation": "2024H1", "training_end_exclusive": "2024-01-01"},
+    {"validation": "2024H2", "training_end_exclusive": "2024-07-01"},
+    {"validation": "2025H1", "training_end_exclusive": "2025-01-01"},
+    {"validation": "2025H2", "training_end_exclusive": "2025-07-01"}
+  ],
+  "outcome_blind_capability_gates": {
+    "minimum_anchor_state_rows_total": 320,
+    "minimum_rows_each_halfyear": 50,
+    "minimum_active_months_of_24": 18,
+    "minimum_anchor_families_represented": 4,
+    "maximum_single_family_share": 0.60
+  },
+  "magnitude_support_gates": {
+    "cross_fitted_spearman_improvement_over_ordinary_baseline_min": 0.03,
+    "improvement_nonnegative_all_four_halfyears": true,
+    "mean_absolute_error_reduction_fraction_min": 0.03,
+    "same_direction_improvement_in_at_least_two_D1_regimes": true,
+    "does_not_authorize_candidate_PnL": true
+  },
+  "directional_support_gates": {
+    "cross_fitted_residual_spearman_min": 0.05,
+    "residual_spearman_positive_all_four_halfyears": true,
+    "top_decile_actual_residual_mean_min": 0.08,
+    "top_decile_rows_total_min": 160,
+    "top_decile_rows_each_halfyear_min": 25,
+    "top_decile_active_months_min": 18,
+    "top_decile_same_positive_sign_all_four_halfyears": true,
+    "top_decile_same_positive_sign_in_at_least_two_D1_regimes": true,
+    "top_decile_anchor_families_min": 4,
+    "top_decile_max_single_family_share": 0.50
+  },
+  "transfer_tests_open_only_after_directional_support": {
+    "leave_one_D1_regime_out": true,
+    "leave_one_anchor_family_out": true,
+    "leave_one_halfyear_out": true,
+    "candidate_PnL_after_full_transfer_survivor_only": true
+  },
+  "later_candidate_contract_floor": {
+    "completed_trades_min": 96,
+    "positive_months_min_of_24": 15,
+    "profit_factor_min": 1.20,
+    "fixed_spread_usd_per_btc": 22.5
+  },
+  "prohibitions": [
+    "do not cite the invalid raw 13 anchor passes",
+    "do not select only compression-expansion or failed-break families",
+    "do not change the survival barriers after results",
+    "do not add a post-result D1 filter",
+    "do not reduce support or trade-count gates",
+    "do not use 2026 for feature, threshold, family, side, model or exit selection",
+    "do not open exact-M1 candidate PnL without a full directional and transfer survivor",
+    "no external data, portfolio, Shadow, Discord, MT5 orders, live-ready or final signal"
+  ]
+}

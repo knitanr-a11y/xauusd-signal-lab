@@ -1,0 +1,28 @@
+{
+  "candidate_id": "FULL95_ALL_Q20",
+  "training_window": "2024-01-01 <= entry_time < 2026-08-01",
+  "training_n": 1357,
+  "training_first_entry": "2024-01-01 08:00:00",
+  "training_last_entry": "2026-07-31 04:00:00",
+  "target": "clip(net_pnl_usd / entry_atr, -6, 6)",
+  "feature_count": 95,
+  "algorithm": "LightGBM regression",
+  "params": {
+    "n_estimators": 130,
+    "learning_rate": 0.02,
+    "num_leaves": 7,
+    "max_depth": 3,
+    "min_child_samples": 28,
+    "subsample": 0.85,
+    "colsample_bytree": 0.72,
+    "reg_alpha": 1.5,
+    "reg_lambda": 10,
+    "verbosity": -1,
+    "random_state": 42,
+    "n_jobs": 1
+  },
+  "threshold_source": "20th percentile of in-sample training predictions",
+  "threshold": -0.6767195721445508,
+  "research_status": "POSTHOC_HISTORICAL_LEAD_FROZEN_ONLY_FOR_FRESH_PROSPECTIVE_TEST",
+  "no_retraining_after_activation": true
+}

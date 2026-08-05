@@ -1,0 +1,25 @@
+{
+  "contract_id": "BTC_AI_V1_SECOND_CYCLE_FINAL_TEST_TRANSLATION_ADDENDUM_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_ROBUSTNESS_OUTPUT_AND_BEFORE_FINAL_TEST_ACCESS",
+  "applies_to": "ONLY_SECOND_CYCLE_CANDIDATES_THAT_PASS_ALL_FROZEN_ROBUSTNESS_GATES",
+  "model_train": "[2023-01-01, 2025-07-01)",
+  "calibration": "[2025-07-01, 2026-01-01)",
+  "untouched_final_test": "[2026-01-01, 2026-08-01)",
+  "untouched_final_calendar_months": 7,
+  "translation": [
+    "refit the frozen candidate model and feature set on model_train labels only",
+    "derive the same frozen percentile threshold from calibration scores only",
+    "apply the frozen FIRST_CROSS_FROM_BELOW or FOUR_M15_BAR_COOLDOWN policy without change",
+    "freeze final-test event timestamps before exact-M1 PnL replay",
+    "use the frozen development-selected stop ATR, target R and holding horizon",
+    "apply fixed spread 22.50 USD and all original final gates"
+  ],
+  "reporting": "include seven-calendar-month denominator, active months, total trades, trades per calendar month, zero-trade months and monthly distribution",
+  "prohibitions": [
+    "no model refit on any 2026 label",
+    "no 2026 threshold calibration",
+    "no candidate or direction change after final-test output",
+    "no second final-test attempt"
+  ]
+}

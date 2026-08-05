@@ -1,0 +1,32 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_EXPANDING_DECAY_CONSENSUS_SELECTION_FORENSIC_20260804",
+  "date": "2026-08-04",
+  "stage": 34,
+  "status": "FROZEN_BEFORE_STAGE34_OUTCOMES",
+  "parent_result": "BTC_AI_V1_OHLC_SOFT_RECENCY_WEIGHTING_NO_SUPPORTED_HALF_LIFE",
+  "objective": "Test whether requiring expanding and recency-weighted models to independently pass their own past-only P90 thresholds stabilizes top-tail labels without choosing a future-winning schedule.",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "period": "2024-01 through 2025-12",
+    "2026_authorized": false,
+    "candidate_pnl_authorized": false,
+    "external_or_volume_features": false
+  },
+  "inputs": ["Stage31 EXPANDING monthly_prediction_audit", "Stage33 weighted monthly_prediction_audit"],
+  "families": ["EXP_DECAY_HL3M", "EXP_DECAY_HL6M", "EXP_DECAY_HL12M", "EXP_DECAY_HL24M"],
+  "selection": "CONSENSUS_INTERSECTION = expanding selected_p90 AND same-half-life weighted selected_p90; each selected_p90 was calibrated only on the previous complete month",
+  "directions": ["LONG", "SHORT"],
+  "outputs": ["monthly count", "monthly label rate", "label lift over unconditional", "lift improvement versus EXPANDING P90", "D1 UP/NEUTRAL/DOWN count and lift", "year and half-year persistence", "overlap density"],
+  "support_gates": {
+    "available_months": 24,
+    "months_with_at_least_20_events_min": 20,
+    "median_monthly_events_min": 30,
+    "mean_label_lift_improvement_vs_expanding_min": 0.02,
+    "positive_improvement_months_min": 15,
+    "positive_absolute_mean_lift_in_2024_and_2025": true,
+    "positive_absolute_mean_lift_all_D1_regimes": true,
+    "maximum_single_halfyear_positive_improvement_share": 0.5,
+    "same_half_life_pass_LONG_and_SHORT": true
+  },
+  "prohibitions": ["no union selection", "no post-result half-life/direction/month/D1 rescue", "no threshold change", "no candidate PnL", "no 2026", "no external or volume data", "no Shadow, Discord, MT5 orders, live-ready or final signal"]
+}

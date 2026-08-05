@@ -1,0 +1,28 @@
+{
+  "contract_id": "BTC_AI_V1_21_PAIRWISE_RANKING_RECENCY_ADAPTATION_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_PAIRWISE_RANKING_OUTCOMES",
+  "classification_ceiling": "EXPLORATORY_PROSPECTIVE_ONLY",
+  "targets": ["NET_CLOSE_R_480", "PATH_EDGE_R_480", "POLICY_PAYOFF_R_720"],
+  "monthly_relevance_encoding": "Within each training calendar month, continuous target is converted to ordinal quintile relevance 0..4. Thresholds are estimated only from that training month.",
+  "ranker_models": {
+    "XGB_PAIR_D3": {"objective":"rank:pairwise","n_estimators":250,"learning_rate":0.03,"max_depth":3,"min_child_weight":50,"subsample":0.8,"colsample_bytree":0.8,"reg_lambda":2.0},
+    "CAT_YETI_D4": {"loss_function":"YetiRank","iterations":250,"learning_rate":0.03,"depth":4,"l2_leaf_reg":5.0}
+  },
+  "training_schedules": {
+    "EXPANDING": "Original expanding training period ending at calibration start.",
+    "ROLLING_12M": "Most recent up-to-12 calendar months before calibration start; first fold uses all available six months."
+  },
+  "feature_sets": ["MTF_CONTEXT", "FULL_CAUSAL"],
+  "directions": ["LONG", "SHORT"],
+  "event_threshold_percentiles": [0.90, 0.95, 0.975],
+  "event_policies": ["FIRST_CROSS_FROM_BELOW", "FOUR_M15_BAR_COOLDOWN"],
+  "raw_candidate_limit": 288,
+  "capability_survivors_max": 96,
+  "development_period": "[2024-01-01, 2026-01-01), exactly 24 calendar months",
+  "execution_grid": "same frozen 64 configurations",
+  "robustness": "same frozen bootstrap, matched-random, pseudo-state and parameter-neighborhood controls",
+  "fixed_spread_usd": 22.5,
+  "consumed_2026": "diagnostic only after survivor freeze; not selection or support",
+  "no_rescue": ["no schedule/model/target/side/threshold/exit change after results", "no reuse of 2026 as untouched evidence", "no Shadow or live promotion"]
+}

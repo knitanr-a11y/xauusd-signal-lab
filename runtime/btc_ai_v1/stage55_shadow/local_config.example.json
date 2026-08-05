@@ -1,0 +1,20 @@
+{
+  "contract_id": "BTC_AI_V1_STAGE55_DUAL_FALSE_LONG_REVERSAL_SHORT_PROSPECTIVE_SHADOW",
+  "state_root": "%LOCALAPPDATA%/xauusd_signal_lab/btc_stage55_shadow",
+  "max_recoverable_poll_gap_minutes": 10,
+  "ohlc_paths": {
+    "H4": "C:/path/to/BTCUSD#_H4.csv",
+    "M15": "C:/path/to/BTCUSD#_M15.csv",
+    "M5": "C:/path/to/BTCUSD#_M5.csv",
+    "M1": "C:/path/to/BTCUSD#_M1.csv"
+  },
+  "discord": {
+    "enabled": false,
+    "webhook_source": "LOCAL_CONFIG",
+    "webhook_url": "",
+    "username": "BTC Stage55 Shadow",
+    "attach_chart": true,
+    "chart_bars": 120,
+    "poll_seconds": 15
+  }
+}

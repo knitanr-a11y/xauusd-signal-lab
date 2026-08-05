@@ -1,0 +1,16 @@
+{
+  "addendum_id": "BTC_AI_V1_STAGE45_REJECTED_PF13_14_QUARANTINE_DIAGNOSTIC_20260804",
+  "frozen_before_2026_outputs_were_aggregated_or_viewed": true,
+  "purpose": "Explain why apparently attractive PF 1.3-1.4 configurations were not adopted and test whether their known historical asymmetry persists in consumed 2026 diagnostics.",
+  "cohorts": {
+    "meta": "All Stage38 meta configurations with formal_supported=false and 2025 PF >= 1.30 and < 1.50.",
+    "deterministic": "All Stage37 discovery-selected configurations with formal_supported=false and 2024 discovery PF >= 1.30 and < 1.50."
+  },
+  "interpretation": "POST_HOC_QUARANTINE_DIAGNOSTIC_ONLY; cohort membership uses previously viewed 2024/2025 results and cannot create a formal candidate.",
+  "no_rescue": [
+    "No parameter changes",
+    "No direction deletion",
+    "No month/D1 filters",
+    "No replacement of original discovery and validation gates"
+  ]
+}

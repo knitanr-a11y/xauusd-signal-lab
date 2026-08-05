@@ -1,0 +1,90 @@
+{
+  "date": "2026-08-03",
+  "status": "COMPLETE_ROOT_CAUSE_IDENTIFIED_NO_RESCUE",
+  "authoritative_source": "XM BTCUSD# closed-bar OHLC with exact M1 execution",
+  "external_data_used": false,
+  "fixed_spread_usd_per_btc": 22.5,
+  "opportunity": {
+    "short_label_rate_2024H1": 0.3351,
+    "short_label_rate_2024H2": 0.3552,
+    "short_label_rate_2025H1": 0.3577,
+    "short_label_rate_2025H2": 0.3681,
+    "short_label_rate_2026_7m": 0.3653,
+    "conclusion": "SHORT opportunity did not disappear"
+  },
+  "regime_shift": {
+    "d1_up_share_dev_24m": 0.44598,
+    "d1_up_share_2026_7m": 0.151021,
+    "d1_down_share_dev_24m": 0.257115,
+    "d1_down_share_2026_7m": 0.466946,
+    "all_up_share_dev_24m": 0.191891,
+    "all_up_share_2026_7m": 0.054049,
+    "all_down_share_dev_24m": 0.082979,
+    "all_down_share_2026_7m": 0.184494,
+    "d1_ema20_slope_atr_dev_mean": 0.124302,
+    "d1_ema20_slope_atr_2026_mean": -0.123181,
+    "d1_slope_psi": 1.441409
+  },
+  "selected_event_geometry_shift": {
+    "d1_trend_mean_dev": 0.653511,
+    "d1_trend_mean_2026": -0.052126,
+    "d1_slope_mean_dev": 0.434088,
+    "d1_slope_mean_2026": 0.037221,
+    "ret1_atr_mean_dev": -0.190814,
+    "ret1_atr_mean_2026": -0.492831,
+    "ret32_atr_mean_dev": -0.149595,
+    "ret32_atr_mean_2026": -1.153795,
+    "dist_ema50_atr_mean_dev": -0.280385,
+    "dist_ema50_atr_mean_2026": -0.876452,
+    "range_expansion96_mean_dev": 2.310114,
+    "range_expansion96_mean_2026": 2.908723,
+    "interpretation": "high-score SHORT events changed from corrections/impulses inside rising or mixed structure to deeper and more mature selloffs"
+  },
+  "model_discrimination": {
+    "mtf_calibration_auc_range": [0.5252, 0.5257],
+    "mtf_2026_auc_range": [0.5080, 0.5088],
+    "full_calibration_auc": 0.5402,
+    "full_2026_auc": 0.5232,
+    "score_psi_range": [0.0073, 0.0090],
+    "event_sets_below_unconditional_short_label_rate": 4,
+    "finalist_event_sets": 5,
+    "conclusion": "score magnitude remained stable but predictive ordering collapsed"
+  },
+  "d1_composition_and_conditional_decomposition": {
+    "candidate_ledger_weighted_dev": {
+      "D1_UP": {"trades": 2693, "pf": 1.245781, "net": 158499.262227},
+      "D1_NEUTRAL": {"trades": 689, "pf": 1.070674, "net": 14746.439098},
+      "D1_DOWN": {"trades": 292, "pf": 1.067556, "net": 6340.249484}
+    },
+    "composition_only_expected_2026_net_using_dev_conditional_usd": 45765.111272,
+    "actual_2026_candidate_ledger_net_usd": -70521.569206,
+    "conditional_drift_residual_usd": -116286.680479,
+    "conclusion": "regime composition contributed, but within-regime conditional performance deterioration was dominant"
+  },
+  "execution_path": {
+    "main_mtf_2r_dev_win_rate_range": [0.421369, 0.424354],
+    "main_mtf_2r_2026_win_rate_range": [0.362832, 0.371257],
+    "main_mtf_2r_dev_sl_rate_range": [0.474785, 0.476591],
+    "main_mtf_2r_2026_sl_rate_range": [0.572519, 0.584071],
+    "ml2_104_tp_rate_dev": 0.371736,
+    "ml2_104_tp_rate_2026": 0.303150,
+    "ml2_106_win_rate_dev": 0.538674,
+    "ml2_106_win_rate_2026": 0.5
+  },
+  "cost": {
+    "spread_atr_dev_range": [0.061564, 0.074588],
+    "spread_atr_2026_range": [0.086503, 0.095591],
+    "zero_spread_2026_still_negative_candidates": 4,
+    "zero_spread_2026_positive_candidate": "ML2_106",
+    "conclusion": "fixed spread amplified the failure but was not the primary cause"
+  },
+  "formal_root_cause": "OHLC_STATE_TRANSITION_AND_CONDITIONAL_MEANING_SHIFT_CAUSED_LATE_SHORT_SELECTION",
+  "methodology_gap": "bootstrap, random, pseudo-state and parameter tests were within the 2024-2025 regime and did not test regime-transition invariance",
+  "next_stage": "BTC_AI_V1_OHLC_STATE_TRANSITION_REPRESENTATION_AND_LEAVE_ONE_REGIME_OUT_DESIGN",
+  "prohibitions": [
+    "no external data",
+    "no D1-only rescue filter",
+    "no threshold, side, month, exit or horizon rescue",
+    "no Shadow, Discord or orders from this diagnostic"
+  ]
+}

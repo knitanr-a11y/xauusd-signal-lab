@@ -1,0 +1,97 @@
+{
+  "date": "2026-08-04",
+  "research_id": "BTC_AI_V1_OHLC_DECEPTION_META_FAKEOUT_RESEARCH",
+  "formal_status": "BTC_AI_V1_OHLC_DECEPTION_AND_META_FAKEOUT_STACK_SUPPORTED_ON_2024_DISCOVERY_2025_VALIDATION_STAGE39_ROBUSTNESS_2026_DIAGNOSTIC_NOT_EXECUTED",
+  "source_contract": {
+    "symbol": "XM BTCUSD#",
+    "features": "closed OHLC-derived only",
+    "time_basis": "MT5 broker-server naive",
+    "decision_timeframe": "closed M15",
+    "execution": "exact M1",
+    "external_data": false,
+    "volume_features": false
+  },
+  "stage37": {
+    "event_subtypes": 72,
+    "event_rows": 33912,
+    "execution_grid_rows": 864,
+    "formal_supported_individuals": 1,
+    "candidate": "EXPANSION_MIDPOINT_FAILURE_L2_LONG__SL1.00_TP2.00_H480",
+    "validation_2025": {
+      "trades": 132,
+      "pf": 1.0727653250889857,
+      "net_usd": 2133.9676030807877
+    },
+    "combined_2024_2025": {
+      "trades": 273,
+      "pf": 1.2437833324854688,
+      "net_usd": 13037.66955727225,
+      "max_dd_usd": 6256.47205982536,
+      "bootstrap_probability_net_positive": 0.92875
+    },
+    "robustness_supported": true
+  },
+  "stage38_meta": {
+    "candidate_signal_rows": 8595,
+    "model_groups": 48,
+    "configurations": 144,
+    "selected_long": "UNION_FIRST_CROSS__L1__LONG__SCORE_CONFIRM_STATE__LGBM_D3__Q90",
+    "selected_short": "UNION_FIRST_CROSS__L1__SHORT__SCORE_CONFIRM__LGBM_D3__Q90",
+    "long_validation_2025": {
+      "trades": 71,
+      "pf": 1.571853,
+      "net_usd": 8536.139173
+    },
+    "short_validation_2025": {
+      "trades": 80,
+      "pf": 1.121589,
+      "net_usd": 1960.5866
+    },
+    "combined_stack_validation_2025": {
+      "trades": 145,
+      "pf": 1.3901248185237645,
+      "net_usd": 11439.683542309165,
+      "positive_halfyears": 2
+    },
+    "combined_stack_2024h2_2025": {
+      "trades": 188,
+      "pf": 1.6033143179483385,
+      "net_usd": 20700.12786463174,
+      "max_dd_usd": 3376.3210459284564,
+      "bootstrap_probability_net_positive": 0.99975
+    },
+    "formal_supported": true
+  },
+  "stage39": {
+    "formal_meta_stack_robustness_supported": true,
+    "matched_random_net_percentile": 1.0,
+    "matched_random_pf_percentile": 1.0,
+    "positive_2025_months": 8,
+    "positive_d1_regimes": 3,
+    "q90_seed_positive_counts": {
+      "LONG": 3,
+      "SHORT": 3
+    },
+    "deterministic_plus_meta_accumulation": "DIAGNOSTIC_ONLY_NOT_FORMAL"
+  },
+  "causality": {
+    "status": "PASS",
+    "all_recorded_violation_counts": 0,
+    "selection_recomputed_from_2024_only_matches": true,
+    "2026_rows_used": 0
+  },
+  "stage40": {
+    "contract_frozen": true,
+    "period": "2026-01 through 2026-07",
+    "status": "NOT_EXECUTED_NO_COMPLETE_RESULT_USED",
+    "interpretation": "diagnostic only because 2026 was consumed by earlier BTC research"
+  },
+  "authorization": {
+    "research_candidate_supported": true,
+    "shadow": false,
+    "discord": false,
+    "mt5_orders": false,
+    "live_ready": false,
+    "final_signal": false
+  }
+}

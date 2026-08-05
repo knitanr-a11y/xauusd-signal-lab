@@ -1,0 +1,17 @@
+{
+  "stage": "BTC_AI_V1_09_SECOND_CYCLE_FINAL_TEST_EVENT_FREEZE",
+  "status": "FROZEN_BEFORE_FINAL_TEST_PNL_REPLAY",
+  "period": "[2026-01-01, 2026-08-01)",
+  "calendar_months": 7,
+  "candidate_count": 5,
+  "events_file_sha256": "cf68fbfb703756fed6b29836a60665301a1fd160aab5c3dcfa1d6dedc601f294",
+  "summary_file_sha256": "10521b711a36f1315be67b961ac3fd6e987ca24de0e0bbe958504652c00f92bb",
+  "candidates": [
+    {"candidate_id":"ML2_126","model_id":"LOGIT_EN50","feature_set":"MTF_CONTEXT","direction":"SHORT","percentile":0.9,"event_policy":"FIRST_CROSS_FROM_BELOW","threshold":0.548876941204071,"evaluation_calendar_months":7,"events_total":493,"events_per_calendar_month":70.42857142857143,"active_months":7,"zero_event_months":0,"monthly_min":29,"monthly_median":64.0,"monthly_max":116},
+    {"candidate_id":"ML2_106","model_id":"LOGIT_L2","feature_set":"FULL_CAUSAL","direction":"SHORT","percentile":0.975,"event_policy":"FIRST_CROSS_FROM_BELOW","threshold":0.6133829379252701,"evaluation_calendar_months":7,"events_total":144,"events_per_calendar_month":20.571428571428573,"active_months":7,"zero_event_months":0,"monthly_min":9,"monthly_median":17.0,"monthly_max":48},
+    {"candidate_id":"ML2_127","model_id":"LOGIT_EN50","feature_set":"MTF_CONTEXT","direction":"SHORT","percentile":0.9,"event_policy":"FOUR_M15_BAR_COOLDOWN","threshold":0.548876941204071,"evaluation_calendar_months":7,"events_total":631,"events_per_calendar_month":90.14285714285714,"active_months":7,"zero_event_months":0,"monthly_min":34,"monthly_median":84.0,"monthly_max":142},
+    {"candidate_id":"ML2_090","model_id":"LOGIT_L2","feature_set":"MTF_CONTEXT","direction":"SHORT","percentile":0.9,"event_policy":"FIRST_CROSS_FROM_BELOW","threshold":0.5496498806191781,"evaluation_calendar_months":7,"events_total":497,"events_per_calendar_month":71.0,"active_months":7,"zero_event_months":0,"monthly_min":35,"monthly_median":63.0,"monthly_max":113},
+    {"candidate_id":"ML2_104","model_id":"LOGIT_L2","feature_set":"FULL_CAUSAL","direction":"SHORT","percentile":0.95,"event_policy":"FIRST_CROSS_FROM_BELOW","threshold":0.5893704953960865,"evaluation_calendar_months":7,"events_total":285,"events_per_calendar_month":40.714285714285715,"active_months":7,"zero_event_months":0,"monthly_min":17,"monthly_median":37.0,"monthly_max":62}
+  ],
+  "pnl_opened": false
+}

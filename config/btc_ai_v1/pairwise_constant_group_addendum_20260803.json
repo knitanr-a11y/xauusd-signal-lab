@@ -1,0 +1,9 @@
+{
+  "addendum_id": "BTC_AI_V1_21_PAIRWISE_CONSTANT_MONTH_GROUP_HANDLING_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_AFFECTED_MODEL_OUTPUTS",
+  "reason": "POLICY_PAYOFF_R_720 can be constant within a training calendar month, so that month contains no pairwise ordering information.",
+  "rule": "A training month with fewer than two distinct ordinal relevance labels is excluded from ranker fitting. It remains present in calibration, validation, event-density and PnL evaluation. No threshold or outcome is inspected to decide exclusion.",
+  "unaffected_outputs": "Previously completed NET_CLOSE_R_480 and PATH_EDGE_R_480 XGBoost ranker outputs remain valid because every training month had multiple relevance levels.",
+  "catboost_status": "CatBoost YetiRank produced no completed model artifact under the month-group contract because one series exceeded execution limits. No CatBoost outcome is used."
+}

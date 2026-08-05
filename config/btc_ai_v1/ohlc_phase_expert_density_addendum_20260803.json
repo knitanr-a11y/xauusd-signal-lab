@@ -1,0 +1,28 @@
+{
+  "addendum_id": "BTC_AI_V1_OHLC_PHASE_EXPERT_DENSITY_20260803",
+  "date": "2026-08-03",
+  "status": "FROZEN_BEFORE_PHASE_EXPERT_OUTCOME_ACCEPTANCE",
+  "reason": "Outcome-blind phase counts showed EARLY_IMPULSE contains only 163 to 270 rows per half-year. A fixed LightGBM minimum leaf size of 120 would permit too few leaves and is not a fair implementation of a phase-specific expert.",
+  "invalidated_dry_run": "All phase-expert outputs produced before this addendum, including RANGE_NEUTRAL, are invalid and must not be used.",
+  "final_model_rule": {
+    "model": "LightGBM depth-3 classifier",
+    "minimum_training_rows": 150,
+    "minimum_calibration_rows": 100,
+    "minimum_leaf_size": "max(20, min(120, floor(training_rows / 10)))",
+    "rule_is_outcome_blind": true,
+    "same_rule_applies_to_every_phase_direction_fold": true
+  },
+  "phase_halfyear_row_range": {
+    "RANGE_NEUTRAL": [2083, 2715],
+    "EARLY_IMPULSE": [163, 270],
+    "MATURE_EXTENSION": [5359, 5809],
+    "PULLBACK": [3698, 4335],
+    "EXHAUSTION_REJECTION": [751, 1049],
+    "REVERSAL_ATTEMPT": [4291, 4579]
+  },
+  "candidate_contract_changed": false,
+  "thresholds_changed": false,
+  "execution_changed": false,
+  "development_gates_changed": false,
+  "2026_opened": false
+}

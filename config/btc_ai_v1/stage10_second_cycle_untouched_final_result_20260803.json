@@ -1,0 +1,13 @@
+{
+  "stage": "BTC_AI_V1_10_SECOND_CYCLE_UNTOUCHED_FINAL",
+  "status": "COMPLETE_UNTOUCHED_FINAL",
+  "period": "[2026-01-01, 2026-08-01)",
+  "calendar_months": 7,
+  "finalists_evaluated": 5,
+  "supported_retrospective": 0,
+  "supported_ids": [],
+  "results_sha256": "196d488556442e964a9bd15b7af3b26fd4c241e93ceeca7f2f6b3e3f87320368",
+  "monthly_sha256": "570cfc4f6c47563e01e119d5d8904b421be42db9fd0c670114c595fd1c3adb0f",
+  "automatic_promotion": false,
+  "prospective_shadow_authorized": false
+}

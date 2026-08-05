@@ -1,0 +1,32 @@
+{
+  "date": "2026-08-04",
+  "stage": 31,
+  "contract_id": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_FORENSIC_20260803",
+  "formal_status": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_NO_SUPPORTED_SCHEDULE",
+  "formal_months": 24,
+  "evaluations": 192,
+  "available_evaluations": 192,
+  "unavailable_evaluations": 0,
+  "prediction_audit_rows": 541984,
+  "source_manifest_match": true,
+  "state_rows": 125567,
+  "feature_count": 100,
+  "formal_decision_rows": 70066,
+  "leakage_violation_count": 0,
+  "supported_schedules": [],
+  "schedule_results": [
+    {"schedule":"ROLLING_3M","direction":"LONG","mean_auc_delta":-0.006655899711160089,"positive_auc_months":12,"mean_p90_lift_delta":0.011529240807117652,"positive_p90_months":13,"pass":false},
+    {"schedule":"ROLLING_3M","direction":"SHORT","mean_auc_delta":-0.025056407583437242,"positive_auc_months":4,"mean_p90_lift_delta":-0.05662737898861817,"positive_p90_months":5,"pass":false},
+    {"schedule":"ROLLING_6M","direction":"LONG","mean_auc_delta":-0.0018232630923032238,"positive_auc_months":15,"mean_p90_lift_delta":-0.011601652357447608,"positive_p90_months":14,"pass":false},
+    {"schedule":"ROLLING_6M","direction":"SHORT","mean_auc_delta":-0.016842139039106148,"positive_auc_months":5,"mean_p90_lift_delta":-0.0396989806333815,"positive_p90_months":9,"pass":false},
+    {"schedule":"ROLLING_12M","direction":"LONG","mean_auc_delta":0.00035081540725544896,"positive_auc_months":11,"mean_p90_lift_delta":-0.0024178495466312664,"positive_p90_months":17,"pass":false},
+    {"schedule":"ROLLING_12M","direction":"SHORT","mean_auc_delta":-0.010314907117047994,"positive_auc_months":6,"mean_p90_lift_delta":-0.03588515297407776,"positive_p90_months":5,"pass":false}
+  ],
+  "candidate_pnl_opened": false,
+  "2026_opened": false,
+  "shadow": false,
+  "discord": false,
+  "mt5_orders": false,
+  "live_ready": false,
+  "final_signal": false
+}

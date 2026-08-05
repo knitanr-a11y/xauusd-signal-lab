@@ -1,0 +1,53 @@
+{
+  "status": "BTC_AI_V1_OHLC_ROLLING_ADAPTIVE_RECALIBRATION_IMPLEMENTATION_READY_FORMAL_EXECUTION_BLOCKED_MISSING_AUTHORITATIVE_STATE_INPUTS",
+  "date": "2026-08-03",
+  "branch": "feature/btc-ai-v1-data-acquisition",
+  "parent_contract": "config/btc_ai_v1/ohlc_rolling_adaptive_recalibration_forensic_contract_20260803.json",
+  "implementation_complete": true,
+  "formal_market_execution_complete": false,
+  "missing_preferred_state_inputs": [
+    "features.npy",
+    "meta.csv",
+    "feature_sets.json"
+  ],
+  "accepted_raw_regeneration_inputs": [
+    {
+      "file": "BTCUSD#_M1_20230101_20260803.csv",
+      "sha256": "c33e9ecc258f01ee8959f9d6b219ba1c5047a0c1f2ab99683054398400e87135"
+    },
+    {
+      "file": "BTCUSD#_M15_20230101_20260803.csv",
+      "sha256": "8df8d24f2dd14df71545324b30784f8fcd00dd82ee90caf7e5c389c58b9751b6"
+    },
+    {
+      "file": "BTCUSD#_H1_20230101_20260803.csv",
+      "sha256": "7c04ec467399f00d89c19a59491aef91a4ce54ac834c3edc0c122501ed2306e4"
+    },
+    {
+      "file": "BTCUSD#_H4_20230101_20260802.csv",
+      "sha256": "94c2013dc175e340b3d22e229383863ba699aad224ea14d3e6fda90bc857a7d0"
+    },
+    {
+      "file": "BTCUSD#_D1_20230101_20260802.csv",
+      "sha256": "8485e0249e6320c66cc43efd1ad90f86913eee6ea98e177fc684b4d0f4760c73"
+    }
+  ],
+  "verification": {
+    "unit_tests_passed": 5,
+    "synthetic_full_path_count": 192,
+    "synthetic_leakage_violation_count": 0,
+    "missing_input_fail_closed_exit_code": 2,
+    "synthetic_results_are_research_evidence": false
+  },
+  "unopened": {
+    "formal_2024_2025_metrics": true,
+    "schedule_support": true,
+    "candidate_pnl": true,
+    "2026_diagnostic": true,
+    "shadow": true,
+    "discord": true,
+    "mt5_orders": true,
+    "live_ready": true,
+    "final_signal": true
+  }
+}

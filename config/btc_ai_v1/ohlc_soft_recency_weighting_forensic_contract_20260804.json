@@ -1,0 +1,52 @@
+{
+  "contract_id": "BTC_AI_V1_OHLC_SOFT_RECENCY_WEIGHTING_FORENSIC_20260804",
+  "date": "2026-08-04",
+  "stage": 33,
+  "status": "FROZEN_BEFORE_STAGE33_OUTCOMES",
+  "parent_result": "BTC_AI_V1_HARD_WINDOW_SAMPLE_LOSS_AND_PAST_VISIBLE_RANK_INSTABILITY_NO_SUPPORTED_LIVE_DRIFT_GATE",
+  "objective": "Test whether exponential recency weighting can adapt without deleting older training rows.",
+  "authority": {
+    "source": "accepted XM BTCUSD# closed-bar OHLC only",
+    "time": "MT5 broker-server naive time",
+    "period": "[2024-01-01, 2026-01-01)",
+    "2026_selection_authorized": false,
+    "candidate_pnl_authorized": false,
+    "external_or_volume_features": false
+  },
+  "feature_and_label_universe": {
+    "features": "same frozen 100 causal OHLC state-transition features",
+    "directions": ["LONG", "SHORT"],
+    "label": "same exact-M1 1 ATR stop / 1.5 ATR target-before-stop label",
+    "resolved_only": "maturity_ns <= current monthly refit time"
+  },
+  "monthly_prequential": {
+    "months": 24,
+    "each_month_once": true,
+    "training_history": "EXPANDING from 2023-01-01; no row deletion",
+    "calibration": "previous complete calendar month only",
+    "top_tail": "P90 fixed"
+  },
+  "weighting_schedules": [
+    {"name": "UNWEIGHTED_EXPANDING", "half_life_months": null},
+    {"name": "EXP_DECAY_HL3M", "half_life_months": 3},
+    {"name": "EXP_DECAY_HL6M", "half_life_months": 6},
+    {"name": "EXP_DECAY_HL12M", "half_life_months": 12},
+    {"name": "EXP_DECAY_HL24M", "half_life_months": 24}
+  ],
+  "weight_definition": "row_recency_weight = exp(-ln(2) * age_days / (half_life_months * 30.4375)); multiply by the frozen positive-class weight; no minimum-weight truncation",
+  "model": "same frozen Stage31 LightGBM parameters; no model grid",
+  "outputs": ["monthly AUC", "P90 label lift", "Brier", "calibration slope", "score PSI", "D1 P90 lift", "effective sample size", "weight concentration by source year"],
+  "support_gates_against_unweighted": {
+    "available_months_min": 20,
+    "mean_AUC_improvement_min": 0.01,
+    "median_AUC_improvement_positive": true,
+    "positive_AUC_months_min": 15,
+    "mean_P90_lift_improvement_min": 0.02,
+    "positive_P90_lift_months_min": 15,
+    "positive_mean_P90_lift_in_2024_and_2025": true,
+    "positive_mean_P90_lift_in_all_D1_regimes": true,
+    "score_PSI_median_max": 0.25,
+    "same_half_life_must_pass_LONG_and_SHORT": true
+  },
+  "prohibitions": ["no hard-window row deletion", "no 2026 selection", "no post-result side/month/D1 selection", "no PnL before full ordering survivor", "no threshold/gate reduction", "no external or volume data", "no Shadow, Discord, MT5 orders, live-ready or final signal"]
+}
