@@ -1,0 +1,44 @@
+{
+  "date": "2026-08-06",
+  "status": "PRE_ACTIVATION_CSV_COMPATIBILITY_FIX_VALIDATED",
+  "cause": "The frozen loader was fixed to semicolon delimiter while the established btcusdsharp exporter writes comma-delimited time,open,high,low,close CSV files.",
+  "scope": "CSV parsing compatibility only",
+  "accepted_delimiters": [",", ";", "TAB"],
+  "accepted_headers": [
+    "time,open,high,low,close,...",
+    "time;open;high;low;close;...",
+    "<DATE><TAB><TIME><TAB><OPEN><TAB><HIGH><TAB><LOW><TAB><CLOSE>"
+  ],
+  "artifacts": {
+    "bootstrap_run_shadow_csv_compat.py": {
+      "sha256_lf": "582f9e424a055e01066bc81b2613e4ed2de705024548a64fa3329c4cab26631b",
+      "bytes_lf": 2835
+    },
+    "launchers/02_INIT_ONCE_CSV_COMPAT.bat": {
+      "sha256_crlf": "46c42591c93298ff71c209fa684a06a73971f89ff3d9d9e910fcd585b2eee334",
+      "bytes_crlf": 406
+    },
+    "launchers/03_PROCESS_CSV_COMPAT.bat": {
+      "sha256_crlf": "11932cdb41b0f31cf5e6017d693070f7bfb0d037eb3f9db734c9300d3ce988e6",
+      "bytes_crlf": 262
+    }
+  },
+  "validation": {
+    "comma_loader": "PASS",
+    "semicolon_loader": "PASS",
+    "mt5_tab_date_time_loader": "PASS",
+    "full_init_with_comma_csv": "PASS",
+    "full_init_control_context_closed_trades": 162,
+    "test_activation_was_temporary": true
+  },
+  "unchanged": [
+    "LightGBM model",
+    "95 feature contract",
+    "Q20 threshold",
+    "parent matched-pair rule",
+    "no-backfill activation policy",
+    "review gates",
+    "Stage55 runtime and cutoff"
+  ],
+  "user_pc_activation_created_by_failed_runs": false
+}
