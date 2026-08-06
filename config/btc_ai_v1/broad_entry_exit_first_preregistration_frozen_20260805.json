@@ -1,0 +1,116 @@
+{
+  "contract_id": "BTC_AI_V1_BROAD_ENTRY_EXIT_FIRST_PREREGISTRATION_FROZEN_20260805",
+  "status": "FROZEN_BEFORE_OUTCOMES",
+  "research_role": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "branch": "feature/btc-broad-entry-exit-first-research",
+  "base_commit": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "objective": "Broaden entries radically and test whether directional information appears through exit horizon and payoff translation rather than narrow setup selection.",
+  "data_contract": {
+    "symbol": "BTCUSD#",
+    "source": "attached XM closed OHLC CSV only",
+    "time_basis": "MT5 broker-server naive",
+    "entry_start_inclusive": "2023-01-01 00:00:00",
+    "entry_end_exclusive": "2026-08-01 00:00:00",
+    "closed_bars_only": true,
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "cost_usd_per_completed_1btc": 22.5,
+    "double_cost_audit_usd": 45.0,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "entry_principle": {
+    "no_confirmation_filter": true,
+    "no_body_size_filter": true,
+    "no_atr_regime_filter": true,
+    "no_ema_filter": true,
+    "no_session_filter": true,
+    "one_position_scope": "PER_CONFIGURATION",
+    "cross_configuration_overlap": "ALLOWED_FOR_PRIMARY_EVALUATION"
+  },
+  "entry_families": [
+    {
+      "family": "EVERY_H1_BODY_SIGN_CONTINUATION",
+      "decision": "every fully closed H1 bar after indicator warmup",
+      "direction": "LONG when H1 close > open; SHORT when H1 close < open",
+      "skip": "doji only"
+    },
+    {
+      "family": "EVERY_H1_BODY_SIGN_FADE",
+      "decision": "every fully closed H1 bar after indicator warmup",
+      "direction": "SHORT when H1 close > open; LONG when H1 close < open",
+      "skip": "doji only"
+    },
+    {
+      "family": "EVERY_H4_DAY_OPEN_DISPLACEMENT_CONTINUATION",
+      "decision": "every fully closed H4 bar after indicator warmup",
+      "direction": "LONG when H4 close > current broker-day open; SHORT when H4 close < current broker-day open",
+      "skip": "exact equality only"
+    },
+    {
+      "family": "EVERY_H4_DAY_OPEN_DISPLACEMENT_FADE",
+      "decision": "every fully closed H4 bar after indicator warmup",
+      "direction": "SHORT when H4 close > current broker-day open; LONG when H4 close < current broker-day open",
+      "skip": "exact equality only"
+    }
+  ],
+  "exit_translations": [
+    {
+      "config": "TIME60_HARDSTOP_2ATR",
+      "hard_stop": "2.00 x latest fully closed M15 ATR14 at decision",
+      "target": null,
+      "time_exit": "close of 60th existing M1 bar"
+    },
+    {
+      "config": "TIME240_HARDSTOP_2ATR",
+      "hard_stop": "2.00 x latest fully closed M15 ATR14 at decision",
+      "target": null,
+      "time_exit": "close of 240th existing M1 bar"
+    },
+    {
+      "config": "BRACKET_1ATR_2ATR_MAX720",
+      "hard_stop": "1.00 x latest fully closed M15 ATR14 at decision",
+      "target": "2.00 x latest fully closed M15 ATR14 from entry",
+      "time_exit": "close of 720th existing M1 bar"
+    }
+  ],
+  "configuration_count": 12,
+  "formal_gate_per_configuration": {
+    "combined_2024_2026_07_trades_min": 120,
+    "2024_trades_min": 25,
+    "2025_trades_min": 25,
+    "2026_01_07_trades_min": 15,
+    "combined_pf_min": 1.12,
+    "combined_net_usd": "> 0",
+    "combined_net_to_maxdd_min": 1.20,
+    "2024_pf_min": 1.00,
+    "2024_net_usd": ">= 0",
+    "2025_pf_min": 1.00,
+    "2025_net_usd": ">= 0",
+    "2026_01_07_pf_min": 0.95,
+    "largest_winner_removed_pf_min": 1.08,
+    "double_cost_pf_min": 1.00,
+    "long_pf_min_when_long_trades_ge_30": 0.85,
+    "short_pf_min_when_short_trades_ge_30": 0.85,
+    "exact_entry_missing_rate_max": 0.01,
+    "future_open_asof_use_count": 0
+  },
+  "family_robustness_gate": "A family can advance only if at least one exit translation passes every formal gate and at least one other translation has combined PF >= 1.00 and net >= 0. A single lucky exit cannot advance a family.",
+  "selection_prohibitions": [
+    "no post-result direction pruning",
+    "no post-result month or year pruning",
+    "no post-result volatility filtering",
+    "no threshold rescue",
+    "no replacing the frozen family definition",
+    "no automatic prospective shadow"
+  ],
+  "runtime_boundary": {
+    "stage55_modified": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}

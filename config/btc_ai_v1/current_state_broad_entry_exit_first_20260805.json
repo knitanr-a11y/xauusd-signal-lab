@@ -1,0 +1,10 @@
+{
+  "status": "BTC_AI_V1_BROAD_ENTRY_EXIT_FIRST_ALL_FOUR_FAMILIES_REJECTED_STATE_HOLDING_FOLLOWUP_COMPLETED_SEPARATELY",
+  "branch": "feature/btc-broad-entry-exit-first-research",
+  "head_after_result": "cf5892253b0f67994eee7a4d9905361b01b57c59",
+  "formal_candidate": null,
+  "new_shadow_authorized": false,
+  "interpretation": "Broad event entries contained small pre-cost directional effects but turnover exceeded the fixed cost hurdle.",
+  "next_independent_cycle": "feature/btc-broad-state-holding-research",
+  "stage55_modified": false
+}
