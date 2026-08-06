@@ -1,0 +1,109 @@
+{
+  "contract_id": "BTC_AI_V1_BROAD_STATE_HOLDING_PREREGISTRATION_FROZEN_20260805",
+  "status": "FROZEN_BEFORE_OUTCOMES",
+  "research_role": "POST_BROAD_ENTRY_FOLLOWUP_RETROSPECTIVE_EXPLORATORY_EVIDENCE",
+  "branch": "feature/btc-broad-state-holding-research",
+  "base_commit": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "objective": "Keep entry coverage broad while reducing turnover: maintain a directional state and trade only when that state flips, rather than re-entering every H1/H4 event.",
+  "data_contract": {
+    "symbol": "BTCUSD#",
+    "source": "attached XM closed OHLC CSV only",
+    "time_basis": "MT5 broker-server naive",
+    "entry_start_inclusive": "2023-01-01 00:00:00",
+    "entry_end_exclusive": "2026-08-01 00:00:00",
+    "closed_bars_only": true,
+    "exact_m1_execution": true,
+    "missing_exact_decision_m1": "DECISION_NOT_EXECUTED_NO_FALLBACK",
+    "m1_gap_during_position": "POSITION_CONTINUES_WITHOUT_SYNTHETIC_BARS",
+    "cost_usd_per_completed_1btc_trade": 22.5,
+    "double_cost_audit_usd": 45.0,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "state_families": [
+    {
+      "family": "H1_BODY_SIGN_STATE_CONTINUATION",
+      "decision_clock": "every fully closed H1 bar after 200 H1 bars warmup",
+      "desired_state": "LONG if close > open, SHORT if close < open, unchanged on doji"
+    },
+    {
+      "family": "H1_BODY_SIGN_STATE_FADE",
+      "decision_clock": "every fully closed H1 bar after 200 H1 bars warmup",
+      "desired_state": "SHORT if close > open, LONG if close < open, unchanged on doji"
+    },
+    {
+      "family": "H4_DAY_OPEN_DISPLACEMENT_STATE_CONTINUATION",
+      "decision_clock": "every fully closed H4 bar after 200 H4 bars warmup",
+      "desired_state": "LONG if close > broker-day open, SHORT if close < broker-day open, unchanged on equality"
+    },
+    {
+      "family": "H4_DAY_OPEN_DISPLACEMENT_STATE_FADE",
+      "decision_clock": "every fully closed H4 bar after 200 H4 bars warmup",
+      "desired_state": "SHORT if close > broker-day open, LONG if close < broker-day open, unchanged on equality"
+    }
+  ],
+  "execution_state_machine": {
+    "start": "flat",
+    "first_non_neutral_state": "enter desired state at exact decision M1 open",
+    "same_state": "hold without adding or resetting entry",
+    "state_flip": "close current trade and reverse at the same exact decision M1 open",
+    "stopped_position": "remain flat while desired state is unchanged; rearm only when desired state flips",
+    "decision_with_missing_exact_m1": "ignore execution and retain prior executable state; no next-M1 fallback",
+    "end_of_data_open_trade": "UNRESOLVED and excluded from PnL gates"
+  },
+  "risk_translations": [
+    {
+      "config": "FLIP_ONLY_NO_STOP",
+      "stop": null,
+      "exit": "next executable desired-state flip"
+    },
+    {
+      "config": "FLIP_OR_4ATR_STOP",
+      "stop": "4.00 x latest fully closed M15 ATR14 fixed from entry",
+      "exit": "first stop touch or next executable desired-state flip",
+      "same_m1_rule": "decision reversal occurs at M1 open before intrabar stop monitoring"
+    },
+    {
+      "config": "FLIP_OR_2ATR_STOP",
+      "stop": "2.00 x latest fully closed M15 ATR14 fixed from entry",
+      "exit": "first stop touch or next executable desired-state flip",
+      "same_m1_rule": "decision reversal occurs at M1 open before intrabar stop monitoring"
+    }
+  ],
+  "configuration_count": 12,
+  "formal_gate_per_configuration": {
+    "combined_2024_2026_07_trades_min": 100,
+    "2024_trades_min": 20,
+    "2025_trades_min": 20,
+    "2026_01_07_trades_min": 12,
+    "combined_pf_min": 1.15,
+    "combined_net_usd": "> 0",
+    "combined_net_to_maxdd_min": 1.50,
+    "2024_pf_min": 1.00,
+    "2024_net_usd": ">= 0",
+    "2025_pf_min": 1.00,
+    "2025_net_usd": ">= 0",
+    "2026_01_07_pf_min": 0.95,
+    "largest_winner_removed_pf_min": 1.10,
+    "double_cost_pf_min": 1.05,
+    "long_pf_min_when_long_trades_ge_25": 0.85,
+    "short_pf_min_when_short_trades_ge_25": 0.85,
+    "future_open_asof_use_count": 0
+  },
+  "family_robustness_gate": "A family advances only when one risk translation passes all formal gates and at least one other risk translation has combined PF >= 1.00 and net >= 0.",
+  "selection_prohibitions": [
+    "no post-result direction pruning",
+    "no post-result hour month year or volatility pruning",
+    "no post-result stop-distance rescue",
+    "no immediate re-entry after a stop while the state remains unchanged",
+    "no automatic prospective shadow"
+  ],
+  "runtime_boundary": {
+    "stage55_modified": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
