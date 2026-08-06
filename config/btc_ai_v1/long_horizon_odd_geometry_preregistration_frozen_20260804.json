@@ -1,0 +1,81 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_LONG_HORIZON_ODD_GEOMETRY_PREREGISTRATION",
+  "formal_status": "FROZEN_BEFORE_OUTCOMES",
+  "branch": "feature/btc-long-horizon-odd-rule-research",
+  "base_branch": "feature/btc-ai-v1-data-acquisition",
+  "base_head": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "historical_evidence_status": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "closed_ohlc_only": true,
+    "timeframes": ["M1", "M15", "H4", "D1"],
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_usd": 45.0,
+    "external_data": false,
+    "volume_features": false,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "common_execution": {
+    "decision": "CLOSE_TIME_OF_CONFIRMING_M15_BAR",
+    "entry": "EXACT_M1_OPEN_AT_DECISION_TIMESTAMP",
+    "stop": "1.00_X_DECISION_M15_ATR14",
+    "target": "2R",
+    "maximum_hold": "720_EXISTING_M1_BARS",
+    "one_position": "WITHIN_FAMILY",
+    "cross_family_overlap": "ALLOWED_FOR_FAMILY_EVALUATION",
+    "global_one_position": "AUDIT_ONLY"
+  },
+  "families": [
+    {
+      "id": "D1_NR7_NEXT_DAY_FIRST_M15_CLOSE_BREAK",
+      "rule": "A closed D1 bar is NR7 when its high-low range is <= every one of the previous six closed D1 ranges. During the next broker date, inspect only the first 32 existing M15 bars. The first close >= NR7 high + 0.10 M15 ATR is LONG; the first close <= NR7 low - 0.10 M15 ATR is SHORT. One event maximum."
+    },
+    {
+      "id": "H4_INSIDE_BAR_NEXT_16_M15_FIRST_CLOSE_BREAK",
+      "rule": "A closed H4 bar is inside the immediately previous closed H4 bar: high <= previous high and low >= previous low. In the next 16 existing M15 bars, the first close >= inside high + 0.10 M15 ATR is LONG or <= inside low - 0.10 M15 ATR is SHORT. One event maximum."
+    },
+    {
+      "id": "H4_OUTSIDE_EXTREME_CLOSE_MIDPOINT_REVERSION",
+      "rule": "A closed H4 bar is outside the previous H4 bar. If it closes in the top 20% of its range, the first of the next 16 existing M15 closes below the outside-bar midpoint triggers SHORT. If it closes in the bottom 20%, the first close above the midpoint triggers LONG."
+    },
+    {
+      "id": "D1_TWO_COLOR_ALTERNATION_OPENING_RANGE_CONTINUATION",
+      "rule": "The last two closed D1 bars have opposite body signs and each absolute body is >= 0.20 of its own D1 ATR14. On the next broker date, the first four existing M15 bars define an opening range. In the next 12 existing M15 bars, only a close break in the direction of the most recent D1 body is eligible: >= range high + 0.10 M15 ATR for LONG or <= range low - 0.10 M15 ATR for SHORT."
+    }
+  ],
+  "frequency_floor": {
+    "combined_2024_to_2026_07": 48,
+    "2024": 12,
+    "2025": 12,
+    "2026_01_to_07": 7
+  },
+  "acceptance_gate": {
+    "combined_pf_min": 1.2,
+    "combined_net_positive": true,
+    "net_to_max_drawdown_min": 1.5,
+    "pf_2024_min": 1.05,
+    "net_2024_positive": true,
+    "pf_2025_min": 1.05,
+    "net_2025_positive": true,
+    "pf_2026_01_to_07_min": 0.9,
+    "largest_winner_removed_pf_min": 1.1,
+    "double_cost_pf_min": 1.05,
+    "largest_positive_month_gross_profit_share_max": 0.35,
+    "top5_winner_gross_profit_share_max": 0.5,
+    "direction_pf_min_when_direction_has_15_trades": 0.8,
+    "exact_m1_missing_rate_max": 0.01
+  },
+  "anti_overfit": [
+    "Exactly four families and one configuration each.",
+    "No parameter neighbors.",
+    "No post-result direction, month, volatility, weekday or year rescue.",
+    "No rule changes between temporal slices.",
+    "No change to Stage55.",
+    "MT5 orders, live trading, live-ready, final signal and Discord remain OFF."
+  ]
+}
