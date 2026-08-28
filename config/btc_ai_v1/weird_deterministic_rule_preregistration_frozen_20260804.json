@@ -1,0 +1,116 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_WEIRD_BUT_CAUSAL_DETERMINISTIC_RULES_PREREGISTRATION",
+  "formal_status": "FROZEN_BEFORE_OUTCOMES",
+  "branch": "feature/btc-weird-deterministic-rule-research",
+  "base_branch": "feature/btc-ai-v1-data-acquisition",
+  "base_head": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "historical_evidence_status": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "purpose": "Test four deliberately simple and partially unconventional closed-OHLC hypotheses without rescuing prior rejected families.",
+  "authority": {
+    "symbol": "XM BTCUSD#",
+    "closed_ohlc_only": true,
+    "timeframes": ["M1", "M15"],
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "exact_m1_entry": true,
+    "missing_exact_entry_m1": "INVALID_NO_FALLBACK",
+    "same_m1_collision": "SL_FIRST",
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_usd": 45.0,
+    "external_data": false,
+    "volume_features": false,
+    "health_gate": "OFF_NOT_APPLICABLE"
+  },
+  "common_execution": {
+    "decision": "CLOSE_TIME_OF_CONFIRMING_M15_BAR",
+    "entry": "EXACT_M1_OPEN_AT_DECISION_TIMESTAMP",
+    "stop": "1.00_X_DECISION_M15_ATR14",
+    "target": "2R",
+    "maximum_hold": "360_EXISTING_M1_BARS",
+    "one_position": "WITHIN_FAMILY",
+    "cross_family_overlap": "ALLOWED_FOR_FAMILY_EVALUATION",
+    "global_one_position": "AUDIT_ONLY"
+  },
+  "families": [
+    {
+      "id": "FIVE_M15_COLOR_STREAK_FIRST_OPPOSITE_FADE",
+      "direction_policy": "SYMMETRIC_LONG_SHORT",
+      "rule": {
+        "long": "Previous five closed M15 bars are bearish and each body <= -0.10 ATR14 of that bar; current closed M15 is bullish and closes above the previous bar midpoint.",
+        "short": "Previous five closed M15 bars are bullish and each body >= +0.10 ATR14 of that bar; current closed M15 is bearish and closes below the previous bar midpoint."
+      }
+    },
+    {
+      "id": "FOUR_M15_ALTERNATING_COLOR_RANGE_BREAK",
+      "direction_policy": "SYMMETRIC_LONG_SHORT",
+      "rule": {
+        "setup": "Previous four closed M15 bars have strictly alternating non-doji body signs, each absolute body >= 0.05 ATR14, and their total high-low range <= 2.00 ATR14 measured on the fourth setup bar.",
+        "long": "Current closed M15 closes >= setup high + 0.05 ATR14.",
+        "short": "Current closed M15 closes <= setup low - 0.05 ATR14."
+      }
+    },
+    {
+      "id": "ROUND_1000_OPEN_ANCHORED_SWEEP_CLOSE_BACK",
+      "direction_policy": "SYMMETRIC_LONG_SHORT",
+      "rule": {
+        "level": "Nearest 1000 USD level to current M15 open using floor((open+500)/1000)*1000.",
+        "long": "M15 low <= level - 0.10 ATR14 and M15 close > level.",
+        "short": "M15 high >= level + 0.10 ATR14 and M15 close < level.",
+        "ambiguity": "If both directions qualify on the same bar, invalidate both."
+      }
+    },
+    {
+      "id": "BROKER_DAY_FIRST_FOUR_M15_RANGE_FIRST_CLOSE_BREAK",
+      "direction_policy": "SYMMETRIC_LONG_SHORT",
+      "rule": {
+        "setup": "For each MT5 naive calendar date, use the first four existing closed M15 bars as the opening range.",
+        "window": "Only the next twelve existing M15 bars after the fourth setup bar are eligible.",
+        "long": "The first eligible M15 close outside either side closes >= range high + 0.10 ATR14.",
+        "short": "The first eligible M15 close outside either side closes <= range low - 0.10 ATR14.",
+        "first_event_only": true
+      }
+    }
+  ],
+  "formal_periods": {
+    "2023": "IMPLEMENTATION_AND_EVENT_SANITY",
+    "2024": "TEMPORAL_STRESS_A",
+    "2025": "TEMPORAL_STRESS_B",
+    "2026_01_TO_07": "CONSUMED_DIAGNOSTIC_C"
+  },
+  "frequency_floor": {
+    "combined_2024_to_2026_07": 48,
+    "2024": 12,
+    "2025": 12,
+    "2026_01_to_07": 7
+  },
+  "acceptance_gate": {
+    "combined_pf_min": 1.2,
+    "combined_net_positive": true,
+    "net_to_max_drawdown_min": 1.5,
+    "pf_2024_min": 1.05,
+    "net_2024_positive": true,
+    "pf_2025_min": 1.05,
+    "net_2025_positive": true,
+    "pf_2026_01_to_07_min": 0.9,
+    "largest_winner_removed_pf_min": 1.1,
+    "double_cost_pf_min": 1.05,
+    "largest_positive_month_gross_profit_share_max": 0.35,
+    "top5_winner_gross_profit_share_max": 0.5,
+    "direction_pf_min_when_direction_has_15_trades": 0.8,
+    "exact_m1_missing_rate_max": 0.01
+  },
+  "anti_overfit": [
+    "No parameter neighbors in this cycle.",
+    "No post-result direction, month, time, volatility or year rescue.",
+    "No fifth family after outcomes.",
+    "No change to Stage55.",
+    "No prospective Shadow unless a formal base passes every gate."
+  ],
+  "runtime_flags": {
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false
+  }
+}
