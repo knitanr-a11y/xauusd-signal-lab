@@ -1,0 +1,30 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_SIMPLE_DISCRETIONARY_RULES_ALL_FOUR_BASES_REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE",
+  "branch": "feature/btc-simple-discretionary-rule-research",
+  "preregistration_frozen": true,
+  "formal_historical_run_complete": true,
+  "formal_base_results": {
+    "HTF_TREND_PULLBACK_RECLAIM_RESUME": "REJECT",
+    "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK": "REJECT",
+    "COMPRESSION_BREAKOUT_FIRST_RETEST": "REJECT",
+    "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL": "REJECT"
+  },
+  "neighbor_promotion": false,
+  "new_fresh_shadow_authorized": false,
+  "stage55": {
+    "continues_separately": true,
+    "modified_by_this_branch": false,
+    "activation_cutoff_mt5": "2026-08-04 10:52:00",
+    "runtime_state_changed": false,
+    "parameters_changed": false
+  },
+  "historical_evidence_status": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "next_state": "WAIT_USER_DIRECTION_NO_AUTOMATIC_FIFTH_FAMILY_OR_RESCUE_SEARCH",
+  "mt5_orders": false,
+  "live_trading": false,
+  "live_ready": false,
+  "final_signal": false,
+  "discord": false,
+  "automatic_promotion": false
+}

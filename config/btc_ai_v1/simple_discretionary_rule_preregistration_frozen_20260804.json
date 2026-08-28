@@ -1,0 +1,193 @@
+{
+  "date": "2026-08-04",
+  "contract_id": "BTC_AI_V1_SIMPLE_DISCRETIONARY_RULE_PREREGISTRATION_FROZEN",
+  "formal_status": "FROZEN_BEFORE_ANY_PNL_PF_WIN_RATE_OUTCOME_RUN",
+  "user_approval": {
+    "approved": true,
+    "approved_in_chat": true,
+    "approval_time_jst": "2026-08-04T19:30:00+09:00",
+    "authorization": "RUN_RESEARCH_ON_SEPARATE_BRANCH"
+  },
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-simple-discretionary-rule-research",
+  "branch_base_sha": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "stage55_isolation": {
+    "stage55_branch_modified": false,
+    "stage55_checkout_used": false,
+    "stage55_runtime_state_modified": false,
+    "stage55_parameters_modified": false
+  },
+  "data_contract": {
+    "symbol": "XM BTCUSD#",
+    "timeframes": ["M1", "M5", "M15", "H1", "H4", "D1"],
+    "closed_ohlc_only": true,
+    "time_basis": "MT5_BROKER_SERVER_NAIVE",
+    "latest_csv_row_contract": "CLOSED",
+    "external_data": false,
+    "tick_volume": false,
+    "real_volume": false,
+    "roundtrip_cost_usd_per_1btc": 22.5,
+    "double_cost_diagnostic_usd": 45.0
+  },
+  "indicator_contract": {
+    "ema": "STANDARD_RECURSIVE_EMA_CLOSE_ONLY",
+    "atr14": "WILDER_TRUE_RANGE_CLOSED_BARS_ONLY",
+    "minimum_warmup_closed_bars": 200,
+    "causal_asof_only": true
+  },
+  "execution_contract": {
+    "decision_timestamp": "CONFIRMATION_BAR_CLOSE_TIME",
+    "entry": "EXACT_M1_OPEN_AT_DECISION_TIMESTAMP",
+    "missing_exact_entry_m1": "INVALIDATE_CANDIDATE_NO_FALLBACK",
+    "post_entry_missing_m1": "NO_SYNTHETIC_BAR; POSITION_CONTINUES; COUNT_ONLY_EXISTING_M1_BARS; NEXT_EXISTING_M1_RESUMES_MONITORING",
+    "market_gap_open": "ADVERSE_STOP_GAP_EXITS_AT_NEXT_EXISTING_M1_OPEN; FAVORABLE_TARGET_GAP_EXITS_AT_TARGET",
+    "same_m1_sl_tp_collision": "SL_FIRST",
+    "maximum_hold_existing_m1_bars": 360,
+    "time_exit": "CLOSE_OF_360TH_EXISTING_M1_BAR",
+    "target_r": 2.0,
+    "one_position": "INDEPENDENT_WITHIN_EACH_CONFIGURATION",
+    "cross_family_overlap": "ALLOWED_FOR_FAMILY_EVALUATION; GLOBAL_ONE_POSITION_REPORTED_AS_AUDIT_ONLY",
+    "suppressed_candidates": "RETAIN_IN_RAW_LEDGER"
+  },
+  "historical_run_contract": {
+    "single_simultaneous_run_after_full_freeze": true,
+    "entry_periods": {
+      "2023": "IMPLEMENTATION_EVENT_AND_CAUSAL_SANITY_AUDIT",
+      "2024": "TEMPORAL_STRESS_SLICE_A",
+      "2025": "TEMPORAL_STRESS_SLICE_B",
+      "2026_01_TO_2026_07": "CONSUMED_DIAGNOSTIC_SLICE_C"
+    },
+    "allow_outcome_resolution_after_entry_slice_end": true,
+    "no_rule_changes_between_slices": true,
+    "historical_evidence_status": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY"
+  },
+  "common_confirmation": {
+    "bullish_m5": "CLOSE_GT_PREVIOUS_M5_HIGH_AND_BODY_GE_0.20_M5_ATR14",
+    "bearish_m5": "CLOSE_LT_PREVIOUS_M5_LOW_AND_NEGATIVE_BODY_GE_0.20_M5_ATR14"
+  },
+  "families": [
+    {
+      "family_id": "HTF_TREND_PULLBACK_RECLAIM_RESUME",
+      "direction": "LONG_SHORT_SYMMETRIC",
+      "timeframes": {"context": "H1", "setup": "M15", "confirmation": "M5", "execution": "M1"},
+      "context_long": "LAST_CLOSED_H1_CLOSE_GT_EMA20_GT_EMA50_AND_EMA20_GT_EMA20_3_BARS_AGO",
+      "context_short": "EXACT_SIGN_REVERSE",
+      "setup_long": "PREVIOUS_M15_CLOSE_GT_PREVIOUS_EMA20; CURRENT_LOW_LE_EMA20; CURRENT_CLOSE_GE_EMA20; CURRENT_CLOSE_GT_EMA50",
+      "setup_short": "EXACT_SIGN_REVERSE",
+      "confirmation_window_m5_bars": 3,
+      "confirmation": "FIRST_COMMON_DIRECTIONAL_M5_CONFIRMATION",
+      "configurations": [
+        {"id": "BASE_ATR_SL", "role": "FORMAL_BASE", "stop": "1.00_DECISION_M15_ATR14"},
+        {"id": "N1_FIXED_180_SL", "role": "ROBUSTNESS_ONLY", "stop": "180_USD"},
+        {"id": "N2_STRUCTURE_SL", "role": "ROBUSTNESS_ONLY", "stop": "SETUP_AND_CONFIRMATION_DIRECTIONAL_EXTREME_PLUS_0.10_DECISION_M15_ATR14_BUFFER"}
+      ]
+    },
+    {
+      "family_id": "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK",
+      "direction": "LONG_SHORT_SYMMETRIC",
+      "timeframes": {"context": "D1_OR_FIXED_M15_LOOKBACK", "setup": "M15", "confirmation": "M5", "execution": "M1"},
+      "base_level": "MOST_RECENT_FULLY_CLOSED_D1_HIGH_LOW_ASOF_SETUP_CLOSE",
+      "neighbor_level": "PREVIOUS_96_CLOSED_M15_HIGH_LOW_EXCLUDING_SETUP_BAR",
+      "setup_long": "LOW_LE_LEVEL_MINUS_0.10_SETUP_M15_ATR14_AND_CLOSE_GT_LEVEL",
+      "setup_short": "EXACT_SIGN_REVERSE",
+      "confirmation_window_m5_bars": 3,
+      "confirmation": "FIRST_COMMON_DIRECTIONAL_M5_CONFIRMATION",
+      "configurations": [
+        {"id": "BASE_PREVIOUS_D1_STRUCTURE_SL", "role": "FORMAL_BASE", "level": "PREVIOUS_D1", "stop": "SWEEP_M15_EXTREME_PLUS_0.10_DECISION_M15_ATR14_BUFFER"},
+        {"id": "N1_LOOKBACK96_STRUCTURE_SL", "role": "ROBUSTNESS_ONLY", "level": "PREVIOUS_96_M15", "stop": "SWEEP_M15_EXTREME_PLUS_0.10_DECISION_M15_ATR14_BUFFER"},
+        {"id": "N2_PREVIOUS_D1_ATR_SL", "role": "ROBUSTNESS_ONLY", "level": "PREVIOUS_D1", "stop": "1.00_DECISION_M15_ATR14"}
+      ]
+    },
+    {
+      "family_id": "COMPRESSION_BREAKOUT_FIRST_RETEST",
+      "direction": "LONG_SHORT_SYMMETRIC",
+      "timeframes": {"context": "NONE", "setup": "M15", "confirmation": "M5", "execution": "M1"},
+      "compression": "PREVIOUS_6_CLOSED_M15_RANGE_LE_2.00_PREBREAK_M15_ATR14",
+      "breakout_long": "BREAKOUT_CLOSE_GE_COMPRESSION_HIGH_PLUS_0.10_PREBREAK_M15_ATR14",
+      "breakout_short": "EXACT_SIGN_REVERSE",
+      "first_retest_window_m5_bars": 12,
+      "retest_long": "FIRST_M5_LOW_LE_BREAK_LEVEL_PLUS_0.10_PREBREAK_ATR; SAME_BAR_CLOSE_GT_BREAK_LEVEL_AND_BULLISH",
+      "retest_short": "EXACT_SIGN_REVERSE",
+      "first_failed_retest_invalidates_setup": true,
+      "configurations": [
+        {"id": "BASE_RETEST_STRUCTURE_SL", "role": "FORMAL_BASE", "stop": "RETEST_M5_EXTREME_PLUS_0.10_DECISION_M15_ATR14_BUFFER"},
+        {"id": "N1_ATR_SL", "role": "ROBUSTNESS_ONLY", "stop": "1.00_DECISION_M15_ATR14"},
+        {"id": "N2_FIXED_180_SL", "role": "ROBUSTNESS_ONLY", "stop": "180_USD"}
+      ]
+    },
+    {
+      "family_id": "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL",
+      "direction": "LONG_SHORT_SYMMETRIC",
+      "timeframes": {"context": "NONE", "setup": "M15", "confirmation": "M5", "execution": "M1"},
+      "bearish_impulse_for_long": "NEGATIVE_BODY_GE_1.50_PREIMPULSE_M15_ATR14_AND_CLOSE_LOCATION_IN_BOTTOM_20_PERCENT",
+      "bullish_impulse_for_short": "EXACT_SIGN_REVERSE",
+      "confirmation_window_m5_bars": 6,
+      "confirmation_long": "FIRST_CLOSED_M5_CLOSE_GT_IMPULSE_MIDPOINT_AND_BULLISH",
+      "confirmation_short": "EXACT_SIGN_REVERSE",
+      "configurations": [
+        {"id": "BASE_ATR_SL", "role": "FORMAL_BASE", "stop": "1.00_DECISION_M15_ATR14"},
+        {"id": "N1_FIXED_180_SL", "role": "ROBUSTNESS_ONLY", "stop": "180_USD"},
+        {"id": "N2_IMPULSE_STRUCTURE_SL", "role": "ROBUSTNESS_ONLY", "stop": "IMPULSE_M15_EXTREME_PLUS_0.10_DECISION_M15_ATR14_BUFFER"}
+      ]
+    }
+  ],
+  "frequency_gate": {
+    "2023_raw_setups_minimum": 5,
+    "resolved_one_position_2024_to_2026_07_minimum": 48,
+    "2024_minimum": 12,
+    "2025_minimum": 12,
+    "2026_01_to_2026_07_minimum": 7,
+    "post_result_threshold_relaxation": false
+  },
+  "base_acceptance_gate": {
+    "combined_2024_to_2026_07": {"pf_min": 1.20, "net_gt": 0, "net_to_max_drawdown_min": 1.50},
+    "2024": {"pf_min": 1.05, "net_gt": 0},
+    "2025": {"pf_min": 1.05, "net_gt": 0},
+    "2026_01_to_2026_07": {"pf_min": 0.90},
+    "largest_winner_removed_pf_min": 1.10,
+    "double_cost_pf_min": 1.05,
+    "largest_positive_month_gross_profit_share_max": 0.35,
+    "top5_winners_gross_profit_share_max": 0.50,
+    "direction_pf_min_when_direction_has_at_least_15_trades": 0.80,
+    "exact_entry_m1_missing_rate_max": 0.01,
+    "future_or_open_bar_use_count": 0,
+    "same_m1_collision_mismatch_count": 0
+  },
+  "neighbor_stability_gate": {
+    "evaluated_only_after_base_pass": true,
+    "each_neighbor_combined_pf_min": 0.90,
+    "at_least_one_neighbor_combined_pf_min": 1.05,
+    "each_neighbor_trade_count_ratio_to_base_min": 0.60,
+    "passing_neighbor_cannot_replace_failing_base": true
+  },
+  "mandatory_reporting": [
+    "raw_candidate_count",
+    "exact_m1_valid_count",
+    "one_position_non_overlap_count",
+    "resolved_only_live_reproducible_count",
+    "health_gate_status_off",
+    "trades_and_trades_per_month",
+    "win_rate_pf_net_max_drawdown",
+    "year_halfyear_month",
+    "direction_split",
+    "causal_high_low_volatility_split_using_trailing_96_m15_atr_median",
+    "recent_month_2026_07",
+    "largest_winner_removed",
+    "double_cost",
+    "profit_concentration",
+    "exact_m1_gaps",
+    "same_m1_collision_count",
+    "suppressed_overlap_count",
+    "base_vs_neighbors",
+    "global_one_position_audit_only"
+  ],
+  "promotion_boundary": {
+    "maximum_historical_status": "RESEARCH_CANDIDATE_REQUIRES_FRESH_PROSPECTIVE_CONFIRMATION",
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}

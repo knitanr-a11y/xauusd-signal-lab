@@ -1,0 +1,125 @@
+{
+  "date": "2026-08-04",
+  "formal_status": "BTC_AI_V1_SIMPLE_DISCRETIONARY_RULES_ALL_FOUR_BASES_REJECTED_RETROSPECTIVE_EXPLORATORY_EVIDENCE",
+  "repository": "knitanr-a11y/xauusd-signal-lab",
+  "branch": "feature/btc-simple-discretionary-rule-research",
+  "branch_base_sha": "1fd920f62f0145470e50e5430e7b605693532a36",
+  "preregistration_commit": "dfa401d8af2da588d6695b70ad5a2d1ec2dea256",
+  "historical_evidence_status": "RETROSPECTIVE_EXPLORATORY_EVIDENCE_ON_CONSUMED_HISTORY",
+  "single_simultaneous_run_after_freeze": true,
+  "stage55": {
+    "modified": false,
+    "stopped": false,
+    "parameter_changes": false,
+    "runtime_state_changes": false
+  },
+  "pipeline_counts": {
+    "raw_configuration_candidates": 26426,
+    "same_timestamp_duplicates_removed": 6,
+    "deduplicated_candidates": 26420,
+    "missing_exact_entry_m1_configuration_rows": 15,
+    "missing_exact_entry_m1_unique_events": 5,
+    "invalid_nonpositive_structure_risk_rows": 10,
+    "exact_m1_valid_candidates": 26395,
+    "one_position_trades": 20481,
+    "suppressed_open_position": 5914,
+    "health_gate": "OFF_NOT_APPLICABLE",
+    "resolved_only_live_reproducible_trades": 20481,
+    "unresolved_end_of_data": 0,
+    "same_m1_sl_tp_collisions_sl_first": 8,
+    "trades_crossing_absent_m1_timestamps": 592
+  },
+  "formal_bases_2024_to_2026_07": [
+    {
+      "family": "HTF_TREND_PULLBACK_RECLAIM_RESUME",
+      "configuration": "BASE_ATR_SL",
+      "trades": 1984,
+      "win_rate": 0.3402217742,
+      "profit_factor": 0.8332708836,
+      "net_usd": -62308.61244239,
+      "maximum_drawdown_usd": 64516.97751177,
+      "negative_months_out_of_31": 24,
+      "decision": "REJECT"
+    },
+    {
+      "family": "PREVIOUS_OR_LOOKBACK_HIGH_LOW_SWEEP_CLOSE_BACK",
+      "configuration": "BASE_PREVIOUS_D1_STRUCTURE_SL",
+      "trades": 1061,
+      "win_rate": 0.3817153629,
+      "profit_factor": 0.8960561774,
+      "net_usd": -29538.35129788,
+      "maximum_drawdown_usd": 38986.79350904,
+      "negative_months_out_of_31": 18,
+      "decision": "REJECT"
+    },
+    {
+      "family": "COMPRESSION_BREAKOUT_FIRST_RETEST",
+      "configuration": "BASE_RETEST_STRUCTURE_SL",
+      "trades": 1030,
+      "win_rate": 0.3174757282,
+      "profit_factor": 0.7570881202,
+      "net_usd": -27884.35088112,
+      "maximum_drawdown_usd": 29992.61637733,
+      "negative_months_out_of_31": 26,
+      "decision": "REJECT"
+    },
+    {
+      "family": "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL",
+      "configuration": "BASE_ATR_SL",
+      "trades": 869,
+      "win_rate": 0.3636363636,
+      "profit_factor": 0.985427803,
+      "net_usd": -2437.65481434,
+      "maximum_drawdown_usd": 16053.48738205,
+      "negative_months_out_of_31": 15,
+      "decision": "REJECT"
+    }
+  ],
+  "notable_robustness_observation": {
+    "family": "ATR_IMPULSE_EXHAUSTION_SIMPLE_REVERSAL",
+    "configuration": "N2_IMPULSE_STRUCTURE_SL",
+    "role": "ROBUSTNESS_ONLY",
+    "trades": 829,
+    "profit_factor": 1.056727,
+    "net_usd": 11484.011193,
+    "largest_winner_removed_pf": 1.041655,
+    "double_cost_pf": 0.966453,
+    "promotion_prohibited_because_base_failed": true,
+    "passes_formal_gate": false
+  },
+  "post_result_slice_rescue_prohibited": {
+    "atr_impulse_long_pf": 1.151265,
+    "atr_impulse_long_net_usd": 12819.002573,
+    "atr_impulse_short_pf": 0.815152,
+    "atr_impulse_short_net_usd": -15256.657388,
+    "atr_impulse_recent_2026_07_pf": 1.726232,
+    "retain_only_good_direction_month_or_volatility": false
+  },
+  "global_one_position_base_audit_2024_to_2026_07": {
+    "trades": 4096,
+    "win_rate": 0.3527832031,
+    "profit_factor": 0.875862,
+    "net_usd": -98237.688803,
+    "maximum_drawdown_usd": 110672.091721,
+    "gate_use": "AUDIT_ONLY"
+  },
+  "reproducibility": {
+    "real_data_parity_slice": "2023-01-01_TO_2023-02-15",
+    "raw_candidate_semantics_reference_and_fast": 762,
+    "trade_outcomes_reference_and_fast": 558,
+    "semantic_parity": true,
+    "outcome_parity": true,
+    "future_or_open_bar_use_count": 0,
+    "exact_entry_fallback_count": 0
+  },
+  "promotion_boundary": {
+    "historical_candidate_reached": false,
+    "fresh_shadow_authorized": false,
+    "mt5_orders": false,
+    "live_trading": false,
+    "live_ready": false,
+    "final_signal": false,
+    "discord": false,
+    "automatic_promotion": false
+  }
+}
